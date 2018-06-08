@@ -11,7 +11,6 @@
 #include <new>
 #include <vector>
 
-#include "base/allocator/buildflags.h"
 #include "base/allocator/partition_allocator/partition_alloc.h"
 #include "base/atomicops.h"
 #include "base/process/process_metrics.h"
@@ -455,12 +454,6 @@ TEST_F(AllocatorShimTest, NewHandlerConcurrency) {
   RemoveAllocatorDispatchForTesting(&g_mock_dispatch);
   ASSERT_EQ(kNumThreads, GetNumberOfNewHandlerCalls());
 }
-
-#if defined(OS_WIN) && BUILDFLAG(USE_ALLOCATOR_SHIM)
-TEST_F(AllocatorShimTest, ShimReplacesCRTHeapWhenEnabled) {
-  ASSERT_NE(::GetProcessHeap(), reinterpret_cast<HANDLE>(_get_heap_handle()));
-}
-#endif  // defined(OS_WIN) && BUILDFLAG(USE_ALLOCATOR_SHIM)
 
 }  // namespace
 }  // namespace allocator

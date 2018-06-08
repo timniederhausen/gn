@@ -7,7 +7,6 @@
 #include <map>
 
 #include "base/allocator/allocator_shim.h"
-#include "base/allocator/buildflags.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(OS_MACOSX)
@@ -552,56 +551,6 @@ TEST_F(ThreadHeapUsageTrackerTest, AllShimFunctionsAreProvided) {
   ASSERT_TRUE(estimate == 0 || estimate >= kAllocSize);
   MockFree(alloc);
 }
-
-#if BUILDFLAG(USE_ALLOCATOR_SHIM)
-class ThreadHeapUsageShimTest : public testing::Test {
-#if defined(OS_MACOSX)
-  void SetUp() override { allocator::InitializeAllocatorShim(); }
-  void TearDown() override { allocator::UninterceptMallocZonesForTesting(); }
-#endif
-};
-
-TEST_F(ThreadHeapUsageShimTest, HooksIntoMallocWhenShimAvailable) {
-  ASSERT_FALSE(ThreadHeapUsageTracker::IsHeapTrackingEnabled());
-
-  ThreadHeapUsageTracker::EnableHeapTracking();
-
-  ASSERT_TRUE(ThreadHeapUsageTracker::IsHeapTrackingEnabled());
-
-  const size_t kAllocSize = 9993;
-  // This test verifies that the scoped heap data is affected by malloc &
-  // free only when the shim is available.
-  ThreadHeapUsageTracker usage_tracker;
-  usage_tracker.Start();
-
-  ThreadHeapUsage u1 = ThreadHeapUsageTracker::GetUsageSnapshot();
-  void* ptr = malloc(kAllocSize);
-  // Prevent the compiler from optimizing out the malloc/free pair.
-  ASSERT_NE(nullptr, ptr);
-
-  ThreadHeapUsage u2 = ThreadHeapUsageTracker::GetUsageSnapshot();
-  free(ptr);
-
-  usage_tracker.Stop(false);
-  ThreadHeapUsage u3 = usage_tracker.usage();
-
-  // Verify that at least one allocation operation was recorded, and that free
-  // operations are at least monotonically growing.
-  EXPECT_LE(0U, u1.alloc_ops);
-  EXPECT_LE(u1.alloc_ops + 1, u2.alloc_ops);
-  EXPECT_LE(u1.alloc_ops + 1, u3.alloc_ops);
-
-  // Verify that at least the bytes above were recorded.
-  EXPECT_LE(u1.alloc_bytes + kAllocSize, u2.alloc_bytes);
-
-  // Verify that at least the one free operation above was recorded.
-  EXPECT_LE(u2.free_ops + 1, u3.free_ops);
-
-  TestingThreadHeapUsageTracker::DisableHeapTrackingForTesting();
-
-  ASSERT_FALSE(ThreadHeapUsageTracker::IsHeapTrackingEnabled());
-}
-#endif  // BUILDFLAG(USE_ALLOCATOR_SHIM)
 
 }  // namespace debug
 }  // namespace base

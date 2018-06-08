@@ -27,7 +27,6 @@
 
 #include <new>
 
-#include "base/allocator/buildflags.h"
 #include "base/allocator/malloc_zone_functions_mac.h"
 #include "base/bind.h"
 #include "base/logging.h"

@@ -11,7 +11,6 @@
 #include <type_traits>
 
 #include "base/allocator/allocator_shim.h"
-#include "base/allocator/buildflags.h"
 #include "base/logging.h"
 #include "base/no_destructor.h"
 #include "base/threading/thread_local_storage.h"
@@ -306,11 +305,7 @@ void ThreadHeapUsageTracker::EnableHeapTracking() {
 
   CHECK_EQ(false, g_heap_tracking_enabled) << "No double-enabling.";
   g_heap_tracking_enabled = true;
-#if BUILDFLAG(USE_ALLOCATOR_SHIM)
-  base::allocator::InsertAllocatorDispatch(&allocator_dispatch);
-#else
   CHECK(false) << "Can't enable heap tracking without the shim.";
-#endif  // BUILDFLAG(USE_ALLOCATOR_SHIM)
 }
 
 bool ThreadHeapUsageTracker::IsHeapTrackingEnabled() {
@@ -318,11 +313,7 @@ bool ThreadHeapUsageTracker::IsHeapTrackingEnabled() {
 }
 
 void ThreadHeapUsageTracker::DisableHeapTrackingForTesting() {
-#if BUILDFLAG(USE_ALLOCATOR_SHIM)
-  base::allocator::RemoveAllocatorDispatchForTesting(&allocator_dispatch);
-#else
   CHECK(false) << "Can't disable heap tracking without the shim.";
-#endif  // BUILDFLAG(USE_ALLOCATOR_SHIM)
   DCHECK_EQ(true, g_heap_tracking_enabled) << "Heap tracking not enabled.";
   g_heap_tracking_enabled = false;
 }

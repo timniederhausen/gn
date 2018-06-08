@@ -4,7 +4,6 @@
 
 #include "base/allocator/allocator_check.h"
 
-#include "base/allocator/buildflags.h"
 #include "build/build_config.h"
 
 #if defined(OS_WIN)
@@ -23,11 +22,7 @@ namespace base {
 namespace allocator {
 
 bool IsAllocatorInitialized() {
-#if defined(OS_WIN) && BUILDFLAG(USE_ALLOCATOR_SHIM)
-  // Set by allocator_shim_override_ucrt_symbols_win.h when the
-  // shimmed _set_new_mode() is called.
-  return g_is_win_shim_layer_initialized;
-#elif defined(OS_LINUX) && defined(USE_TCMALLOC) && \
+#if defined(OS_LINUX) && defined(USE_TCMALLOC) && \
     !defined(MEMORY_TOOL_REPLACES_ALLOCATOR)
 // From third_party/tcmalloc/chromium/src/gperftools/tcmalloc.h.
 // TODO(primiano): replace with an include once base can depend on allocator.

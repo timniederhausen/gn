@@ -11,7 +11,6 @@
 #include "base/posix/safe_strerror.h"
 #include "base/strings/stringprintf.h"
 #include "base/synchronization/lock.h"
-#include "base/synchronization/synchronization_buildflags.h"
 #include "build/build_config.h"
 
 namespace base {
@@ -105,9 +104,7 @@ void LockImpl::Lock() {
 
 // static
 bool LockImpl::PriorityInheritanceAvailable() {
-#if BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
-  return true;
-#elif PRIORITY_INHERITANCE_LOCKS_POSSIBLE() && defined(OS_MACOSX)
+#if PRIORITY_INHERITANCE_LOCKS_POSSIBLE() && defined(OS_MACOSX)
   return true;
 #else
   // Security concerns prevent the use of priority inheritance mutexes on Linux.

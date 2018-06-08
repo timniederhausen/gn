@@ -11,7 +11,6 @@
 #include <memory>
 #include <utility>
 
-#include "base/allocator/buildflags.h"
 #include "base/base_switches.h"
 #include "base/command_line.h"
 #include "base/debug/alias.h"
@@ -112,40 +111,6 @@ inline bool ShouldEnableMDPAllocatorHooks(HeapProfilingMode mode) {
          (mode == kHeapProfilingModeBackground);
 }
 
-#if BUILDFLAG(USE_ALLOCATOR_SHIM) && !defined(OS_NACL)
-inline bool IsHeapProfilingModeEnabled(HeapProfilingMode mode) {
-  return mode != kHeapProfilingModeDisabled &&
-         mode != kHeapProfilingModeInvalid;
-}
-
-void EnableFilteringForPseudoStackProfiling() {
-  if (AllocationContextTracker::capture_mode() !=
-          AllocationContextTracker::CaptureMode::PSEUDO_STACK ||
-      (TraceLog::GetInstance()->enabled_modes() & TraceLog::FILTERING_MODE)) {
-    return;
-  }
-  // Create trace config with heap profiling filter.
-  std::string filter_string = JoinString(
-      {"*", TRACE_DISABLED_BY_DEFAULT("net"), TRACE_DISABLED_BY_DEFAULT("cc"),
-       MemoryDumpManager::kTraceCategory},
-      ",");
-  TraceConfigCategoryFilter category_filter;
-  category_filter.InitializeFromString(filter_string);
-
-  TraceConfig::EventFilterConfig heap_profiler_filter_config(
-      HeapProfilerEventFilter::kName);
-  heap_profiler_filter_config.SetCategoryFilter(category_filter);
-
-  TraceConfig::EventFilters filters;
-  filters.push_back(heap_profiler_filter_config);
-  TraceConfig filtering_trace_config;
-  filtering_trace_config.SetEventFilters(filters);
-
-  TraceLog::GetInstance()->SetEnabled(filtering_trace_config,
-                                      TraceLog::FILTERING_MODE);
-}
-#endif  // BUILDFLAG(USE_ALLOCATOR_SHIM) && !defined(OS_NACL)
-
 }  // namespace
 
 // static
@@ -208,84 +173,8 @@ MemoryDumpManager::~MemoryDumpManager() {
 
 bool MemoryDumpManager::EnableHeapProfiling(HeapProfilingMode profiling_mode) {
   AutoLock lock(lock_);
-#if BUILDFLAG(USE_ALLOCATOR_SHIM) && !defined(OS_NACL)
-  bool notify_mdps = true;
-
-  if (heap_profiling_mode_ == kHeapProfilingModeInvalid)
-    return false;  // Disabled permanently.
-
-  if (IsHeapProfilingModeEnabled(heap_profiling_mode_) ==
-      IsHeapProfilingModeEnabled(profiling_mode)) {
-    if (profiling_mode == kHeapProfilingModeDisabled)
-      heap_profiling_mode_ = kHeapProfilingModeInvalid;  // Disable permanently.
-    return false;
-  }
-
-  switch (profiling_mode) {
-    case kHeapProfilingModeTaskProfiler:
-      if (!base::debug::ThreadHeapUsageTracker::IsHeapTrackingEnabled())
-        base::debug::ThreadHeapUsageTracker::EnableHeapTracking();
-      notify_mdps = false;
-      break;
-
-    case kHeapProfilingModeBackground:
-      AllocationContextTracker::SetCaptureMode(
-          AllocationContextTracker::CaptureMode::MIXED_STACK);
-      break;
-
-    case kHeapProfilingModePseudo:
-      AllocationContextTracker::SetCaptureMode(
-          AllocationContextTracker::CaptureMode::PSEUDO_STACK);
-      EnableFilteringForPseudoStackProfiling();
-      break;
-
-    case kHeapProfilingModeNative:
-#if defined(OS_ANDROID) && BUILDFLAG(CAN_UNWIND_WITH_CFI_TABLE)
-    {
-      bool can_unwind = CFIBacktraceAndroid::GetInitializedInstance()
-                            ->can_unwind_stack_frames();
-      DCHECK(can_unwind);
-    }
-#endif
-      // If we don't have frame pointers and unwind tables then native tracing
-      // falls-back to using base::debug::StackTrace, which may be slow.
-      AllocationContextTracker::SetCaptureMode(
-          AllocationContextTracker::CaptureMode::NATIVE_STACK);
-      break;
-
-    case kHeapProfilingModeDisabled:
-      if (heap_profiling_mode_ == kHeapProfilingModeTaskProfiler) {
-        LOG(ERROR) << "ThreadHeapUsageTracker cannot be disabled.";
-        return false;
-      }
-      if (heap_profiling_mode_ == kHeapProfilingModePseudo)
-        TraceLog::GetInstance()->SetDisabled(TraceLog::FILTERING_MODE);
-      AllocationContextTracker::SetCaptureMode(
-          AllocationContextTracker::CaptureMode::DISABLED);
-      heap_profiling_mode_ = kHeapProfilingModeInvalid;  // Disable permanently.
-      break;
-
-    default:
-      NOTREACHED() << "Incorrect heap profiling mode " << profiling_mode;
-      return false;
-  }
-
-  if (heap_profiling_mode_ != kHeapProfilingModeInvalid)
-    heap_profiling_mode_ = profiling_mode;
-
-  // In case tracing was already enabled, setup the serialization state before
-  // notifying mdps.
-  InitializeHeapProfilerStateIfNeededLocked();
-  if (notify_mdps) {
-    bool enabled = IsHeapProfilingModeEnabled(heap_profiling_mode_);
-    for (const auto& mdpinfo : dump_providers_)
-      NotifyHeapProfilingEnabledLocked(mdpinfo, enabled);
-  }
-  return true;
-#else
   heap_profiling_mode_ = kHeapProfilingModeInvalid;
   return false;
-#endif  // BUILDFLAG(USE_ALLOCATOR_SHIM) && !defined(OS_NACL)
 }
 
 HeapProfilingMode MemoryDumpManager::GetHeapProfilingMode() {

@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "base/allocator/allocator_shim.h"
-#include "base/allocator/buildflags.h"
 #include "base/allocator/partition_allocator/partition_alloc.h"
 #include "base/atomicops.h"
 #include "base/debug/stack_trace.h"
@@ -199,13 +198,9 @@ void SamplingHeapProfiler::InstallAllocatorHooksOnce() {
 
 // static
 bool SamplingHeapProfiler::InstallAllocatorHooks() {
-#if BUILDFLAG(USE_ALLOCATOR_SHIM)
-  base::allocator::InsertAllocatorDispatch(&g_allocator_dispatch);
-#else
   ignore_result(g_allocator_dispatch);
   DLOG(WARNING)
       << "base::allocator shims are not available for memory sampling.";
-#endif  // BUILDFLAG(USE_ALLOCATOR_SHIM)
 
 #if BUILDFLAG(USE_PARTITION_ALLOC) && !defined(OS_NACL)
   base::PartitionAllocHooks::SetAllocationHook(&PartitionAllocHook);

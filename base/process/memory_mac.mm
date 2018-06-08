@@ -6,7 +6,6 @@
 
 #include "base/allocator/allocator_interception_mac.h"
 #include "base/allocator/allocator_shim.h"
-#include "base/allocator/buildflags.h"
 #include "build/build_config.h"
 
 namespace base {
@@ -35,13 +34,7 @@ void EnableTerminationOnOutOfMemory() {
   // Step 1: Enable OOM killer on C++ failures.
   std::set_new_handler(oom_killer_new);
 
-// Step 2: Enable OOM killer on C-malloc failures for the default zone (if we
-// have a shim).
-#if BUILDFLAG(USE_ALLOCATOR_SHIM)
-  allocator::SetCallNewHandlerOnMallocFailure(true);
-#endif
-
-  // Step 3: Enable OOM killer on all other malloc zones (or just "all" without
+  // Step 2: Enable OOM killer on all other malloc zones (or just "all" without
   // "other" if shim is disabled).
   allocator::InterceptAllocationsMac();
 }
