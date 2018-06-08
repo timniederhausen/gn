@@ -56,27 +56,12 @@
 #include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/macros.h"
-#include "base/memory/protected_memory_buildflags.h"
 #include "base/synchronization/lock.h"
 #include "build/build_config.h"
 
 #define PROTECTED_MEMORY_ENABLED 1
 
-// Linking with lld is required to workaround crbug.com/792777.
-// TODO(vtsyrklevich): Remove once support for gold on Android/CrOs is dropped
-#if defined(OS_LINUX) && BUILDFLAG(USE_LLD)
-// Define the section read-only
-__asm__(".section protected_memory, \"a\"\n\t");
-#define PROTECTED_MEMORY_SECTION __attribute__((section("protected_memory")))
-
-// Explicitly mark these variables hidden so the symbols are local to the
-// currently built component. Otherwise they are created with global (external)
-// linkage and component builds would break because a single pair of these
-// symbols would override the rest.
-__attribute__((visibility("hidden"))) extern char __start_protected_memory;
-__attribute__((visibility("hidden"))) extern char __stop_protected_memory;
-
-#elif defined(OS_MACOSX) && !defined(OS_IOS)
+#if defined(OS_MACOSX) && !defined(OS_IOS)
 // The segment the section is in is defined read-only with a linker flag in
 // build/config/mac/BUILD.gn
 #define PROTECTED_MEMORY_SECTION \
