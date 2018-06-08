@@ -16,7 +16,7 @@
 #include "base/files/scoped_file.h"
 #include "base/macros.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include <sys/stat.h>

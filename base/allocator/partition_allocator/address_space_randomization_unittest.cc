@@ -8,7 +8,7 @@
 #include "base/bit_cast.h"
 #include "base/bits.h"
 #include "base/sys_info.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(OS_WIN)

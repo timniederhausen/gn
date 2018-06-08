@@ -9,7 +9,7 @@
 #include "base/macros.h"
 #include "base/power_monitor/power_monitor_source.h"
 #include "base/power_monitor/power_observer.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

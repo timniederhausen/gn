@@ -12,7 +12,7 @@
 #include "base/debug/profiler.h"
 #include "base/trace_event/process_memory_dump.h"
 #include "base/trace_event/trace_event_argument.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_MACOSX)
 #include <malloc/malloc.h>

@@ -17,7 +17,7 @@
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/memory/free_deleter.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(OS_POSIX)

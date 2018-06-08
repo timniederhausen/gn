@@ -21,7 +21,7 @@
 #include "base/test/launcher/unit_test_launcher.h"
 #include "base/test/test_switches.h"
 #include "base/test/test_timeouts.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_POSIX)
 #include "base/files/file_descriptor_watcher_posix.h"

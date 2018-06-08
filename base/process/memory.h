@@ -9,7 +9,7 @@
 
 #include "base/base_export.h"
 #include "base/process/process_handle.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #ifdef PVALLOC_AVAILABLE
 // Build config explicitly tells us whether or not pvalloc is available.

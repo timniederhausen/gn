@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "base/memory/shared_memory.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

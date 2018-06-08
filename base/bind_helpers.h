@@ -13,7 +13,7 @@
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/memory/weak_ptr.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 // This defines a set of simple functions and utilities that people want when
 // using Callback<> and Bind().

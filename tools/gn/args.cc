@@ -5,7 +5,7 @@
 #include "tools/gn/args.h"
 
 #include "base/sys_info.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "tools/gn/source_file.h"
 #include "tools/gn/string_utils.h"
 #include "tools/gn/variables.h"

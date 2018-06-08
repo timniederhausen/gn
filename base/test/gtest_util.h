@@ -11,7 +11,7 @@
 
 #include "base/compiler_specific.h"
 #include "base/logging.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 // EXPECT/ASSERT_DCHECK_DEATH is intended to replace EXPECT/ASSERT_DEBUG_DEATH

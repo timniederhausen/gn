@@ -20,7 +20,7 @@
 #include "base/macros.h"
 #include "base/threading/platform_thread.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(__GLIBCXX__)
 #include <cxxabi.h>

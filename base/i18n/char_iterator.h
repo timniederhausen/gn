@@ -13,7 +13,7 @@
 #include "base/i18n/base_i18n_export.h"
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 // The CharIterator classes iterate through the characters in UTF8 and
 // UTF16 strings.  Example usage:

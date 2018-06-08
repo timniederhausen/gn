@@ -19,7 +19,7 @@
 #include "base/run_loop.h"
 #include "base/threading/thread.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {

@@ -16,7 +16,7 @@
 
 #include "base/numerics/safe_math.h"
 #include "base/synchronization/lock.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_ANDROID)
 #include "base/os_compat_android.h"

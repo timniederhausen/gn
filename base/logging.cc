@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #include "base/macros.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include <io.h>

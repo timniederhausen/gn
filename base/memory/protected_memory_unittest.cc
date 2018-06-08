@@ -6,7 +6,7 @@
 #include "base/memory/protected_memory_cfi.h"
 #include "base/synchronization/lock.h"
 #include "base/test/gtest_util.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {

@@ -9,7 +9,7 @@
 #include <limits>
 
 #include "base/strings/string_util.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {

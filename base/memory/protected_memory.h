@@ -57,7 +57,7 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/synchronization/lock.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #define PROTECTED_MEMORY_ENABLED 1
 

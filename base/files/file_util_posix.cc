@@ -42,7 +42,7 @@
 #include "base/sys_info.h"
 #include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_MACOSX)
 #include <AvailabilityMacros.h>

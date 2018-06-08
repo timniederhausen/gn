@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #include "base/process/process_metrics.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

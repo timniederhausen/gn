@@ -21,7 +21,7 @@
 #include "base/threading/platform_thread_internal_posix.h"
 #include "base/threading/thread_id_name_manager.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_LINUX)
 #include <sys/syscall.h>

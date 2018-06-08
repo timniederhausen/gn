@@ -13,7 +13,7 @@
 #include "base/macros.h"
 #include "base/process/process_metrics.h"
 #include "base/threading/platform_thread.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if !defined(OS_WIN)
 #include <unistd.h>

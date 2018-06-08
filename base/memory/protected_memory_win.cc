@@ -10,7 +10,7 @@
 
 #include "base/process/process_metrics.h"
 #include "base/synchronization/lock.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

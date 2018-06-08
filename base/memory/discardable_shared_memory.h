@@ -14,7 +14,7 @@
 #include "base/memory/unsafe_shared_memory_region.h"
 #include "base/threading/thread_collision_warner.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if DCHECK_IS_ON()
 #include <set>

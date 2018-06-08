@@ -14,7 +14,7 @@
 #include "base/strings/stringprintf.h"
 #include "base/synchronization/lock.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 // Not defined on AIX by default.
 #if defined(OS_AIX)

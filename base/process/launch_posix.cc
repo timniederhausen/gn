@@ -43,7 +43,7 @@
 #include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_LINUX) || defined(OS_AIX)
 #include <sys/prctl.h>

@@ -4,7 +4,7 @@
 
 #include "base/scoped_native_library.h"
 
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(OS_WIN)

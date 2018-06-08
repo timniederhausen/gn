@@ -6,7 +6,7 @@
 #define BASE_DEBUG_LEAK_ANNOTATIONS_H_
 
 #include "base/macros.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 // This file defines macros which can be used to annotate intentional memory
 // leaks. Support for annotations is implemented in LeakSanitizer. Annotated

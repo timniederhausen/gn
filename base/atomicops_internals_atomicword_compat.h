@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 // AtomicWord is a synonym for intptr_t, and Atomic32 is a synonym for int32_t,
 // which in turn means int. On some LP32 platforms, intptr_t is an int, but

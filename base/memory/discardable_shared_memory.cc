@@ -16,7 +16,7 @@
 #include "base/process/process_metrics.h"
 #include "base/trace_event/memory_allocator_dump.h"
 #include "base/trace_event/process_memory_dump.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_POSIX) && !defined(OS_NACL)
 // For madvise() which is available on all POSIX compatible systems.

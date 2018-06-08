@@ -10,7 +10,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/power_monitor/power_observer.h"
 #include "base/timer/timer.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

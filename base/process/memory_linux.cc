@@ -14,7 +14,7 @@
 #include "base/logging.h"
 #include "base/process/internal_linux.h"
 #include "base/strings/string_number_conversions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(USE_TCMALLOC)
 #include "third_party/tcmalloc/chromium/src/config.h"
@@ -95,14 +95,7 @@ bool AdjustOOMScore(ProcessId process, int score) {
 }
 
 bool UncheckedMalloc(size_t size, void** result) {
-#if defined(MEMORY_TOOL_REPLACES_ALLOCATOR) || \
-    (!defined(LIBC_GLIBC) && !defined(USE_TCMALLOC))
   *result = malloc(size);
-#elif defined(LIBC_GLIBC) && !defined(USE_TCMALLOC)
-  *result = __libc_malloc(size);
-#elif defined(USE_TCMALLOC)
-  *result = tc_malloc_skip_new_handler(size);
-#endif
   return *result != nullptr;
 }
 

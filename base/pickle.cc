@@ -13,7 +13,7 @@
 #include "base/macros.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/numerics/safe_math.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

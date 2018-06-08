@@ -17,7 +17,7 @@
 #include "base/posix/eintr_wrapper.h"
 #include "base/threading/scoped_blocking_call.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

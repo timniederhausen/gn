@@ -8,7 +8,7 @@
 #include "base/base_export.h"
 #include "base/macros.h"
 #include "base/sequenced_task_runner.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include "base/win/object_watcher.h"

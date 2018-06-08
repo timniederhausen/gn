@@ -14,7 +14,7 @@
 #include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/numerics/checked_math.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #include <atomic>
 

@@ -10,7 +10,7 @@
 
 #include "base/debug/alias.h"
 #include "base/logging.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

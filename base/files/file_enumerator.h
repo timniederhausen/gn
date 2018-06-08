@@ -15,7 +15,7 @@
 #include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

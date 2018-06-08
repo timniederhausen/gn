@@ -9,7 +9,7 @@
 #include "base/logging.h"
 #include "base/process/process_metrics.h"
 #include "base/sys_info.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(USE_TCMALLOC)

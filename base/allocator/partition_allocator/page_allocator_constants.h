@@ -7,7 +7,7 @@
 
 #include <stddef.h>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 #if defined(OS_WIN)

@@ -12,7 +12,7 @@
 
 #include "base/base_export.h"
 #include "base/compiler_specific.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(COMPILER_MSVC)
 #include <malloc.h>

@@ -17,7 +17,7 @@
 #include "base/observer_list.h"
 #include "base/sequence_checker.h"
 #include "base/threading/thread_checker.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 #if defined(OS_ANDROID)

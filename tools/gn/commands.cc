@@ -8,7 +8,7 @@
 #include "base/environment.h"
 #include "base/strings/string_split.h"
 #include "base/values.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "tools/gn/builder.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/item.h"

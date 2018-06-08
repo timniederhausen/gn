@@ -5,7 +5,7 @@
 #ifndef TESTING_LIBFUZZER_LIBFUZZER_EXPORTS_H_
 #define TESTING_LIBFUZZER_LIBFUZZER_EXPORTS_H_
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 // On macOS, the linker may strip symbols for functions that are not reachable
 // by the program entrypoint. Several libFuzzer functions are resolved via

@@ -73,7 +73,7 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/synchronization/lock.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include "base/win/windows_types.h"

@@ -23,7 +23,7 @@
 #include "base/task_scheduler/task_scheduler.h"
 #include "base/task_scheduler/task_tracker.h"
 #include "base/task_scheduler/task_traits.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_POSIX) && !defined(OS_NACL_SFI)
 #include "base/task_scheduler/task_tracker_posix.h"

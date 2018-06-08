@@ -5,7 +5,7 @@
 // This file contains the unit tests for the bit utilities.
 
 #include "base/bits.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #include <stddef.h>
 

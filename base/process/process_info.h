@@ -6,7 +6,7 @@
 #define BASE_PROCESS_PROCESS_INFO_H_
 
 #include "base/base_export.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

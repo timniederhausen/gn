@@ -15,7 +15,7 @@
 #include "base/logging.h"
 #include "base/numerics/safe_math.h"
 #include "base/time/time_override.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 // Ensure the Fuchsia and Mac builds do not include this module. Instead,
 // non-POSIX implementation is used for sampling the system clocks.

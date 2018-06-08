@@ -5,7 +5,7 @@
 #include "base/strings/utf_string_conversion_utils.h"
 
 #include "base/third_party/icu/icu_utf.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

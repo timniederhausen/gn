@@ -9,7 +9,7 @@
 #include "base/logging.h"
 #include "base/memory/shared_memory_tracker.h"
 #include "base/unguessable_token.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_POSIX)
 #include <sys/mman.h>

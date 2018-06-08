@@ -29,7 +29,7 @@
 #include <tuple>
 #include <utility>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

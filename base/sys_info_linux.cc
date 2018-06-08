@@ -16,7 +16,7 @@
 #include "base/process/process_metrics.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/sys_info_internal.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace {
 

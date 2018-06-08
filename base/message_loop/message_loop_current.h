@@ -12,7 +12,7 @@
 #include "base/message_loop/message_pump_for_ui.h"
 #include "base/pending_task.h"
 #include "base/single_thread_task_runner.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

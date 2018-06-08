@@ -15,7 +15,7 @@
 #include "base/threading/thread_id_name_manager.h"
 #include "base/threading/thread_local.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_POSIX) && !defined(OS_NACL)
 #include "base/files/file_descriptor_watcher_posix.h"

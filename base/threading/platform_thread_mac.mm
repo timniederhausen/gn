@@ -18,7 +18,7 @@
 #include "base/mac/foundation_util.h"
 #include "base/mac/mach_logging.h"
 #include "base/threading/thread_id_name_manager.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

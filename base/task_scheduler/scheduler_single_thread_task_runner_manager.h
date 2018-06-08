@@ -17,7 +17,7 @@
 #include "base/task_scheduler/single_thread_task_runner_thread_mode.h"
 #include "base/task_scheduler/tracked_ref.h"
 #include "base/threading/platform_thread.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

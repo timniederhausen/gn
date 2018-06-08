@@ -10,7 +10,7 @@
 #include "base/compiler_specific.h"
 #include "base/i18n/base_i18n_export.h"
 #include "base/strings/string16.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

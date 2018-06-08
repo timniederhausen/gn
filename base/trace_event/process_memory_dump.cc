@@ -17,7 +17,7 @@
 #include "base/trace_event/memory_infra_background_whitelist.h"
 #include "base/trace_event/trace_event_argument.h"
 #include "base/unguessable_token.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_IOS)
 #include <mach/vm_page_size.h>

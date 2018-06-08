@@ -23,7 +23,7 @@
 #include "base/trace_event/trace_category.h"
 #include "base/trace_event/trace_event_system_stats_monitor.h"
 #include "base/trace_event/trace_log.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 // By default, const char* argument values are assumed to have long-lived scope
 // and will not be copied. Use this macro to force a const char* to be copied.

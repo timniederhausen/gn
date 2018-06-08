@@ -6,7 +6,7 @@
 
 #include "base/allocator/allocator_interception_mac.h"
 #include "base/allocator/allocator_shim.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <unwind.h>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace mac {

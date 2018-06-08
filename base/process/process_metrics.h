@@ -20,7 +20,7 @@
 #include "base/process/process_handle.h"
 #include "base/time/time.h"
 #include "base/values.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_MACOSX)
 #include <mach/mach.h>

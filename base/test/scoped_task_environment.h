@@ -9,7 +9,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/single_thread_task_runner.h"
 #include "base/task_scheduler/lazy_task_runner.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

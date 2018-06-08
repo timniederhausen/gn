@@ -9,7 +9,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "tools/gn/err.h"
 #include "tools/gn/exec_process.h"
 #include "tools/gn/filesystem_utils.h"

@@ -17,7 +17,7 @@
 #include "base/memory/scoped_refptr.h"
 #include "base/sequence_checker.h"
 #include "base/threading/thread_collision_warner.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace subtle {

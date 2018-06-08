@@ -5,7 +5,7 @@
 #ifndef THIRD_PARTY_GOOGLETEST_CUSTOM_GTEST_INTERNAL_CUSTOM_GTEST_H_
 #define THIRD_PARTY_GOOGLETEST_CUSTOM_GTEST_INTERNAL_CUSTOM_GTEST_H_
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if !defined(GTEST_DISABLE_PRINT_STACK_TRACE)
 #include "third_party/googletest/custom/gtest/internal/custom/stack_trace_getter.h"

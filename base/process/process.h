@@ -9,7 +9,7 @@
 #include "base/macros.h"
 #include "base/process/process_handle.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include "base/win/scoped_handle.h"

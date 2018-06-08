@@ -19,7 +19,7 @@
 #include "base/task_scheduler/single_thread_task_runner_thread_mode.h"
 #include "base/task_scheduler/task_traits.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

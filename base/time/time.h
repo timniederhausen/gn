@@ -61,7 +61,7 @@
 #include "base/compiler_specific.h"
 #include "base/logging.h"
 #include "base/numerics/safe_math.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_FUCHSIA)
 #include <zircon/types.h>

@@ -8,7 +8,7 @@
 #include <string.h>
 
 #include "base/allocator/partition_allocator/address_space_randomization.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(OS_POSIX) && !defined(OS_FUCHSIA)

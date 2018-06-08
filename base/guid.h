@@ -11,7 +11,7 @@
 
 #include "base/base_export.h"
 #include "base/strings/string_piece.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

@@ -16,7 +16,7 @@
 #include "base/win/iat_patch_function.h"
 #include "base/win/pe_image.h"
 #include "base/win/scoped_handle.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace {
 

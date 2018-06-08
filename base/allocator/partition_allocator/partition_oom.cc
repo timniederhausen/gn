@@ -5,7 +5,7 @@
 #include "base/allocator/partition_allocator/partition_oom.h"
 
 #include "base/allocator/partition_allocator/oom.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace internal {

@@ -10,7 +10,7 @@
 #include "base/base_export.h"
 #include "base/base_paths.h"
 #include "base/gtest_prod_util.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

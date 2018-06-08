@@ -15,7 +15,7 @@
 #include <sys/resource.h>
 #endif
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #ifndef MAP_ANONYMOUS
 #define MAP_ANONYMOUS MAP_ANON

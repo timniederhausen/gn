@@ -9,7 +9,7 @@
 #include "base/memory/singleton.h"
 #include "base/synchronization/lock.h"
 #include "base/trace_event/memory_dump_provider.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_LINUX) || defined(OS_ANDROID) || defined(OS_WIN) || \
     (defined(OS_MACOSX) && !defined(OS_IOS))

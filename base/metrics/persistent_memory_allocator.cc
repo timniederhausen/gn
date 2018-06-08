@@ -22,7 +22,7 @@
 #include "base/numerics/safe_conversions.h"
 #include "base/sys_info.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace {
 

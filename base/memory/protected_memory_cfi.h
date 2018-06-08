@@ -16,7 +16,7 @@
 #include "base/compiler_specific.h"
 #include "base/macros.h"
 #include "base/memory/protected_memory.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace internal {

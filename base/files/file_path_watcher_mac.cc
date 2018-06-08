@@ -8,7 +8,7 @@
 #include "base/files/file_path_watcher_kqueue.h"
 #include "base/macros.h"
 #include "base/memory/ptr_util.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if !defined(OS_IOS)
 #include "base/files/file_path_watcher_fsevents.h"

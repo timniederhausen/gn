@@ -10,7 +10,7 @@
 #include <limits>
 
 #include "base/macros.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if !defined(NDEBUG)
 // In debug builds, we use RAW_CHECK() to print useful error messages, if

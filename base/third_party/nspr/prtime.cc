@@ -69,7 +69,7 @@
 
 #include "base/logging.h"
 #include "base/third_party/nspr/prtime.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #include <errno.h>  /* for EINVAL */
 #include <time.h>

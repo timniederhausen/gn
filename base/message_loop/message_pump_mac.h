@@ -38,7 +38,7 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "base/message_loop/timer_slack.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(__OBJC__)
 #if defined(OS_IOS)

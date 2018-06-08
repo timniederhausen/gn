@@ -11,7 +11,7 @@
 #include "base/lazy_instance.h"
 #include "base/sys_info_internal.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace {

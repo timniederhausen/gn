@@ -19,7 +19,7 @@
 #include "base/task_scheduler/tracked_ref.h"
 #include "base/threading/platform_thread.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include "base/win/com_init_check_hook.h"

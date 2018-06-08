@@ -10,7 +10,7 @@
 #include "base/task_scheduler/scoped_set_task_priority_for_current_thread.h"
 #include "base/test/scoped_task_environment.h"
 #include "base/threading/thread_checker_impl.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(OS_WIN)

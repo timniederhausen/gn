@@ -15,7 +15,7 @@
 #include "base/memory/shared_memory_handle.h"
 #include "base/process/process_handle.h"
 #include "base/strings/string16.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include <stdio.h>

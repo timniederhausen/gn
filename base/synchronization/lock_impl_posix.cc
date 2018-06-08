@@ -11,7 +11,7 @@
 #include "base/posix/safe_strerror.h"
 #include "base/strings/stringprintf.h"
 #include "base/synchronization/lock.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace internal {

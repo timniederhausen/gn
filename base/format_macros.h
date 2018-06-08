@@ -24,7 +24,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if (defined(OS_POSIX) || defined(OS_FUCHSIA)) && \
     (defined(_INTTYPES_H) || defined(_INTTYPES_H_)) && !defined(PRId64)

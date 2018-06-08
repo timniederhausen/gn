@@ -18,7 +18,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/sys_info_internal.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if !defined(OS_FUCHSIA)
 #include <sys/resource.h>

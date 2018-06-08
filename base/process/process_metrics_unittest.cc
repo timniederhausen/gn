@@ -22,7 +22,7 @@
 #include "base/sys_info.h"
 #include "base/test/multiprocess_test.h"
 #include "base/threading/thread.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "testing/multiprocess_func_list.h"
 

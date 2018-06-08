@@ -22,7 +22,7 @@
 #include "base/threading/thread_checker.h"
 #include "base/time/time.h"
 #include "base/timer/timer.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

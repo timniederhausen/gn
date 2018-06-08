@@ -28,7 +28,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/thread_restrictions.h"
 #include "base/unguessable_token.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_IOS)
 #error "MacOS only - iOS uses shared_memory_posix.cc"

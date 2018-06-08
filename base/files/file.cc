@@ -7,7 +7,7 @@
 #include "base/files/file_tracing.h"
 #include "base/metrics/histogram.h"
 #include "base/timer/elapsed_timer.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include <errno.h>

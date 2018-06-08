@@ -12,7 +12,7 @@
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace {
 

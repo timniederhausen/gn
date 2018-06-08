@@ -4,7 +4,7 @@
 
 #include "base/i18n/encoding_detection.h"
 
-#include "build/build_config.h"
+#include "build_config.h"
 #include "third_party/ced/src/compact_enc_det/compact_enc_det.h"
 
 // third_party/ced/src/util/encodings/encodings.h, which is included

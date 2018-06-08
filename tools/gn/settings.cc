@@ -5,7 +5,7 @@
 #include "tools/gn/settings.h"
 
 #include "base/logging.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "tools/gn/filesystem_utils.h"
 
 Settings::Settings(const BuildSettings* build_settings,

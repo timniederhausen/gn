@@ -25,7 +25,7 @@
 #include "base/threading/thread_restrictions.h"
 #include "base/trace_event/trace_event.h"
 #include "base/unguessable_token.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_ANDROID)
 #include "base/os_compat_android.h"

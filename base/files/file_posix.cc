@@ -15,7 +15,7 @@
 #include "base/posix/eintr_wrapper.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_ANDROID)
 #include "base/os_compat_android.h"

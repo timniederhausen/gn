@@ -8,7 +8,7 @@
 
 #include <iomanip>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if !defined(OS_IOS)
 #include <CoreServices/CoreServices.h>

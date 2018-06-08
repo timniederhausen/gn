@@ -5,7 +5,7 @@
 #ifndef BASE_TEST_NATIVE_LIBRARY_TEST_UTILS_H_
 #define BASE_TEST_NATIVE_LIBRARY_TEST_UTILS_H_
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #define NATIVE_LIBRARY_TEST_ALWAYS_EXPORT __declspec(dllexport)

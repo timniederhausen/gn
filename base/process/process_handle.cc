@@ -6,7 +6,7 @@
 
 #include "base/logging.h"
 #include "base/process/process_handle.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

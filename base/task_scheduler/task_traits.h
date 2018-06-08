@@ -12,7 +12,7 @@
 
 #include "base/base_export.h"
 #include "base/task_scheduler/task_traits_details.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

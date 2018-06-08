@@ -10,7 +10,7 @@
 #include "base/macros.h"
 #include "base/synchronization/lock_impl.h"
 #include "base/threading/platform_thread.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

@@ -22,7 +22,7 @@
 #include "base/macros.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/time/time_override.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_IOS)
 #include <time.h>

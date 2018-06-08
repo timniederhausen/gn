@@ -12,7 +12,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/sys_info.h"
 #include "base/task_scheduler/task_scheduler.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/err.h"
 #include "tools/gn/location.h"

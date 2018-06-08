@@ -13,7 +13,7 @@
 #include "base/strings/string_piece.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "tools/gn/switches.h"
 
 #if defined(OS_WIN)

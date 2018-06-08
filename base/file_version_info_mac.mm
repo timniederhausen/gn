@@ -11,7 +11,7 @@
 #include "base/mac/bundle_locations.h"
 #include "base/mac/foundation_util.h"
 #include "base/strings/sys_string_conversions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 FileVersionInfoMac::FileVersionInfoMac(NSBundle *bundle)
     : bundle_([bundle retain]) {

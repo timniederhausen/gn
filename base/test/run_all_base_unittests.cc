@@ -5,7 +5,7 @@
 #include "base/bind.h"
 #include "base/test/launcher/unit_test_launcher.h"
 #include "base/test/test_suite.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 int main(int argc, char** argv) {
   base::TestSuite test_suite(argc, argv);

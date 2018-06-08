@@ -8,7 +8,7 @@
 #include <sstream>
 #include <utility>
 
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "tools/gn/config.h"
 #include "tools/gn/scheduler.h"

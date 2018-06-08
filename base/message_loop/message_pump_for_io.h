@@ -8,7 +8,7 @@
 // This header is a forwarding header to coalesce the various platform specific
 // types representing MessagePumpForIO.
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include "base/message_loop/message_pump_win.h"

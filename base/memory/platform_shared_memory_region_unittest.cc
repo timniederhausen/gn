@@ -9,7 +9,7 @@
 #include "base/sys_info.h"
 #include "base/test/gtest_util.h"
 #include "base/test/test_shared_memory_util.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(OS_MACOSX) && !defined(OS_IOS)

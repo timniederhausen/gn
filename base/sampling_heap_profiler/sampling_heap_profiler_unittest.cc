@@ -10,7 +10,7 @@
 #include "base/allocator/allocator_shim.h"
 #include "base/debug/alias.h"
 #include "base/threading/simple_thread.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {

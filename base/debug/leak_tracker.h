@@ -7,7 +7,7 @@
 
 #include <stddef.h>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 // Only enable leak tracking in non-uClibc debug builds.
 #if !defined(NDEBUG) && !defined(__UCLIBC__)

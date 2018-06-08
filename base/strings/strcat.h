@@ -11,7 +11,7 @@
 #include "base/compiler_specific.h"
 #include "base/containers/span.h"
 #include "base/strings/string_piece.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 // To resolve a conflict with Win32 API StrCat macro.

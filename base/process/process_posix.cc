@@ -16,7 +16,7 @@
 #include "base/posix/eintr_wrapper.h"
 #include "base/process/kill.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_MACOSX)
 #include <sys/event.h>

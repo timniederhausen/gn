@@ -14,7 +14,7 @@
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 // Death tests on Android are currently very flaky. No need to add more flaky

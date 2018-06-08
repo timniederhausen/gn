@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <sys/types.h>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

@@ -5,7 +5,7 @@
 #include <malloc.h>
 
 #include "base/allocator/allocator_shim.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_ANDROID) && __ANDROID_API__ < 17
 #include <dlfcn.h>

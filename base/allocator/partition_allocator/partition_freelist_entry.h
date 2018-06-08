@@ -10,7 +10,7 @@
 #include "base/allocator/partition_allocator/partition_alloc_constants.h"
 #include "base/compiler_specific.h"
 #include "base/sys_byteorder.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace internal {

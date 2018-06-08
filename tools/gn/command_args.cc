@@ -16,7 +16,7 @@
 #include "base/process/launch.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/input_file.h"

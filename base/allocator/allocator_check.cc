@@ -4,7 +4,7 @@
 
 #include "base/allocator/allocator_check.h"
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include "base/allocator/winheap_stubs_win.h"

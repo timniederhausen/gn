@@ -7,7 +7,7 @@
 #ifndef BASE_BASE_SWITCHES_H_
 #define BASE_BASE_SWITCHES_H_
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace switches {
 

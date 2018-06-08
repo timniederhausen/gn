@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "base/debug/alias.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace debug {

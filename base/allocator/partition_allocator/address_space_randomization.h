@@ -7,7 +7,7 @@
 
 #include "base/allocator/partition_allocator/page_allocator.h"
 #include "base/base_export.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

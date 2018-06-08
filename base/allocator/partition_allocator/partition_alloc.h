@@ -76,7 +76,7 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/sys_byteorder.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(MEMORY_TOOL_REPLACES_ALLOCATOR)
 #include <stdlib.h>

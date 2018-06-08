@@ -17,7 +17,7 @@
 #include "base/process/process_handle.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

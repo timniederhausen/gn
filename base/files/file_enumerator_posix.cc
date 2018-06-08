@@ -12,7 +12,7 @@
 
 #include "base/logging.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace {

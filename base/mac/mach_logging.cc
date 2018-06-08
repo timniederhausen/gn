@@ -8,7 +8,7 @@
 #include <string>
 
 #include "base/strings/stringprintf.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if !defined(OS_IOS)
 #include <servers/bootstrap.h>

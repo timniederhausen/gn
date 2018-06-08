@@ -30,7 +30,7 @@
 #include "base/task_scheduler/task.h"
 #include "base/task_scheduler/tracked_ref.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

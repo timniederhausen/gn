@@ -21,7 +21,7 @@
 #include "base/synchronization/lock.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/threading/platform_thread.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

@@ -18,7 +18,7 @@
 #include "base/process/process_iterator.h"
 #include "base/task_scheduler/post_task.h"
 #include "base/threading/platform_thread.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

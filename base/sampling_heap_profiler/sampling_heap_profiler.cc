@@ -17,7 +17,7 @@
 #include "base/partition_alloc_buildflags.h"
 #include "base/rand_util.h"
 #include "base/threading/thread_local_storage.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

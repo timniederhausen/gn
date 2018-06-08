@@ -8,7 +8,7 @@
 #include <stddef.h> // for size_t
 
 #include "base/base_export.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace allocator {

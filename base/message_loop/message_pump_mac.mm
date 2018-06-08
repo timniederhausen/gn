@@ -17,7 +17,7 @@
 #include "base/message_loop/timer_slack.h"
 #include "base/run_loop.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if !defined(OS_IOS)
 #import <AppKit/AppKit.h>

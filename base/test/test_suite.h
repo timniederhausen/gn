@@ -17,7 +17,7 @@
 #include "base/macros.h"
 #include "base/test/scoped_feature_list.h"
 #include "base/test/trace_to_file.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace testing {
 class TestInfo;

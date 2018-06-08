@@ -26,7 +26,7 @@
 #include "base/threading/sequence_local_storage_map.h"
 #include "base/threading/thread_checker.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

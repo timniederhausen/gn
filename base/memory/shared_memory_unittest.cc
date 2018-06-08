@@ -26,7 +26,7 @@
 #include "base/threading/platform_thread.h"
 #include "base/time/time.h"
 #include "base/unguessable_token.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "testing/multiprocess_func_list.h"
 

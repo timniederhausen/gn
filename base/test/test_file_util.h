@@ -14,7 +14,7 @@
 #include "base/compiler_specific.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_ANDROID)
 #include <jni.h>

@@ -14,7 +14,7 @@
 #include "base/logging.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_ANDROID)
 #include <android/api-level.h>

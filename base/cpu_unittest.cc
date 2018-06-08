@@ -4,7 +4,7 @@
 
 #include "base/cpu.h"
 #include "base/stl_util.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if _MSC_VER >= 1700

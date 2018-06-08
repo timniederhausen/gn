@@ -6,7 +6,7 @@
 #define BASE_FILES_PLATFORM_FILE_H_
 
 #include "base/files/scoped_file.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_WIN)
 #include "base/win/scoped_handle.h"

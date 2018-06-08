@@ -10,7 +10,7 @@
 #include "base/logging.h"
 #include "base/numerics/safe_math.h"
 #include "base/sys_info.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

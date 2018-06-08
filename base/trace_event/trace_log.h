@@ -21,7 +21,7 @@
 #include "base/trace_event/memory_dump_provider.h"
 #include "base/trace_event/trace_config.h"
 #include "base/trace_event/trace_event_impl.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 

@@ -9,7 +9,7 @@
 #include "base/mac/mach_logging.h"
 #include "base/mac/scoped_mach_vm.h"
 #include "base/numerics/checked_math.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_IOS)
 #error "MacOS only - iOS uses platform_shared_memory_region_posix.cc"

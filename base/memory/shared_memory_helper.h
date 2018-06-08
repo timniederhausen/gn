@@ -6,7 +6,7 @@
 #define BASE_MEMORY_SHARED_MEMORY_HELPER_H_
 
 #include "base/memory/shared_memory.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #include <fcntl.h>
 

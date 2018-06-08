@@ -9,7 +9,7 @@
 #define BASE_ALLOCATOR_PARTITION_ALLOCATOR_PARTITION_OOM_H_
 
 #include "base/compiler_specific.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 namespace internal {

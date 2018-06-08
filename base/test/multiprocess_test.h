@@ -10,7 +10,7 @@
 #include "base/macros.h"
 #include "base/process/launch.h"
 #include "base/process/process.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/platform_test.h"
 
 namespace base {

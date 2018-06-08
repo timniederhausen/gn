@@ -7,7 +7,7 @@
 #include "base/auto_reset.h"
 #include "base/logging.h"
 #include "base/threading/thread_restrictions.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_MACOSX)
 #include <mach/thread_policy.h>

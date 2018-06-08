@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "build/build_config.h"
+#include "build_config.h"
 
 // Some versions of libstdc++ have partial support for type_traits, but misses
 // a smaller subset while removing some of the older non-standard stuff. Assume

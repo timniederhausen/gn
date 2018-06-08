@@ -43,7 +43,7 @@
 #include "base/threading/thread_local_storage.h"
 #include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(OS_WIN)

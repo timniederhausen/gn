@@ -7,7 +7,7 @@
 #include "base/native_library.h"
 #include "base/path_service.h"
 #include "base/test/native_library_test_utils.h"
-#include "build/build_config.h"
+#include "build_config.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {

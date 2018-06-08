@@ -14,7 +14,7 @@
 #include "base/logging.h"
 #include "base/no_destructor.h"
 #include "base/threading/thread_local_storage.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 #if defined(OS_MACOSX) || defined(OS_IOS)
 #include <malloc/malloc.h>

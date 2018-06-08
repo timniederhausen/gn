@@ -13,7 +13,7 @@
 #include "base/base_export.h"
 #include "base/files/scoped_file.h"
 #include "base/process/process_handle.h"
-#include "build/build_config.h"
+#include "build_config.h"
 
 namespace base {
 
