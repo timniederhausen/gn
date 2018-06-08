@@ -90,10 +90,6 @@ void ThreadSafeAssignOrCreateScopedHandleVerifier(
 
 // static
 void ScopedHandleVerifier::InstallVerifier() {
-#if BUILDFLAG(SINGLE_MODULE_MODE_HANDLE_VERIFIER)
-  // Component build has one Active Verifier per module.
-  ThreadSafeAssignOrCreateScopedHandleVerifier(nullptr, true);
-#else
   // If you are reading this, wondering why your process seems deadlocked, take
   // a look at your DllMain code and remove things that should not be done
   // there, like doing whatever gave you that nice windows handle you are trying
@@ -125,7 +121,6 @@ void ScopedHandleVerifier::InstallVerifier() {
   DCHECK(main_module_verifier);
 
   ThreadSafeAssignOrCreateScopedHandleVerifier(main_module_verifier, false);
-#endif
 }
 
 bool ScopedHandleVerifier::CloseHandle(HANDLE handle) {

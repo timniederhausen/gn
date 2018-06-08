@@ -192,28 +192,6 @@ def write_compiled_message(root_gen_dir, source):
       os.path.join(SRC_ROOT, source),
   ])
 
-def write_buildflag_header_manually(root_gen_dir, header, flags):
-  mkdir_p(os.path.join(root_gen_dir, os.path.dirname(header)))
-
-  # Don't use tempfile.NamedTemporaryFile() here.
-  # It doesn't work correctly on Windows.
-  # see: http://bugs.python.org/issue14243
-  temp_path = os.path.join(root_gen_dir, header + '.tmp')
-  with open(temp_path, 'w') as f:
-    f.write('--flags')
-    for name,value in flags.items():
-      f.write(' ' + name + '=' + value)
-
-  check_call([
-      sys.executable,
-      os.path.join(SRC_ROOT, 'build', 'write_buildflag_header.py'),
-      '--output', header,
-      '--gen-dir', root_gen_dir,
-      '--definitions', temp_path,
-  ])
-
-  os.remove(temp_path)
-
 def write_build_date_header(root_gen_dir):
   check_call([
        sys.executable,
@@ -240,10 +218,6 @@ def build_gn_with_ninja_manually(tempdir, options, windows_x64_toolchain):
     ])
 
   if is_win:
-    write_buildflag_header_manually(root_gen_dir,
-                                    'base/win/base_win_buildflags.h',
-        {'SINGLE_MODULE_MODE_HANDLE_VERIFIER': 'true'})
-
     write_compiled_message(root_gen_dir,
         'base/trace_event/etw_manifest/chrome_events_win.man')
 
