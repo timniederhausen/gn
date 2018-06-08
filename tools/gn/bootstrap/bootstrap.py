@@ -161,6 +161,8 @@ def main(argv):
   if args:
     parser.error('Unrecognized command line arguments: %s.' % ', '.join(args))
 
+  options.no_rebuild = True
+
   logging.basicConfig(level=logging.DEBUG if options.verbose else logging.ERROR)
 
   try:
@@ -634,6 +636,10 @@ def write_gn_ninja(path, root_gen_dir, options, windows_x64_toolchain):
       'base/trace_event/heap_profiler_allocation_context.cc',
       'base/trace_event/heap_profiler_allocation_context_tracker.cc',
       'base/trace_event/heap_profiler_event_filter.cc',
+      'base/trace_event/heap_profiler_heap_dump_writer.cc',
+      'base/trace_event/heap_profiler_serialization_state.cc',
+      'base/trace_event/heap_profiler_stack_frame_deduplicator.cc',
+      'base/trace_event/heap_profiler_type_name_deduplicator.cc',
       'base/trace_event/malloc_dump_provider.cc',
       'base/trace_event/memory_allocator_dump.cc',
       'base/trace_event/memory_allocator_dump_guid.cc',
@@ -642,6 +648,7 @@ def write_gn_ninja(path, root_gen_dir, options, windows_x64_toolchain):
       'base/trace_event/memory_dump_request_args.cc',
       'base/trace_event/memory_dump_scheduler.cc',
       'base/trace_event/memory_infra_background_whitelist.cc',
+      'base/trace_event/memory_peak_detector.cc',
       'base/trace_event/memory_usage_estimator.cc',
       'base/trace_event/process_memory_dump.cc',
       'base/trace_event/trace_buffer.cc',

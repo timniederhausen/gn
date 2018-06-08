@@ -1,0 +1,7 @@
+# Generated from '.DEPS.git'
+build_with_chromium = true
+checkout_android = true
+checkout_android_native_support = true
+checkout_libaom = true
+checkout_nacl = true
+checkout_oculus_sdk = false
