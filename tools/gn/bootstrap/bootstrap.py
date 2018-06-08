@@ -226,14 +226,6 @@ def build_gn_with_ninja_manually(tempdir, options, windows_x64_toolchain):
   root_gen_dir = os.path.join(tempdir, 'gen')
   mkdir_p(root_gen_dir)
 
-  write_buildflag_header_manually(root_gen_dir, 'base/cfi_buildflags.h',
-      {
-          'CFI_CAST_CHECK': 'false',
-          'CFI_ICALL_CHECK': 'false',
-          'CFI_ENFORCEMENT_TRAP': 'false',
-          'CFI_ENFORCEMENT_DIAGNOSTIC': 'false'
-      })
-
   write_build_date_header(root_gen_dir)
 
   if is_mac:

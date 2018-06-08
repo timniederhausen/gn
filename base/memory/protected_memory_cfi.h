@@ -13,15 +13,10 @@
 
 #include <utility>
 
-#include "base/cfi_buildflags.h"
 #include "base/compiler_specific.h"
 #include "base/macros.h"
 #include "base/memory/protected_memory.h"
 #include "build/build_config.h"
-
-#if BUILDFLAG(CFI_ICALL_CHECK) && !PROTECTED_MEMORY_ENABLED
-#error "CFI-icall enabled for platform without protected memory support"
-#endif  // BUILDFLAG(CFI_ICALL_CHECK) && !PROTECTED_MEMORY_ENABLED
 
 namespace base {
 namespace internal {

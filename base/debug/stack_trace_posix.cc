@@ -39,7 +39,6 @@
 #include "base/debug/proc_maps_linux.h"
 #endif
 
-#include "base/cfi_buildflags.h"
 #include "base/debug/debugger.h"
 #include "base/files/scoped_file.h"
 #include "base/logging.h"
@@ -320,16 +319,6 @@ void StackDumpSignalHandler(int signal, siginfo_t* info, void* void_context) {
     PrintToStderr(buf);
   }
   PrintToStderr("\n");
-
-#if BUILDFLAG(CFI_ENFORCEMENT_TRAP)
-  if (signal == SIGILL && info->si_code == ILL_ILLOPN) {
-    PrintToStderr(
-        "CFI: Most likely a control flow integrity violation; for more "
-        "information see:\n");
-    PrintToStderr(
-        "https://www.chromium.org/developers/testing/control-flow-integrity\n");
-  }
-#endif  // BUILDFLAG(CFI_ENFORCEMENT_TRAP)
 
   debug::StackTrace().Print();
 

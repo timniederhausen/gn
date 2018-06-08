@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "base/memory/protected_memory.h"
-#include "base/cfi_buildflags.h"
 #include "base/memory/protected_memory_cfi.h"
 #include "base/synchronization/lock.h"
 #include "base/test/gtest_util.h"
@@ -100,11 +99,7 @@ TEST_F(ProtectedMemoryTest, BadMemberCall) {
       &icall_pm1, BadIcall(reinterpret_cast<int (*)(int)>(&bad_icall)));
 
   EXPECT_EQ(UnsanitizedCfiCall(icall_pm1, &BadIcall::fp)(1), 5);
-#if !BUILDFLAG(CFI_ICALL_CHECK)
   EXPECT_EQ(icall_pm1->fp(1), 5);
-#elif BUILDFLAG(CFI_ENFORCEMENT_TRAP) || BUILDFLAG(CFI_ENFORCEMENT_DIAGNOSTIC)
-  EXPECT_DEATH({ icall_pm1->fp(1); }, "");
-#endif
 }
 
 PROTECTED_MEMORY_SECTION ProtectedMemory<int (*)(int)> icall_pm2;
@@ -114,11 +109,7 @@ TEST_F(ProtectedMemoryTest, BadFnPtrCall) {
       &icall_pm2, reinterpret_cast<int (*)(int)>(&bad_icall));
 
   EXPECT_EQ(UnsanitizedCfiCall(icall_pm2)(1), 5);
-#if !BUILDFLAG(CFI_ICALL_CHECK)
   EXPECT_EQ((*icall_pm2)(1), 5);
-#elif BUILDFLAG(CFI_ENFORCEMENT_TRAP) || BUILDFLAG(CFI_ENFORCEMENT_DIAGNOSTIC)
-  EXPECT_DEATH({ (*icall_pm2)(1); }, "");
-#endif
 }
 
 #endif  // defined(GTEST_HAS_DEATH_TEST) && !defined(OS_ANDROID)
