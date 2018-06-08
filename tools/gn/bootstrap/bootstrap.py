@@ -227,16 +227,6 @@ def build_gn_with_ninja_manually(tempdir, options, windows_x64_toolchain):
   mkdir_p(root_gen_dir)
 
   write_buildflag_header_manually(root_gen_dir,
-                                  'base/debug/debugging_buildflags.h',
-      {
-          'ENABLE_LOCATION_SOURCE': 'false',
-          'ENABLE_PROFILING': 'false',
-          'CAN_UNWIND_WITH_FRAME_POINTERS': 'false',
-          'UNSAFE_DEVELOPER_BUILD': 'false',
-          'CAN_UNWIND_WITH_CFI_TABLE': 'false',
-      })
-
-  write_buildflag_header_manually(root_gen_dir,
                                   'base/memory/protected_memory_buildflags.h',
                                   { 'USE_LLD': 'false' })
 

@@ -8,7 +8,6 @@
 #include <sstream>
 #include <string>
 
-#include "base/debug/debugging_buildflags.h"
 #include "base/debug/stack_trace.h"
 #include "base/logging.h"
 #include "base/process/kill.h"
@@ -254,67 +253,6 @@ TEST_F(StackTraceTest, itoa_r) {
   EXPECT_EQ("00688", itoa_r_wrapper(0x688, 128, 16, 5));
 }
 #endif  // defined(OS_POSIX) && !defined(OS_ANDROID) && !defined(OS_FUCHSIA)
-
-#if BUILDFLAG(CAN_UNWIND_WITH_FRAME_POINTERS)
-
-template <size_t Depth>
-void NOINLINE ExpectStackFramePointers(const void** frames,
-                                       size_t max_depth) {
-  code_start:
-  // Calling __builtin_frame_address() forces compiler to emit
-  // frame pointers, even if they are not enabled.
-  EXPECT_NE(nullptr, __builtin_frame_address(0));
-  ExpectStackFramePointers<Depth - 1>(frames, max_depth);
-
-  constexpr size_t frame_index = Depth - 1;
-  const void* frame = frames[frame_index];
-  EXPECT_GE(frame, &&code_start) << "For frame at index " << frame_index;
-  EXPECT_LE(frame, &&code_end) << "For frame at index " << frame_index;
-  code_end: return;
-}
-
-template <>
-void NOINLINE ExpectStackFramePointers<1>(const void** frames,
-                                          size_t max_depth) {
-  code_start:
-  // Calling __builtin_frame_address() forces compiler to emit
-  // frame pointers, even if they are not enabled.
-  EXPECT_NE(nullptr, __builtin_frame_address(0));
-  size_t count = TraceStackFramePointers(frames, max_depth, 0);
-  ASSERT_EQ(max_depth, count);
-
-  const void* frame = frames[0];
-  EXPECT_GE(frame, &&code_start) << "For the top frame";
-  EXPECT_LE(frame, &&code_end) << "For the top frame";
-  code_end: return;
-}
-
-#if defined(MEMORY_SANITIZER)
-// The test triggers use-of-uninitialized-value errors on MSan bots.
-// This is expected because we're walking and reading the stack, and
-// sometimes we read fp / pc from the place that previously held
-// uninitialized value.
-#define MAYBE_TraceStackFramePointers DISABLED_TraceStackFramePointers
-#else
-#define MAYBE_TraceStackFramePointers TraceStackFramePointers
-#endif
-TEST_F(StackTraceTest, MAYBE_TraceStackFramePointers) {
-  constexpr size_t kDepth = 5;
-  const void* frames[kDepth];
-  ExpectStackFramePointers<kDepth>(frames, kDepth);
-}
-
-#if defined(OS_ANDROID) || defined(OS_MACOSX)
-#define MAYBE_StackEnd StackEnd
-#else
-#define MAYBE_StackEnd DISABLED_StackEnd
-#endif
-
-TEST_F(StackTraceTest, MAYBE_StackEnd) {
-  EXPECT_NE(0u, GetStackEnd());
-}
-
-#endif  // BUILDFLAG(CAN_UNWIND_WITH_FRAME_POINTERS)
 
 }  // namespace debug
 }  // namespace base
