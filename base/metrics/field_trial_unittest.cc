@@ -7,7 +7,6 @@
 #include <stddef.h>
 
 #include "base/base_switches.h"
-#include "base/build_time.h"
 #include "base/feature_list.h"
 #include "base/macros.h"
 #include "base/memory/ptr_util.h"
@@ -41,13 +40,6 @@ scoped_refptr<FieldTrial> CreateFieldTrial(
       trial_name, total_probability, default_group_name,
       FieldTrialList::kNoExpirationYear, 1, 1, FieldTrial::SESSION_RANDOMIZED,
       default_group_number);
-}
-
-int OneYearBeforeBuildTime() {
-  Time one_year_before_build_time = GetBuildTime() - TimeDelta::FromDays(365);
-  Time::Exploded exploded;
-  one_year_before_build_time.LocalExplode(&exploded);
-  return exploded.year;
 }
 
 // FieldTrialList::Observer implementation for testing.
@@ -273,26 +265,6 @@ TEST_F(FieldTrialTest, OneWinner) {
   EXPECT_EQ(trial->group_name(), winner_name);
 }
 
-TEST_F(FieldTrialTest, DisableProbability) {
-  const std::string default_group_name = "Default group";
-  const std::string loser = "Loser";
-  const std::string name = "Trial";
-
-  // Create a field trail that has expired.
-  int default_group_number = -1;
-  FieldTrial* trial = FieldTrialList::FactoryGetFieldTrial(
-      name, 1000000000, default_group_name, OneYearBeforeBuildTime(), 1, 1,
-      FieldTrial::SESSION_RANDOMIZED,
-      &default_group_number);
-  trial->AppendGroup(loser, 999999999);  // 99.9999999% chance of being chosen.
-
-  // Because trial has expired, we should always be in the default group.
-  EXPECT_EQ(default_group_number, trial->group());
-
-  // And that default_group_name should ALWAYS win.
-  EXPECT_EQ(default_group_name, trial->group_name());
-}
-
 TEST_F(FieldTrialTest, ActiveGroups) {
   std::string no_group("No Group");
   scoped_refptr<FieldTrial> trial =
@@ -450,69 +422,6 @@ TEST_F(FieldTrialTest, Save) {
 
   FieldTrialList::StatesToString(&save_string);
   EXPECT_EQ("Some name/Winner/xxx/yyyy/zzz/default/", save_string);
-}
-
-TEST_F(FieldTrialTest, SaveAll) {
-  std::string save_string;
-
-  scoped_refptr<FieldTrial> trial =
-      CreateFieldTrial("Some name", 10, "Default some name", nullptr);
-  EXPECT_EQ("", trial->group_name_internal());
-  FieldTrialList::AllStatesToString(&save_string, false);
-  EXPECT_EQ("Some name/Default some name/", save_string);
-  // Getting all states should have finalized the trial.
-  EXPECT_EQ("Default some name", trial->group_name_internal());
-  save_string.clear();
-
-  // Create a winning group.
-  trial = CreateFieldTrial("trial2", 10, "Default some name", nullptr);
-  trial->AppendGroup("Winner", 10);
-  // Finalize the group selection by accessing the selected group.
-  trial->group();
-  FieldTrialList::AllStatesToString(&save_string, false);
-  EXPECT_EQ("Some name/Default some name/*trial2/Winner/", save_string);
-  save_string.clear();
-
-  // Create a second trial and winning group.
-  scoped_refptr<FieldTrial> trial2 =
-      CreateFieldTrial("xxx", 10, "Default xxx", nullptr);
-  trial2->AppendGroup("yyyy", 10);
-  // Finalize the group selection by accessing the selected group.
-  trial2->group();
-
-  FieldTrialList::AllStatesToString(&save_string, false);
-  // We assume names are alphabetized... though this is not critical.
-  EXPECT_EQ("Some name/Default some name/*trial2/Winner/*xxx/yyyy/",
-            save_string);
-  save_string.clear();
-
-  // Create a third trial with only the default group.
-  scoped_refptr<FieldTrial> trial3 =
-      CreateFieldTrial("zzz", 10, "default", nullptr);
-
-  FieldTrialList::AllStatesToString(&save_string, false);
-  EXPECT_EQ("Some name/Default some name/*trial2/Winner/*xxx/yyyy/zzz/default/",
-            save_string);
-
-  // Create expired study.
-  int default_group_number = -1;
-  scoped_refptr<FieldTrial> expired_trial =
-      FieldTrialList::FactoryGetFieldTrial(
-          "Expired trial name", 1000000000, "Default group",
-          OneYearBeforeBuildTime(), 1, 1, FieldTrial::SESSION_RANDOMIZED,
-          &default_group_number);
-  expired_trial->AppendGroup("Expired trial group name", 999999999);
-
-  save_string.clear();
-  FieldTrialList::AllStatesToString(&save_string, false);
-  EXPECT_EQ("Some name/Default some name/*trial2/Winner/*xxx/yyyy/zzz/default/",
-            save_string);
-  save_string.clear();
-  FieldTrialList::AllStatesToString(&save_string, true);
-  EXPECT_EQ(
-      "Expired trial name/Default group/"
-      "Some name/Default some name/*trial2/Winner/*xxx/yyyy/zzz/default/",
-      save_string);
 }
 
 TEST_F(FieldTrialTest, Restore) {

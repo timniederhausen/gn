@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "base/base_switches.h"
-#include "base/build_time.h"
 #include "base/command_line.h"
 #include "base/debug/activity_tracker.h"
 #include "base/logging.h"
@@ -500,10 +499,7 @@ FieldTrialList::FieldTrialList(
   DCHECK(!used_without_global_);
   global_ = this;
 
-  Time two_years_from_build_time = GetBuildTime() + TimeDelta::FromDays(730);
-  Time::Exploded exploded;
-  two_years_from_build_time.LocalExplode(&exploded);
-  kNoExpirationYear = exploded.year;
+  CHECK(false);  // TODO(scottmg): Remove FieldTrialList.
 }
 
 FieldTrialList::~FieldTrialList() {
@@ -592,9 +588,7 @@ FieldTrial* FieldTrialList::FactoryGetFieldTrialWithRandomizationSeed(
 
   FieldTrial* field_trial = new FieldTrial(trial_name, total_probability,
                                            default_group_name, entropy_value);
-  if (GetBuildTime() > CreateTimeFromParams(year, month, day_of_month))
-    field_trial->Disable();
-  FieldTrialList::Register(field_trial);
+  CHECK(false);  // TODO(scottmg): Remove FieldTrialList.
   return field_trial;
 }
 

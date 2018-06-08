@@ -192,30 +192,9 @@ def write_compiled_message(root_gen_dir, source):
       os.path.join(SRC_ROOT, source),
   ])
 
-def write_build_date_header(root_gen_dir):
-  check_call([
-       sys.executable,
-       os.path.join(SRC_ROOT, 'build', 'write_build_date_header.py'),
-       os.path.join(root_gen_dir, 'base/generated_build_date.h'),
-       'default',
-  ])
-
 def build_gn_with_ninja_manually(tempdir, options, windows_x64_toolchain):
   root_gen_dir = os.path.join(tempdir, 'gen')
   mkdir_p(root_gen_dir)
-
-  write_build_date_header(root_gen_dir)
-
-  if is_mac:
-    # //base/build_time.cc needs base/generated_build_date.h,
-    # and this file is only included for Mac builds.
-    mkdir_p(os.path.join(root_gen_dir, 'base'))
-    check_call([
-        sys.executable,
-        os.path.join(SRC_ROOT, 'build', 'write_build_date_header.py'),
-        os.path.join(root_gen_dir, 'base', 'generated_build_date.h'),
-        'default'
-    ])
 
   if is_win:
     write_compiled_message(root_gen_dir,
@@ -435,7 +414,6 @@ def write_gn_ninja(path, root_gen_dir, options, windows_x64_toolchain):
       'base/at_exit.cc',
       'base/base_paths.cc',
       'base/base_switches.cc',
-      'base/build_time.cc',
       'base/callback_helpers.cc',
       'base/callback_internal.cc',
       'base/command_line.cc',
