@@ -70,18 +70,41 @@
     ]
   },
   {
+    "cmd": [],
+    "name": "build"
+  },
+  {
     "cmd": [
       "python",
       "-u",
-      "[START_DIR]/gn/tools/gn/bootstrap/bootstrap.py",
-      "--no-rebuild"
+      "[START_DIR]/gn/build/gen.py"
+    ],
+    "cwd": "[START_DIR]/gn",
+    "env_prefixes": {
+      "PATH": [
+        "[START_DIR]/cipd"
+      ]
+    },
+    "name": "build.generate",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "ninja",
+      "-C",
+      "[START_DIR]/gn/out"
     ],
     "env_prefixes": {
       "PATH": [
         "[START_DIR]/cipd"
       ]
     },
-    "name": "bootstrap"
+    "name": "build.ninja",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@1@@@"
+    ]
   },
   {
     "name": "$result",

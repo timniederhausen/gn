@@ -5,7 +5,7 @@ GN is a meta-build system that generates build files for
 
 Get started with:
 
-  git clone https://gn.googlesource.com/gn
-  cd gn
-  build/gen.py
-  ninja -C out
+    git clone https://gn.googlesource.com/gn
+    cd gn
+    build/gen.py
+    ninja -C out
