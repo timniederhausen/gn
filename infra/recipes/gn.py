@@ -23,27 +23,25 @@ def RunSteps(api):
 
     with api.context(cwd=src_dir):
       build_input = api.buildbucket.build_input
-      if build_input.gerrit_changes:
-        for change in build_input.gerrit_changes:
-          api.step('fetch', [
-              'git', 'fetch',
-              'https://%s/gn' % change.host,
-              'refs/changes/%s/%s/%s' %
-              (str(change.change)[-2:], change.change, change.patchset)
-          ])
-          api.step('cherry-pick', ['git', 'cherry-pick', 'FETCH_HEAD'])
-      else:
-        ref = (
-            build_input.gitiles_commit.id
-            if build_input.gitiles_commit else 'refs/heads/master')
-        api.step('fetch',
-                 ['git', 'fetch', 'https://gn.googlesource.com/gn', ref])
-        api.step('checkout', ['git', 'checkout', 'FETCH_HEAD'])
+      ref = (
+          build_input.gitiles_commit.id
+          if build_input.gitiles_commit else 'refs/heads/master')
+      api.step('fetch', ['git', 'fetch', 'https://gn.googlesource.com/gn', ref])
+      api.step('checkout', ['git', 'checkout', 'FETCH_HEAD'])
+      for change in build_input.gerrit_changes:
+        api.step('fetch %s/%s' % (change.change, change.patchset), [
+            'git', 'fetch',
+            'https://%s/gn' % change.host,
+            'refs/changes/%s/%s/%s' %
+            (str(change.change)[-2:], change.change, change.patchset)
+        ])
+        api.step('cherry-pick %s/%s' % (change.change, change.patchset),
+                 ['git', 'cherry-pick', 'FETCH_HEAD'])
 
   with api.context(infra_steps=True):
     cipd_dir = api.path['start_dir'].join('cipd')
     packages = {
-      'infra/ninja/${platform}': 'version:1.8.2',
+        'infra/ninja/${platform}': 'version:1.8.2',
     }
     api.cipd.ensure(cipd_dir, packages)
 
