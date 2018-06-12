@@ -134,6 +134,13 @@
     ]
   },
   {
+    "cmd": [
+      "[START_DIR]\\gn\\out\\gn_unittests"
+    ],
+    "cwd": "[START_DIR]\\gn",
+    "name": "test"
+  },
+  {
     "name": "$result",
     "recipe_result": null,
     "status_code": 0

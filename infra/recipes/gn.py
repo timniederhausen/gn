@@ -55,6 +55,9 @@ def RunSteps(api):
       api.step('ninja',
               ['ninja', '-C', src_dir.join('out')])
 
+  with api.context(cwd=src_dir):
+    api.step('test', [src_dir.join('out', 'gn_unittests')])
+
 
 def GenTests(api):
   for platform in ('linux', 'mac', 'win'):
