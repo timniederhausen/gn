@@ -1,4 +1,3 @@
-
 arch = environment.x64
 
 rule cc

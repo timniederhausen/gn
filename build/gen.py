@@ -16,8 +16,8 @@ import subprocess
 import sys
 import tempfile
 
-BOOTSTRAP_DIR = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT = os.path.dirname(BOOTSTRAP_DIR)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(SCRIPT_DIR)
 GN_ROOT = os.path.join(REPO_ROOT, 'tools', 'gn')
 
 is_win = sys.platform.startswith('win')
@@ -56,16 +56,24 @@ def write_generic_ninja(path, static_libraries, executables,
     'ar = ' + ar,
     'ld = ' + ld,
     '',
+    'rule regen',
+    '  command = %s ../build/gen.py' % sys.executable,
+    '  description = Regenerating ninja files',
+    '',
+    'build build.ninja: regen',
+    '  generator = 1',
+    '  depfile = build.ninja.d',
+    '',
   ]
 
-  if is_win:
-    template_filename = 'build_vs.ninja.template'
-  elif is_mac:
-    template_filename = 'build_mac.ninja.template'
-  else:
-    template_filename = 'build.ninja.template'
 
-  with open(os.path.join(BOOTSTRAP_DIR, template_filename)) as f:
+  template_filename = os.path.join(SCRIPT_DIR, {
+      'win32': 'build_win.ninja.template',
+      'darwin': 'build_mac.ninja.template',
+      'linux2': 'build_linux.ninja.template'
+  }[sys.platform])
+
+  with open(template_filename) as f:
     ninja_template = f.read()
 
   if is_win:
@@ -130,6 +138,13 @@ def write_generic_ninja(path, static_libraries, executables,
     f.write('\n'.join(ninja_header_lines))
     f.write(ninja_template)
     f.write('\n'.join(ninja_lines))
+
+  with open(path + '.d', 'w') as f:
+    f.write('build.ninja: ' +
+            os.path.relpath(os.path.join(SCRIPT_DIR, 'gen.py'),
+                            os.path.dirname(path)) + ' ' +
+            os.path.relpath(template_filename, os.path.dirname(path)) + '\n')
+
 
 def write_gn_ninja(path, options):
   if is_win:
