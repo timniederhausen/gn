@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/ninja_build_writer.h"
 #include "tools/gn/pool.h"
 #include "tools/gn/scheduler.h"
@@ -93,10 +93,10 @@ TEST_F(NinjaBuildWriterTest, TwoTargets) {
   const char expected_default[] =
       "default all\n";
   std::string out_str = ninja_out.str();
-#define EXPECT_SNIPPET(expected) \
-    EXPECT_NE(std::string::npos, out_str.find(expected)) << \
-        "Expected to find: " << expected << std::endl << \
-        "Within: " << out_str
+#define EXPECT_SNIPPET(expected)                       \
+  EXPECT_NE(std::string::npos, out_str.find(expected)) \
+      << "Expected to find: " << expected << "\n"      \
+      << "Within: " << out_str
   EXPECT_SNIPPET(expected_rule_gn);
   EXPECT_SNIPPET(expected_build_ninja);
   EXPECT_SNIPPET(expected_other_pool);

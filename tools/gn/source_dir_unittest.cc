@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "build_config.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/err.h"
 #include "tools/gn/source_dir.h"
 #include "tools/gn/source_file.h"

@@ -5,7 +5,7 @@
 #include <stddef.h>
 
 #include "base/stl_util.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/runtime_deps.h"
 #include "tools/gn/scheduler.h"
 #include "tools/gn/target.h"

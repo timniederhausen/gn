@@ -6,7 +6,7 @@
 
 #include "base/location.h"
 #include "base/strings/string_util.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 
 TEST(VisualStudioUtils, MakeGuid) {
   std::string pattern = "{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}";

@@ -4,7 +4,7 @@
 
 #include "tools/gn/xcode_object.h"
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 
 namespace {
 

@@ -4,7 +4,7 @@
 
 #include <stddef.h>
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/c_include_iterator.h"
 #include "tools/gn/input_file.h"
 #include "tools/gn/location.h"

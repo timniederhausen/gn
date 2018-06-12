@@ -6,7 +6,7 @@
 
 #include "base/macros.h"
 #include "build_config.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/err.h"
 #include "tools/gn/label.h"
 #include "tools/gn/value.h"

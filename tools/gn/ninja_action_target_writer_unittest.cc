@@ -6,7 +6,7 @@
 #include <sstream>
 
 #include "build_config.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/ninja_action_target_writer.h"
 #include "tools/gn/pool.h"
 #include "tools/gn/substitution_list.h"

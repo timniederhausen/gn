@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "base/strings/string_util.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/test_with_scope.h"
 #include "tools/gn/visual_studio_utils.h"
 

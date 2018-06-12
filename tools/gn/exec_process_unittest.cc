@@ -8,7 +8,7 @@
 #include "base/files/scoped_temp_dir.h"
 #include "base/strings/string_util.h"
 #include "build_config.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 
 #if defined(OS_WIN)
 #include "base/strings/utf_string_conversions.h"

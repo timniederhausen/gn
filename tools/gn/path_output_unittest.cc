@@ -6,7 +6,7 @@
 
 #include "base/files/file_path.h"
 #include "build_config.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/output_file.h"
 #include "tools/gn/path_output.h"
 #include "tools/gn/source_dir.h"

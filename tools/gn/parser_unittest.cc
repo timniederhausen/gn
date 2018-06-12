@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/input_file.h"
 #include "tools/gn/parser.h"
 #include "tools/gn/tokenizer.h"

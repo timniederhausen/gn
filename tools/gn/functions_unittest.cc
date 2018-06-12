@@ -7,7 +7,7 @@
 #include <memory>
 #include <utility>
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/test_with_scope.h"
 #include "tools/gn/value.h"

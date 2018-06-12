@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/ninja_group_target_writer.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scope.h"

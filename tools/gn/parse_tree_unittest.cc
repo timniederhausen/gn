@@ -9,7 +9,7 @@
 #include <memory>
 #include <utility>
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/input_file.h"
 #include "tools/gn/scope.h"
 #include "tools/gn/test_with_scope.h"

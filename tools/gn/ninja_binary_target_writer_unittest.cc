@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "build_config.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/config.h"
 #include "tools/gn/scheduler.h"
 #include "tools/gn/target.h"
@@ -172,7 +172,7 @@ TEST_F(NinjaBinaryTargetWriterTest, EscapeDefines) {
       "defines = -DBOOL_DEF -DINT_DEF=123 -DSTR_DEF=\\\"ABCD-1\\\"";
 #endif
   std::string out_str = out.str();
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, expectedSubstr, out_str);
+  EXPECT_TRUE(out_str.find(out_str) != std::string::npos);
 }
 
 TEST_F(NinjaBinaryTargetWriterTest, StaticLibrary) {

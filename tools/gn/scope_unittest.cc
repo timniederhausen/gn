@@ -4,7 +4,7 @@
 
 #include "tools/gn/scope.h"
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/input_file.h"
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/source_file.h"

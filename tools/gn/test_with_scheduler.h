@@ -7,7 +7,7 @@
 
 #include "base/macros.h"
 #include "base/test/scoped_task_environment.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/scheduler.h"
 
 class TestWithScheduler : public testing::Test {

@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "testing/gtest/include/gtest/gtest.h"
+#include "test/test.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scope.h"
 
