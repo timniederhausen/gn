@@ -54,7 +54,6 @@ bool CheckExpansionCase(const char* input, const char* expected, bool success) {
 
   if (!success)
     return true;  // Don't check result on failure.
-  printf("%s\n", result.string_value().c_str());
   return result.string_value() == expected;
 }
 

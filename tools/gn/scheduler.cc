@@ -21,6 +21,7 @@ Scheduler::Scheduler()
       verbose_logging_(false),
       pool_work_count_cv_(&pool_work_count_lock_),
       is_failed_(false),
+      suppress_output_for_testing_(false),
       has_been_shutdown_(false) {
   g_scheduler = this;
 }
@@ -166,6 +167,11 @@ void Scheduler::DecrementWorkCount() {
   }
 }
 
+void Scheduler::SuppressOutputForTesting(bool suppress) {
+  base::AutoLock lock(lock_);
+  suppress_output_for_testing_ = suppress;
+}
+
 void Scheduler::LogOnMainThread(const std::string& verb,
                                 const std::string& msg) {
   OutputString(verb, DECORATION_YELLOW);
@@ -173,7 +179,8 @@ void Scheduler::LogOnMainThread(const std::string& verb,
 }
 
 void Scheduler::FailWithErrorOnMainThread(const Err& err) {
-  err.PrintToStdout();
+  if (!suppress_output_for_testing_)
+    err.PrintToStdout();
   runner_.Quit();
 }
 

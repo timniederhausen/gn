@@ -90,6 +90,8 @@ class Scheduler {
   void IncrementWorkCount();
   void DecrementWorkCount();
 
+  void SuppressOutputForTesting(bool suppress);
+
  private:
   void LogOnMainThread(const std::string& verb, const std::string& msg);
   void FailWithErrorOnMainThread(const Err& err);
@@ -126,6 +128,8 @@ class Scheduler {
 
   mutable base::Lock lock_;
   bool is_failed_;
+
+  bool suppress_output_for_testing_;
 
   // Used to track whether the worker pool has been shutdown. This is necessary
   // to clean up after tests that make a scheduler but don't run the message
