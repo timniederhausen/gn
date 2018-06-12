@@ -47,8 +47,8 @@ def main(argv):
 
 
 def write_generic_ninja(path, static_libraries, executables,
-                        cc, cxx, ar, ld,
-                        cflags=[], cflags_cc=[], ldflags=[],
+                        cc, cxx, ar, ld, options,
+                        cflags=[], cflags_cc=[], ldflags=[], libflags=[],
                         include_dirs=[], solibs=[]):
   ninja_header_lines = [
     'cc = ' + cc,
@@ -57,7 +57,8 @@ def write_generic_ninja(path, static_libraries, executables,
     'ld = ' + ld,
     '',
     'rule regen',
-    '  command = %s ../build/gen.py' % sys.executable,
+    '  command = %s ../build/gen.py%s' % (
+        sys.executable, ' -d' if options.debug else ''),
     '  description = Regenerating ninja files',
     '',
     'build build.ninja: regen',
@@ -116,6 +117,8 @@ def write_generic_ninja(path, static_libraries, executables,
     ninja_lines.append('build %s: alink_thin %s' % (
         library_to_a(library),
         ' '.join([src_to_obj(src_file) for src_file in settings['sources']])))
+    ninja_lines.append('  libflags = %s' % ' '.join(libflags))
+
 
   for executable, settings in executables.iteritems():
     for src_file in settings['sources']:
@@ -161,6 +164,7 @@ def write_gn_ninja(path, options):
   cflags = os.environ.get('CFLAGS', '').split()
   cflags_cc = os.environ.get('CXXFLAGS', '').split()
   ldflags = os.environ.get('LDFLAGS', '').split()
+  libflags = os.environ.get('LIBFLAGS', '').split()
   include_dirs = [REPO_ROOT, os.path.join(REPO_ROOT, 'src')]
   libs = []
 
@@ -191,24 +195,37 @@ def write_gn_ninja(path, options):
   elif is_win:
     if not options.debug:
       cflags.extend(['/Ox', '/DNDEBUG', '/GL'])
+      libflags.extend(['/LTCG'])
       ldflags.extend(['/LTCG', '/OPT:REF', '/OPT:ICF'])
 
     cflags.extend([
+        '/DNOMINMAX',
+        '/DUNICODE',
+        '/DWIN32_LEAN_AND_MEAN',
+        '/DWINVER=0x0A00',
+        '/D_CRT_SECURE_NO_DEPRECATE',
+        '/D_SCL_SECURE_NO_DEPRECATE',
+        '/D_UNICODE',
+        '/D_WIN32_WINNT=0x0A00',
         '/FS',
         '/Gy',
-        '/W3', '/wd4244',
+        '/W4',
+        '/WX',
         '/Zi',
-        '/DWIN32_LEAN_AND_MEAN', '/DNOMINMAX',
-        '/D_CRT_SECURE_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE',
-        '/D_WIN32_WINNT=0x0A00', '/DWINVER=0x0A00',
-        '/DUNICODE', '/D_UNICODE',
+        '/wd4099',
+        '/wd4100',
+        '/wd4127',
+        '/wd4244',
+        '/wd4267',
+        '/wd4838',
+        '/wd4996',
     ])
     cflags_cc.extend([
         '/GR-',
         '/D_HAS_EXCEPTIONS=0',
     ])
 
-    ldflags.extend(['/MACHINE:x64'])
+    ldflags.extend(['/DEBUG', '/MACHINE:x64'])
 
   static_libraries = {
       'base': {'sources': [
@@ -789,7 +806,6 @@ def write_gn_ninja(path, options):
         'base/threading/thread_local_storage_win.cc',
         'base/time/time_win.cc',
         'base/timer/hi_res_timer_manager_win.cc',
-        'base/trace_event/trace_event_etw_export_win.cc',
         'base/win/core_winrt_util.cc',
         'base/win/enum_variant.cc',
         'base/win/event_trace_controller.cc',
@@ -809,7 +825,6 @@ def write_gn_ninja(path, options):
         'base/win/scoped_handle_verifier.cc',
         'base/win/scoped_process_information.cc',
         'base/win/scoped_variant.cc',
-        'base/win/scoped_winrt_initializer.cc',
         'base/win/shortcut.cc',
         'base/win/startup_information.cc',
         'base/win/wait_chain.cc',
@@ -837,7 +852,8 @@ def write_gn_ninja(path, options):
   executables['gn_unittests']['libs'].extend(static_libraries.keys())
 
   write_generic_ninja(path, static_libraries, executables, cc, cxx, ar, ld,
-                      cflags, cflags_cc, ldflags, include_dirs, libs)
+                      options, cflags, cflags_cc, ldflags, libflags,
+                      include_dirs, libs)
 
 
 if __name__ == '__main__':

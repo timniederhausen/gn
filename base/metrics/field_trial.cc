@@ -1229,7 +1229,8 @@ SharedMemoryHandle FieldTrialList::DeserializeSharedMemoryHandleMetadata(
 #if defined(OS_FUCHSIA)
   zx_handle_t handle = static_cast<zx_handle_t>(field_trial_handle);
 #elif defined(OS_WIN)
-  HANDLE handle = reinterpret_cast<HANDLE>(field_trial_handle);
+  HANDLE handle =
+      reinterpret_cast<HANDLE>(static_cast<uintptr_t>(field_trial_handle));
   if (base::IsCurrentProcessElevated()) {
     // base::LaunchElevatedProcess doesn't have a way to duplicate the handle,
     // but this process can since by definition it's not sandboxed.

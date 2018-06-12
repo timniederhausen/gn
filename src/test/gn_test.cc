@@ -120,10 +120,13 @@ int main(int argc, char** argv) {
     }
   }
 
-  int nactivetests = 0;
-  for (int i = 0; i < ntests; i++)
-    if ((tests[i].should_run = TestMatchesFilter(tests[i].name, test_filter)))
-      ++nactivetests;
+  int num_active_tests = 0;
+  for (int i = 0; i < ntests; i++) {
+    tests[i].should_run = TestMatchesFilter(tests[i].name, test_filter);
+    if (tests[i].should_run) {
+      ++num_active_tests;
+    }
+  }
 
   const char* prefix = "";
   const char* suffix = "\n";
@@ -143,8 +146,8 @@ int main(int argc, char** argv) {
 
     ++tests_started;
     testing::Test* test = tests[i].factory();
-    printf("%s[%d/%d] %s%s", prefix, tests_started, nactivetests, tests[i].name,
-           suffix);
+    printf("%s[%d/%d] %s%s", prefix, tests_started, num_active_tests,
+           tests[i].name, suffix);
     test->SetUp();
     test->Run();
     test->TearDown();

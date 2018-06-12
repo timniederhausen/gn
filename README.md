@@ -7,5 +7,5 @@ Get started with:
 
     git clone https://gn.googlesource.com/gn
     cd gn
-    build/gen.py
+    python build/gen.py
     ninja -C out

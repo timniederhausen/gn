@@ -45,10 +45,6 @@
 #include "base/trace_event/trace_event.h"
 #include "build_config.h"
 
-#if defined(OS_WIN)
-#include "base/trace_event/trace_event_etw_export_win.h"
-#endif
-
 #if defined(OS_ANDROID)
 // The linker assigns the virtual address of the start of current library to
 // this symbol.
@@ -482,13 +478,6 @@ void TraceLog::UpdateCategoryState(TraceCategory* category) {
       category == CategoryRegistry::kCategoryMetadata) {
     state_flags |= TraceCategory::ENABLED_FOR_RECORDING;
   }
-
-#if defined(OS_WIN)
-  if (base::trace_event::TraceEventETWExport::IsCategoryGroupEnabled(
-          category->name())) {
-    state_flags |= TraceCategory::ENABLED_FOR_ETW_EXPORT;
-  }
-#endif
 
   uint32_t enabled_filters_bitmap = 0;
   int index = 0;
@@ -1243,15 +1232,6 @@ TraceEventHandle TraceLog::AddTraceEventWithThreadIdAndTimestamp(
     }
   }
 
-#if defined(OS_WIN)
-  // This is done sooner rather than later, to avoid creating the event and
-  // acquiring the lock, which is not needed for ETW as it's already threadsafe.
-  if (*category_group_enabled & TraceCategory::ENABLED_FOR_ETW_EXPORT)
-    TraceEventETWExport::AddEvent(phase, category_group_enabled, name, id,
-                                  num_args, arg_names, arg_types, arg_values,
-                                  convertable_values);
-#endif  // OS_WIN
-
   AddTraceEventOverrideCallback trace_event_override =
       reinterpret_cast<AddTraceEventOverrideCallback>(
           subtle::NoBarrier_Load(&trace_event_override_));
@@ -1451,12 +1431,6 @@ void TraceLog::UpdateTraceEventDurationExplicit(
   if (thread_is_in_trace_event_.Get())
     return;
   AutoThreadLocalBoolean thread_is_in_trace_event(&thread_is_in_trace_event_);
-
-#if defined(OS_WIN)
-  // Generate an ETW event that marks the end of a complete event.
-  if (category_group_enabled_local & TraceCategory::ENABLED_FOR_ETW_EXPORT)
-    TraceEventETWExport::AddCompleteEndEvent(name);
-#endif  // OS_WIN
 
   std::string console_message;
   if (category_group_enabled_local & TraceCategory::ENABLED_FOR_RECORDING) {
@@ -1701,21 +1675,6 @@ TraceBuffer* TraceLog::CreateTraceBuffer() {
   return TraceBuffer::CreateTraceBufferVectorOfSize(
       kTraceEventVectorBufferChunks);
 }
-
-#if defined(OS_WIN)
-void TraceLog::UpdateETWCategoryGroupEnabledFlags() {
-  // Go through each category and set/clear the ETW bit depending on whether the
-  // category is enabled.
-  for (TraceCategory& category : CategoryRegistry::GetAllCategories()) {
-    if (base::trace_event::TraceEventETWExport::IsCategoryGroupEnabled(
-            category.name())) {
-      category.set_state_flag(TraceCategory::ENABLED_FOR_ETW_EXPORT);
-    } else {
-      category.clear_state_flag(TraceCategory::ENABLED_FOR_ETW_EXPORT);
-    }
-  }
-}
-#endif  // defined(OS_WIN)
 
 void TraceLog::SetTraceBufferForTesting(
     std::unique_ptr<TraceBuffer> trace_buffer) {
