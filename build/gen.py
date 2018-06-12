@@ -23,8 +23,7 @@ GN_ROOT = os.path.join(REPO_ROOT, 'tools', 'gn')
 is_win = sys.platform.startswith('win')
 is_linux = sys.platform.startswith('linux')
 is_mac = sys.platform.startswith('darwin')
-is_aix = sys.platform.startswith('aix')
-is_posix = is_linux or is_mac or is_aix
+is_posix = is_linux or is_mac
 
 
 def main(argv):
@@ -63,8 +62,6 @@ def write_generic_ninja(path, static_libraries, executables,
     template_filename = 'build_vs.ninja.template'
   elif is_mac:
     template_filename = 'build_mac.ninja.template'
-  elif is_aix:
-    template_filename = 'build_aix.ninja.template'
   else:
     template_filename = 'build.ninja.template'
 
@@ -140,11 +137,6 @@ def write_gn_ninja(path, options):
     cxx = os.environ.get('CXX', 'cl.exe')
     ld = os.environ.get('LD', 'link.exe')
     ar = os.environ.get('AR', 'lib.exe')
-  elif is_aix:
-    cc = os.environ.get('CC', 'gcc')
-    cxx = os.environ.get('CXX', 'c++')
-    ld = os.environ.get('LD', cxx)
-    ar = os.environ.get('AR', 'ar -X64')
   else:
     cc = os.environ.get('CC', 'cc')
     cxx = os.environ.get('CXX', 'c++')
@@ -181,9 +173,6 @@ def write_gn_ninja(path, options):
         '-fno-exceptions'
     ])
     cflags_cc.extend(['-std=c++14', '-Wno-c++11-narrowing'])
-    if is_aix:
-     cflags.extend(['-maix64'])
-     ldflags.extend([ '-maix64 -Wl,-bbigtoc' ])
   elif is_win:
     if not options.debug:
       cflags.extend(['/Ox', '/DNDEBUG', '/GL'])
@@ -477,7 +466,7 @@ def write_gn_ninja(path, options):
         'cflags': cflags + ['-DHAVE_CONFIG_H'],
     }
 
-  if is_linux or is_aix:
+  if is_linux:
     static_libraries['xdg_user_dirs'] = {
         'sources': [
             'base/third_party/xdg_user_dirs/xdg_user_dir_lookup.cc',
@@ -502,37 +491,24 @@ def write_gn_ninja(path, options):
         'base/time/time_now_posix.cc',
         'base/threading/platform_thread_linux.cc',
     ])
-    if is_linux:
-      libs.extend([
-          '-lc',
-          '-lgcc_s',
-          '-lm',
-          '-lpthread',
-          '-lrt',
-          '-latomic',
-      ])
-      static_libraries['base']['sources'].extend([
-        'base/allocator/allocator_shim.cc',
-        'base/allocator/allocator_shim_default_dispatch_to_glibc.cc',
-      ])
-      static_libraries['libevent']['include_dirs'].extend([
-          os.path.join(REPO_ROOT, 'base', 'third_party', 'libevent', 'linux')
-      ])
-      static_libraries['libevent']['sources'].extend([
-         'base/third_party/libevent/epoll.c',
-      ])
-    else:
-      ldflags.extend(['-pthread'])
-      libs.extend(['-lrt'])
-      static_libraries['base']['sources'].extend([
-          'base/process/internal_aix.cc'
-      ])
-      static_libraries['libevent']['include_dirs'].extend([
-          os.path.join(REPO_ROOT, 'base', 'third_party', 'libevent', 'aix')
-      ])
-      static_libraries['libevent']['include_dirs'].extend([
-          os.path.join(REPO_ROOT, 'base', 'third_party', 'libevent', 'compat')
-      ])
+    libs.extend([
+        '-lc',
+        '-lgcc_s',
+        '-lm',
+        '-lpthread',
+        '-lrt',
+        '-latomic',
+    ])
+    static_libraries['base']['sources'].extend([
+      'base/allocator/allocator_shim.cc',
+      'base/allocator/allocator_shim_default_dispatch_to_glibc.cc',
+    ])
+    static_libraries['libevent']['include_dirs'].extend([
+        os.path.join(REPO_ROOT, 'base', 'third_party', 'libevent', 'linux')
+    ])
+    static_libraries['libevent']['sources'].extend([
+        'base/third_party/libevent/epoll.c',
+    ])
 
   if is_mac:
     static_libraries['base']['sources'].extend([
