@@ -342,7 +342,6 @@ def write_gn_ninja(path, options):
         'base/time/time.cc',
         'base/timer/elapsed_timer.cc',
         'base/timer/timer.cc',
-        'base/unguessable_token.cc',
         'base/value_iterators.cc',
         'base/values.cc',
         'base/vlog.cc',
