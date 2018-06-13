@@ -49,7 +49,7 @@
       "-root",
       "[START_DIR]\\cipd",
       "-ensure-file",
-      "infra/ninja/${platform} version:1.8.2",
+      "chrome_internal/third_party/sdk/windows latest\ninfra/ninja/${platform} version:1.8.2",
       "-json-output",
       "/path/to/tmp/json"
     ],
@@ -60,9 +60,83 @@
       "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
       "@@@STEP_LOG_LINE@json.output@    \"\": [@@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-latest----------\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"package\": \"chrome_internal/third_party/sdk/windows\"@@@",
+      "@@@STEP_LOG_LINE@json.output@      }, @@@",
+      "@@@STEP_LOG_LINE@json.output@      {@@@",
       "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-version:1.8.2---\", @@@",
       "@@@STEP_LOG_LINE@json.output@        \"package\": \"infra/ninja/${platform}\"@@@",
       "@@@STEP_LOG_LINE@json.output@      }@@@",
+      "@@@STEP_LOG_LINE@json.output@    ]@@@",
+      "@@@STEP_LOG_LINE@json.output@  }@@@",
+      "@@@STEP_LOG_LINE@json.output@}@@@",
+      "@@@STEP_LOG_END@json.output@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "python",
+      "-u",
+      "\nimport shutil\nimport sys\nshutil.copy(sys.argv[1], sys.argv[2])\n",
+      "[START_DIR]\\cipd\\win_sdk\\bin\\SetEnv.x64.json",
+      "/path/to/tmp/json"
+    ],
+    "name": "SetEnv.x64.json",
+    "~followup_annotations": [
+      "@@@STEP_LOG_LINE@json.output@{@@@",
+      "@@@STEP_LOG_LINE@json.output@  \"env\": {@@@",
+      "@@@STEP_LOG_LINE@json.output@    \"INCLUDE\": [@@@",
+      "@@@STEP_LOG_LINE@json.output@      [@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"win_sdk\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"Include\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"10.0.17134.0\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"um\"@@@",
+      "@@@STEP_LOG_LINE@json.output@      ], @@@",
+      "@@@STEP_LOG_LINE@json.output@      [@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"win_sdk\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"Include\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"10.0.17134.0\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"shared\"@@@",
+      "@@@STEP_LOG_LINE@json.output@      ], @@@",
+      "@@@STEP_LOG_LINE@json.output@      [@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"win_sdk\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"Include\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"10.0.17134.0\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"winrt\"@@@",
+      "@@@STEP_LOG_LINE@json.output@      ]@@@",
+      "@@@STEP_LOG_LINE@json.output@    ], @@@",
+      "@@@STEP_LOG_LINE@json.output@    \"PATH\": [@@@",
+      "@@@STEP_LOG_LINE@json.output@      [@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"win_sdk\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"bin\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"10.0.17134.0\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"x64\"@@@",
+      "@@@STEP_LOG_LINE@json.output@      ], @@@",
+      "@@@STEP_LOG_LINE@json.output@      [@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"VC\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"Tools\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"MSVC\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"14.14.26428\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"bin\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"HostX64\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"x64\"@@@",
+      "@@@STEP_LOG_LINE@json.output@      ]@@@",
+      "@@@STEP_LOG_LINE@json.output@    ], @@@",
+      "@@@STEP_LOG_LINE@json.output@    \"VSINSTALLDIR\": [@@@",
+      "@@@STEP_LOG_LINE@json.output@      [@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"..\\\\\"@@@",
+      "@@@STEP_LOG_LINE@json.output@      ]@@@",
       "@@@STEP_LOG_LINE@json.output@    ]@@@",
       "@@@STEP_LOG_LINE@json.output@  }@@@",
       "@@@STEP_LOG_LINE@json.output@}@@@",
@@ -88,6 +162,16 @@
       "-d"
     ],
     "cwd": "[START_DIR]\\gn",
+    "env": {
+      "INCLUDE": "[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\um;[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\shared;[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\winrt",
+      "VSINSTALLDIR": "[START_DIR]\\cipd"
+    },
+    "env_prefixes": {
+      "PATH": [
+        "[START_DIR]\\cipd\\win_sdk\\bin\\10.0.17134.0\\x64",
+        "[START_DIR]\\cipd\\VC\\Tools\\MSVC\\14.14.26428\\bin\\HostX64\\x64"
+      ]
+    },
     "name": "debug.build.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -132,6 +216,16 @@
       "[START_DIR]\\gn\\build\\gen.py"
     ],
     "cwd": "[START_DIR]\\gn",
+    "env": {
+      "INCLUDE": "[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\um;[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\shared;[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\winrt",
+      "VSINSTALLDIR": "[START_DIR]\\cipd"
+    },
+    "env_prefixes": {
+      "PATH": [
+        "[START_DIR]\\cipd\\win_sdk\\bin\\10.0.17134.0\\x64",
+        "[START_DIR]\\cipd\\VC\\Tools\\MSVC\\14.14.26428\\bin\\HostX64\\x64"
+      ]
+    },
     "name": "release.build.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
