@@ -49,7 +49,7 @@
       "-root",
       "[START_DIR]/cipd",
       "-ensure-file",
-      "infra/ninja/${platform} version:1.8.2",
+      "fuchsia/clang/${platform} goma\ninfra/ninja/${platform} version:1.8.2",
       "-json-output",
       "/path/to/tmp/json"
     ],
@@ -59,6 +59,10 @@
       "@@@STEP_LOG_LINE@json.output@{@@@",
       "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
       "@@@STEP_LOG_LINE@json.output@    \"\": [@@@",
+      "@@@STEP_LOG_LINE@json.output@      {@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-goma------------\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"package\": \"fuchsia/clang/${platform}\"@@@",
+      "@@@STEP_LOG_LINE@json.output@      }, @@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",
       "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-version:1.8.2---\", @@@",
       "@@@STEP_LOG_LINE@json.output@        \"package\": \"infra/ninja/${platform}\"@@@",
@@ -80,10 +84,11 @@
       "[START_DIR]/gn/build/gen.py"
     ],
     "cwd": "[START_DIR]/gn",
-    "env_prefixes": {
-      "PATH": [
-        "[START_DIR]/cipd"
-      ]
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-static-libstdc++ -ldl -lpthread"
     },
     "name": "build.generate",
     "~followup_annotations": [
@@ -96,11 +101,6 @@
       "-C",
       "[START_DIR]/gn/out"
     ],
-    "env_prefixes": {
-      "PATH": [
-        "[START_DIR]/cipd"
-      ]
-    },
     "name": "build.ninja",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"

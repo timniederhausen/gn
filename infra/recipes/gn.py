@@ -43,17 +43,31 @@ def RunSteps(api):
     packages = {
         'infra/ninja/${platform}': 'version:1.8.2',
     }
+    packages.update({
+        'linux': {
+            'fuchsia/clang/${platform}': 'goma',
+        },
+        'mac': {},
+        'win': {},
+    }[api.platform.name])
     api.cipd.ensure(cipd_dir, packages)
 
-  with api.step.nest('build'):
-    with api.context(env_prefixes={'PATH': [cipd_dir]}, cwd=src_dir):
-      api.python(
-          'generate',
-          src_dir.join('build', 'gen.py'))
+  environ = {
+      'linux': {
+          'CC': cipd_dir.join('bin', 'clang'),
+          'CXX': cipd_dir.join('bin', 'clang++'),
+          'AR': cipd_dir.join('bin', 'llvm-ar'),
+          'LDFLAGS': '-static-libstdc++ -ldl -lpthread',
+      },
+      'mac': {},
+      'win': {},
+  }[api.platform.name]
 
-    with api.context(env_prefixes={'PATH': [cipd_dir]}):
-      api.step('ninja',
-              ['ninja', '-C', src_dir.join('out')])
+  with api.step.nest('build'):
+    with api.context(env=environ, cwd=src_dir):
+      api.python('generate', src_dir.join('build', 'gen.py'))
+
+    api.step('ninja', ['ninja', '-C', src_dir.join('out')])
 
   with api.context(cwd=src_dir):
     api.step('test', [src_dir.join('out', 'gn_unittests')])

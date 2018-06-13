@@ -80,11 +80,6 @@
       "[START_DIR]\\gn\\build\\gen.py"
     ],
     "cwd": "[START_DIR]\\gn",
-    "env_prefixes": {
-      "PATH": [
-        "[START_DIR]\\cipd"
-      ]
-    },
     "name": "build.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
@@ -96,11 +91,6 @@
       "-C",
       "[START_DIR]\\gn\\out"
     ],
-    "env_prefixes": {
-      "PATH": [
-        "[START_DIR]\\cipd"
-      ]
-    },
     "name": "build.ninja",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
