@@ -67,7 +67,7 @@ def RunSteps(api):
     with api.context(env=environ, cwd=src_dir):
       api.python('generate', src_dir.join('build', 'gen.py'))
 
-    api.step('ninja', ['ninja', '-C', src_dir.join('out')])
+    api.step('ninja', [cipd_dir.join('ninja'), '-C', src_dir.join('out')])
 
   with api.context(cwd=src_dir):
     api.step('test', [src_dir.join('out', 'gn_unittests')])

@@ -97,7 +97,7 @@
   },
   {
     "cmd": [
-      "ninja",
+      "[START_DIR]/cipd/ninja",
       "-C",
       "[START_DIR]/gn/out"
     ],
