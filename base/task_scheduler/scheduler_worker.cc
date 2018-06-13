@@ -13,7 +13,6 @@
 #include "base/logging.h"
 #include "base/task_scheduler/scheduler_worker_observer.h"
 #include "base/task_scheduler/task_tracker.h"
-#include "base/trace_event/trace_event.h"
 
 #if defined(OS_MACOSX)
 #include "base/mac/scoped_nsautorelease_pool.h"
@@ -274,7 +273,6 @@ NOINLINE void SchedulerWorker::RunBackgroundDedicatedCOMWorker() {
 
 void SchedulerWorker::RunWorker() {
   DCHECK_EQ(self_, this);
-  TRACE_EVENT_BEGIN0("task_scheduler", "SchedulerWorkerThread active");
 
   if (scheduler_worker_observer_)
     scheduler_worker_observer_->OnSchedulerWorkerMainEntry();
@@ -283,9 +281,7 @@ void SchedulerWorker::RunWorker() {
 
   // A SchedulerWorker starts out waiting for work.
   {
-    TRACE_EVENT_END0("task_scheduler", "SchedulerWorkerThread active");
     delegate_->WaitForWork(&wake_up_event_);
-    TRACE_EVENT_BEGIN0("task_scheduler", "SchedulerWorkerThread active");
   }
 
 // When defined(COM_INIT_CHECK_HOOK_ENABLED), ignore
@@ -311,9 +307,7 @@ void SchedulerWorker::RunWorker() {
       if (ShouldExit())
         break;
 
-      TRACE_EVENT_END0("task_scheduler", "SchedulerWorkerThread active");
       delegate_->WaitForWork(&wake_up_event_);
-      TRACE_EVENT_BEGIN0("task_scheduler", "SchedulerWorkerThread active");
       continue;
     }
 
@@ -345,8 +339,6 @@ void SchedulerWorker::RunWorker() {
   // Release the self-reference to |this|. This can result in deleting |this|
   // and as such no more member accesses should be made after this point.
   self_ = nullptr;
-
-  TRACE_EVENT_END0("task_scheduler", "SchedulerWorkerThread active");
 }
 
 }  // namespace internal

@@ -12,7 +12,6 @@
 #include "base/no_destructor.h"
 #include "base/strings/string_util.h"
 #include "base/threading/thread_local.h"
-#include "base/trace_event/heap_profiler_allocation_context_tracker.h"
 
 namespace base {
 namespace {
@@ -88,14 +87,6 @@ void ThreadIdNameManager::SetName(const std::string& name) {
     }
     thread_handle_to_interned_name_[id_to_handle_iter->second] = leaked_str;
   }
-
-  // Add the leaked thread name to heap profiler context tracker. The name added
-  // is valid for the lifetime of the process. AllocationContextTracker cannot
-  // call GetName(which holds a lock) during the first allocation because it can
-  // cause a deadlock when the first allocation happens in the
-  // ThreadIdNameManager itself when holding the lock.
-  trace_event::AllocationContextTracker::SetCurrentThreadName(
-      leaked_str->c_str());
 }
 
 const char* ThreadIdNameManager::GetName(PlatformThreadId id) {

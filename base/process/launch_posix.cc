@@ -42,7 +42,6 @@
 #include "base/threading/platform_thread.h"
 #include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
-#include "base/trace_event/trace_event.h"
 #include "build_config.h"
 
 #if defined(OS_LINUX) || defined(OS_AIX)

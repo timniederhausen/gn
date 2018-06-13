@@ -10,7 +10,6 @@
 #include "base/callback.h"
 #include "base/location.h"
 #include "base/time/time.h"
-#include "base/trace_event/trace_event_argument.h"
 
 namespace base {
 
@@ -58,20 +57,9 @@ struct TestPendingTask {
   TimeDelta delay;
   TestNestability nestability;
 
-  // Functions for using test pending task with tracing, useful in unit
-  // testing.
-  void AsValueInto(base::trace_event::TracedValue* state) const;
-  std::unique_ptr<base::trace_event::ConvertableToTraceFormat> AsValue() const;
-  std::string ToString() const;
-
  private:
   DISALLOW_COPY_AND_ASSIGN(TestPendingTask);
 };
-
-// gtest helpers which allow pretty printing of the tasks, very useful in unit
-// testing.
-std::ostream& operator<<(std::ostream& os, const TestPendingTask& task);
-void PrintTo(const TestPendingTask& task, std::ostream* os);
 
 }  // namespace base
 

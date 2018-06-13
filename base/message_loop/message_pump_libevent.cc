@@ -16,7 +16,6 @@
 #include "base/posix/eintr_wrapper.h"
 #include "base/third_party/libevent/event.h"
 #include "base/time/time.h"
-#include "base/trace_event/trace_event.h"
 #include "build_config.h"
 
 #if defined(OS_MACOSX)
@@ -306,11 +305,6 @@ void MessagePumpLibevent::OnLibeventNotification(int fd,
                                                  void* context) {
   FdWatchController* controller = static_cast<FdWatchController*>(context);
   DCHECK(controller);
-  TRACE_EVENT2("toplevel", "MessagePumpLibevent::OnLibeventNotification",
-               "src_file", controller->created_from_location().file_name(),
-               "src_func", controller->created_from_location().function_name());
-  TRACE_HEAP_PROFILER_API_SCOPED_TASK_EXECUTION heap_profiler_scope(
-      controller->created_from_location().file_name());
 
   MessagePumpLibevent* pump = controller->pump();
   pump->processed_io_events_ = true;

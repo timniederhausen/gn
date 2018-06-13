@@ -13,7 +13,6 @@
 #include "base/memory/ptr_util.h"
 #include "base/metrics/histogram_macros.h"
 #include "base/strings/stringprintf.h"
-#include "base/trace_event/trace_event.h"
 #include "base/win/current_module.h"
 #include "base/win/wrapped_window_proc.h"
 
@@ -347,8 +346,6 @@ bool MessagePumpForUI::ProcessNextWindowsMessage() {
 }
 
 bool MessagePumpForUI::ProcessMessageHelper(const MSG& msg) {
-  TRACE_EVENT1("base", "MessagePumpForUI::ProcessMessageHelper",
-               "message", msg.message);
   if (WM_QUIT == msg.message) {
     // WM_QUIT is the standard way to exit a GetMessage() loop. Our MessageLoop
     // has its own quit mechanism, so WM_QUIT is unexpected and should be

@@ -11,7 +11,6 @@
 #include "base/no_destructor.h"
 #include "base/pending_task.h"
 #include "base/threading/thread_local.h"
-#include "base/trace_event/trace_event.h"
 
 namespace base {
 namespace debug {
@@ -37,13 +36,6 @@ TaskAnnotator::~TaskAnnotator() = default;
 
 void TaskAnnotator::DidQueueTask(const char* queue_function,
                                  const PendingTask& pending_task) {
-  if (queue_function) {
-    TRACE_EVENT_WITH_FLOW0(TRACE_DISABLED_BY_DEFAULT("toplevel.flow"),
-                           queue_function,
-                           TRACE_ID_MANGLE(GetTaskTraceID(pending_task)),
-                           TRACE_EVENT_FLAG_FLOW_OUT);
-  }
-
   // TODO(https://crbug.com/826902): Fix callers that invoke DidQueueTask()
   // twice for the same PendingTask.
   // DCHECK(!pending_task.task_backtrace[0])
@@ -63,13 +55,6 @@ void TaskAnnotator::DidQueueTask(const char* queue_function,
 void TaskAnnotator::RunTask(const char* queue_function,
                             PendingTask* pending_task) {
   ScopedTaskRunActivity task_activity(*pending_task);
-
-  if (queue_function) {
-    TRACE_EVENT_WITH_FLOW0(TRACE_DISABLED_BY_DEFAULT("toplevel.flow"),
-                           queue_function,
-                           TRACE_ID_MANGLE(GetTaskTraceID(*pending_task)),
-                           TRACE_EVENT_FLAG_FLOW_IN);
-  }
 
   // Before running the task, store the task backtrace with the chain of
   // PostTasks that resulted in this call and deliberately alias it to ensure

@@ -15,6 +15,7 @@
 #include "base/memory/ptr_util.h"
 #include "base/metrics/histogram_macros.h"
 #include "base/sequence_token.h"
+#include "base/strings/string_util.h"
 #include "base/synchronization/condition_variable.h"
 #include "base/task_scheduler/scoped_set_task_priority_for_current_thread.h"
 #include "base/threading/sequence_local_storage_map.h"
@@ -22,7 +23,6 @@
 #include "base/threading/thread_restrictions.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "base/time/time.h"
-#include "base/trace_event/trace_event.h"
 #include "base/values.h"
 
 namespace base {
@@ -35,7 +35,7 @@ constexpr char kSequencedExecutionMode[] = "sequenced";
 constexpr char kSingleThreadExecutionMode[] = "single thread";
 
 // An immutable copy of a scheduler task's info required by tracing.
-class TaskTracingInfo : public trace_event::ConvertableToTraceFormat {
+class TaskTracingInfo {
  public:
   TaskTracingInfo(const TaskTraits& task_traits,
                   const char* execution_mode,
@@ -43,9 +43,6 @@ class TaskTracingInfo : public trace_event::ConvertableToTraceFormat {
       : task_traits_(task_traits),
         execution_mode_(execution_mode),
         sequence_token_(sequence_token) {}
-
-  // trace_event::ConvertableToTraceFormat implementation.
-  void AppendAsTraceFormat(std::string* out) const override;
 
  private:
   const TaskTraits task_traits_;
@@ -55,27 +52,10 @@ class TaskTracingInfo : public trace_event::ConvertableToTraceFormat {
   DISALLOW_COPY_AND_ASSIGN(TaskTracingInfo);
 };
 
-void TaskTracingInfo::AppendAsTraceFormat(std::string* out) const {
-  DictionaryValue dict;
-
-  dict.SetString("task_priority",
-                 base::TaskPriorityToString(task_traits_.priority()));
-  dict.SetString("execution_mode", execution_mode_);
-  if (execution_mode_ != kParallelExecutionMode)
-    dict.SetInteger("sequence_token", sequence_token_.ToInternalValue());
-
-  std::string tmp;
-  JSONWriter::Write(dict, &tmp);
-  out->append(tmp);
-}
-
 // These name conveys that a Task is posted to/run by the task scheduler without
 // revealing its implementation details.
 constexpr char kQueueFunctionName[] = "TaskScheduler PostTask";
 constexpr char kRunFunctionName[] = "TaskScheduler RunTask";
-
-constexpr char kTaskSchedulerFlowTracingCategory[] =
-    TRACE_DISABLED_BY_DEFAULT("task_scheduler.flow");
 
 // Constructs a histogram to track latency which is logging to
 // "TaskScheduler.{histogram_name}.{histogram_label}.{task_type_suffix}".
@@ -347,13 +327,6 @@ bool TaskTracker::WillPostTask(const Task& task) {
   if (task.delayed_run_time.is_null())
     subtle::NoBarrier_AtomicIncrement(&num_incomplete_undelayed_tasks_, 1);
 
-  {
-    TRACE_EVENT_WITH_FLOW0(
-        kTaskSchedulerFlowTracingCategory, kQueueFunctionName,
-        TRACE_ID_MANGLE(task_annotator_.GetTaskTraceID(task)),
-        TRACE_EVENT_FLAG_FLOW_OUT);
-  }
-
   task_annotator_.DidQueueTask(nullptr, task);
 
   return true;
@@ -496,29 +469,6 @@ void TaskTracker::RunOrSkipTask(Task task,
     }
 
     if (can_run_task) {
-      TRACE_TASK_EXECUTION(kRunFunctionName, task);
-
-      const char* const execution_mode =
-          task.single_thread_task_runner_ref
-              ? kSingleThreadExecutionMode
-              : (task.sequenced_task_runner_ref ? kSequencedExecutionMode
-                                                : kParallelExecutionMode);
-      // TODO(gab): In a better world this would be tacked on as an extra arg
-      // to the trace event generated above. This is not possible however until
-      // http://crbug.com/652692 is resolved.
-      TRACE_EVENT1("task_scheduler", "TaskTracker::RunTask", "task_info",
-                   std::make_unique<TaskTracingInfo>(
-                       task.traits, execution_mode, sequence_token));
-
-      {
-        // Put this in its own scope so it preceeds rather than overlaps with
-        // RunTask() in the trace view.
-        TRACE_EVENT_WITH_FLOW0(
-            kTaskSchedulerFlowTracingCategory, kQueueFunctionName,
-            TRACE_ID_MANGLE(task_annotator_.GetTaskTraceID(task)),
-            TRACE_EVENT_FLAG_FLOW_IN);
-      }
-
       task_annotator_.RunTask(nullptr, &task);
     }
 

@@ -5,7 +5,6 @@
 #include "base/memory/memory_pressure_listener.h"
 
 #include "base/observer_list_threadsafe.h"
-#include "base/trace_event/trace_event.h"
 
 namespace base {
 

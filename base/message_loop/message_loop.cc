@@ -18,7 +18,6 @@
 #include "base/third_party/dynamic_annotations/dynamic_annotations.h"
 #include "base/threading/thread_id_name_manager.h"
 #include "base/threading/thread_task_runner_handle.h"
-#include "base/trace_event/trace_event.h"
 
 #if defined(OS_MACOSX)
 #include "base/message_loop/message_pump_mac.h"
@@ -311,8 +310,6 @@ void MessageLoop::RunTask(PendingTask* pending_task) {
 
   // Execute the task and assume the worst: It is probably not reentrant.
   task_execution_allowed_ = false;
-
-  TRACE_TASK_EXECUTION("MessageLoop::RunTask", *pending_task);
 
   for (auto& observer : task_observers_)
     observer.WillProcessTask(*pending_task);
