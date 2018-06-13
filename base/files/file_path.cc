@@ -9,7 +9,6 @@
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "base/pickle.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
 #include "base/strings/sys_string_conversions.h"
@@ -666,33 +665,6 @@ FilePath FilePath::FromUTF16Unsafe(StringPiece16 utf16) {
 }
 
 #endif  // defined(OS_WIN)
-
-void FilePath::WriteToPickle(Pickle* pickle) const {
-#if defined(OS_WIN)
-  pickle->WriteString16(path_);
-#elif defined(OS_POSIX) || defined(OS_FUCHSIA)
-  pickle->WriteString(path_);
-#else
-#error Unsupported platform
-#endif
-}
-
-bool FilePath::ReadFromPickle(PickleIterator* iter) {
-#if defined(OS_WIN)
-  if (!iter->ReadString16(&path_))
-    return false;
-#elif defined(OS_POSIX) || defined(OS_FUCHSIA)
-  if (!iter->ReadString(&path_))
-    return false;
-#else
-#error Unsupported platform
-#endif
-
-  if (path_.find(kStringTerminator) != StringType::npos)
-    return false;
-
-  return true;
-}
 
 #if defined(OS_WIN)
 // Windows specific implementation of file string comparisons.
