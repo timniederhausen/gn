@@ -756,7 +756,6 @@ def write_gn_ninja(path, options):
         'base/win/enum_variant.cc',
         'base/win/event_trace_controller.cc',
         'base/win/event_trace_provider.cc',
-        'base/win/i18n.cc',
         'base/win/iat_patch_function.cc',
         'base/win/iunknown_impl.cc',
         'base/win/message_window.cc',
