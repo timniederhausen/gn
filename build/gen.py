@@ -263,13 +263,7 @@ def write_gn_ninja(path, options):
         'base/location.cc',
         'base/logging.cc',
         'base/md5.cc',
-        'base/memory/platform_shared_memory_region.cc',
-        'base/memory/read_only_shared_memory_region.cc',
         'base/memory/ref_counted.cc',
-        'base/memory/ref_counted_memory.cc',
-        'base/memory/shared_memory_mapping.cc',
-        'base/memory/shared_memory_handle.cc',
-        'base/memory/shared_memory_tracker.cc',
         'base/memory/weak_ptr.cc',
         'base/message_loop/incoming_task_queue.cc',
         'base/message_loop/message_loop.cc',
@@ -554,19 +548,6 @@ def write_gn_ninja(path, options):
       ], 'tool': 'cxx', 'include_dirs': [], 'libs': []},
   }
 
-  if is_win:
-    static_libraries['base']['sources'].extend([
-        'base/memory/platform_shared_memory_region_win.cc'
-    ])
-  elif is_mac:
-    static_libraries['base']['sources'].extend([
-        'base/memory/platform_shared_memory_region_mac.cc'
-    ])
-  elif is_linux:
-    static_libraries['base']['sources'].extend([
-        'base/memory/platform_shared_memory_region_posix.cc'
-    ])
-
   if is_posix:
     static_libraries['base']['sources'].extend([
         'base/base_paths_posix.cc',
@@ -577,7 +558,6 @@ def write_gn_ninja(path, options):
         'base/files/file_posix.cc',
         'base/files/file_util_posix.cc',
         'base/files/memory_mapped_file_posix.cc',
-        'base/memory/shared_memory_helper.cc',
         'base/message_loop/message_pump_libevent.cc',
         'base/posix/file_descriptor_shuffle.cc',
         'base/posix/global_descriptors.cc',
@@ -626,8 +606,6 @@ def write_gn_ninja(path, options):
         'tool': 'cxx',
     }
     static_libraries['base']['sources'].extend([
-        'base/memory/shared_memory_handle_posix.cc',
-        'base/memory/shared_memory_posix.cc',
         'base/nix/xdg_util.cc',
         'base/process/internal_linux.cc',
         'base/process/memory_linux.cc',
@@ -675,8 +653,6 @@ def write_gn_ninja(path, options):
         'base/mac/scoped_mach_port.cc',
         'base/mac/scoped_mach_vm.cc',
         'base/mac/scoped_nsautorelease_pool.mm',
-        'base/memory/shared_memory_handle_mac.cc',
-        'base/memory/shared_memory_mac.cc',
         'base/message_loop/message_pump_mac.mm',
         'base/process/process_handle_mac.cc',
         'base/process/process_info_mac.cc',
@@ -723,9 +699,6 @@ def write_gn_ninja(path, options):
         'base/files/memory_mapped_file_win.cc',
         'base/guid.cc',
         'base/logging_win.cc',
-        'base/memory/memory_pressure_monitor_win.cc',
-        'base/memory/shared_memory_handle_win.cc',
-        'base/memory/shared_memory_win.cc',
         'base/message_loop/message_pump_win.cc',
         'base/native_library_win.cc',
         'base/power_monitor/power_monitor_device_source_win.cc',
