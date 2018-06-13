@@ -34,7 +34,6 @@
 
 namespace base {
 
-class HistogramBase;
 class SchedulerWorkerObserver;
 class SchedulerWorkerPoolParams;
 
@@ -94,16 +93,6 @@ class BASE_EXPORT SchedulerWorkerPoolImpl : public SchedulerWorkerPool {
 
   // SchedulerWorkerPool:
   void JoinForTesting() override;
-
-  const HistogramBase* num_tasks_before_detach_histogram() const {
-    return num_tasks_before_detach_histogram_;
-  }
-
-  const HistogramBase* num_tasks_between_waits_histogram() const {
-    return num_tasks_between_waits_histogram_;
-  }
-
-  void GetHistograms(std::vector<const HistogramBase*>* histograms) const;
 
   // Returns the maximum number of non-blocked tasks that can run concurrently
   // in this pool.
@@ -305,18 +294,6 @@ class BASE_EXPORT SchedulerWorkerPoolImpl : public SchedulerWorkerPool {
   // Set at the start of JoinForTesting().
   AtomicFlag join_for_testing_started_;
 #endif
-
-  // TaskScheduler.DetachDuration.[worker pool name] histogram. Intentionally
-  // leaked.
-  HistogramBase* const detach_duration_histogram_;
-
-  // TaskScheduler.NumTasksBeforeDetach.[worker pool name] histogram.
-  // Intentionally leaked.
-  HistogramBase* const num_tasks_before_detach_histogram_;
-
-  // TaskScheduler.NumTasksBetweenWaits.[worker pool name] histogram.
-  // Intentionally leaked.
-  HistogramBase* const num_tasks_between_waits_histogram_;
 
   scoped_refptr<TaskRunner> service_thread_task_runner_;
 

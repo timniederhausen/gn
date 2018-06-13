@@ -6,17 +6,12 @@
 
 #include <mach/mach.h>
 
-#include "base/feature_list.h"
 #include "base/mac/mach_logging.h"
 
 namespace base {
 
-// Enables backgrounding hidden renderers on Mac.
-const Feature kMacAllowBackgroundingProcesses{"MacAllowBackgroundingProcesses",
-                                              FEATURE_DISABLED_BY_DEFAULT};
-
 bool Process::CanBackgroundProcesses() {
-  return FeatureList::IsEnabled(kMacAllowBackgroundingProcesses);
+  return false;
 }
 
 bool Process::IsProcessBackgrounded(PortProvider* port_provider) const {

@@ -8,7 +8,7 @@
 #include <mach/mach.h>
 #include <sys/event.h>
 
-#include "base/debug/activity_tracker.h"
+#include "base/callback.h"
 #include "base/files/scoped_file.h"
 #include "base/mac/dispatch_source_mach.h"
 #include "base/mac/mac_util.h"
@@ -113,8 +113,6 @@ bool WaitableEvent::TimedWait(const TimeDelta& wait_delta) {
 bool WaitableEvent::TimedWaitUntil(const TimeTicks& end_time) {
   internal::AssertBaseSyncPrimitivesAllowed();
   ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
-  // Record the event that this thread is blocking upon (for hang diagnosis).
-  debug::ScopedEventWaitActivity event_activity(this);
 
   TimeDelta wait_time = end_time - TimeTicks::Now();
   if (wait_time < TimeDelta()) {
@@ -169,8 +167,6 @@ size_t WaitableEvent::WaitMany(WaitableEvent** raw_waitables, size_t count) {
   internal::AssertBaseSyncPrimitivesAllowed();
   DCHECK(count) << "Cannot wait on no events";
   ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
-  // Record an event (the first) that this thread is blocking upon.
-  debug::ScopedEventWaitActivity event_activity(raw_waitables[0]);
 
   // On macOS 10.11+, using Mach port sets may cause system instability, per
   // https://crbug.com/756102. On macOS 10.12+, a kqueue can be used

@@ -10,7 +10,6 @@
 #include <sys/resource.h>
 #include <sys/wait.h>
 
-#include "base/debug/activity_tracker.h"
 #include "base/files/scoped_file.h"
 #include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
@@ -338,9 +337,6 @@ bool Process::WaitForExit(int* exit_code) const {
 bool Process::WaitForExitWithTimeout(TimeDelta timeout, int* exit_code) const {
   if (!timeout.is_zero())
     internal::AssertBaseSyncPrimitivesAllowed();
-
-  // Record the event that this thread is blocking upon (for hang diagnosis).
-  base::debug::ScopedProcessWaitActivity process_activity(this);
 
   int local_exit_code;
   bool exited = WaitForExitWithTimeoutImpl(Handle(), &local_exit_code, timeout);

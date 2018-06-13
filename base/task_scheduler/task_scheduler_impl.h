@@ -79,7 +79,6 @@ class BASE_EXPORT TaskSchedulerImpl : public TaskScheduler {
       const TaskTraits& traits,
       SingleThreadTaskRunnerThreadMode thread_mode) override;
 #endif  // defined(OS_WIN)
-  std::vector<const HistogramBase*> GetHistograms() const override;
   int GetMaxConcurrentNonBlockedTasksWithTraitsDeprecated(
       const TaskTraits& traits) const override;
   void Shutdown() override;
@@ -100,14 +99,6 @@ class BASE_EXPORT TaskSchedulerImpl : public TaskScheduler {
   std::unique_ptr<Thread> service_thread_;
   DelayedTaskManager delayed_task_manager_;
   SchedulerSingleThreadTaskRunnerManager single_thread_task_runner_manager_;
-
-  // Indicates that all tasks are handled as if they had been posted with
-  // TaskPriority::USER_BLOCKING. Since this is set in Start(), it doesn't apply
-  // to tasks posted before Start() or to tasks posted to TaskRunners created
-  // before Start().
-  //
-  // TODO(fdoray): Remove after experiment. https://crbug.com/757022
-  AtomicFlag all_tasks_user_blocking_;
 
   // There are 4 SchedulerWorkerPoolImpl in this array to match the 4
   // SchedulerWorkerPoolParams in TaskScheduler::InitParams.

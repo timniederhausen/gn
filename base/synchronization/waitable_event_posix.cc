@@ -8,7 +8,6 @@
 #include <limits>
 #include <vector>
 
-#include "base/debug/activity_tracker.h"
 #include "base/logging.h"
 #include "base/synchronization/condition_variable.h"
 #include "base/synchronization/lock.h"
@@ -164,8 +163,6 @@ bool WaitableEvent::TimedWait(const TimeDelta& wait_delta) {
 bool WaitableEvent::TimedWaitUntil(const TimeTicks& end_time) {
   internal::AssertBaseSyncPrimitivesAllowed();
   ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
-  // Record the event that this thread is blocking upon (for hang diagnosis).
-  base::debug::ScopedEventWaitActivity event_activity(this);
 
   const bool finite_time = !end_time.is_max();
 
@@ -240,8 +237,6 @@ size_t WaitableEvent::WaitMany(WaitableEvent** raw_waitables,
   internal::AssertBaseSyncPrimitivesAllowed();
   DCHECK(count) << "Cannot wait on no events";
   ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
-  // Record an event (the first) that this thread is blocking upon.
-  base::debug::ScopedEventWaitActivity event_activity(raw_waitables[0]);
 
   // We need to acquire the locks in a globally consistent order. Thus we sort
   // the array of waitables by address. We actually sort a pairs so that we can

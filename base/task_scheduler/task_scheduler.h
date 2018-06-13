@@ -136,9 +136,6 @@ class BASE_EXPORT TaskScheduler {
       SingleThreadTaskRunnerThreadMode thread_mode) = 0;
 #endif  // defined(OS_WIN)
 
-  // Returns a vector of all histograms available in this task scheduler.
-  virtual std::vector<const HistogramBase*> GetHistograms() const = 0;
-
   // Synchronously shuts down the scheduler. Once this is called, only tasks
   // posted with the BLOCK_SHUTDOWN behavior will be run. When this returns:
   // - All SKIP_ON_SHUTDOWN tasks that were already running have completed their

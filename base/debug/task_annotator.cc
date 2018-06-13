@@ -6,7 +6,6 @@
 
 #include <array>
 
-#include "base/debug/activity_tracker.h"
 #include "base/debug/alias.h"
 #include "base/no_destructor.h"
 #include "base/pending_task.h"
@@ -54,8 +53,6 @@ void TaskAnnotator::DidQueueTask(const char* queue_function,
 
 void TaskAnnotator::RunTask(const char* queue_function,
                             PendingTask* pending_task) {
-  ScopedTaskRunActivity task_activity(*pending_task);
-
   // Before running the task, store the task backtrace with the chain of
   // PostTasks that resulted in this call and deliberately alias it to ensure
   // it is on the stack if the task crashes. Be careful not to assume that the

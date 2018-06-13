@@ -27,23 +27,12 @@ class BASE_EXPORT ServiceThread : public Thread {
   // |task_tracker| if non-null. In that case, this ServiceThread will assume a
   // registered TaskScheduler instance and that |task_tracker| will outlive this
   // ServiceThread.
-  explicit ServiceThread(const TaskTracker* task_tracker);
+  ServiceThread();
 
  private:
   // Thread:
   void Init() override;
   void Run(RunLoop* run_loop) override;
-
-  // Kicks off async tasks which will record a histogram on the latency of
-  // various traits.
-  void PerformHeartbeatLatencyReport() const;
-
-  const TaskTracker* const task_tracker_;
-
-  // Fires a recurring heartbeat task to record latency histograms which are
-  // independent from any execution sequence. This is done on the service thread
-  // to avoid all external dependencies (even main thread).
-  base::RepeatingTimer heartbeat_latency_timer_;
 
   DISALLOW_COPY_AND_ASSIGN(ServiceThread);
 };

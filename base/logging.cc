@@ -88,7 +88,6 @@ typedef pthread_mutex_t* MutexHandle;
 #include "base/callback.h"
 #include "base/command_line.h"
 #include "base/containers/stack.h"
-#include "base/debug/activity_tracker.h"
 #include "base/debug/alias.h"
 #include "base/debug/debugger.h"
 #include "base/debug/stack_trace.h"
@@ -816,12 +815,6 @@ LogMessage::~LogMessage() {
   }
 
   if (severity_ == LOG_FATAL) {
-    // Write the log message to the global activity tracker, if running.
-    base::debug::GlobalActivityTracker* tracker =
-        base::debug::GlobalActivityTracker::Get();
-    if (tracker)
-      tracker->RecordLogMessage(str_newline);
-
     // Ensure the first characters of the string are on the stack so they
     // are contained in minidumps for diagnostic purposes.
     DEBUG_ALIAS_FOR_CSTR(str_stack, str_newline.c_str(), 1024);

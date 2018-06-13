@@ -13,40 +13,14 @@
 namespace base {
 namespace internal {
 
-ServiceThread::ServiceThread(const TaskTracker* task_tracker)
-    : Thread("TaskSchedulerServiceThread"), task_tracker_(task_tracker) {}
+ServiceThread::ServiceThread() : Thread("TaskSchedulerServiceThread") {}
 
-void ServiceThread::Init() {
-  if (task_tracker_) {
-    heartbeat_latency_timer_.Start(
-        FROM_HERE, TimeDelta::FromSeconds(5),
-        BindRepeating(&ServiceThread::PerformHeartbeatLatencyReport,
-                      Unretained(this)));
-  }
-}
+void ServiceThread::Init() {}
 
 NOINLINE void ServiceThread::Run(RunLoop* run_loop) {
   const int line_number = __LINE__;
   Thread::Run(run_loop);
   base::debug::Alias(&line_number);
-}
-
-void ServiceThread::PerformHeartbeatLatencyReport() const {
-  static constexpr TaskTraits kReportedTraits[] = {
-      {TaskPriority::BACKGROUND},    {TaskPriority::BACKGROUND, MayBlock()},
-      {TaskPriority::USER_VISIBLE},  {TaskPriority::USER_VISIBLE, MayBlock()},
-      {TaskPriority::USER_BLOCKING}, {TaskPriority::USER_BLOCKING, MayBlock()}};
-
-  for (auto& traits : kReportedTraits) {
-    // Post through the static API to time the full stack. Use a new Now() for
-    // every set of traits in case PostTaskWithTraits() itself is slow.
-    base::PostTaskWithTraits(
-        FROM_HERE, traits,
-        BindOnce(&TaskTracker::RecordLatencyHistogram,
-                 Unretained(task_tracker_),
-                 TaskTracker::LatencyHistogramType::HEARTBEAT_LATENCY, traits,
-                 TimeTicks::Now()));
-  }
 }
 
 }  // namespace internal

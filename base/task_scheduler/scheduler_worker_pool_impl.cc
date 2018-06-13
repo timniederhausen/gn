@@ -16,7 +16,6 @@
 #include "base/compiler_specific.h"
 #include "base/location.h"
 #include "base/memory/ptr_util.h"
-#include "base/metrics/histogram.h"
 #include "base/sequence_token.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
@@ -41,13 +40,6 @@ constexpr TimeDelta SchedulerWorkerPoolImpl::kBlockedWorkersPollPeriod;
 
 namespace {
 
-constexpr char kPoolNameSuffix[] = "Pool";
-constexpr char kDetachDurationHistogramPrefix[] =
-    "TaskScheduler.DetachDuration.";
-constexpr char kNumTasksBeforeDetachHistogramPrefix[] =
-    "TaskScheduler.NumTasksBeforeDetach.";
-constexpr char kNumTasksBetweenWaitsHistogramPrefix[] =
-    "TaskScheduler.NumTasksBetweenWaits.";
 constexpr size_t kMaxNumberOfWorkers = 256;
 
 // Only used in DCHECKs.
@@ -168,38 +160,6 @@ SchedulerWorkerPoolImpl::SchedulerWorkerPoolImpl(
       priority_hint_(priority_hint),
       lock_(shared_priority_queue_.container_lock()),
       idle_workers_stack_cv_for_testing_(lock_.CreateConditionVariable()),
-      // Mimics the UMA_HISTOGRAM_LONG_TIMES macro.
-      detach_duration_histogram_(Histogram::FactoryTimeGet(
-          JoinString({kDetachDurationHistogramPrefix, histogram_label,
-                      kPoolNameSuffix},
-                     ""),
-          TimeDelta::FromMilliseconds(1),
-          TimeDelta::FromHours(1),
-          50,
-          HistogramBase::kUmaTargetedHistogramFlag)),
-      // Mimics the UMA_HISTOGRAM_COUNTS_1000 macro. When a worker runs more
-      // than 1000 tasks before detaching, there is no need to know the exact
-      // number of tasks that ran.
-      num_tasks_before_detach_histogram_(Histogram::FactoryGet(
-          JoinString({kNumTasksBeforeDetachHistogramPrefix, histogram_label,
-                      kPoolNameSuffix},
-                     ""),
-          1,
-          1000,
-          50,
-          HistogramBase::kUmaTargetedHistogramFlag)),
-      // Mimics the UMA_HISTOGRAM_COUNTS_100 macro. A SchedulerWorker is
-      // expected to run between zero and a few tens of tasks between waits.
-      // When it runs more than 100 tasks, there is no need to know the exact
-      // number of tasks that ran.
-      num_tasks_between_waits_histogram_(Histogram::FactoryGet(
-          JoinString({kNumTasksBetweenWaitsHistogramPrefix, histogram_label,
-                      kPoolNameSuffix},
-                     ""),
-          1,
-          100,
-          50,
-          HistogramBase::kUmaTargetedHistogramFlag)),
       tracked_ref_factory_(this) {
   DCHECK(!histogram_label.empty());
   DCHECK(!pool_label_.empty());
@@ -269,12 +229,6 @@ void SchedulerWorkerPoolImpl::OnCanScheduleSequence(
                                                   sequence_sort_key);
 
   WakeUpOneWorker();
-}
-
-void SchedulerWorkerPoolImpl::GetHistograms(
-    std::vector<const HistogramBase*>* histograms) const {
-  histograms->push_back(detach_duration_histogram_);
-  histograms->push_back(num_tasks_between_waits_histogram_);
 }
 
 int SchedulerWorkerPoolImpl::GetMaxConcurrentNonBlockedTasksDeprecated() const {
@@ -521,7 +475,6 @@ void SchedulerWorkerPoolImpl::SchedulerWorkerDelegateImpl::CleanupLockRequired(
   DCHECK_CALLED_ON_VALID_THREAD(worker_thread_checker_);
 
   outer_->lock_.AssertAcquired();
-  outer_->num_tasks_before_detach_histogram_->Add(num_tasks_since_last_detach_);
   outer_->cleanup_timestamps_.push(TimeTicks::Now());
   worker->Cleanup();
   outer_->RemoveFromIdleWorkersStackLockRequired(worker);
@@ -546,7 +499,6 @@ void SchedulerWorkerPoolImpl::SchedulerWorkerDelegateImpl::
   // returns nullptr, the SchedulerWorker will perform a wait on its
   // WaitableEvent, so we record how many tasks were ran since the last wait
   // here.
-  outer_->num_tasks_between_waits_histogram_->Add(num_tasks_since_last_wait_);
   num_tasks_since_last_wait_ = 0;
   outer_->AddToIdleWorkersStackLockRequired(worker);
   SetIsOnIdleWorkersStackLockRequired(worker);
@@ -843,8 +795,6 @@ SchedulerWorkerPoolImpl::CreateRegisterAndStartSchedulerWorkerLockRequired() {
   DCHECK_LE(workers_.size(), worker_capacity_);
 
   if (!cleanup_timestamps_.empty()) {
-    detach_duration_histogram_->AddTime(TimeTicks::Now() -
-                                        cleanup_timestamps_.top());
     cleanup_timestamps_.pop();
   }
   return worker.get();

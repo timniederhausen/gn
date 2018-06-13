@@ -20,15 +20,10 @@
 #endif
 
 #if defined(OS_MACOSX)
-#include "base/feature_list.h"
 #include "base/process/port_provider_mac.h"
 #endif
 
 namespace base {
-
-#if defined(OS_MACOSX)
-extern const Feature kMacAllowBackgroundingProcesses;
-#endif
 
 // Provides a move-only encapsulation of a process.
 //
