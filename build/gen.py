@@ -375,10 +375,6 @@ def write_gn_ninja(path, options):
         'base/values.cc',
         'base/vlog.cc',
       ], 'tool': 'cxx', 'include_dirs': []},
-      'dynamic_annotations': {'sources': [
-        'base/third_party/dynamic_annotations/dynamic_annotations.c',
-        'base/third_party/superfasthash/superfasthash.c',
-       ], 'tool': 'cc', 'include_dirs': []},
       'gn_lib': {'sources': [
         'tools/gn/action_target_generator.cc',
         'tools/gn/action_values.cc',
