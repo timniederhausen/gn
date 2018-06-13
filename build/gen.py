@@ -725,6 +725,7 @@ def write_gn_ninja(path, options):
         'base/mac/bundle_locations.mm',
         'base/mac/call_with_eh_frame.cc',
         'base/mac/call_with_eh_frame_asm.S',
+        'base/mac/dispatch_source_mach.cc',
         'base/mac/foundation_util.mm',
         'base/mac/mach_logging.cc',
         'base/mac/scoped_mach_port.cc',
