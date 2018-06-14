@@ -683,7 +683,6 @@ def write_gn_ninja(path, options):
         'base/debug/debugger_win.cc',
         'base/debug/profiler.cc',
         'base/debug/stack_trace_win.cc',
-        'base/file_version_info_win.cc',
         'base/files/file_enumerator_win.cc',
         'base/files/file_path_watcher_win.cc',
         'base/files/file_util_win.cc',
