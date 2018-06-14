@@ -19,7 +19,6 @@
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/logging.h"
-#include "base/nix/xdg_util.h"
 #include "base/path_service.h"
 #include "base/process/process_metrics.h"
 #include "build_config.h"
@@ -101,16 +100,6 @@ bool PathProviderPosix(int key, FilePath* result) {
       DLOG(ERROR) << "Couldn't find your source root.  "
                   << "Try running from your chromium/src directory.";
       return false;
-    }
-    case DIR_USER_DESKTOP:
-      *result = nix::GetXDGUserDirectory("DESKTOP", "Desktop");
-      return true;
-    case DIR_CACHE: {
-      std::unique_ptr<Environment> env(Environment::Create());
-      FilePath cache_dir(
-          nix::GetXDGDirectory(env.get(), "XDG_CACHE_HOME", ".cache"));
-      *result = cache_dir;
-      return true;
     }
   }
   return false;
