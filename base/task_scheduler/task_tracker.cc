@@ -245,8 +245,6 @@ bool TaskTracker::WillPostTask(const Task& task) {
   if (task.delayed_run_time.is_null())
     subtle::NoBarrier_AtomicIncrement(&num_incomplete_undelayed_tasks_, 1);
 
-  task_annotator_.DidQueueTask(nullptr, task);
-
   return true;
 }
 
@@ -374,7 +372,7 @@ void TaskTracker::RunOrSkipTask(Task task,
     }
 
     if (can_run_task) {
-      task_annotator_.RunTask(nullptr, &task);
+      std::move(task.task).Run();
     }
 
     // Make sure the arguments bound to the callback are deleted within the

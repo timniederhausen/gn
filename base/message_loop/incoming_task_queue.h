@@ -7,7 +7,6 @@
 
 #include "base/base_export.h"
 #include "base/callback.h"
-#include "base/debug/task_annotator.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "base/pending_task.h"
@@ -205,8 +204,6 @@ class BASE_EXPORT IncomingTaskQueue
 
   // Checks calls made only on the MessageLoop thread.
   SEQUENCE_CHECKER(sequence_checker_);
-
-  debug::TaskAnnotator task_annotator_;
 
   // True if we always need to call ScheduleWork when receiving a new task, even
   // if the incoming queue was not empty.

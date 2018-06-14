@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <utility>
 
-#include "base/debug/activity_tracker.h"
 #include "base/logging.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/threading/scoped_blocking_call.h"

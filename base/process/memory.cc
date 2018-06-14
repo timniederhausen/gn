@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/debug/alias.h"
 #include "base/logging.h"
 #include "base/process/memory.h"
 #include "build_config.h"
@@ -17,9 +16,7 @@ namespace {
 // Breakpad server classifies base::`anonymous namespace'::OnNoMemory as
 // out-of-memory crash.
 NOINLINE void OnNoMemory(size_t size) {
-  size_t tmp_size = size;
-  base::debug::Alias(&tmp_size);
-  LOG(FATAL) << "Out of memory. size=" << tmp_size;
+  LOG(FATAL) << "Out of memory. size=" << size;
 }
 
 }  // namespace

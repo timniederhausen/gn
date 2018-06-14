@@ -88,9 +88,6 @@ typedef pthread_mutex_t* MutexHandle;
 #include "base/callback.h"
 #include "base/command_line.h"
 #include "base/containers/stack.h"
-#include "base/debug/alias.h"
-#include "base/debug/debugger.h"
-#include "base/debug/stack_trace.h"
 #include "base/lazy_instance.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/strings/string_piece.h"
@@ -586,11 +583,8 @@ LogMessage::~LogMessage() {
   size_t stack_start = stream_.tellp();
 #if !defined(OFFICIAL_BUILD) && !defined(OS_NACL) && !defined(__UCLIBC__) && \
     !defined(OS_AIX)
-  if (severity_ == LOG_FATAL && !base::debug::BeingDebugged()) {
-    // Include a stack trace on a fatal, unless a debugger is attached.
-    base::debug::StackTrace trace;
+  if (severity_ == LOG_FATAL) {
     stream_ << std::endl;  // Newline to separate from log message.
-    trace.OutputToStream(&stream_);
   }
 #endif
   stream_ << std::endl;
@@ -815,10 +809,6 @@ LogMessage::~LogMessage() {
   }
 
   if (severity_ == LOG_FATAL) {
-    // Ensure the first characters of the string are on the stack so they
-    // are contained in minidumps for diagnostic purposes.
-    DEBUG_ALIAS_FOR_CSTR(str_stack, str_newline.c_str(), 1024);
-
     if (log_assert_handler_stack.IsCreated() &&
         !log_assert_handler_stack.Get().empty()) {
       LogAssertHandlerFunction log_assert_handler =
@@ -838,14 +828,12 @@ LogMessage::~LogMessage() {
       // information, and displaying message boxes when the application is
       // hosed can cause additional problems.
 #ifndef NDEBUG
-      if (!base::debug::BeingDebugged()) {
-        // Displaying a dialog is unnecessary when debugging and can complicate
-        // debugging.
-        DisplayDebugMessageInDialog(stream_.str());
-      }
+      // Displaying a dialog is unnecessary when debugging and can complicate
+      // debugging.
+      DisplayDebugMessageInDialog(stream_.str());
 #endif
       // Crash the process to generate a dump.
-      base::debug::BreakDebugger();
+      abort();
     }
   }
 }
@@ -959,10 +947,6 @@ Win32ErrorLogMessage::Win32ErrorLogMessage(const char* file,
 
 Win32ErrorLogMessage::~Win32ErrorLogMessage() {
   stream() << ": " << SystemErrorCodeToString(err_);
-  // We're about to crash (CHECK). Put |err_| on the stack (by placing it in a
-  // field) and use Alias in hopes that it makes it into crash dumps.
-  DWORD last_error = err_;
-  base::debug::Alias(&last_error);
 }
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
 ErrnoLogMessage::ErrnoLogMessage(const char* file,
@@ -975,10 +959,6 @@ ErrnoLogMessage::ErrnoLogMessage(const char* file,
 
 ErrnoLogMessage::~ErrnoLogMessage() {
   stream() << ": " << SystemErrorCodeToString(err_);
-  // We're about to crash (CHECK). Put |err_| on the stack (by placing it in a
-  // field) and use Alias in hopes that it makes it into crash dumps.
-  int last_error = err_;
-  base::debug::Alias(&last_error);
 }
 #endif  // defined(OS_WIN)
 
@@ -1017,7 +997,7 @@ void RawLog(int level, const char* message) {
   }
 
   if (level == LOG_FATAL)
-    base::debug::BreakDebugger();
+    abort();
 }
 
 // This was defined at the beginning of this file.

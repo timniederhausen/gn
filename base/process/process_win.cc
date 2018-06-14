@@ -4,7 +4,6 @@
 
 #include "base/process/process.h"
 
-#include "base/debug/activity_tracker.h"
 #include "base/logging.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/process/kill.h"

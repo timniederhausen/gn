@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "base/bind.h"
-#include "base/debug/leak_annotations.h"
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
 #include "base/sequenced_task_runner.h"
@@ -54,7 +53,6 @@ class PostTaskAndReplyRelay {
         // https://crbug.com/829122).
         auto relay_to_delete =
             std::make_unique<PostTaskAndReplyRelay>(std::move(*this));
-        ANNOTATE_LEAKING_OBJECT_PTR(relay_to_delete.get());
         reply_task_runner_->DeleteSoon(from_here_, std::move(relay_to_delete));
       }
 

@@ -9,8 +9,6 @@
 
 #include <unordered_map>
 
-#include "base/debug/alias.h"
-#include "base/debug/stack_trace.h"
 #include "base/synchronization/lock_impl.h"
 #include "base/win/current_module.h"
 
@@ -156,9 +154,7 @@ void ScopedHandleVerifier::StartTracking(HANDLE handle,
   std::pair<HandleMap::iterator, bool> result = map_.insert(item);
   if (!result.second) {
     ScopedHandleVerifierInfo other = result.first->second;
-    base::debug::Alias(&other);
     auto creation_stack = creation_stack_;
-    base::debug::Alias(&creation_stack);
     CHECK(false);  // Attempt to start tracking already tracked handle.
   }
 }
@@ -174,15 +170,12 @@ void ScopedHandleVerifier::StopTracking(HANDLE handle,
   HandleMap::iterator i = map_.find(handle);
   if (i == map_.end()) {
     auto creation_stack = creation_stack_;
-    base::debug::Alias(&creation_stack);
     CHECK(false);  // Attempting to close an untracked handle.
   }
 
   ScopedHandleVerifierInfo other = i->second;
   if (other.owner != owner) {
-    base::debug::Alias(&other);
     auto creation_stack = creation_stack_;
-    base::debug::Alias(&creation_stack);
     CHECK(false);  // Attempting to close a handle not owned by opener.
   }
 
@@ -206,9 +199,7 @@ void ScopedHandleVerifier::OnHandleBeingClosed(HANDLE handle) {
     return;
 
   ScopedHandleVerifierInfo other = i->second;
-  base::debug::Alias(&other);
   auto creation_stack = creation_stack_;
-  base::debug::Alias(&creation_stack);
   CHECK(false);  // CloseHandle called on tracked handle.
 }
 

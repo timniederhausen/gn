@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 #include "base/base_export.h"
-#include "base/debug/stack_trace.h"
 #include "base/hash.h"
 #include "base/synchronization/lock_impl.h"
 #include "base/threading/thread_local.h"

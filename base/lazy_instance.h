@@ -48,7 +48,6 @@
 #include <new>  // For placement new.
 
 #include "base/atomicops.h"
-#include "base/debug/leak_annotations.h"
 #include "base/lazy_instance_helpers.h"
 #include "base/logging.h"
 #include "base/threading/thread_restrictions.h"
@@ -113,7 +112,6 @@ struct LeakyLazyInstanceTraits {
 #endif
 
   static Type* New(void* instance) {
-    ANNOTATE_SCOPED_MEMORY_LEAK;
     return LazyInstanceTraitsBase<Type>::New(instance);
   }
   static void Delete(Type* instance) {

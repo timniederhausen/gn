@@ -121,7 +121,7 @@ IncomingTaskQueue::~IncomingTaskQueue() {
 
 void IncomingTaskQueue::RunTask(PendingTask* pending_task) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
-  task_annotator_.RunTask("MessageLoop::PostTask", pending_task);
+  std::move(pending_task->task).Run();
 }
 
 IncomingTaskQueue::TriageQueue::TriageQueue(IncomingTaskQueue* outer)
@@ -328,8 +328,6 @@ bool IncomingTaskQueue::PostPendingTaskLockRequired(PendingTask* pending_task) {
   // tasks (to facilitate FIFO sorting when two tasks have the same
   // delayed_run_time value) and for identifying the task in about:tracing.
   pending_task->sequence_num = next_sequence_num_++;
-
-  task_annotator_.DidQueueTask("MessageLoop::PostTask", *pending_task);
 
   bool was_empty = incoming_queue_.empty();
   incoming_queue_.push(std::move(*pending_task));

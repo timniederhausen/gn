@@ -7,7 +7,6 @@
 
 #include <windows.h>
 
-#include "base/debug/gdi_debug_util_win.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/win/scoped_handle.h"

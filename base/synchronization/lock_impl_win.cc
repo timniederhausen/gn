@@ -4,8 +4,6 @@
 
 #include "base/synchronization/lock_impl.h"
 
-#include "base/debug/activity_tracker.h"
-
 #include <windows.h>
 
 namespace base {
