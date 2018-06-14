@@ -8,18 +8,12 @@
 
 #include <new>
 
-#include "base/allocator/allocator_shim.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/process/internal_linux.h"
 #include "base/strings/string_number_conversions.h"
 #include "build_config.h"
-
-#if defined(USE_TCMALLOC)
-#include "third_party/tcmalloc/chromium/src/config.h"
-#include "third_party/tcmalloc/chromium/src/gperftools/tcmalloc.h"
-#endif
 
 namespace base {
 
@@ -50,11 +44,6 @@ void EnableTerminationOnOutOfMemory() {
   std::set_new_handler(&OnNoMemory);
   // If we're using glibc's allocator, the above functions will override
   // malloc and friends and make them die on out of memory.
-
-#if defined(USE_TCMALLOC)
-  // For tcmalloc, we need to tell it to behave like new.
-  tc_set_new_mode(1);
-#endif
 }
 
 // NOTE: This is not the only version of this function in the source:

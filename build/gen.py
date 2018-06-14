@@ -168,10 +168,6 @@ def write_gn_ninja(path, options):
   include_dirs = [REPO_ROOT, os.path.join(REPO_ROOT, 'src')]
   libs = []
 
-  # //base/allocator/allocator_extension.cc needs this macro defined,
-  # otherwise there would be link errors.
-  cflags.extend(['-DNO_TCMALLOC', '-D__STDC_FORMAT_MACROS'])
-
   if is_posix:
     if options.debug:
       cflags.extend(['-O0', '-g'])
@@ -229,8 +225,6 @@ def write_gn_ninja(path, options):
 
   static_libraries = {
       'base': {'sources': [
-        'base/allocator/allocator_check.cc',
-        'base/allocator/allocator_extension.cc',
         'base/at_exit.cc',
         'base/base_paths.cc',
         'base/base_switches.cc',
@@ -242,7 +236,6 @@ def write_gn_ninja(path, options):
         'base/debug/dump_without_crashing.cc',
         'base/debug/stack_trace.cc',
         'base/debug/task_annotator.cc',
-        'base/debug/thread_heap_usage_tracker.cc',
         'base/environment.cc',
         'base/files/file.cc',
         'base/files/file_enumerator.cc',
@@ -621,10 +614,6 @@ def write_gn_ninja(path, options):
         '-lrt',
         '-latomic',
     ])
-    static_libraries['base']['sources'].extend([
-      'base/allocator/allocator_shim.cc',
-      'base/allocator/allocator_shim_default_dispatch_to_glibc.cc',
-    ])
     static_libraries['libevent']['include_dirs'].extend([
         os.path.join(REPO_ROOT, 'base', 'third_party', 'libevent', 'linux')
     ])
@@ -673,9 +662,6 @@ def write_gn_ninja(path, options):
 
   if is_win:
     static_libraries['base']['sources'].extend([
-        "base/allocator/partition_allocator/address_space_randomization.cc",
-        'base/allocator/partition_allocator/page_allocator.cc',
-        "base/allocator/partition_allocator/spin_lock.cc",
         'base/base_paths_win.cc',
         'base/cpu.cc',
         'base/debug/close_handle_hook_win.cc',

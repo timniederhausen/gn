@@ -4,8 +4,6 @@
 
 #include "base/process/memory.h"
 
-#include "base/allocator/allocator_interception_mac.h"
-#include "base/allocator/allocator_shim.h"
 #include "build_config.h"
 
 namespace base {
@@ -23,11 +21,13 @@ void EnableTerminationOnHeapCorruption() {
 }
 
 bool UncheckedMalloc(size_t size, void** result) {
-  return allocator::UncheckedMallocMac(size, result);
+  *result = malloc(size);
+  return *result != nullptr;
 }
 
 bool UncheckedCalloc(size_t num_items, size_t size, void** result) {
-  return allocator::UncheckedCallocMac(num_items, size, result);
+  *result = calloc(num_items, size);
+  return *result != nullptr;
 }
 
 void EnableTerminationOnOutOfMemory() {
