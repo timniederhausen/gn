@@ -41,7 +41,7 @@ def main():
 
   subprocess.check_call([sys.executable, os.path.join('build', 'gen.py')])
   subprocess.check_call(['ninja', '-C', 'out'])
-  #subprocess.check_call([os.path.join('out', 'gn_unittests')])
+  subprocess.check_call([os.path.join('out', 'gn_unittests')])
   orig_dir = os.getcwd()
 
   in_chrome_tree_gn = sys.argv[2]

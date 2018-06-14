@@ -333,6 +333,7 @@ def write_gn_ninja(path, options):
       ], 'tool': 'cxx', 'include_dirs': []},
       'gn_lib': {'sources': [
         'src/exe_path.cc',
+        'src/worker_pool.cc',
         'tools/gn/action_target_generator.cc',
         'tools/gn/action_values.cc',
         'tools/gn/analyzer.cc',

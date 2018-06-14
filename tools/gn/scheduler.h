@@ -18,6 +18,7 @@
 #include "tools/gn/label.h"
 #include "tools/gn/source_file.h"
 #include "tools/gn/token.h"
+#include "worker_pool.h"
 
 class Target;
 
@@ -44,7 +45,7 @@ class Scheduler {
   void Log(const std::string& verb, const std::string& msg);
   void FailWithError(const Err& err);
 
-  void ScheduleWork(base::OnceClosure work);
+  void ScheduleWork(std::function<void()> work);
 
   void Shutdown();
 
@@ -98,8 +99,6 @@ class Scheduler {
 
   void DoTargetFileWrite(const Target* target);
 
-  void DoWork(base::OnceClosure closure);
-
   void OnComplete();
 
   // Waits for tasks scheduled via ScheduleWork() to complete their execution.
@@ -125,6 +124,8 @@ class Scheduler {
 
   // Condition variable signaled when |pool_work_count_| reaches zero.
   base::ConditionVariable pool_work_count_cv_;
+
+  WorkerPool worker_pool_;
 
   mutable base::Lock lock_;
   bool is_failed_;

@@ -10,7 +10,6 @@
 #include "base/containers/queue.h"
 #include "base/files/file_util.h"
 #include "base/strings/string_util.h"
-#include "base/task_scheduler/post_task.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/builder.h"
 #include "tools/gn/c_include_iterator.h"
@@ -22,6 +21,7 @@
 #include "tools/gn/source_file_type.h"
 #include "tools/gn/target.h"
 #include "tools/gn/trace.h"
+#include "worker_pool.h"
 
 namespace {
 
@@ -149,6 +149,8 @@ bool HeaderChecker::Run(const std::vector<const Target*>& to_check,
 }
 
 void HeaderChecker::RunCheckOverFiles(const FileMap& files, bool force_check) {
+  WorkerPool pool;
+
   for (const auto& file : files) {
     // Only check C-like source files (RC files also have includes).
     SourceFileType type = GetSourceFileType(file.first);
@@ -168,9 +170,19 @@ void HeaderChecker::RunCheckOverFiles(const FileMap& files, bool force_check) {
     for (const auto& vect_i : file.second) {
       if (vect_i.target->check_includes()) {
         task_count_.Increment();
-        base::PostTaskWithTraits(FROM_HERE, {base::MayBlock()},
-                                 base::BindOnce(&HeaderChecker::DoWork, this,
-                                                vect_i.target, file.first));
+        pool.PostTask([ this, target = vect_i.target, f = file.first ] {
+          Err err;
+          if (!CheckFile(target, f, &err)) {
+            base::AutoLock lock(lock_);
+            errors_.push_back(err);
+          }
+
+          if (!task_count_.Decrement()) {
+            // Signal |task_count_cv_| when |task_count_| becomes zero.
+            base::AutoLock auto_lock(lock_);
+            task_count_cv_.Signal();
+          }
+        });
       }
     }
   }
@@ -179,20 +191,6 @@ void HeaderChecker::RunCheckOverFiles(const FileMap& files, bool force_check) {
   base::AutoLock auto_lock(lock_);
   while (!task_count_.IsZero())
     task_count_cv_.Wait();
-}
-
-void HeaderChecker::DoWork(const Target* target, const SourceFile& file) {
-  Err err;
-  if (!CheckFile(target, file, &err)) {
-    base::AutoLock lock(lock_);
-    errors_.push_back(err);
-  }
-
-  if (!task_count_.Decrement()) {
-    // Signal |task_count_cv_| when |task_count_| becomes zero.
-    base::AutoLock auto_lock(lock_);
-    task_count_cv_.Signal();
-  }
 }
 
 // static

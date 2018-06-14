@@ -8,10 +8,13 @@
 
 #include "base/bind.h"
 #include "base/single_thread_task_runner.h"
-#include "base/task_scheduler/post_task.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "tools/gn/standard_out.h"
 #include "tools/gn/target.h"
+
+namespace {
+
+}  // namespace
 
 Scheduler* g_scheduler = nullptr;
 
@@ -20,6 +23,7 @@ Scheduler::Scheduler()
       input_file_manager_(new InputFileManager),
       verbose_logging_(false),
       pool_work_count_cv_(&pool_work_count_lock_),
+      worker_pool_(),
       is_failed_(false),
       suppress_output_for_testing_(false),
       has_been_shutdown_(false) {
@@ -78,13 +82,17 @@ void Scheduler::FailWithError(const Err& err) {
   }
 }
 
-void Scheduler::ScheduleWork(base::OnceClosure work) {
+void Scheduler::ScheduleWork(std::function<void()> work) {
   IncrementWorkCount();
   pool_work_count_.Increment();
-  base::PostTaskWithTraits(
-      FROM_HERE, {base::MayBlock()},
-      base::BindOnce(&Scheduler::DoWork, base::Unretained(this),
-                     std::move(work)));
+  worker_pool_.PostTask([ this, work = std::move(work) ] {
+    work();
+    DecrementWorkCount();
+    if (!pool_work_count_.Decrement()) {
+      base::AutoLock auto_lock(pool_work_count_lock_);
+      pool_work_count_cv_.Signal();
+    }
+  });
 }
 
 void Scheduler::AddGenDependency(const base::FilePath& file) {
@@ -182,15 +190,6 @@ void Scheduler::FailWithErrorOnMainThread(const Err& err) {
   if (!suppress_output_for_testing_)
     err.PrintToStdout();
   runner_.Quit();
-}
-
-void Scheduler::DoWork(base::OnceClosure closure) {
-  std::move(closure).Run();
-  DecrementWorkCount();
-  if (!pool_work_count_.Decrement()) {
-    base::AutoLock auto_lock(pool_work_count_lock_);
-    pool_work_count_cv_.Signal();
-  }
 }
 
 void Scheduler::OnComplete() {

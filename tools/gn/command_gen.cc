@@ -72,8 +72,8 @@ void ItemResolvedAndGeneratedCallback(TargetWriteInfo* write_info,
   const Item* item = record->item();
   const Target* target = item->AsTarget();
   if (target) {
-    g_scheduler->ScheduleWork(base::Bind(&BackgroundDoWrite,
-                                         write_info, target));
+    g_scheduler->ScheduleWork(
+        std::bind(&BackgroundDoWrite, write_info, target));
   }
 }
 
