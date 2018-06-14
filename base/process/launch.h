@@ -23,12 +23,9 @@
 
 #if defined(OS_WIN)
 #include <windows.h>
-#elif defined(OS_FUCHSIA)
-#include <launchpad/launchpad.h>
-#include <zircon/types.h>
 #endif
 
-#if defined(OS_POSIX) || defined(OS_FUCHSIA)
+#if defined(OS_POSIX)
 #include "base/posix/file_descriptor_shuffle.h"
 #endif
 
@@ -38,13 +35,6 @@ class CommandLine;
 
 #if defined(OS_WIN)
 typedef std::vector<HANDLE> HandlesToInheritVector;
-#elif defined(OS_FUCHSIA)
-struct HandleToTransfer {
-  uint32_t id;
-  zx_handle_t handle;
-};
-typedef std::vector<HandleToTransfer> HandlesToTransferVector;
-typedef std::vector<std::pair<int, int>> FileHandleMappingVector;
 #elif defined(OS_POSIX)
 typedef std::vector<std::pair<int, int>> FileHandleMappingVector;
 #endif  // defined(OS_WIN)
@@ -52,7 +42,7 @@ typedef std::vector<std::pair<int, int>> FileHandleMappingVector;
 // Options for launching a subprocess that are passed to LaunchProcess().
 // The default constructor constructs the object with default options.
 struct BASE_EXPORT LaunchOptions {
-#if defined(OS_POSIX) || defined(OS_FUCHSIA)
+#if defined(OS_POSIX)
   // Delegate to be run in between fork and exec in the subprocess (see
   // pre_exec_delegate below)
   class BASE_EXPORT PreExecDelegate {
@@ -152,7 +142,7 @@ struct BASE_EXPORT LaunchOptions {
   // If set to true, permission to bring windows to the foreground is passed to
   // the launched process if the current process has such permission.
   bool grant_foreground_privilege = false;
-#elif defined(OS_POSIX) || defined(OS_FUCHSIA)
+#elif defined(OS_POSIX)
   // Set/unset environment variables. These are applied on top of the parent
   // process environment.  Empty (the default) means to inherit the same
   // environment. See AlterEnvironment().
@@ -182,36 +172,6 @@ struct BASE_EXPORT LaunchOptions {
   bool kill_on_parent_death = false;
 #endif  // defined(OS_LINUX)
 
-#if defined(OS_FUCHSIA)
-  // If valid, launches the application in that job object.
-  zx_handle_t job_handle = ZX_HANDLE_INVALID;
-
-  // Specifies additional handles to transfer (not duplicate) to the child
-  // process. The handles remain valid in this process if launch fails.
-  // Each entry is an <id,handle> pair, with an |id| created using the PA_HND()
-  // macro. The child retrieves the handle |zx_get_startup_handle(id)|.
-  HandlesToTransferVector handles_to_transfer;
-
-  // If set, specifies which capabilities should be granted (cloned) to the
-  // child process.
-  // A zero value indicates that the child process will receive
-  // no capabilities.
-  // By default the child will inherit the same capabilities, job, and CWD
-  // from the parent process.
-  uint32_t clone_flags =
-      LP_CLONE_FDIO_NAMESPACE | LP_CLONE_DEFAULT_JOB | LP_CLONE_FDIO_STDIO;
-
-  // Specifies the namespace paths which are to be cloned in the child process'
-  // namespace. If left unset, the child process will be launched with an empty
-  // namespace.
-  // This flag allows the parent to pass only the bare minimum OS capabilities
-  // to the child process, so that the potential attack surface is reduced in
-  // case child process is compromised.
-  // Cannot be combined with the clone flag LP_CLONE_FDIO_NAMESPACE, which is
-  // equivalent to cloning every path.
-  std::vector<FilePath> paths_to_map;
-#endif  // defined(OS_FUCHSIA)
-
 #if defined(OS_POSIX)
   // If not empty, launch the specified executable instead of
   // cmdline.GetProgram(). This is useful when it is necessary to pass a custom
@@ -236,12 +196,6 @@ struct BASE_EXPORT LaunchOptions {
   // will be the same as its pid.
   bool new_process_group = false;
 #endif  // defined(OS_POSIX)
-
-#if defined(OS_CHROMEOS)
-  // If non-negative, the specified file descriptor will be set as the launched
-  // process' controlling terminal.
-  int ctrl_terminal_fd = -1;
-#endif  // defined(OS_CHROMEOS)
 };
 
 // Launch a process via the command line |cmdline|.
@@ -282,7 +236,7 @@ BASE_EXPORT Process LaunchProcess(const string16& cmdline,
 BASE_EXPORT Process LaunchElevatedProcess(const CommandLine& cmdline,
                                           const LaunchOptions& options);
 
-#elif defined(OS_POSIX) || defined(OS_FUCHSIA)
+#elif defined(OS_POSIX)
 // A POSIX-specific version of LaunchProcess that takes an argv array
 // instead of a CommandLine.  Useful for situations where you need to
 // control the command line arguments directly, but prefer the
@@ -328,7 +282,7 @@ BASE_EXPORT bool GetAppOutputWithExitCode(const CommandLine& cl,
 // instead of a CommandLine object. Useful for situations where you need to
 // control the command line arguments directly.
 BASE_EXPORT bool GetAppOutput(const StringPiece16& cl, std::string* output);
-#elif defined(OS_POSIX) || defined(OS_FUCHSIA)
+#elif defined(OS_POSIX)
 // A POSIX-specific version of GetAppOutput that takes an argv array
 // instead of a CommandLine.  Useful for situations where you need to
 // control the command line arguments directly.

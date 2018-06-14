@@ -18,8 +18,6 @@
 
 #if defined(OS_WIN)
 #include "base/win/windows_types.h"
-#elif defined(OS_FUCHSIA)
-#include <zircon/types.h>
 #elif defined(OS_MACOSX)
 #include <mach/mach_types.h>
 #elif defined(OS_POSIX)
@@ -32,8 +30,6 @@ namespace base {
 // Used for logging. Always an integer value.
 #if defined(OS_WIN)
 typedef DWORD PlatformThreadId;
-#elif defined(OS_FUCHSIA)
-typedef zx_handle_t PlatformThreadId;
 #elif defined(OS_MACOSX)
 typedef mach_port_t PlatformThreadId;
 #elif defined(OS_POSIX)

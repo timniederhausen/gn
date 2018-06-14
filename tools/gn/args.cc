@@ -302,14 +302,6 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
   os = "mac";
 #elif defined(OS_LINUX)
   os = "linux";
-#elif defined(OS_ANDROID)
-  os = "android";
-#elif defined(OS_NETBSD)
-  os = "netbsd";
-#elif defined(OS_AIX)
-  os = "aix";
-#elif defined(OS_FUCHSIA)
-  os = "fuchsia";
 #else
   #error Unknown OS type.
 #endif

@@ -16,10 +16,6 @@
 #include "base/win/windows_types.h"
 #endif
 
-#if defined(OS_FUCHSIA)
-#include <zircon/types.h>
-#endif
-
 namespace base {
 
 // ProcessHandle is a platform specific type which represents the underlying OS
@@ -31,11 +27,6 @@ typedef DWORD ProcessId;
 typedef HANDLE UserTokenHandle;
 const ProcessHandle kNullProcessHandle = NULL;
 const ProcessId kNullProcessId = 0;
-#elif defined(OS_FUCHSIA)
-typedef zx_handle_t ProcessHandle;
-typedef zx_koid_t ProcessId;
-const ProcessHandle kNullProcessHandle = ZX_HANDLE_INVALID;
-const ProcessId kNullProcessId = ZX_KOID_INVALID;
 #elif defined(OS_POSIX)
 // On POSIX, our ProcessHandle will just be the PID.
 typedef pid_t ProcessHandle;
@@ -47,7 +38,7 @@ const ProcessId kNullProcessId = 0;
 // To print ProcessIds portably use CrPRIdPid (based on PRIuS and friends from
 // C99 and format_macros.h) like this:
 // base::StringPrintf("PID is %" CrPRIdPid ".\n", pid);
-#if defined(OS_WIN) || defined(OS_FUCHSIA)
+#if defined(OS_WIN)
 #define CrPRIdPid "ld"
 #else
 #define CrPRIdPid "d"

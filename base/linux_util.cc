@@ -106,19 +106,9 @@ static const int kDistroSize = 128 + 1;
 
 // We use this static string to hold the Linux distro info. If we
 // crash, the crash handler code will send this in the crash dump.
-char g_linux_distro[kDistroSize] =
-#if defined(OS_CHROMEOS)
-    "CrOS";
-#elif defined(OS_ANDROID)
-    "Android";
-#else  // if defined(OS_LINUX)
-    "Unknown";
-#endif
+char g_linux_distro[kDistroSize] = "Unknown";
 
 std::string GetLinuxDistro() {
-#if defined(OS_CHROMEOS) || defined(OS_ANDROID)
-  return g_linux_distro;
-#elif defined(OS_LINUX)
   LinuxDistroHelper* distro_state_singleton = LinuxDistroHelper::GetInstance();
   LinuxDistroState state = distro_state_singleton->State();
   if (STATE_CHECK_FINISHED == state)
@@ -143,10 +133,6 @@ std::string GetLinuxDistro() {
   }
   distro_state_singleton->CheckFinished();
   return g_linux_distro;
-#else
-  NOTIMPLEMENTED();
-  return "Unknown";
-#endif
 }
 
 void SetLinuxDistro(const std::string& distro) {

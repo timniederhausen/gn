@@ -18,11 +18,6 @@
 #include "base/strings/string_util.h"
 #include "base/time/time.h"
 
-// Not defined on AIX by default.
-#if defined(OS_AIX)
-#define NAME_MAX 255
-#endif
-
 namespace base {
 namespace internal {
 

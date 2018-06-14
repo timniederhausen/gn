@@ -34,68 +34,6 @@ base::Lock* GetSysTimeToTimeStructLock() {
 // Define a system-specific SysTime that wraps either to a time_t or
 // a time64_t depending on the host system, and associated convertion.
 // See crbug.com/162007
-#if defined(OS_ANDROID) && !defined(__LP64__)
-typedef time64_t SysTime;
-
-SysTime SysTimeFromTimeStruct(struct tm* timestruct, bool is_local) {
-  base::AutoLock locked(*GetSysTimeToTimeStructLock());
-  if (is_local)
-    return mktime64(timestruct);
-  else
-    return timegm64(timestruct);
-}
-
-void SysTimeToTimeStruct(SysTime t, struct tm* timestruct, bool is_local) {
-  base::AutoLock locked(*GetSysTimeToTimeStructLock());
-  if (is_local)
-    localtime64_r(&t, timestruct);
-  else
-    gmtime64_r(&t, timestruct);
-}
-
-#elif defined(OS_AIX)
-
-// The function timegm is not available on AIX.
-time_t aix_timegm(struct tm* tm) {
-  time_t ret;
-  char* tz;
-
-  tz = getenv("TZ");
-  if (tz) {
-    tz = strdup(tz);
-  }
-  setenv("TZ", "GMT0", 1);
-  tzset();
-  ret = mktime(tm);
-  if (tz) {
-    setenv("TZ", tz, 1);
-    free(tz);
-  } else {
-    unsetenv("TZ");
-  }
-  tzset();
-  return ret;
-}
-
-typedef time_t SysTime;
-
-SysTime SysTimeFromTimeStruct(struct tm* timestruct, bool is_local) {
-  base::AutoLock locked(*GetSysTimeToTimeStructLock());
-  if (is_local)
-    return mktime(timestruct);
-  else
-    return aix_timegm(timestruct);
-}
-
-void SysTimeToTimeStruct(SysTime t, struct tm* timestruct, bool is_local) {
-  base::AutoLock locked(*GetSysTimeToTimeStructLock());
-  if (is_local)
-    localtime_r(&t, timestruct);
-  else
-    gmtime_r(&t, timestruct);
-}
-
-#else   // OS_ANDROID && !__LP64__
 typedef time_t SysTime;
 
 SysTime SysTimeFromTimeStruct(struct tm* timestruct, bool is_local) {
@@ -113,7 +51,6 @@ void SysTimeToTimeStruct(SysTime t, struct tm* timestruct, bool is_local) {
   else
     gmtime_r(&t, timestruct);
 }
-#endif  // OS_ANDROID
 
 }  // namespace
 

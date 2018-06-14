@@ -111,21 +111,6 @@ FilePath FileEnumerator::Next() {
 
     directory_entries_.clear();
 
-#if defined(OS_FUCHSIA)
-    // Fuchsia does not support .. on the file system server side, see
-    // https://fuchsia.googlesource.com/docs/+/master/dotdot.md and
-    // https://crbug.com/735540. However, for UI purposes, having the parent
-    // directory show up in directory listings makes sense, so we add it here to
-    // match the expectation on other operating systems. In cases where this
-    // is useful it should be resolvable locally.
-    FileInfo dotdot;
-    dotdot.stat_.st_mode = S_IFDIR;
-    dotdot.filename_ = FilePath("..");
-    if (!ShouldSkip(dotdot.filename_)) {
-      directory_entries_.push_back(std::move(dotdot));
-    }
-#endif  // OS_FUCHSIA
-
     current_directory_entry_ = 0;
     struct dirent* dent;
     while ((dent = readdir(dir))) {

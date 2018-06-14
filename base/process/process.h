@@ -15,10 +15,6 @@
 #include "base/win/scoped_handle.h"
 #endif
 
-#if defined(OS_FUCHSIA)
-#include "base/fuchsia/scoped_zx_handle.h"
-#endif
-
 #if defined(OS_MACOSX)
 #include "base/process/port_provider_mac.h"
 #endif
@@ -172,36 +168,19 @@ class BASE_EXPORT Process {
   // of this value is OS dependent.
   int GetPriority() const;
 
-#if defined(OS_CHROMEOS)
-  // Get the PID in its PID namespace.
-  // If the process is not in a PID namespace or /proc/<pid>/status does not
-  // report NSpid, kNullProcessId is returned.
-  ProcessId GetPidInNamespace() const;
-#endif
-
  private:
 #if defined(OS_WIN)
   win::ScopedHandle process_;
-#elif defined(OS_FUCHSIA)
-  ScopedZxHandle process_;
 #else
   ProcessHandle process_;
 #endif
 
-#if defined(OS_WIN) || defined(OS_FUCHSIA)
+#if defined(OS_WIN)
   bool is_current_process_;
 #endif
 
   DISALLOW_COPY_AND_ASSIGN(Process);
 };
-
-#if defined(OS_CHROMEOS)
-// Exposed for testing.
-// Given the contents of the /proc/<pid>/cgroup file, determine whether the
-// process is backgrounded or not.
-BASE_EXPORT bool IsProcessBackgroundedCGroup(
-    const StringPiece& cgroup_contents);
-#endif  // defined(OS_CHROMEOS)
 
 }  // namespace base
 

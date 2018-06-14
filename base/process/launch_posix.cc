@@ -45,15 +45,6 @@
 #include <sys/prctl.h>
 #endif
 
-#if defined(OS_CHROMEOS)
-#include <sys/ioctl.h>
-#endif
-
-#if defined(OS_FREEBSD)
-#include <sys/event.h>
-#include <sys/ucontext.h>
-#endif
-
 #if defined(OS_MACOSX)
 #include <crt_externs.h>
 #include <sys/event.h>
@@ -105,15 +96,7 @@ void SetEnvironment(char** env) {
 // the previous signal mask.
 sigset_t SetSignalMask(const sigset_t& new_sigmask) {
   sigset_t old_sigmask;
-#if defined(OS_ANDROID)
-  // POSIX says pthread_sigmask() must be used in multi-threaded processes,
-  // but Android's pthread_sigmask() was broken until 4.1:
-  // https://code.google.com/p/android/issues/detail?id=15337
-  // http://stackoverflow.com/questions/13777109/pthread-sigmask-on-android-not-working
-  RAW_CHECK(sigprocmask(SIG_SETMASK, &new_sigmask, &old_sigmask) == 0);
-#else
   RAW_CHECK(pthread_sigmask(SIG_SETMASK, &new_sigmask, &old_sigmask) == 0);
-#endif
   return old_sigmask;
 }
 
@@ -219,14 +202,6 @@ typedef std::unique_ptr<DIR, ScopedDIRClose> ScopedDIR;
 static const char kFDDir[] = "/proc/self/fd";
 #elif defined(OS_MACOSX)
 static const char kFDDir[] = "/dev/fd";
-#elif defined(OS_SOLARIS)
-static const char kFDDir[] = "/dev/fd";
-#elif defined(OS_FREEBSD)
-static const char kFDDir[] = "/dev/fd";
-#elif defined(OS_OPENBSD)
-static const char kFDDir[] = "/dev/fd";
-#elif defined(OS_ANDROID)
-static const char kFDDir[] = "/proc/self/fd";
 #endif
 
 void CloseSuperfluousFds(const base::InjectiveMultimap& saved_mapping) {
@@ -439,20 +414,6 @@ Process LaunchProcess(const std::vector<std::string>& argv,
     mprotect(malloc_thunk, 4096, PROT_READ | PROT_WRITE | PROT_EXEC);
     memset(reinterpret_cast<void*>(malloc), 0xff, 8);
 #endif  // 0
-
-#if defined(OS_CHROMEOS)
-    if (options.ctrl_terminal_fd >= 0) {
-      // Set process' controlling terminal.
-      if (HANDLE_EINTR(setsid()) != -1) {
-        if (HANDLE_EINTR(
-                ioctl(options.ctrl_terminal_fd, TIOCSCTTY, nullptr)) == -1) {
-          RAW_LOG(WARNING, "ioctl(TIOCSCTTY), ctrl terminal not set");
-        }
-      } else {
-        RAW_LOG(WARNING, "setsid failed, ctrl terminal not set");
-      }
-    }
-#endif  // defined(OS_CHROMEOS)
 
     // Cannot use STL iterators here, since debug iterators use locks.
     for (size_t i = 0; i < options.fds_to_remap.size(); ++i) {

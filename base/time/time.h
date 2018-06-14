@@ -63,21 +63,13 @@
 #include "base/numerics/safe_math.h"
 #include "build_config.h"
 
-#if defined(OS_FUCHSIA)
-#include <zircon/types.h>
-#endif
-
 #if defined(OS_MACOSX)
 #include <CoreFoundation/CoreFoundation.h>
 // Avoid Mac system header macro leak.
 #undef TYPE_BOOL
 #endif
 
-#if defined(OS_ANDROID)
-#include <jni.h>
-#endif
-
-#if defined(OS_POSIX) || defined(OS_FUCHSIA)
+#if defined(OS_POSIX)
 #include <unistd.h>
 #include <sys/time.h>
 #endif
@@ -473,16 +465,7 @@ class BASE_EXPORT Time : public time_internal::TimeBase<Time> {
 #if defined(OS_WIN)
   static constexpr int kExplodedMinYear = 1601;
   static constexpr int kExplodedMaxYear = 30827;
-#elif defined(OS_IOS)
-  static constexpr int kExplodedMinYear = std::numeric_limits<int>::min();
-  static constexpr int kExplodedMaxYear = std::numeric_limits<int>::max();
 #elif defined(OS_MACOSX)
-  static constexpr int kExplodedMinYear = 1902;
-  static constexpr int kExplodedMaxYear = std::numeric_limits<int>::max();
-#elif defined(OS_ANDROID)
-  // Though we use 64-bit time APIs on both 32 and 64 bit Android, some OS
-  // versions like KitKat (ARM but not x86 emulator) can't handle some early
-  // dates (e.g. before 1170). So we set min conservatively here.
   static constexpr int kExplodedMinYear = 1902;
   static constexpr int kExplodedMaxYear = std::numeric_limits<int>::max();
 #else
@@ -840,12 +823,6 @@ class BASE_EXPORT TimeTicks : public time_internal::TimeBase<TimeTicks> {
   // considered to have an ambiguous ordering.)
   static bool IsConsistentAcrossProcesses() WARN_UNUSED_RESULT;
 
-#if defined(OS_FUCHSIA)
-  // Converts between TimeTicks and an ZX_CLOCK_MONOTONIC zx_time_t value.
-  static TimeTicks FromZxTime(zx_time_t nanos_since_boot);
-  zx_time_t ToZxTime() const;
-#endif
-
 #if defined(OS_WIN)
   // Translates an absolute QPC timestamp into a TimeTicks value. The returned
   // value has the same origin as Now(). Do NOT attempt to use this if
@@ -856,14 +833,6 @@ class BASE_EXPORT TimeTicks : public time_internal::TimeBase<TimeTicks> {
 #if defined(OS_MACOSX) && !defined(OS_IOS)
   static TimeTicks FromMachAbsoluteTime(uint64_t mach_absolute_time);
 #endif  // defined(OS_MACOSX) && !defined(OS_IOS)
-
-#if defined(OS_ANDROID)
-  // Converts to TimeTicks the value obtained from SystemClock.uptimeMillis().
-  // Note: this convertion may be non-monotonic in relation to previously
-  // obtained TimeTicks::Now() values because of the truncation (to
-  // milliseconds) performed by uptimeMillis().
-  static TimeTicks FromUptimeMillis(jlong uptime_millis_value);
-#endif
 
   // Get an estimate of the TimeTick value at the time of the UnixEpoch. Because
   // Time and TimeTicks respond differently to user-set time and NTP

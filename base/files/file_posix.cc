@@ -115,14 +115,7 @@ void File::Info::FromStat(const stat_wrapper_t& stat_info) {
   int64_t last_accessed_nsec = stat_info.st_atim.tv_nsec;
   time_t creation_time_sec = stat_info.st_ctim.tv_sec;
   int64_t creation_time_nsec = stat_info.st_ctim.tv_nsec;
-#elif defined(OS_ANDROID)
-  time_t last_modified_sec = stat_info.st_mtime;
-  int64_t last_modified_nsec = stat_info.st_mtime_nsec;
-  time_t last_accessed_sec = stat_info.st_atime;
-  int64_t last_accessed_nsec = stat_info.st_atime_nsec;
-  time_t creation_time_sec = stat_info.st_ctime;
-  int64_t creation_time_nsec = stat_info.st_ctime_nsec;
-#elif defined(OS_MACOSX) || defined(OS_IOS) || defined(OS_BSD)
+#elif defined(OS_MACOSX)
   time_t last_modified_sec = stat_info.st_mtimespec.tv_sec;
   int64_t last_modified_nsec = stat_info.st_mtimespec.tv_nsec;
   time_t last_accessed_sec = stat_info.st_atimespec.tv_sec;
@@ -130,12 +123,7 @@ void File::Info::FromStat(const stat_wrapper_t& stat_info) {
   time_t creation_time_sec = stat_info.st_ctimespec.tv_sec;
   int64_t creation_time_nsec = stat_info.st_ctimespec.tv_nsec;
 #else
-  time_t last_modified_sec = stat_info.st_mtime;
-  int64_t last_modified_nsec = 0;
-  time_t last_accessed_sec = stat_info.st_atime;
-  int64_t last_accessed_nsec = 0;
-  time_t creation_time_sec = stat_info.st_ctime;
-  int64_t creation_time_nsec = 0;
+#error
 #endif
 
   last_modified =
@@ -176,15 +164,9 @@ void File::Close() {
 int64_t File::Seek(Whence whence, int64_t offset) {
   DCHECK(IsValid());
 
-#if defined(OS_ANDROID)
-  static_assert(sizeof(int64_t) == sizeof(off64_t), "off64_t must be 64 bits");
-  return lseek64(file_.get(), static_cast<off64_t>(offset),
-                 static_cast<int>(whence));
-#else
   static_assert(sizeof(int64_t) == sizeof(off_t), "off_t must be 64 bits");
   return lseek(file_.get(), static_cast<off_t>(offset),
                static_cast<int>(whence));
-#endif
 }
 
 int File::Read(int64_t offset, char* data, int size) {
@@ -435,10 +417,6 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
   static_assert(O_RDONLY == 0, "O_RDONLY must equal zero");
 
   int mode = S_IRUSR | S_IWUSR;
-#if defined(OS_CHROMEOS)
-  mode |= S_IRGRP | S_IROTH;
-#endif
-
   int descriptor = HANDLE_EINTR(open(path.value().c_str(), open_flags, mode));
 
   if (flags & FLAG_OPEN_ALWAYS) {
@@ -473,10 +451,7 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
 bool File::Flush() {
   DCHECK(IsValid());
 
-#if defined(OS_NACL)
-  NOTIMPLEMENTED();  // NaCl doesn't implement fsync.
-  return true;
-#elif defined(OS_LINUX) || defined(OS_ANDROID)
+#if defined(OS_LINUX)
   return !HANDLE_EINTR(fdatasync(file_.get()));
 #else
   return !HANDLE_EINTR(fsync(file_.get()));

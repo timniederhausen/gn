@@ -1305,10 +1305,4 @@ FilePath FilePath::NormalizePathSeparatorsTo(CharType separator) const {
 #endif
 }
 
-#if defined(OS_ANDROID)
-bool FilePath::IsContentUri() const {
-  return StartsWith(path_, "content://", base::CompareCase::INSENSITIVE_ASCII);
-}
-#endif
-
 }  // namespace base

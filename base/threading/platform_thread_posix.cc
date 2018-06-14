@@ -22,11 +22,7 @@
 #include <sys/syscall.h>
 #endif
 
-#if defined(OS_FUCHSIA)
-#include <zircon/process.h>
-#else
 #include <sys/resource.h>
-#endif
 
 namespace base {
 
@@ -114,21 +110,8 @@ PlatformThreadId PlatformThread::CurrentId() {
   return pthread_mach_thread_np(pthread_self());
 #elif defined(OS_LINUX)
   return syscall(__NR_gettid);
-#elif defined(OS_ANDROID)
-  return gettid();
-#elif defined(OS_FUCHSIA)
-  return zx_thread_self();
-#elif defined(OS_SOLARIS) || defined(OS_QNX)
-  return pthread_self();
-#elif defined(OS_NACL) && defined(__GLIBC__)
-  return pthread_self();
-#elif defined(OS_NACL) && !defined(__GLIBC__)
-  // Pointers are 32-bits in NaCl.
-  return reinterpret_cast<int32_t>(pthread_self());
-#elif defined(OS_POSIX) && defined(OS_AIX)
-  return pthread_self();
-#elif defined(OS_POSIX) && !defined(OS_AIX)
-  return reinterpret_cast<int64_t>(pthread_self());
+#else
+#error
 #endif
 }
 

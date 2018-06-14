@@ -48,12 +48,6 @@
 #include <grp.h>
 #endif
 
-// We need to do this on AIX due to some inconsistencies in how AIX
-// handles XOPEN_SOURCE and ALL_SOURCE.
-#if defined(OS_AIX)
-extern "C" char* mkdtemp(char* path);
-#endif
-
 namespace base {
 
 namespace {
@@ -310,8 +304,6 @@ bool DoCopyDirectory(const FilePath& from_path,
     // set of permissions than it does on other POSIX platforms.
 #if defined(OS_MACOSX)
     int mode = 0600 | (stat_at_use.st_mode & 0177);
-#elif defined(OS_CHROMEOS)
-    int mode = 0644;
 #else
     int mode = 0600;
 #endif
@@ -466,11 +458,6 @@ bool SetCloseOnExec(int fd) {
 }
 
 bool PathExists(const FilePath& path) {
-#if defined(OS_ANDROID)
-  if (path.IsContentUri()) {
-    return ContentUriExists(path);
-  }
-#endif
   return access(path.value().c_str(), F_OK) == 0;
 }
 
@@ -608,10 +595,6 @@ FilePath GetHomeDir() {
   if (home_dir && home_dir[0])
     return FilePath(home_dir);
 
-#if defined(OS_ANDROID)
-  DLOG(WARNING) << "OS_ANDROID: Home directory lookup not yet implemented.";
-#endif
-
   FilePath rv;
   if (GetTempDir(&rv))
     return rv;
@@ -746,19 +729,8 @@ bool IsLink(const FilePath& file_path) {
 
 bool GetFileInfo(const FilePath& file_path, File::Info* results) {
   stat_wrapper_t file_info;
-#if defined(OS_ANDROID)
-  if (file_path.IsContentUri()) {
-    File file = OpenContentUriForRead(file_path);
-    if (!file.IsValid())
-      return false;
-    return file.GetInfo(results);
-  } else {
-#endif  // defined(OS_ANDROID)
-    if (CallStat(file_path.value().c_str(), &file_info) != 0)
-      return false;
-#if defined(OS_ANDROID)
-  }
-#endif  // defined(OS_ANDROID)
+  if (CallStat(file_path.value().c_str(), &file_info) != 0)
+    return false;
 
   results->FromStat(file_info);
   return true;
@@ -941,17 +913,9 @@ bool VerifyPathControlledByAdmin(const FilePath& path) {
 #endif  // defined(OS_MACOSX) && !defined(OS_IOS)
 
 int GetMaximumPathComponentLength(const FilePath& path) {
-#if defined(OS_FUCHSIA)
-  // Return a value we do not expect anyone ever to reach, but which is small
-  // enough to guard against e.g. bugs causing multi-megabyte paths.
-  return 1024;
-#else
   return pathconf(path.value().c_str(), _PC_NAME_MAX);
-#endif
 }
 
-#if !defined(OS_ANDROID)
-// This is implemented in file_util_android.cc for that platform.
 bool GetShmemTempDir(bool executable, FilePath* path) {
 #if defined(OS_LINUX) || defined(OS_AIX)
   bool use_dev_shm = true;
@@ -966,21 +930,12 @@ bool GetShmemTempDir(bool executable, FilePath* path) {
 #endif  // defined(OS_LINUX) || defined(OS_AIX)
   return GetTempDir(path);
 }
-#endif  // !defined(OS_ANDROID)
 
 #if !defined(OS_MACOSX)
 // Mac has its own implementation, this is for all other Posix systems.
 bool CopyFile(const FilePath& from_path, const FilePath& to_path) {
   File infile;
-#if defined(OS_ANDROID)
-  if (from_path.IsContentUri()) {
-    infile = OpenContentUriForRead(from_path);
-  } else {
-    infile = File(from_path, File::FLAG_OPEN | File::FLAG_READ);
-  }
-#else
   infile = File(from_path, File::FLAG_OPEN | File::FLAG_READ);
-#endif
   if (!infile.IsValid())
     return false;
 
