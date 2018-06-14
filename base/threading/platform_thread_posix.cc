@@ -15,11 +15,7 @@
 
 #include <memory>
 
-#include "base/lazy_instance.h"
 #include "base/logging.h"
-#include "base/threading/platform_thread_internal_posix.h"
-#include "base/threading/thread_id_name_manager.h"
-#include "base/threading/thread_restrictions.h"
 #include "build_config.h"
 
 #if defined(OS_LINUX)
@@ -41,12 +37,10 @@ size_t GetDefaultThreadStackSize(const pthread_attr_t& attributes);
 namespace {
 
 struct ThreadParams {
-  ThreadParams()
-      : delegate(nullptr), joinable(false), priority(ThreadPriority::NORMAL) {}
+  ThreadParams() : delegate(nullptr), joinable(false) {}
 
   PlatformThread::Delegate* delegate;
   bool joinable;
-  ThreadPriority priority;
 };
 
 void* ThreadFunc(void* params) {
@@ -57,26 +51,9 @@ void* ThreadFunc(void* params) {
         static_cast<ThreadParams*>(params));
 
     delegate = thread_params->delegate;
-    if (!thread_params->joinable)
-      base::ThreadRestrictions::SetSingletonAllowed(false);
-
-#if !defined(OS_NACL)
-    // Threads on linux/android may inherit their priority from the thread
-    // where they were created. This explicitly sets the priority of all new
-    // threads.
-    PlatformThread::SetCurrentThreadPriority(thread_params->priority);
-#endif
   }
 
-  ThreadIdNameManager::GetInstance()->RegisterThread(
-      PlatformThread::CurrentHandle().platform_handle(),
-      PlatformThread::CurrentId());
-
   delegate->ThreadMain();
-
-  ThreadIdNameManager::GetInstance()->RemoveName(
-      PlatformThread::CurrentHandle().platform_handle(),
-      PlatformThread::CurrentId());
 
   base::TerminateOnThread();
   return nullptr;
@@ -85,8 +62,7 @@ void* ThreadFunc(void* params) {
 bool CreateThread(size_t stack_size,
                   bool joinable,
                   PlatformThread::Delegate* delegate,
-                  PlatformThreadHandle* thread_handle,
-                  ThreadPriority priority) {
+                  PlatformThreadHandle* thread_handle) {
   DCHECK(thread_handle);
   base::InitThreading();
 
@@ -108,7 +84,6 @@ bool CreateThread(size_t stack_size,
   std::unique_ptr<ThreadParams> params(new ThreadParams);
   params->delegate = delegate;
   params->joinable = joinable;
-  params->priority = priority;
 
   pthread_t handle;
   int err = pthread_create(&handle, &attributes, ThreadFunc, params.get());
@@ -188,41 +163,24 @@ void PlatformThread::Sleep(TimeDelta duration) {
 }
 
 // static
-const char* PlatformThread::GetName() {
-  return ThreadIdNameManager::GetInstance()->GetName(CurrentId());
-}
-
-// static
-bool PlatformThread::CreateWithPriority(size_t stack_size, Delegate* delegate,
-                                        PlatformThreadHandle* thread_handle,
-                                        ThreadPriority priority) {
+bool PlatformThread::Create(size_t stack_size,
+                            Delegate* delegate,
+                            PlatformThreadHandle* thread_handle) {
   return CreateThread(stack_size, true /* joinable thread */, delegate,
-                      thread_handle, priority);
+                      thread_handle);
 }
 
 // static
 bool PlatformThread::CreateNonJoinable(size_t stack_size, Delegate* delegate) {
-  return CreateNonJoinableWithPriority(stack_size, delegate,
-                                       ThreadPriority::NORMAL);
-}
-
-// static
-bool PlatformThread::CreateNonJoinableWithPriority(size_t stack_size,
-                                                   Delegate* delegate,
-                                                   ThreadPriority priority) {
   PlatformThreadHandle unused;
 
   bool result = CreateThread(stack_size, false /* non-joinable thread */,
-                             delegate, &unused, priority);
+                             delegate, &unused);
   return result;
 }
 
 // static
 void PlatformThread::Join(PlatformThreadHandle thread_handle) {
-  // Joining another thread may block the current thread for a long time, since
-  // the thread referred to by |thread_handle| may still be running long-lived /
-  // blocking tasks.
-  AssertBlockingAllowed();
   CHECK_EQ(0, pthread_join(thread_handle.platform_handle(), nullptr));
 }
 
@@ -230,67 +188,5 @@ void PlatformThread::Join(PlatformThreadHandle thread_handle) {
 void PlatformThread::Detach(PlatformThreadHandle thread_handle) {
   CHECK_EQ(0, pthread_detach(thread_handle.platform_handle()));
 }
-
-// Mac and Fuchsia have their own Set/GetCurrentThreadPriority()
-// implementations.
-#if !defined(OS_MACOSX) && !defined(OS_FUCHSIA)
-
-// static
-bool PlatformThread::CanIncreaseCurrentThreadPriority() {
-#if defined(OS_NACL)
-  return false;
-#else
-  // Only root can raise thread priority on POSIX environment. On Linux, users
-  // who have CAP_SYS_NICE permission also can raise the thread priority, but
-  // libcap.so would be needed to check the capability.
-  return geteuid() == 0;
-#endif  // defined(OS_NACL)
-}
-
-// static
-void PlatformThread::SetCurrentThreadPriority(ThreadPriority priority) {
-#if defined(OS_NACL)
-  NOTIMPLEMENTED();
-#else
-  if (internal::SetCurrentThreadPriorityForPlatform(priority))
-    return;
-
-  // setpriority(2) should change the whole thread group's (i.e. process)
-  // priority. However, as stated in the bugs section of
-  // http://man7.org/linux/man-pages/man2/getpriority.2.html: "under the current
-  // Linux/NPTL implementation of POSIX threads, the nice value is a per-thread
-  // attribute". Also, 0 is prefered to the current thread id since it is
-  // equivalent but makes sandboxing easier (https://crbug.com/399473).
-  const int nice_setting = internal::ThreadPriorityToNiceValue(priority);
-  setpriority(PRIO_PROCESS, 0, nice_setting);
-#endif  // defined(OS_NACL)
-}
-
-// static
-ThreadPriority PlatformThread::GetCurrentThreadPriority() {
-#if defined(OS_NACL)
-  NOTIMPLEMENTED();
-  return ThreadPriority::NORMAL;
-#else
-  // Mirrors SetCurrentThreadPriority()'s implementation.
-  ThreadPriority platform_specific_priority;
-  if (internal::GetCurrentThreadPriorityForPlatform(
-          &platform_specific_priority)) {
-    return platform_specific_priority;
-  }
-
-  // Need to clear errno before calling getpriority():
-  // http://man7.org/linux/man-pages/man2/getpriority.2.html
-  errno = 0;
-  int nice_value = getpriority(PRIO_PROCESS, 0);
-  if (errno != 0) {
-    return ThreadPriority::NORMAL;
-  }
-
-  return internal::NiceValueToThreadPriority(nice_value);
-#endif  // !defined(OS_NACL)
-}
-
-#endif  // !defined(OS_MACOSX) && !defined(OS_FUCHSIA)
 
 }  // namespace base

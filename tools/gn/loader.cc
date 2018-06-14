@@ -7,7 +7,6 @@
 #include <memory>
 
 #include "base/bind.h"
-#include "base/threading/thread_task_runner_handle.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/err.h"
 #include "tools/gn/filesystem_utils.h"
@@ -98,8 +97,7 @@ LoaderImpl::LoaderImpl(const BuildSettings* build_settings)
     : pending_loads_(0), build_settings_(build_settings) {
   // There may not be an active TaskRunner at this point. When that's the case,
   // the calling code is expected to call set_task_runner().
-  if (base::ThreadTaskRunnerHandle::IsSet())
-    task_runner_ = base::ThreadTaskRunnerHandle::Get();
+  task_runner_ = MsgLoop::Current();
 }
 
 LoaderImpl::~LoaderImpl() = default;
@@ -239,7 +237,7 @@ void LoaderImpl::BackgroundLoadFile(const Settings* settings,
                                     const ParseNode* root) {
   if (!root) {
     task_runner_->PostTask(
-        FROM_HERE, base::Bind(&LoaderImpl::DecrementPendingLoads, this));
+        base::BindOnce(&LoaderImpl::DecrementPendingLoads, this));
     return;
   }
 
@@ -278,7 +276,7 @@ void LoaderImpl::BackgroundLoadFile(const Settings* settings,
 
   trace.Done();
 
-  task_runner_->PostTask(FROM_HERE, base::Bind(&LoaderImpl::DidLoadFile, this));
+  task_runner_->PostTask(base::BindOnce(&LoaderImpl::DidLoadFile, this));
 }
 
 void LoaderImpl::BackgroundLoadBuildConfig(
@@ -287,7 +285,7 @@ void LoaderImpl::BackgroundLoadBuildConfig(
     const ParseNode* root) {
   if (!root) {
     task_runner_->PostTask(
-        FROM_HERE, base::Bind(&LoaderImpl::DecrementPendingLoads, this));
+        base::BindOnce(&LoaderImpl::DecrementPendingLoads, this));
     return;
   }
 
@@ -339,9 +337,8 @@ void LoaderImpl::BackgroundLoadBuildConfig(
     }
   }
 
-  task_runner_->PostTask(FROM_HERE,
-                         base::Bind(&LoaderImpl::DidLoadBuildConfig, this,
-                                    settings->toolchain_label()));
+  task_runner_->PostTask(base::BindOnce(&LoaderImpl::DidLoadBuildConfig, this,
+                                        settings->toolchain_label()));
 }
 
 void LoaderImpl::DidLoadFile() {

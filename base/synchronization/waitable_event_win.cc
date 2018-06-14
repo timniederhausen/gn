@@ -12,8 +12,6 @@
 
 #include "base/logging.h"
 #include "base/numerics/safe_conversions.h"
-#include "base/threading/scoped_blocking_call.h"
-#include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
 
 namespace base {
@@ -52,9 +50,6 @@ bool WaitableEvent::IsSignaled() {
 }
 
 void WaitableEvent::Wait() {
-  internal::AssertBaseSyncPrimitivesAllowed();
-  ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
-
   DWORD result = WaitForSingleObject(handle_.Get(), INFINITE);
   // It is most unexpected that this should ever fail.  Help consumers learn
   // about it if it should ever fail.
@@ -66,8 +61,6 @@ namespace {
 
 // Helper function called from TimedWait and TimedWaitUntil.
 bool WaitUntil(HANDLE handle, const TimeTicks& now, const TimeTicks& end_time) {
-  ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
-
   TimeDelta delta = end_time - now;
   DCHECK_GT(delta, TimeDelta());
 
@@ -104,8 +97,6 @@ bool WaitableEvent::TimedWait(const TimeDelta& wait_delta) {
   if (wait_delta.is_zero())
     return IsSignaled();
 
-  internal::AssertBaseSyncPrimitivesAllowed();
-
   TimeTicks now(TimeTicks::Now());
   // TimeTicks takes care of overflow including the cases when wait_delta
   // is a maximum value.
@@ -115,8 +106,6 @@ bool WaitableEvent::TimedWait(const TimeDelta& wait_delta) {
 bool WaitableEvent::TimedWaitUntil(const TimeTicks& end_time) {
   if (end_time.is_null())
     return IsSignaled();
-
-  internal::AssertBaseSyncPrimitivesAllowed();
 
   TimeTicks now(TimeTicks::Now());
   if (end_time <= now)
@@ -128,9 +117,6 @@ bool WaitableEvent::TimedWaitUntil(const TimeTicks& end_time) {
 // static
 size_t WaitableEvent::WaitMany(WaitableEvent** events, size_t count) {
   DCHECK(count) << "Cannot wait on no events";
-
-  internal::AssertBaseSyncPrimitivesAllowed();
-  ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
 
   HANDLE handles[MAXIMUM_WAIT_OBJECTS];
   CHECK_LE(count, static_cast<size_t>(MAXIMUM_WAIT_OBJECTS))

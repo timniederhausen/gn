@@ -7,8 +7,8 @@
 
 #include <map>
 #include <set>
+#include <unordered_map>
 
-#include "base/containers/hash_tables.h"
 #include "base/macros.h"
 #include "base/synchronization/lock.h"
 #include "tools/gn/scope.h"
@@ -97,7 +97,7 @@ class Args {
 
  private:
   using ArgumentsPerToolchain =
-      base::hash_map<const Settings*, Scope::KeyValueMap>;
+      std::unordered_map<const Settings*, Scope::KeyValueMap>;
 
   // Sets the default config based on the current system.
   void SetSystemVarsLocked(Scope* scope) const;

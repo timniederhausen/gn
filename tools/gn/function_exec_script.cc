@@ -7,7 +7,6 @@
 #include "base/logging.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
 #include "build_config.h"
 #include "tools/gn/err.h"
@@ -115,9 +114,6 @@ Example
   # result.
   exec_script("//foo/bar/myscript.py")
 )";
-
-class ExecScriptScopedAllowBaseSyncPrimitives
-    : public base::ScopedAllowBaseSyncPrimitives {};
 
 Value RunExecScript(Scope* scope,
                     const FunctionCallNode* function,
@@ -229,7 +225,6 @@ Value RunExecScript(Scope* scope,
   std::string stderr_output;
   int exit_code = 0;
   {
-    ExecScriptScopedAllowBaseSyncPrimitives allow_base_sync_primitives;
     if (!internal::ExecProcess(cmdline, startup_dir, &output, &stderr_output,
                                &exit_code)) {
       *err = Err(

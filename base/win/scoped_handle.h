@@ -9,7 +9,6 @@
 
 #include "base/base_export.h"
 #include "base/gtest_prod_util.h"
-#include "base/location.h"
 #include "base/logging.h"
 #include "base/macros.h"
 
@@ -72,8 +71,6 @@ class GenericScopedHandle {
 
       if (Traits::IsHandleValid(handle)) {
         handle_ = handle;
-        Verifier::StartTracking(handle, this, BASE_WIN_GET_CALLER,
-                                GetProgramCounter());
       }
       ::SetLastError(last_error);
     }
@@ -87,19 +84,12 @@ class GenericScopedHandle {
   Handle Take() {
     Handle temp = handle_;
     handle_ = Traits::NullHandle();
-    if (Traits::IsHandleValid(temp)) {
-      Verifier::StopTracking(temp, this, BASE_WIN_GET_CALLER,
-                             GetProgramCounter());
-    }
     return temp;
   }
 
   // Explicitly closes the owned handle.
   void Close() {
     if (Traits::IsHandleValid(handle_)) {
-      Verifier::StopTracking(handle_, this, BASE_WIN_GET_CALLER,
-                             GetProgramCounter());
-
       Traits::CloseHandle(handle_);
       handle_ = Traits::NullHandle();
     }

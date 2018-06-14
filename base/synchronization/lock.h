@@ -9,7 +9,6 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/synchronization/lock_impl.h"
-#include "base/threading/platform_thread.h"
 #include "build_config.h"
 
 namespace base {
@@ -19,7 +18,6 @@ namespace base {
 // AssertAcquired() method.
 class BASE_EXPORT Lock {
  public:
-#if !DCHECK_IS_ON()
    // Optimized wrapper implementation
   Lock() : lock_() {}
   ~Lock() {}
@@ -34,32 +32,6 @@ class BASE_EXPORT Lock {
 
   // Null implementation if not debug.
   void AssertAcquired() const {}
-#else
-  Lock();
-  ~Lock();
-
-  // NOTE: We do not permit recursive locks and will commonly fire a DCHECK() if
-  // a thread attempts to acquire the lock a second time (while already holding
-  // it).
-  void Acquire() {
-    lock_.Lock();
-    CheckUnheldAndMark();
-  }
-  void Release() {
-    CheckHeldAndUnmark();
-    lock_.Unlock();
-  }
-
-  bool Try() {
-    bool rv = lock_.Try();
-    if (rv) {
-      CheckUnheldAndMark();
-    }
-    return rv;
-  }
-
-  void AssertAcquired() const;
-#endif  // DCHECK_IS_ON()
 
   // Whether Lock mitigates priority inversion when used from different thread
   // priorities.
@@ -84,20 +56,6 @@ class BASE_EXPORT Lock {
   friend class ConditionVariable;
 
  private:
-#if DCHECK_IS_ON()
-  // Members and routines taking care of locks assertions.
-  // Note that this checks for recursive locks and allows them
-  // if the variable is set.  This is allowed by the underlying implementation
-  // on windows but not on Posix, so we're doing unneeded checks on Posix.
-  // It's worth it to share the code.
-  void CheckHeldAndUnmark();
-  void CheckUnheldAndMark();
-
-  // All private data is implicitly protected by lock_.
-  // Be VERY careful to only access members under that lock.
-  base::PlatformThreadRef owning_thread_ref_;
-#endif  // DCHECK_IS_ON()
-
   // Platform specific underlying lock implementation.
   internal::LockImpl lock_;
 

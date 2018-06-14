@@ -4,7 +4,6 @@
 
 #include "base/files/file.h"
 #include "base/files/file_path.h"
-#include "base/files/file_tracing.h"
 #include "base/timer/elapsed_timer.h"
 #include "build_config.h"
 
@@ -53,7 +52,6 @@ File::File(Error error_details)
 
 File::File(File&& other)
     : file_(other.TakePlatformFile()),
-      tracing_path_(other.tracing_path_),
       error_details_(other.error_details()),
       created_(other.created()),
       async_(other.async_) {}
@@ -75,7 +73,6 @@ File File::CreateForAsyncHandle(PlatformFile platform_file) {
 File& File::operator=(File&& other) {
   Close();
   SetPlatformFile(other.TakePlatformFile());
-  tracing_path_ = other.tracing_path_;
   error_details_ = other.error_details();
   created_ = other.created();
   async_ = other.async_;
@@ -95,9 +92,6 @@ void File::Initialize(const FilePath& path, uint32_t flags) {
     error_details_ = FILE_ERROR_ACCESS_DENIED;
     return;
   }
-  if (FileTracing::IsCategoryEnabled())
-    tracing_path_ = path;
-  SCOPED_FILE_TRACE("Initialize");
   DoInitialize(path, flags);
 }
 #endif

@@ -23,7 +23,7 @@ namespace base {
 
 namespace {
 
-const char* const kTypeNames[] = {"null",   "boolean", "integer",    "double",
+const char* const kTypeNames[] = {"null",   "boolean", "integer",
                                   "string", "binary",  "dictionary", "list"};
 static_assert(arraysize(kTypeNames) ==
                   static_cast<size_t>(Value::Type::LIST) + 1,
@@ -109,9 +109,6 @@ Value::Value(Type type) : type_(type) {
     case Type::INTEGER:
       int_value_ = 0;
       return;
-    case Type::DOUBLE:
-      double_value_ = 0.0;
-      return;
     case Type::STRING:
       new (&string_value_) std::string();
       return;
@@ -130,14 +127,6 @@ Value::Value(Type type) : type_(type) {
 Value::Value(bool in_bool) : type_(Type::BOOLEAN), bool_value_(in_bool) {}
 
 Value::Value(int in_int) : type_(Type::INTEGER), int_value_(in_int) {}
-
-Value::Value(double in_double) : type_(Type::DOUBLE), double_value_(in_double) {
-  if (!std::isfinite(double_value_)) {
-    NOTREACHED() << "Non-finite (i.e. NaN or positive/negative infinity) "
-                 << "values cannot be represented in JSON";
-    double_value_ = 0.0;
-  }
-}
 
 Value::Value(const char* in_string) : Value(std::string(in_string)) {}
 
@@ -193,8 +182,6 @@ Value Value::Clone() const {
       return Value(bool_value_);
     case Type::INTEGER:
       return Value(int_value_);
-    case Type::DOUBLE:
-      return Value(double_value_);
     case Type::STRING:
       return Value(string_value_);
     case Type::BINARY:
@@ -228,15 +215,6 @@ bool Value::GetBool() const {
 int Value::GetInt() const {
   CHECK(is_int());
   return int_value_;
-}
-
-double Value::GetDouble() const {
-  if (is_double())
-    return double_value_;
-  if (is_int())
-    return int_value_;
-  CHECK(false);
-  return 0.0;
 }
 
 const std::string& Value::GetString() const {
@@ -455,18 +433,6 @@ bool Value::GetAsInteger(int* out_value) const {
   return is_int();
 }
 
-bool Value::GetAsDouble(double* out_value) const {
-  if (out_value && is_double()) {
-    *out_value = double_value_;
-    return true;
-  } else if (out_value && is_int()) {
-    // Allow promotion from int to double.
-    *out_value = int_value_;
-    return true;
-  }
-  return is_double() || is_int();
-}
-
 bool Value::GetAsString(std::string* out_value) const {
   if (out_value && is_string()) {
     *out_value = string_value_;
@@ -550,8 +516,6 @@ bool operator==(const Value& lhs, const Value& rhs) {
       return lhs.bool_value_ == rhs.bool_value_;
     case Value::Type::INTEGER:
       return lhs.int_value_ == rhs.int_value_;
-    case Value::Type::DOUBLE:
-      return lhs.double_value_ == rhs.double_value_;
     case Value::Type::STRING:
       return lhs.string_value_ == rhs.string_value_;
     case Value::Type::BINARY:
@@ -590,8 +554,6 @@ bool operator<(const Value& lhs, const Value& rhs) {
       return lhs.bool_value_ < rhs.bool_value_;
     case Value::Type::INTEGER:
       return lhs.int_value_ < rhs.int_value_;
-    case Value::Type::DOUBLE:
-      return lhs.double_value_ < rhs.double_value_;
     case Value::Type::STRING:
       return lhs.string_value_ < rhs.string_value_;
     case Value::Type::BINARY:
@@ -643,9 +605,6 @@ void Value::InternalMoveConstructFrom(Value&& that) {
     case Type::INTEGER:
       int_value_ = that.int_value_;
       return;
-    case Type::DOUBLE:
-      double_value_ = that.double_value_;
-      return;
     case Type::STRING:
       new (&string_value_) std::string(std::move(that.string_value_));
       return;
@@ -666,7 +625,6 @@ void Value::InternalCleanup() {
     case Type::NONE:
     case Type::BOOLEAN:
     case Type::INTEGER:
-    case Type::DOUBLE:
       // Nothing to do
       return;
 
@@ -748,10 +706,6 @@ Value* DictionaryValue::SetInteger(StringPiece path, int in_value) {
   return Set(path, std::make_unique<Value>(in_value));
 }
 
-Value* DictionaryValue::SetDouble(StringPiece path, double in_value) {
-  return Set(path, std::make_unique<Value>(in_value));
-}
-
 Value* DictionaryValue::SetString(StringPiece path, StringPiece in_value) {
   return Set(path, std::make_unique<Value>(in_value));
 }
@@ -825,14 +779,6 @@ bool DictionaryValue::GetInteger(StringPiece path, int* out_value) const {
     return false;
 
   return value->GetAsInteger(out_value);
-}
-
-bool DictionaryValue::GetDouble(StringPiece path, double* out_value) const {
-  const Value* value;
-  if (!Get(path, &value))
-    return false;
-
-  return value->GetAsDouble(out_value);
 }
 
 bool DictionaryValue::GetString(StringPiece path,
@@ -959,15 +905,6 @@ bool DictionaryValue::GetIntegerWithoutPathExpansion(StringPiece key,
     return false;
 
   return value->GetAsInteger(out_value);
-}
-
-bool DictionaryValue::GetDoubleWithoutPathExpansion(StringPiece key,
-                                                    double* out_value) const {
-  const Value* value;
-  if (!GetWithoutPathExpansion(key, &value))
-    return false;
-
-  return value->GetAsDouble(out_value);
 }
 
 bool DictionaryValue::GetStringWithoutPathExpansion(
@@ -1201,14 +1138,6 @@ bool ListValue::GetInteger(size_t index, int* out_value) const {
   return value->GetAsInteger(out_value);
 }
 
-bool ListValue::GetDouble(size_t index, double* out_value) const {
-  const Value* value;
-  if (!Get(index, &value))
-    return false;
-
-  return value->GetAsDouble(out_value);
-}
-
 bool ListValue::GetString(size_t index, std::string* out_value) const {
   const Value* value;
   if (!Get(index, &value))
@@ -1303,10 +1232,6 @@ void ListValue::AppendBoolean(bool in_value) {
 }
 
 void ListValue::AppendInteger(int in_value) {
-  list_.emplace_back(in_value);
-}
-
-void ListValue::AppendDouble(double in_value) {
   list_.emplace_back(in_value);
 }
 

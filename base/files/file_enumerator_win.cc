@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include "base/logging.h"
-#include "base/threading/thread_restrictions.h"
 
 namespace base {
 
@@ -111,8 +110,6 @@ FileEnumerator::FileInfo FileEnumerator::GetInfo() const {
 }
 
 FilePath FileEnumerator::Next() {
-  AssertBlockingAllowed();
-
   while (has_find_data_ || !pending_paths_.empty()) {
     if (!has_find_data_) {
       // The last find FindFirstFile operation is done, prepare a new one.

@@ -4,8 +4,8 @@
 
 #include "tools/gn/args.h"
 
-#include "base/sys_info.h"
 #include "build_config.h"
+#include "sys_info.h"
 #include "tools/gn/source_file.h"
 #include "tools/gn/string_utils.h"
 #include "tools/gn/variables.h"
@@ -329,7 +329,7 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
 
   // Set the host CPU architecture based on the underlying OS, not
   // whatever the current bit-tedness of the GN binary is.
-  std::string os_arch = base::SysInfo::OperatingSystemArchitecture();
+  std::string os_arch = OperatingSystemArchitecture();
   if (os_arch == "x86")
     arch = kX86;
   else if (os_arch == "x86_64")

@@ -12,8 +12,7 @@
 #include "base/synchronization/condition_variable.h"
 #include "base/synchronization/lock.h"
 #include "base/synchronization/waitable_event.h"
-#include "base/threading/scoped_blocking_call.h"
-#include "base/threading/thread_restrictions.h"
+#include "base/time/time.h"
 
 // -----------------------------------------------------------------------------
 // A WaitableEvent on POSIX is implemented as a wait-list. Currently we don't
@@ -161,9 +160,6 @@ bool WaitableEvent::TimedWait(const TimeDelta& wait_delta) {
 }
 
 bool WaitableEvent::TimedWaitUntil(const TimeTicks& end_time) {
-  internal::AssertBaseSyncPrimitivesAllowed();
-  ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
-
   const bool finite_time = !end_time.is_max();
 
   kernel_->lock_.Acquire();
@@ -234,9 +230,7 @@ cmp_fst_addr(const std::pair<WaitableEvent*, unsigned> &a,
 // static
 size_t WaitableEvent::WaitMany(WaitableEvent** raw_waitables,
                                size_t count) {
-  internal::AssertBaseSyncPrimitivesAllowed();
   DCHECK(count) << "Cannot wait on no events";
-  ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
 
   // We need to acquire the locks in a globally consistent order. Thus we sort
   // the array of waitables by address. We actually sort a pairs so that we can

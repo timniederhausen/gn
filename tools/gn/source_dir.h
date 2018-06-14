@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <string>
 
-#include "base/containers/hash_tables.h"
 #include "base/files/file_path.h"
 #include "base/logging.h"
 #include "base/strings/string_piece.h"
@@ -145,7 +144,7 @@ class SourceDir {
   // Copy & assign supported.
 };
 
-namespace BASE_HASH_NAMESPACE {
+namespace std {
 
 template<> struct hash<SourceDir> {
   std::size_t operator()(const SourceDir& v) const {
@@ -154,7 +153,7 @@ template<> struct hash<SourceDir> {
   }
 };
 
-}  // namespace BASE_HASH_NAMESPACE
+}  // namespace std
 
 inline void swap(SourceDir& lhs, SourceDir& rhs) {
   lhs.swap(rhs);

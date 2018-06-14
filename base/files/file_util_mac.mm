@@ -13,12 +13,10 @@
 #include "base/logging.h"
 #include "base/mac/foundation_util.h"
 #include "base/strings/string_util.h"
-#include "base/threading/thread_restrictions.h"
 
 namespace base {
 
 bool CopyFile(const FilePath& from_path, const FilePath& to_path) {
-  AssertBlockingAllowed();
   if (from_path.ReferencesParent() || to_path.ReferencesParent())
     return false;
   return (copyfile(from_path.value().c_str(),

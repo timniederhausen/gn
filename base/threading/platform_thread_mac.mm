@@ -13,11 +13,9 @@
 
 #include <algorithm>
 
-#include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/mac/foundation_util.h"
 #include "base/mac/mach_logging.h"
-#include "base/threading/thread_id_name_manager.h"
 #include "build_config.h"
 
 namespace base {
@@ -44,154 +42,6 @@ void InitThreading() {
     multithreaded = YES;
 
     DCHECK([NSThread isMultiThreaded]);
-  }
-}
-
-// static
-void PlatformThread::SetName(const std::string& name) {
-  ThreadIdNameManager::GetInstance()->SetName(name);
-
-  // Mac OS X does not expose the length limit of the name, so
-  // hardcode it.
-  const int kMaxNameLength = 63;
-  std::string shortened_name = name.substr(0, kMaxNameLength);
-  // pthread_setname() fails (harmlessly) in the sandbox, ignore when it does.
-  // See http://crbug.com/47058
-  pthread_setname_np(shortened_name.c_str());
-}
-
-namespace {
-
-// Enables time-contraint policy and priority suitable for low-latency,
-// glitch-resistant audio.
-void SetPriorityRealtimeAudio() {
-  // Increase thread priority to real-time.
-
-  // Please note that the thread_policy_set() calls may fail in
-  // rare cases if the kernel decides the system is under heavy load
-  // and is unable to handle boosting the thread priority.
-  // In these cases we just return early and go on with life.
-
-  mach_port_t mach_thread_id =
-      pthread_mach_thread_np(PlatformThread::CurrentHandle().platform_handle());
-
-  // Make thread fixed priority.
-  thread_extended_policy_data_t policy;
-  policy.timeshare = 0;  // Set to 1 for a non-fixed thread.
-  kern_return_t result =
-      thread_policy_set(mach_thread_id,
-                        THREAD_EXTENDED_POLICY,
-                        reinterpret_cast<thread_policy_t>(&policy),
-                        THREAD_EXTENDED_POLICY_COUNT);
-  if (result != KERN_SUCCESS) {
-    return;
-  }
-
-  // Set to relatively high priority.
-  thread_precedence_policy_data_t precedence;
-  precedence.importance = 63;
-  result = thread_policy_set(mach_thread_id,
-                             THREAD_PRECEDENCE_POLICY,
-                             reinterpret_cast<thread_policy_t>(&precedence),
-                             THREAD_PRECEDENCE_POLICY_COUNT);
-  if (result != KERN_SUCCESS) {
-    return;
-  }
-
-  // Most important, set real-time constraints.
-
-  // Define the guaranteed and max fraction of time for the audio thread.
-  // These "duty cycle" values can range from 0 to 1.  A value of 0.5
-  // means the scheduler would give half the time to the thread.
-  // These values have empirically been found to yield good behavior.
-  // Good means that audio performance is high and other threads won't starve.
-  const double kGuaranteedAudioDutyCycle = 0.75;
-  const double kMaxAudioDutyCycle = 0.85;
-
-  // Define constants determining how much time the audio thread can
-  // use in a given time quantum.  All times are in milliseconds.
-
-  // About 128 frames @44.1KHz
-  const double kTimeQuantum = 2.9;
-
-  // Time guaranteed each quantum.
-  const double kAudioTimeNeeded = kGuaranteedAudioDutyCycle * kTimeQuantum;
-
-  // Maximum time each quantum.
-  const double kMaxTimeAllowed = kMaxAudioDutyCycle * kTimeQuantum;
-
-  // Get the conversion factor from milliseconds to absolute time
-  // which is what the time-constraints call needs.
-  mach_timebase_info_data_t tb_info;
-  mach_timebase_info(&tb_info);
-  double ms_to_abs_time =
-      (static_cast<double>(tb_info.denom) / tb_info.numer) * 1000000;
-
-  thread_time_constraint_policy_data_t time_constraints;
-  time_constraints.period = kTimeQuantum * ms_to_abs_time;
-  time_constraints.computation = kAudioTimeNeeded * ms_to_abs_time;
-  time_constraints.constraint = kMaxTimeAllowed * ms_to_abs_time;
-  time_constraints.preemptible = 0;
-
-  result =
-      thread_policy_set(mach_thread_id,
-                        THREAD_TIME_CONSTRAINT_POLICY,
-                        reinterpret_cast<thread_policy_t>(&time_constraints),
-                        THREAD_TIME_CONSTRAINT_POLICY_COUNT);
-  return;
-}
-
-}  // anonymous namespace
-
-// static
-bool PlatformThread::CanIncreaseCurrentThreadPriority() {
-  return true;
-}
-
-// static
-void PlatformThread::SetCurrentThreadPriority(ThreadPriority priority) {
-  // Changing the priority of the main thread causes performance regressions.
-  // https://crbug.com/601270
-  DCHECK(![[NSThread currentThread] isMainThread]);
-
-  switch (priority) {
-    case ThreadPriority::BACKGROUND:
-      [[NSThread currentThread] setThreadPriority:0];
-      break;
-    case ThreadPriority::NORMAL:
-    case ThreadPriority::DISPLAY:
-      [[NSThread currentThread] setThreadPriority:0.5];
-      break;
-    case ThreadPriority::REALTIME_AUDIO:
-      SetPriorityRealtimeAudio();
-      DCHECK_EQ([[NSThread currentThread] threadPriority], 1.0);
-      break;
-  }
-
-  [[[NSThread currentThread] threadDictionary]
-      setObject:@(static_cast<int>(priority))
-         forKey:kThreadPriorityKey];
-}
-
-// static
-ThreadPriority PlatformThread::GetCurrentThreadPriority() {
-  NSNumber* priority = base::mac::ObjCCast<NSNumber>([[[NSThread currentThread]
-      threadDictionary] objectForKey:kThreadPriorityKey]);
-
-  if (!priority)
-    return ThreadPriority::NORMAL;
-
-  ThreadPriority thread_priority =
-      static_cast<ThreadPriority>(priority.intValue);
-  switch (thread_priority) {
-    case ThreadPriority::BACKGROUND:
-    case ThreadPriority::NORMAL:
-    case ThreadPriority::DISPLAY:
-    case ThreadPriority::REALTIME_AUDIO:
-      return thread_priority;
-    default:
-      NOTREACHED() << "Unknown priority.";
-      return ThreadPriority::NORMAL;
   }
 }
 

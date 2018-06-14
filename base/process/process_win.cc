@@ -7,7 +7,6 @@
 #include "base/logging.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/process/kill.h"
-#include "base/threading/thread_restrictions.h"
 
 #include <windows.h>
 
@@ -164,9 +163,6 @@ bool Process::WaitForExit(int* exit_code) const {
 }
 
 bool Process::WaitForExitWithTimeout(TimeDelta timeout, int* exit_code) const {
-  if (!timeout.is_zero())
-    internal::AssertBaseSyncPrimitivesAllowed();
-
   // Limit timeout to INFINITE.
   DWORD timeout_ms = saturated_cast<DWORD>(timeout.InMilliseconds());
   if (::WaitForSingleObject(Handle(), timeout_ms) != WAIT_OBJECT_0)

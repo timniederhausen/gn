@@ -5,11 +5,11 @@
 #include <algorithm>
 #include <string>
 
-#include "base/at_exit.h"
 #include "base/command_line.h"
-#include "base/message_loop/message_loop.h"
 #include "base/strings/utf_string_conversions.h"
 #include "build_config.h"
+#include "msg_loop.h"
+#include "sys_info.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/err.h"
 #include "tools/gn/location.h"
@@ -41,7 +41,6 @@ std::vector<std::string> GetArgs(const base::CommandLine& cmdline) {
 }  // namespace
 
 int main(int argc, char** argv) {
-  base::AtExitManager at_exit;
 #if defined(OS_WIN)
   base::CommandLine::set_slash_is_not_a_switch();
 #endif
@@ -75,7 +74,7 @@ int main(int argc, char** argv) {
 
   int retval;
   if (found_command != command_map.end()) {
-    base::MessageLoop message_loop;
+    MsgLoop msg_loop;
     retval = found_command->second.runner(args);
   } else {
     Err(Location(), "Command \"" + command + "\" unknown.").PrintToStdout();

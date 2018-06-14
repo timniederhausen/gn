@@ -8,8 +8,7 @@
 #include <stddef.h>
 
 #include <algorithm>
-
-#include "base/containers/hash_tables.h"
+#include <unordered_set>
 
 namespace internal {
 
@@ -65,7 +64,7 @@ class UniquifyRef {
 
  private:
   void FillHashValue() {
-    BASE_HASH_NAMESPACE::hash<T> h;
+    std::hash<T> h;
     hash_val_ = h(value());
   }
 
@@ -91,7 +90,7 @@ template<typename T> inline bool operator<(const UniquifyRef<T>& a,
 
 }  // namespace internal
 
-namespace BASE_HASH_NAMESPACE {
+namespace std {
 
 template<typename T> struct hash< internal::UniquifyRef<T> > {
   std::size_t operator()(const internal::UniquifyRef<T>& v) const {
@@ -99,7 +98,7 @@ template<typename T> struct hash< internal::UniquifyRef<T> > {
   }
 };
 
-}  // namespace BASE_HASH_NAMESPACE
+}  // namespace std
 
 // An ordered set optimized for GN's usage. Such sets are used to store lists
 // of configs and libraries, and are appended to but not randomly inserted
@@ -169,7 +168,7 @@ class UniqueVector {
 
  private:
   typedef internal::UniquifyRef<T> Ref;
-  typedef base::hash_set<Ref> HashSet;
+  typedef std::unordered_set<Ref> HashSet;
 
   HashSet set_;
   Vector vector_;

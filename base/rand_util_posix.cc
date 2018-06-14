@@ -11,7 +11,6 @@
 #include <unistd.h>
 
 #include "base/files/file_util.h"
-#include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
 
@@ -43,21 +42,24 @@ class URandomFd {
   const int fd_;
 };
 
-base::LazyInstance<URandomFd>::Leaky g_urandom_fd = LAZY_INSTANCE_INITIALIZER;
+URandomFd* GetInstance() {
+  static URandomFd* instance = new URandomFd;
+  return instance;
+}
 
 }  // namespace
 
 namespace base {
 
 void RandBytes(void* output, size_t output_length) {
-  const int urandom_fd = g_urandom_fd.Pointer()->fd();
+  const int urandom_fd = GetInstance()->fd();
   const bool success =
       ReadFromFD(urandom_fd, static_cast<char*>(output), output_length);
   CHECK(success);
 }
 
 int GetUrandomFD(void) {
-  return g_urandom_fd.Pointer()->fd();
+  return GetInstance()->fd();
 }
 
 }  // namespace base

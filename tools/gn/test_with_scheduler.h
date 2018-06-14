@@ -6,7 +6,7 @@
 #define TOOLS_GN_TEST_WITH_SCHEDULER_H_
 
 #include "base/macros.h"
-#include "base/test/scoped_task_environment.h"
+#include "msg_loop.h"
 #include "test/test.h"
 #include "tools/gn/scheduler.h"
 
@@ -18,7 +18,7 @@ class TestWithScheduler : public testing::Test {
   Scheduler& scheduler() { return scheduler_; }
 
  private:
-  base::test::ScopedTaskEnvironment scoped_task_environment_;
+  MsgLoop run_loop_;
   Scheduler scheduler_;
 
   DISALLOW_COPY_AND_ASSIGN(TestWithScheduler);

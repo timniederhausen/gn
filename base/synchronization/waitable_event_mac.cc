@@ -15,8 +15,7 @@
 #include "base/mac/mach_logging.h"
 #include "base/mac/scoped_dispatch_object.h"
 #include "base/posix/eintr_wrapper.h"
-#include "base/threading/scoped_blocking_call.h"
-#include "base/threading/thread_restrictions.h"
+#include "base/time/time.h"
 #include "build_config.h"
 
 namespace base {
@@ -111,9 +110,6 @@ bool WaitableEvent::TimedWait(const TimeDelta& wait_delta) {
 }
 
 bool WaitableEvent::TimedWaitUntil(const TimeTicks& end_time) {
-  internal::AssertBaseSyncPrimitivesAllowed();
-  ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
-
   TimeDelta wait_time = end_time - TimeTicks::Now();
   if (wait_time < TimeDelta()) {
     // A negative delta would be treated by the system as indefinite, but
@@ -164,9 +160,7 @@ bool WaitableEvent::UseSlowWatchList(ResetPolicy policy) {
 
 // static
 size_t WaitableEvent::WaitMany(WaitableEvent** raw_waitables, size_t count) {
-  internal::AssertBaseSyncPrimitivesAllowed();
   DCHECK(count) << "Cannot wait on no events";
-  ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
 
   // On macOS 10.11+, using Mach port sets may cause system instability, per
   // https://crbug.com/756102. On macOS 10.12+, a kqueue can be used

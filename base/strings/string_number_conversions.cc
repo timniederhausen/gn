@@ -16,7 +16,6 @@
 #include "base/numerics/safe_math.h"
 #include "base/scoped_clear_errno.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/third_party/dmg_fp/dmg_fp.h"
 
 namespace base {
 
@@ -360,23 +359,6 @@ string16 NumberToString16(unsigned long long value) {
   return IntToStringT<string16, unsigned long long>::IntToString(value);
 }
 
-std::string NumberToString(double value) {
-  // According to g_fmt.cc, it is sufficient to declare a buffer of size 32.
-  char buffer[32];
-  dmg_fp::g_fmt(buffer, value);
-  return std::string(buffer);
-}
-
-base::string16 NumberToString16(double value) {
-  // According to g_fmt.cc, it is sufficient to declare a buffer of size 32.
-  char buffer[32];
-  dmg_fp::g_fmt(buffer, value);
-
-  // The number will be ASCII. This creates the string using the "input
-  // iterator" variant which promotes from 8-bit to 16-bit via "=".
-  return base::string16(&buffer[0], &buffer[strlen(buffer)]);
-}
-
 bool StringToInt(StringPiece input, int* output) {
   return StringToIntImpl(input, output);
 }
@@ -415,28 +397,6 @@ bool StringToSizeT(StringPiece input, size_t* output) {
 
 bool StringToSizeT(StringPiece16 input, size_t* output) {
   return String16ToIntImpl(input, output);
-}
-
-bool StringToDouble(const std::string& input, double* output) {
-  // Thread-safe?  It is on at least Mac, Linux, and Windows.
-  ScopedClearErrno clear_errno;
-
-  char* endptr = nullptr;
-  *output = dmg_fp::strtod(input.c_str(), &endptr);
-
-  // Cases to return false:
-  //  - If errno is ERANGE, there was an overflow or underflow.
-  //  - If the input string is empty, there was nothing to parse.
-  //  - If endptr does not point to the end of the string, there are either
-  //    characters remaining in the string after a parsed number, or the string
-  //    does not begin with a parseable number.  endptr is compared to the
-  //    expected end given the string's stated length to correctly catch cases
-  //    where the string contains embedded NUL characters.
-  //  - If the first character is a space, there was leading whitespace
-  return errno == 0 &&
-         !input.empty() &&
-         input.c_str() + input.length() == endptr &&
-         !isspace(input[0]);
 }
 
 // Note: if you need to add String16ToDouble, first ask yourself if it's

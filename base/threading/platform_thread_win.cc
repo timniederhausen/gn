@@ -8,8 +8,6 @@
 
 #include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/threading/thread_id_name_manager.h"
-#include "base/threading/thread_restrictions.h"
 #include "base/win/scoped_handle.h"
 
 #include <windows.h>
@@ -51,17 +49,11 @@ void SetNameInternal(PlatformThreadId thread_id, const char* name) {
 struct ThreadParams {
   PlatformThread::Delegate* delegate;
   bool joinable;
-  ThreadPriority priority;
 };
 
 DWORD __stdcall ThreadFunc(void* params) {
   ThreadParams* thread_params = static_cast<ThreadParams*>(params);
   PlatformThread::Delegate* delegate = thread_params->delegate;
-  if (!thread_params->joinable)
-    base::ThreadRestrictions::SetSingletonAllowed(false);
-
-  if (thread_params->priority != ThreadPriority::NORMAL)
-    PlatformThread::SetCurrentThreadPriority(thread_params->priority);
 
   // Retrieve a copy of the thread handle to use as the key in the
   // thread name mapping.
@@ -78,19 +70,10 @@ DWORD __stdcall ThreadFunc(void* params) {
 
   if (did_dup) {
     scoped_platform_handle.Set(platform_handle);
-    ThreadIdNameManager::GetInstance()->RegisterThread(
-        scoped_platform_handle.Get(),
-        PlatformThread::CurrentId());
   }
 
   delete thread_params;
   delegate->ThreadMain();
-
-  if (did_dup) {
-    ThreadIdNameManager::GetInstance()->RemoveName(
-        scoped_platform_handle.Get(),
-        PlatformThread::CurrentId());
-  }
 
   return 0;
 }
@@ -100,8 +83,7 @@ DWORD __stdcall ThreadFunc(void* params) {
 // is created.
 bool CreateThreadInternal(size_t stack_size,
                           PlatformThread::Delegate* delegate,
-                          PlatformThreadHandle* out_thread_handle,
-                          ThreadPriority priority) {
+                          PlatformThreadHandle* out_thread_handle) {
   unsigned int flags = 0;
   if (stack_size > 0) {
     flags = STACK_SIZE_PARAM_IS_A_RESERVATION;
@@ -110,7 +92,6 @@ bool CreateThreadInternal(size_t stack_size,
   ThreadParams* params = new ThreadParams;
   params->delegate = delegate;
   params->joinable = out_thread_handle != nullptr;
-  params->priority = priority;
 
   void* thread_handle;
   {
@@ -168,51 +149,17 @@ void PlatformThread::Sleep(TimeDelta duration) {
 }
 
 // static
-void PlatformThread::SetName(const std::string& name) {
-  ThreadIdNameManager::GetInstance()->SetName(name);
-
-  // The SetThreadDescription API works even if no debugger is attached.
-  auto set_thread_description_func =
-      reinterpret_cast<SetThreadDescription>(::GetProcAddress(
-          ::GetModuleHandle(L"Kernel32.dll"), "SetThreadDescription"));
-  if (set_thread_description_func) {
-    set_thread_description_func(::GetCurrentThread(),
-                                base::UTF8ToWide(name).c_str());
-  }
-
-  // The debugger needs to be around to catch the name in the exception.  If
-  // there isn't a debugger, we are just needlessly throwing an exception.
-  if (!::IsDebuggerPresent())
-    return;
-
-  SetNameInternal(CurrentId(), name.c_str());
-}
-
-// static
-const char* PlatformThread::GetName() {
-  return ThreadIdNameManager::GetInstance()->GetName(CurrentId());
-}
-
-// static
-bool PlatformThread::CreateWithPriority(size_t stack_size, Delegate* delegate,
-                                        PlatformThreadHandle* thread_handle,
-                                        ThreadPriority priority) {
+bool PlatformThread::Create(size_t stack_size,
+                            Delegate* delegate,
+                            PlatformThreadHandle* thread_handle) {
   DCHECK(thread_handle);
-  return CreateThreadInternal(stack_size, delegate, thread_handle, priority);
+  return CreateThreadInternal(stack_size, delegate, thread_handle);
 }
 
 // static
 bool PlatformThread::CreateNonJoinable(size_t stack_size, Delegate* delegate) {
-  return CreateNonJoinableWithPriority(stack_size, delegate,
-                                       ThreadPriority::NORMAL);
-}
-
-// static
-bool PlatformThread::CreateNonJoinableWithPriority(size_t stack_size,
-                                                   Delegate* delegate,
-                                                   ThreadPriority priority) {
-  return CreateThreadInternal(stack_size, delegate, nullptr /* non-joinable */,
-                              priority);
+  return CreateThreadInternal(stack_size, delegate, nullptr /* non-joinable */
+                              );
 }
 
 // static
@@ -241,64 +188,6 @@ void PlatformThread::Join(PlatformThreadHandle thread_handle) {
 // static
 void PlatformThread::Detach(PlatformThreadHandle thread_handle) {
   CloseHandle(thread_handle.platform_handle());
-}
-
-// static
-bool PlatformThread::CanIncreaseCurrentThreadPriority() {
-  return true;
-}
-
-// static
-void PlatformThread::SetCurrentThreadPriority(ThreadPriority priority) {
-  int desired_priority = THREAD_PRIORITY_ERROR_RETURN;
-  switch (priority) {
-    case ThreadPriority::BACKGROUND:
-      desired_priority = THREAD_PRIORITY_LOWEST;
-      break;
-    case ThreadPriority::NORMAL:
-      desired_priority = THREAD_PRIORITY_NORMAL;
-      break;
-    case ThreadPriority::DISPLAY:
-      desired_priority = THREAD_PRIORITY_ABOVE_NORMAL;
-      break;
-    case ThreadPriority::REALTIME_AUDIO:
-      desired_priority = THREAD_PRIORITY_TIME_CRITICAL;
-      break;
-    default:
-      NOTREACHED() << "Unknown priority.";
-      break;
-  }
-  DCHECK_NE(desired_priority, THREAD_PRIORITY_ERROR_RETURN);
-
-#if DCHECK_IS_ON()
-  const BOOL success =
-#endif
-      ::SetThreadPriority(PlatformThread::CurrentHandle().platform_handle(),
-                          desired_priority);
-  DPLOG_IF(ERROR, !success) << "Failed to set thread priority to "
-                            << desired_priority;
-}
-
-// static
-ThreadPriority PlatformThread::GetCurrentThreadPriority() {
-  int priority =
-      ::GetThreadPriority(PlatformThread::CurrentHandle().platform_handle());
-  switch (priority) {
-    case THREAD_PRIORITY_LOWEST:
-      return ThreadPriority::BACKGROUND;
-    case THREAD_PRIORITY_NORMAL:
-      return ThreadPriority::NORMAL;
-    case THREAD_PRIORITY_ABOVE_NORMAL:
-      return ThreadPriority::DISPLAY;
-    case THREAD_PRIORITY_TIME_CRITICAL:
-      return ThreadPriority::REALTIME_AUDIO;
-    case THREAD_PRIORITY_ERROR_RETURN:
-      DPCHECK(false) << "GetThreadPriority error";
-      FALLTHROUGH;
-    default:
-      NOTREACHED() << "Unexpected priority: " << priority;
-      return ThreadPriority::NORMAL;
-  }
 }
 
 }  // namespace base

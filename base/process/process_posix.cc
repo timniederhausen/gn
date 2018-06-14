@@ -14,7 +14,6 @@
 #include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/process/kill.h"
-#include "base/threading/thread_restrictions.h"
 #include "build_config.h"
 
 #if defined(OS_MACOSX)
@@ -335,9 +334,6 @@ bool Process::WaitForExit(int* exit_code) const {
 }
 
 bool Process::WaitForExitWithTimeout(TimeDelta timeout, int* exit_code) const {
-  if (!timeout.is_zero())
-    internal::AssertBaseSyncPrimitivesAllowed();
-
   int local_exit_code;
   bool exited = WaitForExitWithTimeoutImpl(Handle(), &local_exit_code, timeout);
   if (exited) {

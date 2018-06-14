@@ -170,19 +170,8 @@ void HeaderChecker::RunCheckOverFiles(const FileMap& files, bool force_check) {
     for (const auto& vect_i : file.second) {
       if (vect_i.target->check_includes()) {
         task_count_.Increment();
-        pool.PostTask([ this, target = vect_i.target, f = file.first ] {
-          Err err;
-          if (!CheckFile(target, f, &err)) {
-            base::AutoLock lock(lock_);
-            errors_.push_back(err);
-          }
-
-          if (!task_count_.Decrement()) {
-            // Signal |task_count_cv_| when |task_count_| becomes zero.
-            base::AutoLock auto_lock(lock_);
-            task_count_cv_.Signal();
-          }
-        });
+        pool.PostTask(base::BindOnce(&HeaderChecker::DoWork, this,
+                                     vect_i.target, file.first));
       }
     }
   }
@@ -191,6 +180,20 @@ void HeaderChecker::RunCheckOverFiles(const FileMap& files, bool force_check) {
   base::AutoLock auto_lock(lock_);
   while (!task_count_.IsZero())
     task_count_cv_.Wait();
+}
+
+void HeaderChecker::DoWork(const Target* target, const SourceFile& file) {
+  Err err;
+  if (!CheckFile(target, file, &err)) {
+    base::AutoLock lock(lock_);
+    errors_.push_back(err);
+  }
+
+  if (!task_count_.Decrement()) {
+    // Signal |task_count_cv_| when |task_count_| becomes zero.
+    base::AutoLock auto_lock(lock_);
+    task_count_cv_.Signal();
+  }
 }
 
 // static

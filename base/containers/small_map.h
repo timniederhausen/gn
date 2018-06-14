@@ -12,7 +12,6 @@
 #include <string>
 #include <utility>
 
-#include "base/containers/hash_tables.h"
 #include "base/logging.h"
 
 namespace base {

@@ -8,7 +8,6 @@
 #include "base/atomicops.h"
 #include "base/base_export.h"
 #include "base/macros.h"
-#include "base/sequence_checker.h"
 
 namespace base {
 
@@ -34,7 +33,6 @@ class BASE_EXPORT AtomicFlag {
 
  private:
   base::subtle::Atomic32 flag_ = 0;
-  SequenceChecker set_sequence_checker_;
 
   DISALLOW_COPY_AND_ASSIGN(AtomicFlag);
 };

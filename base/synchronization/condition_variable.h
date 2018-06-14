@@ -112,10 +112,6 @@ class BASE_EXPORT ConditionVariable {
   pthread_mutex_t* user_mutex_;
 #endif
 
-#if DCHECK_IS_ON()
-  base::Lock* const user_lock_;  // Needed to adjust shadow lock state on wait.
-#endif
-
   DISALLOW_COPY_AND_ASSIGN(ConditionVariable);
 };
 

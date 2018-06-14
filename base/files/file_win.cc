@@ -8,7 +8,6 @@
 #include <stdint.h>
 
 #include "base/logging.h"
-#include "base/threading/thread_restrictions.h"
 
 #include <windows.h>
 
@@ -36,16 +35,11 @@ void File::Close() {
   if (!file_.IsValid())
     return;
 
-  AssertBlockingAllowed();
-  SCOPED_FILE_TRACE("Close");
   file_.Close();
 }
 
 int64_t File::Seek(Whence whence, int64_t offset) {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
-
-  SCOPED_FILE_TRACE_WITH_SIZE("Seek", offset);
 
   LARGE_INTEGER distance, res;
   distance.QuadPart = offset;
@@ -56,13 +50,10 @@ int64_t File::Seek(Whence whence, int64_t offset) {
 }
 
 int File::Read(int64_t offset, char* data, int size) {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
   DCHECK(!async_);
   if (size < 0)
     return -1;
-
-  SCOPED_FILE_TRACE_WITH_SIZE("Read", size);
 
   LARGE_INTEGER offset_li;
   offset_li.QuadPart = offset;
@@ -81,13 +72,10 @@ int File::Read(int64_t offset, char* data, int size) {
 }
 
 int File::ReadAtCurrentPos(char* data, int size) {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
   DCHECK(!async_);
   if (size < 0)
     return -1;
-
-  SCOPED_FILE_TRACE_WITH_SIZE("ReadAtCurrentPos", size);
 
   DWORD bytes_read;
   if (::ReadFile(file_.Get(), data, size, &bytes_read, NULL))
@@ -109,11 +97,8 @@ int File::ReadAtCurrentPosNoBestEffort(char* data, int size) {
 }
 
 int File::Write(int64_t offset, const char* data, int size) {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
   DCHECK(!async_);
-
-  SCOPED_FILE_TRACE_WITH_SIZE("Write", size);
 
   LARGE_INTEGER offset_li;
   offset_li.QuadPart = offset;
@@ -130,13 +115,10 @@ int File::Write(int64_t offset, const char* data, int size) {
 }
 
 int File::WriteAtCurrentPos(const char* data, int size) {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
   DCHECK(!async_);
   if (size < 0)
     return -1;
-
-  SCOPED_FILE_TRACE_WITH_SIZE("WriteAtCurrentPos", size);
 
   DWORD bytes_written;
   if (::WriteFile(file_.Get(), data, size, &bytes_written, NULL))
@@ -150,10 +132,7 @@ int File::WriteAtCurrentPosNoBestEffort(const char* data, int size) {
 }
 
 int64_t File::GetLength() {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
-
-  SCOPED_FILE_TRACE("GetLength");
 
   LARGE_INTEGER size;
   if (!::GetFileSizeEx(file_.Get(), &size))
@@ -163,10 +142,7 @@ int64_t File::GetLength() {
 }
 
 bool File::SetLength(int64_t length) {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
-
-  SCOPED_FILE_TRACE_WITH_SIZE("SetLength", length);
 
   // Get the current file pointer.
   LARGE_INTEGER file_pointer;
@@ -194,10 +170,7 @@ bool File::SetLength(int64_t length) {
 }
 
 bool File::SetTimes(Time last_access_time, Time last_modified_time) {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
-
-  SCOPED_FILE_TRACE("SetTimes");
 
   FILETIME last_access_filetime = last_access_time.ToFileTime();
   FILETIME last_modified_filetime = last_modified_time.ToFileTime();
@@ -206,10 +179,7 @@ bool File::SetTimes(Time last_access_time, Time last_modified_time) {
 }
 
 bool File::GetInfo(Info* info) {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
-
-  SCOPED_FILE_TRACE("GetInfo");
 
   BY_HANDLE_FILE_INFORMATION file_info;
   if (!GetFileInformationByHandle(file_.Get(), &file_info))
@@ -231,8 +201,6 @@ bool File::GetInfo(Info* info) {
 File::Error File::Lock() {
   DCHECK(IsValid());
 
-  SCOPED_FILE_TRACE("Lock");
-
   BOOL result = LockFile(file_.Get(), 0, 0, MAXDWORD, MAXDWORD);
   if (!result)
     return GetLastFileError();
@@ -241,8 +209,6 @@ File::Error File::Lock() {
 
 File::Error File::Unlock() {
   DCHECK(IsValid());
-
-  SCOPED_FILE_TRACE("Unlock");
 
   BOOL result = UnlockFile(file_.Get(), 0, 0, MAXDWORD, MAXDWORD);
   if (!result)
@@ -253,8 +219,6 @@ File::Error File::Unlock() {
 File File::Duplicate() const {
   if (!IsValid())
     return File();
-
-  SCOPED_FILE_TRACE("Duplicate");
 
   HANDLE other_handle = nullptr;
 
@@ -319,7 +283,6 @@ File::Error File::OSErrorToFileError(DWORD last_error) {
 }
 
 void File::DoInitialize(const FilePath& path, uint32_t flags) {
-  AssertBlockingAllowed();
   DCHECK(!IsValid());
 
   DWORD disposition = 0;
@@ -409,9 +372,7 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
 }
 
 bool File::Flush() {
-  AssertBlockingAllowed();
   DCHECK(IsValid());
-  SCOPED_FILE_TRACE("Flush");
   return ::FlushFileBuffers(file_.Get()) != FALSE;
 }
 

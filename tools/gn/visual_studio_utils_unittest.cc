@@ -4,7 +4,6 @@
 
 #include "tools/gn/visual_studio_utils.h"
 
-#include "base/location.h"
 #include "base/strings/string_util.h"
 #include "test/test.h"
 

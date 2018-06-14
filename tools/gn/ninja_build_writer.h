@@ -8,6 +8,7 @@
 #include <iosfwd>
 #include <map>
 #include <vector>
+#include <unordered_map>
 
 #include "base/macros.h"
 #include "tools/gn/path_output.h"

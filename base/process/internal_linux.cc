@@ -16,7 +16,6 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
-#include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
 
 // Not defined on AIX by default.
@@ -57,9 +56,6 @@ pid_t ProcDirSlotToPid(const char* d_name) {
 
 bool ReadProcFile(const FilePath& file, std::string* buffer) {
   buffer->clear();
-  // Synchronously reading files in /proc is safe.
-  ThreadRestrictions::ScopedAllowIO allow_io;
-
   if (!ReadFileToString(file, buffer)) {
     DLOG(WARNING) << "Failed to read " << file.MaybeAsASCII();
     return false;

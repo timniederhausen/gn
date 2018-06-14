@@ -221,7 +221,8 @@ TEST_F(InputConversionTest, ValueJSONUnsupported) {
   Value result = ConvertInputToValue(settings(), input, nullptr,
                                      Value(nullptr, "json"), &err);
   EXPECT_TRUE(err.has_error());
-  EXPECT_EQ("Floating point values are not supported.", err.message());
+  // Doubles aren't supported.
+  EXPECT_EQ("Input is not a valid JSON: ", err.message());
 }
 
 TEST_F(InputConversionTest, ValueEmpty) {

@@ -9,7 +9,6 @@
 
 #include <string>
 
-#include "base/containers/hash_tables.h"
 #include "tools/gn/build_settings.h"
 
 class SourceFile;
@@ -48,7 +47,7 @@ class OutputFile {
   std::string value_;
 };
 
-namespace BASE_HASH_NAMESPACE {
+namespace std {
 
 template<> struct hash<OutputFile> {
   std::size_t operator()(const OutputFile& v) const {
@@ -57,7 +56,7 @@ template<> struct hash<OutputFile> {
   }
 };
 
-}  // namespace BASE_HASH_NAMESPACE
+}  // namespace std
 
 inline void swap(OutputFile& lhs, OutputFile& rhs) {
   lhs.value().swap(rhs.value());

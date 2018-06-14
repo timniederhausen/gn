@@ -13,7 +13,6 @@
 #include "base/strings/string_split.h"
 #include "base/strings/stringprintf.h"
 #include "base/synchronization/lock.h"
-#include "base/threading/thread_restrictions.h"
 #include "build_config.h"
 
 // Not defined on AIX by default.
@@ -100,8 +99,6 @@ bool Process::IsProcessBackgrounded() const {
 
 #if defined(OS_CHROMEOS)
   if (CGroups::Get().enabled) {
-    // Used to allow reading the process priority from proc on thread launch.
-    base::ThreadRestrictions::ScopedAllowIO allow_io;
     std::string proc;
     if (base::ReadFileToString(
             base::FilePath(StringPrintf(kProcPath, process_)), &proc)) {
@@ -165,8 +162,6 @@ bool IsProcessBackgroundedCGroup(const StringPiece& cgroup_contents) {
 ProcessId Process::GetPidInNamespace() const {
   std::string status;
   {
-    // Synchronously reading files in /proc does not hit the disk.
-    ThreadRestrictions::ScopedAllowIO allow_io;
     FilePath status_file =
         FilePath("/proc").Append(IntToString(process_)).Append("status");
     if (!ReadFileToString(status_file, &status)) {

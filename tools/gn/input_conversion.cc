@@ -131,9 +131,6 @@ Value ParseJSONValue(const Settings* settings,
       return Value(origin, value.GetBool());
     case base::Value::Type::INTEGER:
       return Value(origin, static_cast<int64_t>(value.GetInt()));
-    case base::Value::Type::DOUBLE:
-      *err = Err(origin, "Floating point values are not supported.");
-      return Value();
     case base::Value::Type::STRING:
       return Value(origin, value.GetString());
     case base::Value::Type::BINARY:

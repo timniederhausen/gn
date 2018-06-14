@@ -11,7 +11,6 @@
 #include <string.h>
 
 #include "base/logging.h"
-#include "base/threading/thread_restrictions.h"
 #include "build_config.h"
 
 namespace base {
@@ -95,8 +94,6 @@ FileEnumerator::FileEnumerator(const FilePath& root_path,
 FileEnumerator::~FileEnumerator() = default;
 
 FilePath FileEnumerator::Next() {
-  AssertBlockingAllowed();
-
   ++current_directory_entry_;
 
   // While we've exhausted the entries in the current directory, do the next

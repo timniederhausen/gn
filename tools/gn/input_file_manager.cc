@@ -103,7 +103,7 @@ bool InputFileManager::AsyncLoadFile(const LocationRange& origin,
   // Try not to schedule callbacks while holding the lock. All cases that don't
   // want to schedule should return early. Otherwise, this will be scheduled
   // after we leave the lock.
-  std::function<void()> schedule_this;
+  Task schedule_this;
   {
     base::AutoLock lock(lock_);
 
@@ -113,8 +113,9 @@ bool InputFileManager::AsyncLoadFile(const LocationRange& origin,
       std::unique_ptr<InputFileData> data =
           std::make_unique<InputFileData>(file_name);
       data->scheduled_callbacks.push_back(callback);
-      schedule_this = std::bind(&InputFileManager::BackgroundLoadFile, this,
-                                origin, build_settings, file_name, &data->file);
+      schedule_this =
+          base::BindOnce(&InputFileManager::BackgroundLoadFile, this, origin,
+                         build_settings, file_name, &data->file);
       input_files_[file_name] = std::move(data);
 
     } else {
@@ -134,8 +135,8 @@ bool InputFileManager::AsyncLoadFile(const LocationRange& origin,
 
       if (data->loaded) {
         // Can just directly issue the callback on the background thread.
-        schedule_this = std::bind(&InvokeFileLoadCallback, callback,
-                                  data->parsed_root.get());
+        schedule_this = base::BindOnce(&InvokeFileLoadCallback, callback,
+                                       data->parsed_root.get());
       } else {
         // Load is pending on this file, schedule the invoke.
         data->scheduled_callbacks.push_back(callback);
@@ -143,7 +144,7 @@ bool InputFileManager::AsyncLoadFile(const LocationRange& origin,
       }
     }
   }
-  g_scheduler->ScheduleWork(schedule_this);
+  g_scheduler->ScheduleWork(std::move(schedule_this));
   return true;
 }
 

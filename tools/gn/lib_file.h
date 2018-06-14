@@ -39,7 +39,7 @@ class LibFile {
   SourceFile source_file_;
 };
 
-namespace BASE_HASH_NAMESPACE {
+namespace std {
 
 template <>
 struct hash<LibFile> {
@@ -49,7 +49,7 @@ struct hash<LibFile> {
   }
 };
 
-}  // namespace BASE_HASH_NAMESPACE
+}  // namespace std
 
 inline void swap(LibFile& lhs, LibFile& rhs) {
   lhs.Swap(&rhs);

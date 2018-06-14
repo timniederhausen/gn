@@ -11,7 +11,6 @@
 
 #include "base/base_export.h"
 #include "base/files/file_path.h"
-#include "base/files/file_tracing.h"
 #include "base/files/platform_file.h"
 #include "base/files/scoped_file.h"
 #include "base/macros.h"
@@ -345,8 +344,6 @@ class BASE_EXPORT File {
   static std::string ErrorToString(Error error);
 
  private:
-  friend class FileTracing::ScopedTrace;
-
   // Creates or opens the given file. Only called if |path| has no
   // traversal ('..') components.
   void DoInitialize(const FilePath& path, uint32_t flags);
@@ -354,13 +351,6 @@ class BASE_EXPORT File {
   void SetPlatformFile(PlatformFile file);
 
   ScopedPlatformFile file_;
-
-  // A path to use for tracing purposes. Set if file tracing is enabled during
-  // |Initialize()|.
-  FilePath tracing_path_;
-
-  // Object tied to the lifetime of |this| that enables/disables tracing.
-  FileTracing::ScopedEnabler trace_enabler_;
 
   Error error_details_;
   bool created_;

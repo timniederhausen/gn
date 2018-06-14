@@ -6,11 +6,11 @@
 #define TOOLS_GN_INPUT_FILE_MANAGER_H_
 
 #include <set>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include "base/callback.h"
-#include "base/containers/hash_tables.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
@@ -137,7 +137,7 @@ class InputFileManager : public base::RefCountedThreadSafe<InputFileManager> {
   mutable base::Lock lock_;
 
   // Maps repo-relative filenames to the corresponding owned pointer.
-  typedef base::hash_map<SourceFile, std::unique_ptr<InputFileData>>
+  typedef std::unordered_map<SourceFile, std::unique_ptr<InputFileData>>
       InputFileMap;
   InputFileMap input_files_;
 

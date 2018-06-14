@@ -101,6 +101,8 @@ class HeaderChecker : public base::RefCountedThreadSafe<HeaderChecker> {
   // will be populate on failure.
   void RunCheckOverFiles(const FileMap& flies, bool force_check);
 
+  void DoWork(const Target* target, const SourceFile& file);
+
   // Adds the sources and public files from the given target to the given map.
   static void AddTargetToFileMap(const Target* target, FileMap* dest);
 

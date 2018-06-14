@@ -9,8 +9,6 @@
 #include <sys/time.h>
 
 #include "base/synchronization/lock.h"
-#include "base/threading/scoped_blocking_call.h"
-#include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
 #include "build_config.h"
 
@@ -18,9 +16,6 @@ namespace base {
 
 ConditionVariable::ConditionVariable(Lock* user_lock)
     : user_mutex_(user_lock->lock_.native_handle())
-#if DCHECK_IS_ON()
-    , user_lock_(user_lock)
-#endif
 {
   int rv = 0;
   // http://crbug.com/293736
@@ -63,30 +58,16 @@ ConditionVariable::~ConditionVariable() {
 }
 
 void ConditionVariable::Wait() {
-  internal::AssertBaseSyncPrimitivesAllowed();
-  ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
-#if DCHECK_IS_ON()
-  user_lock_->CheckHeldAndUnmark();
-#endif
   int rv = pthread_cond_wait(&condition_, user_mutex_);
   DCHECK_EQ(0, rv);
-#if DCHECK_IS_ON()
-  user_lock_->CheckUnheldAndMark();
-#endif
 }
 
 void ConditionVariable::TimedWait(const TimeDelta& max_time) {
-  internal::AssertBaseSyncPrimitivesAllowed();
-  ScopedBlockingCall scoped_blocking_call(BlockingType::MAY_BLOCK);
   int64_t usecs = max_time.InMicroseconds();
   struct timespec relative_time;
   relative_time.tv_sec = usecs / Time::kMicrosecondsPerSecond;
   relative_time.tv_nsec =
       (usecs % Time::kMicrosecondsPerSecond) * Time::kNanosecondsPerMicrosecond;
-
-#if DCHECK_IS_ON()
-  user_lock_->CheckHeldAndUnmark();
-#endif
 
 #if defined(OS_MACOSX)
   int rv = pthread_cond_timedwait_relative_np(
@@ -124,9 +105,6 @@ void ConditionVariable::TimedWait(const TimeDelta& max_time) {
   // On failure, we only expect the CV to timeout. Any other error value means
   // that we've unexpectedly woken up.
   DCHECK(rv == 0 || rv == ETIMEDOUT);
-#if DCHECK_IS_ON()
-  user_lock_->CheckUnheldAndMark();
-#endif
 }
 
 void ConditionVariable::Broadcast() {

@@ -9,6 +9,7 @@
 #include <fstream>
 #include <map>
 #include <sstream>
+#include <unordered_set>
 
 #include "base/command_line.h"
 #include "base/files/file_util.h"
@@ -417,7 +418,7 @@ bool NinjaBuildWriter::WritePhonyAndAllRules(Err* err) {
   // Track rules as we generate them so we don't accidentally write a phony
   // rule that collides with something else.
   // GN internally generates an "all" target, so don't duplicate it.
-  base::hash_set<std::string> written_rules;
+  std::unordered_set<std::string> written_rules;
   written_rules.insert("all");
 
   // Set if we encounter a target named "//:default".

@@ -77,7 +77,6 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
-#include "base/sequence_checker.h"
 
 namespace base {
 
@@ -104,7 +103,6 @@ class BASE_EXPORT WeakReference {
 
     ~Flag();
 
-    SequenceChecker sequence_checker_;
     bool is_valid_;
   };
 

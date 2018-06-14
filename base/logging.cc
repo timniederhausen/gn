@@ -84,10 +84,8 @@ typedef pthread_mutex_t* MutexHandle;
 #include <string>
 #include <utility>
 
-#include "base/base_switches.h"
 #include "base/callback.h"
 #include "base/containers/stack.h"
-#include "base/lazy_instance.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
@@ -143,12 +141,6 @@ bool g_log_tickcount = false;
 
 // Should we pop up fatal debug messages in a dialog?
 bool show_error_dialogs = false;
-
-// An assert handler override specified by the client to be called instead of
-// the debug message dialog and process termination. Assert handlers are stored
-// in stack to allow overriding and restoring.
-base::LazyInstance<base::stack<LogAssertHandlerFunction>>::Leaky
-    log_assert_handler_stack = LAZY_INSTANCE_INITIALIZER;
 
 // A log message handler that gets notified of every log message we process.
 LogMessageHandlerFunction log_message_handler = nullptr;
@@ -453,15 +445,6 @@ void SetShowErrorDialogs(bool enable_dialogs) {
   show_error_dialogs = enable_dialogs;
 }
 
-ScopedLogAssertHandler::ScopedLogAssertHandler(
-    LogAssertHandlerFunction handler) {
-  log_assert_handler_stack.Get().push(std::move(handler));
-}
-
-ScopedLogAssertHandler::~ScopedLogAssertHandler() {
-  log_assert_handler_stack.Get().pop();
-}
-
 void SetLogMessageHandler(LogMessageHandlerFunction handler) {
   log_message_handler = handler;
 }
@@ -544,7 +527,6 @@ LogMessage::LogMessage(const char* file, int line, LogSeverity severity,
 }
 
 LogMessage::~LogMessage() {
-  size_t stack_start = stream_.tellp();
 #if !defined(OFFICIAL_BUILD) && !defined(OS_NACL) && !defined(__UCLIBC__) && \
     !defined(OS_AIX)
   if (severity_ == LOG_FATAL) {
@@ -773,32 +755,18 @@ LogMessage::~LogMessage() {
   }
 
   if (severity_ == LOG_FATAL) {
-    if (log_assert_handler_stack.IsCreated() &&
-        !log_assert_handler_stack.Get().empty()) {
-      LogAssertHandlerFunction log_assert_handler =
-          log_assert_handler_stack.Get().top();
-
-      if (log_assert_handler) {
-        log_assert_handler.Run(
-            file_, line_,
-            base::StringPiece(str_newline.c_str() + message_start_,
-                              stack_start - message_start_),
-            base::StringPiece(str_newline.c_str() + stack_start));
-      }
-    } else {
-      // Don't use the string with the newline, get a fresh version to send to
-      // the debug message process. We also don't display assertions to the
-      // user in release mode. The enduser can't do anything with this
-      // information, and displaying message boxes when the application is
-      // hosed can cause additional problems.
+// Don't use the string with the newline, get a fresh version to send to
+// the debug message process. We also don't display assertions to the
+// user in release mode. The enduser can't do anything with this
+// information, and displaying message boxes when the application is
+// hosed can cause additional problems.
 #ifndef NDEBUG
-      // Displaying a dialog is unnecessary when debugging and can complicate
-      // debugging.
-      DisplayDebugMessageInDialog(stream_.str());
+    // Displaying a dialog is unnecessary when debugging and can complicate
+    // debugging.
+    DisplayDebugMessageInDialog(stream_.str());
 #endif
-      // Crash the process to generate a dump.
-      abort();
-    }
+    // Crash the process to generate a dump.
+    abort();
   }
 }
 

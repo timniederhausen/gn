@@ -10,10 +10,10 @@
 #include "base/atomic_ref_count.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
-#include "base/run_loop.h"
-#include "base/single_thread_task_runner.h"
 #include "base/synchronization/condition_variable.h"
 #include "base/synchronization/lock.h"
+#include "msg_loop.h"
+#include "task.h"
 #include "tools/gn/input_file_manager.h"
 #include "tools/gn/label.h"
 #include "tools/gn/source_file.h"
@@ -30,8 +30,9 @@ class Scheduler {
 
   bool Run();
 
-  scoped_refptr<base::SingleThreadTaskRunner> task_runner() {
-    return main_thread_task_runner_;
+  MsgLoop* task_runner() {
+    DCHECK(main_thread_run_loop_);
+    return main_thread_run_loop_;
   }
 
   InputFileManager* input_file_manager() { return input_file_manager_.get(); }
@@ -45,7 +46,7 @@ class Scheduler {
   void Log(const std::string& verb, const std::string& msg);
   void FailWithError(const Err& err);
 
-  void ScheduleWork(std::function<void()> work);
+  void ScheduleWork(Task work);
 
   void Shutdown();
 
@@ -104,12 +105,9 @@ class Scheduler {
   // Waits for tasks scheduled via ScheduleWork() to complete their execution.
   void WaitForPoolTasks();
 
-  // TaskRunner for the thread on which the Scheduler is initialized.
-  const scoped_refptr<base::SingleThreadTaskRunner> main_thread_task_runner_;
+  MsgLoop* main_thread_run_loop_;
 
   scoped_refptr<InputFileManager> input_file_manager_;
-
-  base::RunLoop runner_;
 
   bool verbose_logging_;
 

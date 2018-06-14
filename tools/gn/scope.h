@@ -10,8 +10,8 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include <unordered_map>
 
-#include "base/containers/hash_tables.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "tools/gn/err.h"
@@ -38,7 +38,7 @@ class Template;
 // variables. So you should use a non-const containing scope whenever possible.
 class Scope {
  public:
-  typedef base::hash_map<base::StringPiece, Value, base::StringPieceHash>
+  typedef std::unordered_map<base::StringPiece, Value, base::StringPieceHash>
       KeyValueMap;
   // Holds an owning list of Items.
   typedef std::vector<std::unique_ptr<Item>> ItemVector;
@@ -338,7 +338,7 @@ class Scope {
     Value value;
   };
 
-  typedef base::hash_map<base::StringPiece, Record, base::StringPieceHash>
+  typedef std::unordered_map<base::StringPiece, Record, base::StringPieceHash>
       RecordMap;
 
   void AddProvider(ProgrammaticProvider* p);
@@ -367,7 +367,7 @@ class Scope {
 
   // Note that this can't use string pieces since the names are constructed from
   // Values which might be deallocated before this goes out of scope.
-  typedef base::hash_map<std::string, std::unique_ptr<Scope>> NamedScopeMap;
+  typedef std::unordered_map<std::string, std::unique_ptr<Scope>> NamedScopeMap;
   NamedScopeMap target_defaults_;
 
   // Null indicates not set and that we should fallback to the containing

@@ -118,14 +118,6 @@ BASE_EXPORT void EnsureProcessGetsReaped(Process process);
 #endif  // defined(OS_LINUX)
 #endif  // defined(OS_POSIX) && !defined(OS_FUCHSIA)
 
-// Registers |process| to be asynchronously monitored for termination, forcibly
-// terminated if necessary, and reaped on exit. The caller should have signalled
-// |process| to exit before calling this API. The API will allow a couple of
-// seconds grace period before forcibly terminating |process|.
-// TODO(https://crbug.com/806451): The Mac implementation currently blocks the
-// calling thread for up to two seconds.
-BASE_EXPORT void EnsureProcessTerminated(Process process);
-
 // These are only sparingly used, and not needed on Fuchsia. They could be
 // implemented if necessary.
 #if !defined(OS_FUCHSIA)

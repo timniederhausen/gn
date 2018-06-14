@@ -11,7 +11,7 @@
 
 #include "base/callback.h"
 #include "base/memory/ref_counted.h"
-#include "base/single_thread_task_runner.h"
+#include "msg_loop.h"
 #include "tools/gn/label.h"
 #include "tools/gn/scope.h"
 
@@ -90,10 +90,7 @@ class LoaderImpl : public Loader {
   // Sets the task runner corresponding to the main thread. By default this
   // class will use the thread active during construction, but there is not
   // a task runner active during construction all the time.
-  void set_task_runner(
-      scoped_refptr<base::SingleThreadTaskRunner> task_runner) {
-    task_runner_ = task_runner;
-  }
+  void set_task_runner(MsgLoop* task_runner) { task_runner_ = task_runner; }
 
   // The complete callback is called whenever there are no more pending loads.
   // Called on the main thread only. This may be called more than once if the
@@ -159,7 +156,7 @@ class LoaderImpl : public Loader {
                      const base::Callback<void(const ParseNode*)>& callback,
                      Err* err);
 
-  scoped_refptr<base::SingleThreadTaskRunner> task_runner_;
+  MsgLoop* task_runner_;
 
   int pending_loads_;
   base::Closure complete_callback_;

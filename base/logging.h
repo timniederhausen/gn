@@ -219,26 +219,6 @@ BASE_EXPORT void SetLogItems(bool enable_process_id, bool enable_thread_id,
 // Dialogs are not shown by default.
 BASE_EXPORT void SetShowErrorDialogs(bool enable_dialogs);
 
-// Sets the Log Assert Handler that will be used to notify of check failures.
-// Resets Log Assert Handler on object destruction.
-// The default handler shows a dialog box and then terminate the process,
-// however clients can use this function to override with their own handling
-// (e.g. a silent one for Unit Tests)
-using LogAssertHandlerFunction =
-    base::Callback<void(const char* file,
-                        int line,
-                        const base::StringPiece message,
-                        const base::StringPiece stack_trace)>;
-
-class BASE_EXPORT ScopedLogAssertHandler {
- public:
-  explicit ScopedLogAssertHandler(LogAssertHandlerFunction handler);
-  ~ScopedLogAssertHandler();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(ScopedLogAssertHandler);
-};
-
 // Sets the Log Message Handler that gets passed every log message before
 // it's sent to other log destinations (if any).
 // Returns true to signal that it handled the message and the message

@@ -29,7 +29,7 @@
 //
 // DO NOT use these functions in any UI unless it's NOT localized on purpose.
 // Instead, use base::MessageFormatter for a complex message with numbers
-// (integer, float, double) embedded or base::Format{Number,Double,Percent} to
+// (integer, float) embedded or base::Format{Number,Percent} to
 // just format a single number/percent. Note that some languages use native
 // digits instead of ASCII digits while others use a group separator or decimal
 // point different from ',' and '.'. Using these functions in the UI would lead
@@ -53,8 +53,6 @@ BASE_EXPORT std::string NumberToString(long long value);
 BASE_EXPORT string16 NumberToString16(long long value);
 BASE_EXPORT std::string NumberToString(unsigned long long value);
 BASE_EXPORT string16 NumberToString16(unsigned long long value);
-BASE_EXPORT std::string NumberToString(double value);
-BASE_EXPORT string16 NumberToString16(double value);
 
 // Type-specific naming for backwards compatibility.
 //
@@ -111,16 +109,6 @@ BASE_EXPORT bool StringToUint64(StringPiece16 input, uint64_t* output);
 
 BASE_EXPORT bool StringToSizeT(StringPiece input, size_t* output);
 BASE_EXPORT bool StringToSizeT(StringPiece16 input, size_t* output);
-
-// For floating-point conversions, only conversions of input strings in decimal
-// form are defined to work.  Behavior with strings representing floating-point
-// numbers in hexadecimal, and strings representing non-finite values (such as
-// NaN and inf) is undefined.  Otherwise, these behave the same as the integral
-// variants.  This expects the input string to NOT be specific to the locale.
-// If your input is locale specific, use ICU to read the number.
-// WARNING: Will write to |output| even when returning false.
-//          Read the comments here and above StringToInt() carefully.
-BASE_EXPORT bool StringToDouble(const std::string& input, double* output);
 
 // Hex encoding ----------------------------------------------------------------
 

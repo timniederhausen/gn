@@ -21,7 +21,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "base/base_switches.h"
 #include "base/command_line.h"
 #include "base/containers/stack.h"
 #include "base/environment.h"
@@ -30,7 +29,6 @@
 #include "base/files/scoped_file.h"
 #include "base/logging.h"
 #include "base/macros.h"
-#include "base/memory/singleton.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/stl_util.h"
 #include "base/strings/string_split.h"
@@ -38,8 +36,6 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/sys_string_conversions.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/sys_info.h"
-#include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
 #include "build_config.h"
 
@@ -65,20 +61,16 @@ namespace {
 #if defined(OS_BSD) || defined(OS_MACOSX) || defined(OS_NACL) || \
     defined(OS_ANDROID) && __ANDROID_API__ < 21
 int CallStat(const char* path, stat_wrapper_t* sb) {
-  AssertBlockingAllowed();
   return stat(path, sb);
 }
 int CallLstat(const char* path, stat_wrapper_t* sb) {
-  AssertBlockingAllowed();
   return lstat(path, sb);
 }
 #else
 int CallStat(const char* path, stat_wrapper_t* sb) {
-  AssertBlockingAllowed();
   return stat64(path, sb);
 }
 int CallLstat(const char* path, stat_wrapper_t* sb) {
-  AssertBlockingAllowed();
   return lstat64(path, sb);
 }
 #endif
@@ -204,7 +196,6 @@ bool DoCopyDirectory(const FilePath& from_path,
                      const FilePath& to_path,
                      bool recursive,
                      bool open_exclusive) {
-  AssertBlockingAllowed();
   // Some old callers of CopyDirectory want it to support wildcards.
   // After some discussion, we decided to fix those callers.
   // Break loudly here if anyone tries to do this.
@@ -358,7 +349,6 @@ std::string AppendModeCharacter(StringPiece mode, char mode_char) {
 
 #if !defined(OS_NACL_NONSFI)
 FilePath MakeAbsoluteFilePath(const FilePath& input) {
-  AssertBlockingAllowed();
   char full_path[PATH_MAX];
   if (realpath(input.value().c_str(), full_path) == nullptr)
     return FilePath();
@@ -370,7 +360,6 @@ FilePath MakeAbsoluteFilePath(const FilePath& input) {
 // that functionality. If not, remove from file_util_win.cc, otherwise add it
 // here.
 bool DeleteFile(const FilePath& path, bool recursive) {
-  AssertBlockingAllowed();
   const char* path_str = path.value().c_str();
   stat_wrapper_t file_info;
   if (CallLstat(path_str, &file_info) != 0) {
@@ -407,7 +396,6 @@ bool DeleteFile(const FilePath& path, bool recursive) {
 bool ReplaceFile(const FilePath& from_path,
                  const FilePath& to_path,
                  File::Error* error) {
-  AssertBlockingAllowed();
   if (rename(from_path.value().c_str(), to_path.value().c_str()) == 0)
     return true;
   if (error)
@@ -478,7 +466,6 @@ bool SetCloseOnExec(int fd) {
 }
 
 bool PathExists(const FilePath& path) {
-  AssertBlockingAllowed();
 #if defined(OS_ANDROID)
   if (path.IsContentUri()) {
     return ContentUriExists(path);
@@ -489,13 +476,11 @@ bool PathExists(const FilePath& path) {
 
 #if !defined(OS_NACL_NONSFI)
 bool PathIsWritable(const FilePath& path) {
-  AssertBlockingAllowed();
   return access(path.value().c_str(), W_OK) == 0;
 }
 #endif  // !defined(OS_NACL_NONSFI)
 
 bool DirectoryExists(const FilePath& path) {
-  AssertBlockingAllowed();
   stat_wrapper_t file_info;
   if (CallStat(path.value().c_str(), &file_info) != 0)
     return false;
@@ -518,7 +503,6 @@ bool ReadFromFD(int fd, char* buffer, size_t bytes) {
 
 int CreateAndOpenFdForTemporaryFileInDir(const FilePath& directory,
                                          FilePath* path) {
-  AssertBlockingAllowed();  // For call to mkstemp().
   *path = directory.Append(TempFileName());
   const std::string& tmpdir_string = path->value();
   // this should be OK since mkstemp just replaces characters in place
@@ -552,7 +536,6 @@ bool ReadSymbolicLink(const FilePath& symlink_path, FilePath* target_path) {
 }
 
 bool GetPosixFilePermissions(const FilePath& path, int* mode) {
-  AssertBlockingAllowed();
   DCHECK(mode);
 
   stat_wrapper_t file_info;
@@ -567,7 +550,6 @@ bool GetPosixFilePermissions(const FilePath& path, int* mode) {
 
 bool SetPosixFilePermissions(const FilePath& path,
                              int mode) {
-  AssertBlockingAllowed();
   DCHECK_EQ(mode & ~FILE_PERMISSION_MASK, 0);
 
   // Calls stat() so that we can preserve the higher bits like S_ISGID.
@@ -622,14 +604,6 @@ bool GetTempDir(FilePath* path) {
 
 #if !defined(OS_MACOSX)  // Mac implementation is in file_util_mac.mm.
 FilePath GetHomeDir() {
-#if defined(OS_CHROMEOS)
-  if (SysInfo::IsRunningOnChromeOS()) {
-    // On Chrome OS chrome::DIR_USER_DATA is overridden with a primary user
-    // homedir once it becomes available. Return / as the safe option.
-    return FilePath("/");
-  }
-#endif
-
   const char* home_dir = getenv("HOME");
   if (home_dir && home_dir[0])
     return FilePath(home_dir);
@@ -648,7 +622,6 @@ FilePath GetHomeDir() {
 #endif  // !defined(OS_MACOSX)
 
 bool CreateTemporaryFile(FilePath* path) {
-  AssertBlockingAllowed();  // For call to close().
   FilePath directory;
   if (!GetTempDir(&directory))
     return false;
@@ -671,7 +644,6 @@ FILE* CreateAndOpenTemporaryFileInDir(const FilePath& dir, FilePath* path) {
 }
 
 bool CreateTemporaryFileInDir(const FilePath& dir, FilePath* temp_file) {
-  AssertBlockingAllowed();  // For call to close().
   int fd = CreateAndOpenFdForTemporaryFileInDir(dir, temp_file);
   return ((fd >= 0) && !IGNORE_EINTR(close(fd)));
 }
@@ -679,7 +651,6 @@ bool CreateTemporaryFileInDir(const FilePath& dir, FilePath* temp_file) {
 static bool CreateTemporaryDirInDirImpl(const FilePath& base_dir,
                                         const FilePath::StringType& name_tmpl,
                                         FilePath* new_dir) {
-  AssertBlockingAllowed();  // For call to mkdtemp().
   DCHECK(name_tmpl.find("XXXXXX") != FilePath::StringType::npos)
       << "Directory name template must contain \"XXXXXX\".";
 
@@ -716,7 +687,6 @@ bool CreateNewTempDirectory(const FilePath::StringType& prefix,
 
 bool CreateDirectoryAndGetError(const FilePath& full_path,
                                 File::Error* error) {
-  AssertBlockingAllowed();  // For call to mkdir().
   std::vector<FilePath> subpaths;
 
   // Collect a list of all parent directories.
@@ -801,7 +771,6 @@ FILE* OpenFile(const FilePath& filename, const char* mode) {
   DCHECK(
       strchr(mode, 'e') == nullptr ||
       (strchr(mode, ',') != nullptr && strchr(mode, 'e') > strchr(mode, ',')));
-  AssertBlockingAllowed();
   FILE* result = nullptr;
 #if defined(OS_MACOSX)
   // macOS does not provide a mode character to set O_CLOEXEC; see
@@ -833,7 +802,6 @@ FILE* FileToFILE(File file, const char* mode) {
 #endif  // !defined(OS_NACL)
 
 int ReadFile(const FilePath& filename, char* data, int max_size) {
-  AssertBlockingAllowed();
   int fd = HANDLE_EINTR(open(filename.value().c_str(), O_RDONLY));
   if (fd < 0)
     return -1;
@@ -845,7 +813,6 @@ int ReadFile(const FilePath& filename, char* data, int max_size) {
 }
 
 int WriteFile(const FilePath& filename, const char* data, int size) {
-  AssertBlockingAllowed();
   int fd = HANDLE_EINTR(creat(filename.value().c_str(), 0666));
   if (fd < 0)
     return -1;
@@ -874,7 +841,6 @@ bool WriteFileDescriptor(const int fd, const char* data, int size) {
 #if !defined(OS_NACL_NONSFI)
 
 bool AppendToFile(const FilePath& filename, const char* data, int size) {
-  AssertBlockingAllowed();
   bool ret = true;
   int fd = HANDLE_EINTR(open(filename.value().c_str(), O_WRONLY | O_APPEND));
   if (fd < 0) {
@@ -894,9 +860,6 @@ bool AppendToFile(const FilePath& filename, const char* data, int size) {
 }
 
 bool GetCurrentDirectory(FilePath* dir) {
-  // getcwd can return ENOENT, which implies it checks against the disk.
-  AssertBlockingAllowed();
-
   char system_buffer[PATH_MAX] = "";
   if (!getcwd(system_buffer, sizeof(system_buffer))) {
     NOTREACHED();
@@ -907,7 +870,6 @@ bool GetCurrentDirectory(FilePath* dir) {
 }
 
 bool SetCurrentDirectory(const FilePath& path) {
-  AssertBlockingAllowed();
   return chdir(path.value().c_str()) == 0;
 }
 
@@ -961,9 +923,6 @@ bool VerifyPathControlledByAdmin(const FilePath& path) {
     "wheel"
   };
 
-  // Reading the groups database may touch the file system.
-  AssertBlockingAllowed();
-
   std::set<gid_t> allowed_group_ids;
   for (int i = 0, ie = arraysize(kAdminGroupNames); i < ie; ++i) {
     struct group *group_record = getgrnam(kAdminGroupNames[i]);
@@ -987,7 +946,6 @@ int GetMaximumPathComponentLength(const FilePath& path) {
   // enough to guard against e.g. bugs causing multi-megabyte paths.
   return 1024;
 #else
-  AssertBlockingAllowed();
   return pathconf(path.value().c_str(), _PC_NAME_MAX);
 #endif
 }
@@ -996,17 +954,12 @@ int GetMaximumPathComponentLength(const FilePath& path) {
 // This is implemented in file_util_android.cc for that platform.
 bool GetShmemTempDir(bool executable, FilePath* path) {
 #if defined(OS_LINUX) || defined(OS_AIX)
-  bool disable_dev_shm = false;
-#if !defined(OS_CHROMEOS)
-  disable_dev_shm = CommandLine::ForCurrentProcess()->HasSwitch(
-      switches::kDisableDevShmUsage);
-#endif
   bool use_dev_shm = true;
   if (executable) {
     static const bool s_dev_shm_executable = DetermineDevShmExecutable();
     use_dev_shm = s_dev_shm_executable;
   }
-  if (use_dev_shm && !disable_dev_shm) {
+  if (use_dev_shm) {
     *path = FilePath("/dev/shm");
     return true;
   }
@@ -1018,7 +971,6 @@ bool GetShmemTempDir(bool executable, FilePath* path) {
 #if !defined(OS_MACOSX)
 // Mac has its own implementation, this is for all other Posix systems.
 bool CopyFile(const FilePath& from_path, const FilePath& to_path) {
-  AssertBlockingAllowed();
   File infile;
 #if defined(OS_ANDROID)
   if (from_path.IsContentUri()) {
@@ -1045,7 +997,6 @@ bool CopyFile(const FilePath& from_path, const FilePath& to_path) {
 namespace internal {
 
 bool MoveUnsafe(const FilePath& from_path, const FilePath& to_path) {
-  AssertBlockingAllowed();
   // Windows compatibility: if |to_path| exists, |from_path| and |to_path|
   // must be the same type, either both files, or both directories.
   stat_wrapper_t to_file_info;

@@ -11,7 +11,6 @@
 #include "base/process/internal_linux.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
-#include "base/threading/thread_restrictions.h"
 
 namespace base {
 
@@ -42,9 +41,6 @@ std::string GetProcStatsFieldAsString(
 // null characters. We tokenize it into a vector of strings using '\0' as a
 // delimiter.
 bool GetProcCmdline(pid_t pid, std::vector<std::string>* proc_cmd_line_args) {
-  // Synchronously reading files in /proc is safe.
-  ThreadRestrictions::ScopedAllowIO allow_io;
-
   FilePath cmd_line_file = internal::GetProcPidDir(pid).Append("cmdline");
   std::string cmd_line;
   if (!ReadFileToString(cmd_line_file, &cmd_line))

@@ -10,8 +10,8 @@
 #include <cstring>
 #include <set>
 #include <sstream>
+#include <unordered_set>
 
-#include "base/containers/hash_tables.h"
 #include "base/strings/string_util.h"
 #include "tools/gn/config_values_extractors.h"
 #include "tools/gn/deps_iterator.h"
@@ -1064,7 +1064,7 @@ OutputFile NinjaBinaryTargetWriter::GetWindowsPCHFile(
 
 bool NinjaBinaryTargetWriter::CheckForDuplicateObjectFiles(
     const std::vector<OutputFile>& files) const {
-  base::hash_set<std::string> set;
+  std::unordered_set<std::string> set;
   for (const auto& file : files) {
     if (!set.insert(file.value()).second) {
       Err err(

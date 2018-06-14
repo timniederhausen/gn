@@ -143,22 +143,6 @@ BASE_EXPORT int CompareCaseInsensitiveASCII(StringPiece16 a, StringPiece16 b);
 BASE_EXPORT bool EqualsCaseInsensitiveASCII(StringPiece a, StringPiece b);
 BASE_EXPORT bool EqualsCaseInsensitiveASCII(StringPiece16 a, StringPiece16 b);
 
-// These threadsafe functions return references to globally unique empty
-// strings.
-//
-// It is likely faster to construct a new empty string object (just a few
-// instructions to set the length to 0) than to get the empty string singleton
-// returned by these functions (which requires threadsafe singleton access).
-//
-// Therefore, DO NOT USE THESE AS A GENERAL-PURPOSE SUBSTITUTE FOR DEFAULT
-// CONSTRUCTORS. There is only one case where you should use these: functions
-// which need to return a string by reference (e.g. as a class member
-// accessor), and don't have an empty string to use (e.g. in an error case).
-// These should not be used as initializers, function arguments, or return
-// values for functions which return by value or outparam.
-BASE_EXPORT const std::string& EmptyString();
-BASE_EXPORT const string16& EmptyString16();
-
 // Contains the set of characters representing whitespace in the corresponding
 // encoding. Null-terminated. The ASCII versions are the whitespaces as defined
 // by HTML5, and don't include control characters.

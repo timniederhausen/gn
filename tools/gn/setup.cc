@@ -17,7 +17,6 @@
 #include "base/files/file_util.h"
 #include "base/memory/ref_counted.h"
 #include "base/process/launch.h"
-#include "base/single_thread_task_runner.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/strings/sys_string_conversions.h"
@@ -163,20 +162,10 @@ base::FilePath FindDotFile(const base::FilePath& current_dir) {
   return FindDotFile(up_one_dir);
 }
 
-void ForwardItemDefinedToBuilderInMainThread(
-    Builder* builder_call_on_main_thread_only,
-    std::unique_ptr<Item> item) {
-  builder_call_on_main_thread_only->ItemDefined(std::move(item));
-
-  // Pair to the Increment in ItemDefinedCallback.
-  g_scheduler->DecrementWorkCount();
-}
-
 // Called on any thread. Post the item to the builder on the main thread.
-void ItemDefinedCallback(
-    scoped_refptr<base::SingleThreadTaskRunner> task_runner,
-    Builder* builder_call_on_main_thread_only,
-    std::unique_ptr<Item> item) {
+void ItemDefinedCallback(MsgLoop* task_runner,
+                         Builder* builder_call_on_main_thread_only,
+                         std::unique_ptr<Item> item) {
   DCHECK(item);
 
   // Increment the work count for the duration of defining the item with the
@@ -185,11 +174,13 @@ void ItemDefinedCallback(
   // this call completing on the main thread, the 'Complete' function will
   // be signaled and we'll stop running with an incomplete build.
   g_scheduler->IncrementWorkCount();
-  task_runner->PostTask(
-      FROM_HERE,
-      base::Bind(&ForwardItemDefinedToBuilderInMainThread,
-                 base::Unretained(builder_call_on_main_thread_only),
-                 base::Passed(&item)));
+  task_runner->PostTask(base::BindOnce(
+      [](Builder* builder_call_on_main_thread_only,
+         std::unique_ptr<Item> item) {
+        builder_call_on_main_thread_only->ItemDefined(std::move(item));
+        g_scheduler->DecrementWorkCount();
+      },
+      builder_call_on_main_thread_only, base::Passed(&item)));
 }
 
 void DecrementWorkCount() {
