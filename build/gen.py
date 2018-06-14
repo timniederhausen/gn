@@ -226,7 +226,6 @@ def write_gn_ninja(path, options):
   static_libraries = {
       'base': {'sources': [
         'base/at_exit.cc',
-        'base/base_paths.cc',
         'base/base_switches.cc',
         'base/callback_helpers.cc',
         'base/callback_internal.cc',
@@ -261,7 +260,6 @@ def write_gn_ninja(path, options):
         'base/message_loop/message_pump_default.cc',
         'base/message_loop/watchable_io_message_pump_posix.cc',
         'base/observer_list_threadsafe.cc',
-        'base/path_service.cc',
         'base/pending_task.cc',
         'base/process/kill.cc',
         'base/process/memory.cc',
@@ -334,6 +332,7 @@ def write_gn_ninja(path, options):
         'base/values.cc',
       ], 'tool': 'cxx', 'include_dirs': []},
       'gn_lib': {'sources': [
+        'src/exe_path.cc',
         'tools/gn/action_target_generator.cc',
         'tools/gn/action_values.cc',
         'tools/gn/analyzer.cc',
@@ -536,7 +535,6 @@ def write_gn_ninja(path, options):
 
   if is_posix:
     static_libraries['base']['sources'].extend([
-        'base/base_paths_posix.cc',
         'base/files/file_enumerator_posix.cc',
         'base/files/file_descriptor_watcher_posix.cc',
         'base/files/file_posix.cc',
@@ -615,7 +613,6 @@ def write_gn_ninja(path, options):
 
   if is_mac:
     static_libraries['base']['sources'].extend([
-        'base/base_paths_mac.mm',
         'base/files/file_util_mac.mm',
         'base/mac/bundle_locations.mm',
         'base/mac/call_with_eh_frame.cc',
@@ -654,7 +651,6 @@ def write_gn_ninja(path, options):
 
   if is_win:
     static_libraries['base']['sources'].extend([
-        'base/base_paths_win.cc',
         'base/cpu.cc',
         'base/files/file_enumerator_win.cc',
         'base/files/file_path_watcher_win.cc',

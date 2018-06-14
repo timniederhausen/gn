@@ -31,7 +31,6 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/singleton.h"
-#include "base/path_service.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/stl_util.h"
 #include "base/strings/string_split.h"
@@ -616,12 +615,8 @@ bool GetTempDir(FilePath* path) {
     return true;
   }
 
-#if defined(OS_ANDROID)
-  return PathService::Get(DIR_CACHE, path);
-#else
   *path = FilePath("/tmp");
   return true;
-#endif
 }
 #endif  // !defined(OS_MACOSX)
 

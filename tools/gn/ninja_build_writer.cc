@@ -12,11 +12,11 @@
 
 #include "base/command_line.h"
 #include "base/files/file_util.h"
-#include "base/path_service.h"
 #include "base/process/process_handle.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "build_config.h"
+#include "exe_path.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/builder.h"
 #include "tools/gn/err.h"
@@ -51,8 +51,7 @@ std::string GetSelfInvocationCommand(const BuildSettings* build_settings) {
   const base::FilePath build_path =
       build_settings->build_dir().Resolve(build_settings->root_path());
 
-  base::FilePath exe_path;
-  base::PathService::Get(base::FILE_EXE, &exe_path);
+  base::FilePath exe_path = GetExePath();
   if (build_path.IsAbsolute())
     exe_path = MakeAbsoluteFilePathRelativeIfPossible(build_path, exe_path);
 

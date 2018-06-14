@@ -5,8 +5,8 @@
 #include "tools/gn/command_format.h"
 
 #include "base/files/file_util.h"
-#include "base/path_service.h"
 #include "base/strings/string_util.h"
+#include "exe_path.h"
 #include "test/test.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/setup.h"
@@ -19,6 +19,8 @@ using FormatTest = TestWithScheduler;
     ::Setup setup;                                                          \
     std::string out;                                                        \
     std::string expected;                                                   \
+    base::FilePath src_dir = GetExePath().DirName().Append("..");           \
+    base::SetCurrentDirectory(src_dir);                                     \
     EXPECT_TRUE(commands::FormatFileToString(                               \
         &setup, SourceFile("//tools/gn/format_test_data/" #n ".gn"), false, \
         &out));                                                             \
