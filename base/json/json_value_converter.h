@@ -270,7 +270,6 @@ class RepeatedValueConverter
       if (basic_converter_.Convert(*element, e.get())) {
         field->push_back(std::move(e));
       } else {
-        DVLOG(1) << "failure at " << i << "-th element";
         return false;
       }
     }
@@ -304,7 +303,6 @@ class RepeatedMessageConverter
       if (converter_.Convert(*element, nested.get())) {
         field->push_back(std::move(nested));
       } else {
-        DVLOG(1) << "failure at " << i << "-th element";
         return false;
       }
     }
@@ -341,7 +339,6 @@ class RepeatedCustomValueConverter
       if ((*convert_func_)(element, nested.get())) {
         field->push_back(std::move(nested));
       } else {
-        DVLOG(1) << "failure at " << i << "-th element";
         return false;
       }
     }
@@ -504,7 +501,6 @@ class JSONValueConverter {
       const base::Value* field = NULL;
       if (dictionary_value->Get(field_converter->field_path(), &field)) {
         if (!field_converter->ConvertField(*field, output)) {
-          DVLOG(1) << "failure at field " << field_converter->field_path();
           return false;
         }
       }

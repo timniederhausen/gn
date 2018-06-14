@@ -332,7 +332,6 @@ def write_gn_ninja(path, options):
         'base/timer/timer.cc',
         'base/value_iterators.cc',
         'base/values.cc',
-        'base/vlog.cc',
       ], 'tool': 'cxx', 'include_dirs': []},
       'gn_lib': {'sources': [
         'tools/gn/action_target_generator.cc',
@@ -664,7 +663,6 @@ def write_gn_ninja(path, options):
         'base/files/memory_mapped_file_win.cc',
         'base/logging_win.cc',
         'base/message_loop/message_pump_win.cc',
-        'base/native_library_win.cc',
         'base/process/kill_win.cc',
         'base/process/launch_win.cc',
         'base/process/memory_win.cc',

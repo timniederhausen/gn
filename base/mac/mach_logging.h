@@ -49,30 +49,14 @@ class BASE_EXPORT MachLogMessage : public logging::LogMessage {
 
 }  // namespace logging
 
-#if defined(NDEBUG)
-#define MACH_DVLOG_IS_ON(verbose_level) 0
-#else
-#define MACH_DVLOG_IS_ON(verbose_level) VLOG_IS_ON(verbose_level)
-#endif
-
 #define MACH_LOG_STREAM(severity, mach_err) \
     COMPACT_GOOGLE_LOG_EX_ ## severity(MachLogMessage, mach_err).stream()
-#define MACH_VLOG_STREAM(verbose_level, mach_err) \
-    logging::MachLogMessage(__FILE__, __LINE__, \
-                            -verbose_level, mach_err).stream()
 
 #define MACH_LOG(severity, mach_err) \
     LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), LOG_IS_ON(severity))
 #define MACH_LOG_IF(severity, condition, mach_err) \
     LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), \
                 LOG_IS_ON(severity) && (condition))
-
-#define MACH_VLOG(verbose_level, mach_err) \
-    LAZY_STREAM(MACH_VLOG_STREAM(verbose_level, mach_err), \
-                VLOG_IS_ON(verbose_level))
-#define MACH_VLOG_IF(verbose_level, condition, mach_err) \
-    LAZY_STREAM(MACH_VLOG_STREAM(verbose_level, mach_err), \
-                VLOG_IS_ON(verbose_level) && (condition))
 
 #define MACH_CHECK(condition, mach_err) \
     LAZY_STREAM(MACH_LOG_STREAM(FATAL, mach_err), !(condition)) \
@@ -83,13 +67,6 @@ class BASE_EXPORT MachLogMessage : public logging::LogMessage {
 #define MACH_DLOG_IF(severity, condition, mach_err) \
     LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), \
                 DLOG_IS_ON(severity) && (condition))
-
-#define MACH_DVLOG(verbose_level, mach_err) \
-    LAZY_STREAM(MACH_VLOG_STREAM(verbose_level, mach_err), \
-                MACH_DVLOG_IS_ON(verbose_level))
-#define MACH_DVLOG_IF(verbose_level, condition, mach_err) \
-    LAZY_STREAM(MACH_VLOG_STREAM(verbose_level, mach_err), \
-                MACH_DVLOG_IS_ON(verbose_level) && (condition))
 
 #define MACH_DCHECK(condition, mach_err)        \
   LAZY_STREAM(MACH_LOG_STREAM(FATAL, mach_err), \
@@ -116,28 +93,15 @@ class BASE_EXPORT BootstrapLogMessage : public logging::LogMessage {
 
 }  // namespace logging
 
-#define BOOTSTRAP_DVLOG_IS_ON MACH_DVLOG_IS_ON
-
 #define BOOTSTRAP_LOG_STREAM(severity, bootstrap_err) \
     COMPACT_GOOGLE_LOG_EX_ ## severity(BootstrapLogMessage, \
                                        bootstrap_err).stream()
-#define BOOTSTRAP_VLOG_STREAM(verbose_level, bootstrap_err) \
-    logging::BootstrapLogMessage(__FILE__, __LINE__, \
-                                 -verbose_level, bootstrap_err).stream()
-
 #define BOOTSTRAP_LOG(severity, bootstrap_err) \
     LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, \
                                      bootstrap_err), LOG_IS_ON(severity))
 #define BOOTSTRAP_LOG_IF(severity, condition, bootstrap_err) \
     LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, bootstrap_err), \
                 LOG_IS_ON(severity) && (condition))
-
-#define BOOTSTRAP_VLOG(verbose_level, bootstrap_err) \
-    LAZY_STREAM(BOOTSTRAP_VLOG_STREAM(verbose_level, bootstrap_err), \
-                VLOG_IS_ON(verbose_level))
-#define BOOTSTRAP_VLOG_IF(verbose_level, condition, bootstrap_err) \
-    LAZY_STREAM(BOOTSTRAP_VLOG_STREAM(verbose_level, bootstrap_err), \
-                VLOG_IS_ON(verbose_level) && (condition))
 
 #define BOOTSTRAP_CHECK(condition, bootstrap_err) \
     LAZY_STREAM(BOOTSTRAP_LOG_STREAM(FATAL, bootstrap_err), !(condition)) \
@@ -149,13 +113,6 @@ class BASE_EXPORT BootstrapLogMessage : public logging::LogMessage {
 #define BOOTSTRAP_DLOG_IF(severity, condition, bootstrap_err) \
     LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, bootstrap_err), \
                 DLOG_IS_ON(severity) && (condition))
-
-#define BOOTSTRAP_DVLOG(verbose_level, bootstrap_err) \
-    LAZY_STREAM(BOOTSTRAP_VLOG_STREAM(verbose_level, bootstrap_err), \
-                BOOTSTRAP_DVLOG_IS_ON(verbose_level))
-#define BOOTSTRAP_DVLOG_IF(verbose_level, condition, bootstrap_err) \
-    LAZY_STREAM(BOOTSTRAP_VLOG_STREAM(verbose_level, bootstrap_err), \
-                BOOTSTRAP_DVLOG_IS_ON(verbose_level) && (condition))
 
 #define BOOTSTRAP_DCHECK(condition, bootstrap_err)        \
   LAZY_STREAM(BOOTSTRAP_LOG_STREAM(FATAL, bootstrap_err), \

@@ -92,11 +92,9 @@ void MessagePumpDefault::SetTimerSlack(TimerSlack timer_slack) {
                                        ? LATENCY_QOS_TIER_3
                                        : LATENCY_QOS_TIER_UNSPECIFIED;
   mac::ScopedMachSendRight thread_port(mach_thread_self());
-  kern_return_t kr =
-      thread_policy_set(thread_port.get(), THREAD_LATENCY_QOS_POLICY,
-                        reinterpret_cast<thread_policy_t>(&policy),
-                        THREAD_LATENCY_QOS_POLICY_COUNT);
-  MACH_DVLOG_IF(1, kr != KERN_SUCCESS, kr) << "thread_policy_set";
+  thread_policy_set(thread_port.get(), THREAD_LATENCY_QOS_POLICY,
+                    reinterpret_cast<thread_policy_t>(&policy),
+                    THREAD_LATENCY_QOS_POLICY_COUNT);
 }
 #endif
 

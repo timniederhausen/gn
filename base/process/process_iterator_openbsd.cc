@@ -79,13 +79,11 @@ bool ProcessIterator::CheckForNextProcess() {
     // Find out what size buffer we need.
     size_t data_len = 0;
     if (sysctl(mib, arraysize(mib), NULL, &data_len, NULL, 0) < 0) {
-      DVPLOG(1) << "failed to figure out the buffer size for a commandline";
       continue;
     }
 
     data.resize(data_len);
     if (sysctl(mib, arraysize(mib), &data[0], &data_len, NULL, 0) < 0) {
-      DVPLOG(1) << "failed to fetch a commandline";
       continue;
     }
 

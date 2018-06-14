@@ -112,7 +112,6 @@ bool AppendStringKeyValue(StringPiece input,
   // Find the delimiter.
   size_t end_key_pos = input.find_first_of(delimiter);
   if (end_key_pos == std::string::npos) {
-    DVLOG(1) << "cannot find delimiter in: " << input;
     return false;    // No delimiter.
   }
   input.substr(0, end_key_pos).CopyToString(&result_pair.first);
@@ -121,7 +120,6 @@ bool AppendStringKeyValue(StringPiece input,
   StringPiece remains = input.substr(end_key_pos, input.size() - end_key_pos);
   size_t begin_value_pos = remains.find_first_not_of(delimiter);
   if (begin_value_pos == StringPiece::npos) {
-    DVLOG(1) << "cannot parse value from input: " << input;
     return false;   // No value.
   }
   remains.substr(begin_value_pos, remains.size() - begin_value_pos)

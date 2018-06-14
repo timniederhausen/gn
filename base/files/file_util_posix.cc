@@ -883,18 +883,15 @@ bool AppendToFile(const FilePath& filename, const char* data, int size) {
   bool ret = true;
   int fd = HANDLE_EINTR(open(filename.value().c_str(), O_WRONLY | O_APPEND));
   if (fd < 0) {
-    VPLOG(1) << "Unable to create file " << filename.value();
     return false;
   }
 
   // This call will either write all of the data or return false.
   if (!WriteFileDescriptor(fd, data, size)) {
-    VPLOG(1) << "Error while writing to file " << filename.value();
     ret = false;
   }
 
   if (IGNORE_EINTR(close(fd)) < 0) {
-    VPLOG(1) << "Error while closing file " << filename.value();
     return false;
   }
 

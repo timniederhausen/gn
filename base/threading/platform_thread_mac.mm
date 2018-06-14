@@ -84,7 +84,6 @@ void SetPriorityRealtimeAudio() {
                         reinterpret_cast<thread_policy_t>(&policy),
                         THREAD_EXTENDED_POLICY_COUNT);
   if (result != KERN_SUCCESS) {
-    MACH_DVLOG(1, result) << "thread_policy_set";
     return;
   }
 
@@ -96,7 +95,6 @@ void SetPriorityRealtimeAudio() {
                              reinterpret_cast<thread_policy_t>(&precedence),
                              THREAD_PRECEDENCE_POLICY_COUNT);
   if (result != KERN_SUCCESS) {
-    MACH_DVLOG(1, result) << "thread_policy_set";
     return;
   }
 
@@ -140,8 +138,6 @@ void SetPriorityRealtimeAudio() {
                         THREAD_TIME_CONSTRAINT_POLICY,
                         reinterpret_cast<thread_policy_t>(&time_constraints),
                         THREAD_TIME_CONSTRAINT_POLICY_COUNT);
-  MACH_DVLOG_IF(1, result != KERN_SUCCESS, result) << "thread_policy_set";
-
   return;
 }
 

@@ -86,7 +86,6 @@ typedef pthread_mutex_t* MutexHandle;
 
 #include "base/base_switches.h"
 #include "base/callback.h"
-#include "base/command_line.h"
 #include "base/containers/stack.h"
 #include "base/lazy_instance.h"
 #include "base/posix/eintr_wrapper.h"
@@ -97,7 +96,6 @@ typedef pthread_mutex_t* MutexHandle;
 #include "base/strings/utf_string_conversions.h"
 #include "base/synchronization/lock_impl.h"
 #include "base/threading/platform_thread.h"
-#include "base/vlog.h"
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include "base/posix/safe_strerror.h"
@@ -106,9 +104,6 @@ typedef pthread_mutex_t* MutexHandle;
 namespace logging {
 
 namespace {
-
-VlogInfo* g_vlog_info = nullptr;
-VlogInfo* g_vlog_info_prev = nullptr;
 
 const char* const log_severity_names[] = {"INFO", "WARNING", "ERROR", "FATAL"};
 static_assert(LOG_NUM_SEVERITIES == arraysize(log_severity_names),
@@ -403,23 +398,6 @@ bool BaseInitLoggingImpl(const LoggingSettings& settings) {
   // Can log only to the system debug log.
   CHECK_EQ(settings.logging_dest & ~LOG_TO_SYSTEM_DEBUG_LOG, 0);
 #endif
-  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
-  // Don't bother initializing |g_vlog_info| unless we use one of the
-  // vlog switches.
-  if (command_line->HasSwitch(switches::kV) ||
-      command_line->HasSwitch(switches::kVModule)) {
-    // NOTE: If |g_vlog_info| has already been initialized, it might be in use
-    // by another thread. Don't delete the old VLogInfo, just create a second
-    // one. We keep track of both to avoid memory leak warnings.
-    CHECK(!g_vlog_info_prev);
-    g_vlog_info_prev = g_vlog_info;
-
-    g_vlog_info =
-        new VlogInfo(command_line->GetSwitchValueASCII(switches::kV),
-                     command_line->GetSwitchValueASCII(switches::kVModule),
-                     &g_min_log_level);
-  }
-
   g_logging_destination = settings.logging_dest;
 
   // ignore file options unless logging to file is set.
@@ -461,20 +439,6 @@ bool ShouldCreateLogMessage(int severity) {
   // when g_logging_destination is LOG_NONE.
   return g_logging_destination != LOG_NONE || log_message_handler ||
          severity >= kAlwaysPrintErrorLevel;
-}
-
-int GetVlogVerbosity() {
-  return std::max(-1, LOG_INFO - GetMinLogLevel());
-}
-
-int GetVlogLevelHelper(const char* file, size_t N) {
-  DCHECK_GT(N, 0U);
-  // Note: |g_vlog_info| may change on a different thread during startup
-  // (but will always be valid or nullptr).
-  VlogInfo* vlog_info = g_vlog_info;
-  return vlog_info ?
-      vlog_info->GetVlogLevel(base::StringPiece(file, N - 1)) :
-      GetVlogVerbosity();
 }
 
 void SetLogItems(bool enable_process_id, bool enable_thread_id,
