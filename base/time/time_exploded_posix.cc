@@ -18,12 +18,6 @@
 #include "base/synchronization/lock.h"
 #include "build_config.h"
 
-#if defined(OS_ANDROID)
-#include "base/os_compat_android.h"
-#elif defined(OS_NACL)
-#include "base/os_compat_nacl.h"
-#endif
-
 #if defined(OS_MACOSX)
 static_assert(sizeof(time_t) >= 8, "Y2038 problem!");
 #endif

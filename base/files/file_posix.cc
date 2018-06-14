@@ -16,10 +16,6 @@
 #include "base/threading/thread_restrictions.h"
 #include "build_config.h"
 
-#if defined(OS_ANDROID)
-#include "base/os_compat_android.h"
-#endif
-
 namespace base {
 
 // Make sure our Whence mappings match the system headers.
