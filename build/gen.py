@@ -693,7 +693,6 @@ def write_gn_ninja(path, options):
         'base/win/scoped_bstr.cc',
         'base/win/scoped_com_initializer.cc',
         'base/win/scoped_handle.cc',
-        'base/win/scoped_handle_verifier.cc',
         'base/win/scoped_process_information.cc',
         'base/win/scoped_variant.cc',
         'base/win/shortcut.cc',

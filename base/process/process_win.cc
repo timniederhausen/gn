@@ -167,9 +167,6 @@ bool Process::WaitForExitWithTimeout(TimeDelta timeout, int* exit_code) const {
   if (!timeout.is_zero())
     internal::AssertBaseSyncPrimitivesAllowed();
 
-  // Record the event that this thread is blocking upon (for hang diagnosis).
-  base::debug::ScopedProcessWaitActivity process_activity(this);
-
   // Limit timeout to INFINITE.
   DWORD timeout_ms = saturated_cast<DWORD>(timeout.InMilliseconds());
   if (::WaitForSingleObject(Handle(), timeout_ms) != WAIT_OBJECT_0)
@@ -187,8 +184,6 @@ bool Process::WaitForExitWithTimeout(TimeDelta timeout, int* exit_code) const {
 }
 
 void Process::Exited(int exit_code) const {
-  base::debug::GlobalActivityTracker::RecordProcessExitIfEnabled(Pid(),
-                                                                 exit_code);
 }
 
 bool Process::IsProcessBackgrounded() const {

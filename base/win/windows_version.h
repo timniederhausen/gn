@@ -99,7 +99,6 @@ class BASE_EXPORT OSInfo {
   static OSInfo* GetInstance();
 
   Version version() const { return version_; }
-  Version Kernel32Version() const;
   // The next two functions return arrays of values, [major, minor(, build)].
   VersionNumber version_number() const { return version_number_; }
   VersionType version_type() const { return version_type_; }
@@ -121,7 +120,6 @@ class BASE_EXPORT OSInfo {
 
   Version version_;
   mutable Version kernel32_version_;
-  mutable bool got_kernel32_version_;
   VersionNumber version_number_;
   VersionType version_type_;
   ServicePack service_pack_;

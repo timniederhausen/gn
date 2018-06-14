@@ -20,15 +20,14 @@
 
 #include "base/files/file_enumerator.h"
 #include "base/files/file_path.h"
-#include "base/guid.h"
 #include "base/logging.h"
 #include "base/macros.h"
-#include "base/metrics/histogram_functions.h"
 #include "base/process/process_handle.h"
 #include "base/rand_util.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
+#include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
@@ -41,67 +40,6 @@ namespace {
 
 const DWORD kFileShareAll =
     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
-
-// Records a sample in a histogram named
-// "Windows.PostOperationState.|operation|" indicating the state of |path|
-// following the named operation. If |operation_succeeded| is true, the
-// "operation succeeded" sample is recorded. Otherwise, the state of |path| is
-// queried and the most meaningful sample is recorded.
-void RecordPostOperationState(const FilePath& path,
-                              StringPiece operation,
-                              bool operation_succeeded) {
-  // The state of a filesystem item after an operation.
-  // These values are persisted to logs. Entries should not be renumbered and
-  // numeric values should never be reused.
-  enum class PostOperationState {
-    kOperationSucceeded = 0,
-    kFileNotFoundAfterFailure = 1,
-    kPathNotFoundAfterFailure = 2,
-    kAccessDeniedAfterFailure = 3,
-    kNoAttributesAfterFailure = 4,
-    kEmptyDirectoryAfterFailure = 5,
-    kNonEmptyDirectoryAfterFailure = 6,
-    kNotDirectoryAfterFailure = 7,
-    kCount
-  } metric = PostOperationState::kOperationSucceeded;
-
-  if (!operation_succeeded) {
-    const DWORD attributes = ::GetFileAttributes(path.value().c_str());
-    if (attributes == INVALID_FILE_ATTRIBUTES) {
-      // On failure to delete, one might expect the file/directory to still be
-      // in place. Slice a failure to get its attributes into a few common error
-      // buckets.
-      const DWORD error_code = ::GetLastError();
-      if (error_code == ERROR_FILE_NOT_FOUND)
-        metric = PostOperationState::kFileNotFoundAfterFailure;
-      else if (error_code == ERROR_PATH_NOT_FOUND)
-        metric = PostOperationState::kPathNotFoundAfterFailure;
-      else if (error_code == ERROR_ACCESS_DENIED)
-        metric = PostOperationState::kAccessDeniedAfterFailure;
-      else
-        metric = PostOperationState::kNoAttributesAfterFailure;
-    } else if (attributes & FILE_ATTRIBUTE_DIRECTORY) {
-      if (IsDirectoryEmpty(path))
-        metric = PostOperationState::kEmptyDirectoryAfterFailure;
-      else
-        metric = PostOperationState::kNonEmptyDirectoryAfterFailure;
-    } else {
-      metric = PostOperationState::kNotDirectoryAfterFailure;
-    }
-  }
-
-  std::string histogram_name = "Windows.PostOperationState.";
-  operation.AppendToString(&histogram_name);
-  UmaHistogramEnumeration(histogram_name, metric, PostOperationState::kCount);
-}
-
-// Records the sample |error| in a histogram named
-// "Windows.FilesystemError.|operation|".
-void RecordFilesystemError(StringPiece operation, DWORD error) {
-  std::string histogram_name = "Windows.FilesystemError.";
-  operation.AppendToString(&histogram_name);
-  UmaHistogramSparse(histogram_name, error);
-}
 
 // Deletes all files and directories in a path.
 // Returns ERROR_SUCCESS on success or the Windows error code corresponding to
@@ -322,6 +260,37 @@ DWORD DoDeleteFile(const FilePath& path, bool recursive) {
                                                  : ::GetLastError();
 }
 
+std::string RandomDataToGUIDString(const uint64_t bytes[2]) {
+  return base::StringPrintf(
+      "%08x-%04x-%04x-%04x-%012llx", static_cast<unsigned int>(bytes[0] >> 32),
+      static_cast<unsigned int>((bytes[0] >> 16) & 0x0000ffff),
+      static_cast<unsigned int>(bytes[0] & 0x0000ffff),
+      static_cast<unsigned int>(bytes[1] >> 48),
+      bytes[1] & 0x0000ffff'ffffffffULL);
+}
+
+std::string GenerateGUID() {
+  uint64_t sixteen_bytes[2];
+  // Use base::RandBytes instead of crypto::RandBytes, because crypto calls the
+  // base version directly, and to prevent the dependency from base/ to crypto/.
+  base::RandBytes(&sixteen_bytes, sizeof(sixteen_bytes));
+
+  // Set the GUID to version 4 as described in RFC 4122, section 4.4.
+  // The format of GUID version 4 must be xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx,
+  // where y is one of [8, 9, A, B].
+
+  // Clear the version bits and set the version to 4:
+  sixteen_bytes[0] &= 0xffffffff'ffff0fffULL;
+  sixteen_bytes[0] |= 0x00000000'00004000ULL;
+
+  // Set the two most significant bits (bits 6 and 7) of the
+  // clock_seq_hi_and_reserved to zero and one, respectively:
+  sixteen_bytes[1] &= 0x3fffffff'ffffffffULL;
+  sixteen_bytes[1] |= 0x80000000'00000000ULL;
+
+  return RandomDataToGUIDString(sixteen_bytes);
+}
+
 }  // namespace
 
 FilePath MakeAbsoluteFilePath(const FilePath& input) {
@@ -344,12 +313,7 @@ bool DeleteFile(const FilePath& path, bool recursive) {
   // current code so that any improvements or regressions resulting from
   // subsequent code changes can be detected.
   const DWORD error = DoDeleteFile(path, recursive);
-  RecordPostOperationState(path, operation, error == ERROR_SUCCESS);
-  if (error == ERROR_SUCCESS)
-    return true;
-
-  RecordFilesystemError(operation, error);
-  return false;
+  return error == ERROR_SUCCESS;
 }
 
 bool DeleteFileAfterReboot(const FilePath& path) {

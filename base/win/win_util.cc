@@ -39,7 +39,6 @@
 #include "base/files/file_path.h"
 #include "base/logging.h"
 #include "base/macros.h"
-#include "base/scoped_native_library.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
@@ -527,60 +526,6 @@ bool IsDeviceUsedAsATablet(std::string* reason) {
       *reason += "Device role is not mobile or slate.\n";
   }
   return is_tablet;
-}
-
-enum DomainEnrollmentState {UNKNOWN = -1, NOT_ENROLLED, ENROLLED};
-static volatile long int g_domain_state = UNKNOWN;
-
-bool IsEnrolledToDomain() {
-  // Doesn't make any sense to retry inside a user session because joining a
-  // domain will only kick in on a restart.
-  if (g_domain_state == UNKNOWN) {
-    ::InterlockedCompareExchange(&g_domain_state,
-                                 IsOS(OS_DOMAINMEMBER) ?
-                                     ENROLLED : NOT_ENROLLED,
-                                 UNKNOWN);
-  }
-
-  return g_domain_state == ENROLLED;
-}
-
-bool IsDeviceRegisteredWithManagement() {
-  static bool is_device_registered_with_management = []() {
-    ScopedNativeLibrary library(
-        FilePath(FILE_PATH_LITERAL("MDMRegistration.dll")));
-    if (!library.is_valid())
-      return false;
-
-    using IsDeviceRegisteredWithManagementFunction =
-        decltype(&::IsDeviceRegisteredWithManagement);
-    IsDeviceRegisteredWithManagementFunction
-        is_device_registered_with_management_function =
-            reinterpret_cast<IsDeviceRegisteredWithManagementFunction>(
-                library.GetFunctionPointer("IsDeviceRegisteredWithManagement"));
-    if (!is_device_registered_with_management_function)
-      return false;
-
-    BOOL is_managed = false;
-    HRESULT hr =
-        is_device_registered_with_management_function(&is_managed, 0, nullptr);
-    return SUCCEEDED(hr) && is_managed;
-  }();
-  return is_device_registered_with_management;
-}
-
-bool IsEnterpriseManaged() {
-  // TODO(rogerta): this function should really be:
-  //
-  //    return IsEnrolledToDomain() || IsDeviceRegisteredWithManagement();
-  //
-  // However, for now it is decided to collect some UMA metrics about
-  // IsDeviceRegisteredWithMdm() before changing chrome's behavior.
-  return IsEnrolledToDomain();
-}
-
-void SetDomainStateForTesting(bool state) {
-  g_domain_state = state ? ENROLLED : NOT_ENROLLED;
 }
 
 bool IsUser32AndGdi32Available() {

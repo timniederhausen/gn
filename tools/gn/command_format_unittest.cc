@@ -19,7 +19,8 @@ using FormatTest = TestWithScheduler;
     ::Setup setup;                                                          \
     std::string out;                                                        \
     std::string expected;                                                   \
-    base::FilePath src_dir = GetExePath().DirName().Append("..");           \
+    base::FilePath src_dir =                                                \
+        GetExePath().DirName().Append(FILE_PATH_LITERAL(".."));             \
     base::SetCurrentDirectory(src_dir);                                     \
     EXPECT_TRUE(commands::FormatFileToString(                               \
         &setup, SourceFile("//tools/gn/format_test_data/" #n ".gn"), false, \

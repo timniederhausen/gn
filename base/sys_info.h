@@ -168,7 +168,6 @@ class BASE_EXPORT SysInfo {
 
  private:
   FRIEND_TEST_ALL_PREFIXES(SysInfoTest, AmountOfAvailablePhysicalMemory);
-  FRIEND_TEST_ALL_PREFIXES(debug::SystemMetricsTest, ParseMeminfo);
 
   static int64_t AmountOfPhysicalMemoryImpl();
   static int64_t AmountOfAvailablePhysicalMemoryImpl();

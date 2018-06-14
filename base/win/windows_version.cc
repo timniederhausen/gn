@@ -8,7 +8,6 @@
 
 #include <memory>
 
-#include "base/file_version_info_win.h"
 #include "base/files/file_path.h"
 #include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
@@ -74,28 +73,6 @@ Version MajorMinorBuildToVersion(int major, int minor, int build) {
   return VERSION_PRE_XP;
 }
 
-// Retrieve a version from kernel32. This is useful because when running in
-// compatibility mode for a down-level version of the OS, the file version of
-// kernel32 will still be the "real" version.
-Version GetVersionFromKernel32() {
-  std::unique_ptr<FileVersionInfoWin> file_version_info(
-      static_cast<FileVersionInfoWin*>(
-          FileVersionInfoWin::CreateFileVersionInfo(
-              base::FilePath(FILE_PATH_LITERAL("kernel32.dll")))));
-  if (file_version_info) {
-    const int major =
-        HIWORD(file_version_info->fixed_file_info()->dwFileVersionMS);
-    const int minor =
-        LOWORD(file_version_info->fixed_file_info()->dwFileVersionMS);
-    const int build =
-        HIWORD(file_version_info->fixed_file_info()->dwFileVersionLS);
-    return MajorMinorBuildToVersion(major, minor, build);
-  }
-
-  NOTREACHED();
-  return VERSION_WIN_LAST;
-}
-
 // Returns the the "UBR" value from the registry. Introduced in Windows 10,
 // this undocumented value appears to be similar to a patch number.
 // Returns 0 if the value does not exist or it could not be read.
@@ -138,7 +115,6 @@ OSInfo* OSInfo::GetInstance() {
 OSInfo::OSInfo()
     : version_(VERSION_PRE_XP),
       kernel32_version_(VERSION_PRE_XP),
-      got_kernel32_version_(false),
       architecture_(OTHER_ARCHITECTURE),
       wow64_status_(GetWOW64StatusForProcess(GetCurrentProcess())) {
   OSVERSIONINFOEX version_info = { sizeof version_info };
@@ -238,14 +214,6 @@ OSInfo::OSInfo()
 }
 
 OSInfo::~OSInfo() {
-}
-
-Version OSInfo::Kernel32Version() const {
-  if (!got_kernel32_version_) {
-    kernel32_version_ = GetVersionFromKernel32();
-    got_kernel32_version_ = true;
-  }
-  return kernel32_version_;
 }
 
 std::string OSInfo::processor_model_name() {

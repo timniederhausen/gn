@@ -11,6 +11,11 @@
 
 #if defined(OS_MACOSX)
 #include <mach-o/dyld.h>
+#elif defined(OS_WIN)
+#include <windows.h>
+#endif
+
+#if defined(OS_MACOSX)
 
 base::FilePath GetExePath() {
   // Executable path can have relative references ("..") depending on
@@ -33,7 +38,14 @@ base::FilePath GetExePath() {
 
 #elif defined(OS_WIN)
 
-#error
+base::FilePath GetExePath() {
+  wchar_t system_buffer[MAX_PATH];
+  system_buffer[0] = 0;
+  if (GetModuleFileName(NULL, system_buffer, MAX_PATH) == 0) {
+    return base::FilePath();
+  }
+  return base::FilePath(system_buffer);
+}
 
 #else
 

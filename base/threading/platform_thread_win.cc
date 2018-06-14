@@ -7,7 +7,6 @@
 #include <stddef.h>
 
 #include "base/logging.h"
-#include "base/metrics/histogram_macros.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/thread_id_name_manager.h"
 #include "base/threading/thread_restrictions.h"
@@ -115,8 +114,6 @@ bool CreateThreadInternal(size_t stack_size,
 
   void* thread_handle;
   {
-    SCOPED_UMA_HISTOGRAM_TIMER("Windows.CreateThreadTime");
-
     // Using CreateThread here vs _beginthreadex makes thread creation a bit
     // faster and doesn't require the loader lock to be available.  Our code
     // will  have to work running on CreateThread() threads anyway, since we run
@@ -233,9 +230,6 @@ void PlatformThread::Join(PlatformThreadHandle thread_handle) {
   DWORD last_error = 0;
   if (!thread_id)
     last_error = ::GetLastError();
-
-  // Record the event that this thread is blocking upon (for hang diagnosis).
-  base::debug::ScopedThreadJoinActivity thread_activity(&thread_handle);
 
   // Wait for the thread to exit.  It should already have terminated but make
   // sure this assumption is valid.
