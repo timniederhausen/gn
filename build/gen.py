@@ -713,7 +713,6 @@ def write_gn_ninja(path, options):
         'base/profiler/win32_stack_frame_unwinder.cc',
         'base/rand_util_win.cc',
         'base/strings/sys_string_conversions_win.cc',
-        'base/sync_socket_win.cc',
         'base/synchronization/condition_variable_win.cc',
         'base/synchronization/lock_impl_win.cc',
         'base/synchronization/waitable_event_watcher_win.cc',
