@@ -37,7 +37,6 @@
 #include <mmsystem.h>
 #include <stdint.h>
 
-#include "base/atomicops.h"
 #include "base/bit_cast.h"
 #include "base/logging.h"
 #include "base/synchronization/lock.h"

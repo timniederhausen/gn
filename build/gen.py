@@ -225,7 +225,6 @@ def write_gn_ninja(path, options):
 
   static_libraries = {
       'base': {'sources': [
-        'base/callback_helpers.cc',
         'base/callback_internal.cc',
         'base/command_line.cc',
         'base/environment.cc',
@@ -566,7 +565,6 @@ def write_gn_ninja(path, options):
         'base/win/wait_chain.cc',
         'base/win/win_util.cc',
         'base/win/windows_version.cc',
-        'base/win/wrapped_window_proc.cc',
     ])
 
     libs.extend([
