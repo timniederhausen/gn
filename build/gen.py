@@ -551,7 +551,6 @@ def write_gn_ninja(path, options):
         'base/files/file_util_win.cc',
         'base/files/file_win.cc',
         'base/process/kill_win.cc',
-        'base/process/launch_win.cc',
         'base/process/memory_win.cc',
         'base/process/process_handle_win.cc',
         'base/process/process_info_win.cc',
