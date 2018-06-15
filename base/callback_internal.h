@@ -8,7 +8,6 @@
 #ifndef BASE_CALLBACK_INTERNAL_H_
 #define BASE_CALLBACK_INTERNAL_H_
 
-#include "base/base_export.h"
 #include "base/callback_forward.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
@@ -58,7 +57,7 @@ using PassingTraitsType = typename PassingTraits<T>::Type;
 // Creating a vtable for every BindState template instantiation results in a lot
 // of bloat. Its only task is to call the destructor which can be done with a
 // function pointer.
-class BASE_EXPORT BindStateBase
+class BindStateBase
     : public RefCountedThreadSafe<BindStateBase, BindStateBaseRefCountTraits> {
  public:
   REQUIRE_ADOPTION_FOR_REFCOUNTED_TYPE();
@@ -106,7 +105,7 @@ class BASE_EXPORT BindStateBase
 // template bloat.
 // CallbackBase<MoveOnly> is a direct base class of MoveOnly callbacks, and
 // CallbackBase<Copyable> uses CallbackBase<MoveOnly> for its implementation.
-class BASE_EXPORT CallbackBase {
+class CallbackBase {
  public:
   CallbackBase(CallbackBase&& c) noexcept;
   CallbackBase& operator=(CallbackBase&& c) noexcept;
@@ -155,7 +154,7 @@ class BASE_EXPORT CallbackBase {
 constexpr CallbackBase::CallbackBase() = default;
 
 // CallbackBase<Copyable> is a direct base class of Copyable Callbacks.
-class BASE_EXPORT CallbackBaseCopyable : public CallbackBase {
+class CallbackBaseCopyable : public CallbackBase {
  public:
   CallbackBaseCopyable(const CallbackBaseCopyable& c);
   CallbackBaseCopyable(CallbackBaseCopyable&& c) noexcept;

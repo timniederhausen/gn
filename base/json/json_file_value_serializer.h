@@ -9,12 +9,11 @@
 
 #include <string>
 
-#include "base/base_export.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/values.h"
 
-class BASE_EXPORT JSONFileValueSerializer : public base::ValueSerializer {
+class JSONFileValueSerializer : public base::ValueSerializer {
  public:
   // |json_file_path_| is the path of a file that will be destination of the
   // serialization. The serializer will attempt to create the file at the
@@ -45,7 +44,7 @@ class BASE_EXPORT JSONFileValueSerializer : public base::ValueSerializer {
   DISALLOW_IMPLICIT_CONSTRUCTORS(JSONFileValueSerializer);
 };
 
-class BASE_EXPORT JSONFileValueDeserializer : public base::ValueDeserializer {
+class JSONFileValueDeserializer : public base::ValueDeserializer {
  public:
   // |json_file_path_| is the path of a file that will be source of the
   // deserialization. |options| is a bitmask of JSONParserOptions.

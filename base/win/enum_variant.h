@@ -15,7 +15,7 @@ namespace base {
 namespace win {
 
 // A simple implementation of IEnumVARIANT.
-class BASE_EXPORT EnumVariant
+class EnumVariant
   : public IEnumVARIANT,
     public IUnknownImpl {
  public:

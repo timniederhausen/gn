@@ -11,7 +11,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "base/base_export.h"
 #include "base/strings/string16.h"
 
 namespace base {
@@ -41,20 +40,20 @@ inline bool IsValidCharacter(uint32_t code_point) {
 // (as in a for loop) will take the reader to the next character.
 //
 // Returns true on success. On false, |*code_point| will be invalid.
-BASE_EXPORT bool ReadUnicodeCharacter(const char* src,
+bool ReadUnicodeCharacter(const char* src,
                                       int32_t src_len,
                                       int32_t* char_index,
                                       uint32_t* code_point_out);
 
 // Reads a UTF-16 character. The usage is the same as the 8-bit version above.
-BASE_EXPORT bool ReadUnicodeCharacter(const char16* src,
+bool ReadUnicodeCharacter(const char16* src,
                                       int32_t src_len,
                                       int32_t* char_index,
                                       uint32_t* code_point);
 
 #if defined(WCHAR_T_IS_UTF32)
 // Reads UTF-32 character. The usage is the same as the 8-bit version above.
-BASE_EXPORT bool ReadUnicodeCharacter(const wchar_t* src,
+bool ReadUnicodeCharacter(const wchar_t* src,
                                       int32_t src_len,
                                       int32_t* char_index,
                                       uint32_t* code_point);
@@ -64,12 +63,12 @@ BASE_EXPORT bool ReadUnicodeCharacter(const wchar_t* src,
 
 // Appends a UTF-8 character to the given 8-bit string.  Returns the number of
 // bytes written.
-BASE_EXPORT size_t WriteUnicodeCharacter(uint32_t code_point,
+size_t WriteUnicodeCharacter(uint32_t code_point,
                                          std::string* output);
 
 // Appends the given code point as a UTF-16 character to the given 16-bit
 // string.  Returns the number of 16-bit values written.
-BASE_EXPORT size_t WriteUnicodeCharacter(uint32_t code_point, string16* output);
+size_t WriteUnicodeCharacter(uint32_t code_point, string16* output);
 
 #if defined(WCHAR_T_IS_UTF32)
 // Appends the given UTF-32 character to the given 32-bit string.  Returns the

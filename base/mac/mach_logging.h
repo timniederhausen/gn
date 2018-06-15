@@ -7,7 +7,6 @@
 
 #include <mach/mach.h>
 
-#include "base/base_export.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "build_config.h"
@@ -33,7 +32,7 @@
 
 namespace logging {
 
-class BASE_EXPORT MachLogMessage : public logging::LogMessage {
+class MachLogMessage : public logging::LogMessage {
  public:
   MachLogMessage(const char* file_path,
                  int line,
@@ -77,7 +76,7 @@ class BASE_EXPORT MachLogMessage : public logging::LogMessage {
 
 namespace logging {
 
-class BASE_EXPORT BootstrapLogMessage : public logging::LogMessage {
+class BootstrapLogMessage : public logging::LogMessage {
  public:
   BootstrapLogMessage(const char* file_path,
                       int line,

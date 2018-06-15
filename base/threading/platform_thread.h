@@ -11,7 +11,6 @@
 
 #include <stddef.h>
 
-#include "base/base_export.h"
 #include "base/macros.h"
 #include "base/time/time.h"
 #include "build_config.h"
@@ -100,11 +99,11 @@ class PlatformThreadHandle {
 const PlatformThreadId kInvalidThreadId(0);
 
 // A namespace for low-level thread functions.
-class BASE_EXPORT PlatformThread {
+class PlatformThread {
  public:
   // Implement this interface to run code on a background thread.  Your
   // ThreadMain method will be called on the newly created thread.
-  class BASE_EXPORT Delegate {
+  class Delegate {
    public:
     virtual void ThreadMain() = 0;
 

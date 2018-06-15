@@ -5,7 +5,6 @@
 #ifndef BASE_PROCESS_PROCESS_INFO_H_
 #define BASE_PROCESS_PROCESS_INFO_H_
 
-#include "base/base_export.h"
 #include "build_config.h"
 
 namespace base {
@@ -13,7 +12,7 @@ namespace base {
 class Time;
 
 // Vends information about the current process.
-class BASE_EXPORT CurrentProcessInfo {
+class CurrentProcessInfo {
  public:
   // Returns the time at which the process was launched. May be empty if an
   // error occurred retrieving the information.
@@ -30,10 +29,10 @@ enum IntegrityLevel {
 
 // Returns the integrity level of the process. Returns INTEGRITY_UNKNOWN in the
 // case of an underlying system failure.
-BASE_EXPORT IntegrityLevel GetCurrentProcessIntegrityLevel();
+IntegrityLevel GetCurrentProcessIntegrityLevel();
 
 // Determines whether the current process is elevated.
-BASE_EXPORT bool IsCurrentProcessElevated();
+bool IsCurrentProcessElevated();
 
 #endif  // defined(OS_WIN)
 

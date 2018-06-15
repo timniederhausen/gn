@@ -33,7 +33,7 @@ struct NONCLIENTMETRICS_XP {
 namespace base {
 namespace win {
 
-BASE_EXPORT void GetNonClientMetrics(NONCLIENTMETRICS_XP* metrics);
+void GetNonClientMetrics(NONCLIENTMETRICS_XP* metrics);
 
 }  // namespace win
 }  // namespace base

@@ -5,7 +5,6 @@
 #ifndef BASE_PROCESS_PROCESS_H_
 #define BASE_PROCESS_PROCESS_H_
 
-#include "base/base_export.h"
 #include "base/macros.h"
 #include "base/process/process_handle.h"
 #include "base/time/time.h"
@@ -30,7 +29,7 @@ namespace base {
 // POSIX: The underlying ProcessHandle is not guaranteed to remain valid after
 // the process dies, and it may be reused by the system, which means that it may
 // end up pointing to the wrong process.
-class BASE_EXPORT Process {
+class Process {
  public:
   // On Windows, this takes ownership of |handle|. On POSIX, this does not take
   // ownership of |handle|.

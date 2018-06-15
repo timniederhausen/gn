@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include "base/base_export.h"
 #include "base/files/file_path.h"
 #include "build_config.h"
 
@@ -47,13 +46,13 @@ const ProcessId kNullProcessId = 0;
 // Returns the id of the current process.
 // Note that on some platforms, this is not guaranteed to be unique across
 // processes (use GetUniqueIdForProcess if uniqueness is required).
-BASE_EXPORT ProcessId GetCurrentProcId();
+ProcessId GetCurrentProcId();
 
 // Returns a unique ID for the current process. The ID will be unique across all
 // currently running processes within the chrome session, but IDs of terminated
 // processes may be reused. This returns an opaque value that is different from
 // a process's PID.
-BASE_EXPORT uint32_t GetUniqueIdForProcess();
+uint32_t GetUniqueIdForProcess();
 
 #if defined(OS_LINUX)
 // When a process is started in a different PID namespace from the browser
@@ -62,12 +61,12 @@ BASE_EXPORT uint32_t GetUniqueIdForProcess();
 // WARNING: To avoid inconsistent results from GetUniqueIdForProcess, this
 // should only be called very early after process startup - ideally as soon
 // after process creation as possible.
-BASE_EXPORT void InitUniqueIdForProcessInPidNamespace(
+void InitUniqueIdForProcessInPidNamespace(
     ProcessId pid_outside_of_namespace);
 #endif
 
 // Returns the ProcessHandle of the current process.
-BASE_EXPORT ProcessHandle GetCurrentProcessHandle();
+ProcessHandle GetCurrentProcessHandle();
 
 // Returns the process ID for the specified process. This is functionally the
 // same as Windows' GetProcessId(), but works on versions of Windows before Win
@@ -75,18 +74,18 @@ BASE_EXPORT ProcessHandle GetCurrentProcessHandle();
 // DEPRECATED. New code should be using Process::Pid() instead.
 // Note that on some platforms, this is not guaranteed to be unique across
 // processes.
-BASE_EXPORT ProcessId GetProcId(ProcessHandle process);
+ProcessId GetProcId(ProcessHandle process);
 
 #if !defined(OS_FUCHSIA)
 // Returns the ID for the parent of the given process. Not available on Fuchsia.
 // Returning a negative value indicates an error, such as if the |process| does
 // not exist. Returns 0 when |process| has no parent process.
-BASE_EXPORT ProcessId GetParentProcessId(ProcessHandle process);
+ProcessId GetParentProcessId(ProcessHandle process);
 #endif  // !defined(OS_FUCHSIA)
 
 #if defined(OS_POSIX)
 // Returns the path to the executable of the given process.
-BASE_EXPORT FilePath GetProcessExecutablePath(ProcessHandle process);
+FilePath GetProcessExecutablePath(ProcessHandle process);
 #endif
 
 }  // namespace base

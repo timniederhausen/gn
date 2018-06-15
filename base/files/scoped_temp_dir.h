@@ -17,13 +17,12 @@
 // (CreateUniqueTempDir, CreateUniqueTempDirUnderPath, and Set) must have
 // intervening calls to Delete or Take, or the calls will fail.
 
-#include "base/base_export.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
 
 namespace base {
 
-class BASE_EXPORT ScopedTempDir {
+class ScopedTempDir {
  public:
   // No directory is owned/created initially.
   ScopedTempDir();

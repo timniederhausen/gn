@@ -11,7 +11,6 @@
 #include <string>
 #include <vector>
 
-#include "base/base_export.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/ptr_util.h"
@@ -138,7 +137,7 @@ template <typename FieldType>
 class BasicValueConverter;
 
 template <>
-class BASE_EXPORT BasicValueConverter<int> : public ValueConverter<int> {
+class BasicValueConverter<int> : public ValueConverter<int> {
  public:
   BasicValueConverter() = default;
 
@@ -149,7 +148,7 @@ class BASE_EXPORT BasicValueConverter<int> : public ValueConverter<int> {
 };
 
 template <>
-class BASE_EXPORT BasicValueConverter<std::string>
+class BasicValueConverter<std::string>
     : public ValueConverter<std::string> {
  public:
   BasicValueConverter() = default;
@@ -161,7 +160,7 @@ class BASE_EXPORT BasicValueConverter<std::string>
 };
 
 template <>
-class BASE_EXPORT BasicValueConverter<string16>
+class BasicValueConverter<string16>
     : public ValueConverter<string16> {
  public:
   BasicValueConverter() = default;
@@ -173,7 +172,7 @@ class BASE_EXPORT BasicValueConverter<string16>
 };
 
 template <>
-class BASE_EXPORT BasicValueConverter<double> : public ValueConverter<double> {
+class BasicValueConverter<double> : public ValueConverter<double> {
  public:
   BasicValueConverter() = default;
 
@@ -184,7 +183,7 @@ class BASE_EXPORT BasicValueConverter<double> : public ValueConverter<double> {
 };
 
 template <>
-class BASE_EXPORT BasicValueConverter<bool> : public ValueConverter<bool> {
+class BasicValueConverter<bool> : public ValueConverter<bool> {
  public:
   BasicValueConverter() = default;
 

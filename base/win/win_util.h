@@ -28,7 +28,6 @@
 #include <string>
 #include <vector>
 
-#include "base/base_export.h"
 #include "base/strings/string16.h"
 
 struct IPropertyStore;
@@ -52,7 +51,7 @@ inline HANDLE Uint32ToHandle(uint32_t h) {
 }
 
 // Returns the string representing the current user sid.
-BASE_EXPORT bool GetUserSidString(std::wstring* user_sid);
+bool GetUserSidString(std::wstring* user_sid);
 
 // Returns false if user account control (UAC) has been disabled with the
 // EnableLUA registry flag. Returns true if user account control is enabled.
@@ -60,42 +59,42 @@ BASE_EXPORT bool GetUserSidString(std::wstring* user_sid);
 // machines, might still exist and be set to 0 (UAC disabled), in which case
 // this function will return false. You should therefore check this flag only
 // if the OS is Vista or later.
-BASE_EXPORT bool UserAccountControlIsEnabled();
+bool UserAccountControlIsEnabled();
 
 // Sets the boolean value for a given key in given IPropertyStore.
-BASE_EXPORT bool SetBooleanValueForPropertyStore(
+bool SetBooleanValueForPropertyStore(
     IPropertyStore* property_store,
     const PROPERTYKEY& property_key,
     bool property_bool_value);
 
 // Sets the string value for a given key in given IPropertyStore.
-BASE_EXPORT bool SetStringValueForPropertyStore(
+bool SetStringValueForPropertyStore(
     IPropertyStore* property_store,
     const PROPERTYKEY& property_key,
     const wchar_t* property_string_value);
 
 // Sets the CLSID value for a given key in a given IPropertyStore.
-BASE_EXPORT bool SetClsidForPropertyStore(IPropertyStore* property_store,
+bool SetClsidForPropertyStore(IPropertyStore* property_store,
                                           const PROPERTYKEY& property_key,
                                           const CLSID& property_clsid_value);
 
 // Sets the application id in given IPropertyStore. The function is intended
 // for tagging application/chromium shortcut, browser window and jump list for
 // Win7.
-BASE_EXPORT bool SetAppIdForPropertyStore(IPropertyStore* property_store,
+bool SetAppIdForPropertyStore(IPropertyStore* property_store,
                                           const wchar_t* app_id);
 
 // Adds the specified |command| using the specified |name| to the AutoRun key.
 // |root_key| could be HKCU or HKLM or the root of any user hive.
-BASE_EXPORT bool AddCommandToAutoRun(HKEY root_key, const string16& name,
+bool AddCommandToAutoRun(HKEY root_key, const string16& name,
                                      const string16& command);
 // Removes the command specified by |name| from the AutoRun key. |root_key|
 // could be HKCU or HKLM or the root of any user hive.
-BASE_EXPORT bool RemoveCommandFromAutoRun(HKEY root_key, const string16& name);
+bool RemoveCommandFromAutoRun(HKEY root_key, const string16& name);
 
 // Reads the command specified by |name| from the AutoRun key. |root_key|
 // could be HKCU or HKLM or the root of any user hive. Used for unit-tests.
-BASE_EXPORT bool ReadCommandFromAutoRun(HKEY root_key,
+bool ReadCommandFromAutoRun(HKEY root_key,
                                         const string16& name,
                                         string16* command);
 
@@ -104,12 +103,12 @@ BASE_EXPORT bool ReadCommandFromAutoRun(HKEY root_key,
 // exit(), abort(), _exit(), ExitProcess()) and convert them into crashes.
 // Note that not all mechanisms for terminating the process are covered by
 // this. In particular, TerminateProcess() is not caught.
-BASE_EXPORT void SetShouldCrashOnProcessDetach(bool crash);
-BASE_EXPORT bool ShouldCrashOnProcessDetach();
+void SetShouldCrashOnProcessDetach(bool crash);
+bool ShouldCrashOnProcessDetach();
 
 // Adjusts the abort behavior so that crash reports can be generated when the
 // process is aborted.
-BASE_EXPORT void SetAbortBehaviorForCrashReporting();
+void SetAbortBehaviorForCrashReporting();
 
 // Get the size of a struct up to and including the specified member.
 // This is necessary to set compatible struct sizes for different versions
@@ -120,33 +119,33 @@ BASE_EXPORT void SetAbortBehaviorForCrashReporting();
 
 // Used by tests to mock any wanted state. Call with |state| set to true to
 // simulate being in a domain and false otherwise.
-BASE_EXPORT void SetDomainStateForTesting(bool state);
+void SetDomainStateForTesting(bool state);
 
 // Returns true if the current process can make USER32 or GDI32 calls such as
 // CreateWindow and CreateDC. Windows 8 and above allow the kernel component
 // of these calls to be disabled which can cause undefined behaviour such as
 // crashes. This function can be used to guard areas of code using these calls
 // and provide a fallback path if necessary.
-BASE_EXPORT bool IsUser32AndGdi32Available();
+bool IsUser32AndGdi32Available();
 
 // Takes a snapshot of the modules loaded in the |process|. The returned
 // HMODULEs are not add-ref'd, so they should not be closed and may be
 // invalidated at any time (should a module be unloaded). |process| requires
 // the PROCESS_QUERY_INFORMATION and PROCESS_VM_READ permissions.
-BASE_EXPORT bool GetLoadedModulesSnapshot(HANDLE process,
+bool GetLoadedModulesSnapshot(HANDLE process,
                                           std::vector<HMODULE>* snapshot);
 
 // Adds or removes the MICROSOFT_TABLETPENSERVICE_PROPERTY property with the
 // TABLET_DISABLE_FLICKS & TABLET_DISABLE_FLICKFALLBACKKEYS flags in order to
 // disable pen flick gestures for the given HWND.
-BASE_EXPORT void EnableFlicks(HWND hwnd);
-BASE_EXPORT void DisableFlicks(HWND hwnd);
+void EnableFlicks(HWND hwnd);
+void DisableFlicks(HWND hwnd);
 
 // Returns true if the process is per monitor DPI aware.
-BASE_EXPORT bool IsProcessPerMonitorDpiAware();
+bool IsProcessPerMonitorDpiAware();
 
 // Enable high-DPI support for the current process.
-BASE_EXPORT void EnableHighDPISupport();
+void EnableHighDPISupport();
 
 }  // namespace win
 }  // namespace base

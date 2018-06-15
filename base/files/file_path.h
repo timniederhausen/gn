@@ -108,7 +108,6 @@
 #include <string>
 #include <vector>
 
-#include "base/base_export.h"
 #include "base/compiler_specific.h"
 #include "base/macros.h"
 #include "base/strings/string16.h"
@@ -140,7 +139,7 @@ class PickleIterator;
 
 // An abstraction to isolate users from the differences between native
 // pathnames on different platforms.
-class BASE_EXPORT FilePath {
+class FilePath {
  public:
 #if defined(OS_WIN)
   // On Windows, for Unicode-aware applications, native pathnames are wchar_t
@@ -438,7 +437,7 @@ class BASE_EXPORT FilePath {
   StringType path_;
 };
 
-BASE_EXPORT std::ostream& operator<<(std::ostream& out,
+std::ostream& operator<<(std::ostream& out,
                                      const FilePath& file_path);
 
 }  // namespace base

@@ -10,7 +10,6 @@
 
 #include <vector>
 
-#include "base/base_export.h"
 #include "base/containers/stack.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
@@ -37,10 +36,10 @@ namespace base {
 //                             FILE_PATH_LITERAL("*.txt"));
 //   for (base::FilePath name = enum.Next(); !name.empty(); name = enum.Next())
 //     ...
-class BASE_EXPORT FileEnumerator {
+class FileEnumerator {
  public:
   // Note: copy & assign supported.
-  class BASE_EXPORT FileInfo {
+  class FileInfo {
    public:
     FileInfo();
     ~FileInfo();

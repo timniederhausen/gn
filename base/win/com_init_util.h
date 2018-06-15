@@ -5,7 +5,6 @@
 #ifndef BASE_WIN_COM_INIT_UTIL_H_
 #define BASE_WIN_COM_INIT_UTIL_H_
 
-#include "base/base_export.h"
 #include "base/logging.h"
 
 namespace base {
@@ -24,11 +23,11 @@ enum class ComApartmentType {
 
 // DCHECKs if COM is not initialized on this thread as an STA or MTA.
 // |message| is optional and is used for the DCHECK if specified.
-BASE_EXPORT void AssertComInitialized(const char* message = nullptr);
+void AssertComInitialized(const char* message = nullptr);
 
 // DCHECKs if |apartment_type| is not the same as the current thread's apartment
 // type.
-BASE_EXPORT void AssertComApartmentType(ComApartmentType apartment_type);
+void AssertComApartmentType(ComApartmentType apartment_type);
 
 #else   // DCHECK_IS_ON()
 inline void AssertComInitialized() {}

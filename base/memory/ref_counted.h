@@ -10,7 +10,6 @@
 #include <utility>
 
 #include "base/atomic_ref_count.h"
-#include "base/base_export.h"
 #include "base/compiler_specific.h"
 #include "base/logging.h"
 #include "base/macros.h"
@@ -20,7 +19,7 @@
 namespace base {
 namespace subtle {
 
-class BASE_EXPORT RefCountedBase {
+class RefCountedBase {
  public:
   bool HasOneRef() const { return ref_count_ == 1; }
 
@@ -85,7 +84,7 @@ class BASE_EXPORT RefCountedBase {
   DISALLOW_COPY_AND_ASSIGN(RefCountedBase);
 };
 
-class BASE_EXPORT RefCountedThreadSafeBase {
+class RefCountedThreadSafeBase {
  public:
   bool HasOneRef() const;
 
@@ -145,7 +144,7 @@ class BASE_EXPORT RefCountedThreadSafeBase {
 // should properly std::move() the ref to avoid hitting this check).
 // TODO(tzik): Cleanup existing use cases and remove
 // ScopedAllowCrossThreadRefCountAccess.
-class BASE_EXPORT ScopedAllowCrossThreadRefCountAccess final {
+class ScopedAllowCrossThreadRefCountAccess final {
  public:
   ScopedAllowCrossThreadRefCountAccess() {}
   ~ScopedAllowCrossThreadRefCountAccess() {}

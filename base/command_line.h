@@ -20,7 +20,6 @@
 #include <string>
 #include <vector>
 
-#include "base/base_export.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
 #include "build_config.h"
@@ -29,7 +28,7 @@ namespace base {
 
 class FilePath;
 
-class BASE_EXPORT CommandLine {
+class CommandLine {
  public:
 #if defined(OS_WIN)
   // The native command line string type.

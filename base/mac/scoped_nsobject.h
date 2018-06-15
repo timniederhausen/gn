@@ -12,7 +12,6 @@
 // singled out because it is most typically included from other header files.
 #import <Foundation/NSObject.h>
 
-#include "base/base_export.h"
 #include "base/compiler_specific.h"
 #include "base/mac/scoped_typeref.h"
 
@@ -51,11 +50,11 @@ namespace base {
 
 namespace internal {
 
-BASE_EXPORT id ScopedNSProtocolTraitsRetain(__unsafe_unretained id obj)
+id ScopedNSProtocolTraitsRetain(__unsafe_unretained id obj)
     __attribute((ns_returns_not_retained));
-BASE_EXPORT id ScopedNSProtocolTraitsAutoRelease(__unsafe_unretained id obj)
+id ScopedNSProtocolTraitsAutoRelease(__unsafe_unretained id obj)
     __attribute((ns_returns_not_retained));
-BASE_EXPORT void ScopedNSProtocolTraitsRelease(__unsafe_unretained id obj);
+void ScopedNSProtocolTraitsRelease(__unsafe_unretained id obj);
 
 // Traits for ScopedTypeRef<>. As this class may be compiled from file with
 // Automatic Reference Counting enable or not all methods have annotation to

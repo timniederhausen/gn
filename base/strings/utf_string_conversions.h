@@ -9,7 +9,6 @@
 
 #include <string>
 
-#include "base/base_export.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
 
@@ -21,33 +20,33 @@ namespace base {
 // do the best it can and put the result in the output buffer. The versions that
 // return strings ignore this error and just return the best conversion
 // possible.
-BASE_EXPORT bool WideToUTF8(const wchar_t* src, size_t src_len,
+bool WideToUTF8(const wchar_t* src, size_t src_len,
                             std::string* output);
-BASE_EXPORT std::string WideToUTF8(WStringPiece wide);
-BASE_EXPORT bool UTF8ToWide(const char* src, size_t src_len,
+std::string WideToUTF8(WStringPiece wide);
+bool UTF8ToWide(const char* src, size_t src_len,
                             std::wstring* output);
-BASE_EXPORT std::wstring UTF8ToWide(StringPiece utf8);
+std::wstring UTF8ToWide(StringPiece utf8);
 
-BASE_EXPORT bool WideToUTF16(const wchar_t* src, size_t src_len,
+bool WideToUTF16(const wchar_t* src, size_t src_len,
                              string16* output);
-BASE_EXPORT string16 WideToUTF16(WStringPiece wide);
-BASE_EXPORT bool UTF16ToWide(const char16* src, size_t src_len,
+string16 WideToUTF16(WStringPiece wide);
+bool UTF16ToWide(const char16* src, size_t src_len,
                              std::wstring* output);
-BASE_EXPORT std::wstring UTF16ToWide(StringPiece16 utf16);
+std::wstring UTF16ToWide(StringPiece16 utf16);
 
-BASE_EXPORT bool UTF8ToUTF16(const char* src, size_t src_len, string16* output);
-BASE_EXPORT string16 UTF8ToUTF16(StringPiece utf8);
-BASE_EXPORT bool UTF16ToUTF8(const char16* src, size_t src_len,
+bool UTF8ToUTF16(const char* src, size_t src_len, string16* output);
+string16 UTF8ToUTF16(StringPiece utf8);
+bool UTF16ToUTF8(const char16* src, size_t src_len,
                              std::string* output);
-BASE_EXPORT std::string UTF16ToUTF8(StringPiece16 utf16);
+std::string UTF16ToUTF8(StringPiece16 utf16);
 
 // This converts an ASCII string, typically a hardcoded constant, to a UTF16
 // string.
-BASE_EXPORT string16 ASCIIToUTF16(StringPiece ascii);
+string16 ASCIIToUTF16(StringPiece ascii);
 
 // Converts to 7-bit ASCII by truncating. The result must be known to be ASCII
 // beforehand.
-BASE_EXPORT std::string UTF16ToASCII(StringPiece16 utf16);
+std::string UTF16ToASCII(StringPiece16 utf16);
 
 }  // namespace base
 

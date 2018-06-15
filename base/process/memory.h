@@ -7,7 +7,6 @@
 
 #include <stddef.h>
 
-#include "base/base_export.h"
 #include "base/process/process_handle.h"
 #include "build_config.h"
 
@@ -23,17 +22,17 @@ namespace base {
 
 // Enables 'terminate on heap corruption' flag. Helps protect against heap
 // overflow. Has no effect if the OS doesn't provide the necessary facility.
-BASE_EXPORT void EnableTerminationOnHeapCorruption();
+void EnableTerminationOnHeapCorruption();
 
 // Turns on process termination if memory runs out.
-BASE_EXPORT void EnableTerminationOnOutOfMemory();
+void EnableTerminationOnOutOfMemory();
 
 // Terminates process. Should be called only for out of memory errors.
 // Crash reporting classifies such crashes as OOM.
-BASE_EXPORT void TerminateBecauseOutOfMemory(size_t size);
+void TerminateBecauseOutOfMemory(size_t size);
 
 #if defined(OS_LINUX) || defined(OS_ANDROID) || defined(OS_AIX)
-BASE_EXPORT extern size_t g_oom_size;
+extern size_t g_oom_size;
 
 // The maximum allowed value for the OOM score.
 const int kMaxOomScore = 1000;
@@ -45,7 +44,7 @@ const int kMaxOomScore = 1000;
 // of [0, 1000], then we revert to using the older oom_adj, and
 // translate the given value into [0, 15].  Some aliasing of values
 // may occur in that case, of course.
-BASE_EXPORT bool AdjustOOMScore(ProcessId process, int score);
+bool AdjustOOMScore(ProcessId process, int score);
 #endif
 
 #if defined(OS_WIN)
@@ -72,9 +71,9 @@ const DWORD kOomExceptionCode = 0xe0000008;
 // specifically ASan and other sanitizers.
 // Return value tells whether the allocation succeeded. If it fails |result| is
 // set to NULL, otherwise it holds the memory address.
-BASE_EXPORT WARN_UNUSED_RESULT bool UncheckedMalloc(size_t size,
+WARN_UNUSED_RESULT bool UncheckedMalloc(size_t size,
                                                     void** result);
-BASE_EXPORT WARN_UNUSED_RESULT bool UncheckedCalloc(size_t num_items,
+WARN_UNUSED_RESULT bool UncheckedCalloc(size_t num_items,
                                                     size_t size,
                                                     void** result);
 

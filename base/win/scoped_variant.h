@@ -9,7 +9,6 @@
 #include <oleauto.h>
 #include <stdint.h>
 
-#include "base/base_export.h"
 #include "base/macros.h"
 
 namespace base {
@@ -21,7 +20,7 @@ namespace win {
 // Instead of inheriting from VARIANT, we take the containment approach
 // in order to have more control over the usage of the variant and guard
 // against memory leaks.
-class BASE_EXPORT ScopedVariant {
+class ScopedVariant {
  public:
   // Declaration of a global variant variable that's always VT_EMPTY
   static const VARIANT kEmptyVariant;

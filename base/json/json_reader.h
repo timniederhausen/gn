@@ -31,7 +31,6 @@
 #include <memory>
 #include <string>
 
-#include "base/base_export.h"
 #include "base/strings/string_piece.h"
 
 namespace base {
@@ -56,7 +55,7 @@ enum JSONParserOptions {
   JSON_REPLACE_INVALID_CHARACTERS = 1 << 1,
 };
 
-class BASE_EXPORT JSONReader {
+class JSONReader {
  public:
   static const int kStackMaxDepth;
 

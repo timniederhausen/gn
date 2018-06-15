@@ -19,7 +19,6 @@
 #import <QuartzCore/QuartzCore.h>
 #include <stdint.h>
 
-#include "base/base_export.h"
 #include "base/mac/availability.h"
 
 // ----------------------------------------------------------------------------
@@ -77,10 +76,10 @@ typedef NSUInteger NSSpringLoadingHighlight;
 extern "C" {
 #if !defined(MAC_OS_X_VERSION_10_10) || \
     MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_10
-BASE_EXPORT extern NSString* const CIDetectorTypeQRCode;
-BASE_EXPORT extern NSString* const NSUserActivityTypeBrowsingWeb;
-BASE_EXPORT extern NSString* const NSAppearanceNameVibrantDark;
-BASE_EXPORT extern NSString* const NSAppearanceNameVibrantLight;
+extern NSString* const CIDetectorTypeQRCode;
+extern NSString* const NSUserActivityTypeBrowsingWeb;
+extern NSString* const NSAppearanceNameVibrantDark;
+extern NSString* const NSAppearanceNameVibrantLight;
 #endif  // MAC_OS_X_VERSION_10_10
 }  // extern "C"
 
@@ -170,7 +169,7 @@ BASE_EXPORT extern NSString* const NSAppearanceNameVibrantLight;
 extern "C" {
 #if !defined(MAC_OS_X_VERSION_10_11) || \
     MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_11
-BASE_EXPORT extern NSString* const CIDetectorTypeText;
+extern NSString* const CIDetectorTypeText;
 #endif  // MAC_OS_X_VERSION_10_11
 }  // extern "C"
 
@@ -329,6 +328,6 @@ typedef NSString* VNImageOption NS_STRING_ENUM;
 // declared in the OSX 10.9+ SDK, so when compiling against an OSX 10.9+ SDK,
 // declare the symbol.
 // ----------------------------------------------------------------------------
-BASE_EXPORT extern "C" NSString* const kCWSSIDDidChangeNotification;
+extern "C" NSString* const kCWSSIDDidChangeNotification;
 
 #endif  // BASE_MAC_SDK_FORWARD_DECLARATIONS_H_

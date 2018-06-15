@@ -14,7 +14,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "base/base_export.h"
 #include "base/callback_forward.h"
 #include "base/compiler_specific.h"
 #include "base/macros.h"
@@ -144,7 +143,7 @@ enum LogLockingState { LOCK_LOG_FILE, DONT_LOCK_LOG_FILE };
 // Defaults to APPEND_TO_OLD_LOG_FILE.
 enum OldFileDeletionState { DELETE_OLD_LOG_FILE, APPEND_TO_OLD_LOG_FILE };
 
-struct BASE_EXPORT LoggingSettings {
+struct LoggingSettings {
   // The defaults values are:
   //
   //  logging_dest: LOG_DEFAULT
@@ -175,7 +174,7 @@ struct BASE_EXPORT LoggingSettings {
 // Implementation of the InitLogging() method declared below.  We use a
 // more-specific name so we can #define it above without affecting other code
 // that has named stuff "InitLogging".
-BASE_EXPORT bool BaseInitLoggingImpl(const LoggingSettings& settings);
+bool BaseInitLoggingImpl(const LoggingSettings& settings);
 
 // Sets the log file name and other global logging state. Calling this function
 // is recommended, and is normally done at the beginning of application init.
@@ -199,25 +198,25 @@ inline bool InitLogging(const LoggingSettings& settings) {
 // log file/displayed to the user (if applicable). Anything below this level
 // will be silently ignored. The log level defaults to 0 (everything is logged
 // up to level INFO) if this function is not called.
-BASE_EXPORT void SetMinLogLevel(int level);
+void SetMinLogLevel(int level);
 
 // Gets the current log level.
-BASE_EXPORT int GetMinLogLevel();
+int GetMinLogLevel();
 
 // Used by LOG_IS_ON to lazy-evaluate stream arguments.
-BASE_EXPORT bool ShouldCreateLogMessage(int severity);
+bool ShouldCreateLogMessage(int severity);
 
 // Sets the common items you want to be prepended to each log message.
 // process and thread IDs default to off, the timestamp defaults to on.
 // If this function is not called, logging defaults to writing the timestamp
 // only.
-BASE_EXPORT void SetLogItems(bool enable_process_id, bool enable_thread_id,
+void SetLogItems(bool enable_process_id, bool enable_thread_id,
                              bool enable_timestamp, bool enable_tickcount);
 
 // Sets whether or not you'd like to see fatal debug messages popped up in
 // a dialog box or not.
 // Dialogs are not shown by default.
-BASE_EXPORT void SetShowErrorDialogs(bool enable_dialogs);
+void SetShowErrorDialogs(bool enable_dialogs);
 
 // Sets the Log Message Handler that gets passed every log message before
 // it's sent to other log destinations (if any).
@@ -225,8 +224,8 @@ BASE_EXPORT void SetShowErrorDialogs(bool enable_dialogs);
 // should not be sent to other log destinations.
 typedef bool (*LogMessageHandlerFunction)(int severity,
     const char* file, int line, size_t message_start, const std::string& str);
-BASE_EXPORT void SetLogMessageHandler(LogMessageHandlerFunction handler);
-BASE_EXPORT LogMessageHandlerFunction GetLogMessageHandler();
+void SetLogMessageHandler(LogMessageHandlerFunction handler);
+LogMessageHandlerFunction GetLogMessageHandler();
 
 // The ANALYZER_ASSUME_TRUE(bool arg) macro adds compiler-specific hints
 // to Clang which control what code paths are statically analyzed,
@@ -360,7 +359,7 @@ const LogSeverity LOG_0 = LOG_ERROR;
 #define PLOG_IF(severity, condition) \
   LAZY_STREAM(PLOG_STREAM(severity), LOG_IS_ON(severity) && (condition))
 
-BASE_EXPORT extern std::ostream* g_swallow_stream;
+extern std::ostream* g_swallow_stream;
 
 // Note that g_swallow_stream is used instead of an arbitrary LOG() stream to
 // avoid the creation of an object with a non-trivial destructor (LogMessage).
@@ -606,7 +605,7 @@ MakeCheckOpValueString(std::ostream* os, const T& v) {
 }
 
 // We need an explicit overload for std::nullptr_t.
-BASE_EXPORT void MakeCheckOpValueString(std::ostream* os, std::nullptr_t p);
+void MakeCheckOpValueString(std::ostream* os, std::nullptr_t p);
 
 // Build the error message string.  This is separate from the "Impl"
 // function template because it is not performance critical and so can
@@ -626,18 +625,18 @@ std::string* MakeCheckOpString(const t1& v1, const t2& v2, const char* names) {
 
 // Commonly used instantiations of MakeCheckOpString<>. Explicitly instantiated
 // in logging.cc.
-extern template BASE_EXPORT std::string* MakeCheckOpString<int, int>(
+extern template std::string* MakeCheckOpString<int, int>(
     const int&, const int&, const char* names);
-extern template BASE_EXPORT
+extern template
 std::string* MakeCheckOpString<unsigned long, unsigned long>(
     const unsigned long&, const unsigned long&, const char* names);
-extern template BASE_EXPORT
+extern template
 std::string* MakeCheckOpString<unsigned long, unsigned int>(
     const unsigned long&, const unsigned int&, const char* names);
-extern template BASE_EXPORT
+extern template
 std::string* MakeCheckOpString<unsigned int, unsigned long>(
     const unsigned int&, const unsigned long&, const char* names);
-extern template BASE_EXPORT
+extern template
 std::string* MakeCheckOpString<std::string, std::string>(
     const std::string&, const std::string&, const char* name);
 
@@ -718,7 +717,7 @@ DEFINE_CHECK_OP_IMPL(GT, > )
 #if DCHECK_IS_ON()
 
 #if DCHECK_IS_CONFIGURABLE
-BASE_EXPORT extern LogSeverity LOG_DCHECK;
+extern LogSeverity LOG_DCHECK;
 #else
 const LogSeverity LOG_DCHECK = LOG_FATAL;
 #endif
@@ -861,7 +860,7 @@ void LogErrorNotReached(const char* file, int line);
 // You shouldn't actually use LogMessage's constructor to log things,
 // though.  You should use the LOG() macro (and variants thereof)
 // above.
-class BASE_EXPORT LogMessage {
+class LogMessage {
  public:
   // Used for LOG(severity).
   LogMessage(const char* file, int line, LogSeverity severity);
@@ -937,12 +936,12 @@ typedef int SystemErrorCode;
 
 // Alias for ::GetLastError() on Windows and errno on POSIX. Avoids having to
 // pull in windows.h just for GetLastError() and DWORD.
-BASE_EXPORT SystemErrorCode GetLastSystemErrorCode();
-BASE_EXPORT std::string SystemErrorCodeToString(SystemErrorCode error_code);
+SystemErrorCode GetLastSystemErrorCode();
+std::string SystemErrorCodeToString(SystemErrorCode error_code);
 
 #if defined(OS_WIN)
 // Appends a formatted system message of the GetLastError() type.
-class BASE_EXPORT Win32ErrorLogMessage {
+class Win32ErrorLogMessage {
  public:
   Win32ErrorLogMessage(const char* file,
                        int line,
@@ -962,7 +961,7 @@ class BASE_EXPORT Win32ErrorLogMessage {
 };
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
 // Appends a formatted system message of the errno type
-class BASE_EXPORT ErrnoLogMessage {
+class ErrnoLogMessage {
  public:
   ErrnoLogMessage(const char* file,
                   int line,
@@ -986,10 +985,10 @@ class BASE_EXPORT ErrnoLogMessage {
 // NOTE: Since the log file is opened as necessary by the action of logging
 //       statements, there's no guarantee that it will stay closed
 //       after this call.
-BASE_EXPORT void CloseLogFile();
+void CloseLogFile();
 
 // Async signal safe logging mechanism.
-BASE_EXPORT void RawLog(int level, const char* message);
+void RawLog(int level, const char* message);
 
 #define RAW_LOG(level, message) \
   ::logging::RawLog(::logging::LOG_##level, message)
@@ -1003,10 +1002,10 @@ BASE_EXPORT void RawLog(int level, const char* message);
 
 #if defined(OS_WIN)
 // Returns true if logging to file is enabled.
-BASE_EXPORT bool IsLoggingToFileEnabled();
+bool IsLoggingToFileEnabled();
 
 // Returns the default log file path.
-BASE_EXPORT std::wstring GetLogFileFullPath();
+std::wstring GetLogFileFullPath();
 #endif
 
 }  // namespace logging
@@ -1026,7 +1025,7 @@ namespace std {
 // which is normally ASCII. It is relatively slow, so try not to use it for
 // common cases. Non-ASCII characters will be converted to UTF-8 by these
 // operators.
-BASE_EXPORT std::ostream& operator<<(std::ostream& out, const wchar_t* wstr);
+std::ostream& operator<<(std::ostream& out, const wchar_t* wstr);
 inline std::ostream& operator<<(std::ostream& out, const std::wstring& wstr) {
   return out << wstr.c_str();
 }

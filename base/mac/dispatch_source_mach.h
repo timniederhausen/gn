@@ -7,7 +7,6 @@
 
 #include <dispatch/dispatch.h>
 
-#include "base/base_export.h"
 #include "base/mac/scoped_dispatch_object.h"
 #include "base/macros.h"
 
@@ -17,7 +16,7 @@ namespace base {
 // destroyed, the source will be cancelled and it will wait for the source
 // to stop executing work. The source can run on either a user-supplied queue,
 // or it can create its own for the source.
-class BASE_EXPORT DispatchSourceMach {
+class DispatchSourceMach {
  public:
   // Creates a new dispatch source for the |port| and schedules it on a new
   // queue that will be created with |name|. When a Mach message is received,

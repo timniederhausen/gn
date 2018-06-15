@@ -5,14 +5,13 @@
 #ifndef BASE_TIMER_ELAPSED_TIMER_H_
 #define BASE_TIMER_ELAPSED_TIMER_H_
 
-#include "base/base_export.h"
 #include "base/macros.h"
 #include "base/time/time.h"
 
 namespace base {
 
 // A simple wrapper around TimeTicks::Now().
-class BASE_EXPORT ElapsedTimer {
+class ElapsedTimer {
  public:
   ElapsedTimer();
   ElapsedTimer(ElapsedTimer&& other);

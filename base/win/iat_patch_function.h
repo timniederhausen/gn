@@ -7,7 +7,6 @@
 
 #include <windows.h>
 
-#include "base/base_export.h"
 #include "base/macros.h"
 
 namespace base {
@@ -20,7 +19,7 @@ namespace win {
 // This is the case when, for example, we want to intercept
 // CertDuplicateCertificateContext function (exported from crypt32.dll) called
 // by wininet.dll.
-class BASE_EXPORT IATPatchFunction {
+class IATPatchFunction {
  public:
   IATPatchFunction();
   ~IATPatchFunction();

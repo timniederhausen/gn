@@ -33,7 +33,6 @@
 #include <functional>
 #include <string>
 
-#include "base/base_export.h"
 #include "build_config.h"
 
 #if defined(WCHAR_T_IS_UTF16)
@@ -56,12 +55,12 @@ typedef uint16_t char16;
 // char16 versions of the functions required by string16_char_traits; these
 // are based on the wide character functions of similar names ("w" or "wcs"
 // instead of "c16").
-BASE_EXPORT int c16memcmp(const char16* s1, const char16* s2, size_t n);
-BASE_EXPORT size_t c16len(const char16* s);
-BASE_EXPORT const char16* c16memchr(const char16* s, char16 c, size_t n);
-BASE_EXPORT char16* c16memmove(char16* s1, const char16* s2, size_t n);
-BASE_EXPORT char16* c16memcpy(char16* s1, const char16* s2, size_t n);
-BASE_EXPORT char16* c16memset(char16* s, char16 c, size_t n);
+int c16memcmp(const char16* s1, const char16* s2, size_t n);
+size_t c16len(const char16* s);
+const char16* c16memchr(const char16* s, char16 c, size_t n);
+char16* c16memmove(char16* s1, const char16* s2, size_t n);
+char16* c16memcpy(char16* s1, const char16* s2, size_t n);
+char16* c16memset(char16* s, char16 c, size_t n);
 
 // This namespace contains the implementation of base::string16 along with
 // things that need to be found via argument-dependent lookup from a
@@ -146,11 +145,11 @@ typedef std::basic_string<char16,
 
 namespace string16_internals {
 
-BASE_EXPORT extern std::ostream& operator<<(std::ostream& out,
+extern std::ostream& operator<<(std::ostream& out,
                                             const string16& str);
 
 // This is required by googletest to print a readable output on test failures.
-BASE_EXPORT extern void PrintTo(const string16& str, std::ostream* out);
+extern void PrintTo(const string16& str, std::ostream* out);
 
 }  // namespace string16_internals
 
@@ -195,7 +194,7 @@ BASE_EXPORT extern void PrintTo(const string16& str, std::ostream* out);
 //
 // TODO(mark): File this bug with Apple and update this note with a bug number.
 
-extern template class BASE_EXPORT
+extern template class
     std::basic_string<base::char16,
                       base::string16_internals::string16_char_traits>;
 

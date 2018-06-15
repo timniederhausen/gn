@@ -9,7 +9,6 @@
 #include <oleauto.h>
 #include <stddef.h>
 
-#include "base/base_export.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/strings/string16.h"
@@ -19,7 +18,7 @@ namespace win {
 
 // Manages a BSTR string pointer.
 // The class interface is based on unique_ptr.
-class BASE_EXPORT ScopedBstr {
+class ScopedBstr {
  public:
   ScopedBstr() : bstr_(NULL) {
   }

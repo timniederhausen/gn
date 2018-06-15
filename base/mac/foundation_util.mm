@@ -80,7 +80,7 @@ void SetOverrideAmIBundled(bool value) {
   g_override_am_i_bundled_value = value;
 }
 
-BASE_EXPORT void ClearAmIBundledCache() {
+void ClearAmIBundledCache() {
   g_cached_am_i_bundled_called = false;
 }
 

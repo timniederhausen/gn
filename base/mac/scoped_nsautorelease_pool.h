@@ -5,7 +5,6 @@
 #ifndef BASE_MAC_SCOPED_NSAUTORELEASE_POOL_H_
 #define BASE_MAC_SCOPED_NSAUTORELEASE_POOL_H_
 
-#include "base/base_export.h"
 #include "base/macros.h"
 
 #if defined(__OBJC__)
@@ -22,7 +21,7 @@ namespace mac {
 // be maintained in ordinary C++ code without bringing in any direct Objective-C
 // dependency.
 
-class BASE_EXPORT ScopedNSAutoreleasePool {
+class ScopedNSAutoreleasePool {
  public:
   ScopedNSAutoreleasePool();
   ~ScopedNSAutoreleasePool();

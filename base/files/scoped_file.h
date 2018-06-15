@@ -9,7 +9,6 @@
 
 #include <memory>
 
-#include "base/base_export.h"
 #include "base/logging.h"
 #include "base/scoped_generic.h"
 #include "build_config.h"
@@ -19,7 +18,7 @@ namespace base {
 namespace internal {
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
-struct BASE_EXPORT ScopedFDCloseTraits {
+struct ScopedFDCloseTraits {
   static int InvalidValue() {
     return -1;
   }

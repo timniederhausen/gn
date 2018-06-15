@@ -9,7 +9,6 @@
 #include <string>
 #include <utility>
 
-#include "base/base_export.h"
 #include "base/containers/flat_map.h"
 #include "base/macros.h"
 
@@ -26,7 +25,7 @@ using DictStorage = base::flat_map<std::string, std::unique_ptr<Value>>;
 // value_type is std::pair<const std::string, Value>. It's reference type is a
 // std::pair<const std::string&, Value&>, so that callers have read-write
 // access without incurring a copy.
-class BASE_EXPORT dict_iterator {
+class dict_iterator {
  public:
   using difference_type = DictStorage::iterator::difference_type;
   using value_type = std::pair<const std::string, Value>;
@@ -58,9 +57,9 @@ class BASE_EXPORT dict_iterator {
   dict_iterator& operator--();
   dict_iterator operator--(int);
 
-  BASE_EXPORT friend bool operator==(const dict_iterator& lhs,
+  friend bool operator==(const dict_iterator& lhs,
                                      const dict_iterator& rhs);
-  BASE_EXPORT friend bool operator!=(const dict_iterator& lhs,
+  friend bool operator!=(const dict_iterator& lhs,
                                      const dict_iterator& rhs);
 
  private:
@@ -72,7 +71,7 @@ class BASE_EXPORT dict_iterator {
 // value_type is std::pair<const std::string, Value>. It's reference type is a
 // std::pair<const std::string&, const Value&>, so that callers have read-only
 // access without incurring a copy.
-class BASE_EXPORT const_dict_iterator {
+class const_dict_iterator {
  public:
   using difference_type = DictStorage::const_iterator::difference_type;
   using value_type = std::pair<const std::string, Value>;
@@ -104,9 +103,9 @@ class BASE_EXPORT const_dict_iterator {
   const_dict_iterator& operator--();
   const_dict_iterator operator--(int);
 
-  BASE_EXPORT friend bool operator==(const const_dict_iterator& lhs,
+  friend bool operator==(const const_dict_iterator& lhs,
                                      const const_dict_iterator& rhs);
-  BASE_EXPORT friend bool operator!=(const const_dict_iterator& lhs,
+  friend bool operator!=(const const_dict_iterator& lhs,
                                      const const_dict_iterator& rhs);
 
  private:
@@ -118,7 +117,7 @@ class BASE_EXPORT const_dict_iterator {
 // to use this class for easy iteration over the underlying values, granting
 // them either read-only or read-write access, depending on the
 // const-qualification.
-class BASE_EXPORT dict_iterator_proxy {
+class dict_iterator_proxy {
  public:
   using key_type = DictStorage::key_type;
   using mapped_type = DictStorage::mapped_type::element_type;
@@ -157,7 +156,7 @@ class BASE_EXPORT dict_iterator_proxy {
 // underlying DictStorage in const_dict_iterators. This allows callers to use
 // this class for easy iteration over the underlying values, granting them
 // either read-only access.
-class BASE_EXPORT const_dict_iterator_proxy {
+class const_dict_iterator_proxy {
  public:
   using key_type = const DictStorage::key_type;
   using mapped_type = const DictStorage::mapped_type::element_type;

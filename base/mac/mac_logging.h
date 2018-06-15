@@ -5,7 +5,6 @@
 #ifndef BASE_MAC_MAC_LOGGING_H_
 #define BASE_MAC_MAC_LOGGING_H_
 
-#include "base/base_export.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "build_config.h"
@@ -30,9 +29,9 @@
 namespace logging {
 
 // Returns a UTF8 description from an OS X Status error.
-BASE_EXPORT std::string DescriptionFromOSStatus(OSStatus err);
+std::string DescriptionFromOSStatus(OSStatus err);
 
-class BASE_EXPORT OSStatusLogMessage : public logging::LogMessage {
+class OSStatusLogMessage : public logging::LogMessage {
  public:
   OSStatusLogMessage(const char* file_path,
                      int line,

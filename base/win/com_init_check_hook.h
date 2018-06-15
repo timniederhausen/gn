@@ -5,7 +5,6 @@
 #ifndef BASE_WIN_COM_INIT_CHECK_HOOK_H_
 #define BASE_WIN_COM_INIT_CHECK_HOOK_H_
 
-#include "base/base_export.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "build_config.h"
@@ -28,7 +27,7 @@ namespace win {
 // COM to be initialized and only works if COM_INIT_CHECK_HOOK_ENABLED is
 // defined. Care should be taken if this is instantiated with multiple threads
 // running as the hotpatch does not apply atomically.
-class BASE_EXPORT ComInitCheckHook {
+class ComInitCheckHook {
  public:
   ComInitCheckHook();
   ~ComInitCheckHook();

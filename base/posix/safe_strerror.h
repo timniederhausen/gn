@@ -9,7 +9,6 @@
 
 #include <string>
 
-#include "base/base_export.h"
 
 namespace base {
 
@@ -29,7 +28,7 @@ namespace base {
 // result is always null-terminated. The value of errno is never changed.
 //
 // Use this instead of strerror_r().
-BASE_EXPORT void safe_strerror_r(int err, char *buf, size_t len);
+void safe_strerror_r(int err, char *buf, size_t len);
 
 // Calls safe_strerror_r with a buffer of suitable size and returns the result
 // in a C++ string.
@@ -37,7 +36,7 @@ BASE_EXPORT void safe_strerror_r(int err, char *buf, size_t len);
 // Use this instead of strerror(). Note though that safe_strerror_r will be
 // more robust in the case of heap corruption errors, since it doesn't need to
 // allocate a string.
-BASE_EXPORT std::string safe_strerror(int err);
+std::string safe_strerror(int err);
 
 }  // namespace base
 

@@ -23,7 +23,6 @@
 
 #include <vector>
 
-#include "base/base_export.h"
 #include "base/compiler_specific.h"
 
 namespace base {
@@ -47,7 +46,7 @@ class InjectionDelegate {
 
 // An implementation of the InjectionDelegate interface using the file
 // descriptor table of the current process as the domain.
-class BASE_EXPORT FileDescriptorTableInjection : public InjectionDelegate {
+class FileDescriptorTableInjection : public InjectionDelegate {
   bool Duplicate(int* result, int fd) override;
   bool Move(int src, int dest) override;
   void Close(int fd) override;
@@ -69,10 +68,10 @@ struct InjectionArc {
 
 typedef std::vector<InjectionArc> InjectiveMultimap;
 
-BASE_EXPORT bool PerformInjectiveMultimap(const InjectiveMultimap& map,
+bool PerformInjectiveMultimap(const InjectiveMultimap& map,
                                           InjectionDelegate* delegate);
 
-BASE_EXPORT bool PerformInjectiveMultimapDestructive(
+bool PerformInjectiveMultimapDestructive(
     InjectiveMultimap* map,
     InjectionDelegate* delegate);
 

@@ -5,7 +5,6 @@
 #ifndef BASE_SYNCHRONIZATION_LOCK_IMPL_H_
 #define BASE_SYNCHRONIZATION_LOCK_IMPL_H_
 
-#include "base/base_export.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "build_config.h"
@@ -23,7 +22,7 @@ namespace internal {
 // This class implements the underlying platform-specific spin-lock mechanism
 // used for the Lock class.  Most users should not use LockImpl directly, but
 // should instead use Lock.
-class BASE_EXPORT LockImpl {
+class LockImpl {
  public:
 #if defined(OS_WIN)
   using NativeHandle = CHROME_SRWLOCK;

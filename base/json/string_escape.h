@@ -9,7 +9,6 @@
 
 #include <string>
 
-#include "base/base_export.h"
 #include "base/strings/string_piece.h"
 
 namespace base {
@@ -26,21 +25,21 @@ namespace base {
 //
 // If |put_in_quotes| is true, then a leading and trailing double-quote mark
 // will be appended to |dest| as well.
-BASE_EXPORT bool EscapeJSONString(StringPiece str,
+bool EscapeJSONString(StringPiece str,
                                   bool put_in_quotes,
                                   std::string* dest);
 
 // Performs a similar function to the UTF-8 StringPiece version above,
 // converting UTF-16 code units to UTF-8 code units and escaping non-printing
 // control characters. On return, |dest| will contain a valid UTF-8 JSON string.
-BASE_EXPORT bool EscapeJSONString(StringPiece16 str,
+bool EscapeJSONString(StringPiece16 str,
                                   bool put_in_quotes,
                                   std::string* dest);
 
 // Helper functions that wrap the above two functions but return the value
 // instead of appending. |put_in_quotes| is always true.
-BASE_EXPORT std::string GetQuotedJSONString(StringPiece str);
-BASE_EXPORT std::string GetQuotedJSONString(StringPiece16 str);
+std::string GetQuotedJSONString(StringPiece str);
+std::string GetQuotedJSONString(StringPiece16 str);
 
 // Given an arbitrary byte string |str|, this will escape all non-ASCII bytes
 // as \uXXXX escape sequences. This function is *NOT* meant to be used with
@@ -53,7 +52,7 @@ BASE_EXPORT std::string GetQuotedJSONString(StringPiece16 str);
 //
 // The output of this function takes the *appearance* of JSON but is not in
 // fact valid according to RFC 4627.
-BASE_EXPORT std::string EscapeBytesAsInvalidJSONString(StringPiece str,
+std::string EscapeBytesAsInvalidJSONString(StringPiece str,
                                                        bool put_in_quotes);
 
 }  // namespace base

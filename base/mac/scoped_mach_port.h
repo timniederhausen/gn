@@ -7,7 +7,6 @@
 
 #include <mach/mach.h>
 
-#include "base/base_export.h"
 #include "base/scoped_generic.h"
 
 namespace base {
@@ -15,20 +14,20 @@ namespace mac {
 
 namespace internal {
 
-struct BASE_EXPORT SendRightTraits {
+struct SendRightTraits {
   static mach_port_t InvalidValue() {
     return MACH_PORT_NULL;
   }
 
-  BASE_EXPORT static void Free(mach_port_t port);
+  static void Free(mach_port_t port);
 };
 
-struct BASE_EXPORT ReceiveRightTraits {
+struct ReceiveRightTraits {
   static mach_port_t InvalidValue() {
     return MACH_PORT_NULL;
   }
 
-  BASE_EXPORT static void Free(mach_port_t port);
+  static void Free(mach_port_t port);
 };
 
 struct PortSetTraits {
@@ -36,7 +35,7 @@ struct PortSetTraits {
     return MACH_PORT_NULL;
   }
 
-  BASE_EXPORT static void Free(mach_port_t port);
+  static void Free(mach_port_t port);
 };
 
 }  // namespace internal

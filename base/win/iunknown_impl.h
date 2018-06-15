@@ -8,14 +8,13 @@
 #include <unknwn.h>
 
 #include "base/atomic_ref_count.h"
-#include "base/base_export.h"
 #include "base/compiler_specific.h"
 
 namespace base {
 namespace win {
 
 // IUnknown implementation for other classes to derive from.
-class BASE_EXPORT IUnknownImpl : public IUnknown {
+class IUnknownImpl : public IUnknown {
  public:
   IUnknownImpl();
 

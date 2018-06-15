@@ -5,7 +5,6 @@
 #ifndef BASE_TIME_TIME_OVERRIDE_H_
 #define BASE_TIME_TIME_OVERRIDE_H_
 
-#include "base/base_export.h"
 #include "base/time/time.h"
 
 namespace base {
@@ -23,7 +22,7 @@ namespace subtle {
 // modify progression of time. Note that the override should be set while
 // single-threaded and before the first call to Now() to avoid threading issues
 // and inconsistencies in returned values. Nested overrides are not allowed.
-class BASE_EXPORT ScopedTimeClockOverrides {
+class ScopedTimeClockOverrides {
  public:
   // Pass |nullptr| for any override if it shouldn't be overriden.
   ScopedTimeClockOverrides(TimeNowFunction time_override,
@@ -46,10 +45,10 @@ class BASE_EXPORT ScopedTimeClockOverrides {
 // should only be used in places where emulated time should be disregarded. For
 // example, they can be used to implement test timeouts for tests that may
 // override time.
-BASE_EXPORT Time TimeNowIgnoringOverride();
-BASE_EXPORT Time TimeNowFromSystemTimeIgnoringOverride();
-BASE_EXPORT TimeTicks TimeTicksNowIgnoringOverride();
-BASE_EXPORT ThreadTicks ThreadTicksNowIgnoringOverride();
+Time TimeNowIgnoringOverride();
+Time TimeNowFromSystemTimeIgnoringOverride();
+TimeTicks TimeTicksNowIgnoringOverride();
+ThreadTicks ThreadTicksNowIgnoringOverride();
 
 }  // namespace subtle
 

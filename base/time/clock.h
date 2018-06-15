@@ -5,7 +5,6 @@
 #ifndef BASE_TIME_CLOCK_H_
 #define BASE_TIME_CLOCK_H_
 
-#include "base/base_export.h"
 #include "base/time/time.h"
 
 namespace base {
@@ -25,7 +24,7 @@ namespace base {
 //
 // See TickClock (base/time/tick_clock.h) for the equivalent interface for
 // TimeTicks.
-class BASE_EXPORT Clock {
+class Clock {
  public:
   virtual ~Clock();
 

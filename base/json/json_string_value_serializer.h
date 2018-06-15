@@ -7,13 +7,12 @@
 
 #include <string>
 
-#include "base/base_export.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
 #include "base/values.h"
 
-class BASE_EXPORT JSONStringValueSerializer : public base::ValueSerializer {
+class JSONStringValueSerializer : public base::ValueSerializer {
  public:
   // |json_string| is the string that will be the destination of the
   // serialization.  The caller of the constructor retains ownership of the
@@ -44,7 +43,7 @@ class BASE_EXPORT JSONStringValueSerializer : public base::ValueSerializer {
   DISALLOW_COPY_AND_ASSIGN(JSONStringValueSerializer);
 };
 
-class BASE_EXPORT JSONStringValueDeserializer : public base::ValueDeserializer {
+class JSONStringValueDeserializer : public base::ValueDeserializer {
  public:
   // This retains a reference to the contents of |json_string|, so the data
   // must outlive the JSONStringValueDeserializer. |options| is a bitmask of

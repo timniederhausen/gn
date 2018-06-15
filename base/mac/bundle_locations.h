@@ -5,7 +5,6 @@
 #ifndef BASE_MAC_BUNDLE_LOCATIONS_H_
 #define BASE_MAC_BUNDLE_LOCATIONS_H_
 
-#include "base/base_export.h"
 #include "base/files/file_path.h"
 
 #if defined(__OBJC__)
@@ -44,21 +43,21 @@ namespace mac {
 //  bundle is probably the one to use.
 
 // Methods for retrieving the various bundles.
-BASE_EXPORT NSBundle* MainBundle();
-BASE_EXPORT FilePath MainBundlePath();
-BASE_EXPORT NSBundle* OuterBundle();
-BASE_EXPORT FilePath OuterBundlePath();
-BASE_EXPORT NSBundle* FrameworkBundle();
-BASE_EXPORT FilePath FrameworkBundlePath();
+NSBundle* MainBundle();
+FilePath MainBundlePath();
+NSBundle* OuterBundle();
+FilePath OuterBundlePath();
+NSBundle* FrameworkBundle();
+FilePath FrameworkBundlePath();
 
 // Set the bundle that the preceding functions will return, overriding the
 // default values. Restore the default by passing in |nil|.
-BASE_EXPORT void SetOverrideOuterBundle(NSBundle* bundle);
-BASE_EXPORT void SetOverrideFrameworkBundle(NSBundle* bundle);
+void SetOverrideOuterBundle(NSBundle* bundle);
+void SetOverrideFrameworkBundle(NSBundle* bundle);
 
 // Same as above but accepting a FilePath argument.
-BASE_EXPORT void SetOverrideOuterBundlePath(const FilePath& file_path);
-BASE_EXPORT void SetOverrideFrameworkBundlePath(const FilePath& file_path);
+void SetOverrideOuterBundlePath(const FilePath& file_path);
+void SetOverrideFrameworkBundlePath(const FilePath& file_path);
 
 }  // namespace mac
 }  // namespace base

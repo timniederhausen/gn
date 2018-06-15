@@ -7,7 +7,6 @@
 
 #include <stddef.h>
 
-#include "base/base_export.h"
 #include "base/macros.h"
 #include "build_config.h"
 
@@ -51,7 +50,7 @@ class TimeTicks;
 // by a Windows event object.  This is intentional.  If you are writing Windows
 // specific code and you need other features of a Windows event, then you might
 // be better off just using an Windows event directly.
-class BASE_EXPORT WaitableEvent {
+class WaitableEvent {
  public:
   // Indicates whether a WaitableEvent should automatically reset the event
   // state after a single waiting thread has been released or remain signaled

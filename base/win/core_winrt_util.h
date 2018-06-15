@@ -10,7 +10,6 @@
 #include <roapi.h>
 #include <windef.h>
 
-#include "base/base_export.h"
 #include "base/strings/string16.h"
 #include "base/win/scoped_hstring.h"
 
@@ -21,20 +20,20 @@ namespace win {
 // Windows 7. Loads functions dynamically at runtime to prevent library
 // dependencies.
 
-BASE_EXPORT bool ResolveCoreWinRTDelayload();
+bool ResolveCoreWinRTDelayload();
 
 // The following stubs are provided for when component build is enabled, in
 // order to avoid the propagation of delay-loading CoreWinRT to other modules.
 
-BASE_EXPORT HRESULT RoInitialize(RO_INIT_TYPE init_type);
+HRESULT RoInitialize(RO_INIT_TYPE init_type);
 
-BASE_EXPORT void RoUninitialize();
+void RoUninitialize();
 
-BASE_EXPORT HRESULT RoGetActivationFactory(HSTRING class_id,
+HRESULT RoGetActivationFactory(HSTRING class_id,
                                            const IID& iid,
                                            void** out_factory);
 
-BASE_EXPORT HRESULT RoActivateInstance(HSTRING class_id,
+HRESULT RoActivateInstance(HSTRING class_id,
                                        IInspectable** instance);
 
 // Retrieves an activation factory for the type specified.

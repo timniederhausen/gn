@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 
-#include "base/base_export.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
 
@@ -20,9 +19,9 @@ namespace base {
 // string in response to various adjustments one might do to that string
 // (e.g., eliminating a range).  For details on offsets, see the comments by
 // the AdjustOffsets() function below.
-class BASE_EXPORT OffsetAdjuster {
+class OffsetAdjuster {
  public:
-  struct BASE_EXPORT Adjustment {
+  struct Adjustment {
     Adjustment(size_t original_offset,
                size_t original_length,
                size_t output_length);
@@ -91,21 +90,21 @@ class BASE_EXPORT OffsetAdjuster {
 // Like the conversions in utf_string_conversions.h, but also fills in an
 // |adjustments| parameter that reflects the alterations done to the string.
 // It may be NULL.
-BASE_EXPORT bool UTF8ToUTF16WithAdjustments(
+bool UTF8ToUTF16WithAdjustments(
     const char* src,
     size_t src_len,
     string16* output,
     base::OffsetAdjuster::Adjustments* adjustments);
-BASE_EXPORT string16 UTF8ToUTF16WithAdjustments(
+string16 UTF8ToUTF16WithAdjustments(
     const base::StringPiece& utf8,
     base::OffsetAdjuster::Adjustments* adjustments);
 // As above, but instead internally examines the adjustments and applies them
 // to |offsets_for_adjustment|.  Input offsets greater than the length of the
 // input string will be set to string16::npos.  See comments by AdjustOffsets().
-BASE_EXPORT string16 UTF8ToUTF16AndAdjustOffsets(
+string16 UTF8ToUTF16AndAdjustOffsets(
     const base::StringPiece& utf8,
     std::vector<size_t>* offsets_for_adjustment);
-BASE_EXPORT std::string UTF16ToUTF8AndAdjustOffsets(
+std::string UTF16ToUTF8AndAdjustOffsets(
     const base::StringPiece16& utf16,
     std::vector<size_t>* offsets_for_adjustment);
 

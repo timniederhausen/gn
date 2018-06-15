@@ -8,14 +8,13 @@
 #include <windows.h>
 #include <stddef.h>
 
-#include "base/base_export.h"
 #include "base/macros.h"
 
 namespace base {
 namespace win {
 
 // Manages the lifetime of additional attributes in STARTUPINFOEX.
-class BASE_EXPORT StartupInformation {
+class StartupInformation {
  public:
   StartupInformation();
 

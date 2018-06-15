@@ -9,14 +9,13 @@
 
 #include <string>
 
-#include "base/base_export.h"
 #include "base/macros.h"
 
 namespace base {
 
 class Value;
 
-class BASE_EXPORT JSONWriter {
+class JSONWriter {
  public:
   enum Options {
     // This option instructs the writer that if a Binary value is encountered,

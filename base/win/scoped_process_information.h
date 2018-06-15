@@ -7,7 +7,6 @@
 
 #include <windows.h>
 
-#include "base/base_export.h"
 #include "base/macros.h"
 #include "base/win/scoped_handle.h"
 
@@ -16,7 +15,7 @@ namespace win {
 
 // Manages the closing of process and thread handles from PROCESS_INFORMATION
 // structures. Allows clients to take ownership of either handle independently.
-class BASE_EXPORT ScopedProcessInformation {
+class ScopedProcessInformation {
  public:
   ScopedProcessInformation();
   explicit ScopedProcessInformation(const PROCESS_INFORMATION& process_info);

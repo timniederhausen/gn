@@ -61,14 +61,14 @@ enum TerminationStatus {
 // filter is non-null, then only processes selected by the filter are killed.
 // Returns true if all processes were able to be killed off, false if at least
 // one couldn't be killed.
-BASE_EXPORT bool KillProcesses(const FilePath::StringType& executable_name,
+bool KillProcesses(const FilePath::StringType& executable_name,
                                int exit_code,
                                const ProcessFilter* filter);
 
 #if defined(OS_POSIX)
 // Attempts to kill the process group identified by |process_group_id|. Returns
 // true on success.
-BASE_EXPORT bool KillProcessGroup(ProcessHandle process_group_id);
+bool KillProcessGroup(ProcessHandle process_group_id);
 #endif  // defined(OS_POSIX)
 
 // Get the termination status of the process by interpreting the
@@ -78,7 +78,7 @@ BASE_EXPORT bool KillProcessGroup(ProcessHandle process_group_id);
 // will only return a useful result the first time it is called after
 // the child exits (because it will reap the child and the information
 // will no longer be available).
-BASE_EXPORT TerminationStatus GetTerminationStatus(ProcessHandle handle,
+TerminationStatus GetTerminationStatus(ProcessHandle handle,
                                                    int* exit_code);
 
 #if defined(OS_POSIX) && !defined(OS_FUCHSIA)
@@ -97,13 +97,13 @@ BASE_EXPORT TerminationStatus GetTerminationStatus(ProcessHandle handle,
 // GetTerminationStatus as the child will be reaped when WaitForExitCode
 // returns, and this information will be lost.
 //
-BASE_EXPORT TerminationStatus GetKnownDeadTerminationStatus(
+TerminationStatus GetKnownDeadTerminationStatus(
     ProcessHandle handle, int* exit_code);
 
 #if defined(OS_LINUX)
 // Spawns a thread to wait asynchronously for the child |process| to exit
 // and then reaps it.
-BASE_EXPORT void EnsureProcessGetsReaped(Process process);
+void EnsureProcessGetsReaped(Process process);
 #endif  // defined(OS_LINUX)
 #endif  // defined(OS_POSIX) && !defined(OS_FUCHSIA)
 
@@ -114,7 +114,7 @@ BASE_EXPORT void EnsureProcessGetsReaped(Process process);
 // is non-null, then only processes selected by the filter are waited on.
 // Returns after all processes have exited or wait_milliseconds have expired.
 // Returns true if all the processes exited, false otherwise.
-BASE_EXPORT bool WaitForProcessesToExit(
+bool WaitForProcessesToExit(
     const FilePath::StringType& executable_name,
     base::TimeDelta wait,
     const ProcessFilter* filter);
@@ -125,7 +125,7 @@ BASE_EXPORT bool WaitForProcessesToExit(
 // on.  Killed processes are ended with the given exit code.  Returns false if
 // any processes needed to be killed, true if they all exited cleanly within
 // the wait_milliseconds delay.
-BASE_EXPORT bool CleanupProcesses(const FilePath::StringType& executable_name,
+bool CleanupProcesses(const FilePath::StringType& executable_name,
                                   base::TimeDelta wait,
                                   int exit_code,
                                   const ProcessFilter* filter);

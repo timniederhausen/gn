@@ -16,7 +16,7 @@ namespace internal {
 
 // Scoped HSTRING class to maintain lifetime of HSTRINGs allocated with
 // WindowsCreateString().
-struct BASE_EXPORT ScopedHStringTraits {
+struct ScopedHStringTraits {
   static HSTRING InvalidValue() { return nullptr; }
   static void Free(HSTRING hstr);
 };
@@ -51,7 +51,7 @@ namespace win {
 //   HRESULT hr = WindowsCreateString(..., &win_string);
 //   ScopedHString string(win_string);
 //
-class BASE_EXPORT ScopedHString
+class ScopedHString
     : public ScopedGeneric<HSTRING, base::internal::ScopedHStringTraits> {
  public:
   // Constructs a ScopedHString from an HSTRING, and takes ownership of |hstr|.

@@ -345,7 +345,7 @@ void CloseLogFileUnlocked() {
 // In DCHECK-enabled Chrome builds, allow the meaning of LOG_DCHECK to be
 // determined at run-time. We default it to INFO, to avoid it triggering
 // crashes before the run-time has explicitly chosen the behaviour.
-BASE_EXPORT logging::LogSeverity LOG_DCHECK = LOG_INFO;
+logging::LogSeverity LOG_DCHECK = LOG_INFO;
 #endif  // DCHECK_IS_CONFIGURABLE
 
 // This is never instantiated, it's just used for EAT_STREAM_PARAMETERS to have
@@ -799,7 +799,7 @@ SystemErrorCode GetLastSystemErrorCode() {
 #endif
 }
 
-BASE_EXPORT std::string SystemErrorCodeToString(SystemErrorCode error_code) {
+std::string SystemErrorCodeToString(SystemErrorCode error_code) {
 #if defined(OS_WIN)
   const int kErrorMessageBufferSize = 256;
   char msgbuf[kErrorMessageBufferSize];
@@ -899,7 +899,7 @@ std::wstring GetLogFileFullPath() {
 }
 #endif
 
-BASE_EXPORT void LogErrorNotReached(const char* file, int line) {
+void LogErrorNotReached(const char* file, int line) {
   LogMessage(file, line, LOG_ERROR).stream()
       << "NOTREACHED() hit.";
 }
