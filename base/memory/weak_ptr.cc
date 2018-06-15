@@ -7,8 +7,7 @@
 namespace base {
 namespace internal {
 
-WeakReference::Flag::Flag() : is_valid_(true) {
-}
+WeakReference::Flag::Flag() : is_valid_(true) {}
 
 void WeakReference::Flag::Invalidate() {
   is_valid_ = false;

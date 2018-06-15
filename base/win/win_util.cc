@@ -125,11 +125,9 @@ static bool g_crash_on_process_detach = false;
 void GetNonClientMetrics(NONCLIENTMETRICS_XP* metrics) {
   DCHECK(metrics);
   metrics->cbSize = sizeof(*metrics);
-  const bool success = !!SystemParametersInfo(
-      SPI_GETNONCLIENTMETRICS,
-      metrics->cbSize,
-      reinterpret_cast<NONCLIENTMETRICS*>(metrics),
-      0);
+  const bool success =
+      !!SystemParametersInfo(SPI_GETNONCLIENTMETRICS, metrics->cbSize,
+                             reinterpret_cast<NONCLIENTMETRICS*>(metrics), 0);
   DCHECK(success);
 }
 
@@ -183,8 +181,7 @@ bool SetBooleanValueForPropertyStore(IPropertyStore* property_store,
     return false;
   }
 
-  return SetPropVariantValueForPropertyStore(property_store,
-                                             property_key,
+  return SetPropVariantValueForPropertyStore(property_store, property_key,
                                              property_value);
 }
 
@@ -197,8 +194,7 @@ bool SetStringValueForPropertyStore(IPropertyStore* property_store,
     return false;
   }
 
-  return SetPropVariantValueForPropertyStore(property_store,
-                                             property_key,
+  return SetPropVariantValueForPropertyStore(property_store, property_key,
                                              property_value);
 }
 
@@ -222,19 +218,19 @@ bool SetAppIdForPropertyStore(IPropertyStore* property_store,
   // See http://msdn.microsoft.com/en-us/library/dd378459%28VS.85%29.aspx
   DCHECK(lstrlen(app_id) < 64 && wcschr(app_id, L' ') == NULL);
 
-  return SetStringValueForPropertyStore(property_store,
-                                        PKEY_AppUserModel_ID,
+  return SetStringValueForPropertyStore(property_store, PKEY_AppUserModel_ID,
                                         app_id);
 }
 
 static const char16 kAutoRunKeyPath[] =
     L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 
-bool AddCommandToAutoRun(HKEY root_key, const string16& name,
+bool AddCommandToAutoRun(HKEY root_key,
+                         const string16& name,
                          const string16& command) {
   RegKey autorun_key(root_key, kAutoRunKeyPath, KEY_SET_VALUE);
   return (autorun_key.WriteValue(name.c_str(), command.c_str()) ==
-      ERROR_SUCCESS);
+          ERROR_SUCCESS);
 }
 
 bool RemoveCommandFromAutoRun(HKEY root_key, const string16& name) {
@@ -348,8 +344,8 @@ void EnableFlicks(HWND hwnd) {
 
 void DisableFlicks(HWND hwnd) {
   ::SetProp(hwnd, MICROSOFT_TABLETPENSERVICE_PROPERTY,
-      reinterpret_cast<HANDLE>(TABLET_DISABLE_FLICKS |
-          TABLET_DISABLE_FLICKFALLBACKKEYS));
+            reinterpret_cast<HANDLE>(TABLET_DISABLE_FLICKS |
+                                     TABLET_DISABLE_FLICKFALLBACKKEYS));
 }
 
 bool IsProcessPerMonitorDpiAware() {

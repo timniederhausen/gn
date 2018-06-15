@@ -22,24 +22,18 @@ const int JSONReader::kStackMaxDepth = 200;
 static_assert(JSONReader::JSON_PARSE_ERROR_COUNT < 1000,
               "JSONReader error out of bounds");
 
-const char JSONReader::kInvalidEscape[] =
-    "Invalid escape sequence.";
-const char JSONReader::kSyntaxError[] =
-    "Syntax error.";
-const char JSONReader::kUnexpectedToken[] =
-    "Unexpected token.";
-const char JSONReader::kTrailingComma[] =
-    "Trailing comma not allowed.";
-const char JSONReader::kTooMuchNesting[] =
-    "Too much nesting.";
+const char JSONReader::kInvalidEscape[] = "Invalid escape sequence.";
+const char JSONReader::kSyntaxError[] = "Syntax error.";
+const char JSONReader::kUnexpectedToken[] = "Unexpected token.";
+const char JSONReader::kTrailingComma[] = "Trailing comma not allowed.";
+const char JSONReader::kTooMuchNesting[] = "Too much nesting.";
 const char JSONReader::kUnexpectedDataAfterRoot[] =
     "Unexpected data after root element.";
 const char JSONReader::kUnsupportedEncoding[] =
     "Unsupported encoding. JSON must be UTF-8.";
 const char JSONReader::kUnquotedDictionaryKey[] =
     "Dictionary keys must be quoted.";
-const char JSONReader::kInputTooLarge[] =
-    "Input string is too large (>2GB).";
+const char JSONReader::kInputTooLarge[] = "Input string is too large (>2GB).";
 
 JSONReader::JSONReader(int options, int max_depth)
     : parser_(new internal::JSONParser(options, max_depth)) {}
@@ -54,7 +48,6 @@ std::unique_ptr<Value> JSONReader::Read(StringPiece json,
   Optional<Value> root = parser.Parse(json);
   return root ? std::make_unique<Value>(std::move(*root)) : nullptr;
 }
-
 
 // static
 std::unique_ptr<Value> JSONReader::ReadAndReturnError(

@@ -25,4 +25,3 @@ class CopyTargetGenerator : public TargetGenerator {
 };
 
 #endif  // TOOLS_GN_COPY_TARGET_GENERATOR_H_
-

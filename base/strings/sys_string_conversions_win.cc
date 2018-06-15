@@ -4,8 +4,8 @@
 
 #include "base/strings/sys_string_conversions.h"
 
-#include <windows.h>
 #include <stdint.h>
+#include <windows.h>
 
 #include "base/strings/string_piece.h"
 
@@ -36,8 +36,8 @@ std::wstring SysMultiByteToWide(StringPiece mb, uint32_t code_page) {
 
   int mb_length = static_cast<int>(mb.length());
   // Compute the length of the buffer.
-  int charcount = MultiByteToWideChar(code_page, 0,
-                                      mb.data(), mb_length, NULL, 0);
+  int charcount =
+      MultiByteToWideChar(code_page, 0, mb.data(), mb_length, NULL, 0);
   if (charcount == 0)
     return std::wstring();
 
@@ -62,8 +62,8 @@ std::string SysWideToMultiByte(const std::wstring& wide, uint32_t code_page) {
 
   std::string mb;
   mb.resize(charcount);
-  WideCharToMultiByte(code_page, 0, wide.data(), wide_length,
-                      &mb[0], charcount, NULL, NULL);
+  WideCharToMultiByte(code_page, 0, wide.data(), wide_length, &mb[0], charcount,
+                      NULL, NULL);
 
   return mb;
 }

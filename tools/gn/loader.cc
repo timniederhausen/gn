@@ -208,8 +208,8 @@ void LoaderImpl::ScheduleLoadFile(const Settings* settings,
   Err err;
   pending_loads_++;
   if (!AsyncLoadFile(origin, settings->build_settings(), file,
-                     base::Bind(&LoaderImpl::BackgroundLoadFile, this,
-                                settings, file, origin),
+                     base::Bind(&LoaderImpl::BackgroundLoadFile, this, settings,
+                                file, origin),
                      &err)) {
     g_scheduler->FailWithError(err);
     DecrementPendingLoads();
@@ -223,8 +223,8 @@ void LoaderImpl::ScheduleLoadBuildConfig(
   pending_loads_++;
   if (!AsyncLoadFile(LocationRange(), settings->build_settings(),
                      settings->build_settings()->build_config_file(),
-                     base::Bind(&LoaderImpl::BackgroundLoadBuildConfig,
-                                this, settings, toolchain_overrides),
+                     base::Bind(&LoaderImpl::BackgroundLoadBuildConfig, this,
+                                settings, toolchain_overrides),
                      &err)) {
     g_scheduler->FailWithError(err);
     DecrementPendingLoads();
@@ -242,8 +242,9 @@ void LoaderImpl::BackgroundLoadFile(const Settings* settings,
   }
 
   if (g_scheduler->verbose_logging()) {
-    g_scheduler->Log("Running", file_name.value() + " with toolchain " +
-                     settings->toolchain_label().GetUserVisibleName(false));
+    g_scheduler->Log("Running",
+                     file_name.value() + " with toolchain " +
+                         settings->toolchain_label().GetUserVisibleName(false));
   }
 
   Scope our_scope(settings->base_config());
@@ -268,7 +269,6 @@ void LoaderImpl::BackgroundLoadFile(const Settings* settings,
       err.AppendSubErr(Err(origin, "which caused the file to be included."));
     g_scheduler->FailWithError(err);
   }
-
 
   // Pass all of the items that were defined off to the builder.
   for (auto& item : collected_items)

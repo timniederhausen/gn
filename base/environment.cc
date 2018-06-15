@@ -143,8 +143,7 @@ bool Environment::HasVar(StringPiece variable_name) {
 
 #if defined(OS_WIN)
 
-string16 AlterEnvironment(const wchar_t* env,
-                          const EnvironmentMap& changes) {
+string16 AlterEnvironment(const wchar_t* env, const EnvironmentMap& changes) {
   string16 result;
 
   // First copy all unmodified values to the output.
@@ -163,8 +162,8 @@ string16 AlterEnvironment(const wchar_t* env,
   }
 
   // Now append all modified and new values.
-  for (EnvironmentMap::const_iterator i = changes.begin();
-       i != changes.end(); ++i) {
+  for (EnvironmentMap::const_iterator i = changes.begin(); i != changes.end();
+       ++i) {
     if (!i->second.empty()) {
       result.append(i->first);
       result.push_back('=');
@@ -203,8 +202,8 @@ std::unique_ptr<char* []> AlterEnvironment(const char* const* const env,
   }
 
   // Now append all modified and new values.
-  for (EnvironmentMap::const_iterator i = changes.begin();
-       i != changes.end(); ++i) {
+  for (EnvironmentMap::const_iterator i = changes.begin(); i != changes.end();
+       ++i) {
     if (!i->second.empty()) {
       result_indices.push_back(value_storage.size());
       value_storage.append(i->first);
@@ -220,8 +219,8 @@ std::unique_ptr<char* []> AlterEnvironment(const char* const* const env,
   std::unique_ptr<char* []> result(new char*[pointer_count_required]);
 
   // The string storage goes after the array of pointers.
-  char* storage_data = reinterpret_cast<char*>(
-      &result.get()[result_indices.size() + 1]);
+  char* storage_data =
+      reinterpret_cast<char*>(&result.get()[result_indices.size() + 1]);
   if (!value_storage.empty())
     memcpy(storage_data, value_storage.data(), value_storage.size());
 

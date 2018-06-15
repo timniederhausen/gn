@@ -5,6 +5,7 @@
 #include "base/files/file_util.h"
 
 #include <windows.h>
+
 #include <io.h>
 #include <psapi.h>
 #include <shellapi.h>
@@ -326,8 +327,8 @@ bool DeleteFileAfterReboot(const FilePath& path) {
     return false;
 
   return MoveFileEx(path.value().c_str(), NULL,
-                    MOVEFILE_DELAY_UNTIL_REBOOT |
-                        MOVEFILE_REPLACE_EXISTING) != FALSE;
+                    MOVEFILE_DELAY_UNTIL_REBOOT | MOVEFILE_REPLACE_EXISTING) !=
+         FALSE;
 }
 
 bool ReplaceFile(const FilePath& from_path,
@@ -376,8 +377,8 @@ bool PathExists(const FilePath& path) {
 
 bool PathIsWritable(const FilePath& path) {
   HANDLE dir =
-      CreateFile(path.value().c_str(), FILE_ADD_FILE, kFileShareAll,
-                 NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+      CreateFile(path.value().c_str(), FILE_ADD_FILE, kFileShareAll, NULL,
+                 OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 
   if (dir == INVALID_HANDLE_VALUE)
     return false;
@@ -528,8 +529,7 @@ bool CreateNewTempDirectory(const FilePath::StringType& prefix,
   return CreateTemporaryDirInDir(system_temp_dir, prefix, new_temp_path);
 }
 
-bool CreateDirectoryAndGetError(const FilePath& full_path,
-                                File::Error* error) {
+bool CreateDirectoryAndGetError(const FilePath& full_path, File::Error* error) {
   // If the path exists, we've succeeded if it's a directory, failed otherwise.
   const wchar_t* full_path_str = full_path.value().c_str();
   DWORD fileattr = ::GetFileAttributes(full_path_str);
@@ -622,14 +622,16 @@ bool DevicePathToDriveLetterPath(const FilePath& nt_device_path,
       FilePath device_path(device_path_as_string);
       if (device_path == nt_device_path ||
           device_path.IsParent(nt_device_path)) {
-        *out_drive_letter_path = FilePath(drive +
-            nt_device_path.value().substr(wcslen(device_path_as_string)));
+        *out_drive_letter_path =
+            FilePath(drive + nt_device_path.value().substr(
+                                 wcslen(device_path_as_string)));
         return true;
       }
     }
     // Move to the next drive letter string, which starts one
     // increment after the '\0' that terminates the current string.
-    while (*drive_map_ptr++) {}
+    while (*drive_map_ptr++) {
+    }
   }
 
   // No drive matched.  The path does not start with a device junction
@@ -644,14 +646,9 @@ bool NormalizeToNativeFilePath(const FilePath& path, FilePath* nt_path) {
   // code below to a call to GetFinalPathNameByHandle().  The method this
   // function uses is explained in the following msdn article:
   // http://msdn.microsoft.com/en-us/library/aa366789(VS.85).aspx
-  win::ScopedHandle file_handle(
-      ::CreateFile(path.value().c_str(),
-                   GENERIC_READ,
-                   kFileShareAll,
-                   NULL,
-                   OPEN_EXISTING,
-                   FILE_ATTRIBUTE_NORMAL,
-                   NULL));
+  win::ScopedHandle file_handle(::CreateFile(path.value().c_str(), GENERIC_READ,
+                                             kFileShareAll, NULL, OPEN_EXISTING,
+                                             FILE_ATTRIBUTE_NORMAL, NULL));
   if (!file_handle.IsValid())
     return false;
 
@@ -659,18 +656,15 @@ bool NormalizeToNativeFilePath(const FilePath& path, FilePath* nt_path) {
   // we only map the first byte, and need direct access to the handle. You can
   // not map an empty file, this call fails in that case.
   win::ScopedHandle file_map_handle(
-      ::CreateFileMapping(file_handle.Get(),
-                          NULL,
-                          PAGE_READONLY,
-                          0,
+      ::CreateFileMapping(file_handle.Get(), NULL, PAGE_READONLY, 0,
                           1,  // Just one byte.  No need to look at the data.
                           NULL));
   if (!file_map_handle.IsValid())
     return false;
 
   // Use a view of the file to get the path to the file.
-  void* file_view = MapViewOfFile(file_map_handle.Get(),
-                                  FILE_MAP_READ, 0, 0, 1);
+  void* file_view =
+      MapViewOfFile(file_map_handle.Get(), FILE_MAP_READ, 0, 0, 1);
   if (!file_view)
     return false;
 
@@ -700,8 +694,8 @@ bool IsLink(const FilePath& file_path) {
 
 bool GetFileInfo(const FilePath& file_path, File::Info* results) {
   WIN32_FILE_ATTRIBUTE_DATA attr;
-  if (!GetFileAttributesEx(file_path.value().c_str(),
-                           GetFileExInfoStandard, &attr)) {
+  if (!GetFileAttributesEx(file_path.value().c_str(), GetFileExInfoStandard,
+                           &attr)) {
     return false;
   }
 
@@ -745,12 +739,9 @@ FILE* FileToFILE(File file, const char* mode) {
 }
 
 int ReadFile(const FilePath& filename, char* data, int max_size) {
-  win::ScopedHandle file(CreateFile(filename.value().c_str(),
-                                    GENERIC_READ,
-                                    FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                    NULL,
-                                    OPEN_EXISTING,
-                                    FILE_FLAG_SEQUENTIAL_SCAN,
+  win::ScopedHandle file(CreateFile(filename.value().c_str(), GENERIC_READ,
+                                    FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                                    OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN,
                                     NULL));
   if (!file.IsValid())
     return -1;
@@ -790,13 +781,8 @@ int WriteFile(const FilePath& filename, const char* data, int size) {
 }
 
 bool AppendToFile(const FilePath& filename, const char* data, int size) {
-  win::ScopedHandle file(CreateFile(filename.value().c_str(),
-                                    FILE_APPEND_DATA,
-                                    0,
-                                    NULL,
-                                    OPEN_EXISTING,
-                                    0,
-                                    NULL));
+  win::ScopedHandle file(CreateFile(filename.value().c_str(), FILE_APPEND_DATA,
+                                    0, NULL, OPEN_EXISTING, 0, NULL));
   if (!file.IsValid()) {
     return false;
   }
@@ -830,8 +816,7 @@ bool SetCurrentDirectory(const FilePath& directory) {
 int GetMaximumPathComponentLength(const FilePath& path) {
   wchar_t volume_path[MAX_PATH];
   if (!GetVolumePathNameW(path.NormalizePathSeparators().value().c_str(),
-                          volume_path,
-                          arraysize(volume_path))) {
+                          volume_path, arraysize(volume_path))) {
     return -1;
   }
 

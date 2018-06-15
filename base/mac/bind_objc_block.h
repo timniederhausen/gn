@@ -41,9 +41,9 @@ namespace base {
 namespace internal {
 
 // Helper function to run the block contained in the parameter.
-template<typename R, typename... Args>
-R RunBlock(base::mac::ScopedBlock<R(^)(Args...)> block, Args... args) {
-  R(^extracted_block)(Args...) = block.get();
+template <typename R, typename... Args>
+R RunBlock(base::mac::ScopedBlock<R (^)(Args...)> block, Args... args) {
+  R (^extracted_block)(Args...) = block.get();
   return extracted_block(args...);
 }
 
@@ -53,8 +53,8 @@ R RunBlock(base::mac::ScopedBlock<R(^)(Args...)> block, Args... args) {
 
 // Construct a callback from an objective-C block with up to six arguments (see
 // note above).
-template<typename R, typename... Args>
-base::Callback<R(Args...)> BindBlock(R(^block)(Args...)) {
+template <typename R, typename... Args>
+base::Callback<R(Args...)> BindBlock(R (^block)(Args...)) {
   return base::Bind(
       &base::internal::RunBlock<R, Args...>,
       base::mac::ScopedBlock<R (^)(Args...)>(

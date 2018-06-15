@@ -11,9 +11,7 @@
 using base::Value;
 
 JSONStringValueSerializer::JSONStringValueSerializer(std::string* json_string)
-    : json_string_(json_string),
-      pretty_print_(false) {
-}
+    : json_string_(json_string), pretty_print_(false) {}
 
 JSONStringValueSerializer::~JSONStringValueSerializer() = default;
 

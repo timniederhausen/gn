@@ -175,8 +175,9 @@ using MakeUnwrappedTypeList =
 
 // Bind as OnceCallback.
 template <typename Functor, typename... Args>
-inline OnceCallback<MakeUnboundRunType<Functor, Args...>>
-BindOnce(Functor&& functor, Args&&... args) {
+inline OnceCallback<MakeUnboundRunType<Functor, Args...>> BindOnce(
+    Functor&& functor,
+    Args&&... args) {
   static_assert(!internal::IsOnceCallback<std::decay_t<Functor>>() ||
                     (std::is_rvalue_reference<Functor&&>() &&
                      !std::is_const<std::remove_reference_t<Functor>>()),
@@ -212,14 +213,14 @@ BindOnce(Functor&& functor, Args&&... args) {
   using InvokeFuncStorage = internal::BindStateBase::InvokeFuncStorage;
   return CallbackType(new BindState(
       reinterpret_cast<InvokeFuncStorage>(invoke_func),
-      std::forward<Functor>(functor),
-      std::forward<Args>(args)...));
+      std::forward<Functor>(functor), std::forward<Args>(args)...));
 }
 
 // Bind as RepeatingCallback.
 template <typename Functor, typename... Args>
-inline RepeatingCallback<MakeUnboundRunType<Functor, Args...>>
-BindRepeating(Functor&& functor, Args&&... args) {
+inline RepeatingCallback<MakeUnboundRunType<Functor, Args...>> BindRepeating(
+    Functor&& functor,
+    Args&&... args) {
   static_assert(
       !internal::IsOnceCallback<std::decay_t<Functor>>(),
       "BindRepeating cannot bind OnceCallback. Use BindOnce with std::move().");
@@ -253,16 +254,15 @@ BindRepeating(Functor&& functor, Args&&... args) {
   using InvokeFuncStorage = internal::BindStateBase::InvokeFuncStorage;
   return CallbackType(new BindState(
       reinterpret_cast<InvokeFuncStorage>(invoke_func),
-      std::forward<Functor>(functor),
-      std::forward<Args>(args)...));
+      std::forward<Functor>(functor), std::forward<Args>(args)...));
 }
 
 // Unannotated Bind.
 // TODO(tzik): Deprecate this and migrate to OnceCallback and
 // RepeatingCallback, once they get ready.
 template <typename Functor, typename... Args>
-inline Callback<MakeUnboundRunType<Functor, Args...>>
-Bind(Functor&& functor, Args&&... args) {
+inline Callback<MakeUnboundRunType<Functor, Args...>> Bind(Functor&& functor,
+                                                           Args&&... args) {
   return base::BindRepeating(std::forward<Functor>(functor),
                              std::forward<Args>(args)...);
 }

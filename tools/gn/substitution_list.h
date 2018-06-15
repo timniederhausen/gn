@@ -23,10 +23,9 @@ class SubstitutionList {
              Err* err);
 
   // Makes a SubstitutionList from the given hardcoded patterns.
-  static SubstitutionList MakeForTest(
-      const char* a,
-      const char* b = nullptr,
-      const char* c = nullptr);
+  static SubstitutionList MakeForTest(const char* a,
+                                      const char* b = nullptr,
+                                      const char* c = nullptr);
 
   const std::vector<SubstitutionPattern>& list() const { return list_; }
 

@@ -6,11 +6,11 @@
 #define BASE_GTEST_PROD_UTIL_H_
 
 // TODO: Remove me.
-#define FRIEND_TEST_ALL_PREFIXES(test_case_name, test_name)                    \
+#define FRIEND_TEST_ALL_PREFIXES(test_case_name, test_name) \
   friend class test_case_name##test_name
 
 // TODO: Remove me.
-#define FORWARD_DECLARE_TEST(test_case_name, test_name)                        \
+#define FORWARD_DECLARE_TEST(test_case_name, test_name) \
   class test_case_name##test_name
 
 #endif  // BASE_GTEST_PROD_UTIL_H_

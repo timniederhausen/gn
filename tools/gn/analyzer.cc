@@ -109,7 +109,8 @@ void WriteLabels(const Label& default_toolchain,
 }
 
 Label AbsoluteOrSourceAbsoluteStringToLabel(const Label& default_toolchain,
-                                            const std::string& s, Err* err) {
+                                            const std::string& s,
+                                            Err* err) {
   if (!IsPathSourceAbsolute(s) && !IsPathAbsolute(s)) {
     *err = Err(Location(),
                "\"" + s + "\" is not a source-absolute or absolute path.");
@@ -184,7 +185,8 @@ Err JSONToInputs(const Label& default_toolchain,
 }
 
 std::string OutputsToJSON(const Outputs& outputs,
-                          const Label& default_toolchain, Err *err) {
+                          const Label& default_toolchain,
+                          Err* err) {
   std::string output;
   auto value = std::make_unique<base::DictionaryValue>();
 

@@ -5,7 +5,6 @@
 #ifndef BASE_WIN_PROCESS_STARTUP_HELPER_H_
 #define BASE_WIN_PROCESS_STARTUP_HELPER_H_
 
-
 namespace base {
 
 class CommandLine;

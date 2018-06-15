@@ -49,8 +49,8 @@ TEST_F(WriteFileTest, WithData) {
 
   // Should refuse to write files outside of the output dir.
   EXPECT_FALSE(CallWriteFile(setup.scope(), "//in_root.txt", some_string));
-  EXPECT_FALSE(CallWriteFile(setup.scope(), "//other_dir/foo.txt",
-                             some_string));
+  EXPECT_FALSE(
+      CallWriteFile(setup.scope(), "//other_dir/foo.txt", some_string));
 
   // Should be able to write to a new dir inside the out dir.
   EXPECT_TRUE(CallWriteFile(setup.scope(), "//out/foo.txt", some_string));
@@ -73,9 +73,8 @@ TEST_F(WriteFileTest, WithData) {
   // Start by setting the modified time to something old to avoid clock
   // resolution issues.
   base::Time old_time = base::Time::Now() - base::TimeDelta::FromDays(1);
-  base::File foo_file(foo_name,
-                      base::File::FLAG_OPEN |
-                      base::File::FLAG_READ | base::File::FLAG_WRITE);
+  base::File foo_file(foo_name, base::File::FLAG_OPEN | base::File::FLAG_READ |
+                                    base::File::FLAG_WRITE);
   ASSERT_TRUE(foo_file.IsValid());
   foo_file.SetTimes(old_time, old_time);
 

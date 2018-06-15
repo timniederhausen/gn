@@ -61,7 +61,8 @@ int main(int argc, char** argv) {
     // No command, print error and exit.
     Err(Location(), "No command specified.",
         "Most commonly you want \"gn gen <out_dir>\" to make a build dir.\n"
-        "Or try \"gn help\" for more commands.").PrintToStdout();
+        "Or try \"gn help\" for more commands.")
+        .PrintToStdout();
     return 1;
   } else {
     command = args[0];

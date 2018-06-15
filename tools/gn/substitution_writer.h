@@ -59,10 +59,9 @@ class SubstitutionWriter {
 
   // Writes the pattern to the given stream with no special handling, and with
   // Ninja variables replacing the patterns.
-  static void WriteWithNinjaVariables(
-      const SubstitutionPattern& pattern,
-      const EscapeOptions& escape_options,
-      std::ostream& out);
+  static void WriteWithNinjaVariables(const SubstitutionPattern& pattern,
+                                      const EscapeOptions& escape_options,
+                                      std::ostream& out);
 
   // NOP substitutions ---------------------------------------------------------
 
@@ -70,13 +69,11 @@ class SubstitutionWriter {
   // no substitutions (it will assert if there are). This is used for cases
   // like actions where the outputs are explicit, but the list is stored as
   // a SubstitutionList.
-  static void GetListAsSourceFiles(
-      const SubstitutionList& list,
-      std::vector<SourceFile>* output);
-  static void GetListAsOutputFiles(
-      const Settings* settings,
-      const SubstitutionList& list,
-      std::vector<OutputFile>* output);
+  static void GetListAsSourceFiles(const SubstitutionList& list,
+                                   std::vector<SourceFile>* output);
+  static void GetListAsOutputFiles(const Settings* settings,
+                                   const SubstitutionList& list,
+                                   std::vector<OutputFile>* output);
 
   // Source substitutions -----------------------------------------------------
 
@@ -87,11 +84,10 @@ class SubstitutionWriter {
   // first (see for example IsFileInOuputDir).
   //
   // The target can be null (see class comment above).
-  static SourceFile ApplyPatternToSource(
-      const Target* target,
-      const Settings* settings,
-      const SubstitutionPattern& pattern,
-      const SourceFile& source);
+  static SourceFile ApplyPatternToSource(const Target* target,
+                                         const Settings* settings,
+                                         const SubstitutionPattern& pattern,
+                                         const SourceFile& source);
   static std::string ApplyPatternToSourceAsString(
       const Target* target,
       const Settings* settings,
@@ -109,41 +105,36 @@ class SubstitutionWriter {
   // SourceFiles or OutputFiles.
   //
   // The target can be null (see class comment above).
-  static void ApplyListToSource(
-      const Target* target,
-      const Settings* settings,
-      const SubstitutionList& list,
-      const SourceFile& source,
-      std::vector<SourceFile>* output);
-  static void ApplyListToSourceAsString(
-      const Target* target,
-      const Settings* settings,
-      const SubstitutionList& list,
-      const SourceFile& source,
-      std::vector<std::string>* output);
-  static void ApplyListToSourceAsOutputFile(
-      const Target* target,
-      const Settings* settings,
-      const SubstitutionList& list,
-      const SourceFile& source,
-      std::vector<OutputFile>* output);
+  static void ApplyListToSource(const Target* target,
+                                const Settings* settings,
+                                const SubstitutionList& list,
+                                const SourceFile& source,
+                                std::vector<SourceFile>* output);
+  static void ApplyListToSourceAsString(const Target* target,
+                                        const Settings* settings,
+                                        const SubstitutionList& list,
+                                        const SourceFile& source,
+                                        std::vector<std::string>* output);
+  static void ApplyListToSourceAsOutputFile(const Target* target,
+                                            const Settings* settings,
+                                            const SubstitutionList& list,
+                                            const SourceFile& source,
+                                            std::vector<OutputFile>* output);
 
   // Like ApplyListToSource but applies the list to all sources and replaces
   // rather than appends the output (this produces the complete output).
   //
   // The target can be null (see class comment above).
-  static void ApplyListToSources(
-      const Target* target,
-      const Settings* settings,
-      const SubstitutionList& list,
-      const std::vector<SourceFile>& sources,
-      std::vector<SourceFile>* output);
-  static void ApplyListToSourcesAsString(
-      const Target* target,
-      const Settings* settings,
-      const SubstitutionList& list,
-      const std::vector<SourceFile>& sources,
-      std::vector<std::string>* output);
+  static void ApplyListToSources(const Target* target,
+                                 const Settings* settings,
+                                 const SubstitutionList& list,
+                                 const std::vector<SourceFile>& sources,
+                                 std::vector<SourceFile>* output);
+  static void ApplyListToSourcesAsString(const Target* target,
+                                         const Settings* settings,
+                                         const SubstitutionList& list,
+                                         const std::vector<SourceFile>& sources,
+                                         std::vector<std::string>* output);
   static void ApplyListToSourcesAsOutputFile(
       const Target* target,
       const Settings* settings,
@@ -173,13 +164,12 @@ class SubstitutionWriter {
   // to, otherwise it is ignored.
   //
   // The target can be null (see class comment above).
-  static std::string GetSourceSubstitution(
-      const Target* target,
-      const Settings* settings,
-      const SourceFile& source,
-      SubstitutionType type,
-      OutputStyle output_style,
-      const SourceDir& relative_to);
+  static std::string GetSourceSubstitution(const Target* target,
+                                           const Settings* settings,
+                                           const SourceFile& source,
+                                           SubstitutionType type,
+                                           OutputStyle output_style,
+                                           const SourceDir& relative_to);
 
   // Target substitutions ------------------------------------------------------
   //
@@ -189,23 +179,20 @@ class SubstitutionWriter {
       const Target* target,
       const Tool* tool,
       const SubstitutionPattern& pattern);
-  static void ApplyListToTargetAsOutputFile(
-      const Target* target,
-      const Tool* tool,
-      const SubstitutionList& list,
-      std::vector<OutputFile>* output);
+  static void ApplyListToTargetAsOutputFile(const Target* target,
+                                            const Tool* tool,
+                                            const SubstitutionList& list,
+                                            std::vector<OutputFile>* output);
 
   // This function is slightly different than the other substitution getters
   // since it can handle failure (since it is designed to be used by the
   // compiler and linker ones which will fall through if it's not a common tool
   // one).
-  static bool GetTargetSubstitution(
-      const Target* target,
-      SubstitutionType type,
-      std::string* result);
-  static std::string GetTargetSubstitution(
-      const Target* target,
-      SubstitutionType type);
+  static bool GetTargetSubstitution(const Target* target,
+                                    SubstitutionType type,
+                                    std::string* result);
+  static std::string GetTargetSubstitution(const Target* target,
+                                           SubstitutionType type);
 
   // Compiler substitutions ----------------------------------------------------
   //
@@ -216,19 +203,17 @@ class SubstitutionWriter {
       const Target* target,
       const SourceFile& source,
       const SubstitutionPattern& pattern);
-  static void ApplyListToCompilerAsOutputFile(
-      const Target* target,
-      const SourceFile& source,
-      const SubstitutionList& list,
-      std::vector<OutputFile>* output);
+  static void ApplyListToCompilerAsOutputFile(const Target* target,
+                                              const SourceFile& source,
+                                              const SubstitutionList& list,
+                                              std::vector<OutputFile>* output);
 
   // Like GetSourceSubstitution but for strings based on the target or
   // toolchain. This type of result will always be relative to the build
   // directory.
-  static std::string GetCompilerSubstitution(
-      const Target* target,
-      const SourceFile& source,
-      SubstitutionType type);
+  static std::string GetCompilerSubstitution(const Target* target,
+                                             const SourceFile& source,
+                                             SubstitutionType type);
 
   // Linker substitutions ------------------------------------------------------
 
@@ -236,19 +221,17 @@ class SubstitutionWriter {
       const Target* target,
       const Tool* tool,
       const SubstitutionPattern& pattern);
-  static void ApplyListToLinkerAsOutputFile(
-      const Target* target,
-      const Tool* tool,
-      const SubstitutionList& list,
-      std::vector<OutputFile>* output);
+  static void ApplyListToLinkerAsOutputFile(const Target* target,
+                                            const Tool* tool,
+                                            const SubstitutionList& list,
+                                            std::vector<OutputFile>* output);
 
   // Like GetSourceSubstitution but for strings based on the target or
   // toolchain. This type of result will always be relative to the build
   // directory.
-  static std::string GetLinkerSubstitution(
-      const Target* target,
-      const Tool* tool,
-      SubstitutionType type);
+  static std::string GetLinkerSubstitution(const Target* target,
+                                           const Tool* tool,
+                                           SubstitutionType type);
 };
 
 #endif  // TOOLS_GN_SUBSTITUTION_WRITER_H_

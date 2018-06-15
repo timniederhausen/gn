@@ -57,11 +57,12 @@ struct IntToStringT {
 };
 
 // Utility to convert a character to a digit in a given base
-template<typename CHAR, int BASE, bool BASE_LTE_10> class BaseCharToDigit {
-};
+template <typename CHAR, int BASE, bool BASE_LTE_10>
+class BaseCharToDigit {};
 
 // Faster specialization for bases <= 10
-template<typename CHAR, int BASE> class BaseCharToDigit<CHAR, BASE, true> {
+template <typename CHAR, int BASE>
+class BaseCharToDigit<CHAR, BASE, true> {
  public:
   static bool Convert(CHAR c, uint8_t* digit) {
     if (c >= '0' && c < '0' + BASE) {
@@ -73,7 +74,8 @@ template<typename CHAR, int BASE> class BaseCharToDigit<CHAR, BASE, true> {
 };
 
 // Specialization for bases where 10 < base <= 36
-template<typename CHAR, int BASE> class BaseCharToDigit<CHAR, BASE, false> {
+template <typename CHAR, int BASE>
+class BaseCharToDigit<CHAR, BASE, false> {
  public:
   static bool Convert(CHAR c, uint8_t* digit) {
     if (c >= '0' && c <= '9') {
@@ -98,24 +100,25 @@ bool CharToDigit(CHAR c, uint8_t* digit) {
 // is locale independent, whereas the functions we are replacing were
 // locale-dependent. TBD what is desired, but for the moment let's not
 // introduce a change in behaviour.
-template<typename CHAR> class WhitespaceHelper {
-};
+template <typename CHAR>
+class WhitespaceHelper {};
 
-template<> class WhitespaceHelper<char> {
+template <>
+class WhitespaceHelper<char> {
  public:
   static bool Invoke(char c) {
     return 0 != isspace(static_cast<unsigned char>(c));
   }
 };
 
-template<> class WhitespaceHelper<char16> {
+template <>
+class WhitespaceHelper<char16> {
  public:
-  static bool Invoke(char16 c) {
-    return 0 != iswspace(c);
-  }
+  static bool Invoke(char16 c) { return 0 != iswspace(c); }
 };
 
-template<typename CHAR> bool LocalIsWhitespace(CHAR c) {
+template <typename CHAR>
+bool LocalIsWhitespace(CHAR c) {
   return WhitespaceHelper<CHAR>::Invoke(c);
 }
 
@@ -125,7 +128,7 @@ template<typename CHAR> bool LocalIsWhitespace(CHAR c) {
 //  - static functions min, max (returning the minimum and maximum permitted
 //    values)
 //  - constant kBase, the base in which to interpret the input
-template<typename IteratorRangeToNumberTraits>
+template <typename IteratorRangeToNumberTraits>
 class IteratorRangeToNumber {
  public:
   typedef IteratorRangeToNumberTraits traits;
@@ -169,10 +172,11 @@ class IteratorRangeToNumber {
   //    causes an overflow/underflow
   //  - a static function, Increment, that appends the next digit appropriately
   //    according to the sign of the number being parsed.
-  template<typename Sign>
+  template <typename Sign>
   class Base {
    public:
-    static bool Invoke(const_iterator begin, const_iterator end,
+    static bool Invoke(const_iterator begin,
+                       const_iterator end,
                        typename traits::value_type* output) {
       *output = 0;
 
@@ -240,24 +244,19 @@ class IteratorRangeToNumber {
   };
 };
 
-template<typename ITERATOR, typename VALUE, int BASE>
+template <typename ITERATOR, typename VALUE, int BASE>
 class BaseIteratorRangeToNumberTraits {
  public:
   typedef ITERATOR iterator_type;
   typedef VALUE value_type;
-  static value_type min() {
-    return std::numeric_limits<value_type>::min();
-  }
-  static value_type max() {
-    return std::numeric_limits<value_type>::max();
-  }
+  static value_type min() { return std::numeric_limits<value_type>::min(); }
+  static value_type max() { return std::numeric_limits<value_type>::max(); }
   static const int kBase = BASE;
 };
 
-template<typename ITERATOR>
+template <typename ITERATOR>
 class BaseHexIteratorRangeToIntTraits
-    : public BaseIteratorRangeToNumberTraits<ITERATOR, int, 16> {
-};
+    : public BaseIteratorRangeToNumberTraits<ITERATOR, int, 16> {};
 
 template <typename ITERATOR>
 class BaseHexIteratorRangeToUIntTraits
@@ -287,12 +286,11 @@ template <typename VALUE, int BASE>
 class StringPieceToNumberTraits
     : public BaseIteratorRangeToNumberTraits<StringPiece::const_iterator,
                                              VALUE,
-                                             BASE> {
-};
+                                             BASE> {};
 
 template <typename VALUE>
 bool StringToIntImpl(StringPiece input, VALUE* output) {
-  return IteratorRangeToNumber<StringPieceToNumberTraits<VALUE, 10> >::Invoke(
+  return IteratorRangeToNumber<StringPieceToNumberTraits<VALUE, 10>>::Invoke(
       input.begin(), input.end(), output);
 }
 
@@ -300,12 +298,11 @@ template <typename VALUE, int BASE>
 class StringPiece16ToNumberTraits
     : public BaseIteratorRangeToNumberTraits<StringPiece16::const_iterator,
                                              VALUE,
-                                             BASE> {
-};
+                                             BASE> {};
 
 template <typename VALUE>
 bool String16ToIntImpl(StringPiece16 input, VALUE* output) {
-  return IteratorRangeToNumber<StringPiece16ToNumberTraits<VALUE, 10> >::Invoke(
+  return IteratorRangeToNumber<StringPiece16ToNumberTraits<VALUE, 10>>::Invoke(
       input.begin(), input.end(), output);
 }
 
@@ -423,7 +420,7 @@ std::string HexEncode(const void* bytes, size_t size) {
 
 bool HexStringToInt(StringPiece input, int* output) {
   return IteratorRangeToNumber<HexIteratorRangeToIntTraits>::Invoke(
-    input.begin(), input.end(), output);
+      input.begin(), input.end(), output);
 }
 
 bool HexStringToUInt(StringPiece input, uint32_t* output) {
@@ -433,7 +430,7 @@ bool HexStringToUInt(StringPiece input, uint32_t* output) {
 
 bool HexStringToInt64(StringPiece input, int64_t* output) {
   return IteratorRangeToNumber<HexIteratorRangeToInt64Traits>::Invoke(
-    input.begin(), input.end(), output);
+      input.begin(), input.end(), output);
 }
 
 bool HexStringToUInt64(StringPiece input, uint64_t* output) {

@@ -126,31 +126,33 @@ bool Resolve(const SourceDir& current_dir,
       // Leave location piece null.
     } else if (!out_toolchain_dir) {
       // Toolchain specified but not allows in this context.
-      *err = Err(original_value, "Toolchain has a toolchain.",
-          "Your toolchain definition (inside the parens) seems to itself "
-          "have a\ntoolchain. Don't do this.");
+      *err =
+          Err(original_value, "Toolchain has a toolchain.",
+              "Your toolchain definition (inside the parens) seems to itself "
+              "have a\ntoolchain. Don't do this.");
       return false;
     } else {
       // Name piece is everything between the two separators. Note that the
       // separators may be the same (e.g. "//foo(bar)" which means empty name.
       if (toolchain_separator > path_separator) {
-        name_piece = base::StringPiece(
-            &input_str[path_separator + 1],
-            toolchain_separator - path_separator - 1);
+        name_piece =
+            base::StringPiece(&input_str[path_separator + 1],
+                              toolchain_separator - path_separator - 1);
       }
 
       // Toolchain name should end in a ) and this should be the end of the
       // string.
       if (input[input.size() - 1] != ')') {
-        *err = Err(original_value, "Bad toolchain name.",
-            "Toolchain name must end in a \")\" at the end of the label.");
+        *err =
+            Err(original_value, "Bad toolchain name.",
+                "Toolchain name must end in a \")\" at the end of the label.");
         return false;
       }
 
       // Subtract off the two parens to just get the toolchain name.
-      toolchain_piece = base::StringPiece(
-          &input_str[toolchain_separator + 1],
-          input.size() - toolchain_separator - 2);
+      toolchain_piece =
+          base::StringPiece(&input_str[toolchain_separator + 1],
+                            input.size() - toolchain_separator - 2);
     }
   }
 
@@ -169,8 +171,8 @@ bool Resolve(const SourceDir& current_dir,
                                    out_dir, err))
     return false;
 
-  if (!ComputeTargetNameFromDep(original_value, *out_dir, name_piece,
-                                out_name, err))
+  if (!ComputeTargetNameFromDep(original_value, *out_dir, name_piece, out_name,
+                                err))
     return false;
 
   // Last, do the toolchains.
@@ -254,14 +256,12 @@ Label::Label(const SourceDir& dir,
              const base::StringPiece& name,
              const SourceDir& toolchain_dir,
              const base::StringPiece& toolchain_name)
-    : dir_(dir),
-      toolchain_dir_(toolchain_dir) {
+    : dir_(dir), toolchain_dir_(toolchain_dir) {
   name_.assign(name.data(), name.size());
   toolchain_name_.assign(toolchain_name.data(), toolchain_name.size());
 }
 
-Label::Label(const SourceDir& dir, const base::StringPiece& name)
-    : dir_(dir) {
+Label::Label(const SourceDir& dir, const base::StringPiece& name) : dir_(dir) {
   name_.assign(name.data(), name.size());
 }
 
@@ -285,10 +285,8 @@ Label Label::Resolve(const SourceDir& current_dir,
     return ret;
   }
 
-  if (!::Resolve(current_dir, current_toolchain, input, input_string,
-                 &ret.dir_, &ret.name_,
-                 &ret.toolchain_dir_, &ret.toolchain_name_,
-                 err))
+  if (!::Resolve(current_dir, current_toolchain, input, input_string, &ret.dir_,
+                 &ret.name_, &ret.toolchain_dir_, &ret.toolchain_name_, err))
     return Label();
   return ret;
 }
@@ -325,8 +323,7 @@ std::string Label::GetUserVisibleName(bool include_toolchain) const {
 }
 
 std::string Label::GetUserVisibleName(const Label& default_toolchain) const {
-  bool include_toolchain =
-      default_toolchain.dir() != toolchain_dir_ ||
-      default_toolchain.name() != toolchain_name_;
+  bool include_toolchain = default_toolchain.dir() != toolchain_dir_ ||
+                           default_toolchain.name() != toolchain_name_;
   return GetUserVisibleName(include_toolchain);
 }

@@ -5,6 +5,7 @@
 #include "base/process/process_handle.h"
 
 #include <windows.h>
+
 #include <tlhelp32.h>
 
 #include "base/win/scoped_handle.h"
@@ -28,7 +29,7 @@ ProcessId GetProcId(ProcessHandle process) {
 ProcessId GetParentProcessId(ProcessHandle process) {
   ProcessId child_pid = GetProcId(process);
   PROCESSENTRY32 process_entry;
-      process_entry.dwSize = sizeof(PROCESSENTRY32);
+  process_entry.dwSize = sizeof(PROCESSENTRY32);
 
   win::ScopedHandle snapshot(CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0));
   if (snapshot.IsValid() && Process32First(snapshot.Get(), &process_entry)) {

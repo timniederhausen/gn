@@ -75,7 +75,8 @@ class LoaderImpl : public Loader {
                               const BuildSettings*,
                               const SourceFile&,
                               const base::Callback<void(const ParseNode*)>&,
-                              Err*)> AsyncLoadFileCallback;
+                              Err*)>
+      AsyncLoadFileCallback;
 
   explicit LoaderImpl(const BuildSettings* build_settings);
 
@@ -118,9 +119,8 @@ class LoaderImpl : public Loader {
   void ScheduleLoadFile(const Settings* settings,
                         const LocationRange& origin,
                         const SourceFile& file);
-  void ScheduleLoadBuildConfig(
-      Settings* settings,
-      const Scope::KeyValueMap& toolchain_overrides);
+  void ScheduleLoadBuildConfig(Settings* settings,
+                               const Scope::KeyValueMap& toolchain_overrides);
 
   // Runs the given file on the background thread. These are called by the
   // input file manager.
@@ -128,10 +128,9 @@ class LoaderImpl : public Loader {
                           const SourceFile& file_name,
                           const LocationRange& origin,
                           const ParseNode* root);
-  void BackgroundLoadBuildConfig(
-      Settings* settings,
-      const Scope::KeyValueMap& toolchain_overrides,
-      const ParseNode* root);
+  void BackgroundLoadBuildConfig(Settings* settings,
+                                 const Scope::KeyValueMap& toolchain_overrides,
+                                 const ParseNode* root);
 
   // Posted to the main thread when any file other than a build config file
   // file has completed running.

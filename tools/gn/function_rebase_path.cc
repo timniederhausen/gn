@@ -73,11 +73,13 @@ Value ConvertOnePath(const Scope* scope,
     base::FilePath system_path;
     if (looks_like_dir) {
       system_path = scope->settings()->build_settings()->GetFullPath(
-          from_dir.ResolveRelativeDir(value, err,
+          from_dir.ResolveRelativeDir(
+              value, err,
               scope->settings()->build_settings()->root_path_utf8()));
     } else {
       system_path = scope->settings()->build_settings()->GetFullPath(
-          from_dir.ResolveRelativeFile(value, err,
+          from_dir.ResolveRelativeFile(
+              value, err,
               scope->settings()->build_settings()->root_path_utf8()));
     }
     if (err->has_error())
@@ -92,15 +94,16 @@ Value ConvertOnePath(const Scope* scope,
   result = Value(function, Value::STRING);
   if (looks_like_dir) {
     result.string_value() = RebasePath(
-        from_dir.ResolveRelativeDir(value, err,
-            scope->settings()->build_settings()->root_path_utf8()).value(),
-        to_dir,
-        scope->settings()->build_settings()->root_path_utf8());
+        from_dir
+            .ResolveRelativeDir(
+                value, err,
+                scope->settings()->build_settings()->root_path_utf8())
+            .value(),
+        to_dir, scope->settings()->build_settings()->root_path_utf8());
     MakeSlashEndingMatchInput(string_value, &result.string_value());
   } else {
-    SourceFile resolved_file =
-        from_dir.ResolveRelativeFile(value, err,
-            scope->settings()->build_settings()->root_path_utf8());
+    SourceFile resolved_file = from_dir.ResolveRelativeFile(
+        value, err, scope->settings()->build_settings()->root_path_utf8());
     if (err->has_error())
       return Value();
     // Special case:
@@ -110,10 +113,9 @@ Value ConvertOnePath(const Scope* scope,
         to_dir.value().substr(0, to_dir.value().size() - 1)) {
       result.string_value() = ".";
     } else {
-      result.string_value() = RebasePath(
-          resolved_file.value(),
-          to_dir,
-          scope->settings()->build_settings()->root_path_utf8());
+      result.string_value() =
+          RebasePath(resolved_file.value(), to_dir,
+                     scope->settings()->build_settings()->root_path_utf8());
     }
   }
 
@@ -268,8 +270,8 @@ Value RunRebasePath(Scope* scope,
 
   // Path conversion.
   if (inputs.type() == Value::STRING) {
-    return ConvertOnePath(scope, function, inputs,
-                          from_dir, to_dir, convert_to_system_absolute, err);
+    return ConvertOnePath(scope, function, inputs, from_dir, to_dir,
+                          convert_to_system_absolute, err);
 
   } else if (inputs.type() == Value::LIST) {
     result = Value(function, Value::LIST);
@@ -277,8 +279,8 @@ Value RunRebasePath(Scope* scope,
 
     for (const auto& input : inputs.list_value()) {
       result.list_value().push_back(
-          ConvertOnePath(scope, function, input,
-                         from_dir, to_dir, convert_to_system_absolute, err));
+          ConvertOnePath(scope, function, input, from_dir, to_dir,
+                         convert_to_system_absolute, err));
       if (err->has_error()) {
         result = Value();
         return result;
@@ -287,8 +289,7 @@ Value RunRebasePath(Scope* scope,
     return result;
   }
 
-  *err = Err(function->function(),
-             "rebase_path requires a list or a string.");
+  *err = Err(function->function(), "rebase_path requires a list or a string.");
   return result;
 }
 

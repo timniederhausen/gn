@@ -42,11 +42,15 @@ void* GetIATFunction(IMAGE_THUNK_DATA* iat_thunk) {
   return iat_function.pointer;
 }
 
-bool InterceptEnumCallback(const base::win::PEImage& image, const char* module,
-                           DWORD ordinal, const char* name, DWORD hint,
-                           IMAGE_THUNK_DATA* iat, void* cookie) {
+bool InterceptEnumCallback(const base::win::PEImage& image,
+                           const char* module,
+                           DWORD ordinal,
+                           const char* name,
+                           DWORD hint,
+                           IMAGE_THUNK_DATA* iat,
+                           void* cookie) {
   InterceptFunctionInformation* intercept_information =
-    reinterpret_cast<InterceptFunctionInformation*>(cookie);
+      reinterpret_cast<InterceptFunctionInformation*>(cookie);
 
   if (NULL == intercept_information) {
     NOTREACHED();
@@ -56,8 +60,8 @@ bool InterceptEnumCallback(const base::win::PEImage& image, const char* module,
   DCHECK(module);
 
   if ((0 == lstrcmpiA(module, intercept_information->imported_from_module)) &&
-     (NULL != name) &&
-     (0 == lstrcmpiA(name, intercept_information->function_name))) {
+      (NULL != name) &&
+      (0 == lstrcmpiA(name, intercept_information->function_name))) {
     // Save the old pointer.
     if (NULL != intercept_information->old_function) {
       *(intercept_information->old_function) = GetIATFunction(iat);
@@ -101,11 +105,12 @@ bool InterceptEnumCallback(const base::win::PEImage& image, const char* module,
 //          as defined in winerror.h
 DWORD InterceptImportedFunction(HMODULE module_handle,
                                 const char* imported_from_module,
-                                const char* function_name, void* new_function,
+                                const char* function_name,
+                                void* new_function,
                                 void** old_function,
                                 IMAGE_THUNK_DATA** iat_thunk) {
   if ((NULL == module_handle) || (NULL == imported_from_module) ||
-     (NULL == function_name) || (NULL == new_function)) {
+      (NULL == function_name) || (NULL == new_function)) {
     NOTREACHED();
     return ERROR_INVALID_PARAMETER;
   }
@@ -116,14 +121,13 @@ DWORD InterceptImportedFunction(HMODULE module_handle,
     return ERROR_INVALID_PARAMETER;
   }
 
-  InterceptFunctionInformation intercept_information = {
-    false,
-    imported_from_module,
-    function_name,
-    new_function,
-    old_function,
-    iat_thunk,
-    ERROR_GEN_FAILURE};
+  InterceptFunctionInformation intercept_information = {false,
+                                                        imported_from_module,
+                                                        function_name,
+                                                        new_function,
+                                                        old_function,
+                                                        iat_thunk,
+                                                        ERROR_GEN_FAILURE};
 
   // First go through the IAT. If we don't find the import we are looking
   // for in IAT, search delay import table.
@@ -170,8 +174,7 @@ IATPatchFunction::IATPatchFunction()
     : module_handle_(NULL),
       intercept_function_(NULL),
       original_function_(NULL),
-      iat_thunk_(NULL) {
-}
+      iat_thunk_(NULL) {}
 
 IATPatchFunction::~IATPatchFunction() {
   if (NULL != intercept_function_) {
@@ -210,12 +213,9 @@ DWORD IATPatchFunction::PatchFromModule(HMODULE module,
   DCHECK_EQ(static_cast<void*>(NULL), intercept_function_);
   DCHECK(module);
 
-  DWORD error = InterceptImportedFunction(module,
-                                          imported_from_module,
-                                          function_name,
-                                          new_function,
-                                          &original_function_,
-                                          &iat_thunk_);
+  DWORD error =
+      InterceptImportedFunction(module, imported_from_module, function_name,
+                                new_function, &original_function_, &iat_thunk_);
 
   if (NO_ERROR == error) {
     DCHECK_NE(original_function_, intercept_function_);
@@ -226,8 +226,7 @@ DWORD IATPatchFunction::PatchFromModule(HMODULE module,
 }
 
 DWORD IATPatchFunction::Unpatch() {
-  DWORD error = RestoreImportedFunction(intercept_function_,
-                                        original_function_,
+  DWORD error = RestoreImportedFunction(intercept_function_, original_function_,
                                         iat_thunk_);
   DCHECK_EQ(static_cast<DWORD>(NO_ERROR), error);
 

@@ -79,8 +79,10 @@
 
 namespace base {
 
-template <typename T> class SupportsWeakPtr;
-template <typename T> class WeakPtr;
+template <typename T>
+class SupportsWeakPtr;
+template <typename T>
+class WeakPtr;
 
 namespace internal {
 // These classes are part of the WeakPtr implementation.
@@ -175,7 +177,7 @@ class SupportsWeakPtrBase {
   // function that makes calling this easier.
   //
   // Precondition: t != nullptr
-  template<typename Derived>
+  template <typename Derived>
   static WeakPtr<Derived> StaticAsWeakPtr(Derived* t) {
     static_assert(
         std::is_base_of<internal::SupportsWeakPtrBase, Derived>::value,
@@ -197,7 +199,8 @@ class SupportsWeakPtrBase {
 
 }  // namespace internal
 
-template <typename T> class WeakPtrFactory;
+template <typename T>
+class WeakPtrFactory;
 
 // The WeakPtr class holds a weak reference to |T*|.
 //
@@ -254,7 +257,8 @@ class WeakPtr : public internal::WeakPtrBase {
 
  private:
   friend class internal::SupportsWeakPtrBase;
-  template <typename U> friend class WeakPtr;
+  template <typename U>
+  friend class WeakPtr;
   friend class SupportsWeakPtr<T>;
   friend class WeakPtrFactory<T>;
 

@@ -72,7 +72,10 @@ TEST(StringUtils, ExpandStringLiteralIdentifier) {
   EXPECT_TRUE(CheckExpansionCase("$onelist", "[1]", true));
 
   // Hex values
-  EXPECT_TRUE(CheckExpansionCase("$0x0AA", "\x0A""A", true));
+  EXPECT_TRUE(CheckExpansionCase("$0x0AA",
+                                 "\x0A"
+                                 "A",
+                                 true));
   EXPECT_TRUE(CheckExpansionCase("$0x0a$0xfF", "\x0A\xFF", true));
 
   // Errors

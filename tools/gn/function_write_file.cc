@@ -20,8 +20,7 @@
 namespace functions {
 
 const char kWriteFile[] = "write_file";
-const char kWriteFile_HelpShort[] =
-    "write_file: Write a file to disk.";
+const char kWriteFile_HelpShort[] = "write_file: Write a file to disk.";
 const char kWriteFile_Help[] =
     R"(write_file: Write a file to disk.
 
@@ -62,13 +61,13 @@ Value RunWriteFile(Scope* scope,
 
   // Compute the file name and make sure it's in the output dir.
   const SourceDir& cur_dir = scope->GetSourceDir();
-  SourceFile source_file = cur_dir.ResolveRelativeFile(args[0], err,
-      scope->settings()->build_settings()->root_path_utf8());
+  SourceFile source_file = cur_dir.ResolveRelativeFile(
+      args[0], err, scope->settings()->build_settings()->root_path_utf8());
   if (err->has_error())
     return Value();
   if (!EnsureStringIsInOutputDir(
-          scope->settings()->build_settings()->build_dir(),
-          source_file.value(), args[0].origin(), err))
+          scope->settings()->build_settings()->build_dir(), source_file.value(),
+          args[0].origin(), err))
     return Value();
   g_scheduler->AddWrittenFile(source_file);  // Track that we wrote this file.
 

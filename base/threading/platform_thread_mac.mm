@@ -71,16 +71,14 @@ size_t GetDefaultThreadStackSize(const pthread_attr_t& attributes) {
   if (pthread_attr_getstacksize(&attributes, &default_stack_size) == 0 &&
       getrlimit(RLIMIT_STACK, &stack_rlimit) == 0 &&
       stack_rlimit.rlim_cur != RLIM_INFINITY) {
-    default_stack_size =
-        std::max(std::max(default_stack_size,
-                          static_cast<size_t>(PTHREAD_STACK_MIN)),
-                 static_cast<size_t>(stack_rlimit.rlim_cur));
+    default_stack_size = std::max(
+        std::max(default_stack_size, static_cast<size_t>(PTHREAD_STACK_MIN)),
+        static_cast<size_t>(stack_rlimit.rlim_cur));
   }
   return default_stack_size;
 #endif
 }
 
-void TerminateOnThread() {
-}
+void TerminateOnThread() {}
 
 }  // namespace base

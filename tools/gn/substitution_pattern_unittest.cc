@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "tools/gn/substitution_pattern.h"
 #include "test/test.h"
 #include "tools/gn/err.h"
-#include "tools/gn/substitution_pattern.h"
 
 TEST(SubstitutionPattern, ParseLiteral) {
   SubstitutionPattern pattern;

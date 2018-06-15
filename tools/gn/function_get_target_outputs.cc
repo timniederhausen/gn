@@ -100,8 +100,8 @@ Value RunGetTargetOutputs(Scope* scope,
     const Target* as_target = item->AsTarget();
     if (!as_target) {
       *err = Err(function, "Label does not refer to a target.",
-          label.GetUserVisibleName(false) +
-          "\nrefers to a " + item->GetItemTypeName());
+                 label.GetUserVisibleName(false) + "\nrefers to a " +
+                     item->GetItemTypeName());
       return Value();
     }
     target = as_target;
@@ -110,9 +110,10 @@ Value RunGetTargetOutputs(Scope* scope,
 
   if (!target) {
     *err = Err(function, "Target not found in this context.",
-        label.GetUserVisibleName(false) +
-        "\nwas not found. get_target_outputs() can only be used for targets\n"
-        "previously defined in the current file.");
+               label.GetUserVisibleName(false) +
+                   "\nwas not found. get_target_outputs() can only be used for "
+                   "targets\n"
+                   "previously defined in the current file.");
     return Value();
   }
 

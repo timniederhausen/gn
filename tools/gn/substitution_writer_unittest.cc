@@ -17,9 +17,8 @@
 TEST(SubstitutionWriter, GetListAs) {
   TestWithScope setup;
 
-  SubstitutionList list = SubstitutionList::MakeForTest(
-      "//foo/bar/a.cc",
-      "//foo/bar/b.cc");
+  SubstitutionList list =
+      SubstitutionList::MakeForTest("//foo/bar/a.cc", "//foo/bar/b.cc");
 
   std::vector<SourceFile> sources;
   SubstitutionWriter::GetListAsSourceFiles(list, &sources);
@@ -97,9 +96,7 @@ TEST(SubstitutionWriter, WriteWithNinjaVariables) {
   std::ostringstream out;
   SubstitutionWriter::WriteWithNinjaVariables(pattern, options, out);
 
-  EXPECT_EQ(
-      "-i ${in} --out=bar\"${source_name_part}\".o",
-      out.str());
+  EXPECT_EQ("-i ${in} --out=bar\"${source_name_part}\".o", out.str());
 }
 
 TEST(SubstitutionWriter, SourceSubstitutions) {
@@ -111,25 +108,18 @@ TEST(SubstitutionWriter, SourceSubstitutions) {
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
 
-  // Call to get substitutions relative to the build dir.
-  #define GetRelSubst(str, what) \
-      SubstitutionWriter::GetSourceSubstitution( \
-          &target, \
-          setup.settings(), \
-          SourceFile(str), \
-          what, \
-          SubstitutionWriter::OUTPUT_RELATIVE, \
-          setup.settings()->build_settings()->build_dir())
+// Call to get substitutions relative to the build dir.
+#define GetRelSubst(str, what)                          \
+  SubstitutionWriter::GetSourceSubstitution(            \
+      &target, setup.settings(), SourceFile(str), what, \
+      SubstitutionWriter::OUTPUT_RELATIVE,              \
+      setup.settings()->build_settings()->build_dir())
 
-  // Call to get absolute directory substitutions.
-  #define GetAbsSubst(str, what) \
-      SubstitutionWriter::GetSourceSubstitution( \
-          &target, \
-          setup.settings(), \
-          SourceFile(str), \
-          what, \
-          SubstitutionWriter::OUTPUT_ABSOLUTE, \
-          SourceDir())
+// Call to get absolute directory substitutions.
+#define GetAbsSubst(str, what)                          \
+  SubstitutionWriter::GetSourceSubstitution(            \
+      &target, setup.settings(), SourceFile(str), what, \
+      SubstitutionWriter::OUTPUT_ABSOLUTE, SourceDir())
 
   // Try all possible templates with a normal looking string.
   EXPECT_EQ("../../foo/bar/baz.txt",
@@ -184,13 +174,13 @@ TEST(SubstitutionWriter, SourceSubstitutions) {
   EXPECT_EQ(".",
             GetRelSubst("//baz.txt", SUBSTITUTION_SOURCE_ROOT_RELATIVE_DIR));
 
-  EXPECT_EQ("baz.txt",
-      GetRelSubst("//foo/bar/baz.txt", SUBSTITUTION_SOURCE_TARGET_RELATIVE));
-  EXPECT_EQ("baz.txt",
-      GetAbsSubst("//foo/bar/baz.txt", SUBSTITUTION_SOURCE_TARGET_RELATIVE));
+  EXPECT_EQ("baz.txt", GetRelSubst("//foo/bar/baz.txt",
+                                   SUBSTITUTION_SOURCE_TARGET_RELATIVE));
+  EXPECT_EQ("baz.txt", GetAbsSubst("//foo/bar/baz.txt",
+                                   SUBSTITUTION_SOURCE_TARGET_RELATIVE));
 
-  #undef GetAbsSubst
-  #undef GetRelSubst
+#undef GetAbsSubst
+#undef GetRelSubst
 }
 
 TEST(SubstitutionWriter, TargetSubstitutions) {
@@ -243,14 +233,12 @@ TEST(SubstitutionWriter, CompilerSubstitutions) {
 
   // The compiler substitution is just source + target combined. So test one
   // of each of those classes of things to make sure this is hooked up.
-  EXPECT_EQ("file",
-            SubstitutionWriter::GetCompilerSubstitution(
-                &target, SourceFile("//foo/bar/file.txt"),
-                SUBSTITUTION_SOURCE_NAME_PART));
-  EXPECT_EQ("gen/foo/bar",
-            SubstitutionWriter::GetCompilerSubstitution(
-                &target, SourceFile("//foo/bar/file.txt"),
-                SUBSTITUTION_TARGET_GEN_DIR));
+  EXPECT_EQ("file", SubstitutionWriter::GetCompilerSubstitution(
+                        &target, SourceFile("//foo/bar/file.txt"),
+                        SUBSTITUTION_SOURCE_NAME_PART));
+  EXPECT_EQ("gen/foo/bar", SubstitutionWriter::GetCompilerSubstitution(
+                               &target, SourceFile("//foo/bar/file.txt"),
+                               SUBSTITUTION_TARGET_GEN_DIR));
 }
 
 TEST(SubstitutionWriter, LinkerSubstitutions) {
@@ -266,12 +254,10 @@ TEST(SubstitutionWriter, LinkerSubstitutions) {
 
   // The compiler substitution is just target + OUTPUT_EXTENSION combined. So
   // test one target one plus the output extension.
-  EXPECT_EQ(".so",
-            SubstitutionWriter::GetLinkerSubstitution(
-                &target, tool, SUBSTITUTION_OUTPUT_EXTENSION));
-  EXPECT_EQ("gen/foo/bar",
-            SubstitutionWriter::GetLinkerSubstitution(
-                &target, tool, SUBSTITUTION_TARGET_GEN_DIR));
+  EXPECT_EQ(".so", SubstitutionWriter::GetLinkerSubstitution(
+                       &target, tool, SUBSTITUTION_OUTPUT_EXTENSION));
+  EXPECT_EQ("gen/foo/bar", SubstitutionWriter::GetLinkerSubstitution(
+                               &target, tool, SUBSTITUTION_TARGET_GEN_DIR));
 
   // Test that we handle paths that end up in the root build dir properly
   // (no leading "./" or "/").
@@ -285,13 +271,11 @@ TEST(SubstitutionWriter, LinkerSubstitutions) {
 
   // Output extensions can be overridden.
   target.set_output_extension("extension");
-  EXPECT_EQ(".extension",
-            SubstitutionWriter::GetLinkerSubstitution(
-                &target, tool, SUBSTITUTION_OUTPUT_EXTENSION));
+  EXPECT_EQ(".extension", SubstitutionWriter::GetLinkerSubstitution(
+                              &target, tool, SUBSTITUTION_OUTPUT_EXTENSION));
   target.set_output_extension("");
-  EXPECT_EQ("",
-            SubstitutionWriter::GetLinkerSubstitution(
-                &target, tool, SUBSTITUTION_OUTPUT_EXTENSION));
+  EXPECT_EQ("", SubstitutionWriter::GetLinkerSubstitution(
+                    &target, tool, SUBSTITUTION_OUTPUT_EXTENSION));
 
   // Output directory is tested in a separate test below.
 }
@@ -320,18 +304,20 @@ TEST(SubstitutionWriter, OutputDir) {
   ASSERT_TRUE(output_name.Parse("{{output_dir}}/{{target_output_name}}.exe",
                                 nullptr, &err));
   EXPECT_EQ("./baz/baz.exe",
-            SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
-                &target, &tool, output_name).value());
+            SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(&target, &tool,
+                                                                 output_name)
+                .value());
 
   // Override the output name to the root build dir.
   target.set_output_dir(SourceDir("//out/Debug/"));
-  EXPECT_EQ("./baz.exe",
-            SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
-                &target, &tool, output_name).value());
+  EXPECT_EQ("./baz.exe", SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
+                             &target, &tool, output_name)
+                             .value());
 
   // Override the output name to a new subdirectory.
   target.set_output_dir(SourceDir("//out/Debug/foo/bar"));
   EXPECT_EQ("foo/bar/baz.exe",
-            SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
-                &target, &tool, output_name).value());
+            SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(&target, &tool,
+                                                                 output_name)
+                .value());
 }

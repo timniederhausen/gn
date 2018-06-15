@@ -7,8 +7,8 @@
 
 #include <iosfwd>
 #include <map>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include "base/macros.h"
 #include "tools/gn/path_output.h"
@@ -39,10 +39,9 @@ class NinjaBuildWriter {
   // constructor. The class itself doesn't depend on the Builder at all which
   // makes testing much easier (tests integrating various functions along with
   // the Builder get very complicated).
-  static bool RunAndWriteFile(
-      const BuildSettings* settings,
-      const Builder& builder,
-      Err* err);
+  static bool RunAndWriteFile(const BuildSettings* settings,
+                              const Builder& builder,
+                              Err* err);
 
   bool Run(Err* err);
 
@@ -70,4 +69,3 @@ class NinjaBuildWriter {
 extern const char kNinjaRules_Help[];
 
 #endif  // TOOLS_GN_NINJA_BUILD_WRITER_H_
-

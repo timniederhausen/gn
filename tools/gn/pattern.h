@@ -16,15 +16,13 @@ class Pattern {
  public:
   struct Subrange {
     enum Type {
-      LITERAL,  // Matches exactly the contents of the string.
-      ANYTHING,  // * (zero or more chars).
+      LITERAL,       // Matches exactly the contents of the string.
+      ANYTHING,      // * (zero or more chars).
       PATH_BOUNDARY  // '/' or beginning of string.
     };
 
     explicit Subrange(Type t, const std::string& l = std::string())
-        : type(t),
-          literal(l) {
-    }
+        : type(t), literal(l) {}
 
     // Returns the minimum number of chars that this subrange requires.
     size_t MinSize() const {

@@ -82,19 +82,17 @@ bool ExecProcess(const base::CommandLine& cmdline,
   // Keep the normal stdin.
   start_info.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
   // FIXME(brettw) set stderr here when we actually read it below.
-  //start_info.hStdError = err_write;
+  // start_info.hStdError = err_write;
   start_info.hStdError = GetStdHandle(STD_ERROR_HANDLE);
   start_info.dwFlags |= STARTF_USESTDHANDLES;
 
   // Create the child process.
   PROCESS_INFORMATION temp_process_info = {};
-  if (!CreateProcess(nullptr,
-                     &cmdline_str[0],
-                     nullptr, nullptr,
+  if (!CreateProcess(nullptr, &cmdline_str[0], nullptr, nullptr,
                      TRUE,  // Handles are inherited.
                      NORMAL_PRIORITY_CLASS, nullptr,
-                     startup_dir.value().c_str(),
-                     &start_info, &temp_process_info)) {
+                     startup_dir.value().c_str(), &start_info,
+                     &temp_process_info)) {
     return false;
   }
   base::win::ScopedProcessInformation proc_info(temp_process_info);
@@ -177,78 +175,77 @@ bool ExecProcess(const base::CommandLine& cmdline,
     case -1:  // error
       return false;
     case 0:  // child
-      {
-        // DANGER: no calls to malloc are allowed from now on:
-        // http://crbug.com/36678
-        //
-        // STL iterators are also not allowed (including those implied
-        // by range-based for loops), since debug iterators use locks.
+    {
+      // DANGER: no calls to malloc are allowed from now on:
+      // http://crbug.com/36678
+      //
+      // STL iterators are also not allowed (including those implied
+      // by range-based for loops), since debug iterators use locks.
 
-        // Obscure fork() rule: in the child, if you don't end up doing exec*(),
-        // you call _exit() instead of exit(). This is because _exit() does not
-        // call any previously-registered (in the parent) exit handlers, which
-        // might do things like block waiting for threads that don't even exist
-        // in the child.
-        int dev_null = open("/dev/null", O_WRONLY);
-        if (dev_null < 0)
-          _exit(127);
-
-        fd_shuffle1.push_back(
-            base::InjectionArc(out_write.get(), STDOUT_FILENO, true));
-        fd_shuffle1.push_back(
-            base::InjectionArc(err_write.get(), STDERR_FILENO, true));
-        fd_shuffle1.push_back(
-            base::InjectionArc(dev_null, STDIN_FILENO, true));
-        // Adding another element here? Remeber to increase the argument to
-        // reserve(), above.
-
-        // DANGER: Do NOT convert to range-based for loop!
-        for (size_t i = 0; i < fd_shuffle1.size(); ++i)
-          fd_shuffle2.push_back(fd_shuffle1[i]);
-
-        if (!ShuffleFileDescriptors(&fd_shuffle1))
-          _exit(127);
-
-        base::SetCurrentDirectory(startup_dir);
-
-        // TODO(brettw) the base version GetAppOutput does a
-        // CloseSuperfluousFds call here. Do we need this?
-
-        // DANGER: Do NOT convert to range-based for loop!
-        for (size_t i = 0; i < argv.size(); i++)
-          argv_cstr[i] = const_cast<char*>(argv[i].c_str());
-        argv_cstr[argv.size()] = nullptr;
-        execvp(argv_cstr[0], argv_cstr.get());
+      // Obscure fork() rule: in the child, if you don't end up doing exec*(),
+      // you call _exit() instead of exit(). This is because _exit() does not
+      // call any previously-registered (in the parent) exit handlers, which
+      // might do things like block waiting for threads that don't even exist
+      // in the child.
+      int dev_null = open("/dev/null", O_WRONLY);
+      if (dev_null < 0)
         _exit(127);
-      }
+
+      fd_shuffle1.push_back(
+          base::InjectionArc(out_write.get(), STDOUT_FILENO, true));
+      fd_shuffle1.push_back(
+          base::InjectionArc(err_write.get(), STDERR_FILENO, true));
+      fd_shuffle1.push_back(base::InjectionArc(dev_null, STDIN_FILENO, true));
+      // Adding another element here? Remeber to increase the argument to
+      // reserve(), above.
+
+      // DANGER: Do NOT convert to range-based for loop!
+      for (size_t i = 0; i < fd_shuffle1.size(); ++i)
+        fd_shuffle2.push_back(fd_shuffle1[i]);
+
+      if (!ShuffleFileDescriptors(&fd_shuffle1))
+        _exit(127);
+
+      base::SetCurrentDirectory(startup_dir);
+
+      // TODO(brettw) the base version GetAppOutput does a
+      // CloseSuperfluousFds call here. Do we need this?
+
+      // DANGER: Do NOT convert to range-based for loop!
+      for (size_t i = 0; i < argv.size(); i++)
+        argv_cstr[i] = const_cast<char*>(argv[i].c_str());
+      argv_cstr[argv.size()] = nullptr;
+      execvp(argv_cstr[0], argv_cstr.get());
+      _exit(127);
+    }
     default:  // parent
-      {
-        // Close our writing end of pipe now. Otherwise later read would not
-        // be able to detect end of child's output (in theory we could still
-        // write to the pipe).
-        out_write.reset();
-        err_write.reset();
+    {
+      // Close our writing end of pipe now. Otherwise later read would not
+      // be able to detect end of child's output (in theory we could still
+      // write to the pipe).
+      out_write.reset();
+      err_write.reset();
 
-        bool out_open = true, err_open = true;
-        while (out_open || err_open) {
-          fd_set read_fds;
-          FD_ZERO(&read_fds);
-          FD_SET(out_read.get(), &read_fds);
-          FD_SET(err_read.get(), &read_fds);
-          int res =
-              HANDLE_EINTR(select(std::max(out_read.get(), err_read.get()) + 1,
-                                  &read_fds, nullptr, nullptr, nullptr));
-          if (res <= 0)
-            break;
-          if (FD_ISSET(out_read.get(), &read_fds))
-            out_open = ReadFromPipe(out_read.get(), std_out);
-          if (FD_ISSET(err_read.get(), &read_fds))
-            err_open = ReadFromPipe(err_read.get(), std_err);
-        }
-
-        base::Process process(pid);
-        return process.WaitForExit(exit_code);
+      bool out_open = true, err_open = true;
+      while (out_open || err_open) {
+        fd_set read_fds;
+        FD_ZERO(&read_fds);
+        FD_SET(out_read.get(), &read_fds);
+        FD_SET(err_read.get(), &read_fds);
+        int res =
+            HANDLE_EINTR(select(std::max(out_read.get(), err_read.get()) + 1,
+                                &read_fds, nullptr, nullptr, nullptr));
+        if (res <= 0)
+          break;
+        if (FD_ISSET(out_read.get(), &read_fds))
+          out_open = ReadFromPipe(out_read.get(), std_out);
+        if (FD_ISSET(err_read.get(), &read_fds))
+          err_open = ReadFromPipe(err_read.get(), std_err);
       }
+
+      base::Process process(pid);
+      return process.WaitForExit(exit_code);
+    }
   }
 
   return false;
@@ -256,4 +253,3 @@ bool ExecProcess(const base::CommandLine& cmdline,
 #endif
 
 }  // namespace internal
-

@@ -16,7 +16,7 @@ class Label;
 namespace base {
 class CommandLine;
 class FilePath;
-}
+}  // namespace base
 
 class TraceItem {
  public:

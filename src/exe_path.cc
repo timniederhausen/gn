@@ -25,8 +25,7 @@ base::FilePath GetExePath() {
   DCHECK_GT(executable_length, 1u);
   std::string executable_path;
   int rv = _NSGetExecutablePath(
-      base::WriteInto(&executable_path, executable_length),
-                      &executable_length);
+      base::WriteInto(&executable_path, executable_length), &executable_length);
   DCHECK_EQ(rv, 0);
 
   // _NSGetExecutablePath may return paths containing ./ or ../ which makes

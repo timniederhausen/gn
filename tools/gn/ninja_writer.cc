@@ -12,18 +12,15 @@
 #include "tools/gn/settings.h"
 #include "tools/gn/target.h"
 
-NinjaWriter::NinjaWriter(const Builder& builder)
-    : builder_(builder) {
-}
+NinjaWriter::NinjaWriter(const Builder& builder) : builder_(builder) {}
 
 NinjaWriter::~NinjaWriter() = default;
 
 // static
-bool NinjaWriter::RunAndWriteFiles(
-    const BuildSettings* build_settings,
-    const Builder& builder,
-    const PerToolchainRules& per_toolchain_rules,
-    Err* err) {
+bool NinjaWriter::RunAndWriteFiles(const BuildSettings* build_settings,
+                                   const Builder& builder,
+                                   const PerToolchainRules& per_toolchain_rules,
+                                   Err* err) {
   NinjaWriter writer(builder);
 
   if (!writer.WriteToolchains(per_toolchain_rules, err))
@@ -45,8 +42,8 @@ bool NinjaWriter::WriteToolchains(const PerToolchainRules& per_toolchain_rules,
     const Settings* settings =
         builder_.loader()->GetToolchainSettings(toolchain->label());
     if (!NinjaToolchainWriter::RunAndWriteFile(settings, toolchain, i.second)) {
-      Err(Location(),
-          "Couldn't open toolchain buildfile(s) for writing").PrintToStdout();
+      Err(Location(), "Couldn't open toolchain buildfile(s) for writing")
+          .PrintToStdout();
       return false;
     }
   }

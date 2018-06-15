@@ -45,12 +45,12 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   // The tool_type indicates the corresponding tool for flags that are
   // tool-specific (e.g. "cflags_c"). For non-tool-specific flags (e.g.
   // "defines") tool_type should be TYPE_NONE.
-  void WriteOneFlag(
-      SubstitutionType subst_enum,
-      bool has_precompiled_headers,
-      Toolchain::ToolType tool_type,
-      const std::vector<std::string>& (ConfigValues::* getter)() const,
-      EscapeOptions flag_escape_options);
+  void WriteOneFlag(SubstitutionType subst_enum,
+                    bool has_precompiled_headers,
+                    Toolchain::ToolType tool_type,
+                    const std::vector<std::string>& (ConfigValues::*getter)()
+                        const,
+                    EscapeOptions flag_escape_options);
 
   // Writes build lines required for precompiled headers. Any generated
   // object files will be appended to the |object_files|. Any generated
@@ -157,4 +157,3 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
 };
 
 #endif  // TOOLS_GN_NINJA_BINARY_TARGET_WRITER_H_
-

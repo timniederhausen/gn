@@ -215,7 +215,8 @@ bool WriteFileIfChanged(const base::FilePath& file_path,
 
 // Writes given stream contents to the given file. Returns true if data was
 // successfully written, false otherwise. |err| is set on error if not nullptr.
-bool WriteFile(const base::FilePath& file_path, const std::string& data,
+bool WriteFile(const base::FilePath& file_path,
+               const std::string& data,
                Err* err);
 
 // -----------------------------------------------------------------------------

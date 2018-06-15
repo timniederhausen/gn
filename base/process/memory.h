@@ -71,11 +71,10 @@ const DWORD kOomExceptionCode = 0xe0000008;
 // specifically ASan and other sanitizers.
 // Return value tells whether the allocation succeeded. If it fails |result| is
 // set to NULL, otherwise it holds the memory address.
-WARN_UNUSED_RESULT bool UncheckedMalloc(size_t size,
-                                                    void** result);
+WARN_UNUSED_RESULT bool UncheckedMalloc(size_t size, void** result);
 WARN_UNUSED_RESULT bool UncheckedCalloc(size_t num_items,
-                                                    size_t size,
-                                                    void** result);
+                                        size_t size,
+                                        void** result);
 
 }  // namespace base
 

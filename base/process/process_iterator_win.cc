@@ -7,8 +7,7 @@
 namespace base {
 
 ProcessIterator::ProcessIterator(const ProcessFilter* filter)
-    : started_iteration_(false),
-      filter_(filter) {
+    : started_iteration_(false), filter_(filter) {
   snapshot_ = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 }
 

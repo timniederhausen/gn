@@ -54,15 +54,12 @@ class PlatformThreadRef {
 
   explicit constexpr PlatformThreadRef(RefType id) : id_(id) {}
 
-  bool operator==(PlatformThreadRef other) const {
-    return id_ == other.id_;
-  }
+  bool operator==(PlatformThreadRef other) const { return id_ == other.id_; }
 
   bool operator!=(PlatformThreadRef other) const { return id_ != other.id_; }
 
-  bool is_null() const {
-    return id_ == 0;
-  }
+  bool is_null() const { return id_ == 0; }
+
  private:
   RefType id_;
 };
@@ -84,13 +81,9 @@ class PlatformThreadHandle {
     return handle_ == other.handle_;
   }
 
-  bool is_null() const {
-    return !handle_;
-  }
+  bool is_null() const { return !handle_; }
 
-  Handle platform_handle() const {
-    return handle_;
-  }
+  Handle platform_handle() const { return handle_; }
 
  private:
   Handle handle_;

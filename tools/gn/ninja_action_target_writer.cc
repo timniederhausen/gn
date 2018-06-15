@@ -21,8 +21,7 @@ NinjaActionTargetWriter::NinjaActionTargetWriter(const Target* target,
       path_output_no_escaping_(
           target->settings()->build_settings()->build_dir(),
           target->settings()->build_settings()->root_path_utf8(),
-          ESCAPE_NONE) {
-}
+          ESCAPE_NONE) {}
 
 NinjaActionTargetWriter::~NinjaActionTargetWriter() = default;
 
@@ -129,8 +128,8 @@ std::string NinjaActionTargetWriter::WriteRuleDefinition() {
     for (const auto& arg :
          target_->action_values().rsp_file_contents().list()) {
       out_ << " ";
-      SubstitutionWriter::WriteWithNinjaVariables(
-          arg, args_escape_options, out_);
+      SubstitutionWriter::WriteWithNinjaVariables(arg, args_escape_options,
+                                                  out_);
     }
     out_ << std::endl;
   }
@@ -141,8 +140,7 @@ std::string NinjaActionTargetWriter::WriteRuleDefinition() {
   path_output_.WriteFile(out_, target_->action_values().script());
   for (const auto& arg : args.list()) {
     out_ << " ";
-    SubstitutionWriter::WriteWithNinjaVariables(
-        arg, args_escape_options, out_);
+    SubstitutionWriter::WriteWithNinjaVariables(arg, args_escape_options, out_);
   }
   out_ << std::endl;
   out_ << "  description = ACTION " << target_label << std::endl;
@@ -196,8 +194,8 @@ void NinjaActionTargetWriter::WriteSourceRules(
     // other) and the redundant assignment won't bother Ninja.
     SubstitutionWriter::WriteNinjaVariablesForSource(
         target_, settings_, sources[i],
-        target_->action_values().args().required_types(),
-        args_escape_options, out_);
+        target_->action_values().args().required_types(), args_escape_options,
+        out_);
     SubstitutionWriter::WriteNinjaVariablesForSource(
         target_, settings_, sources[i],
         target_->action_values().rsp_file_contents().required_types(),
@@ -233,7 +231,8 @@ void NinjaActionTargetWriter::WriteOutputFilesForBuildLine(
 }
 
 void NinjaActionTargetWriter::WriteDepfile(const SourceFile& source) {
-  path_output_.WriteFile(out_,
+  path_output_.WriteFile(
+      out_,
       SubstitutionWriter::ApplyPatternToSourceAsOutputFile(
           target_, settings_, target_->action_values().depfile(), source));
 }

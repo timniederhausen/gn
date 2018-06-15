@@ -56,7 +56,8 @@ Value RunSetDefaultToolchain(Scope* scope,
                              const std::vector<Value>& args,
                              Err* err) {
   if (!scope->IsProcessingBuildConfig()) {
-    *err = Err(function->function(), "Must be called from build config.",
+    *err = Err(
+        function->function(), "Must be called from build config.",
         "set_default_toolchain can only be called from the build configuration "
         "file.");
     return Value();

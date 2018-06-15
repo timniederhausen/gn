@@ -95,8 +95,7 @@ class StringTokenizerT {
   // should not be constructed with a temporary. The deleted rvalue constructor
   // blocks the most obvious instances of this (e.g. passing a string literal to
   // the constructor), but caution must still be exercised.
-  StringTokenizerT(const str& string,
-                   const str& delims) {
+  StringTokenizerT(const str& string, const str& delims) {
     Init(string.begin(), string.end(), delims);
   }
 
@@ -131,9 +130,7 @@ class StringTokenizerT {
   }
 
   // Start iterating through tokens from the beginning of the string.
-  void Reset() {
-    token_end_ = start_pos_;
-  }
+  void Reset() { token_end_ = start_pos_; }
 
   // Returns true if token is a delimiter.  When the tokenizer is constructed
   // with the RETURN_DELIMS option, this method can be used to check if the
@@ -204,13 +201,9 @@ class StringTokenizerT {
     return true;
   }
 
-  bool IsDelim(char_type c) const {
-    return delims_.find(c) != str::npos;
-  }
+  bool IsDelim(char_type c) const { return delims_.find(c) != str::npos; }
 
-  bool IsQuote(char_type c) const {
-    return quotes_.find(c) != str::npos;
-  }
+  bool IsQuote(char_type c) const { return quotes_.find(c) != str::npos; }
 
   struct AdvanceState {
     bool in_quote;

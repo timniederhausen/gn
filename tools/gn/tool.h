@@ -19,16 +19,9 @@ class Pool;
 
 class Tool {
  public:
-  enum DepsFormat {
-    DEPS_GCC = 0,
-    DEPS_MSVC = 1
-  };
+  enum DepsFormat { DEPS_GCC = 0, DEPS_MSVC = 1 };
 
-  enum PrecompiledHeaderType {
-    PCH_NONE = 0,
-    PCH_GCC = 1,
-    PCH_MSVC = 2
-  };
+  enum PrecompiledHeaderType { PCH_NONE = 0, PCH_GCC = 1, PCH_MSVC = 2 };
 
   Tool();
   ~Tool();
@@ -42,9 +35,7 @@ class Tool {
   // SetComplete(), at which point no other changes can be made.
 
   // Command to run.
-  const SubstitutionPattern& command() const {
-    return command_;
-  }
+  const SubstitutionPattern& command() const { return command_; }
   void set_command(SubstitutionPattern cmd) {
     DCHECK(!complete_);
     command_ = std::move(cmd);
@@ -69,17 +60,13 @@ class Tool {
   }
 
   // Dependency file (if supported).
-  const SubstitutionPattern& depfile() const {
-    return depfile_;
-  }
+  const SubstitutionPattern& depfile() const { return depfile_; }
   void set_depfile(SubstitutionPattern df) {
     DCHECK(!complete_);
     depfile_ = std::move(df);
   }
 
-  DepsFormat depsformat() const {
-    return depsformat_;
-  }
+  DepsFormat depsformat() const { return depsformat_; }
   void set_depsformat(DepsFormat f) {
     DCHECK(!complete_);
     depsformat_ = f;
@@ -92,82 +79,62 @@ class Tool {
     precompiled_header_type_ = pch_type;
   }
 
-  const SubstitutionPattern& description() const {
-    return description_;
-  }
+  const SubstitutionPattern& description() const { return description_; }
   void set_description(SubstitutionPattern desc) {
     DCHECK(!complete_);
     description_ = std::move(desc);
   }
 
-  const std::string& lib_switch() const {
-    return lib_switch_;
-  }
+  const std::string& lib_switch() const { return lib_switch_; }
   void set_lib_switch(std::string s) {
     DCHECK(!complete_);
     lib_switch_ = std::move(s);
   }
 
-  const std::string& lib_dir_switch() const {
-    return lib_dir_switch_;
-  }
+  const std::string& lib_dir_switch() const { return lib_dir_switch_; }
   void set_lib_dir_switch(std::string s) {
     DCHECK(!complete_);
     lib_dir_switch_ = std::move(s);
   }
 
-  const SubstitutionList& outputs() const {
-    return outputs_;
-  }
+  const SubstitutionList& outputs() const { return outputs_; }
   void set_outputs(SubstitutionList out) {
     DCHECK(!complete_);
     outputs_ = std::move(out);
   }
 
   // Should match files in the outputs() if nonempty.
-  const SubstitutionPattern& link_output() const {
-    return link_output_;
-  }
+  const SubstitutionPattern& link_output() const { return link_output_; }
   void set_link_output(SubstitutionPattern link_out) {
     DCHECK(!complete_);
     link_output_ = std::move(link_out);
   }
 
-  const SubstitutionPattern& depend_output() const {
-    return depend_output_;
-  }
+  const SubstitutionPattern& depend_output() const { return depend_output_; }
   void set_depend_output(SubstitutionPattern dep_out) {
     DCHECK(!complete_);
     depend_output_ = std::move(dep_out);
   }
 
-  const SubstitutionList& runtime_outputs() const {
-    return runtime_outputs_;
-  }
+  const SubstitutionList& runtime_outputs() const { return runtime_outputs_; }
   void set_runtime_outputs(SubstitutionList run_out) {
     DCHECK(!complete_);
     runtime_outputs_ = std::move(run_out);
   }
 
-  const std::string& output_prefix() const {
-    return output_prefix_;
-  }
+  const std::string& output_prefix() const { return output_prefix_; }
   void set_output_prefix(std::string s) {
     DCHECK(!complete_);
     output_prefix_ = std::move(s);
   }
 
-  bool restat() const {
-    return restat_;
-  }
+  bool restat() const { return restat_; }
   void set_restat(bool r) {
     DCHECK(!complete_);
     restat_ = r;
   }
 
-  const SubstitutionPattern& rspfile() const {
-    return rspfile_;
-  }
+  const SubstitutionPattern& rspfile() const { return rspfile_; }
   void set_rspfile(SubstitutionPattern rsp) {
     DCHECK(!complete_);
     rspfile_ = std::move(rsp);

@@ -43,10 +43,9 @@ void AddIfNew(const std::string& str,
               const Target* source,
               RuntimeDepsVector* deps,
               std::set<OutputFile>* found_file) {
-  OutputFile output_file(RebasePath(
-      str,
-      source->settings()->build_settings()->build_dir(),
-      source->settings()->build_settings()->root_path_utf8()));
+  OutputFile output_file(
+      RebasePath(str, source->settings()->build_settings()->build_dir(),
+                 source->settings()->build_settings()->root_path_utf8()));
   AddIfNew(output_file, source, deps, found_file);
 }
 
@@ -88,10 +87,9 @@ void RecursiveCollectRuntimeDeps(const Target* target,
     AddIfNew(file, target, deps, found_files);
 
   // Actions/copy have all outputs considered when the're a data dep.
-  if (is_target_data_dep &&
-      (target->output_type() == Target::ACTION ||
-       target->output_type() == Target::ACTION_FOREACH ||
-       target->output_type() == Target::COPY_FILES)) {
+  if (is_target_data_dep && (target->output_type() == Target::ACTION ||
+                             target->output_type() == Target::ACTION_FOREACH ||
+                             target->output_type() == Target::COPY_FILES)) {
     std::vector<SourceFile> outputs;
     target->action_values().GetOutputsAsSourceFiles(target, &outputs);
     for (const auto& output_file : outputs)
@@ -100,8 +98,8 @@ void RecursiveCollectRuntimeDeps(const Target* target,
 
   // Data dependencies.
   for (const auto& dep_pair : target->data_deps()) {
-    RecursiveCollectRuntimeDeps(dep_pair.ptr, true,
-                                deps, seen_targets, found_files);
+    RecursiveCollectRuntimeDeps(dep_pair.ptr, true, deps, seen_targets,
+                                found_files);
   }
 
   // Do not recurse into bundle targets. A bundle's dependencies should be
@@ -124,8 +122,8 @@ void RecursiveCollectRuntimeDeps(const Target* target,
       // unless it were listed in data deps.
       continue;
     }
-    RecursiveCollectRuntimeDeps(dep_pair.ptr, false,
-                                deps, seen_targets, found_files);
+    RecursiveCollectRuntimeDeps(dep_pair.ptr, false, deps, seen_targets,
+                                found_files);
   }
 }
 
@@ -144,18 +142,17 @@ bool CollectRuntimeDepsFromFlag(const Builder& builder,
   if (!base::ReadFileToString(UTF8ToFilePath(deps_target_list_file),
                               &list_contents)) {
     *err = Err(Location(),
-        std::string("File for --") + switches::kRuntimeDepsListFile +
-            " doesn't exist.",
-        "The file given was \"" + deps_target_list_file + "\"");
+               std::string("File for --") + switches::kRuntimeDepsListFile +
+                   " doesn't exist.",
+               "The file given was \"" + deps_target_list_file + "\"");
     return false;
   }
   load_trace.Done();
 
   SourceDir root_dir("//");
   Label default_toolchain_label = builder.loader()->GetDefaultToolchain();
-  for (const auto& line :
-       base::SplitString(list_contents, "\n", base::TRIM_WHITESPACE,
-                         base::SPLIT_WANT_ALL)) {
+  for (const auto& line : base::SplitString(
+           list_contents, "\n", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL)) {
     if (line.empty())
       continue;
     Label label = Label::Resolve(root_dir, default_toolchain_label,
@@ -166,11 +163,14 @@ bool CollectRuntimeDepsFromFlag(const Builder& builder,
     const Item* item = builder.GetItem(label);
     const Target* target = item ? item->AsTarget() : nullptr;
     if (!target) {
-      *err = Err(Location(), "The label \"" + label.GetUserVisibleName(true) +
-          "\" isn't a target.",
-          "When reading the line:\n  " + line + "\n"
-          "from the --" + switches::kRuntimeDepsListFile + "=" +
-          deps_target_list_file);
+      *err =
+          Err(Location(),
+              "The label \"" + label.GetUserVisibleName(true) +
+                  "\" isn't a target.",
+              "When reading the line:\n  " + line +
+                  "\n"
+                  "from the --" +
+                  switches::kRuntimeDepsListFile + "=" + deps_target_list_file);
       return false;
     }
 
@@ -287,8 +287,8 @@ RuntimeDepsVector ComputeRuntimeDeps(const Target* target) {
   // The initial target is not considered a data dependency so that actions's
   // outputs (if the current target is an action) are not automatically
   // considered data deps.
-  RecursiveCollectRuntimeDeps(target, false,
-                              &result, &seen_targets, &found_files);
+  RecursiveCollectRuntimeDeps(target, false, &result, &seen_targets,
+                              &found_files);
   return result;
 }
 

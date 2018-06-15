@@ -48,8 +48,6 @@ DepsIterator& DepsIterator::operator++() {
 }
 
 DepsIteratorRange::DepsIteratorRange(const DepsIterator& b)
-    : begin_(b),
-      end_() {
-}
+    : begin_(b), end_() {}
 
 DepsIteratorRange::~DepsIteratorRange() = default;

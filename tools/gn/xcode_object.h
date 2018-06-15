@@ -19,7 +19,8 @@
 // all features of Xcode project but instead just enough to implement a hybrid
 // mode where Xcode uses external scripts to perform the compilation steps.
 //
-// See https://chromium.googlesource.com/external/gyp/+/master/pylib/gyp/xcodeproj_file.py
+// See
+// https://chromium.googlesource.com/external/gyp/+/master/pylib/gyp/xcodeproj_file.py
 // for more information on Xcode project file format.
 
 enum class CompilerFlags {

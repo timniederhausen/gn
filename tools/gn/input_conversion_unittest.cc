@@ -53,10 +53,10 @@ TEST_F(InputConversionTest, ListLines) {
   EXPECT_FALSE(err.has_error());
   EXPECT_EQ(Value::LIST, result.type());
   ASSERT_EQ(4u, result.list_value().size());
-  EXPECT_EQ("",    result.list_value()[0].string_value());
+  EXPECT_EQ("", result.list_value()[0].string_value());
   EXPECT_EQ("foo", result.list_value()[1].string_value());
   EXPECT_EQ("bar", result.list_value()[2].string_value());
-  EXPECT_EQ("",    result.list_value()[3].string_value());
+  EXPECT_EQ("", result.list_value()[3].string_value());
 
   // Test with trimming.
   result = ConvertInputToValue(settings(), input, nullptr,
@@ -97,7 +97,7 @@ TEST_F(InputConversionTest, ValueList) {
   ASSERT_EQ(Value::LIST, result.type());
   ASSERT_EQ(2u, result.list_value().size());
   EXPECT_EQ("a", result.list_value()[0].string_value());
-  EXPECT_EQ(5,   result.list_value()[1].int_value());
+  EXPECT_EQ(5, result.list_value()[1].int_value());
 }
 
 TEST_F(InputConversionTest, ValueDict) {
@@ -247,8 +247,7 @@ TEST_F(InputConversionTest, ValueError) {
       "233105-1",
 
       // Non-literals hidden in arrays are not allowed.
-      "[233105 - 1]",
-      "[rebase_path(\"//\")]",
+      "[233105 - 1]", "[rebase_path(\"//\")]",
   };
 
   for (auto* test : kTests) {

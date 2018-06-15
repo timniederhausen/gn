@@ -24,8 +24,8 @@ class GetPathInfoTest : public testing::Test {
     args.push_back(Value(nullptr, what));
 
     Err err;
-    Value result = functions::RunGetPathInfo(setup_.scope(), &function,
-                                             args, &err);
+    Value result =
+        functions::RunGetPathInfo(setup_.scope(), &function, args, &err);
     if (err.has_error()) {
       EXPECT_TRUE(result.type() == Value::NONE);
       return std::string();

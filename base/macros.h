@@ -23,8 +23,7 @@
 #endif
 
 // Put this in the declarations for a class to be uncopyable.
-#define DISALLOW_COPY(TypeName) \
-  TypeName(const TypeName&) = delete
+#define DISALLOW_COPY(TypeName) TypeName(const TypeName&) = delete
 
 // Put this in the declarations for a class to be unassignable.
 #define DISALLOW_ASSIGN(TypeName) TypeName& operator=(const TypeName&) = delete
@@ -53,7 +52,8 @@
 //
 // DEPRECATED, please use base::size(array) instead.
 // TODO(https://crbug.com/837308): Replace existing arraysize usages.
-template <typename T, size_t N> char (&ArraySizeHelper(T (&array)[N]))[N];
+template <typename T, size_t N>
+char (&ArraySizeHelper(T (&array)[N]))[N];
 #define arraysize(array) (sizeof(ArraySizeHelper(array)))
 
 // Used to explicitly mark the return value of a function as unused. If you are
@@ -64,9 +64,8 @@ template <typename T, size_t N> char (&ArraySizeHelper(T (&array)[N]))[N];
 //   if (TakeOwnership(my_var.get()) == SUCCESS)
 //     ignore_result(my_var.release());
 //
-template<typename T>
-inline void ignore_result(const T&) {
-}
+template <typename T>
+inline void ignore_result(const T&) {}
 
 namespace base {
 

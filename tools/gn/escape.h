@@ -41,8 +41,7 @@ struct EscapeOptions {
   EscapeOptions()
       : mode(ESCAPE_NONE),
         platform(ESCAPE_PLATFORM_CURRENT),
-        inhibit_quoting(false) {
-  }
+        inhibit_quoting(false) {}
 
   EscapingMode mode;
 

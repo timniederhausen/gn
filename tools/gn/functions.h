@@ -42,10 +42,10 @@ typedef Value (*GenericBlockFunction)(Scope* scope,
 // This type of function takes a block, but does not need to control execution
 // of it. The dispatch function will pre-execute the block and pass the
 // resulting block_scope to the function.
-typedef Value(*ExecutedBlockFunction)(const FunctionCallNode* function,
-                                      const std::vector<Value>& args,
-                                      Scope* block_scope,
-                                      Err* err);
+typedef Value (*ExecutedBlockFunction)(const FunctionCallNode* function,
+                                       const std::vector<Value>& args,
+                                       Scope* block_scope,
+                                       Err* err);
 
 // This type of function does not take a block. It just has arguments.
 typedef Value (*NoBlockFunction)(Scope* scope,

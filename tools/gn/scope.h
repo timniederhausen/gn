@@ -8,9 +8,9 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include <unordered_map>
 
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
@@ -45,10 +45,7 @@ class Scope {
 
   // A flag to indicate whether a function should recurse into nested scopes,
   // or only operate on the current scope.
-  enum SearchNested {
-    SEARCH_NESTED,
-    SEARCH_CURRENT
-  };
+  enum SearchNested { SEARCH_NESTED, SEARCH_CURRENT };
 
   // Allows code to provide values for built-in variables. This class will
   // automatically register itself on construction and deregister itself on
@@ -139,8 +136,7 @@ class Scope {
   // found_in_scope is set to the scope that contains the definition of the
   // ident. If the value was provided programmatically (like host_cpu),
   // found_in_scope will be set to null.
-  const Value* GetValue(const base::StringPiece& ident,
-                        bool counts_as_used);
+  const Value* GetValue(const base::StringPiece& ident, bool counts_as_used);
   const Value* GetValue(const base::StringPiece& ident) const;
   const Value* GetValueWithScope(const base::StringPiece& ident,
                                  const Scope** found_in_scope) const;
@@ -375,7 +371,7 @@ class Scope {
   std::unique_ptr<PatternList> sources_assignment_filter_;
 
   // Owning pointers, must be deleted.
-  typedef std::map<std::string, scoped_refptr<const Template> > TemplateMap;
+  typedef std::map<std::string, scoped_refptr<const Template>> TemplateMap;
   TemplateMap templates_;
 
   ItemVector* item_collector_;

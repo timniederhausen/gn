@@ -13,8 +13,10 @@ namespace {
 #pragma optimize("", off)
 // Handlers for invalid parameter and pure call. They generate a breakpoint to
 // tell breakpad that it needs to dump the process.
-void InvalidParameter(const wchar_t* expression, const wchar_t* function,
-                      const wchar_t* file, unsigned int line,
+void InvalidParameter(const wchar_t* expression,
+                      const wchar_t* function,
+                      const wchar_t* file,
+                      unsigned int line,
                       uintptr_t reserved) {
   __debugbreak();
   _exit(1);

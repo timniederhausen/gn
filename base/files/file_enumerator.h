@@ -111,9 +111,7 @@ class FileEnumerator {
   // since the underlying code uses OS-specific matching routines.  In general,
   // Windows matching is less featureful than others, so test there first.
   // If unspecified, this will match all files.
-  FileEnumerator(const FilePath& root_path,
-                 bool recursive,
-                 int file_type);
+  FileEnumerator(const FilePath& root_path, bool recursive, int file_type);
   FileEnumerator(const FilePath& root_path,
                  bool recursive,
                  int file_type,

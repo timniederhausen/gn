@@ -629,7 +629,7 @@ class OPTIONAL_DECLSPEC_EMPTY_BASES Optional
   }
 
   template <class U>
-  constexpr T value_or(U&& default_value) const& {
+  constexpr T value_or(U&& default_value) const & {
     // TODO(mlamouri): add the following assert when possible:
     // static_assert(std::is_copy_constructible<T>::value,
     //               "T must be copy constructible");

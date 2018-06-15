@@ -59,8 +59,7 @@ void MD5Final(MD5Digest* digest, MD5Context* context);
 // MD5IntermediateFinal() generates a digest without finalizing the MD5
 // operation.  Can be used to generate digests for the input seen thus far,
 // without affecting the digest generated for the entire input.
-void MD5IntermediateFinal(MD5Digest* digest,
-                                      const MD5Context* context);
+void MD5IntermediateFinal(MD5Digest* digest, const MD5Context* context);
 
 // Converts a digest into human-readable hexadecimal.
 std::string MD5DigestToBase16(const MD5Digest& digest);

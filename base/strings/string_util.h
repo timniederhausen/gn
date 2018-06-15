@@ -8,7 +8,7 @@
 #define BASE_STRINGS_STRING_UTIL_H_
 
 #include <ctype.h>
-#include <stdarg.h>   // va_list
+#include <stdarg.h>  // va_list
 #include <stddef.h>
 #include <stdint.h>
 
@@ -119,7 +119,8 @@ string16 ToUpperASCII(StringPiece16 str);
 // context (combining accents), and require handling UTF-16. If you need
 // proper Unicode support, use base::i18n::ToLower/FoldCase and then just
 // use a normal operator== on the result.
-template<typename Char> struct CaseInsensitiveCompareASCII {
+template <typename Char>
+struct CaseInsensitiveCompareASCII {
  public:
   bool operator()(Char x, Char y) const {
     return ToLowerASCII(x) == ToLowerASCII(y);
@@ -157,11 +158,11 @@ extern const char kUtf8ByteOrderMark[];
 // if any characters were removed.  |remove_chars| must be null-terminated.
 // NOTE: Safe to use the same variable for both |input| and |output|.
 bool RemoveChars(const string16& input,
-                             StringPiece16 remove_chars,
-                             string16* output);
+                 StringPiece16 remove_chars,
+                 string16* output);
 bool RemoveChars(const std::string& input,
-                             StringPiece remove_chars,
-                             std::string* output);
+                 StringPiece remove_chars,
+                 std::string* output);
 
 // Replaces characters in |replace_chars| from anywhere in |input| with
 // |replace_with|.  Each character in |replace_chars| will be replaced with
@@ -169,19 +170,19 @@ bool RemoveChars(const std::string& input,
 // |replace_chars| must be null-terminated.
 // NOTE: Safe to use the same variable for both |input| and |output|.
 bool ReplaceChars(const string16& input,
-                              StringPiece16 replace_chars,
-                              const string16& replace_with,
-                              string16* output);
+                  StringPiece16 replace_chars,
+                  const string16& replace_with,
+                  string16* output);
 bool ReplaceChars(const std::string& input,
-                              StringPiece replace_chars,
-                              const std::string& replace_with,
-                              std::string* output);
+                  StringPiece replace_chars,
+                  const std::string& replace_with,
+                  std::string* output);
 
 enum TrimPositions {
-  TRIM_NONE     = 0,
-  TRIM_LEADING  = 1 << 0,
+  TRIM_NONE = 0,
+  TRIM_LEADING = 1 << 0,
   TRIM_TRAILING = 1 << 1,
-  TRIM_ALL      = TRIM_LEADING | TRIM_TRAILING,
+  TRIM_ALL = TRIM_LEADING | TRIM_TRAILING,
 };
 
 // Removes characters in |trim_chars| from the beginning and end of |input|.
@@ -191,26 +192,26 @@ enum TrimPositions {
 // It is safe to use the same variable for both |input| and |output| (this is
 // the normal usage to trim in-place).
 bool TrimString(const string16& input,
-                            StringPiece16 trim_chars,
-                            string16* output);
+                StringPiece16 trim_chars,
+                string16* output);
 bool TrimString(const std::string& input,
-                            StringPiece trim_chars,
-                            std::string* output);
+                StringPiece trim_chars,
+                std::string* output);
 
 // StringPiece versions of the above. The returned pieces refer to the original
 // buffer.
 StringPiece16 TrimString(StringPiece16 input,
-                                     StringPiece16 trim_chars,
-                                     TrimPositions positions);
+                         StringPiece16 trim_chars,
+                         TrimPositions positions);
 StringPiece TrimString(StringPiece input,
-                                   StringPiece trim_chars,
-                                   TrimPositions positions);
+                       StringPiece trim_chars,
+                       TrimPositions positions);
 
 // Truncates a string to the nearest UTF-8 character that will leave
 // the string less than or equal to the specified byte size.
 void TruncateUTF8ToByteSize(const std::string& input,
-                                        const size_t byte_size,
-                                        std::string* output);
+                            const size_t byte_size,
+                            std::string* output);
 
 // Trims any whitespace from either end of the input string.
 //
@@ -220,15 +221,13 @@ void TruncateUTF8ToByteSize(const std::string& input,
 // The std::string versions return where whitespace was found.
 // NOTE: Safe to use the same variable for both input and output.
 TrimPositions TrimWhitespace(const string16& input,
-                                         TrimPositions positions,
-                                         string16* output);
-StringPiece16 TrimWhitespace(StringPiece16 input,
-                                         TrimPositions positions);
+                             TrimPositions positions,
+                             string16* output);
+StringPiece16 TrimWhitespace(StringPiece16 input, TrimPositions positions);
 TrimPositions TrimWhitespaceASCII(const std::string& input,
-                                              TrimPositions positions,
-                                              std::string* output);
-StringPiece TrimWhitespaceASCII(StringPiece input,
-                                            TrimPositions positions);
+                                  TrimPositions positions,
+                                  std::string* output);
+StringPiece TrimWhitespaceASCII(StringPiece input, TrimPositions positions);
 
 // Searches for CR or LF characters.  Removes all contiguous whitespace
 // strings that contain them.  This is useful when trying to deal with text
@@ -238,18 +237,15 @@ StringPiece TrimWhitespaceASCII(StringPiece input,
 // (2) If |trim_sequences_with_line_breaks| is true, any other whitespace
 //     sequences containing a CR or LF are trimmed.
 // (3) All other whitespace sequences are converted to single spaces.
-string16 CollapseWhitespace(
-    const string16& text,
-    bool trim_sequences_with_line_breaks);
-std::string CollapseWhitespaceASCII(
-    const std::string& text,
-    bool trim_sequences_with_line_breaks);
+string16 CollapseWhitespace(const string16& text,
+                            bool trim_sequences_with_line_breaks);
+std::string CollapseWhitespaceASCII(const std::string& text,
+                                    bool trim_sequences_with_line_breaks);
 
 // Returns true if |input| is empty or contains only characters found in
 // |characters|.
 bool ContainsOnlyChars(StringPiece input, StringPiece characters);
-bool ContainsOnlyChars(StringPiece16 input,
-                                   StringPiece16 characters);
+bool ContainsOnlyChars(StringPiece16 input, StringPiece16 characters);
 
 // Returns true if the specified string matches the criteria. How can a wide
 // string be 8-bit or UTF8? It contains only characters that are < 256 (in the
@@ -274,10 +270,8 @@ bool IsStringASCII(WStringPiece str);
 
 // Compare the lower-case form of the given string against the given
 // previously-lower-cased ASCII string (typically a constant).
-bool LowerCaseEqualsASCII(StringPiece str,
-                                      StringPiece lowecase_ascii);
-bool LowerCaseEqualsASCII(StringPiece16 str,
-                                      StringPiece lowecase_ascii);
+bool LowerCaseEqualsASCII(StringPiece str, StringPiece lowecase_ascii);
+bool LowerCaseEqualsASCII(StringPiece16 str, StringPiece lowecase_ascii);
 
 // Performs a case-sensitive string compare of the given 16-bit string against
 // the given 8-bit ASCII string (typically a constant). The behavior is
@@ -298,17 +292,17 @@ enum class CompareCase {
 };
 
 bool StartsWith(StringPiece str,
-                            StringPiece search_for,
-                            CompareCase case_sensitivity);
+                StringPiece search_for,
+                CompareCase case_sensitivity);
 bool StartsWith(StringPiece16 str,
-                            StringPiece16 search_for,
-                            CompareCase case_sensitivity);
+                StringPiece16 search_for,
+                CompareCase case_sensitivity);
 bool EndsWith(StringPiece str,
-                          StringPiece search_for,
-                          CompareCase case_sensitivity);
+              StringPiece search_for,
+              CompareCase case_sensitivity);
 bool EndsWith(StringPiece16 str,
-                          StringPiece16 search_for,
-                          CompareCase case_sensitivity);
+              StringPiece16 search_for,
+              CompareCase case_sensitivity);
 
 // Determines the type of ASCII character, independent of locale (the C
 // library versions will change based on locale).
@@ -335,8 +329,7 @@ inline bool IsAsciiDigit(Char c) {
 
 template <typename Char>
 inline bool IsHexDigit(Char c) {
-  return (c >= '0' && c <= '9') ||
-         (c >= 'A' && c <= 'F') ||
+  return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') ||
          (c >= 'a' && c <= 'f');
 }
 
@@ -358,16 +351,14 @@ string16 FormatBytesUnlocalized(int64_t bytes);
 
 // Starting at |start_offset| (usually 0), replace the first instance of
 // |find_this| with |replace_with|.
-void ReplaceFirstSubstringAfterOffset(
-    base::string16* str,
-    size_t start_offset,
-    StringPiece16 find_this,
-    StringPiece16 replace_with);
-void ReplaceFirstSubstringAfterOffset(
-    std::string* str,
-    size_t start_offset,
-    StringPiece find_this,
-    StringPiece replace_with);
+void ReplaceFirstSubstringAfterOffset(base::string16* str,
+                                      size_t start_offset,
+                                      StringPiece16 find_this,
+                                      StringPiece16 replace_with);
+void ReplaceFirstSubstringAfterOffset(std::string* str,
+                                      size_t start_offset,
+                                      StringPiece find_this,
+                                      StringPiece replace_with);
 
 // Starting at |start_offset| (usually 0), look through |str| and replace all
 // instances of |find_this| with |replace_with|.
@@ -375,16 +366,14 @@ void ReplaceFirstSubstringAfterOffset(
 // This does entire substrings; use std::replace in <algorithm> for single
 // characters, for example:
 //   std::replace(str.begin(), str.end(), 'a', 'b');
-void ReplaceSubstringsAfterOffset(
-    string16* str,
-    size_t start_offset,
-    StringPiece16 find_this,
-    StringPiece16 replace_with);
-void ReplaceSubstringsAfterOffset(
-    std::string* str,
-    size_t start_offset,
-    StringPiece find_this,
-    StringPiece replace_with);
+void ReplaceSubstringsAfterOffset(string16* str,
+                                  size_t start_offset,
+                                  StringPiece16 find_this,
+                                  StringPiece16 replace_with);
+void ReplaceSubstringsAfterOffset(std::string* str,
+                                  size_t start_offset,
+                                  StringPiece find_this,
+                                  StringPiece replace_with);
 
 // Reserves enough memory in |str| to accommodate |length_with_null| characters,
 // sets the size of |str| to |length_with_null - 1| characters, and returns a
@@ -421,39 +410,37 @@ char16* WriteInto(string16* str, size_t length_with_null);
 //
 // Use StrCat (in base/strings/strcat.h) if you don't need a separator.
 std::string JoinString(const std::vector<std::string>& parts,
-                                   StringPiece separator);
+                       StringPiece separator);
 string16 JoinString(const std::vector<string16>& parts,
-                                StringPiece16 separator);
+                    StringPiece16 separator);
 std::string JoinString(const std::vector<StringPiece>& parts,
-                                   StringPiece separator);
+                       StringPiece separator);
 string16 JoinString(const std::vector<StringPiece16>& parts,
-                                StringPiece16 separator);
+                    StringPiece16 separator);
 // Explicit initializer_list overloads are required to break ambiguity when used
 // with a literal initializer list (otherwise the compiler would not be able to
 // decide between the string and StringPiece overloads).
 std::string JoinString(std::initializer_list<StringPiece> parts,
-                                   StringPiece separator);
+                       StringPiece separator);
 string16 JoinString(std::initializer_list<StringPiece16> parts,
-                                StringPiece16 separator);
+                    StringPiece16 separator);
 
 // Replace $1-$2-$3..$9 in the format string with values from |subst|.
 // Additionally, any number of consecutive '$' characters is replaced by that
 // number less one. Eg $$->$, $$$->$$, etc. The offsets parameter here can be
 // NULL. This only allows you to use up to nine replacements.
-string16 ReplaceStringPlaceholders(
-    const string16& format_string,
-    const std::vector<string16>& subst,
-    std::vector<size_t>* offsets);
+string16 ReplaceStringPlaceholders(const string16& format_string,
+                                   const std::vector<string16>& subst,
+                                   std::vector<size_t>* offsets);
 
-std::string ReplaceStringPlaceholders(
-    StringPiece format_string,
-    const std::vector<std::string>& subst,
-    std::vector<size_t>* offsets);
+std::string ReplaceStringPlaceholders(StringPiece format_string,
+                                      const std::vector<std::string>& subst,
+                                      std::vector<size_t>* offsets);
 
 // Single-string shortcut for ReplaceStringHolders. |offset| may be NULL.
 string16 ReplaceStringPlaceholders(const string16& format_string,
-                                               const string16& a,
-                                               size_t* offset);
+                                   const string16& a,
+                                   size_t* offset);
 
 }  // namespace base
 

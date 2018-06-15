@@ -69,8 +69,8 @@
 #endif
 
 #if defined(OS_POSIX)
-#include <unistd.h>
 #include <sys/time.h>
+#include <unistd.h>
 #endif
 
 #if defined(OS_WIN)
@@ -205,12 +205,8 @@ class TimeDelta {
     return TimeDelta(time_internal::SaturatedSub(*this, other.delta_));
   }
 
-  TimeDelta& operator+=(TimeDelta other) {
-    return *this = (*this + other);
-  }
-  TimeDelta& operator-=(TimeDelta other) {
-    return *this = (*this - other);
-  }
+  TimeDelta& operator+=(TimeDelta other) { return *this = (*this + other); }
+  TimeDelta& operator-=(TimeDelta other) { return *this = (*this - other); }
   constexpr TimeDelta operator-() const { return TimeDelta(-delta_); }
 
   // Computations with numeric types. operator*() isn't constexpr because of a
@@ -317,7 +313,7 @@ namespace time_internal {
 // classes. Each subclass provides for strong type-checking to ensure
 // semantically meaningful comparison/math of time values from the same clock
 // source or timeline.
-template<class TimeClass>
+template <class TimeClass>
 class TimeBase {
  public:
   static const int64_t kHoursPerDay = 24;
@@ -341,9 +337,7 @@ class TimeBase {
   // Warning: Be careful when writing code that performs math on time values,
   // since it's possible to produce a valid "zero" result that should not be
   // interpreted as a "null" value.
-  bool is_null() const {
-    return us_ == 0;
-  }
+  bool is_null() const { return us_ == 0; }
 
   // Returns true if this object represents the maximum/minimum time.
   bool is_max() const { return us_ == std::numeric_limits<int64_t>::max(); }
@@ -402,24 +396,12 @@ class TimeBase {
   }
 
   // Comparison operators
-  bool operator==(TimeClass other) const {
-    return us_ == other.us_;
-  }
-  bool operator!=(TimeClass other) const {
-    return us_ != other.us_;
-  }
-  bool operator<(TimeClass other) const {
-    return us_ < other.us_;
-  }
-  bool operator<=(TimeClass other) const {
-    return us_ <= other.us_;
-  }
-  bool operator>(TimeClass other) const {
-    return us_ > other.us_;
-  }
-  bool operator>=(TimeClass other) const {
-    return us_ >= other.us_;
-  }
+  bool operator==(TimeClass other) const { return us_ == other.us_; }
+  bool operator!=(TimeClass other) const { return us_ != other.us_; }
+  bool operator<(TimeClass other) const { return us_ < other.us_; }
+  bool operator<=(TimeClass other) const { return us_ <= other.us_; }
+  bool operator>(TimeClass other) const { return us_ > other.us_; }
+  bool operator>=(TimeClass other) const { return us_ >= other.us_; }
 
  protected:
   constexpr explicit TimeBase(int64_t us) : us_(us) {}
@@ -430,7 +412,7 @@ class TimeBase {
 
 }  // namespace time_internal
 
-template<class TimeClass>
+template <class TimeClass>
 inline TimeClass operator+(TimeDelta delta, TimeClass t) {
   return t + delta;
 }
@@ -620,9 +602,7 @@ class Time : public time_internal::TimeBase<Time> {
 
   // Fills the given exploded structure with either the local time or UTC from
   // this time structure (containing UTC).
-  void UTCExplode(Exploded* exploded) const {
-    return Explode(false, exploded);
-  }
+  void UTCExplode(Exploded* exploded) const { return Explode(false, exploded); }
   void LocalExplode(Exploded* exploded) const {
     return Explode(true, exploded);
   }
@@ -854,8 +834,7 @@ std::ostream& operator<<(std::ostream& os, TimeTicks time_ticks);
 // thread is running.
 class ThreadTicks : public time_internal::TimeBase<ThreadTicks> {
  public:
-  ThreadTicks() : TimeBase(0) {
-  }
+  ThreadTicks() : TimeBase(0) {}
 
   // Returns true if ThreadTicks::Now() is supported on this system.
   static bool IsSupported() WARN_UNUSED_RESULT {

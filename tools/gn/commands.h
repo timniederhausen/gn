@@ -155,28 +155,28 @@ bool FilterPatternsFromString(const BuildSettings* build_settings,
 // These are the documentation strings for the command-line flags used by
 // FilterAndPrintTargets. Commands that call that function should incorporate
 // these into their help.
-#define TARGET_PRINTING_MODE_COMMAND_LINE_HELP \
-    "  --as=(buildfile|label|output)\n"\
-    "      How to print targets.\n"\
-    "\n"\
-    "      buildfile\n"\
-    "          Prints the build files where the given target was declared as\n"\
-    "          file names.\n"\
-    "      label  (default)\n"\
-    "          Prints the label of the target.\n"\
-    "      output\n"\
-    "          Prints the first output file for the target relative to the\n"\
-    "          root build directory.\n"
-#define TARGET_TYPE_FILTER_COMMAND_LINE_HELP \
-    "  --type=(action|copy|executable|group|loadable_module|shared_library|\n"\
-    "          source_set|static_library)\n"\
-    "      Restrict outputs to targets matching the given type. If\n"\
-    "      unspecified, no filtering will be performed.\n"
-#define TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP \
-    "  --testonly=(true|false)\n"\
-    "      Restrict outputs to targets with the testonly flag set\n"\
-    "      accordingly. When unspecified, the target's testonly flags are\n"\
-    "      ignored.\n"
+#define TARGET_PRINTING_MODE_COMMAND_LINE_HELP                                \
+  "  --as=(buildfile|label|output)\n"                                         \
+  "      How to print targets.\n"                                             \
+  "\n"                                                                        \
+  "      buildfile\n"                                                         \
+  "          Prints the build files where the given target was declared as\n" \
+  "          file names.\n"                                                   \
+  "      label  (default)\n"                                                  \
+  "          Prints the label of the target.\n"                               \
+  "      output\n"                                                            \
+  "          Prints the first output file for the target relative to the\n"   \
+  "          root build directory.\n"
+#define TARGET_TYPE_FILTER_COMMAND_LINE_HELP                                 \
+  "  --type=(action|copy|executable|group|loadable_module|shared_library|\n" \
+  "          source_set|static_library)\n"                                   \
+  "      Restrict outputs to targets matching the given type. If\n"          \
+  "      unspecified, no filtering will be performed.\n"
+#define TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP                           \
+  "  --testonly=(true|false)\n"                                            \
+  "      Restrict outputs to targets with the testonly flag set\n"         \
+  "      accordingly. When unspecified, the target's testonly flags are\n" \
+  "      ignored.\n"
 
 // Applies any testonly and type filters specified on the command line,
 // and prints the targets as specified by the --as command line flag.

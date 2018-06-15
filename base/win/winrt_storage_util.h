@@ -9,7 +9,6 @@
 #include <windows.storage.streams.h>
 #include <wrl/client.h>
 
-
 namespace base {
 namespace win {
 

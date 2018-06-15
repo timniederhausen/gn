@@ -5,9 +5,9 @@
 #include "base/process/process_iterator.h"
 
 #include <errno.h>
-#include <sys/types.h>
 #include <stddef.h>
 #include <sys/sysctl.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "base/logging.h"
@@ -18,10 +18,8 @@
 namespace base {
 
 ProcessIterator::ProcessIterator(const ProcessFilter* filter)
-    : index_of_kinfo_proc_(),
-      filter_(filter) {
-
-  int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, getuid() };
+    : index_of_kinfo_proc_(), filter_(filter) {
+  int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_UID, getuid()};
 
   bool done = false;
   int try_num = 1;
@@ -40,7 +38,7 @@ ProcessIterator::ProcessIterator(const ProcessFilter* filter)
       num_of_kinfo_proc += 16;
       kinfo_procs_.resize(num_of_kinfo_proc);
       len = num_of_kinfo_proc * sizeof(struct kinfo_proc);
-      if (sysctl(mib, arraysize(mib), &kinfo_procs_[0], &len, NULL, 0) <0) {
+      if (sysctl(mib, arraysize(mib), &kinfo_procs_[0], &len, NULL, 0) < 0) {
         // If we get a mem error, it just means we need a bigger buffer, so
         // loop around again.  Anything else is a real error and give up.
         if (errno != ENOMEM) {
@@ -63,8 +61,7 @@ ProcessIterator::ProcessIterator(const ProcessFilter* filter)
   }
 }
 
-ProcessIterator::~ProcessIterator() {
-}
+ProcessIterator::~ProcessIterator() {}
 
 bool ProcessIterator::CheckForNextProcess() {
   std::string data;
@@ -72,7 +69,7 @@ bool ProcessIterator::CheckForNextProcess() {
   for (; index_of_kinfo_proc_ < kinfo_procs_.size(); ++index_of_kinfo_proc_) {
     size_t length;
     struct kinfo_proc kinfo = kinfo_procs_[index_of_kinfo_proc_];
-    int mib[] = { CTL_KERN, KERN_PROC_ARGS, kinfo.ki_pid };
+    int mib[] = {CTL_KERN, KERN_PROC_ARGS, kinfo.ki_pid};
 
     if ((kinfo.ki_pid > 0) && (kinfo.ki_stat == SZOMB))
       continue;
@@ -92,8 +89,8 @@ bool ProcessIterator::CheckForNextProcess() {
 
     std::string delimiters;
     delimiters.push_back('\0');
-    entry_.cmd_line_args_ = SplitString(data, delimiters,
-                                        KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
+    entry_.cmd_line_args_ =
+        SplitString(data, delimiters, KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
 
     size_t exec_name_end = data.find('\0');
     if (exec_name_end == std::string::npos) {

@@ -11,8 +11,7 @@ BuilderRecord::BuilderRecord(ItemType type, const Label& label)
       label_(label),
       originally_referenced_from_(nullptr),
       should_generate_(false),
-      resolved_(false) {
-}
+      resolved_(false) {}
 
 BuilderRecord::~BuilderRecord() = default;
 

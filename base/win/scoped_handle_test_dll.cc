@@ -52,7 +52,7 @@ bool InternalRunThreadTest() {
   if (!ready_event)
     return false;
 
-  ThreadParams thread_params = { ready_event, start_event };
+  ThreadParams thread_params = {ready_event, start_event};
 
   for (size_t i = 0; i < kNumThreads; i++) {
     HANDLE thread_handle =
@@ -115,6 +115,6 @@ bool RunTest() {
   return InternalRunThreadTest() && InternalRunLocationTest();
 }
 
-}  // testing
-}  // win
-}  // base
+}  // namespace testing
+}  // namespace win
+}  // namespace base

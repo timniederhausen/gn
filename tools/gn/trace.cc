@@ -26,9 +26,7 @@ namespace {
 
 class TraceLog {
  public:
-  TraceLog() {
-    events_.reserve(16384);
-  }
+  TraceLog() { events_.reserve(16384); }
   // Trace items leaked intentionally.
 
   void Add(TraceItem* item) {
@@ -65,8 +63,7 @@ bool CoalescedDurationGreater(const Coalesced& a, const Coalesced& b) {
   return a.total_duration > b.total_duration;
 }
 
-void SummarizeParses(std::vector<const TraceItem*>& loads,
-                     std::ostream& out) {
+void SummarizeParses(std::vector<const TraceItem*>& loads, std::ostream& out) {
   out << "File parse times: (time in ms, name)\n";
 
   std::sort(loads.begin(), loads.end(), &DurationGreater);
@@ -116,10 +113,7 @@ void SummarizeScriptExecs(std::vector<const TraceItem*>& execs,
 TraceItem::TraceItem(Type type,
                      const std::string& name,
                      base::PlatformThreadId thread_id)
-    : type_(type),
-      name_(name),
-      thread_id_(thread_id) {
-}
+    : type_(type), name_(name), thread_id_(thread_id) {}
 
 TraceItem::~TraceItem() = default;
 
@@ -234,8 +228,8 @@ std::string SummarizeTraces() {
       check_headers_time += cur->delta().InMillisecondsF();
 
     out << "Header check time: (total time in ms, files checked)\n";
-    out << base::StringPrintf(" %8.2f  %d\n",
-                              check_headers_time, headers_checked);
+    out << base::StringPrintf(" %8.2f  %d\n", check_headers_time,
+                              headers_checked);
   }
 
   return out.str();
@@ -334,6 +328,5 @@ void SaveTraces(const base::FilePath& file_name) {
   out << "]}";
 
   std::string out_str = out.str();
-  base::WriteFile(file_name, out_str.data(),
-                       static_cast<int>(out_str.size()));
+  base::WriteFile(file_name, out_str.data(), static_cast<int>(out_str.size()));
 }

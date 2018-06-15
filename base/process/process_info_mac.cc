@@ -19,7 +19,7 @@ namespace base {
 
 // static
 const Time CurrentProcessInfo::CreationTime() {
-  int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+  int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
   size_t len = 0;
   if (sysctl(mib, arraysize(mib), NULL, &len, NULL, 0) < 0)
     return Time();

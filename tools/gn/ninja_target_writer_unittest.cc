@@ -17,8 +17,7 @@ class TestingNinjaTargetWriter : public NinjaTargetWriter {
   TestingNinjaTargetWriter(const Target* target,
                            const Toolchain* toolchain,
                            std::ostream& out)
-      : NinjaTargetWriter(target, out) {
-  }
+      : NinjaTargetWriter(target, out) {}
 
   void Run() override {}
 

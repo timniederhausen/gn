@@ -13,8 +13,7 @@ namespace switches {
 
 struct SwitchInfo {
   SwitchInfo();
-  SwitchInfo(const char* short_help,
-             const char* long_help);
+  SwitchInfo(const char* short_help, const char* long_help);
 
   const char* short_help;
   const char* long_help;
@@ -92,14 +91,14 @@ extern const char kVersion_Help[];
 // but it's documented in the individual commands it applies to rather than
 // globally.
 extern const char kAllToolchains[];
-#define ALL_TOOLCHAINS_SWITCH_HELP \
-  "  --all-toolchains\n" \
-  "      Normally only inputs in the default toolchain will be included.\n" \
-  "      This switch will turn on matching all toolchains.\n" \
-  "\n" \
-  "      For example, a file is in a target might be compiled twice:\n" \
+#define ALL_TOOLCHAINS_SWITCH_HELP                                             \
+  "  --all-toolchains\n"                                                       \
+  "      Normally only inputs in the default toolchain will be included.\n"    \
+  "      This switch will turn on matching all toolchains.\n"                  \
+  "\n"                                                                         \
+  "      For example, a file is in a target might be compiled twice:\n"        \
   "      once in the default toolchain and once in a secondary one. Without\n" \
-  "      this flag, only the default toolchain one will be matched by\n" \
+  "      this flag, only the default toolchain one will be matched by\n"       \
   "      wildcards. With this flag, both will be matched.\n"
 
 }  // namespace switches

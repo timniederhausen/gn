@@ -100,30 +100,30 @@ TEST(Parser, BinaryOp) {
   // TODO(scottmg): The tokenizer is dumb, and treats "5-1" as two integers,
   // not a binary operator between two positive integers.
   DoExpressionPrintTest("5 - 1",
-      "BINARY(-)\n"
-      " LITERAL(5)\n"
-      " LITERAL(1)\n");
+                        "BINARY(-)\n"
+                        " LITERAL(5)\n"
+                        " LITERAL(1)\n");
   DoExpressionPrintTest("5+1",
-      "BINARY(+)\n"
-      " LITERAL(5)\n"
-      " LITERAL(1)\n");
+                        "BINARY(+)\n"
+                        " LITERAL(5)\n"
+                        " LITERAL(1)\n");
   DoExpressionPrintTest("5 - 1 - 2",
-      "BINARY(-)\n"
-      " BINARY(-)\n"
-      "  LITERAL(5)\n"
-      "  LITERAL(1)\n"
-      " LITERAL(2)\n");
+                        "BINARY(-)\n"
+                        " BINARY(-)\n"
+                        "  LITERAL(5)\n"
+                        "  LITERAL(1)\n"
+                        " LITERAL(2)\n");
 }
 
 TEST(Parser, FunctionCall) {
   DoExpressionPrintTest("foo()",
-      "FUNCTION(foo)\n"
-      " LIST\n");
+                        "FUNCTION(foo)\n"
+                        " LIST\n");
   DoExpressionPrintTest("blah(1, 2)",
-      "FUNCTION(blah)\n"
-      " LIST\n"
-      "  LITERAL(1)\n"
-      "  LITERAL(2)\n");
+                        "FUNCTION(blah)\n"
+                        " LIST\n"
+                        "  LITERAL(1)\n"
+                        "  LITERAL(2)\n");
   DoExpressionErrorTest("foo(1, 2,)", 1, 10);
   DoExpressionErrorTest("foo(1 2)", 1, 7);
 }
@@ -179,8 +179,8 @@ TEST(Parser, OrderOfOperationsEqualityBoolean) {
 
 TEST(Parser, UnaryOp) {
   DoExpressionPrintTest("!foo",
-      "UNARY(!)\n"
-      " IDENTIFIER(foo)\n");
+                        "UNARY(!)\n"
+                        " IDENTIFIER(foo)\n");
 
   // No contents for binary operator.
   DoExpressionErrorTest("a = !", 1, 5);
@@ -189,23 +189,23 @@ TEST(Parser, UnaryOp) {
 TEST(Parser, List) {
   DoExpressionPrintTest("[]", "LIST\n");
   DoExpressionPrintTest("[1,asd,]",
-      "LIST\n"
-      " LITERAL(1)\n"
-      " IDENTIFIER(asd)\n");
+                        "LIST\n"
+                        " LITERAL(1)\n"
+                        " IDENTIFIER(asd)\n");
   DoExpressionPrintTest("[1, 2+3 - foo]",
-      "LIST\n"
-      " LITERAL(1)\n"
-      " BINARY(-)\n"
-      "  BINARY(+)\n"
-      "   LITERAL(2)\n"
-      "   LITERAL(3)\n"
-      "  IDENTIFIER(foo)\n");
+                        "LIST\n"
+                        " LITERAL(1)\n"
+                        " BINARY(-)\n"
+                        "  BINARY(+)\n"
+                        "   LITERAL(2)\n"
+                        "   LITERAL(3)\n"
+                        "  IDENTIFIER(foo)\n");
   DoExpressionPrintTest("[1,\n2,\n 3,\n  4]",
-      "LIST\n"
-      " LITERAL(1)\n"
-      " LITERAL(2)\n"
-      " LITERAL(3)\n"
-      " LITERAL(4)\n");
+                        "LIST\n"
+                        " LITERAL(1)\n"
+                        " LITERAL(2)\n"
+                        " LITERAL(3)\n"
+                        " LITERAL(4)\n");
 
   DoExpressionErrorTest("[a, 2+,]", 1, 7);
   DoExpressionErrorTest("[,]", 1, 2);
@@ -400,60 +400,51 @@ TEST(Parser, NewlinesInUnusualPlaces) {
 }
 
 TEST(Parser, NewlinesInUnusualPlaces2) {
-  DoParserPrintTest(
-      "a\n=\n2\n",
-      "BLOCK\n"
-      " BINARY(=)\n"
-      "  IDENTIFIER(a)\n"
-      "  LITERAL(2)\n");
-  DoParserPrintTest(
-      "x =\ny if\n(1\n) {}",
-      "BLOCK\n"
-      " BINARY(=)\n"
-      "  IDENTIFIER(x)\n"
-      "  IDENTIFIER(y)\n"
-      " CONDITION\n"
-      "  LITERAL(1)\n"
-      "  BLOCK\n");
-  DoParserPrintTest(
-      "x = 3\n+2",
-      "BLOCK\n"
-      " BINARY(=)\n"
-      "  IDENTIFIER(x)\n"
-      "  BINARY(+)\n"
-      "   LITERAL(3)\n"
-      "   LITERAL(2)\n"
-      );
+  DoParserPrintTest("a\n=\n2\n",
+                    "BLOCK\n"
+                    " BINARY(=)\n"
+                    "  IDENTIFIER(a)\n"
+                    "  LITERAL(2)\n");
+  DoParserPrintTest("x =\ny if\n(1\n) {}",
+                    "BLOCK\n"
+                    " BINARY(=)\n"
+                    "  IDENTIFIER(x)\n"
+                    "  IDENTIFIER(y)\n"
+                    " CONDITION\n"
+                    "  LITERAL(1)\n"
+                    "  BLOCK\n");
+  DoParserPrintTest("x = 3\n+2",
+                    "BLOCK\n"
+                    " BINARY(=)\n"
+                    "  IDENTIFIER(x)\n"
+                    "  BINARY(+)\n"
+                    "   LITERAL(3)\n"
+                    "   LITERAL(2)\n");
 }
 
 TEST(Parser, NewlineBeforeSubscript) {
   const char* input = "a = b[1]";
   const char* input_with_newline = "a = b\n[1]";
   const char* expected =
-    "BLOCK\n"
-    " BINARY(=)\n"
-    "  IDENTIFIER(a)\n"
-    "  ACCESSOR\n"
-    "   b\n"
-    "   LITERAL(1)\n";
-  DoParserPrintTest(
-      input,
-      expected);
-  DoParserPrintTest(
-      input_with_newline,
-      expected);
-}
-
-TEST(Parser, SequenceOfExpressions) {
-  DoParserPrintTest(
-      "a = 1 b = 2",
       "BLOCK\n"
       " BINARY(=)\n"
       "  IDENTIFIER(a)\n"
-      "  LITERAL(1)\n"
-      " BINARY(=)\n"
-      "  IDENTIFIER(b)\n"
-      "  LITERAL(2)\n");
+      "  ACCESSOR\n"
+      "   b\n"
+      "   LITERAL(1)\n";
+  DoParserPrintTest(input, expected);
+  DoParserPrintTest(input_with_newline, expected);
+}
+
+TEST(Parser, SequenceOfExpressions) {
+  DoParserPrintTest("a = 1 b = 2",
+                    "BLOCK\n"
+                    " BINARY(=)\n"
+                    "  IDENTIFIER(a)\n"
+                    "  LITERAL(1)\n"
+                    " BINARY(=)\n"
+                    "  IDENTIFIER(b)\n"
+                    "  LITERAL(2)\n");
 }
 
 TEST(Parser, BlockAfterFunction) {
@@ -461,11 +452,11 @@ TEST(Parser, BlockAfterFunction) {
   // TODO(scottmg): Do we really want these to mean different things?
   const char* input_with_newline = "func(\"stuff\")\n{\n}";
   const char* expected =
-    "BLOCK\n"
-    " FUNCTION(func)\n"
-    "  LIST\n"
-    "   LITERAL(\"stuff\")\n"
-    "  BLOCK\n";
+      "BLOCK\n"
+      " FUNCTION(func)\n"
+      "  LIST\n"
+      "   LITERAL(\"stuff\")\n"
+      "  BLOCK\n";
   DoParserPrintTest(input, expected);
   DoParserPrintTest(input_with_newline, expected);
 }
@@ -473,180 +464,180 @@ TEST(Parser, BlockAfterFunction) {
 TEST(Parser, LongExpression) {
   const char* input = "a = b + c && d || e";
   const char* expected =
-    "BLOCK\n"
-    " BINARY(=)\n"
-    "  IDENTIFIER(a)\n"
-    "  BINARY(||)\n"
-    "   BINARY(&&)\n"
-    "    BINARY(+)\n"
-    "     IDENTIFIER(b)\n"
-    "     IDENTIFIER(c)\n"
-    "    IDENTIFIER(d)\n"
-    "   IDENTIFIER(e)\n";
+      "BLOCK\n"
+      " BINARY(=)\n"
+      "  IDENTIFIER(a)\n"
+      "  BINARY(||)\n"
+      "   BINARY(&&)\n"
+      "    BINARY(+)\n"
+      "     IDENTIFIER(b)\n"
+      "     IDENTIFIER(c)\n"
+      "    IDENTIFIER(d)\n"
+      "   IDENTIFIER(e)\n";
   DoParserPrintTest(input, expected);
 }
 
 TEST(Parser, CommentsStandalone) {
   const char* input =
-    "# Toplevel comment.\n"
-    "\n"
-    "executable(\"wee\") {}\n";
+      "# Toplevel comment.\n"
+      "\n"
+      "executable(\"wee\") {}\n";
   const char* expected =
-    "BLOCK\n"
-    " BLOCK_COMMENT(# Toplevel comment.)\n"
-    " FUNCTION(executable)\n"
-    "  LIST\n"
-    "   LITERAL(\"wee\")\n"
-    "  BLOCK\n";
+      "BLOCK\n"
+      " BLOCK_COMMENT(# Toplevel comment.)\n"
+      " FUNCTION(executable)\n"
+      "  LIST\n"
+      "   LITERAL(\"wee\")\n"
+      "  BLOCK\n";
   DoParserPrintTest(input, expected);
 }
 
 TEST(Parser, CommentsStandaloneEof) {
   const char* input =
-    "executable(\"wee\") {}\n"
-    "# EOF comment.\n";
+      "executable(\"wee\") {}\n"
+      "# EOF comment.\n";
   const char* expected =
-    "BLOCK\n"
-    " +AFTER_COMMENT(\"# EOF comment.\")\n"
-    " FUNCTION(executable)\n"
-    "  LIST\n"
-    "   LITERAL(\"wee\")\n"
-    "  BLOCK\n";
+      "BLOCK\n"
+      " +AFTER_COMMENT(\"# EOF comment.\")\n"
+      " FUNCTION(executable)\n"
+      "  LIST\n"
+      "   LITERAL(\"wee\")\n"
+      "  BLOCK\n";
   DoParserPrintTest(input, expected);
 }
 
 TEST(Parser, CommentsLineAttached) {
   const char* input =
-    "executable(\"wee\") {\n"
-    "  # Some sources.\n"
-    "  sources = [\n"
-    "    \"stuff.cc\",\n"
-    "    \"things.cc\",\n"
-    "    # This file is special or something.\n"
-    "    \"another.cc\",\n"
-    "  ]\n"
-    "}\n";
+      "executable(\"wee\") {\n"
+      "  # Some sources.\n"
+      "  sources = [\n"
+      "    \"stuff.cc\",\n"
+      "    \"things.cc\",\n"
+      "    # This file is special or something.\n"
+      "    \"another.cc\",\n"
+      "  ]\n"
+      "}\n";
   const char* expected =
-    "BLOCK\n"
-    " FUNCTION(executable)\n"
-    "  LIST\n"
-    "   LITERAL(\"wee\")\n"
-    "  BLOCK\n"
-    "   BINARY(=)\n"
-    "    +BEFORE_COMMENT(\"# Some sources.\")\n"
-    "    IDENTIFIER(sources)\n"
-    "    LIST\n"
-    "     LITERAL(\"stuff.cc\")\n"
-    "     LITERAL(\"things.cc\")\n"
-    "     LITERAL(\"another.cc\")\n"
-    "      +BEFORE_COMMENT(\"# This file is special or something.\")\n";
+      "BLOCK\n"
+      " FUNCTION(executable)\n"
+      "  LIST\n"
+      "   LITERAL(\"wee\")\n"
+      "  BLOCK\n"
+      "   BINARY(=)\n"
+      "    +BEFORE_COMMENT(\"# Some sources.\")\n"
+      "    IDENTIFIER(sources)\n"
+      "    LIST\n"
+      "     LITERAL(\"stuff.cc\")\n"
+      "     LITERAL(\"things.cc\")\n"
+      "     LITERAL(\"another.cc\")\n"
+      "      +BEFORE_COMMENT(\"# This file is special or something.\")\n";
   DoParserPrintTest(input, expected);
 }
 
 TEST(Parser, CommentsSuffix) {
   const char* input =
-    "executable(\"wee\") { # This is some stuff.\n"
-    "sources = [ \"a.cc\" # And another comment here.\n"
-    "] }";
+      "executable(\"wee\") { # This is some stuff.\n"
+      "sources = [ \"a.cc\" # And another comment here.\n"
+      "] }";
   const char* expected =
-    "BLOCK\n"
-    " FUNCTION(executable)\n"
-    "  LIST\n"
-    "   LITERAL(\"wee\")\n"
-    "   END())\n"
-    "    +SUFFIX_COMMENT(\"# This is some stuff.\")\n"
-    "  BLOCK\n"
-    "   BINARY(=)\n"
-    "    IDENTIFIER(sources)\n"
-    "    LIST\n"
-    "     LITERAL(\"a.cc\")\n"
-    "      +SUFFIX_COMMENT(\"# And another comment here.\")\n";
+      "BLOCK\n"
+      " FUNCTION(executable)\n"
+      "  LIST\n"
+      "   LITERAL(\"wee\")\n"
+      "   END())\n"
+      "    +SUFFIX_COMMENT(\"# This is some stuff.\")\n"
+      "  BLOCK\n"
+      "   BINARY(=)\n"
+      "    IDENTIFIER(sources)\n"
+      "    LIST\n"
+      "     LITERAL(\"a.cc\")\n"
+      "      +SUFFIX_COMMENT(\"# And another comment here.\")\n";
   DoParserPrintTest(input, expected);
 }
 
 TEST(Parser, CommentsSuffixDifferentLine) {
   const char* input =
-    "executable(\"wee\") {\n"
-    "  sources = [ \"a\",\n"
-    "      \"b\" ] # Comment\n"
-    "}\n";
+      "executable(\"wee\") {\n"
+      "  sources = [ \"a\",\n"
+      "      \"b\" ] # Comment\n"
+      "}\n";
   const char* expected =
-    "BLOCK\n"
-    " FUNCTION(executable)\n"
-    "  LIST\n"
-    "   LITERAL(\"wee\")\n"
-    "  BLOCK\n"
-    "   BINARY(=)\n"
-    "    IDENTIFIER(sources)\n"
-    "    LIST\n"
-    "     LITERAL(\"a\")\n"
-    "     LITERAL(\"b\")\n"
-    "     END(])\n"
-    "      +SUFFIX_COMMENT(\"# Comment\")\n";
+      "BLOCK\n"
+      " FUNCTION(executable)\n"
+      "  LIST\n"
+      "   LITERAL(\"wee\")\n"
+      "  BLOCK\n"
+      "   BINARY(=)\n"
+      "    IDENTIFIER(sources)\n"
+      "    LIST\n"
+      "     LITERAL(\"a\")\n"
+      "     LITERAL(\"b\")\n"
+      "     END(])\n"
+      "      +SUFFIX_COMMENT(\"# Comment\")\n";
   DoParserPrintTest(input, expected);
 }
 
 TEST(Parser, CommentsSuffixMultiple) {
   const char* input =
-    "executable(\"wee\") {\n"
-    "  sources = [\n"
-    "    \"a\",  # This is a comment,\n"
-    "          # and some more,\n"  // Note that this is aligned with above.
-    "          # then the end.\n"
-    "  ]\n"
-    "}\n";
+      "executable(\"wee\") {\n"
+      "  sources = [\n"
+      "    \"a\",  # This is a comment,\n"
+      "          # and some more,\n"  // Note that this is aligned with above.
+      "          # then the end.\n"
+      "  ]\n"
+      "}\n";
   const char* expected =
-    "BLOCK\n"
-    " FUNCTION(executable)\n"
-    "  LIST\n"
-    "   LITERAL(\"wee\")\n"
-    "  BLOCK\n"
-    "   BINARY(=)\n"
-    "    IDENTIFIER(sources)\n"
-    "    LIST\n"
-    "     LITERAL(\"a\")\n"
-    "      +SUFFIX_COMMENT(\"# This is a comment,\")\n"
-    "      +SUFFIX_COMMENT(\"# and some more,\")\n"
-    "      +SUFFIX_COMMENT(\"# then the end.\")\n";
+      "BLOCK\n"
+      " FUNCTION(executable)\n"
+      "  LIST\n"
+      "   LITERAL(\"wee\")\n"
+      "  BLOCK\n"
+      "   BINARY(=)\n"
+      "    IDENTIFIER(sources)\n"
+      "    LIST\n"
+      "     LITERAL(\"a\")\n"
+      "      +SUFFIX_COMMENT(\"# This is a comment,\")\n"
+      "      +SUFFIX_COMMENT(\"# and some more,\")\n"
+      "      +SUFFIX_COMMENT(\"# then the end.\")\n";
   DoParserPrintTest(input, expected);
 }
 
 TEST(Parser, CommentsConnectedInList) {
   const char* input =
-    "defines = [\n"
-    "\n"
-    "  # Connected comment.\n"
-    "  \"WEE\",\n"
-    "  \"BLORPY\",\n"
-    "]\n";
+      "defines = [\n"
+      "\n"
+      "  # Connected comment.\n"
+      "  \"WEE\",\n"
+      "  \"BLORPY\",\n"
+      "]\n";
   const char* expected =
-    "BLOCK\n"
-    " BINARY(=)\n"
-    "  IDENTIFIER(defines)\n"
-    "  LIST\n"
-    "   LITERAL(\"WEE\")\n"
-    "    +BEFORE_COMMENT(\"# Connected comment.\")\n"
-    "   LITERAL(\"BLORPY\")\n";
+      "BLOCK\n"
+      " BINARY(=)\n"
+      "  IDENTIFIER(defines)\n"
+      "  LIST\n"
+      "   LITERAL(\"WEE\")\n"
+      "    +BEFORE_COMMENT(\"# Connected comment.\")\n"
+      "   LITERAL(\"BLORPY\")\n";
   DoParserPrintTest(input, expected);
 }
 
 TEST(Parser, CommentsAtEndOfBlock) {
   const char* input =
-    "if (is_win) {\n"
-    "  sources = [\"a.cc\"]\n"
-    "  # Some comment at end.\n"
-    "}\n";
+      "if (is_win) {\n"
+      "  sources = [\"a.cc\"]\n"
+      "  # Some comment at end.\n"
+      "}\n";
   const char* expected =
-    "BLOCK\n"
-    " CONDITION\n"
-    "  IDENTIFIER(is_win)\n"
-    "  BLOCK\n"
-    "   BINARY(=)\n"
-    "    IDENTIFIER(sources)\n"
-    "    LIST\n"
-    "     LITERAL(\"a.cc\")\n"
-    "   END(})\n"
-    "    +BEFORE_COMMENT(\"# Some comment at end.\")\n";
+      "BLOCK\n"
+      " CONDITION\n"
+      "  IDENTIFIER(is_win)\n"
+      "  BLOCK\n"
+      "   BINARY(=)\n"
+      "    IDENTIFIER(sources)\n"
+      "    LIST\n"
+      "     LITERAL(\"a.cc\")\n"
+      "   END(})\n"
+      "    +BEFORE_COMMENT(\"# Some comment at end.\")\n";
   DoParserPrintTest(input, expected);
 }
 
@@ -654,14 +645,14 @@ TEST(Parser, CommentsAtEndOfBlock) {
 // which thing this comment is intended to be attached to.
 TEST(Parser, CommentsEndOfBlockSingleLine) {
   const char* input =
-    "defines = [ # EOL defines.\n"
-    "]\n";
+      "defines = [ # EOL defines.\n"
+      "]\n";
   const char* expected =
-    "BLOCK\n"
-    " BINARY(=)\n"
-    "  IDENTIFIER(defines)\n"
-    "   +SUFFIX_COMMENT(\"# EOL defines.\")\n"
-    "  LIST\n";
+      "BLOCK\n"
+      " BINARY(=)\n"
+      "  IDENTIFIER(defines)\n"
+      "   +SUFFIX_COMMENT(\"# EOL defines.\")\n"
+      "  LIST\n";
   DoParserPrintTest(input, expected);
 }
 
@@ -720,25 +711,25 @@ TEST(Parser, StandaloneBlock) {
 
 TEST(Parser, BlockValues) {
   const char* input =
-    "print({a = 1 b = 2}, 3)\n"
-    "a = { b = \"asd\" }";
+      "print({a = 1 b = 2}, 3)\n"
+      "a = { b = \"asd\" }";
   const char* expected =
-    "BLOCK\n"
-    " FUNCTION(print)\n"
-    "  LIST\n"
-    "   BLOCK\n"
-    "    BINARY(=)\n"
-    "     IDENTIFIER(a)\n"
-    "     LITERAL(1)\n"
-    "    BINARY(=)\n"
-    "     IDENTIFIER(b)\n"
-    "     LITERAL(2)\n"
-    "   LITERAL(3)\n"
-    " BINARY(=)\n"
-    "  IDENTIFIER(a)\n"
-    "  BLOCK\n"
-    "   BINARY(=)\n"
-    "    IDENTIFIER(b)\n"
-    "    LITERAL(\"asd\")\n";
+      "BLOCK\n"
+      " FUNCTION(print)\n"
+      "  LIST\n"
+      "   BLOCK\n"
+      "    BINARY(=)\n"
+      "     IDENTIFIER(a)\n"
+      "     LITERAL(1)\n"
+      "    BINARY(=)\n"
+      "     IDENTIFIER(b)\n"
+      "     LITERAL(2)\n"
+      "   LITERAL(3)\n"
+      " BINARY(=)\n"
+      "  IDENTIFIER(a)\n"
+      "  BLOCK\n"
+      "   BINARY(=)\n"
+      "    IDENTIFIER(b)\n"
+      "    LITERAL(\"asd\")\n";
   DoParserPrintTest(input, expected);
 }

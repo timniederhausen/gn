@@ -31,4 +31,3 @@ SourceFileType GetSourceFileType(const SourceFile& file) {
 
   return SOURCE_UNKNOWN;
 }
-

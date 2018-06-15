@@ -45,7 +45,6 @@
 // If DebugMessage.exe is not found, the logging code will use a normal
 // MessageBox, potentially causing the problems discussed above.
 
-
 // Instructions
 // ------------
 //
@@ -114,15 +113,15 @@ typedef char PathChar;
 // Where to record logging output? A flat file and/or system debug log
 // via OutputDebugString.
 enum LoggingDestination {
-  LOG_NONE                = 0,
-  LOG_TO_FILE             = 1 << 0,
+  LOG_NONE = 0,
+  LOG_TO_FILE = 1 << 0,
   LOG_TO_SYSTEM_DEBUG_LOG = 1 << 1,
 
   LOG_TO_ALL = LOG_TO_FILE | LOG_TO_SYSTEM_DEBUG_LOG,
 
-  // On Windows, use a file next to the exe; on POSIX platforms, where
-  // it may not even be possible to locate the executable on disk, use
-  // stderr.
+// On Windows, use a file next to the exe; on POSIX platforms, where
+// it may not even be possible to locate the executable on disk, use
+// stderr.
 #if defined(OS_WIN)
   LOG_DEFAULT = LOG_TO_FILE,
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
@@ -210,8 +209,10 @@ bool ShouldCreateLogMessage(int severity);
 // process and thread IDs default to off, the timestamp defaults to on.
 // If this function is not called, logging defaults to writing the timestamp
 // only.
-void SetLogItems(bool enable_process_id, bool enable_thread_id,
-                             bool enable_timestamp, bool enable_tickcount);
+void SetLogItems(bool enable_process_id,
+                 bool enable_thread_id,
+                 bool enable_timestamp,
+                 bool enable_tickcount);
 
 // Sets whether or not you'd like to see fatal debug messages popped up in
 // a dialog box or not.
@@ -223,7 +224,10 @@ void SetShowErrorDialogs(bool enable_dialogs);
 // Returns true to signal that it handled the message and the message
 // should not be sent to other log destinations.
 typedef bool (*LogMessageHandlerFunction)(int severity,
-    const char* file, int line, size_t message_start, const std::string& str);
+                                          const char* file,
+                                          int line,
+                                          size_t message_start,
+                                          const std::string& str);
 void SetLogMessageHandler(LogMessageHandlerFunction handler);
 LogMessageHandlerFunction GetLogMessageHandler();
 
@@ -308,7 +312,7 @@ const LogSeverity LOG_DFATAL = LOG_FATAL;
 // the Windows SDK does for consistency.
 #define ERROR 0
 #define COMPACT_GOOGLE_LOG_EX_0(ClassName, ...) \
-  COMPACT_GOOGLE_LOG_EX_ERROR(ClassName , ##__VA_ARGS__)
+  COMPACT_GOOGLE_LOG_EX_ERROR(ClassName, ##__VA_ARGS__)
 #define COMPACT_GOOGLE_LOG_0 COMPACT_GOOGLE_LOG_ERROR
 // Needed for LOG_IS_ON(ERROR).
 const LogSeverity LOG_0 = LOG_ERROR;
@@ -322,8 +326,8 @@ const LogSeverity LOG_0 = LOG_ERROR;
 
 // Helper macro which avoids evaluating the arguments to a stream if
 // the condition doesn't hold. Condition is evaluated once and only once.
-#define LAZY_STREAM(stream, condition)                                  \
-  !(condition) ? (void) 0 : ::logging::LogMessageVoidify() & (stream)
+#define LAZY_STREAM(stream, condition) \
+  !(condition) ? (void)0 : ::logging::LogMessageVoidify() & (stream)
 
 // We use the preprocessor's merging operator, "##", so that, e.g.,
 // LOG(INFO) becomes the token COMPACT_GOOGLE_LOG_INFO.  There's some funny
@@ -333,7 +337,7 @@ const LogSeverity LOG_0 = LOG_ERROR;
 // impossible to stream something like a string directly to an unnamed
 // ostream. We employ a neat hack by calling the stream() member
 // function of LogMessage which seems to avoid the problem.
-#define LOG_STREAM(severity) COMPACT_GOOGLE_LOG_ ## severity.stream()
+#define LOG_STREAM(severity) COMPACT_GOOGLE_LOG_##severity.stream()
 
 #define LOG(severity) LAZY_STREAM(LOG_STREAM(severity), LOG_IS_ON(severity))
 #define LOG_IF(severity, condition) \
@@ -344,17 +348,18 @@ const LogSeverity LOG_0 = LOG_ERROR;
       << "Assert failed: " #condition ". "
 
 #if defined(OS_WIN)
-#define PLOG_STREAM(severity) \
-  COMPACT_GOOGLE_LOG_EX_ ## severity(Win32ErrorLogMessage, \
-      ::logging::GetLastSystemErrorCode()).stream()
+#define PLOG_STREAM(severity)                                           \
+  COMPACT_GOOGLE_LOG_EX_##severity(Win32ErrorLogMessage,                \
+                                   ::logging::GetLastSystemErrorCode()) \
+      .stream()
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
-#define PLOG_STREAM(severity) \
-  COMPACT_GOOGLE_LOG_EX_ ## severity(ErrnoLogMessage, \
-      ::logging::GetLastSystemErrorCode()).stream()
+#define PLOG_STREAM(severity)                                           \
+  COMPACT_GOOGLE_LOG_EX_##severity(ErrnoLogMessage,                     \
+                                   ::logging::GetLastSystemErrorCode()) \
+      .stream()
 #endif
 
-#define PLOG(severity)                                          \
-  LAZY_STREAM(PLOG_STREAM(severity), LOG_IS_ON(severity))
+#define PLOG(severity) LAZY_STREAM(PLOG_STREAM(severity), LOG_IS_ON(severity))
 
 #define PLOG_IF(severity, condition) \
   LAZY_STREAM(PLOG_STREAM(severity), LOG_IS_ON(severity) && (condition))
@@ -517,7 +522,7 @@ class CheckOpResult {
   LAZY_STREAM(PLOG_STREAM(FATAL), UNLIKELY(!(condition))); \
   EAT_STREAM_PARAMETERS
 
-#define CHECK_OP(name, op, val1, val2) CHECK((val1) op (val2))
+#define CHECK_OP(name, op, val1, val2) CHECK((val1)op(val2))
 
 #else  // !(OFFICIAL_BUILD && NDEBUG)
 
@@ -529,15 +534,13 @@ class CheckOpResult {
 // __analysis_assume gets confused on some conditions:
 // http://randomascii.wordpress.com/2011/09/13/analyze-for-visual-studio-the-ugly-part-5/
 
-#define CHECK(condition)                    \
-  __analysis_assume(!!(condition)),         \
-      LAZY_STREAM(LOG_STREAM(FATAL), false) \
-          << "Check failed: " #condition ". "
+#define CHECK(condition)                                                  \
+  __analysis_assume(!!(condition)), LAZY_STREAM(LOG_STREAM(FATAL), false) \
+                                        << "Check failed: " #condition ". "
 
-#define PCHECK(condition)                    \
-  __analysis_assume(!!(condition)),          \
-      LAZY_STREAM(PLOG_STREAM(FATAL), false) \
-          << "Check failed: " #condition ". "
+#define PCHECK(condition)                                                  \
+  __analysis_assume(!!(condition)), LAZY_STREAM(PLOG_STREAM(FATAL), false) \
+                                        << "Check failed: " #condition ". "
 
 #else  // _PREFAST_
 
@@ -558,14 +561,17 @@ class CheckOpResult {
 // macro is used in an 'if' clause such as:
 // if (a == 1)
 //   CHECK_EQ(2, a);
-#define CHECK_OP(name, op, val1, val2)                                         \
-  switch (0) case 0: default:                                                  \
-  if (::logging::CheckOpResult true_if_passed =                                \
-      ::logging::Check##name##Impl((val1), (val2),                             \
-                                   #val1 " " #op " " #val2))                   \
-   ;                                                                           \
-  else                                                                         \
-    ::logging::LogMessage(__FILE__, __LINE__, true_if_passed.message()).stream()
+#define CHECK_OP(name, op, val1, val2)                                    \
+  switch (0)                                                              \
+  case 0:                                                                 \
+  default:                                                                \
+    if (::logging::CheckOpResult true_if_passed =                         \
+            ::logging::Check##name##Impl((val1), (val2),                  \
+                                         #val1 " " #op " " #val2))        \
+      ;                                                                   \
+    else                                                                  \
+      ::logging::LogMessage(__FILE__, __LINE__, true_if_passed.message()) \
+          .stream()
 
 #endif  // !(OFFICIAL_BUILD && NDEBUG)
 
@@ -611,7 +617,7 @@ void MakeCheckOpValueString(std::ostream* os, std::nullptr_t p);
 // function template because it is not performance critical and so can
 // be out of line, while the "Impl" code should be inline.  Caller
 // takes ownership of the returned string.
-template<class t1, class t2>
+template <class t1, class t2>
 std::string* MakeCheckOpString(const t1& v1, const t2& v2, const char* names) {
   std::ostringstream ss;
   ss << names << " (";
@@ -625,20 +631,25 @@ std::string* MakeCheckOpString(const t1& v1, const t2& v2, const char* names) {
 
 // Commonly used instantiations of MakeCheckOpString<>. Explicitly instantiated
 // in logging.cc.
-extern template std::string* MakeCheckOpString<int, int>(
-    const int&, const int&, const char* names);
-extern template
-std::string* MakeCheckOpString<unsigned long, unsigned long>(
-    const unsigned long&, const unsigned long&, const char* names);
-extern template
-std::string* MakeCheckOpString<unsigned long, unsigned int>(
-    const unsigned long&, const unsigned int&, const char* names);
-extern template
-std::string* MakeCheckOpString<unsigned int, unsigned long>(
-    const unsigned int&, const unsigned long&, const char* names);
-extern template
-std::string* MakeCheckOpString<std::string, std::string>(
-    const std::string&, const std::string&, const char* name);
+extern template std::string* MakeCheckOpString<int, int>(const int&,
+                                                         const int&,
+                                                         const char* names);
+extern template std::string* MakeCheckOpString<unsigned long, unsigned long>(
+    const unsigned long&,
+    const unsigned long&,
+    const char* names);
+extern template std::string* MakeCheckOpString<unsigned long, unsigned int>(
+    const unsigned long&,
+    const unsigned int&,
+    const char* names);
+extern template std::string* MakeCheckOpString<unsigned int, unsigned long>(
+    const unsigned int&,
+    const unsigned long&,
+    const char* names);
+extern template std::string* MakeCheckOpString<std::string, std::string>(
+    const std::string&,
+    const std::string&,
+    const char* name);
 
 // Helper functions for CHECK_OP macro.
 // The (int, int) specialization works around the issue that the compiler
@@ -666,17 +677,17 @@ std::string* MakeCheckOpString<std::string, std::string>(
 DEFINE_CHECK_OP_IMPL(EQ, ==)
 DEFINE_CHECK_OP_IMPL(NE, !=)
 DEFINE_CHECK_OP_IMPL(LE, <=)
-DEFINE_CHECK_OP_IMPL(LT, < )
+DEFINE_CHECK_OP_IMPL(LT, <)
 DEFINE_CHECK_OP_IMPL(GE, >=)
-DEFINE_CHECK_OP_IMPL(GT, > )
+DEFINE_CHECK_OP_IMPL(GT, >)
 #undef DEFINE_CHECK_OP_IMPL
 
 #define CHECK_EQ(val1, val2) CHECK_OP(EQ, ==, val1, val2)
 #define CHECK_NE(val1, val2) CHECK_OP(NE, !=, val1, val2)
 #define CHECK_LE(val1, val2) CHECK_OP(LE, <=, val1, val2)
-#define CHECK_LT(val1, val2) CHECK_OP(LT, < , val1, val2)
+#define CHECK_LT(val1, val2) CHECK_OP(LT, <, val1, val2)
 #define CHECK_GE(val1, val2) CHECK_OP(GE, >=, val1, val2)
-#define CHECK_GT(val1, val2) CHECK_OP(GT, > , val1, val2)
+#define CHECK_GT(val1, val2) CHECK_OP(GT, >, val1, val2)
 
 #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON)
 #define DCHECK_IS_ON() 0
@@ -706,11 +717,9 @@ DEFINE_CHECK_OP_IMPL(GT, > )
 
 #endif  // DCHECK_IS_ON()
 
-#define DLOG(severity)                                          \
-  LAZY_STREAM(LOG_STREAM(severity), DLOG_IS_ON(severity))
+#define DLOG(severity) LAZY_STREAM(LOG_STREAM(severity), DLOG_IS_ON(severity))
 
-#define DPLOG(severity)                                         \
-  LAZY_STREAM(PLOG_STREAM(severity), DLOG_IS_ON(severity))
+#define DPLOG(severity) LAZY_STREAM(PLOG_STREAM(severity), DLOG_IS_ON(severity))
 
 // Definitions for DCHECK et al.
 
@@ -742,15 +751,13 @@ const LogSeverity LOG_DCHECK = LOG_FATAL;
 #if defined(_PREFAST_) && defined(OS_WIN)
 // See comments on the previous use of __analysis_assume.
 
-#define DCHECK(condition)                    \
-  __analysis_assume(!!(condition)),          \
-      LAZY_STREAM(LOG_STREAM(DCHECK), false) \
-          << "Check failed: " #condition ". "
+#define DCHECK(condition)                                                  \
+  __analysis_assume(!!(condition)), LAZY_STREAM(LOG_STREAM(DCHECK), false) \
+                                        << "Check failed: " #condition ". "
 
-#define DPCHECK(condition)                    \
-  __analysis_assume(!!(condition)),           \
-      LAZY_STREAM(PLOG_STREAM(DCHECK), false) \
-          << "Check failed: " #condition ". "
+#define DPCHECK(condition)                                                  \
+  __analysis_assume(!!(condition)), LAZY_STREAM(PLOG_STREAM(DCHECK), false) \
+                                        << "Check failed: " #condition ". "
 
 #else  // !(defined(_PREFAST_) && defined(OS_WIN))
 
@@ -780,16 +787,19 @@ const LogSeverity LOG_DCHECK = LOG_FATAL;
 //   DCHECK_EQ(2, a);
 #if DCHECK_IS_ON()
 
-#define DCHECK_OP(name, op, val1, val2)                                \
-  switch (0) case 0: default:                                          \
-  if (::logging::CheckOpResult true_if_passed =                        \
-      DCHECK_IS_ON() ?                                                 \
-      ::logging::Check##name##Impl((val1), (val2),                     \
-                                   #val1 " " #op " " #val2) : nullptr) \
-   ;                                                                   \
-  else                                                                 \
-    ::logging::LogMessage(__FILE__, __LINE__, ::logging::LOG_DCHECK,   \
-                          true_if_passed.message()).stream()
+#define DCHECK_OP(name, op, val1, val2)                                   \
+  switch (0)                                                              \
+  case 0:                                                                 \
+  default:                                                                \
+    if (::logging::CheckOpResult true_if_passed =                         \
+            DCHECK_IS_ON() ? ::logging::Check##name##Impl(                \
+                                 (val1), (val2), #val1 " " #op " " #val2) \
+                           : nullptr)                                     \
+      ;                                                                   \
+    else                                                                  \
+      ::logging::LogMessage(__FILE__, __LINE__, ::logging::LOG_DCHECK,    \
+                            true_if_passed.message())                     \
+          .stream()
 
 #else  // DCHECK_IS_ON()
 
@@ -833,9 +843,9 @@ const LogSeverity LOG_DCHECK = LOG_FATAL;
 #define DCHECK_EQ(val1, val2) DCHECK_OP(EQ, ==, val1, val2)
 #define DCHECK_NE(val1, val2) DCHECK_OP(NE, !=, val1, val2)
 #define DCHECK_LE(val1, val2) DCHECK_OP(LE, <=, val1, val2)
-#define DCHECK_LT(val1, val2) DCHECK_OP(LT, < , val1, val2)
+#define DCHECK_LT(val1, val2) DCHECK_OP(LT, <, val1, val2)
 #define DCHECK_GE(val1, val2) DCHECK_OP(GE, >=, val1, val2)
-#define DCHECK_GT(val1, val2) DCHECK_OP(GT, > , val1, val2)
+#define DCHECK_GT(val1, val2) DCHECK_OP(GT, >, val1, val2)
 
 #if !DCHECK_IS_ON() && defined(OS_CHROMEOS)
 // Implement logging of NOTREACHED() as a dedicated function to get function
@@ -873,7 +883,9 @@ class LogMessage {
   LogMessage(const char* file, int line, std::string* result);
 
   // Used for DCHECK_EQ(), etc. Takes ownership of the given string.
-  LogMessage(const char* file, int line, LogSeverity severity,
+  LogMessage(const char* file,
+             int line,
+             LogSeverity severity,
              std::string* result);
 
   ~LogMessage();
@@ -925,7 +937,7 @@ class LogMessageVoidify {
   LogMessageVoidify() = default;
   // This has to be an operator with a precedence lower than << but
   // higher than ?:
-  void operator&(std::ostream&) { }
+  void operator&(std::ostream&) {}
 };
 
 #if defined(OS_WIN)

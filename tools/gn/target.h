@@ -48,7 +48,7 @@ class Target : public Item {
   };
 
   enum DepsIterationType {
-    DEPS_ALL,  // Iterates through all public, private, and data deps.
+    DEPS_ALL,     // Iterates through all public, private, and data deps.
     DEPS_LINKED,  // Iterates through all non-data dependencies.
   };
 
@@ -118,9 +118,7 @@ class Target : public Item {
     output_extension_ = extension;
     output_extension_set_ = true;
   }
-  bool output_extension_set() const {
-    return output_extension_set_;
-  }
+  bool output_extension_set() const { return output_extension_set_; }
 
   const FileList& sources() const { return sources_; }
   FileList& sources() { return sources_; }
@@ -212,9 +210,7 @@ class Target : public Item {
   const UniqueVector<LabelConfigPair>& public_configs() const {
     return public_configs_;
   }
-  UniqueVector<LabelConfigPair>& public_configs() {
-    return public_configs_;
-  }
+  UniqueVector<LabelConfigPair>& public_configs() { return public_configs_; }
 
   // Dependencies that can include files from this target.
   const std::set<Label>& allow_circular_includes_from() const {
@@ -284,9 +280,7 @@ class Target : public Item {
   // These are only known once the target is resolved and will be empty before
   // that. This is a cache of the files to prevent every target that depends on
   // a given library from recomputing the same pattern.
-  const OutputFile& link_output_file() const {
-    return link_output_file_;
-  }
+  const OutputFile& link_output_file() const { return link_output_file_; }
   const OutputFile& dependency_output_file() const {
     return dependency_output_file_;
   }

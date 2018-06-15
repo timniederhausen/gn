@@ -87,7 +87,7 @@ class MockInputFileManager {
   typedef std::map<SourceFile, std::unique_ptr<CannedResult>> CannedResponseMap;
   CannedResponseMap canned_responses_;
 
-  std::vector< std::pair<SourceFile, Callback> > pending_;
+  std::vector<std::pair<SourceFile, Callback>> pending_;
 };
 
 LoaderImpl::AsyncLoadFileCallback MockInputFileManager::GetCallback() {
@@ -142,9 +142,7 @@ void MockInputFileManager::IssueAllPending() {
 
 class LoaderTest : public TestWithScheduler {
  public:
-  LoaderTest() {
-    build_settings_.SetBuildDir(SourceDir("//out/Debug/"));
-  }
+  LoaderTest() { build_settings_.SetBuildDir(SourceDir("//out/Debug/")); }
 
  protected:
   BuildSettings build_settings_;

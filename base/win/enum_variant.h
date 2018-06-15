@@ -15,9 +15,7 @@ namespace base {
 namespace win {
 
 // A simple implementation of IEnumVARIANT.
-class EnumVariant
-  : public IEnumVARIANT,
-    public IUnknownImpl {
+class EnumVariant : public IEnumVARIANT, public IUnknownImpl {
  public:
   // The constructor allocates an array of size |count|. Then use
   // ItemAt to set the value of each item in the array to initialize it.

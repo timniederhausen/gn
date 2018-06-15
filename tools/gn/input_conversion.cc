@@ -42,8 +42,8 @@ Value ParseValueOrScope(const Settings* settings,
   InputFile* input_file;
   std::vector<Token>* tokens;
   std::unique_ptr<ParseNode>* parse_root_ptr;
-  g_scheduler->input_file_manager()->AddDynamicInput(
-      SourceFile(), &input_file, &tokens, &parse_root_ptr);
+  g_scheduler->input_file_manager()->AddDynamicInput(SourceFile(), &input_file,
+                                                     &tokens, &parse_root_ptr);
 
   input_file->SetContents(input);
   if (origin) {
@@ -51,10 +51,9 @@ Value ParseValueOrScope(const Settings* settings,
     // script parsing or if a value is blamed. It will say
     // "Error at <...>:line:char" so here we try to make a string for <...>
     // that reads well in this context.
-    input_file->set_friendly_name(
-        "dynamically parsed input that " +
-        origin->GetRange().begin().Describe(true) +
-        " loaded ");
+    input_file->set_friendly_name("dynamically parsed input that " +
+                                  origin->GetRange().begin().Describe(true) +
+                                  " loaded ");
   } else {
     input_file->set_friendly_name("dynamic input");
   }

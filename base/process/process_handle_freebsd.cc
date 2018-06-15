@@ -17,7 +17,7 @@ namespace base {
 ProcessId GetParentProcessId(ProcessHandle process) {
   struct kinfo_proc info;
   size_t length;
-  int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, process };
+  int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, process};
 
   if (sysctl(mib, arraysize(mib), &info, &length, NULL, 0) < 0)
     return -1;
@@ -28,7 +28,7 @@ ProcessId GetParentProcessId(ProcessHandle process) {
 FilePath GetProcessExecutablePath(ProcessHandle process) {
   char pathname[PATH_MAX];
   size_t length;
-  int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, process };
+  int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, process};
 
   length = sizeof(pathname);
 

@@ -16,20 +16,20 @@ bool HandleTraits::CloseHandle(HANDLE handle) {
 }
 
 // Static.
-void VerifierTraits::StartTracking(HANDLE handle, const void* owner,
-                                   const void* pc1, const void* pc2) {
-}
+void VerifierTraits::StartTracking(HANDLE handle,
+                                   const void* owner,
+                                   const void* pc1,
+                                   const void* pc2) {}
 
 // Static.
-void VerifierTraits::StopTracking(HANDLE handle, const void* owner,
-                                  const void* pc1, const void* pc2) {
-}
+void VerifierTraits::StopTracking(HANDLE handle,
+                                  const void* owner,
+                                  const void* pc1,
+                                  const void* pc2) {}
 
-void DisableHandleVerifier() {
-}
+void DisableHandleVerifier() {}
 
-void OnHandleBeingClosed(HANDLE handle) {
-}
+void OnHandleBeingClosed(HANDLE handle) {}
 
 }  // namespace win
 }  // namespace base

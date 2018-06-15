@@ -19,6 +19,7 @@
 
 #if defined(OS_WIN)
 #include <windows.h>
+
 #include <shellapi.h>
 #endif
 
@@ -123,7 +124,8 @@ string16 QuoteForCommandLineToArgvW(const string16& arg,
     if (arg[i] == '\\') {
       // Find the extent of this run of backslashes.
       size_t start = i, end = start + 1;
-      for (; end < arg.size() && arg[end] == '\\'; ++end) {}
+      for (; end < arg.size() && arg[end] == '\\'; ++end) {
+      }
       size_t backslash_count = end - start;
 
       // Backslashes are escapes only if the run is followed by a double quote.
@@ -153,26 +155,18 @@ string16 QuoteForCommandLineToArgvW(const string16& arg,
 
 }  // namespace
 
-CommandLine::CommandLine(NoProgram no_program)
-    : argv_(1),
-      begin_args_(1) {
-}
+CommandLine::CommandLine(NoProgram no_program) : argv_(1), begin_args_(1) {}
 
-CommandLine::CommandLine(const FilePath& program)
-    : argv_(1),
-      begin_args_(1) {
+CommandLine::CommandLine(const FilePath& program) : argv_(1), begin_args_(1) {
   SetProgram(program);
 }
 
 CommandLine::CommandLine(int argc, const CommandLine::CharType* const* argv)
-    : argv_(1),
-      begin_args_(1) {
+    : argv_(1), begin_args_(1) {
   InitFromArgv(argc, argv);
 }
 
-CommandLine::CommandLine(const StringVector& argv)
-    : argv_(1),
-      begin_args_(1) {
+CommandLine::CommandLine(const StringVector& argv) : argv_(1), begin_args_(1) {
   InitFromArgv(argv);
 }
 

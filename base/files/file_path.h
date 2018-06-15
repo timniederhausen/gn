@@ -191,9 +191,7 @@ class FilePath {
   bool operator!=(const FilePath& that) const;
 
   // Required for some STL containers and operations
-  bool operator<(const FilePath& that) const {
-    return path_ < that.path_;
-  }
+  bool operator<(const FilePath& that) const { return path_ < that.path_; }
 
   const StringType& value() const { return path_; }
 
@@ -284,10 +282,10 @@ class FilePath {
   // path == "jojo.jpg"         suffix == " (1)", returns "jojo (1).jpg"
   // path == "C:\pics\jojo"     suffix == " (1)", returns "C:\pics\jojo (1)"
   // path == "C:\pics.old\jojo" suffix == " (1)", returns "C:\pics.old\jojo (1)"
-  FilePath InsertBeforeExtension(
-      StringPieceType suffix) const WARN_UNUSED_RESULT;
-  FilePath InsertBeforeExtensionASCII(
-      StringPiece suffix) const WARN_UNUSED_RESULT;
+  FilePath InsertBeforeExtension(StringPieceType suffix) const
+      WARN_UNUSED_RESULT;
+  FilePath InsertBeforeExtensionASCII(StringPiece suffix) const
+      WARN_UNUSED_RESULT;
 
   // Adds |extension| to |file_name|. Returns the current FilePath if
   // |extension| is empty. Returns "" if BaseName() == "." or "..".
@@ -437,15 +435,14 @@ class FilePath {
   StringType path_;
 };
 
-std::ostream& operator<<(std::ostream& out,
-                                     const FilePath& file_path);
+std::ostream& operator<<(std::ostream& out, const FilePath& file_path);
 
 }  // namespace base
 
 // Macros for string literal initialization of FilePath::CharType[], and for
 // using a FilePath::CharType[] in a printf-style format string.
 #if defined(OS_WIN)
-#define FILE_PATH_LITERAL(x) L ## x
+#define FILE_PATH_LITERAL(x) L##x
 #define PRFilePath "ls"
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
 #define FILE_PATH_LITERAL(x) x

@@ -110,8 +110,7 @@ TEST(ConfigValuesExtractors, IncludeOrdering) {
 
   // Additionally add some values directly on "target".
   target.config_values().cflags().push_back("--target");
-  target.config_values().include_dirs().push_back(
-      SourceDir("//target/"));
+  target.config_values().include_dirs().push_back(SourceDir("//target/"));
 
   // Mark targets resolved. This should push dependent configs.
   ASSERT_TRUE(dep2.OnResolved(&err));

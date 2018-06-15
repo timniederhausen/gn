@@ -117,7 +117,7 @@ const typename A::container_type& GetUnderlyingContainer(const A& adapter) {
 // Clears internal memory of an STL object.
 // STL clear()/reserve(0) does not always free internal memory allocated
 // This function uses swap/destructor to ensure the internal memory is freed.
-template<class T>
+template <class T>
 void STLClearObject(T* obj) {
   T tmp;
   tmp.swap(*obj);
@@ -175,8 +175,8 @@ bool STLIsSorted(const Container& cont) {
   // Note: Use reverse iterator on container to ensure we only require
   // value_type to implement operator<.
   return std::adjacent_find(cont.rbegin(), cont.rend(),
-                            std::less<typename Container::value_type>())
-      == cont.rend();
+                            std::less<typename Container::value_type>()) ==
+         cont.rend();
 }
 
 // Returns a new ResultType containing the difference of two sorted containers.
@@ -185,8 +185,7 @@ ResultType STLSetDifference(const Arg1& a1, const Arg2& a2) {
   DCHECK(STLIsSorted(a1));
   DCHECK(STLIsSorted(a2));
   ResultType difference;
-  std::set_difference(a1.begin(), a1.end(),
-                      a2.begin(), a2.end(),
+  std::set_difference(a1.begin(), a1.end(), a2.begin(), a2.end(),
                       std::inserter(difference, difference.end()));
   return difference;
 }
@@ -197,8 +196,7 @@ ResultType STLSetUnion(const Arg1& a1, const Arg2& a2) {
   DCHECK(STLIsSorted(a1));
   DCHECK(STLIsSorted(a2));
   ResultType result;
-  std::set_union(a1.begin(), a1.end(),
-                 a2.begin(), a2.end(),
+  std::set_union(a1.begin(), a1.end(), a2.begin(), a2.end(),
                  std::inserter(result, result.end()));
   return result;
 }
@@ -210,8 +208,7 @@ ResultType STLSetIntersection(const Arg1& a1, const Arg2& a2) {
   DCHECK(STLIsSorted(a1));
   DCHECK(STLIsSorted(a2));
   ResultType result;
-  std::set_intersection(a1.begin(), a1.end(),
-                        a2.begin(), a2.end(),
+  std::set_intersection(a1.begin(), a1.end(), a2.begin(), a2.end(),
                         std::inserter(result, result.end()));
   return result;
 }
@@ -222,8 +219,7 @@ template <typename Arg1, typename Arg2>
 bool STLIncludes(const Arg1& a1, const Arg2& a2) {
   DCHECK(STLIsSorted(a1));
   DCHECK(STLIsSorted(a2));
-  return std::includes(a1.begin(), a1.end(),
-                       a2.begin(), a2.end());
+  return std::includes(a1.begin(), a1.end(), a2.begin(), a2.end());
 }
 
 // Erase/EraseIf are based on library fundamentals ts v2 erase/erase_if

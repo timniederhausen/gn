@@ -70,9 +70,7 @@ class Setup {
 
   // After a successful run, setting this will additionally cause the public
   // headers to be checked. Defaults to false.
-  void set_check_public_headers(bool s) {
-    check_public_headers_ = s;
-  }
+  void set_check_public_headers(bool s) { check_public_headers_ = s; }
 
   // Read from the .gn file, these are the targets to check. If the .gn file
   // does not specify anything, this will be null. If the .gn file specifies

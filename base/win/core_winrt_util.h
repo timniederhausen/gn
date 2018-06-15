@@ -30,11 +30,10 @@ HRESULT RoInitialize(RO_INIT_TYPE init_type);
 void RoUninitialize();
 
 HRESULT RoGetActivationFactory(HSTRING class_id,
-                                           const IID& iid,
-                                           void** out_factory);
+                               const IID& iid,
+                               void** out_factory);
 
-HRESULT RoActivateInstance(HSTRING class_id,
-                                       IInspectable** instance);
+HRESULT RoActivateInstance(HSTRING class_id, IInspectable** instance);
 
 // Retrieves an activation factory for the type specified.
 template <typename InterfaceType, char16 const* runtime_class_id>

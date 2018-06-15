@@ -17,7 +17,7 @@
 namespace {
 
 // Sets the error and returns false on failure.
-template<typename T, class Converter>
+template <typename T, class Converter>
 bool ListValueExtractor(const Value& value,
                         std::vector<T>* dest,
                         Err* err,
@@ -35,7 +35,7 @@ bool ListValueExtractor(const Value& value,
 
 // Like the above version but extracts to a UniqueVector and sets the error if
 // there are duplicates.
-template<typename T, class Converter>
+template <typename T, class Converter>
 bool ListValueUniqueExtractor(const Value& value,
                               UniqueVector<T>* dest,
                               Err* err,
@@ -52,8 +52,8 @@ bool ListValueUniqueExtractor(const Value& value,
       // Already in the list, throw error.
       *err = Err(item, "Duplicate item in list");
       size_t previous_index = dest->IndexOf(new_one);
-      err->AppendSubErr(Err(input_list[previous_index],
-                            "This was the previous definition."));
+      err->AppendSubErr(
+          Err(input_list[previous_index], "This was the previous definition."));
       return false;
     }
   }
@@ -63,9 +63,7 @@ bool ListValueUniqueExtractor(const Value& value,
 struct RelativeFileConverter {
   RelativeFileConverter(const BuildSettings* build_settings_in,
                         const SourceDir& current_dir_in)
-      : build_settings(build_settings_in),
-        current_dir(current_dir_in) {
-  }
+      : build_settings(build_settings_in), current_dir(current_dir_in) {}
   bool operator()(const Value& v, SourceFile* out, Err* err) const {
     *out = current_dir.ResolveRelativeFile(v, err,
                                            build_settings->root_path_utf8());
@@ -78,9 +76,7 @@ struct RelativeFileConverter {
 struct LibFileConverter {
   LibFileConverter(const BuildSettings* build_settings_in,
                    const SourceDir& current_dir_in)
-      : build_settings(build_settings_in),
-        current_dir(current_dir_in) {
-  }
+      : build_settings(build_settings_in), current_dir(current_dir_in) {}
   bool operator()(const Value& v, LibFile* out, Err* err) const {
     if (!v.VerifyTypeIs(Value::STRING, err))
       return false;
@@ -99,9 +95,7 @@ struct LibFileConverter {
 struct RelativeDirConverter {
   RelativeDirConverter(const BuildSettings* build_settings_in,
                        const SourceDir& current_dir_in)
-      : build_settings(build_settings_in),
-        current_dir(current_dir_in) {
-  }
+      : build_settings(build_settings_in), current_dir(current_dir_in) {}
   bool operator()(const Value& v, SourceDir* out, Err* err) const {
     *out = current_dir.ResolveRelativeDir(v, err,
                                           build_settings->root_path_utf8());
@@ -112,11 +106,11 @@ struct RelativeDirConverter {
 };
 
 // Fills in a label.
-template<typename T> struct LabelResolver {
+template <typename T>
+struct LabelResolver {
   LabelResolver(const SourceDir& current_dir_in,
                 const Label& current_toolchain_in)
-      : current_dir(current_dir_in),
-        current_toolchain(current_toolchain_in) {}
+      : current_dir(current_dir_in), current_toolchain(current_toolchain_in) {}
   bool operator()(const Value& v, Label* out, Err* err) const {
     if (!v.VerifyTypeIs(Value::STRING, err))
       return false;
@@ -128,11 +122,11 @@ template<typename T> struct LabelResolver {
 };
 
 // Fills the label part of a LabelPtrPair, leaving the pointer null.
-template<typename T> struct LabelPtrResolver {
+template <typename T>
+struct LabelPtrResolver {
   LabelPtrResolver(const SourceDir& current_dir_in,
                    const Label& current_toolchain_in)
-      : current_dir(current_dir_in),
-        current_toolchain(current_toolchain_in) {}
+      : current_dir(current_dir_in), current_toolchain(current_toolchain_in) {}
   bool operator()(const Value& v, LabelPtrPair<T>* out, Err* err) const {
     if (!v.VerifyTypeIs(Value::STRING, err))
       return false;
@@ -146,8 +140,7 @@ template<typename T> struct LabelPtrResolver {
 
 struct LabelPatternResolver {
   LabelPatternResolver(const SourceDir& current_dir_in)
-      : current_dir(current_dir_in) {
-  }
+      : current_dir(current_dir_in) {}
   bool operator()(const Value& v, LabelPattern* out, Err* err) const {
     *out = LabelPattern::GetPattern(current_dir, v, err);
     return !err->has_error();
@@ -204,9 +197,9 @@ bool ExtractListOfLabels(const Value& value,
                          const Label& current_toolchain,
                          LabelTargetVector* dest,
                          Err* err) {
-  return ListValueExtractor(value, dest, err,
-                            LabelPtrResolver<Target>(current_dir,
-                                                     current_toolchain));
+  return ListValueExtractor(
+      value, dest, err,
+      LabelPtrResolver<Target>(current_dir, current_toolchain));
 }
 
 bool ExtractListOfUniqueLabels(const Value& value,
@@ -214,9 +207,8 @@ bool ExtractListOfUniqueLabels(const Value& value,
                                const Label& current_toolchain,
                                UniqueVector<Label>* dest,
                                Err* err) {
-  return ListValueUniqueExtractor(value, dest, err,
-                                  LabelResolver<Config>(current_dir,
-                                                        current_toolchain));
+  return ListValueUniqueExtractor(
+      value, dest, err, LabelResolver<Config>(current_dir, current_toolchain));
 }
 
 bool ExtractListOfUniqueLabels(const Value& value,
@@ -224,9 +216,9 @@ bool ExtractListOfUniqueLabels(const Value& value,
                                const Label& current_toolchain,
                                UniqueVector<LabelConfigPair>* dest,
                                Err* err) {
-  return ListValueUniqueExtractor(value, dest, err,
-                                  LabelPtrResolver<Config>(current_dir,
-                                                           current_toolchain));
+  return ListValueUniqueExtractor(
+      value, dest, err,
+      LabelPtrResolver<Config>(current_dir, current_toolchain));
 }
 
 bool ExtractListOfUniqueLabels(const Value& value,
@@ -234,9 +226,9 @@ bool ExtractListOfUniqueLabels(const Value& value,
                                const Label& current_toolchain,
                                UniqueVector<LabelTargetPair>* dest,
                                Err* err) {
-  return ListValueUniqueExtractor(value, dest, err,
-                                  LabelPtrResolver<Target>(current_dir,
-                                                           current_toolchain));
+  return ListValueUniqueExtractor(
+      value, dest, err,
+      LabelPtrResolver<Target>(current_dir, current_toolchain));
 }
 
 bool ExtractRelativeFile(const BuildSettings* build_settings,

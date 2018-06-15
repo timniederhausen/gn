@@ -55,10 +55,7 @@ class FileDescriptorTableInjection : public InjectionDelegate {
 // A single arc of the directed graph which describes an injective multimapping.
 struct InjectionArc {
   InjectionArc(int in_source, int in_dest, bool in_close)
-      : source(in_source),
-        dest(in_dest),
-        close(in_close) {
-  }
+      : source(in_source), dest(in_dest), close(in_close) {}
 
   int source;
   int dest;
@@ -69,11 +66,10 @@ struct InjectionArc {
 typedef std::vector<InjectionArc> InjectiveMultimap;
 
 bool PerformInjectiveMultimap(const InjectiveMultimap& map,
-                                          InjectionDelegate* delegate);
+                              InjectionDelegate* delegate);
 
-bool PerformInjectiveMultimapDestructive(
-    InjectiveMultimap* map,
-    InjectionDelegate* delegate);
+bool PerformInjectiveMultimapDestructive(InjectiveMultimap* map,
+                                         InjectionDelegate* delegate);
 
 // This function will not call malloc but will mutate |map|
 static inline bool ShuffleFileDescriptors(InjectiveMultimap* map) {

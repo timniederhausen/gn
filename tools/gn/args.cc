@@ -86,16 +86,10 @@ void RemoveDeclaredOverrides(const Scope::KeyValueMap& declared_arguments,
 }  // namespace
 
 Args::ValueWithOverride::ValueWithOverride()
-    : default_value(),
-      has_override(false),
-      override_value() {
-}
+    : default_value(), has_override(false), override_value() {}
 
 Args::ValueWithOverride::ValueWithOverride(const Value& def_val)
-    : default_value(def_val),
-      has_override(false),
-      override_value() {
-}
+    : default_value(def_val), has_override(false), override_value() {}
 
 Args::ValueWithOverride::~ValueWithOverride() = default;
 
@@ -106,8 +100,7 @@ Args::Args(const Args& other)
       all_overrides_(other.all_overrides_),
       declared_arguments_per_toolchain_(
           other.declared_arguments_per_toolchain_),
-      toolchain_overrides_(other.toolchain_overrides_) {
-}
+      toolchain_overrides_(other.toolchain_overrides_) {}
 
 Args::~Args() = default;
 
@@ -182,8 +175,8 @@ bool Args::DeclareArgs(const Scope::KeyValueMap& args,
     if (previously_declared != declared_arguments.end()) {
       if (previously_declared->second.origin() != arg.second.origin()) {
         // Declaration location mismatch.
-        *err = Err(arg.second.origin(),
-            "Duplicate build argument declaration.",
+        *err = Err(
+            arg.second.origin(), "Duplicate build argument declaration.",
             "Here you're declaring an argument that was already declared "
             "elsewhere.\nYou can only declare each argument once in the entire "
             "build so there is one\ncanonical place for documentation and the "
@@ -250,7 +243,8 @@ bool Args::VerifyAllOverridesUsed(Err* err) const {
   const Value& value = unused_overrides.begin()->second;
 
   std::string err_help(
-      "The variable \"" + name + "\" was set as a build argument\n"
+      "The variable \"" + name +
+      "\" was set as a build argument\n"
       "but never appeared in a declare_args() block in any buildfile.\n\n"
       "To view all possible args, run \"gn args --list <out_dir>\"");
 
@@ -303,7 +297,7 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
 #elif defined(OS_LINUX)
   os = "linux";
 #else
-  #error Unknown OS type.
+#error Unknown OS type.
 #endif
   // NOTE: Adding a new port? Please follow
   // https://chromium.googlesource.com/chromium/src/+/master/docs/new_port_policy.md
@@ -409,8 +403,7 @@ Scope::KeyValueMap& Args::DeclaredArgumentsForToolchainLocked(
   return declared_arguments_per_toolchain_[scope->settings()];
 }
 
-Scope::KeyValueMap& Args::OverridesForToolchainLocked(
-    Scope* scope) const {
+Scope::KeyValueMap& Args::OverridesForToolchainLocked(Scope* scope) const {
   lock_.AssertAcquired();
   return toolchain_overrides_[scope->settings()];
 }

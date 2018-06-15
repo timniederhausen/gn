@@ -18,14 +18,12 @@
 namespace base {
 
 ProcessIterator::ProcessIterator(const ProcessFilter* filter)
-    : index_of_kinfo_proc_(0),
-      filter_(filter) {
+    : index_of_kinfo_proc_(0), filter_(filter) {
   // Get a snapshot of all of my processes (yes, as we loop it can go stale, but
   // but trying to find where we were in a constantly changing list is basically
   // impossible.
 
-  int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_UID,
-                static_cast<int>(geteuid()) };
+  int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_UID, static_cast<int>(geteuid())};
 
   // Since more processes could start between when we get the size and when
   // we get the list, we do a loop to keep trying until we get it.
@@ -69,8 +67,7 @@ ProcessIterator::ProcessIterator(const ProcessFilter* filter)
   }
 }
 
-ProcessIterator::~ProcessIterator() {
-}
+ProcessIterator::~ProcessIterator() {}
 
 bool ProcessIterator::CheckForNextProcess() {
   std::string data;
@@ -81,7 +78,7 @@ bool ProcessIterator::CheckForNextProcess() {
     if ((kinfo.kp_proc.p_pid > 0) && (kinfo.kp_proc.p_stat == SZOMB))
       continue;
 
-    int mib[] = { CTL_KERN, KERN_PROCARGS, kinfo.kp_proc.p_pid };
+    int mib[] = {CTL_KERN, KERN_PROCARGS, kinfo.kp_proc.p_pid};
 
     // Find out what size buffer we need.
     size_t data_len = 0;
@@ -100,8 +97,8 @@ bool ProcessIterator::CheckForNextProcess() {
     // |entry_.cmd_line_args_|.
     std::string delimiters;
     delimiters.push_back('\0');
-    entry_.cmd_line_args_ = SplitString(data, delimiters,
-                                        KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
+    entry_.cmd_line_args_ =
+        SplitString(data, delimiters, KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
 
     // |data| starts with the full executable path followed by a null character.
     // We search for the first instance of '\0' and extract everything before it

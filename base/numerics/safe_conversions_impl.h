@@ -691,9 +691,8 @@ constexpr bool IsLessImpl(const L lhs,
                           const RangeCheck l_range,
                           const RangeCheck r_range) {
   return l_range.IsUnderflow() || r_range.IsOverflow() ||
-         (l_range == r_range &&
-          static_cast<decltype(lhs + rhs)>(lhs) <
-              static_cast<decltype(lhs + rhs)>(rhs));
+         (l_range == r_range && static_cast<decltype(lhs + rhs)>(lhs) <
+                                    static_cast<decltype(lhs + rhs)>(rhs));
 }
 
 template <typename L, typename R>
@@ -712,9 +711,8 @@ constexpr bool IsLessOrEqualImpl(const L lhs,
                                  const RangeCheck l_range,
                                  const RangeCheck r_range) {
   return l_range.IsUnderflow() || r_range.IsOverflow() ||
-         (l_range == r_range &&
-          static_cast<decltype(lhs + rhs)>(lhs) <=
-              static_cast<decltype(lhs + rhs)>(rhs));
+         (l_range == r_range && static_cast<decltype(lhs + rhs)>(lhs) <=
+                                    static_cast<decltype(lhs + rhs)>(rhs));
 }
 
 template <typename L, typename R>
@@ -733,9 +731,8 @@ constexpr bool IsGreaterImpl(const L lhs,
                              const RangeCheck l_range,
                              const RangeCheck r_range) {
   return l_range.IsOverflow() || r_range.IsUnderflow() ||
-         (l_range == r_range &&
-          static_cast<decltype(lhs + rhs)>(lhs) >
-              static_cast<decltype(lhs + rhs)>(rhs));
+         (l_range == r_range && static_cast<decltype(lhs + rhs)>(lhs) >
+                                    static_cast<decltype(lhs + rhs)>(rhs));
 }
 
 template <typename L, typename R>
@@ -754,9 +751,8 @@ constexpr bool IsGreaterOrEqualImpl(const L lhs,
                                     const RangeCheck l_range,
                                     const RangeCheck r_range) {
   return l_range.IsOverflow() || r_range.IsUnderflow() ||
-         (l_range == r_range &&
-          static_cast<decltype(lhs + rhs)>(lhs) >=
-              static_cast<decltype(lhs + rhs)>(rhs));
+         (l_range == r_range && static_cast<decltype(lhs + rhs)>(lhs) >=
+                                    static_cast<decltype(lhs + rhs)>(rhs));
 }
 
 template <typename L, typename R>

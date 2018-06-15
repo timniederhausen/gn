@@ -20,6 +20,6 @@ TEST(NinjaToolchainWriter, WriteToolRule) {
   EXPECT_EQ(
       "rule prefix_cc\n"
       "  command = cc ${in} ${cflags} ${cflags_c} ${defines} ${include_dirs} "
-          "-o ${out}\n",
+      "-o ${out}\n",
       stream.str());
 }

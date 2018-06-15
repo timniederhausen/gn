@@ -16,8 +16,7 @@
 namespace commands {
 
 const char kLs[] = "ls";
-const char kLs_HelpShort[] =
-    "ls: List matching targets.";
+const char kLs_HelpShort[] = "ls: List matching targets.";
 const char kLs_Help[] =
     R"(gn ls <out_dir> [<label_pattern>] [--all-toolchains] [--as=...]
       [--type=...] [--testonly=...]
@@ -32,15 +31,10 @@ const char kLs_Help[] =
 
 Options
 
-)"
-    TARGET_PRINTING_MODE_COMMAND_LINE_HELP
-"\n"
-    ALL_TOOLCHAINS_SWITCH_HELP
-"\n"
-    TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP
-"\n"
-    TARGET_TYPE_FILTER_COMMAND_LINE_HELP
-R"(
+)" TARGET_PRINTING_MODE_COMMAND_LINE_HELP "\n" ALL_TOOLCHAINS_SWITCH_HELP
+    "\n" TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP
+    "\n" TARGET_TYPE_FILTER_COMMAND_LINE_HELP
+    R"(
 Examples
 
   gn ls out/Debug
@@ -69,7 +63,8 @@ Examples
 int RunLs(const std::vector<std::string>& args) {
   if (args.size() == 0) {
     Err(Location(), "You're holding it wrong.",
-        "Usage: \"gn ls <build dir> [<label_pattern>]*\"").PrintToStdout();
+        "Usage: \"gn ls <build dir> [<label_pattern>]*\"")
+        .PrintToStdout();
     return 1;
   }
 
@@ -93,8 +88,8 @@ int RunLs(const std::vector<std::string>& args) {
                                      &target_matches, &config_matches,
                                      &toolchain_matches, &file_matches))
       return 1;
-    matches.insert(matches.begin(),
-                   target_matches.begin(), target_matches.end());
+    matches.insert(matches.begin(), target_matches.begin(),
+                   target_matches.end());
   } else if (all_toolchains) {
     // List all resolved targets.
     matches = setup->builder().GetAllResolvedTargets();

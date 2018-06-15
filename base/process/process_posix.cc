@@ -162,13 +162,11 @@ bool WaitForSingleNonChildProcess(base::ProcessHandle handle,
 
   DCHECK_EQ(result, 1);
 
-  if (event.filter != EVFILT_PROC ||
-      (event.fflags & NOTE_EXIT) == 0 ||
+  if (event.filter != EVFILT_PROC || (event.fflags & NOTE_EXIT) == 0 ||
       event.ident != static_cast<uintptr_t>(handle)) {
     DLOG(ERROR) << "kevent (wait " << handle
                 << "): unexpected event: filter=" << event.filter
-                << ", fflags=" << event.fflags
-                << ", ident=" << event.ident;
+                << ", fflags=" << event.fflags << ", ident=" << event.ident;
     return false;
   }
 
@@ -222,8 +220,7 @@ bool WaitForExitWithTimeoutImpl(base::ProcessHandle handle,
 
 namespace base {
 
-Process::Process(ProcessHandle handle) : process_(handle) {
-}
+Process::Process(ProcessHandle handle) : process_(handle) {}
 
 Process::~Process() = default;
 

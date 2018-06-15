@@ -26,9 +26,7 @@ OSStatusLogMessage::OSStatusLogMessage(const char* file_path,
                                        int line,
                                        LogSeverity severity,
                                        OSStatus status)
-    : LogMessage(file_path, line, severity),
-      status_(status) {
-}
+    : LogMessage(file_path, line, severity), status_(status) {}
 
 OSStatusLogMessage::~OSStatusLogMessage() {
 #if defined(OS_IOS)
@@ -36,10 +34,7 @@ OSStatusLogMessage::~OSStatusLogMessage() {
   // to try to get a description of the failure.
   stream() << ": " << status_;
 #else
-  stream() << ": "
-           << DescriptionFromOSStatus(status_)
-           << " ("
-           << status_
+  stream() << ": " << DescriptionFromOSStatus(status_) << " (" << status_
            << ")";
 #endif
 }

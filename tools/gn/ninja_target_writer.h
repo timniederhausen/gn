@@ -58,7 +58,7 @@ class NinjaTargetWriter {
                            const std::vector<OutputFile>& order_only_deps);
 
   const Settings* settings_;  // Non-owning.
-  const Target* target_;  // Non-owning.
+  const Target* target_;      // Non-owning.
   std::ostream& out_;
   PathOutput path_output_;
 

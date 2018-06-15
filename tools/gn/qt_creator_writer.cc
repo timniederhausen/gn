@@ -28,7 +28,7 @@ base::FilePath::CharType kMainProjectFileSuffix[] =
 base::FilePath::CharType kSourcesFileSuffix[] = FILE_PATH_LITERAL(".files");
 base::FilePath::CharType kIncludesFileSuffix[] = FILE_PATH_LITERAL(".includes");
 base::FilePath::CharType kDefinesFileSuffix[] = FILE_PATH_LITERAL(".config");
-}
+}  // namespace
 
 // static
 bool QtCreatorWriter::RunAndWriteFile(const BuildSettings* build_settings,
@@ -43,8 +43,8 @@ bool QtCreatorWriter::RunAndWriteFile(const BuildSettings* build_settings,
     if (!base::CreateDirectoryAndGetError(project_dir, &error)) {
       *err =
           Err(Location(), "Could not create the QtCreator project directory '" +
-                              FilePathToUTF8(project_dir) + "': " +
-                              base::File::ErrorToString(error));
+                              FilePathToUTF8(project_dir) +
+                              "': " + base::File::ErrorToString(error));
       return false;
     }
   }

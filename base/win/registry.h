@@ -34,8 +34,10 @@ class RegKey {
 
   LONG Create(HKEY rootkey, const wchar_t* subkey, REGSAM access);
 
-  LONG CreateWithDisposition(HKEY rootkey, const wchar_t* subkey,
-                             DWORD* disposition, REGSAM access);
+  LONG CreateWithDisposition(HKEY rootkey,
+                             const wchar_t* subkey,
+                             DWORD* disposition,
+                             REGSAM access);
 
   // Creates a subkey or open it if it already exists.
   LONG CreateKey(const wchar_t* name, REGSAM access);

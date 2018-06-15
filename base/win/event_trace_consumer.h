@@ -6,10 +6,10 @@
 #ifndef BASE_WIN_EVENT_TRACE_CONSUMER_H_
 #define BASE_WIN_EVENT_TRACE_CONSUMER_H_
 
-#include <windows.h>
-#include <wmistr.h>
 #include <evntrace.h>
 #include <stddef.h>
+#include <windows.h>
+#include <wmistr.h>
 #include <vector>
 
 #include "base/macros.h"
@@ -34,12 +34,9 @@ template <class ImplClass>
 class EtwTraceConsumerBase {
  public:
   // Constructs a closed consumer.
-  EtwTraceConsumerBase() {
-  }
+  EtwTraceConsumerBase() {}
 
-  ~EtwTraceConsumerBase() {
-    Close();
-  }
+  ~EtwTraceConsumerBase() { Close(); }
 
   // Opens the named realtime session, which must be existent.
   // Note: You can use OpenRealtimeSession or OpenFileSession
@@ -62,8 +59,7 @@ class EtwTraceConsumerBase {
 
  protected:
   // Override in subclasses to handle events.
-  static void ProcessEvent(EVENT_TRACE* event) {
-  }
+  static void ProcessEvent(EVENT_TRACE* event) {}
   // Override in subclasses to handle buffers.
   static bool ProcessBuffer(EVENT_TRACE_LOGFILE* buffer) {
     return true;  // keep going
@@ -85,8 +81,8 @@ class EtwTraceConsumerBase {
   DISALLOW_COPY_AND_ASSIGN(EtwTraceConsumerBase);
 };
 
-template <class ImplClass> inline
-HRESULT EtwTraceConsumerBase<ImplClass>::OpenRealtimeSession(
+template <class ImplClass>
+inline HRESULT EtwTraceConsumerBase<ImplClass>::OpenRealtimeSession(
     const wchar_t* session_name) {
   EVENT_TRACE_LOGFILE logfile = {};
   logfile.LoggerName = const_cast<wchar_t*>(session_name);
@@ -102,8 +98,8 @@ HRESULT EtwTraceConsumerBase<ImplClass>::OpenRealtimeSession(
   return S_OK;
 }
 
-template <class ImplClass> inline
-HRESULT EtwTraceConsumerBase<ImplClass>::OpenFileSession(
+template <class ImplClass>
+inline HRESULT EtwTraceConsumerBase<ImplClass>::OpenFileSession(
     const wchar_t* file_name) {
   EVENT_TRACE_LOGFILE logfile = {};
   logfile.LogFileName = const_cast<wchar_t*>(file_name);
@@ -118,17 +114,16 @@ HRESULT EtwTraceConsumerBase<ImplClass>::OpenFileSession(
   return S_OK;
 }
 
-template <class ImplClass> inline
-HRESULT EtwTraceConsumerBase<ImplClass>::Consume() {
-  ULONG err = ::ProcessTrace(&trace_handles_[0],
-                             static_cast<ULONG>(trace_handles_.size()),
-                             NULL,
-                             NULL);
+template <class ImplClass>
+inline HRESULT EtwTraceConsumerBase<ImplClass>::Consume() {
+  ULONG err =
+      ::ProcessTrace(&trace_handles_[0],
+                     static_cast<ULONG>(trace_handles_.size()), NULL, NULL);
   return HRESULT_FROM_WIN32(err);
 }
 
-template <class ImplClass> inline
-HRESULT EtwTraceConsumerBase<ImplClass>::Close() {
+template <class ImplClass>
+inline HRESULT EtwTraceConsumerBase<ImplClass>::Close() {
   HRESULT hr = S_OK;
   for (size_t i = 0; i < trace_handles_.size(); ++i) {
     if (NULL != trace_handles_[i]) {

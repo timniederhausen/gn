@@ -69,8 +69,7 @@ bool ContentsEqual(const FilePath& filename1, const FilePath& filename2) {
     file1.read(buffer1, BUFFER_SIZE);
     file2.read(buffer2, BUFFER_SIZE);
 
-    if ((file1.eof() != file2.eof()) ||
-        (file1.gcount() != file2.gcount()) ||
+    if ((file1.eof() != file2.eof()) || (file1.gcount() != file2.gcount()) ||
         (memcmp(buffer1, buffer2, static_cast<size_t>(file1.gcount())))) {
       file1.close();
       file2.close();
@@ -98,8 +97,7 @@ bool TextContentsEqual(const FilePath& filename1, const FilePath& filename2) {
     getline(file2, line2);
 
     // Check for mismatched EOF states, or any error state.
-    if ((file1.eof() != file2.eof()) ||
-        file1.bad() || file2.bad()) {
+    if ((file1.eof() != file2.eof()) || file1.bad() || file2.bad()) {
       return false;
     }
 
@@ -194,7 +192,7 @@ bool ReadFileToString(const FilePath& path, std::string* contents) {
 #if !defined(OS_NACL_NONSFI)
 bool IsDirectoryEmpty(const FilePath& dir_path) {
   FileEnumerator files(dir_path, false,
-      FileEnumerator::FILES | FileEnumerator::DIRECTORIES);
+                       FileEnumerator::FILES | FileEnumerator::DIRECTORIES);
   if (files.Next().empty())
     return true;
   return false;

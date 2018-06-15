@@ -9,7 +9,6 @@
 
 #include <string>
 
-
 namespace base {
 
 // BEFORE using anything from this file, first look at PLOG and friends in
@@ -28,7 +27,7 @@ namespace base {
 // result is always null-terminated. The value of errno is never changed.
 //
 // Use this instead of strerror_r().
-void safe_strerror_r(int err, char *buf, size_t len);
+void safe_strerror_r(int err, char* buf, size_t len);
 
 // Calls safe_strerror_r with a buffer of suitable size and returns the result
 // in a C++ string.

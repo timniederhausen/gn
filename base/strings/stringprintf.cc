@@ -150,7 +150,8 @@ const std::string& SStringPrintf(std::string* dst, const char* format, ...) {
 
 #if defined(OS_WIN)
 const std::wstring& SStringPrintf(std::wstring* dst,
-                                  const wchar_t* format, ...) {
+                                  const wchar_t* format,
+                                  ...) {
   va_list ap;
   va_start(ap, format);
   dst->clear();

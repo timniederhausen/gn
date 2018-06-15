@@ -159,8 +159,8 @@ bool FilesystemStringsEqual(const base::FilePath::StringType& a,
   // Note: The documentation for CompareString says it runs fastest on
   // null-terminated strings with -1 passed for the length, so we do that here.
   // There should not be embedded nulls in filesystem strings.
-  return ::CompareString(LOCALE_USER_DEFAULT, LINGUISTIC_IGNORECASE,
-                         a.c_str(), -1, b.c_str(), -1) == CSTR_EQUAL;
+  return ::CompareString(LOCALE_USER_DEFAULT, LINGUISTIC_IGNORECASE, a.c_str(),
+                         -1, b.c_str(), -1) == CSTR_EQUAL;
 #else
   // Assume case-sensitive filesystems on non-Windows.
   return a == b;
@@ -311,11 +311,12 @@ bool EnsureStringIsInOutputDir(const SourceDir& output_dir,
   if (IsStringInOutputDir(output_dir, str))
     return true;  // Output directory is hardcoded.
 
-  *err = Err(origin, "File is not inside output directory.",
+  *err = Err(
+      origin, "File is not inside output directory.",
       "The given file should be in the output directory. Normally you would "
       "specify\n\"$target_out_dir/foo\" or "
-      "\"$target_gen_dir/foo\". I interpreted this as\n\""
-      + str + "\".");
+      "\"$target_gen_dir/foo\". I interpreted this as\n\"" +
+          str + "\".");
   return false;
 }
 
@@ -659,8 +660,8 @@ std::string RebasePath(const std::string& input,
   std::string ret;
   DCHECK(source_root.empty() || !source_root.ends_with("/"));
 
-  bool input_is_source_path = (input.size() >= 2 &&
-                               input[0] == '/' && input[1] == '/');
+  bool input_is_source_path =
+      (input.size() >= 2 && input[0] == '/' && input[1] == '/');
 
   if (!source_root.empty() &&
       (!input_is_source_path || !dest_dir.is_source_absolute())) {
@@ -828,8 +829,7 @@ SourceDir SourceDirForPath(const base::FilePath& source_root,
                            const base::FilePath& path) {
   std::vector<base::FilePath::StringType> source_comp =
       GetPathComponents(source_root);
-  std::vector<base::FilePath::StringType> path_comp =
-      GetPathComponents(path);
+  std::vector<base::FilePath::StringType> path_comp = GetPathComponents(path);
 
   // See if path is inside the source root by looking for each of source root's
   // components at the beginning of path.
@@ -909,7 +909,8 @@ bool WriteFileIfChanged(const base::FilePath& file_path,
   return WriteFile(file_path, data, err);
 }
 
-bool WriteFile(const base::FilePath& file_path, const std::string& data,
+bool WriteFile(const base::FilePath& file_path,
+               const std::string& data,
                Err* err) {
   // Create the directory if necessary.
   if (!base::CreateDirectory(file_path.DirName())) {
@@ -969,39 +970,34 @@ bool WriteFile(const base::FilePath& file_path, const std::string& data,
 }
 
 BuildDirContext::BuildDirContext(const Target* target)
-    : BuildDirContext(target->settings()) {
-}
+    : BuildDirContext(target->settings()) {}
 
 BuildDirContext::BuildDirContext(const Settings* settings)
     : BuildDirContext(settings->build_settings(),
                       settings->toolchain_label(),
-                      settings->is_default()) {
-}
+                      settings->is_default()) {}
 
 BuildDirContext::BuildDirContext(const Scope* execution_scope)
-    : BuildDirContext(execution_scope->settings()) {
-}
+    : BuildDirContext(execution_scope->settings()) {}
 
 BuildDirContext::BuildDirContext(const Scope* execution_scope,
                                  const Label& toolchain_label)
     : BuildDirContext(execution_scope->settings()->build_settings(),
                       toolchain_label,
                       execution_scope->settings()->default_toolchain_label() ==
-                          toolchain_label) {
-}
+                          toolchain_label) {}
 
 BuildDirContext::BuildDirContext(const BuildSettings* in_build_settings,
                                  const Label& in_toolchain_label,
                                  bool in_is_default_toolchain)
     : build_settings(in_build_settings),
       toolchain_label(in_toolchain_label),
-      is_default_toolchain(in_is_default_toolchain) {
-}
+      is_default_toolchain(in_is_default_toolchain) {}
 
 SourceDir GetBuildDirAsSourceDir(const BuildDirContext& context,
                                  BuildDirType type) {
-  return GetBuildDirAsOutputFile(context, type).AsSourceDir(
-      context.build_settings);
+  return GetBuildDirAsOutputFile(context, type)
+      .AsSourceDir(context.build_settings);
 }
 
 OutputFile GetBuildDirAsOutputFile(const BuildDirContext& context,
@@ -1044,20 +1040,20 @@ OutputFile GetSubBuildDirAsOutputFile(const BuildDirContext& context,
 
 SourceDir GetBuildDirForTargetAsSourceDir(const Target* target,
                                           BuildDirType type) {
-  return GetSubBuildDirAsSourceDir(
-      BuildDirContext(target), target->label().dir(), type);
+  return GetSubBuildDirAsSourceDir(BuildDirContext(target),
+                                   target->label().dir(), type);
 }
 
 OutputFile GetBuildDirForTargetAsOutputFile(const Target* target,
                                             BuildDirType type) {
-  return GetSubBuildDirAsOutputFile(
-      BuildDirContext(target), target->label().dir(), type);
+  return GetSubBuildDirAsOutputFile(BuildDirContext(target),
+                                    target->label().dir(), type);
 }
 
 SourceDir GetScopeCurrentBuildDirAsSourceDir(const Scope* scope,
                                              BuildDirType type) {
   if (type == BuildDirType::TOOLCHAIN_ROOT)
     return GetBuildDirAsSourceDir(BuildDirContext(scope), type);
-  return GetSubBuildDirAsSourceDir(
-      BuildDirContext(scope), scope->GetSourceDir(), type);
+  return GetSubBuildDirAsSourceDir(BuildDirContext(scope),
+                                   scope->GetSourceDir(), type);
 }

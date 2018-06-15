@@ -16,9 +16,7 @@
 #include "tools/gn/variables.h"
 
 Template::Template(const Scope* scope, const FunctionCallNode* def)
-    : closure_(scope->MakeClosure()),
-      definition_(def) {
-}
+    : closure_(scope->MakeClosure()), definition_(def) {}
 
 Template::Template(std::unique_ptr<Scope> scope, const FunctionCallNode* def)
     : closure_(std::move(scope)), definition_(def) {}
@@ -39,8 +37,8 @@ Value Template::Invoke(Scope* scope,
   // First run the invocation's block. Need to allocate the scope on the heap
   // so we can pass ownership to the template.
   std::unique_ptr<Scope> invocation_scope = std::make_unique<Scope>(scope);
-  if (!FillTargetBlockScope(scope, invocation, template_name,
-                            block, args, invocation_scope.get(), err))
+  if (!FillTargetBlockScope(scope, invocation, template_name, block, args,
+                            invocation_scope.get(), err))
     return Value();
 
   {
@@ -86,13 +84,11 @@ Value Template::Invoke(Scope* scope,
   template_scope.set_source_dir(scope->GetSourceDir());
 
   const base::StringPiece target_name(variables::kTargetName);
-  template_scope.SetValue(target_name,
-                          Value(invocation, args[0].string_value()),
-                          invocation);
+  template_scope.SetValue(
+      target_name, Value(invocation, args[0].string_value()), invocation);
 
   // Actually run the template code.
-  Value result =
-      definition_->block()->Execute(&template_scope, err);
+  Value result = definition_->block()->Execute(&template_scope, err);
   if (err->has_error()) {
     // If there was an error, append the caller location so the error message
     // displays a stack trace of how it got here.
@@ -108,8 +104,8 @@ Value Template::Invoke(Scope* scope,
   // to overwrite the value of "invoker" and free the Scope owned by the
   // value. So we need to look it up again and don't do anything if it doesn't
   // exist.
-  invoker_value = template_scope.GetMutableValue(
-      variables::kInvoker, Scope::SEARCH_NESTED, false);
+  invoker_value = template_scope.GetMutableValue(variables::kInvoker,
+                                                 Scope::SEARCH_NESTED, false);
   if (invoker_value && invoker_value->type() == Value::SCOPE) {
     if (!invoker_value->scope_value()->CheckForUnusedVars(err))
       return Value();

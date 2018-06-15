@@ -109,10 +109,8 @@ int64_t ComputeThreadTicks() {
   }
 
   kern_return_t kr = thread_info(
-      thread.get(),
-      THREAD_BASIC_INFO,
-      reinterpret_cast<thread_info_t>(&thread_info_data),
-      &thread_info_count);
+      thread.get(), THREAD_BASIC_INFO,
+      reinterpret_cast<thread_info_t>(&thread_info_data), &thread_info_count);
   MACH_DCHECK(kr == KERN_SUCCESS, kr) << "thread_info";
 
   base::CheckedNumeric<int64_t> absolute_micros(
@@ -263,8 +261,8 @@ void Time::Explode(bool is_local, Exploded* exploded) const {
   // Calculate milliseconds ourselves, since we rounded the |seconds|, making
   // sure to round towards -infinity.
   exploded->millisecond =
-      (microsecond >= 0) ? microsecond / kMicrosecondsPerMillisecond :
-                           (microsecond - kMicrosecondsPerMillisecond + 1) /
+      (microsecond >= 0) ? microsecond / kMicrosecondsPerMillisecond
+                         : (microsecond - kMicrosecondsPerMillisecond + 1) /
                                kMicrosecondsPerMillisecond;
 }
 #endif  // OS_IOS

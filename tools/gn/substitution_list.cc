@@ -47,10 +47,9 @@ bool SubstitutionList::Parse(const std::vector<std::string>& values,
   return true;
 }
 
-SubstitutionList SubstitutionList::MakeForTest(
-    const char* a,
-    const char* b,
-    const char* c) {
+SubstitutionList SubstitutionList::MakeForTest(const char* a,
+                                               const char* b,
+                                               const char* c) {
   std::vector<std::string> input_strings;
   input_strings.push_back(a);
   if (b)

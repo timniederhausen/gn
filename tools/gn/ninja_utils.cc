@@ -15,9 +15,10 @@ SourceFile GetNinjaFileForTarget(const Target* target) {
 }
 
 SourceFile GetNinjaFileForToolchain(const Settings* settings) {
-  return SourceFile(GetBuildDirAsSourceDir(
-      BuildDirContext(settings), BuildDirType::TOOLCHAIN_ROOT).value() +
-      "toolchain.ninja");
+  return SourceFile(GetBuildDirAsSourceDir(BuildDirContext(settings),
+                                           BuildDirType::TOOLCHAIN_ROOT)
+                        .value() +
+                    "toolchain.ninja");
 }
 
 std::string GetNinjaRulePrefixForToolchain(const Settings* settings) {

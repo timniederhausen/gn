@@ -15,9 +15,7 @@ namespace base {
 // destruction puts the old value back.
 class ScopedClearErrno {
  public:
-  ScopedClearErrno() : old_errno_(errno) {
-    errno = 0;
-  }
+  ScopedClearErrno() : old_errno_(errno) { errno = 0; }
   ~ScopedClearErrno() {
     if (errno == 0)
       errno = old_errno_;

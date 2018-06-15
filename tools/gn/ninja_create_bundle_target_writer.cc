@@ -18,12 +18,16 @@ namespace {
 
 void FailWithMissingToolError(Toolchain::ToolType tool, const Target* target) {
   const std::string& tool_name = Toolchain::ToolTypeToName(tool);
-  g_scheduler->FailWithError(Err(
-      nullptr, tool_name + " tool not defined",
-      "The toolchain " +
-          target->toolchain()->label().GetUserVisibleName(false) + "\n"
-          "used by target " + target->label().GetUserVisibleName(false) + "\n"
-          "doesn't define a \"" + tool_name + "\" tool."));
+  g_scheduler->FailWithError(
+      Err(nullptr, tool_name + " tool not defined",
+          "The toolchain " +
+              target->toolchain()->label().GetUserVisibleName(false) +
+              "\n"
+              "used by target " +
+              target->label().GetUserVisibleName(false) +
+              "\n"
+              "doesn't define a \"" +
+              tool_name + "\" tool."));
 }
 
 bool EnsureAllToolsAvailable(const Target* target) {

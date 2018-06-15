@@ -187,34 +187,29 @@ TEST(PathOutput, WriteDir) {
     // Output source root dir.
     {
       std::ostringstream out;
-      writer.WriteDir(out, SourceDir("//"),
-                      PathOutput::DIR_INCLUDE_LAST_SLASH);
+      writer.WriteDir(out, SourceDir("//"), PathOutput::DIR_INCLUDE_LAST_SLASH);
       EXPECT_EQ("../../", out.str());
     }
     {
       std::ostringstream out;
-      writer.WriteDir(out, SourceDir("//"),
-                      PathOutput::DIR_NO_LAST_SLASH);
+      writer.WriteDir(out, SourceDir("//"), PathOutput::DIR_NO_LAST_SLASH);
       EXPECT_EQ("../..", out.str());
     }
 
     // Output system root dir.
     {
       std::ostringstream out;
-      writer.WriteDir(out, SourceDir("/"),
-                      PathOutput::DIR_INCLUDE_LAST_SLASH);
+      writer.WriteDir(out, SourceDir("/"), PathOutput::DIR_INCLUDE_LAST_SLASH);
       EXPECT_EQ("/", out.str());
     }
     {
       std::ostringstream out;
-      writer.WriteDir(out, SourceDir("/"),
-                      PathOutput::DIR_INCLUDE_LAST_SLASH);
+      writer.WriteDir(out, SourceDir("/"), PathOutput::DIR_INCLUDE_LAST_SLASH);
       EXPECT_EQ("/", out.str());
     }
     {
       std::ostringstream out;
-      writer.WriteDir(out, SourceDir("/"),
-                      PathOutput::DIR_NO_LAST_SLASH);
+      writer.WriteDir(out, SourceDir("/"), PathOutput::DIR_NO_LAST_SLASH);
       EXPECT_EQ("/.", out.str());
     }
 
@@ -253,14 +248,12 @@ TEST(PathOutput, WriteDir) {
     }
     {
       std::ostringstream out;
-      writer.WriteDir(out, OutputFile("foo/"),
-                      PathOutput::DIR_NO_LAST_SLASH);
+      writer.WriteDir(out, OutputFile("foo/"), PathOutput::DIR_NO_LAST_SLASH);
       EXPECT_EQ("foo", out.str());
     }
     {
       std::ostringstream out;
-      writer.WriteDir(out, OutputFile(),
-                      PathOutput::DIR_INCLUDE_LAST_SLASH);
+      writer.WriteDir(out, OutputFile(), PathOutput::DIR_INCLUDE_LAST_SLASH);
       EXPECT_EQ("", out.str());
     }
   }
@@ -276,8 +269,7 @@ TEST(PathOutput, WriteDir) {
     }
     {
       std::ostringstream out;
-      root_writer.WriteDir(out, SourceDir("//"),
-                           PathOutput::DIR_NO_LAST_SLASH);
+      root_writer.WriteDir(out, SourceDir("//"), PathOutput::DIR_NO_LAST_SLASH);
       EXPECT_EQ(".", out.str());
     }
   }

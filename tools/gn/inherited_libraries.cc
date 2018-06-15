@@ -43,8 +43,8 @@ InheritedLibraries::GetOrderedAndPublicFlag() const {
 
 void InheritedLibraries::Append(const Target* target, bool is_public) {
   // Try to insert a new node.
-  auto insert_result = map_.insert(
-      std::make_pair(target, Node(map_.size(), is_public)));
+  auto insert_result =
+      map_.insert(std::make_pair(target, Node(map_.size(), is_public)));
 
   if (!insert_result.second) {
     // Element already present, insert failed and insert_result indicates the

@@ -12,8 +12,7 @@
 namespace functions {
 
 const char kTemplate[] = "template";
-const char kTemplate_HelpShort[] =
-    "template: Define a template rule.";
+const char kTemplate_HelpShort[] = "template: Define a template rule.";
 const char kTemplate_Help[] =
     R"(template: Define a template rule.
 
@@ -184,8 +183,8 @@ Value RunTemplate(Scope* scope,
   // TODO(brettw) determine if the function is built-in and throw an error if
   // it is.
   if (args.size() != 1) {
-    *err = Err(function->function(),
-               "Need exactly one string arg to template.");
+    *err =
+        Err(function->function(), "Need exactly one string arg to template.");
     return Value();
   }
   if (!args[0].VerifyTypeIs(Value::STRING, err))
@@ -196,8 +195,8 @@ Value RunTemplate(Scope* scope,
   if (existing_template) {
     *err = Err(function, "Duplicate template definition.",
                "A template with this name was already defined.");
-    err->AppendSubErr(Err(existing_template->GetDefinitionRange(),
-                          "Previous definition."));
+    err->AppendSubErr(
+        Err(existing_template->GetDefinitionRange(), "Previous definition."));
     return Value();
   }
 

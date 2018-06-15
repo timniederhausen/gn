@@ -13,9 +13,9 @@
 namespace {
 
 DWORD kBasicProcessAccess =
-  PROCESS_TERMINATE | PROCESS_QUERY_INFORMATION | SYNCHRONIZE;
+    PROCESS_TERMINATE | PROCESS_QUERY_INFORMATION | SYNCHRONIZE;
 
-} // namespace
+}  // namespace
 
 namespace base {
 
@@ -30,8 +30,7 @@ Process::Process(Process&& other)
   other.Close();
 }
 
-Process::~Process() {
-}
+Process::~Process() {}
 
 Process& Process::operator=(Process&& other) {
   DCHECK_NE(this, &other);
@@ -85,13 +84,9 @@ Process Process::Duplicate() const {
     return Current();
 
   ProcessHandle out_handle;
-  if (!IsValid() || !::DuplicateHandle(GetCurrentProcess(),
-                                       Handle(),
-                                       GetCurrentProcess(),
-                                       &out_handle,
-                                       0,
-                                       FALSE,
-                                       DUPLICATE_SAME_ACCESS)) {
+  if (!IsValid() ||
+      !::DuplicateHandle(GetCurrentProcess(), Handle(), GetCurrentProcess(),
+                         &out_handle, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
     return Process();
   }
   return Process(out_handle);
@@ -162,8 +157,7 @@ bool Process::WaitForExitWithTimeout(TimeDelta timeout, int* exit_code) const {
   return true;
 }
 
-void Process::Exited(int exit_code) const {
-}
+void Process::Exited(int exit_code) const {}
 
 int Process::GetPriority() const {
   DCHECK(IsValid());

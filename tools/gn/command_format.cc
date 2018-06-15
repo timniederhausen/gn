@@ -29,8 +29,7 @@ const char kSwitchDumpTree[] = "dump-tree";
 const char kSwitchStdin[] = "stdin";
 
 const char kFormat[] = "format";
-const char kFormat_HelpShort[] =
-    "format: Format .gn file.";
+const char kFormat_HelpShort[] = "format: Format .gn file.";
 const char kFormat_Help[] =
     R"(gn format [--dump-tree] (--stdin | <build_file>)
 
@@ -93,8 +92,10 @@ enum Precedence {
 };
 
 int CountLines(const std::string& str) {
-  return static_cast<int>(base::SplitStringPiece(
-      str, "\n", base::KEEP_WHITESPACE, base::SPLIT_WANT_ALL).size());
+  return static_cast<int>(base::SplitStringPiece(str, "\n",
+                                                 base::KEEP_WHITESPACE,
+                                                 base::SPLIT_WANT_ALL)
+                              .size());
 }
 
 class Printer {
@@ -431,8 +432,8 @@ int Printer::AssessPenalty(const std::string& output) {
 }
 
 bool Printer::ExceedsMaximumWidth(const std::string& output) {
-  for (const auto& line : base::SplitString(
-           output, "\n", base::KEEP_WHITESPACE, base::SPLIT_WANT_ALL)) {
+  for (const auto& line : base::SplitString(output, "\n", base::KEEP_WHITESPACE,
+                                            base::SPLIT_WANT_ALL)) {
     if (line.size() > kMaximumWidth)
       return true;
   }
@@ -541,15 +542,13 @@ int Printer::Expr(const ParseNode* root,
                                  binop->op().value() == "||"));
     Printer sub_left;
     InitializeSub(&sub_left);
-    sub_left.Expr(binop->left(),
-                  prec_left,
+    sub_left.Expr(binop->left(), prec_left,
                   std::string(" ") + binop->op().value().as_string());
     bool left_is_multiline = CountLines(sub_left.String()) > 1;
     // Avoid walking the whole left redundantly times (see timing of Format.046)
     // so pull the output and comments from subprinter.
     Print(sub_left.String().substr(start_column));
-    std::copy(sub_left.comments_.begin(),
-              sub_left.comments_.end(),
+    std::copy(sub_left.comments_.begin(), sub_left.comments_.end(),
               std::back_inserter(comments_));
 
     // Single line.
@@ -604,8 +603,7 @@ int Printer::Expr(const ParseNode* root,
         ExceedsMaximumWidth(sub2.String()) &&
         (!tried_rhs_multiline || ExceedsMaximumWidth(sub3.String()));
 
-    if (penalty_current_line < penalty_next_line ||
-        exceeds_maximum_all_ways) {
+    if (penalty_current_line < penalty_next_line || exceeds_maximum_all_ways) {
       Print(" ");
       Expr(binop->right(), prec_right, std::string());
     } else if (tried_rhs_multiline &&
@@ -625,16 +623,14 @@ int Printer::Expr(const ParseNode* root,
     stack_.pop_back();
     penalty += (CurrentLine() - start_line) * GetPenaltyForLineBreak();
   } else if (const BlockNode* block = root->AsBlock()) {
-    Sequence(
-        kSequenceStyleBracedBlock, block->statements(), block->End(), false);
+    Sequence(kSequenceStyleBracedBlock, block->statements(), block->End(),
+             false);
   } else if (const ConditionNode* condition = root->AsConditionNode()) {
     Print("if (");
     // TODO(scottmg): The { needs to be included in the suffix here.
     Expr(condition->condition(), kPrecedenceLowest, ") ");
-    Sequence(kSequenceStyleBracedBlock,
-             condition->if_true()->statements(),
-             condition->if_true()->End(),
-             false);
+    Sequence(kSequenceStyleBracedBlock, condition->if_true()->statements(),
+             condition->if_true()->End(), false);
     if (condition->if_false()) {
       Print(" else ");
       // If it's a block it's a bare 'else', otherwise it's an 'else if'. See
@@ -645,8 +641,7 @@ int Printer::Expr(const ParseNode* root,
       } else {
         Sequence(kSequenceStyleBracedBlock,
                  condition->if_false()->AsBlock()->statements(),
-                 condition->if_false()->AsBlock()->End(),
-                 false);
+                 condition->if_false()->AsBlock()->End(), false);
       }
     }
   } else if (const FunctionCallNode* func_call = root->AsFunctionCall()) {
@@ -657,8 +652,8 @@ int Printer::Expr(const ParseNode* root,
   } else if (const ListNode* list = root->AsList()) {
     bool force_multiline =
         list->prefer_multiline() && !list->contents().empty();
-    Sequence(
-        kSequenceStyleList, list->contents(), list->End(), force_multiline);
+    Sequence(kSequenceStyleList, list->contents(), list->End(),
+             force_multiline);
   } else if (const LiteralNode* literal = root->AsLiteral()) {
     Print(literal->value().value());
   } else if (const UnaryOpNode* unaryop = root->AsUnaryOp()) {
@@ -678,8 +673,7 @@ int Printer::Expr(const ParseNode* root,
   // Defer any end of line comment until we reach the newline.
   if (root->comments() && !root->comments()->suffix().empty()) {
     std::copy(root->comments()->suffix().begin(),
-              root->comments()->suffix().end(),
-              std::back_inserter(comments_));
+              root->comments()->suffix().end(), std::back_inserter(comments_));
   }
 
   Print(at_end);
@@ -712,8 +706,7 @@ void Printer::Sequence(SequenceStyle style,
     Print(" ");
   } else {
     stack_.push_back(IndentState(margin() + kIndentSize,
-                                 style == kSequenceStyleList,
-                                 false));
+                                 style == kSequenceStyleList, false));
     size_t i = 0;
     for (const auto& x : list) {
       Newline();
@@ -755,8 +748,7 @@ void Printer::Sequence(SequenceStyle style,
     // Defer any end of line comment until we reach the newline.
     if (end->comments() && !end->comments()->suffix().empty()) {
       std::copy(end->comments()->suffix().begin(),
-        end->comments()->suffix().end(),
-        std::back_inserter(comments_));
+                end->comments()->suffix().end(), std::back_inserter(comments_));
     }
   }
 
@@ -879,8 +871,7 @@ int Printer::FunctionCall(const FunctionCallNode* func_call,
   } else {
     if (penalty_multiline_start_next_line < penalty_multiline_start_same_line) {
       stack_.push_back(IndentState(margin() + kIndentSize * 2,
-                                   continuation_requires_indent,
-                                   false));
+                                   continuation_requires_indent, false));
       Newline();
     } else {
       stack_.push_back(
@@ -928,10 +919,8 @@ int Printer::FunctionCall(const FunctionCallNode* func_call,
 
   if (have_block) {
     Print(" ");
-    Sequence(kSequenceStyleBracedBlock,
-             func_call->block()->statements(),
-             func_call->block()->End(),
-             false);
+    Sequence(kSequenceStyleBracedBlock, func_call->block()->statements(),
+             func_call->block()->End(), false);
   }
   return penalty + (CurrentLine() - start_line) * GetPenaltyForLineBreak();
 }
@@ -1078,8 +1067,8 @@ int RunFormat(const std::vector<std::string>& args) {
       SourceDirForCurrentDirectory(setup.build_settings().root_path());
 
   Err err;
-  SourceFile file = source_dir.ResolveRelativeFile(Value(nullptr, args[0]),
-                                                   &err);
+  SourceFile file =
+      source_dir.ResolveRelativeFile(Value(nullptr, args[0]), &err);
   if (err.has_error()) {
     err.PrintToStdout();
     return 1;
@@ -1094,18 +1083,19 @@ int RunFormat(const std::vector<std::string>& args) {
       if (!base::ReadFileToString(to_write, &original_contents)) {
         Err(Location(), std::string("Couldn't read \"") +
                             to_write.AsUTF8Unsafe() +
-                            std::string("\" for comparison.")).PrintToStdout();
+                            std::string("\" for comparison."))
+            .PrintToStdout();
         return 1;
       }
       if (dry_run)
         return original_contents == output_string ? 0 : 2;
       if (original_contents != output_string) {
-        if (base::WriteFile(to_write,
-                            output_string.data(),
+        if (base::WriteFile(to_write, output_string.data(),
                             static_cast<int>(output_string.size())) == -1) {
           Err(Location(),
               std::string("Failed to write formatted output back to \"") +
-                  to_write.AsUTF8Unsafe() + std::string("\".")).PrintToStdout();
+                  to_write.AsUTF8Unsafe() + std::string("\"."))
+              .PrintToStdout();
           return 1;
         }
         printf("Wrote formatted to '%s'.\n", to_write.AsUTF8Unsafe().c_str());

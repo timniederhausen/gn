@@ -28,8 +28,8 @@ TerminationStatus GetTerminationStatusImpl(ProcessHandle handle,
   DCHECK(exit_code);
 
   int status = 0;
-  const pid_t result = HANDLE_EINTR(waitpid(handle, &status,
-                                            can_block ? 0 : WNOHANG));
+  const pid_t result =
+      HANDLE_EINTR(waitpid(handle, &status, can_block ? 0 : WNOHANG));
   if (result == -1) {
     DPLOG(ERROR) << "waitpid(" << handle << ")";
     *exit_code = 0;

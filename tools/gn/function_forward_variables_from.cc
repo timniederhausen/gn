@@ -25,8 +25,7 @@ void ForwardAllValues(const FunctionCallNode* function,
   options.skip_private_vars = true;
   options.mark_dest_used = false;
   options.excluded_values = exclusion_set;
-  source->NonRecursiveMergeTo(dest, options, function,
-                              "source scope", err);
+  source->NonRecursiveMergeTo(dest, options, function, "source scope", err);
   source->MarkAllUsed();
 }
 
@@ -49,19 +48,22 @@ void ForwardValuesFromList(Scope* source,
       base::StringPiece storage_key = source->GetStorageKey(cur.string_value());
       if (storage_key.empty()) {
         // Programmatic value, don't allow copying.
-        *err = Err(cur, "This value can't be forwarded.",
-            "The variable \"" + cur.string_value() + "\" is a built-in.");
+        *err =
+            Err(cur, "This value can't be forwarded.",
+                "The variable \"" + cur.string_value() + "\" is a built-in.");
         return;
       }
 
       // Don't allow clobbering existing values.
       const Value* existing_value = dest->GetValue(storage_key);
       if (existing_value) {
-        *err = Err(cur, "Clobbering existing value.",
+        *err = Err(
+            cur, "Clobbering existing value.",
             "The current scope already defines a value \"" +
-             cur.string_value() + "\".\nforward_variables_from() won't clobber "
-             "existing values. If you want to\nmerge lists, you'll need to "
-             "do this explicitly.");
+                cur.string_value() +
+                "\".\nforward_variables_from() won't clobber "
+                "existing values. If you want to\nmerge lists, you'll need to "
+                "do this explicitly.");
         err->AppendSubErr(Err(*existing_value, "value being clobbered."));
         return;
       }
@@ -170,7 +172,7 @@ Value RunForwardVariablesFrom(Scope* scope,
   }
 
   Value* value = nullptr;  // Value to use, may point to result_value.
-  Value result_value;  // Storage for the "evaluate" case.
+  Value result_value;      // Storage for the "evaluate" case.
   const IdentifierNode* identifier = args_vector[0]->AsIdentifier();
   if (identifier) {
     // Optimize the common case where the input scope is an identifier. This

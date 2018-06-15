@@ -104,8 +104,9 @@ void PrintAllHelp() {
 
   if (is_markdown) {
     OutputString("# GN Reference\n\n");
-    OutputString("*This page is automatically generated from* "
-                 "`gn help --markdown all`.\n\n");
+    OutputString(
+        "*This page is automatically generated from* "
+        "`gn help --markdown all`.\n\n");
 
     // Generate our own table of contents so that we have more control
     // over what's in and out.
@@ -118,7 +119,7 @@ void PrintAllHelp() {
 
   if (is_markdown)
     OutputString("## <a name=\"commands\"></a>Commands\n\n");
-  for (const auto& c: commands::GetCommands())
+  for (const auto& c : commands::GetCommands())
     PrintLongHelp(c.second.help);
 
   if (is_markdown)
@@ -140,7 +141,7 @@ void PrintAllHelp() {
         "## <a name=\"predefined_variables\"></a>"
         "Built-in predefined variables\n\n");
   }
-  for (const auto& v: variables::GetBuiltinVariables())
+  for (const auto& v : variables::GetBuiltinVariables())
     PrintLongHelp(v.second.help);
 
   if (is_markdown) {
@@ -148,7 +149,7 @@ void PrintAllHelp() {
         "## <a name=\"target_variables\"></a>"
         "Variables you set in targets\n\n");
   }
-  for (const auto& v: variables::GetTargetVariables())
+  for (const auto& v : variables::GetTargetVariables())
     PrintLongHelp(v.second.help);
 
   if (is_markdown)
@@ -186,8 +187,7 @@ bool PrintHelpOnSwitch(const std::string& what) {
 }  // namespace
 
 const char kHelp[] = "help";
-const char kHelp_HelpShort[] =
-    "help: Does what you think.";
+const char kHelp_HelpShort[] = "help: Does what you think.";
 const char kHelp_Help[] =
     R"(gn help <anything>
 
@@ -274,7 +274,7 @@ int RunHelp(const std::vector<std::string>& args) {
     return 0;
 
   // Random other topics.
-  std::map<std::string, void(*)()> random_topics;
+  std::map<std::string, void (*)()> random_topics;
   random_topics["all"] = PrintAllHelp;
   random_topics["execution"] = []() { PrintLongHelp(kExecution_Help); };
   random_topics["buildargs"] = []() { PrintLongHelp(kBuildArgs_Help); };

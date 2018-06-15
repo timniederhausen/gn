@@ -30,18 +30,16 @@ class NinjaWriter {
   // On failure will populate |err| and will return false.  The map contains
   // the per-toolchain set of rules collected to write to the toolchain build
   // files.
-  static bool RunAndWriteFiles(
-      const BuildSettings* build_settings,
-      const Builder& builder,
-      const PerToolchainRules& per_toolchain_rules,
-      Err* err);
+  static bool RunAndWriteFiles(const BuildSettings* build_settings,
+                               const Builder& builder,
+                               const PerToolchainRules& per_toolchain_rules,
+                               Err* err);
 
  private:
   NinjaWriter(const Builder& builder);
   ~NinjaWriter();
 
-  bool WriteToolchains(const PerToolchainRules& per_toolchain_rules,
-                       Err* err);
+  bool WriteToolchains(const PerToolchainRules& per_toolchain_rules, Err* err);
 
   const Builder& builder_;
 

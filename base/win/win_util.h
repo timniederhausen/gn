@@ -62,32 +62,31 @@ bool GetUserSidString(std::wstring* user_sid);
 bool UserAccountControlIsEnabled();
 
 // Sets the boolean value for a given key in given IPropertyStore.
-bool SetBooleanValueForPropertyStore(
-    IPropertyStore* property_store,
-    const PROPERTYKEY& property_key,
-    bool property_bool_value);
+bool SetBooleanValueForPropertyStore(IPropertyStore* property_store,
+                                     const PROPERTYKEY& property_key,
+                                     bool property_bool_value);
 
 // Sets the string value for a given key in given IPropertyStore.
-bool SetStringValueForPropertyStore(
-    IPropertyStore* property_store,
-    const PROPERTYKEY& property_key,
-    const wchar_t* property_string_value);
+bool SetStringValueForPropertyStore(IPropertyStore* property_store,
+                                    const PROPERTYKEY& property_key,
+                                    const wchar_t* property_string_value);
 
 // Sets the CLSID value for a given key in a given IPropertyStore.
 bool SetClsidForPropertyStore(IPropertyStore* property_store,
-                                          const PROPERTYKEY& property_key,
-                                          const CLSID& property_clsid_value);
+                              const PROPERTYKEY& property_key,
+                              const CLSID& property_clsid_value);
 
 // Sets the application id in given IPropertyStore. The function is intended
 // for tagging application/chromium shortcut, browser window and jump list for
 // Win7.
 bool SetAppIdForPropertyStore(IPropertyStore* property_store,
-                                          const wchar_t* app_id);
+                              const wchar_t* app_id);
 
 // Adds the specified |command| using the specified |name| to the AutoRun key.
 // |root_key| could be HKCU or HKLM or the root of any user hive.
-bool AddCommandToAutoRun(HKEY root_key, const string16& name,
-                                     const string16& command);
+bool AddCommandToAutoRun(HKEY root_key,
+                         const string16& name,
+                         const string16& command);
 // Removes the command specified by |name| from the AutoRun key. |root_key|
 // could be HKCU or HKLM or the root of any user hive.
 bool RemoveCommandFromAutoRun(HKEY root_key, const string16& name);
@@ -95,8 +94,8 @@ bool RemoveCommandFromAutoRun(HKEY root_key, const string16& name);
 // Reads the command specified by |name| from the AutoRun key. |root_key|
 // could be HKCU or HKLM or the root of any user hive. Used for unit-tests.
 bool ReadCommandFromAutoRun(HKEY root_key,
-                                        const string16& name,
-                                        string16* command);
+                            const string16& name,
+                            string16* command);
 
 // Sets whether to crash the process during exit. This is inspected by DLLMain
 // and used to intercept unexpected terminations of the process (via calls to
@@ -114,8 +113,8 @@ void SetAbortBehaviorForCrashReporting();
 // This is necessary to set compatible struct sizes for different versions
 // of certain Windows APIs (e.g. SystemParametersInfo).
 #define SIZEOF_STRUCT_WITH_SPECIFIED_LAST_MEMBER(struct_name, member) \
-    offsetof(struct_name, member) + \
-    (sizeof static_cast<struct_name*>(NULL)->member)
+  offsetof(struct_name, member) +                                     \
+      (sizeof static_cast<struct_name*>(NULL)->member)
 
 // Used by tests to mock any wanted state. Call with |state| set to true to
 // simulate being in a domain and false otherwise.
@@ -132,8 +131,7 @@ bool IsUser32AndGdi32Available();
 // HMODULEs are not add-ref'd, so they should not be closed and may be
 // invalidated at any time (should a module be unloaded). |process| requires
 // the PROCESS_QUERY_INFORMATION and PROCESS_VM_READ permissions.
-bool GetLoadedModulesSnapshot(HANDLE process,
-                                          std::vector<HMODULE>* snapshot);
+bool GetLoadedModulesSnapshot(HANDLE process, std::vector<HMODULE>* snapshot);
 
 // Adds or removes the MICROSOFT_TABLETPENSERVICE_PROPERTY property with the
 // TABLET_DISABLE_FLICKS & TABLET_DISABLE_FLICKFALLBACKKEYS flags in order to

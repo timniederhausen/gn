@@ -447,8 +447,9 @@ bool Setup::RunPostMessageLoop() {
       return false;
     }
     err.PrintNonfatalToStdout();
-    OutputString("\nThe build continued as if that argument was "
-                 "unspecified.\n\n");
+    OutputString(
+        "\nThe build continued as if that argument was "
+        "unspecified.\n\n");
     return true;
   }
 
@@ -462,8 +463,8 @@ bool Setup::RunPostMessageLoop() {
       to_check = all_targets;
     }
 
-    if (!commands::CheckPublicHeaders(&build_settings_, all_targets,
-                                      to_check, false)) {
+    if (!commands::CheckPublicHeaders(&build_settings_, all_targets, to_check,
+                                      false)) {
       return false;
     }
   }
@@ -580,10 +581,10 @@ bool Setup::SaveArgsToFile() {
   base::ReplaceSubstringsAfterOffset(&contents, 0, "\n", "\r\n");
 #endif
   if (base::WriteFile(build_arg_file, contents.c_str(),
-      static_cast<int>(contents.size())) == -1) {
+                      static_cast<int>(contents.size())) == -1) {
     Err(Location(), "Args file could not be written.",
-      "The file is \"" + FilePathToUTF8(build_arg_file) +
-        "\"").PrintToStdout();
+        "The file is \"" + FilePathToUTF8(build_arg_file) + "\"")
+        .PrintToStdout();
     return false;
   }
 
@@ -606,7 +607,8 @@ bool Setup::FillSourceDir(const base::CommandLine& cmdline) {
     if (root_path.empty()) {
       Err(Location(), "Root source path not found.",
           "The path \"" + FilePathToUTF8(relative_root_path) +
-          "\" doesn't exist.").PrintToStdout();
+              "\" doesn't exist.")
+          .PrintToStdout();
       return false;
     }
 
@@ -622,7 +624,8 @@ bool Setup::FillSourceDir(const base::CommandLine& cmdline) {
       if (dotfile_name_.empty()) {
         Err(Location(), "Could not load dotfile.",
             "The file \"" + FilePathToUTF8(dot_file_path) +
-            "\" couldn't be loaded.").PrintToStdout();
+                "\" couldn't be loaded.")
+            .PrintToStdout();
         return false;
       }
     }
@@ -646,7 +649,8 @@ bool Setup::FillSourceDir(const base::CommandLine& cmdline) {
   if (root_realpath.empty()) {
     Err(Location(), "Can't get the real root path.",
         "I could not get the real path of \"" + FilePathToUTF8(root_path) +
-        "\".").PrintToStdout();
+            "\".")
+        .PrintToStdout();
     return false;
   }
   if (scheduler_.verbose_logging())
@@ -659,9 +663,9 @@ bool Setup::FillSourceDir(const base::CommandLine& cmdline) {
 bool Setup::FillBuildDir(const std::string& build_dir, bool require_exists) {
   Err err;
   SourceDir resolved =
-      SourceDirForCurrentDirectory(build_settings_.root_path()).
-    ResolveRelativeDir(Value(nullptr, build_dir), &err,
-        build_settings_.root_path_utf8());
+      SourceDirForCurrentDirectory(build_settings_.root_path())
+          .ResolveRelativeDir(Value(nullptr, build_dir), &err,
+                              build_settings_.root_path_utf8());
   if (err.has_error()) {
     err.PrintToStdout();
     return false;
@@ -671,7 +675,8 @@ bool Setup::FillBuildDir(const std::string& build_dir, bool require_exists) {
   if (!base::CreateDirectory(build_dir_path)) {
     Err(Location(), "Can't create the build dir.",
         "I could not create the build dir \"" + FilePathToUTF8(build_dir_path) +
-        "\".").PrintToStdout();
+            "\".")
+        .PrintToStdout();
     return false;
   }
   base::FilePath build_dir_realpath =
@@ -679,23 +684,23 @@ bool Setup::FillBuildDir(const std::string& build_dir, bool require_exists) {
   if (build_dir_realpath.empty()) {
     Err(Location(), "Can't get the real build dir path.",
         "I could not get the real path of \"" + FilePathToUTF8(build_dir_path) +
-        "\".").PrintToStdout();
+            "\".")
+        .PrintToStdout();
     return false;
   }
-  resolved = SourceDirForPath(build_settings_.root_path(),
-                              build_dir_realpath);
+  resolved = SourceDirForPath(build_settings_.root_path(), build_dir_realpath);
 
   if (scheduler_.verbose_logging())
     scheduler_.Log("Using build dir", resolved.value());
 
   if (require_exists) {
-    if (!base::PathExists(build_dir_path.Append(
-            FILE_PATH_LITERAL("build.ninja")))) {
+    if (!base::PathExists(
+            build_dir_path.Append(FILE_PATH_LITERAL("build.ninja")))) {
       Err(Location(), "Not a build directory.",
           "This command requires an existing build directory. I interpreted "
-          "your input\n\"" + build_dir + "\" as:\n  " +
-          FilePathToUTF8(build_dir_path) +
-          "\nwhich doesn't seem to contain a previously-generated build.")
+          "your input\n\"" +
+              build_dir + "\" as:\n  " + FilePathToUTF8(build_dir_path) +
+              "\nwhich doesn't seem to contain a previously-generated build.")
           .PrintToStdout();
       return false;
     }
@@ -724,8 +729,9 @@ bool Setup::FillPythonPath(const base::CommandLine& cmdline) {
 #if defined(OS_WIN)
     base::FilePath python_path = FindWindowsPython();
     if (python_path.empty()) {
-      scheduler_.Log("WARNING", "Could not find python on path, using "
-          "just \"python.exe\"");
+      scheduler_.Log("WARNING",
+                     "Could not find python on path, using "
+                     "just \"python.exe\"");
       python_path = base::FilePath(kPythonExeName);
     }
     build_settings_.set_python_path(python_path.NormalizePathSeparatorsTo('/'));
@@ -812,8 +818,10 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline) {
       dotfile_scope_.GetValue("buildconfig", true);
   if (!build_config_value) {
     Err(Location(), "No build config file.",
-        "Your .gn file (\"" + FilePathToUTF8(dotfile_name_) + "\")\n"
-        "didn't specify a \"buildconfig\" value.").PrintToStdout();
+        "Your .gn file (\"" + FilePathToUTF8(dotfile_name_) +
+            "\")\n"
+            "didn't specify a \"buildconfig\" value.")
+        .PrintToStdout();
     return false;
   } else if (!build_config_value->VerifyTypeIs(Value::STRING, &err)) {
     err.PrintToStdout();

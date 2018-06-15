@@ -64,8 +64,8 @@ void PathOutput::WriteDir(std::ostream& out,
     WritePathStr(out, dir.value());
   } else {
     // DIR_NO_LAST_SLASH mode, just trim the last char.
-    WritePathStr(out, base::StringPiece(dir.value().data(),
-                                        dir.value().size() - 1));
+    WritePathStr(out,
+                 base::StringPiece(dir.value().data(), dir.value().size() - 1));
   }
 }
 
@@ -93,8 +93,7 @@ void PathOutput::WriteFiles(std::ostream& out,
 void PathOutput::WriteDir(std::ostream& out,
                           const OutputFile& file,
                           DirSlashEnding slash_ending) const {
-  DCHECK(file.value().empty() ||
-         file.value()[file.value().size() - 1] == '/');
+  DCHECK(file.value().empty() || file.value()[file.value().size() - 1] == '/');
 
   switch (slash_ending) {
     case DIR_INCLUDE_LAST_SLASH:
@@ -122,9 +121,8 @@ void PathOutput::WriteFile(std::ostream& out,
   EscapeStringToStream(out, FilePathToUTF8(file), options_);
 }
 
-void PathOutput::WriteSourceRelativeString(
-    std::ostream& out,
-    const base::StringPiece& str) const {
+void PathOutput::WriteSourceRelativeString(std::ostream& out,
+                                           const base::StringPiece& str) const {
   if (options_.mode == ESCAPE_NINJA_COMMAND) {
     // Shell escaping needs an intermediate string since it may end up
     // quoting the whole thing.
@@ -134,8 +132,8 @@ void PathOutput::WriteSourceRelativeString(
                         inverse_current_dir_.size());
     intermediate.append(str.data(), str.size());
 
-    EscapeStringToStream(out,
-        base::StringPiece(intermediate.c_str(), intermediate.size()),
+    EscapeStringToStream(
+        out, base::StringPiece(intermediate.c_str(), intermediate.size()),
         options_);
   } else {
     // Ninja (and none) escaping can avoid the intermediate string and
@@ -158,8 +156,8 @@ void PathOutput::WritePathStr(std::ostream& out,
   } else if (str.size() >= 2 && str[1] == '/') {
     WriteSourceRelativeString(out, str.substr(2));
   } else {
-    // Input begins with one slash, don't write the current directory since
-    // it's system-absolute.
+// Input begins with one slash, don't write the current directory since
+// it's system-absolute.
 #if defined(OS_WIN)
     // On Windows, trim the leading slash, since the input for absolute
     // paths will look like "/C:/foo/bar.txt".

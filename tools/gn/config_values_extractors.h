@@ -31,9 +31,7 @@ struct EscapeOptions;
 class ConfigValuesIterator {
  public:
   explicit ConfigValuesIterator(const Target* target)
-      : target_(target),
-        cur_index_(-1) {
-  }
+      : target_(target), cur_index_(-1) {}
 
   bool done() const {
     return cur_index_ >= static_cast<int>(target_->configs().size());
@@ -53,9 +51,7 @@ class ConfigValuesIterator {
     return target_->configs()[cur_index_].origin;
   }
 
-  void Next() {
-    cur_index_++;
-  }
+  void Next() { cur_index_++; }
 
   // Returns the config holding the current config values, or NULL for those
   // config values associated with the target itself.
@@ -73,12 +69,12 @@ class ConfigValuesIterator {
   int cur_index_;
 };
 
-template<typename T, class Writer>
-inline void ConfigValuesToStream(
-    const ConfigValues& values,
-    const std::vector<T>& (ConfigValues::* getter)() const,
-    const Writer& writer,
-    std::ostream& out) {
+template <typename T, class Writer>
+inline void ConfigValuesToStream(const ConfigValues& values,
+                                 const std::vector<T>& (ConfigValues::*getter)()
+                                     const,
+                                 const Writer& writer,
+                                 std::ostream& out) {
   const std::vector<T>& v = (values.*getter)();
   for (size_t i = 0; i < v.size(); i++)
     writer(v[i], out);
@@ -87,10 +83,10 @@ inline void ConfigValuesToStream(
 // Writes a given config value that applies to a given target. This collects
 // all values from the target itself and all configs that apply, and writes
 // then in order.
-template<typename T, class Writer>
+template <typename T, class Writer>
 inline void RecursiveTargetConfigToStream(
     const Target* target,
-    const std::vector<T>& (ConfigValues::* getter)() const,
+    const std::vector<T>& (ConfigValues::*getter)() const,
     const Writer& writer,
     std::ostream& out) {
   for (ConfigValuesIterator iter(target); !iter.done(); iter.Next())
@@ -100,7 +96,7 @@ inline void RecursiveTargetConfigToStream(
 // Writes the values out as strings with no transformation.
 void RecursiveTargetConfigStringsToStream(
     const Target* target,
-    const std::vector<std::string>& (ConfigValues::* getter)() const,
+    const std::vector<std::string>& (ConfigValues::*getter)() const,
     const EscapeOptions& escape_options,
     std::ostream& out);
 

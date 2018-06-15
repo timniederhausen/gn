@@ -7,23 +7,17 @@
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/source_file.h"
 
-OutputFile::OutputFile() : value_() {
-}
+OutputFile::OutputFile() : value_() {}
 
-OutputFile::OutputFile(std::string&& v)
-    : value_(v) {
-}
+OutputFile::OutputFile(std::string&& v) : value_(v) {}
 
-OutputFile::OutputFile(const std::string& v)
-    : value_(v) {
-}
+OutputFile::OutputFile(const std::string& v) : value_(v) {}
 
 OutputFile::OutputFile(const BuildSettings* build_settings,
                        const SourceFile& source_file)
     : value_(RebasePath(source_file.value(),
                         build_settings->build_dir(),
-                        build_settings->root_path_utf8())) {
-}
+                        build_settings->root_path_utf8())) {}
 
 OutputFile::~OutputFile() = default;
 

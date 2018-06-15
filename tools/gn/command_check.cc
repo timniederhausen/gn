@@ -53,8 +53,7 @@ More information
 )";
 
 const char kCheck[] = "check";
-const char kCheck_HelpShort[] =
-    "check: Check header dependencies.";
+const char kCheck_HelpShort[] = "check: Check header dependencies.";
 const char kCheck_Help[] =
     R"(gn check <out_dir> [<label_pattern>] [--force]
 
@@ -166,7 +165,8 @@ Examples
 int RunCheck(const std::vector<std::string>& args) {
   if (args.size() != 1 && args.size() != 2) {
     Err(Location(), "You're holding it wrong.",
-        "Usage: \"gn check <out_dir> [<target_label>]\"").PrintToStdout();
+        "Usage: \"gn check <out_dir> [<target_label>]\"")
+        .PrintToStdout();
     return 1;
   }
 
@@ -189,17 +189,17 @@ int RunCheck(const std::vector<std::string>& args) {
     UniqueVector<const Config*> config_matches;
     UniqueVector<const Toolchain*> toolchain_matches;
     UniqueVector<SourceFile> file_matches;
-    if (!ResolveFromCommandLineInput(setup, inputs, false,
-                                     &target_matches, &config_matches,
-                                     &toolchain_matches, &file_matches))
+    if (!ResolveFromCommandLineInput(setup, inputs, false, &target_matches,
+                                     &config_matches, &toolchain_matches,
+                                     &file_matches))
       return 1;
 
     if (target_matches.size() == 0) {
       OutputString("No matching targets.\n");
       return 1;
     }
-    targets_to_check.insert(targets_to_check.begin(),
-                            target_matches.begin(), target_matches.end());
+    targets_to_check.insert(targets_to_check.begin(), target_matches.begin(),
+                            target_matches.end());
   } else {
     // No argument means to check everything allowed by the filter in
     // the build config file.

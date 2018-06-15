@@ -35,8 +35,7 @@ namespace {
 // replaced parameters.
 struct ReplacementOffset {
   ReplacementOffset(uintptr_t parameter, size_t offset)
-      : parameter(parameter),
-        offset(offset) {}
+      : parameter(parameter), offset(offset) {}
 
   // Index of the parameter.
   uintptr_t parameter;
@@ -74,30 +73,38 @@ inline bool IsAlignedToMachineWord(const void* pointer) {
   return !(reinterpret_cast<MachineWord>(pointer) & kMachineWordAlignmentMask);
 }
 
-template<typename T> inline T* AlignToMachineWord(T* pointer) {
+template <typename T>
+inline T* AlignToMachineWord(T* pointer) {
   return reinterpret_cast<T*>(reinterpret_cast<MachineWord>(pointer) &
                               ~kMachineWordAlignmentMask);
 }
 
-template<size_t size, typename CharacterType> struct NonASCIIMask;
-template<> struct NonASCIIMask<4, char16> {
-    static inline uint32_t value() { return 0xFF80FF80U; }
+template <size_t size, typename CharacterType>
+struct NonASCIIMask;
+template <>
+struct NonASCIIMask<4, char16> {
+  static inline uint32_t value() { return 0xFF80FF80U; }
 };
-template<> struct NonASCIIMask<4, char> {
-    static inline uint32_t value() { return 0x80808080U; }
+template <>
+struct NonASCIIMask<4, char> {
+  static inline uint32_t value() { return 0x80808080U; }
 };
-template<> struct NonASCIIMask<8, char16> {
-    static inline uint64_t value() { return 0xFF80FF80FF80FF80ULL; }
+template <>
+struct NonASCIIMask<8, char16> {
+  static inline uint64_t value() { return 0xFF80FF80FF80FF80ULL; }
 };
-template<> struct NonASCIIMask<8, char> {
-    static inline uint64_t value() { return 0x8080808080808080ULL; }
+template <>
+struct NonASCIIMask<8, char> {
+  static inline uint64_t value() { return 0x8080808080808080ULL; }
 };
 #if defined(WCHAR_T_IS_UTF32)
-template<> struct NonASCIIMask<4, wchar_t> {
-    static inline uint32_t value() { return 0xFFFFFF80U; }
+template <>
+struct NonASCIIMask<4, wchar_t> {
+  static inline uint32_t value() { return 0xFFFFFF80U; }
 };
-template<> struct NonASCIIMask<8, wchar_t> {
-    static inline uint64_t value() { return 0xFFFFFF80FFFFFF80ULL; }
+template <>
+struct NonASCIIMask<8, wchar_t> {
+  static inline uint64_t value() { return 0xFFFFFF80FFFFFF80ULL; }
 };
 #endif  // WCHAR_T_IS_UTF32
 
@@ -140,7 +147,7 @@ bool IsWprintfFormatPortable(const wchar_t* format) {
 
 namespace {
 
-template<typename StringType>
+template <typename StringType>
 StringType ToLowerASCIIImpl(BasicStringPiece<StringType> str) {
   StringType ret;
   ret.reserve(str.size());
@@ -149,7 +156,7 @@ StringType ToLowerASCIIImpl(BasicStringPiece<StringType> str) {
   return ret;
 }
 
-template<typename StringType>
+template <typename StringType>
 StringType ToUpperASCIIImpl(BasicStringPiece<StringType> str) {
   StringType ret;
   ret.reserve(str.size());
@@ -176,7 +183,7 @@ string16 ToUpperASCII(StringPiece16 str) {
   return ToUpperASCIIImpl<string16>(str);
 }
 
-template<class StringType>
+template <class StringType>
 int CompareCaseInsensitiveASCIIT(BasicStringPiece<StringType> a,
                                  BasicStringPiece<StringType> b) {
   // Find the first characters that aren't equal and compare them.  If the end
@@ -256,7 +263,7 @@ bool RemoveChars(const std::string& input,
   return ReplaceCharsT(input, remove_chars, StringPiece(), output);
 }
 
-template<typename Str>
+template <typename Str>
 TrimPositions TrimStringT(const Str& input,
                           BasicStringPiece<Str> trim_chars,
                           TrimPositions positions,
@@ -267,24 +274,25 @@ TrimPositions TrimStringT(const Str& input,
   // constant so avoid making a copy).
   BasicStringPiece<Str> input_piece(input);
   const size_t last_char = input.length() - 1;
-  const size_t first_good_char = (positions & TRIM_LEADING) ?
-      input_piece.find_first_not_of(trim_chars) : 0;
-  const size_t last_good_char = (positions & TRIM_TRAILING) ?
-      input_piece.find_last_not_of(trim_chars) : last_char;
+  const size_t first_good_char = (positions & TRIM_LEADING)
+                                     ? input_piece.find_first_not_of(trim_chars)
+                                     : 0;
+  const size_t last_good_char = (positions & TRIM_TRAILING)
+                                    ? input_piece.find_last_not_of(trim_chars)
+                                    : last_char;
 
   // When the string was all trimmed, report that we stripped off characters
   // from whichever position the caller was interested in. For empty input, we
   // stripped no characters, but we still need to clear |output|.
-  if (input.empty() ||
-      (first_good_char == Str::npos) || (last_good_char == Str::npos)) {
+  if (input.empty() || (first_good_char == Str::npos) ||
+      (last_good_char == Str::npos)) {
     bool input_was_empty = input.empty();  // in case output == &input
     output->clear();
     return input_was_empty ? TRIM_NONE : positions;
   }
 
   // Trim.
-  *output =
-      input.substr(first_good_char, last_good_char - first_good_char + 1);
+  *output = input.substr(first_good_char, last_good_char - first_good_char + 1);
 
   // Return where we trimmed from.
   return static_cast<TrimPositions>(
@@ -304,14 +312,15 @@ bool TrimString(const std::string& input,
   return TrimStringT(input, trim_chars, TRIM_ALL, output) != TRIM_NONE;
 }
 
-template<typename Str>
+template <typename Str>
 BasicStringPiece<Str> TrimStringPieceT(BasicStringPiece<Str> input,
                                        BasicStringPiece<Str> trim_chars,
                                        TrimPositions positions) {
-  size_t begin = (positions & TRIM_LEADING) ?
-      input.find_first_not_of(trim_chars) : 0;
-  size_t end = (positions & TRIM_TRAILING) ?
-      input.find_last_not_of(trim_chars) + 1 : input.size();
+  size_t begin =
+      (positions & TRIM_LEADING) ? input.find_first_not_of(trim_chars) : 0;
+  size_t end = (positions & TRIM_TRAILING)
+                   ? input.find_last_not_of(trim_chars) + 1
+                   : input.size();
   return input.substr(begin, end - begin);
 }
 
@@ -350,15 +359,14 @@ void TruncateUTF8ToByteSize(const std::string& input,
     int32_t prev = char_index;
     base_icu::UChar32 code_point = 0;
     CBU8_NEXT(data, char_index, truncation_length, code_point);
-    if (!IsValidCharacter(code_point) ||
-        !IsValidCodepoint(code_point)) {
+    if (!IsValidCharacter(code_point) || !IsValidCodepoint(code_point)) {
       char_index = prev - 1;
     } else {
       break;
     }
   }
 
-  if (char_index >= 0 )
+  if (char_index >= 0)
     *output = input.substr(0, char_index);
   else
     output->clear();
@@ -370,8 +378,7 @@ TrimPositions TrimWhitespace(const string16& input,
   return TrimStringT(input, StringPiece16(kWhitespaceUTF16), positions, output);
 }
 
-StringPiece16 TrimWhitespace(StringPiece16 input,
-                             TrimPositions positions) {
+StringPiece16 TrimWhitespace(StringPiece16 input, TrimPositions positions) {
   return TrimStringPieceT(input, StringPiece16(kWhitespaceUTF16), positions);
 }
 
@@ -385,9 +392,8 @@ StringPiece TrimWhitespaceASCII(StringPiece input, TrimPositions positions) {
   return TrimStringPieceT(input, StringPiece(kWhitespaceASCII), positions);
 }
 
-template<typename STR>
-STR CollapseWhitespaceT(const STR& text,
-                        bool trim_sequences_with_line_breaks) {
+template <typename STR>
+STR CollapseWhitespaceT(const STR& text, bool trim_sequences_with_line_breaks) {
   STR result;
   result.resize(text.size());
 
@@ -490,7 +496,7 @@ bool IsStringASCII(WStringPiece str) {
 #endif
 
 bool IsStringUTF8(StringPiece str) {
-  const char *src = str.data();
+  const char* src = str.data();
   int32_t src_len = static_cast<int32_t>(str.length());
   int32_t char_index = 0;
 
@@ -518,7 +524,7 @@ bool IsStringUTF8(StringPiece str) {
 // The hardcoded strings are typically very short so it doesn't matter, and the
 // string piece gives additional flexibility for the caller (doesn't have to be
 // null terminated) so we choose the StringPiece route.
-template<typename Str>
+template <typename Str>
 static inline bool DoLowerCaseEqualsASCII(BasicStringPiece<Str> str,
                                           StringPiece lowercase_ascii) {
   if (str.size() != lowercase_ascii.size())
@@ -544,7 +550,7 @@ bool EqualsASCII(StringPiece16 str, StringPiece ascii) {
   return std::equal(ascii.begin(), ascii.end(), str.begin());
 }
 
-template<typename Str>
+template <typename Str>
 bool StartsWithT(BasicStringPiece<Str> str,
                  BasicStringPiece<Str> search_for,
                  CompareCase case_sensitivity) {
@@ -559,8 +565,7 @@ bool StartsWithT(BasicStringPiece<Str> str,
 
     case CompareCase::INSENSITIVE_ASCII:
       return std::equal(
-          search_for.begin(), search_for.end(),
-          source.begin(),
+          search_for.begin(), search_for.end(), source.begin(),
           CaseInsensitiveCompareASCII<typename Str::value_type>());
 
     default:
@@ -588,8 +593,8 @@ bool EndsWithT(BasicStringPiece<Str> str,
   if (search_for.size() > str.size())
     return false;
 
-  BasicStringPiece<Str> source = str.substr(str.size() - search_for.size(),
-                                            search_for.size());
+  BasicStringPiece<Str> source =
+      str.substr(str.size() - search_for.size(), search_for.size());
 
   switch (case_sensitivity) {
     case CompareCase::SENSITIVE:
@@ -597,8 +602,7 @@ bool EndsWithT(BasicStringPiece<Str> str,
 
     case CompareCase::INSENSITIVE_ASCII:
       return std::equal(
-          source.begin(), source.end(),
-          search_for.begin(),
+          source.begin(), source.end(), search_for.begin(),
           CaseInsensitiveCompareASCII<typename Str::value_type>());
 
     default:
@@ -639,14 +643,8 @@ bool IsUnicodeWhitespace(wchar_t c) {
   return false;
 }
 
-static const char* const kByteStringsUnlocalized[] = {
-  " B",
-  " kB",
-  " MB",
-  " GB",
-  " TB",
-  " PB"
-};
+static const char* const kByteStringsUnlocalized[] = {" B",  " kB", " MB",
+                                                      " GB", " TB", " PB"};
 
 string16 FormatBytesUnlocalized(int64_t bytes) {
   double unit_amount = static_cast<double>(bytes);
@@ -987,7 +985,7 @@ string16 JoinString(std::initializer_list<StringPiece16> parts,
   return JoinStringT(parts, separator);
 }
 
-template<class FormatStringType, class OutStringType>
+template <class FormatStringType, class OutStringType>
 OutStringType DoReplaceStringPlaceholders(
     const FormatStringType& format_string,
     const std::vector<OutStringType>& subst,
@@ -1086,7 +1084,8 @@ size_t lcpyT(CHAR* dst, const CHAR* src, size_t dst_size) {
     dst[dst_size - 1] = 0;
 
   // Count the rest of the |src|, and return it's length in characters.
-  while (src[dst_size]) ++dst_size;
+  while (src[dst_size])
+    ++dst_size;
   return dst_size;
 }
 

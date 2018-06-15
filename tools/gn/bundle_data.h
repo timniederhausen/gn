@@ -44,13 +44,11 @@ class BundleData {
   void GetSourceFiles(SourceFiles* sources) const;
 
   // Returns the list of outputs.
-  void GetOutputFiles(const Settings* settings,
-                      OutputFiles* outputs) const;
+  void GetOutputFiles(const Settings* settings, OutputFiles* outputs) const;
 
   // Returns the list of outputs as SourceFile.
-  void GetOutputsAsSourceFiles(
-      const Settings* settings,
-      SourceFiles* outputs_as_source) const;
+  void GetOutputsAsSourceFiles(const Settings* settings,
+                               SourceFiles* outputs_as_source) const;
 
   // Returns the path to the compiled asset catalog. Only valid if
   // assets_catalog_sources() is not empty.

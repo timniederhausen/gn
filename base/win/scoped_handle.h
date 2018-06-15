@@ -16,8 +16,8 @@
 #include <intrin.h>
 #define BASE_WIN_GET_CALLER _ReturnAddress()
 #elif defined(COMPILER_GCC)
-#define BASE_WIN_GET_CALLER __builtin_extract_return_addr(\\
-    __builtin_return_address(0))
+#define BASE_WIN_GET_CALLER \
+  __builtin_extract_return_addr(\ __builtin_return_address(0))
 #endif
 
 namespace base {
@@ -48,13 +48,9 @@ class GenericScopedHandle {
     Set(other.Take());
   }
 
-  ~GenericScopedHandle() {
-    Close();
-  }
+  ~GenericScopedHandle() { Close(); }
 
-  bool IsValid() const {
-    return Traits::IsHandleValid(handle_);
-  }
+  bool IsValid() const { return Traits::IsHandleValid(handle_); }
 
   GenericScopedHandle& operator=(GenericScopedHandle&& other) {
     DCHECK_NE(this, &other);
@@ -75,9 +71,7 @@ class GenericScopedHandle {
     }
   }
 
-  Handle Get() const {
-    return handle_;
-  }
+  Handle Get() const { return handle_; }
 
   // Transfers ownership away from this object.
   Handle Take() {
@@ -118,9 +112,7 @@ class HandleTraits {
   }
 
   // Returns NULL handle value.
-  static HANDLE NullHandle() {
-    return NULL;
-  }
+  static HANDLE NullHandle() { return NULL; }
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(HandleTraits);
@@ -131,10 +123,14 @@ class DummyVerifierTraits {
  public:
   typedef HANDLE Handle;
 
-  static void StartTracking(HANDLE handle, const void* owner,
-                            const void* pc1, const void* pc2) {}
-  static void StopTracking(HANDLE handle, const void* owner,
-                           const void* pc1, const void* pc2) {}
+  static void StartTracking(HANDLE handle,
+                            const void* owner,
+                            const void* pc1,
+                            const void* pc2) {}
+  static void StopTracking(HANDLE handle,
+                           const void* owner,
+                           const void* pc1,
+                           const void* pc2) {}
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(DummyVerifierTraits);
@@ -145,10 +141,14 @@ class VerifierTraits {
  public:
   typedef HANDLE Handle;
 
-  static void StartTracking(HANDLE handle, const void* owner,
-                            const void* pc1, const void* pc2);
-  static void StopTracking(HANDLE handle, const void* owner,
-                           const void* pc1, const void* pc2);
+  static void StartTracking(HANDLE handle,
+                            const void* owner,
+                            const void* pc1,
+                            const void* pc2);
+  static void StopTracking(HANDLE handle,
+                           const void* owner,
+                           const void* pc1,
+                           const void* pc2);
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(VerifierTraits);

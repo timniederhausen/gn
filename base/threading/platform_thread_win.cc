@@ -21,10 +21,10 @@ namespace {
 const DWORD kVCThreadNameException = 0x406D1388;
 
 typedef struct tagTHREADNAME_INFO {
-  DWORD dwType;  // Must be 0x1000.
-  LPCSTR szName;  // Pointer to name (in user addr space).
+  DWORD dwType;      // Must be 0x1000.
+  LPCSTR szName;     // Pointer to name (in user addr space).
   DWORD dwThreadID;  // Thread ID (-1=caller thread).
-  DWORD dwFlags;  // Reserved for future use, must be zero.
+  DWORD dwFlags;     // Reserved for future use, must be zero.
 } THREADNAME_INFO;
 
 // The SetThreadDescription API was brought in version 1607 of Windows 10.
@@ -40,9 +40,9 @@ void SetNameInternal(PlatformThreadId thread_id, const char* name) {
   info.dwFlags = 0;
 
   __try {
-    RaiseException(kVCThreadNameException, 0, sizeof(info)/sizeof(DWORD),
+    RaiseException(kVCThreadNameException, 0, sizeof(info) / sizeof(DWORD),
                    reinterpret_cast<DWORD_PTR*>(&info));
-  } __except(EXCEPTION_CONTINUE_EXECUTION) {
+  } __except (EXCEPTION_CONTINUE_EXECUTION) {
   }
 }
 
@@ -58,13 +58,9 @@ DWORD __stdcall ThreadFunc(void* params) {
   // Retrieve a copy of the thread handle to use as the key in the
   // thread name mapping.
   PlatformThreadHandle::Handle platform_handle;
-  BOOL did_dup = DuplicateHandle(GetCurrentProcess(),
-                                GetCurrentThread(),
-                                GetCurrentProcess(),
-                                &platform_handle,
-                                0,
-                                FALSE,
-                                DUPLICATE_SAME_ACCESS);
+  BOOL did_dup = DuplicateHandle(GetCurrentProcess(), GetCurrentThread(),
+                                 GetCurrentProcess(), &platform_handle, 0,
+                                 FALSE, DUPLICATE_SAME_ACCESS);
 
   win::ScopedHandle scoped_platform_handle;
 

@@ -66,9 +66,7 @@ class Settings {
   }
 
   // Directory for generated files.
-  const SourceDir& toolchain_gen_dir() const {
-    return toolchain_gen_dir_;
-  }
+  const SourceDir& toolchain_gen_dir() const { return toolchain_gen_dir_; }
 
   // The import manager caches the result of executing imported files in the
   // context of a given settings object.
@@ -84,9 +82,7 @@ class Settings {
   // means that only targets that have a dependency from (directly or
   // indirectly) some magic root node are actually generated. See the comments
   // on ItemTree for more.
-  bool greedy_target_generation() const {
-    return greedy_target_generation_;
-  }
+  bool greedy_target_generation() const { return greedy_target_generation_; }
   void set_greedy_target_generation(bool gtg) {
     greedy_target_generation_ = gtg;
   }

@@ -17,8 +17,7 @@
 namespace functions {
 
 const char kReadFile[] = "read_file";
-const char kReadFile_HelpShort[] =
-    "read_file: Read a file into a variable.";
+const char kReadFile_HelpShort[] = "read_file: Read a file into a variable.";
 const char kReadFile_Help[] =
     R"(read_file: Read a file into a variable.
 
@@ -54,8 +53,8 @@ Value RunReadFile(Scope* scope,
 
   // Compute the file name.
   const SourceDir& cur_dir = scope->GetSourceDir();
-  SourceFile source_file = cur_dir.ResolveRelativeFile(args[0], err,
-      scope->settings()->build_settings()->root_path_utf8());
+  SourceFile source_file = cur_dir.ResolveRelativeFile(
+      args[0], err, scope->settings()->build_settings()->root_path_utf8());
   if (err->has_error())
     return Value();
   base::FilePath file_path =

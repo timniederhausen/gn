@@ -98,7 +98,7 @@ int64_t TimeDelta::InMillisecondsRoundedUp() const {
     return std::numeric_limits<int64_t>::max();
   }
   return (delta_ + Time::kMicrosecondsPerMillisecond - 1) /
-      Time::kMicrosecondsPerMillisecond;
+         Time::kMicrosecondsPerMillisecond;
 }
 
 int64_t TimeDelta::InMicroseconds() const {
@@ -194,8 +194,8 @@ time_t Time::ToTimeT() const {
     return std::numeric_limits<time_t>::max();
   }
   if (std::numeric_limits<int64_t>::max() - kTimeTToMicrosecondsOffset <= us_) {
-    DLOG(WARNING) << "Overflow when converting base::Time with internal " <<
-                     "value " << us_ << " to time_t.";
+    DLOG(WARNING) << "Overflow when converting base::Time with internal "
+                  << "value " << us_ << " to time_t.";
     return std::numeric_limits<time_t>::max();
   }
   return (us_ - kTimeTToMicrosecondsOffset) / kMicrosecondsPerSecond;
@@ -222,9 +222,8 @@ double Time::ToDoubleT() const {
 #if defined(OS_POSIX)
 // static
 Time Time::FromTimeSpec(const timespec& ts) {
-  return FromDoubleT(ts.tv_sec +
-                     static_cast<double>(ts.tv_nsec) /
-                         base::Time::kNanosecondsPerSecond);
+  return FromDoubleT(ts.tv_sec + static_cast<double>(ts.tv_nsec) /
+                                     base::Time::kNanosecondsPerSecond);
 }
 #endif
 
@@ -263,8 +262,7 @@ int64_t Time::ToJavaTime() const {
     // Preserve max without offset to prevent overflow.
     return std::numeric_limits<int64_t>::max();
   }
-  return ((us_ - kTimeTToMicrosecondsOffset) /
-          kMicrosecondsPerMillisecond);
+  return ((us_ - kTimeTToMicrosecondsOffset) / kMicrosecondsPerMillisecond);
 }
 
 // static
@@ -301,14 +299,10 @@ std::ostream& operator<<(std::ostream& os, Time time) {
   Time::Exploded exploded;
   time.UTCExplode(&exploded);
   // Use StringPrintf because iostreams formatting is painful.
-  return os << StringPrintf("%04d-%02d-%02d %02d:%02d:%02d.%03d UTC",
-                            exploded.year,
-                            exploded.month,
-                            exploded.day_of_month,
-                            exploded.hour,
-                            exploded.minute,
-                            exploded.second,
-                            exploded.millisecond);
+  return os << StringPrintf(
+             "%04d-%02d-%02d %02d:%02d:%02d.%03d UTC", exploded.year,
+             exploded.month, exploded.day_of_month, exploded.hour,
+             exploded.minute, exploded.second, exploded.millisecond);
 }
 
 // TimeTicks ------------------------------------------------------------------
@@ -369,12 +363,9 @@ inline bool is_in_range(int value, int lo, int hi) {
 }
 
 bool Time::Exploded::HasValidValues() const {
-  return is_in_range(month, 1, 12) &&
-         is_in_range(day_of_week, 0, 6) &&
-         is_in_range(day_of_month, 1, 31) &&
-         is_in_range(hour, 0, 23) &&
-         is_in_range(minute, 0, 59) &&
-         is_in_range(second, 0, 60) &&
+  return is_in_range(month, 1, 12) && is_in_range(day_of_week, 0, 6) &&
+         is_in_range(day_of_month, 1, 31) && is_in_range(hour, 0, 23) &&
+         is_in_range(minute, 0, 59) && is_in_range(second, 0, 60) &&
          is_in_range(millisecond, 0, 999);
 }
 

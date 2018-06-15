@@ -110,8 +110,7 @@ TEST(Functions, SplitList) {
 
       // Rounding.
       "out6 = split_list([1, 2, 3, 4, 5, 6], 4)\n"
-      "print(\"rounding = $out6\")\n"
-      );
+      "print(\"rounding = $out6\")\n");
   ASSERT_FALSE(input.has_error());
 
   Err err;

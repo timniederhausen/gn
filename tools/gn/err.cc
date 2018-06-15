@@ -25,7 +25,8 @@ std::string GetNthLine(const base::StringPiece& data, int n) {
   return data.substr(line_off, end - line_off).as_string();
 }
 
-void FillRangeOnLine(const LocationRange& range, int line_number,
+void FillRangeOnLine(const LocationRange& range,
+                     int line_number,
                      std::string* line) {
   // Only bother if the range's begin or end overlaps the line. If the entire
   // line is highlighted as a result of this range, it's not very helpful.
@@ -85,17 +86,12 @@ void OutputHighlighedPosition(const Location& location,
 
 }  // namespace
 
-Err::Err() : has_error_(false) {
-}
+Err::Err() : has_error_(false) {}
 
 Err::Err(const Location& location,
          const std::string& msg,
          const std::string& help)
-    : has_error_(true),
-      location_(location),
-      message_(msg),
-      help_text_(help) {
-}
+    : has_error_(true), location_(location), message_(msg), help_text_(help) {}
 
 Err::Err(const LocationRange& range,
          const std::string& msg,
@@ -107,9 +103,7 @@ Err::Err(const LocationRange& range,
   ranges_.push_back(range);
 }
 
-Err::Err(const Token& token,
-         const std::string& msg,
-         const std::string& help)
+Err::Err(const Token& token, const std::string& msg, const std::string& help)
     : has_error_(true),
       location_(token.location()),
       message_(msg),
@@ -120,9 +114,7 @@ Err::Err(const Token& token,
 Err::Err(const ParseNode* node,
          const std::string& msg,
          const std::string& help_text)
-    : has_error_(true),
-      message_(msg),
-      help_text_(help_text) {
+    : has_error_(true), message_(msg), help_text_(help_text) {
   // Node will be null in certain tests.
   if (node) {
     LocationRange range = node->GetRange();
@@ -134,9 +126,7 @@ Err::Err(const ParseNode* node,
 Err::Err(const Value& value,
          const std::string msg,
          const std::string& help_text)
-    : has_error_(true),
-      message_(msg),
-      help_text_(help_text) {
+    : has_error_(true), message_(msg), help_text_(help_text) {
   if (value.origin()) {
     LocationRange range = value.origin()->GetRange();
     location_ = range.begin();
@@ -184,8 +174,8 @@ void Err::InternalPrintToStdout(bool is_sub_err, bool is_fatal) const {
 
   // Quoted line.
   if (input_file) {
-    std::string line = GetNthLine(input_file->contents(),
-                                  location_.line_number());
+    std::string line =
+        GetNthLine(input_file->contents(), location_.line_number());
     if (!base::ContainsOnlyChars(line, base::kWhitespaceASCII)) {
       OutputString(line + "\n", DECORATION_DIM);
       OutputHighlighedPosition(location_, ranges_, line.size());

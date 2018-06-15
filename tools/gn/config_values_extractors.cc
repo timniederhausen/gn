@@ -11,8 +11,7 @@ namespace {
 class EscapedStringWriter {
  public:
   explicit EscapedStringWriter(const EscapeOptions& escape_options)
-      : escape_options_(escape_options) {
-  }
+      : escape_options_(escape_options) {}
 
   void operator()(const std::string& s, std::ostream& out) const {
     out << " ";
@@ -27,7 +26,7 @@ class EscapedStringWriter {
 
 void RecursiveTargetConfigStringsToStream(
     const Target* target,
-    const std::vector<std::string>& (ConfigValues::* getter)() const,
+    const std::vector<std::string>& (ConfigValues::*getter)() const,
     const EscapeOptions& escape_options,
     std::ostream& out) {
   RecursiveTargetConfigToStream(target, getter,

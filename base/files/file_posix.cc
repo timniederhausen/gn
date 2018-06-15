@@ -26,11 +26,11 @@ namespace {
 
 #if defined(OS_BSD) || defined(OS_MACOSX) || defined(OS_NACL) || \
     defined(OS_ANDROID) && __ANDROID_API__ < 21
-int CallFstat(int fd, stat_wrapper_t *sb) {
+int CallFstat(int fd, stat_wrapper_t* sb) {
   return fstat(fd, sb);
 }
 #else
-int CallFstat(int fd, stat_wrapper_t *sb) {
+int CallFstat(int fd, stat_wrapper_t* sb) {
   return fstat64(fd, sb);
 }
 #endif
@@ -52,9 +52,9 @@ int CallFutimes(PlatformFile file, const struct timeval times[2]) {
   // http://pubs.opengroup.org/onlinepubs/9699919799/
 
   timespec ts_times[2];
-  ts_times[0].tv_sec  = times[0].tv_sec;
+  ts_times[0].tv_sec = times[0].tv_sec;
   ts_times[0].tv_nsec = times[0].tv_usec * 1000;
-  ts_times[1].tv_sec  = times[1].tv_sec;
+  ts_times[1].tv_sec = times[1].tv_sec;
   ts_times[1].tv_nsec = times[1].tv_usec * 1000;
 
   return futimens(file, ts_times);
@@ -126,20 +126,17 @@ void File::Info::FromStat(const stat_wrapper_t& stat_info) {
 #error
 #endif
 
-  last_modified =
-      Time::FromTimeT(last_modified_sec) +
-      TimeDelta::FromMicroseconds(last_modified_nsec /
-                                  Time::kNanosecondsPerMicrosecond);
+  last_modified = Time::FromTimeT(last_modified_sec) +
+                  TimeDelta::FromMicroseconds(last_modified_nsec /
+                                              Time::kNanosecondsPerMicrosecond);
 
-  last_accessed =
-      Time::FromTimeT(last_accessed_sec) +
-      TimeDelta::FromMicroseconds(last_accessed_nsec /
-                                  Time::kNanosecondsPerMicrosecond);
+  last_accessed = Time::FromTimeT(last_accessed_sec) +
+                  TimeDelta::FromMicroseconds(last_accessed_nsec /
+                                              Time::kNanosecondsPerMicrosecond);
 
-  creation_time =
-      Time::FromTimeT(creation_time_sec) +
-      TimeDelta::FromMicroseconds(creation_time_nsec /
-                                  Time::kNanosecondsPerMicrosecond);
+  creation_time = Time::FromTimeT(creation_time_sec) +
+                  TimeDelta::FromMicroseconds(creation_time_nsec /
+                                              Time::kNanosecondsPerMicrosecond);
 }
 
 bool File::IsValid() const {
@@ -177,8 +174,8 @@ int File::Read(int64_t offset, char* data, int size) {
   int bytes_read = 0;
   int rv;
   do {
-    rv = HANDLE_EINTR(pread(file_.get(), data + bytes_read,
-                            size - bytes_read, offset + bytes_read));
+    rv = HANDLE_EINTR(pread(file_.get(), data + bytes_read, size - bytes_read,
+                            offset + bytes_read));
     if (rv <= 0)
       break;
 
@@ -249,8 +246,8 @@ int File::WriteAtCurrentPos(const char* data, int size) {
   int bytes_written = 0;
   int rv;
   do {
-    rv = HANDLE_EINTR(write(file_.get(), data + bytes_written,
-                            size - bytes_written));
+    rv = HANDLE_EINTR(
+        write(file_.get(), data + bytes_written, size - bytes_written));
     if (rv <= 0)
       break;
 
@@ -399,10 +396,8 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
     open_flags |= O_RDWR;
   } else if (flags & FLAG_WRITE) {
     open_flags |= O_WRONLY;
-  } else if (!(flags & FLAG_READ) &&
-             !(flags & FLAG_WRITE_ATTRIBUTES) &&
-             !(flags & FLAG_APPEND) &&
-             !(flags & FLAG_OPEN_ALWAYS)) {
+  } else if (!(flags & FLAG_READ) && !(flags & FLAG_WRITE_ATTRIBUTES) &&
+             !(flags & FLAG_APPEND) && !(flags & FLAG_OPEN_ALWAYS)) {
     NOTREACHED();
   }
 
@@ -423,7 +418,7 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
     if (descriptor < 0) {
       open_flags |= O_CREAT;
       if (flags & FLAG_EXCLUSIVE_READ || flags & FLAG_EXCLUSIVE_WRITE)
-        open_flags |= O_EXCL;   // together with O_CREAT implies O_NOFOLLOW
+        open_flags |= O_EXCL;  // together with O_CREAT implies O_NOFOLLOW
 
       descriptor = HANDLE_EINTR(open(path.value().c_str(), open_flags, mode));
       if (descriptor >= 0)

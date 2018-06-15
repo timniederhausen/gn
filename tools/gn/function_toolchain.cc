@@ -93,8 +93,9 @@ bool ValidateSubstitutionList(const std::vector<SubstitutionType>& list,
   for (const auto& cur_type : list) {
     if (!validate(cur_type)) {
       *err = Err(*origin, "Pattern not valid here.",
-          "You used the pattern " + std::string(kSubstitutionNames[cur_type]) +
-          " which is not valid\nfor this variable.");
+                 "You used the pattern " +
+                     std::string(kSubstitutionNames[cur_type]) +
+                     " which is not valid\nfor this variable.");
       return false;
     }
   }
@@ -207,19 +208,15 @@ bool ReadDepsFormat(Scope* scope, Tool* tool, Err* err) {
 }
 
 bool IsCompilerTool(Toolchain::ToolType type) {
-  return type == Toolchain::TYPE_CC ||
-         type == Toolchain::TYPE_CXX ||
-         type == Toolchain::TYPE_OBJC ||
-         type == Toolchain::TYPE_OBJCXX ||
-         type == Toolchain::TYPE_RC ||
-         type == Toolchain::TYPE_ASM;
+  return type == Toolchain::TYPE_CC || type == Toolchain::TYPE_CXX ||
+         type == Toolchain::TYPE_OBJC || type == Toolchain::TYPE_OBJCXX ||
+         type == Toolchain::TYPE_RC || type == Toolchain::TYPE_ASM;
 }
 
 bool IsLinkerTool(Toolchain::ToolType type) {
   // "alink" is not counted as in the generic "linker" tool list.
   return type == Toolchain::TYPE_SOLINK ||
-         type == Toolchain::TYPE_SOLINK_MODULE ||
-         type == Toolchain::TYPE_LINK;
+         type == Toolchain::TYPE_SOLINK_MODULE || type == Toolchain::TYPE_LINK;
 }
 
 bool IsPatternInOutputList(const SubstitutionList& output_list,
@@ -232,7 +229,6 @@ bool IsPatternInOutputList(const SubstitutionList& output_list,
   }
   return false;
 }
-
 
 bool ValidateOutputs(const Tool* tool, Err* err) {
   if (tool->outputs().list().empty()) {
@@ -258,8 +254,8 @@ bool ValidateLinkAndDependOutput(const Tool* tool,
   if (tool_type != Toolchain::TYPE_SOLINK &&
       tool_type != Toolchain::TYPE_SOLINK_MODULE) {
     *err = Err(tool->defined_from(),
-        "This tool specifies a " + std::string(variable_name) + ".",
-        "This is only valid for solink and solink_module tools.");
+               "This tool specifies a " + std::string(variable_name) + ".",
+               "This is only valid for solink and solink_module tools.");
     return false;
   }
 
@@ -280,7 +276,7 @@ bool ValidateRuntimeOutputs(const Tool* tool,
 
   if (!IsLinkerTool(tool_type)) {
     *err = Err(tool->defined_from(), "This tool specifies runtime_outputs.",
-        "This is only valid for linker tools (alink doesn't count).");
+               "This is only valid for linker tools (alink doesn't count).");
     return false;
   }
 
@@ -288,7 +284,7 @@ bool ValidateRuntimeOutputs(const Tool* tool,
     if (!IsPatternInOutputList(tool->outputs(), pattern)) {
       *err = Err(tool->defined_from(), "This tool's runtime_outputs is bad.",
                  "It must be a subset of the outputs. The bad one is:\n  " +
-                  pattern.AsString());
+                     pattern.AsString());
       return false;
     }
   }
@@ -300,8 +296,7 @@ bool ValidateRuntimeOutputs(const Tool* tool,
 // toolchain -------------------------------------------------------------------
 
 const char kToolchain[] = "toolchain";
-const char kToolchain_HelpShort[] =
-    "toolchain: Defines a toolchain.";
+const char kToolchain_HelpShort[] = "toolchain: Defines a toolchain.";
 const char kToolchain_Help[] =
     R"*(toolchain: Defines a toolchain.
 
@@ -469,9 +464,9 @@ Value RunToolchain(Scope* scope,
   // Read deps (if any).
   const Value* deps_value = block_scope.GetValue(variables::kDeps, true);
   if (deps_value) {
-    ExtractListOfLabels(
-        *deps_value, block_scope.GetSourceDir(),
-        ToolchainLabelForScope(&block_scope), &toolchain->deps(), err);
+    ExtractListOfLabels(*deps_value, block_scope.GetSourceDir(),
+                        ToolchainLabelForScope(&block_scope),
+                        &toolchain->deps(), err);
     if (err->has_error())
       return Value();
   }
@@ -504,8 +499,7 @@ Value RunToolchain(Scope* scope,
 // tool ------------------------------------------------------------------------
 
 const char kTool[] = "tool";
-const char kTool_HelpShort[] =
-    "tool: Specify arguments to a toolchain tool.";
+const char kTool_HelpShort[] = "tool: Specify arguments to a toolchain tool.";
 const char kTool_Help[] =
     R"(tool: Specify arguments to a toolchain tool.
 
@@ -777,7 +771,7 @@ Expansions for tool variables
         the linker tool of "lib".
 
 )"  // String break to prevent overflowing the 16K max VC string length.
-R"(  Compiler tools have the notion of a single input and a single output, along
+    R"(  Compiler tools have the notion of a single input and a single output, along
   with a set of compiler-specific flags. The following expansions are
   available:
 
@@ -880,7 +874,7 @@ R"(  Compiler tools have the notion of a single input and a single output, along
         Example: "libfoo.so libbar.so"
 
 )"  // String break to prevent overflowing the 16K max VC string length.
-R"(  The static library ("alink") tool allows {{arflags}} plus the common tool
+    R"(  The static library ("alink") tool allows {{arflags}} plus the common tool
   substitutions.
 
   The copy tool allows the common compiler/linker substitutions, plus
@@ -977,8 +971,8 @@ Value RunTool(Scope* scope,
       scope->GetProperty(&kToolchainPropertyKey, nullptr));
   if (!toolchain) {
     *err = Err(function->function(), "tool() called outside of toolchain().",
-        "The tool() function can only be used inside a toolchain() "
-        "definition.");
+               "The tool() function can only be used inside a toolchain() "
+               "definition.");
     return Value();
   }
 
@@ -1083,8 +1077,9 @@ Value RunTool(Scope* scope,
     return Value();
   if ((!tool->link_output().empty() && tool->depend_output().empty()) ||
       (tool->link_output().empty() && !tool->depend_output().empty())) {
-    *err = Err(function, "Both link_output and depend_output should either "
-        "be specified or they should both be empty.");
+    *err = Err(function,
+               "Both link_output and depend_output should either "
+               "be specified or they should both be empty.");
     return Value();
   }
 

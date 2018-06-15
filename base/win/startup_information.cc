@@ -8,7 +8,7 @@
 
 namespace {
 
-typedef BOOL (WINAPI *InitializeProcThreadAttributeListFunction)(
+typedef BOOL(WINAPI* InitializeProcThreadAttributeListFunction)(
     LPPROC_THREAD_ATTRIBUTE_LIST attribute_list,
     DWORD attribute_count,
     DWORD flags,
@@ -16,7 +16,7 @@ typedef BOOL (WINAPI *InitializeProcThreadAttributeListFunction)(
 static InitializeProcThreadAttributeListFunction
     initialize_proc_thread_attribute_list;
 
-typedef BOOL (WINAPI *UpdateProcThreadAttributeFunction)(
+typedef BOOL(WINAPI* UpdateProcThreadAttributeFunction)(
     LPPROC_THREAD_ATTRIBUTE_LIST attribute_list,
     DWORD flags,
     DWORD_PTR attribute,
@@ -26,7 +26,7 @@ typedef BOOL (WINAPI *UpdateProcThreadAttributeFunction)(
     PSIZE_T return_size);
 static UpdateProcThreadAttributeFunction update_proc_thread_attribute_list;
 
-typedef VOID (WINAPI *DeleteProcThreadAttributeListFunction)(
+typedef VOID(WINAPI* DeleteProcThreadAttributeListFunction)(
     LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList);
 static DeleteProcThreadAttributeListFunction delete_proc_thread_attribute_list;
 
@@ -59,7 +59,7 @@ StartupInformation::StartupInformation() {
 StartupInformation::~StartupInformation() {
   if (startup_info_.lpAttributeList) {
     delete_proc_thread_attribute_list(startup_info_.lpAttributeList);
-    delete [] reinterpret_cast<BYTE*>(startup_info_.lpAttributeList);
+    delete[] reinterpret_cast<BYTE*>(startup_info_.lpAttributeList);
   }
 }
 
@@ -77,8 +77,8 @@ bool StartupInformation::InitializeProcThreadAttributeList(
   startup_info_.lpAttributeList =
       reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(new BYTE[size]);
   if (!initialize_proc_thread_attribute_list(startup_info_.lpAttributeList,
-                                           attribute_count, 0, &size)) {
-    delete [] reinterpret_cast<BYTE*>(startup_info_.lpAttributeList);
+                                             attribute_count, 0, &size)) {
+    delete[] reinterpret_cast<BYTE*>(startup_info_.lpAttributeList);
     startup_info_.lpAttributeList = NULL;
     return false;
   }
@@ -86,16 +86,14 @@ bool StartupInformation::InitializeProcThreadAttributeList(
   return true;
 }
 
-bool StartupInformation::UpdateProcThreadAttribute(
-    DWORD_PTR attribute,
-    void* value,
-    size_t size) {
+bool StartupInformation::UpdateProcThreadAttribute(DWORD_PTR attribute,
+                                                   void* value,
+                                                   size_t size) {
   if (!startup_info_.lpAttributeList)
     return false;
-  return !!update_proc_thread_attribute_list(startup_info_.lpAttributeList, 0,
-                                       attribute, value, size, NULL, NULL);
+  return !!update_proc_thread_attribute_list(
+      startup_info_.lpAttributeList, 0, attribute, value, size, NULL, NULL);
 }
 
 }  // namespace win
 }  // namespace base
-

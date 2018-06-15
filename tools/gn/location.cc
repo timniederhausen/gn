@@ -10,11 +10,7 @@
 #include "base/strings/string_number_conversions.h"
 #include "tools/gn/input_file.h"
 
-Location::Location()
-    : file_(nullptr),
-      line_number_(-1),
-      column_number_(-1) {
-}
+Location::Location() : file_(nullptr), line_number_(-1), column_number_(-1) {}
 
 Location::Location(const InputFile* file,
                    int line_number,
@@ -23,12 +19,10 @@ Location::Location(const InputFile* file,
     : file_(file),
       line_number_(line_number),
       column_number_(column_number),
-      byte_(byte) {
-}
+      byte_(byte) {}
 
 bool Location::operator==(const Location& other) const {
-  return other.file_ == file_ &&
-         other.line_number_ == line_number_ &&
+  return other.file_ == file_ && other.line_number_ == line_number_ &&
          other.column_number_ == column_number_;
 }
 
@@ -64,14 +58,12 @@ std::string Location::Describe(bool include_column_number) const {
 LocationRange::LocationRange() = default;
 
 LocationRange::LocationRange(const Location& begin, const Location& end)
-    : begin_(begin),
-      end_(end) {
+    : begin_(begin), end_(end) {
   DCHECK(begin_.file() == end_.file());
 }
 
 LocationRange LocationRange::Union(const LocationRange& other) const {
   DCHECK(begin_.file() == other.begin_.file());
-  return LocationRange(
-      begin_ < other.begin_ ? begin_ : other.begin_,
-      end_ < other.end_ ? other.end_ : end_);
+  return LocationRange(begin_ < other.begin_ ? begin_ : other.begin_,
+                       end_ < other.end_ ? other.end_ : end_);
 }

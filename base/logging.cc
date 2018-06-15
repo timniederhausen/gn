@@ -42,9 +42,9 @@ typedef HANDLE MutexHandle;
 #endif
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <mach-o/dyld.h>
 #include <mach/mach.h>
 #include <mach/mach_time.h>
-#include <mach-o/dyld.h>
 
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include <time.h>
@@ -198,13 +198,9 @@ PathString GetDefaultLogFile() {
 // LoggingLocks can not be nested.
 class LoggingLock {
  public:
-  LoggingLock() {
-    LockLogging();
-  }
+  LoggingLock() { LockLogging(); }
 
-  ~LoggingLock() {
-    UnlockLogging();
-  }
+  ~LoggingLock() { UnlockLogging(); }
 
   static void Init(LogLockingState lock_log, const PathChar* new_log_file) {
     if (initialized)
@@ -290,8 +286,8 @@ bool InitializeLogFileHandle() {
       // try the current directory
       wchar_t system_buffer[MAX_PATH];
       system_buffer[0] = 0;
-      DWORD len = ::GetCurrentDirectory(arraysize(system_buffer),
-                                        system_buffer);
+      DWORD len =
+          ::GetCurrentDirectory(arraysize(system_buffer), system_buffer);
       if (len == 0 || len > arraysize(system_buffer))
         return false;
 
@@ -403,8 +399,10 @@ bool ShouldCreateLogMessage(int severity) {
          severity >= kAlwaysPrintErrorLevel;
 }
 
-void SetLogItems(bool enable_process_id, bool enable_thread_id,
-                 bool enable_timestamp, bool enable_tickcount) {
+void SetLogItems(bool enable_process_id,
+                 bool enable_thread_id,
+                 bool enable_timestamp,
+                 bool enable_tickcount) {
   g_log_process_id = enable_process_id;
   g_log_thread_id = enable_thread_id;
   g_log_timestamp = enable_timestamp;
@@ -424,16 +422,25 @@ LogMessageHandlerFunction GetLogMessageHandler() {
 }
 
 // Explicit instantiations for commonly used comparisons.
-template std::string* MakeCheckOpString<int, int>(
-    const int&, const int&, const char* names);
+template std::string* MakeCheckOpString<int, int>(const int&,
+                                                  const int&,
+                                                  const char* names);
 template std::string* MakeCheckOpString<unsigned long, unsigned long>(
-    const unsigned long&, const unsigned long&, const char* names);
+    const unsigned long&,
+    const unsigned long&,
+    const char* names);
 template std::string* MakeCheckOpString<unsigned long, unsigned int>(
-    const unsigned long&, const unsigned int&, const char* names);
+    const unsigned long&,
+    const unsigned int&,
+    const char* names);
 template std::string* MakeCheckOpString<unsigned int, unsigned long>(
-    const unsigned int&, const unsigned long&, const char* names);
+    const unsigned int&,
+    const unsigned long&,
+    const char* names);
 template std::string* MakeCheckOpString<std::string, std::string>(
-    const std::string&, const std::string&, const char* name);
+    const std::string&,
+    const std::string&,
+    const char* name);
 
 void MakeCheckOpValueString(std::ostream* os, std::nullptr_t p) {
   (*os) << "nullptr";
@@ -462,8 +469,7 @@ void DisplayDebugMessageInDialog(const std::string& str) {
 #endif  // !defined(NDEBUG)
 
 #if defined(OS_WIN)
-LogMessage::SaveLastError::SaveLastError() : last_error_(::GetLastError()) {
-}
+LogMessage::SaveLastError::SaveLastError() : last_error_(::GetLastError()) {}
 
 LogMessage::SaveLastError::~SaveLastError() {
   ::SetLastError(last_error_);
@@ -488,7 +494,9 @@ LogMessage::LogMessage(const char* file, int line, std::string* result)
   delete result;
 }
 
-LogMessage::LogMessage(const char* file, int line, LogSeverity severity,
+LogMessage::LogMessage(const char* file,
+                       int line,
+                       LogSeverity severity,
                        std::string* result)
     : severity_(severity), file_(file), line_(line) {
   Init(file, line);
@@ -507,9 +515,8 @@ LogMessage::~LogMessage() {
   std::string str_newline(stream_.str());
 
   // Give any log message handler first dibs on the message.
-  if (log_message_handler &&
-      log_message_handler(severity_, file_, line_,
-                          message_start_, str_newline)) {
+  if (log_message_handler && log_message_handler(severity_, file_, line_,
+                                                 message_start_, str_newline)) {
     // The handler took care of it, no further processing.
     return;
   }
@@ -603,9 +610,9 @@ LogMessage::~LogMessage() {
 
       // Map Chrome log severities to ASL log levels.
       const char* const asl_level_string = [](LogSeverity severity) {
-        // ASL_LEVEL_* are ints, but ASL needs equivalent strings. This
-        // non-obvious two-step macro trick achieves what's needed.
-        // https://gcc.gnu.org/onlinedocs/cpp/Stringification.html
+// ASL_LEVEL_* are ints, but ASL needs equivalent strings. This
+// non-obvious two-step macro trick achieves what's needed.
+// https://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 #define ASL_LEVEL_STR(level) ASL_LEVEL_STR_X(level)
 #define ASL_LEVEL_STR_X(level) #level
         switch (severity) {
@@ -677,13 +684,13 @@ LogMessage::~LogMessage() {
 
   // write to log file
   if ((g_logging_destination & LOG_TO_FILE) != 0) {
-    // We can have multiple threads and/or processes, so try to prevent them
-    // from clobbering each other's writes.
-    // If the client app did not call InitLogging, and the lock has not
-    // been created do it now. We do this on demand, but if two threads try
-    // to do this at the same time, there will be a race condition to create
-    // the lock. This is why InitLogging should be called from the main
-    // thread at the beginning of execution.
+// We can have multiple threads and/or processes, so try to prevent them
+// from clobbering each other's writes.
+// If the client app did not call InitLogging, and the lock has not
+// been created do it now. We do this on demand, but if two threads try
+// to do this at the same time, there will be a race condition to create
+// the lock. This is why InitLogging should be called from the main
+// thread at the beginning of execution.
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
     LoggingLock::Init(LOCK_LOG_FILE, nullptr);
     LoggingLock logging_lock;
@@ -691,14 +698,12 @@ LogMessage::~LogMessage() {
     if (InitializeLogFileHandle()) {
 #if defined(OS_WIN)
       DWORD num_written;
-      WriteFile(g_log_file,
-                static_cast<const void*>(str_newline.c_str()),
-                static_cast<DWORD>(str_newline.length()),
-                &num_written,
+      WriteFile(g_log_file, static_cast<const void*>(str_newline.c_str()),
+                static_cast<DWORD>(str_newline.length()), &num_written,
                 nullptr);
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
-      ignore_result(fwrite(
-          str_newline.data(), str_newline.size(), 1, g_log_file));
+      ignore_result(
+          fwrite(str_newline.data(), str_newline.size(), 1, g_log_file));
       fflush(g_log_file);
 #else
 #error Unsupported platform
@@ -731,7 +736,7 @@ void LogMessage::Init(const char* file, int line) {
 
   // TODO(darin): It might be nice if the columns were fixed width.
 
-  stream_ <<  '[';
+  stream_ << '[';
   if (g_log_process_id)
     stream_ << CurrentProcessId() << ':';
   if (g_log_thread_id)
@@ -740,17 +745,11 @@ void LogMessage::Init(const char* file, int line) {
 #if defined(OS_WIN)
     SYSTEMTIME local_time;
     GetLocalTime(&local_time);
-    stream_ << std::setfill('0')
-            << std::setw(2) << local_time.wMonth
-            << std::setw(2) << local_time.wDay
-            << '/'
-            << std::setw(2) << local_time.wHour
-            << std::setw(2) << local_time.wMinute
-            << std::setw(2) << local_time.wSecond
-            << '.'
-            << std::setw(3)
-            << local_time.wMilliseconds
-            << ':';
+    stream_ << std::setfill('0') << std::setw(2) << local_time.wMonth
+            << std::setw(2) << local_time.wDay << '/' << std::setw(2)
+            << local_time.wHour << std::setw(2) << local_time.wMinute
+            << std::setw(2) << local_time.wSecond << '.' << std::setw(3)
+            << local_time.wMilliseconds << ':';
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
     timeval tv;
     gettimeofday(&tv, nullptr);
@@ -758,16 +757,11 @@ void LogMessage::Init(const char* file, int line) {
     struct tm local_time;
     localtime_r(&t, &local_time);
     struct tm* tm_time = &local_time;
-    stream_ << std::setfill('0')
-            << std::setw(2) << 1 + tm_time->tm_mon
-            << std::setw(2) << tm_time->tm_mday
-            << '/'
-            << std::setw(2) << tm_time->tm_hour
-            << std::setw(2) << tm_time->tm_min
-            << std::setw(2) << tm_time->tm_sec
-            << '.'
-            << std::setw(6) << tv.tv_usec
-            << ':';
+    stream_ << std::setfill('0') << std::setw(2) << 1 + tm_time->tm_mon
+            << std::setw(2) << tm_time->tm_mday << '/' << std::setw(2)
+            << tm_time->tm_hour << std::setw(2) << tm_time->tm_min
+            << std::setw(2) << tm_time->tm_sec << '.' << std::setw(6)
+            << tv.tv_usec << ':';
 #else
 #error Unsupported platform
 #endif
@@ -819,15 +813,12 @@ std::string SystemErrorCodeToString(SystemErrorCode error_code) {
 #endif  // defined(OS_WIN)
 }
 
-
 #if defined(OS_WIN)
 Win32ErrorLogMessage::Win32ErrorLogMessage(const char* file,
                                            int line,
                                            LogSeverity severity,
                                            SystemErrorCode err)
-    : err_(err),
-      log_message_(file, line, severity) {
-}
+    : err_(err), log_message_(file, line, severity) {}
 
 Win32ErrorLogMessage::~Win32ErrorLogMessage() {
   stream() << ": " << SystemErrorCodeToString(err_);
@@ -837,9 +828,7 @@ ErrnoLogMessage::ErrnoLogMessage(const char* file,
                                  int line,
                                  LogSeverity severity,
                                  SystemErrorCode err)
-    : err_(err),
-      log_message_(file, line, severity) {
-}
+    : err_(err), log_message_(file, line, severity) {}
 
 ErrnoLogMessage::~ErrnoLogMessage() {
   stream() << ": " << SystemErrorCodeToString(err_);
@@ -859,9 +848,8 @@ void RawLog(int level, const char* message) {
     const size_t message_len = strlen(message);
     int rv;
     while (bytes_written < message_len) {
-      rv = HANDLE_EINTR(
-          write(STDERR_FILENO, message + bytes_written,
-                message_len - bytes_written));
+      rv = HANDLE_EINTR(write(STDERR_FILENO, message + bytes_written,
+                              message_len - bytes_written));
       if (rv < 0) {
         // Give up, nothing we can do now.
         break;
@@ -900,8 +888,7 @@ std::wstring GetLogFileFullPath() {
 #endif
 
 void LogErrorNotReached(const char* file, int line) {
-  LogMessage(file, line, LOG_ERROR).stream()
-      << "NOTREACHED() hit.";
+  LogMessage(file, line, LOG_ERROR).stream() << "NOTREACHED() hit.";
 }
 
 }  // namespace logging

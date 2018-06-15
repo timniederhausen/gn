@@ -35,8 +35,7 @@ TargetGenerator::TargetGenerator(Target* target,
     : target_(target),
       scope_(scope),
       function_call_(function_call),
-      err_(err) {
-}
+      err_(err) {}
 
 TargetGenerator::~TargetGenerator() = default;
 
@@ -75,9 +74,8 @@ void TargetGenerator::GenerateTarget(Scope* scope,
                                      Err* err) {
   // Name is the argument to the function.
   if (args.size() != 1u || args[0].type() != Value::STRING) {
-    *err = Err(function_call,
-        "Target generator requires one string argument.",
-        "Otherwise I'm not sure what to call this target.");
+    *err = Err(function_call, "Target generator requires one string argument.",
+               "Otherwise I'm not sure what to call this target.");
     return;
   }
 
@@ -96,8 +94,8 @@ void TargetGenerator::GenerateTarget(Scope* scope,
 
   // Create and call out to the proper generator.
   if (output_type == functions::kBundleData) {
-    BundleDataTargetGenerator generator(
-        target.get(), scope, function_call, err);
+    BundleDataTargetGenerator generator(target.get(), scope, function_call,
+                                        err);
     generator.Run();
   } else if (output_type == functions::kCreateBundle) {
     CreateBundleTargetGenerator generator(target.get(), scope, function_call,
@@ -287,18 +285,19 @@ bool TargetGenerator::FillOutputs(bool allow_substitutions) {
   if (!allow_substitutions) {
     // Verify no substitutions were actually used.
     if (!outputs.required_types().empty()) {
-      *err_ = Err(*value, "Source expansions not allowed here.",
-          "The outputs of this target used source {{expansions}} but this "
-          "target type\ndoesn't support them. Just express the outputs "
-          "literally.");
+      *err_ =
+          Err(*value, "Source expansions not allowed here.",
+              "The outputs of this target used source {{expansions}} but this "
+              "target type\ndoesn't support them. Just express the outputs "
+              "literally.");
       return false;
     }
   }
 
   // Check the substitutions used are valid for this purpose.
   if (!EnsureValidSubstitutions(outputs.required_types(),
-                                &IsValidSourceSubstitution,
-                                value->origin(), err_))
+                                &IsValidSourceSubstitution, value->origin(),
+                                err_))
     return false;
 
   // Validate that outputs are in the output dir.
@@ -332,19 +331,19 @@ bool TargetGenerator::EnsureSubstitutionIsInOutputDir(
 
   if (pattern.ranges()[0].type == SUBSTITUTION_LITERAL) {
     // If the first thing is a literal, it must start with the output dir.
-    if (!EnsureStringIsInOutputDir(
-            GetBuildSettings()->build_dir(),
-            pattern.ranges()[0].literal, original_value.origin(), err_))
+    if (!EnsureStringIsInOutputDir(GetBuildSettings()->build_dir(),
+                                   pattern.ranges()[0].literal,
+                                   original_value.origin(), err_))
       return false;
   } else {
     // Otherwise, the first subrange must be a pattern that expands to
     // something in the output directory.
     if (!SubstitutionIsInOutputDir(pattern.ranges()[0].type)) {
-      *err_ = Err(original_value,
-          "File is not inside output directory.",
-          "The given file should be in the output directory. Normally you\n"
-          "would specify\n\"$target_out_dir/foo\" or "
-          "\"{{source_gen_dir}}/foo\".");
+      *err_ =
+          Err(original_value, "File is not inside output directory.",
+              "The given file should be in the output directory. Normally you\n"
+              "would specify\n\"$target_out_dir/foo\" or "
+              "\"{{source_gen_dir}}/foo\".");
       return false;
     }
   }
@@ -383,7 +382,7 @@ bool TargetGenerator::FillWriteRuntimeDeps() {
   if (err_->has_error())
     return false;
   if (!EnsureStringIsInOutputDir(GetBuildSettings()->build_dir(),
-          source_file.value(), value->origin(), err_))
+                                 source_file.value(), value->origin(), err_))
     return false;
   OutputFile output_file(GetBuildSettings(), source_file);
   target_->set_write_runtime_deps_output(output_file);

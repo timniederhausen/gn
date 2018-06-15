@@ -127,8 +127,10 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
 
   // SOLINK
   std::unique_ptr<Tool> solink_tool = std::make_unique<Tool>();
-  SetCommandForTool("ld -shared -o {{target_output_name}}.so {{inputs}} "
-      "{{ldflags}} {{libs}}", solink_tool.get());
+  SetCommandForTool(
+      "ld -shared -o {{target_output_name}}.so {{inputs}} "
+      "{{ldflags}} {{libs}}",
+      solink_tool.get());
   solink_tool->set_lib_switch("-l");
   solink_tool->set_lib_dir_switch("-L");
   solink_tool->set_output_prefix("lib");
@@ -139,8 +141,10 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
 
   // SOLINK_MODULE
   std::unique_ptr<Tool> solink_module_tool = std::make_unique<Tool>();
-  SetCommandForTool("ld -bundle -o {{target_output_name}}.so {{inputs}} "
-      "{{ldflags}} {{libs}}", solink_module_tool.get());
+  SetCommandForTool(
+      "ld -bundle -o {{target_output_name}}.so {{inputs}} "
+      "{{ldflags}} {{libs}}",
+      solink_module_tool.get());
   solink_module_tool->set_lib_switch("-l");
   solink_module_tool->set_lib_dir_switch("-L");
   solink_module_tool->set_output_prefix("lib");
@@ -152,12 +156,14 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
 
   // LINK
   std::unique_ptr<Tool> link_tool = std::make_unique<Tool>();
-  SetCommandForTool("ld -o {{target_output_name}} {{source}} "
-      "{{ldflags}} {{libs}}", link_tool.get());
+  SetCommandForTool(
+      "ld -o {{target_output_name}} {{source}} "
+      "{{ldflags}} {{libs}}",
+      link_tool.get());
   link_tool->set_lib_switch("-l");
   link_tool->set_lib_dir_switch("-L");
-  link_tool->set_outputs(SubstitutionList::MakeForTest(
-      "{{root_out_dir}}/{{target_output_name}}"));
+  link_tool->set_outputs(
+      SubstitutionList::MakeForTest("{{root_out_dir}}/{{target_output_name}}"));
   toolchain->SetTool(Toolchain::TYPE_LINK, std::move(link_tool));
 
   // STAMP
@@ -190,8 +196,8 @@ void TestWithScope::SetCommandForTool(const std::string& cmd, Tool* tool) {
   Err err;
   SubstitutionPattern command;
   command.Parse(cmd, nullptr, &err);
-  CHECK(!err.has_error())
-      << "Couldn't parse \"" << cmd << "\", " << "got " << err.message();
+  CHECK(!err.has_error()) << "Couldn't parse \"" << cmd << "\", "
+                          << "got " << err.message();
   tool->set_command(command);
 }
 

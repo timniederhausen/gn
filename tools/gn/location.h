@@ -50,7 +50,6 @@ class LocationRange {
     return begin_.is_null();  // No need to check both for the null case.
   }
 
-
   LocationRange Union(const LocationRange& other) const;
 
  private:

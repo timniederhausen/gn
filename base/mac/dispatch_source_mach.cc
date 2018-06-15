@@ -24,11 +24,13 @@ DispatchSourceMach::DispatchSourceMach(dispatch_queue_t queue,
                                        void (^event_handler)())
     : queue_(queue, base::scoped_policy::RETAIN),
       source_(dispatch_source_create(DISPATCH_SOURCE_TYPE_MACH_RECV,
-          port, 0, queue_)),
+                                     port,
+                                     0,
+                                     queue_)),
       source_canceled_(dispatch_semaphore_create(0)) {
   dispatch_source_set_event_handler(source_, event_handler);
   dispatch_source_set_cancel_handler(source_, ^{
-      dispatch_semaphore_signal(source_canceled_);
+    dispatch_semaphore_signal(source_canceled_);
   });
 }
 

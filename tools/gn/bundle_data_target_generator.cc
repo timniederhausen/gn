@@ -15,7 +15,8 @@ BundleDataTargetGenerator::BundleDataTargetGenerator(
     Target* target,
     Scope* scope,
     const FunctionCallNode* function_call,
-    Err* err) : TargetGenerator(target, scope, function_call, err) {}
+    Err* err)
+    : TargetGenerator(target, scope, function_call, err) {}
 
 BundleDataTargetGenerator::~BundleDataTargetGenerator() = default;
 
@@ -28,13 +29,14 @@ void BundleDataTargetGenerator::DoRun() {
     return;
 
   if (target_->sources().empty()) {
-    *err_ = Err(function_call_, "Empty sources for bundle_data target."
-        "You have to specify at least one file in the \"sources\".");
+    *err_ = Err(function_call_,
+                "Empty sources for bundle_data target."
+                "You have to specify at least one file in the \"sources\".");
     return;
   }
   if (target_->action_values().outputs().list().size() != 1) {
-    *err_ = Err(function_call_,
-        "Target bundle_data must have exactly one ouput.",
+    *err_ = Err(
+        function_call_, "Target bundle_data must have exactly one ouput.",
         "You must specify exactly one value in the \"output\" array for the"
         "destination\ninto the generated bundle (see \"gn help bundle_data\"). "
         "If there are multiple\nsources to copy, use source expansion (see "
@@ -56,9 +58,9 @@ bool BundleDataTargetGenerator::FillOutputs() {
   for (SubstitutionType type : outputs.required_types()) {
     if (!IsValidBundleDataSubstitution(type)) {
       *err_ = Err(value->origin(), "Invalid substitution type.",
-          "The substitution " + std::string(kSubstitutionNames[type]) +
-          " isn't valid for something\n"
-          "operating on a bundle_data file such as this.");
+                  "The substitution " + std::string(kSubstitutionNames[type]) +
+                      " isn't valid for something\n"
+                      "operating on a bundle_data file such as this.");
       return false;
     }
   }
@@ -86,9 +88,8 @@ bool BundleDataTargetGenerator::EnsureSubstitutionIsInBundleDir(
   if (SubstitutionIsInBundleDir(pattern.ranges()[0].type))
     return true;
 
-  *err_ = Err(original_value,
-      "File is not inside bundle directory.",
-      "The given file should be in the output directory. Normally you\n"
-      "would specify {{bundle_resources_dir}} or such substitution.");
+  *err_ = Err(original_value, "File is not inside bundle directory.",
+              "The given file should be in the output directory. Normally you\n"
+              "would specify {{bundle_resources_dir}} or such substitution.");
   return false;
 }

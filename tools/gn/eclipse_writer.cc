@@ -50,10 +50,9 @@ EclipseWriter::EclipseWriter(const BuildSettings* build_settings,
 EclipseWriter::~EclipseWriter() = default;
 
 // static
-bool EclipseWriter::RunAndWriteFile(
-    const BuildSettings* build_settings,
-    const Builder& builder,
-    Err* err) {
+bool EclipseWriter::RunAndWriteFile(const BuildSettings* build_settings,
+                                    const Builder& builder,
+                                    Err* err) {
   base::FilePath file = build_settings->GetFullPath(build_settings->build_dir())
                             .AppendASCII("eclipse-cdt-settings.xml");
   std::ofstream file_out;

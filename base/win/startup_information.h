@@ -5,8 +5,8 @@
 #ifndef BASE_WIN_STARTUP_INFORMATION_H_
 #define BASE_WIN_STARTUP_INFORMATION_H_
 
-#include <windows.h>
 #include <stddef.h>
+#include <windows.h>
 
 #include "base/macros.h"
 
@@ -26,9 +26,7 @@ class StartupInformation {
   // Sets one entry in the initialized attribute list.
   // |value| needs to live at least as long as the StartupInformation object
   // this is called on.
-  bool UpdateProcThreadAttribute(DWORD_PTR attribute,
-                                 void* value,
-                                 size_t size);
+  bool UpdateProcThreadAttribute(DWORD_PTR attribute, void* value, size_t size);
 
   LPSTARTUPINFOW startup_info() { return &startup_info_.StartupInfo; }
   LPSTARTUPINFOW startup_info() const {

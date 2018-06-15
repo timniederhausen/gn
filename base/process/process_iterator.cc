@@ -37,9 +37,8 @@ bool ProcessIterator::IncludeEntry() {
 
 NamedProcessIterator::NamedProcessIterator(
     const FilePath::StringType& executable_name,
-    const ProcessFilter* filter) : ProcessIterator(filter),
-                                   executable_name_(executable_name) {
-}
+    const ProcessFilter* filter)
+    : ProcessIterator(filter), executable_name_(executable_name) {}
 
 NamedProcessIterator::~NamedProcessIterator() = default;
 

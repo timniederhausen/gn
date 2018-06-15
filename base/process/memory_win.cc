@@ -40,7 +40,7 @@ namespace base {
 namespace {
 
 #pragma warning(push)
-#pragma warning(disable: 4702)  // Unreachable code after the _exit.
+#pragma warning(disable : 4702)  // Unreachable code after the _exit.
 
 NOINLINE int OnNoMemory(size_t size) {
   // Kill the process. This is important for security since most of code

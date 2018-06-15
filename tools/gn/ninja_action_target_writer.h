@@ -26,8 +26,7 @@ class NinjaActionTargetWriter : public NinjaTargetWriter {
                            WriteOutputFilesForBuildLine);
   FRIEND_TEST_ALL_PREFIXES(NinjaActionTargetWriter,
                            WriteOutputFilesForBuildLineWithDepfile);
-  FRIEND_TEST_ALL_PREFIXES(NinjaActionTargetWriter,
-                           WriteArgsSubstitutions);
+  FRIEND_TEST_ALL_PREFIXES(NinjaActionTargetWriter, WriteArgsSubstitutions);
 
   // Writes the Ninja rule for invoking the script.
   //

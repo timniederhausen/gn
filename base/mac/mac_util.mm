@@ -32,7 +32,7 @@ namespace {
 
 // The current count of outstanding requests for full screen mode from browser
 // windows, plugins, etc.
-int g_full_screen_requests[kNumFullScreenModes] = { 0 };
+int g_full_screen_requests[kNumFullScreenModes] = {0};
 
 // Sets the appropriate application presentation option based on the current
 // full screen requests.  Since only one presentation option can be active at a
@@ -82,8 +82,8 @@ void SetUIMode() {
 // representing the current application.  If such an item is found, returns a
 // retained reference to it. Caller is responsible for releasing the reference.
 LSSharedFileListItemRef GetLoginItemForApp() {
-  ScopedCFTypeRef<LSSharedFileListRef> login_items(LSSharedFileListCreate(
-      NULL, kLSSharedFileListSessionLoginItems, NULL));
+  ScopedCFTypeRef<LSSharedFileListRef> login_items(
+      LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL));
 
   if (!login_items.get()) {
     DLOG(ERROR) << "Couldn't get a Login Items list.";
@@ -95,7 +95,7 @@ LSSharedFileListItemRef GetLoginItemForApp() {
 
   NSURL* url = [NSURL fileURLWithPath:[base::mac::MainBundle() bundlePath]];
 
-  for(NSUInteger i = 0; i < [login_items_array count]; ++i) {
+  for (NSUInteger i = 0; i < [login_items_array count]; ++i) {
     LSSharedFileListItemRef item =
         reinterpret_cast<LSSharedFileListItemRef>(login_items_array[i]);
     CFURLRef item_url_ref = NULL;
@@ -117,8 +117,9 @@ LSSharedFileListItemRef GetLoginItemForApp() {
 }
 
 bool IsHiddenLoginItem(LSSharedFileListItemRef item) {
-  ScopedCFTypeRef<CFBooleanRef> hidden(reinterpret_cast<CFBooleanRef>(
-      LSSharedFileListItemCopyProperty(item,
+  ScopedCFTypeRef<CFBooleanRef> hidden(
+      reinterpret_cast<CFBooleanRef>(LSSharedFileListItemCopyProperty(
+          item,
           reinterpret_cast<CFStringRef>(kLSSharedFileListLoginItemHidden))));
 
   return hidden && hidden == kCFBooleanTrue;
@@ -130,8 +131,8 @@ CGColorSpaceRef GetGenericRGBColorSpace() {
   // Leaked. That's OK, it's scoped to the lifetime of the application.
   static CGColorSpaceRef g_color_space_generic_rgb(
       CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB));
-  DLOG_IF(ERROR, !g_color_space_generic_rgb) <<
-      "Couldn't get the generic RGB color space";
+  DLOG_IF(ERROR, !g_color_space_generic_rgb)
+      << "Couldn't get the generic RGB color space";
   return g_color_space_generic_rgb;
 }
 
@@ -154,8 +155,8 @@ CGColorSpaceRef GetSystemColorSpace() {
     g_system_color_space = CGColorSpaceCreateDeviceRGB();
 
     if (g_system_color_space) {
-      DLOG(WARNING) <<
-          "Couldn't get the main display's color space, using generic";
+      DLOG(WARNING)
+          << "Couldn't get the main display's color space, using generic";
     } else {
       DLOG(ERROR) << "Couldn't get any color space";
     }
@@ -247,8 +248,8 @@ void AddToLoginItems(bool hide_on_startup) {
     return;  // Already is a login item with required hide flag.
   }
 
-  ScopedCFTypeRef<LSSharedFileListRef> login_items(LSSharedFileListCreate(
-      NULL, kLSSharedFileListSessionLoginItems, NULL));
+  ScopedCFTypeRef<LSSharedFileListRef> login_items(
+      LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL));
 
   if (!login_items.get()) {
     DLOG(ERROR) << "Couldn't get a Login Items list.";
@@ -263,10 +264,9 @@ void AddToLoginItems(bool hide_on_startup) {
   NSURL* url = [NSURL fileURLWithPath:[base::mac::MainBundle() bundlePath]];
 
   BOOL hide = hide_on_startup ? YES : NO;
-  NSDictionary* properties =
-      [NSDictionary
-        dictionaryWithObject:[NSNumber numberWithBool:hide]
-                      forKey:(NSString*)kLSSharedFileListLoginItemHidden];
+  NSDictionary* properties = [NSDictionary
+      dictionaryWithObject:[NSNumber numberWithBool:hide]
+                    forKey:(NSString*)kLSSharedFileListLoginItemHidden];
 
   ScopedCFTypeRef<LSSharedFileListItemRef> new_item;
   new_item.reset(LSSharedFileListInsertItemURL(
@@ -284,8 +284,8 @@ void RemoveFromLoginItems() {
   if (!item.get())
     return;
 
-  ScopedCFTypeRef<LSSharedFileListRef> login_items(LSSharedFileListCreate(
-      NULL, kLSSharedFileListSessionLoginItems, NULL));
+  ScopedCFTypeRef<LSSharedFileListRef> login_items(
+      LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL));
 
   if (!login_items.get()) {
     DLOG(ERROR) << "Couldn't get a Login Items list.";
@@ -296,7 +296,7 @@ void RemoveFromLoginItems() {
 }
 
 bool WasLaunchedAsLoginOrResumeItem() {
-  ProcessSerialNumber psn = { 0, kCurrentProcess };
+  ProcessSerialNumber psn = {0, kCurrentProcess};
   ProcessInfoRec info = {};
   info.processInfoLength = sizeof(info);
 
@@ -393,9 +393,9 @@ int DarwinMajorVersionInternal() {
   int darwin_major_version = 0;
   char* dot = strchr(uname_info.release, '.');
   if (dot) {
-    if (!base::StringToInt(base::StringPiece(uname_info.release,
-                                             dot - uname_info.release),
-                           &darwin_major_version)) {
+    if (!base::StringToInt(
+            base::StringPiece(uname_info.release, dot - uname_info.release),
+            &darwin_major_version)) {
       dot = NULL;
     }
   }
@@ -440,16 +440,12 @@ int MacOSXMinorVersion() {
 
 std::string GetModelIdentifier() {
   std::string return_string;
-  ScopedIOObject<io_service_t> platform_expert(
-      IOServiceGetMatchingService(kIOMasterPortDefault,
-                                  IOServiceMatching("IOPlatformExpertDevice")));
+  ScopedIOObject<io_service_t> platform_expert(IOServiceGetMatchingService(
+      kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice")));
   if (platform_expert) {
     ScopedCFTypeRef<CFDataRef> model_data(
         static_cast<CFDataRef>(IORegistryEntryCreateCFProperty(
-            platform_expert,
-            CFSTR("model"),
-            kCFAllocatorDefault,
-            0)));
+            platform_expert, CFSTR("model"), kCFAllocatorDefault, 0)));
     if (model_data) {
       return_string =
           reinterpret_cast<const char*>(CFDataGetBytePtr(model_data));
@@ -470,10 +466,9 @@ bool ParseModelIdentifier(const std::string& ident,
     return false;
   int32_t major_tmp, minor_tmp;
   std::string::const_iterator begin = ident.begin();
-  if (!StringToInt(
-          StringPiece(begin + number_loc, begin + comma_loc), &major_tmp) ||
-      !StringToInt(
-          StringPiece(begin + comma_loc + 1, ident.end()), &minor_tmp))
+  if (!StringToInt(StringPiece(begin + number_loc, begin + comma_loc),
+                   &major_tmp) ||
+      !StringToInt(StringPiece(begin + comma_loc + 1, ident.end()), &minor_tmp))
     return false;
   *type = ident.substr(0, number_loc);
   *major = major_tmp;

@@ -63,7 +63,7 @@ TEST_F(NinjaBuildWriterTest, TwoTargets) {
   used_toolchains[setup.settings()] = setup.toolchain();
   used_toolchains[&other_settings] = &other_toolchain;
 
-  std::vector<const Target*> targets = { &target_foo, &target_bar };
+  std::vector<const Target*> targets = {&target_foo, &target_bar};
 
   std::ostringstream ninja_out;
   std::ostringstream depfile_out;
@@ -80,8 +80,7 @@ TEST_F(NinjaBuildWriterTest, TwoTargets) {
   const char expected_other_pool[] =
       "pool other_toolchain_other_depth_pool\n"
       "  depth = 42\n";
-  const char expected_toolchain[] =
-      "subninja toolchain.ninja\n";
+  const char expected_toolchain[] = "subninja toolchain.ninja\n";
   const char expected_targets[] =
       "build bar: phony obj/bar/bar.stamp\n"
       "build foo$:bar: phony obj/foo/bar.stamp\n"
@@ -90,8 +89,7 @@ TEST_F(NinjaBuildWriterTest, TwoTargets) {
       "build all: phony $\n"
       "    obj/foo/bar.stamp $\n"
       "    obj/bar/bar.stamp\n";
-  const char expected_default[] =
-      "default all\n";
+  const char expected_default[] = "default all\n";
   std::string out_str = ninja_out.str();
 #define EXPECT_SNIPPET(expected)                       \
   EXPECT_NE(std::string::npos, out_str.find(expected)) \
@@ -132,7 +130,7 @@ TEST_F(NinjaBuildWriterTest, DuplicateOutputs) {
 
   std::unordered_map<const Settings*, const Toolchain*> used_toolchains;
   used_toolchains[setup.settings()] = setup.toolchain();
-  std::vector<const Target*> targets = { &target_foo, &target_bar };
+  std::vector<const Target*> targets = {&target_foo, &target_bar};
   std::ostringstream ninja_out;
   std::ostringstream depfile_out;
   NinjaBuildWriter writer(setup.build_settings(), used_toolchains,

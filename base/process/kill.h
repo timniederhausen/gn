@@ -46,13 +46,13 @@ const DWORD kProcessKilledExitCode = 1;
 // exit code arguments to KillProcess*(), use platform/application
 // specific values instead.
 enum TerminationStatus {
-  TERMINATION_STATUS_NORMAL_TERMINATION,   // zero exit status
-  TERMINATION_STATUS_ABNORMAL_TERMINATION, // non-zero exit status
-  TERMINATION_STATUS_PROCESS_WAS_KILLED,   // e.g. SIGKILL or task manager kill
-  TERMINATION_STATUS_PROCESS_CRASHED,      // e.g. Segmentation fault
-  TERMINATION_STATUS_STILL_RUNNING,        // child hasn't exited yet
-  TERMINATION_STATUS_LAUNCH_FAILED,        // child process never launched
-  TERMINATION_STATUS_OOM,                  // Process died due to oom
+  TERMINATION_STATUS_NORMAL_TERMINATION,    // zero exit status
+  TERMINATION_STATUS_ABNORMAL_TERMINATION,  // non-zero exit status
+  TERMINATION_STATUS_PROCESS_WAS_KILLED,    // e.g. SIGKILL or task manager kill
+  TERMINATION_STATUS_PROCESS_CRASHED,       // e.g. Segmentation fault
+  TERMINATION_STATUS_STILL_RUNNING,         // child hasn't exited yet
+  TERMINATION_STATUS_LAUNCH_FAILED,         // child process never launched
+  TERMINATION_STATUS_OOM,                   // Process died due to oom
   TERMINATION_STATUS_MAX_ENUM
 };
 
@@ -62,8 +62,8 @@ enum TerminationStatus {
 // Returns true if all processes were able to be killed off, false if at least
 // one couldn't be killed.
 bool KillProcesses(const FilePath::StringType& executable_name,
-                               int exit_code,
-                               const ProcessFilter* filter);
+                   int exit_code,
+                   const ProcessFilter* filter);
 
 #if defined(OS_POSIX)
 // Attempts to kill the process group identified by |process_group_id|. Returns
@@ -78,8 +78,7 @@ bool KillProcessGroup(ProcessHandle process_group_id);
 // will only return a useful result the first time it is called after
 // the child exits (because it will reap the child and the information
 // will no longer be available).
-TerminationStatus GetTerminationStatus(ProcessHandle handle,
-                                                   int* exit_code);
+TerminationStatus GetTerminationStatus(ProcessHandle handle, int* exit_code);
 
 #if defined(OS_POSIX) && !defined(OS_FUCHSIA)
 // Send a kill signal to the process and then wait for the process to exit
@@ -97,8 +96,8 @@ TerminationStatus GetTerminationStatus(ProcessHandle handle,
 // GetTerminationStatus as the child will be reaped when WaitForExitCode
 // returns, and this information will be lost.
 //
-TerminationStatus GetKnownDeadTerminationStatus(
-    ProcessHandle handle, int* exit_code);
+TerminationStatus GetKnownDeadTerminationStatus(ProcessHandle handle,
+                                                int* exit_code);
 
 #if defined(OS_LINUX)
 // Spawns a thread to wait asynchronously for the child |process| to exit
@@ -114,10 +113,9 @@ void EnsureProcessGetsReaped(Process process);
 // is non-null, then only processes selected by the filter are waited on.
 // Returns after all processes have exited or wait_milliseconds have expired.
 // Returns true if all the processes exited, false otherwise.
-bool WaitForProcessesToExit(
-    const FilePath::StringType& executable_name,
-    base::TimeDelta wait,
-    const ProcessFilter* filter);
+bool WaitForProcessesToExit(const FilePath::StringType& executable_name,
+                            base::TimeDelta wait,
+                            const ProcessFilter* filter);
 
 // Waits a certain amount of time (can be 0) for all the processes with a given
 // executable name to exit, then kills off any of them that are still around.
@@ -126,9 +124,9 @@ bool WaitForProcessesToExit(
 // any processes needed to be killed, true if they all exited cleanly within
 // the wait_milliseconds delay.
 bool CleanupProcesses(const FilePath::StringType& executable_name,
-                                  base::TimeDelta wait,
-                                  int exit_code,
-                                  const ProcessFilter* filter);
+                      base::TimeDelta wait,
+                      int exit_code,
+                      const ProcessFilter* filter);
 #endif  // !defined(OS_FUCHSIA)
 
 }  // namespace base

@@ -45,42 +45,72 @@ const Toolchain* Toolchain::AsToolchain() const {
 
 // static
 Toolchain::ToolType Toolchain::ToolNameToType(const base::StringPiece& str) {
-  if (str == kToolCc) return TYPE_CC;
-  if (str == kToolCxx) return TYPE_CXX;
-  if (str == kToolObjC) return TYPE_OBJC;
-  if (str == kToolObjCxx) return TYPE_OBJCXX;
-  if (str == kToolRc) return TYPE_RC;
-  if (str == kToolAsm) return TYPE_ASM;
-  if (str == kToolAlink) return TYPE_ALINK;
-  if (str == kToolSolink) return TYPE_SOLINK;
-  if (str == kToolSolinkModule) return TYPE_SOLINK_MODULE;
-  if (str == kToolLink) return TYPE_LINK;
-  if (str == kToolStamp) return TYPE_STAMP;
-  if (str == kToolCopy) return TYPE_COPY;
-  if (str == kToolCopyBundleData) return TYPE_COPY_BUNDLE_DATA;
-  if (str == kToolCompileXCAssets) return TYPE_COMPILE_XCASSETS;
-  if (str == kToolAction) return TYPE_ACTION;
+  if (str == kToolCc)
+    return TYPE_CC;
+  if (str == kToolCxx)
+    return TYPE_CXX;
+  if (str == kToolObjC)
+    return TYPE_OBJC;
+  if (str == kToolObjCxx)
+    return TYPE_OBJCXX;
+  if (str == kToolRc)
+    return TYPE_RC;
+  if (str == kToolAsm)
+    return TYPE_ASM;
+  if (str == kToolAlink)
+    return TYPE_ALINK;
+  if (str == kToolSolink)
+    return TYPE_SOLINK;
+  if (str == kToolSolinkModule)
+    return TYPE_SOLINK_MODULE;
+  if (str == kToolLink)
+    return TYPE_LINK;
+  if (str == kToolStamp)
+    return TYPE_STAMP;
+  if (str == kToolCopy)
+    return TYPE_COPY;
+  if (str == kToolCopyBundleData)
+    return TYPE_COPY_BUNDLE_DATA;
+  if (str == kToolCompileXCAssets)
+    return TYPE_COMPILE_XCASSETS;
+  if (str == kToolAction)
+    return TYPE_ACTION;
   return TYPE_NONE;
 }
 
 // static
 std::string Toolchain::ToolTypeToName(ToolType type) {
   switch (type) {
-    case TYPE_CC: return kToolCc;
-    case TYPE_CXX: return kToolCxx;
-    case TYPE_OBJC: return kToolObjC;
-    case TYPE_OBJCXX: return kToolObjCxx;
-    case TYPE_RC: return kToolRc;
-    case TYPE_ASM: return kToolAsm;
-    case TYPE_ALINK: return kToolAlink;
-    case TYPE_SOLINK: return kToolSolink;
-    case TYPE_SOLINK_MODULE: return kToolSolinkModule;
-    case TYPE_LINK: return kToolLink;
-    case TYPE_STAMP: return kToolStamp;
-    case TYPE_COPY: return kToolCopy;
-    case TYPE_COPY_BUNDLE_DATA: return kToolCopyBundleData;
-    case TYPE_COMPILE_XCASSETS: return kToolCompileXCAssets;
-    case TYPE_ACTION: return kToolAction;
+    case TYPE_CC:
+      return kToolCc;
+    case TYPE_CXX:
+      return kToolCxx;
+    case TYPE_OBJC:
+      return kToolObjC;
+    case TYPE_OBJCXX:
+      return kToolObjCxx;
+    case TYPE_RC:
+      return kToolRc;
+    case TYPE_ASM:
+      return kToolAsm;
+    case TYPE_ALINK:
+      return kToolAlink;
+    case TYPE_SOLINK:
+      return kToolSolink;
+    case TYPE_SOLINK_MODULE:
+      return kToolSolinkModule;
+    case TYPE_LINK:
+      return kToolLink;
+    case TYPE_STAMP:
+      return kToolStamp;
+    case TYPE_COPY:
+      return kToolCopy;
+    case TYPE_COPY_BUNDLE_DATA:
+      return kToolCopyBundleData;
+    case TYPE_COMPILE_XCASSETS:
+      return kToolCompileXCAssets;
+    case TYPE_ACTION:
+      return kToolAction;
     default:
       NOTREACHED();
       return std::string();

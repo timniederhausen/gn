@@ -24,17 +24,15 @@ const char kIndent[] = "  ";
 
 }  // namespace
 
-NinjaToolchainWriter::NinjaToolchainWriter(
-    const Settings* settings,
-    const Toolchain* toolchain,
-    std::ostream& out)
+NinjaToolchainWriter::NinjaToolchainWriter(const Settings* settings,
+                                           const Toolchain* toolchain,
+                                           std::ostream& out)
     : settings_(settings),
       toolchain_(toolchain),
       out_(out),
       path_output_(settings_->build_settings()->build_dir(),
                    settings_->build_settings()->root_path_utf8(),
-                   ESCAPE_NINJA) {
-}
+                   ESCAPE_NINJA) {}
 
 NinjaToolchainWriter::~NinjaToolchainWriter() = default;
 

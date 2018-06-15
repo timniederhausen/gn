@@ -5,8 +5,8 @@
 #ifndef BASE_WIN_SHORTCUT_H_
 #define BASE_WIN_SHORTCUT_H_
 
-#include <windows.h>
 #include <stdint.h>
+#include <windows.h>
 
 #include "base/files/file_path.h"
 #include "base/logging.h"
@@ -130,10 +130,9 @@ struct ShortcutProperties {
 // |operation|: a choice from the ShortcutOperation enum.
 // If |operation| is SHORTCUT_REPLACE_EXISTING or SHORTCUT_UPDATE_EXISTING and
 // |shortcut_path| does not exist, this method is a no-op and returns false.
-bool CreateOrUpdateShortcutLink(
-    const FilePath& shortcut_path,
-    const ShortcutProperties& properties,
-    ShortcutOperation operation);
+bool CreateOrUpdateShortcutLink(const FilePath& shortcut_path,
+                                const ShortcutProperties& properties,
+                                ShortcutOperation operation);
 
 // Resolves Windows shortcut (.LNK file).
 // This methods tries to resolve selected properties of a shortcut .LNK file.
@@ -146,8 +145,8 @@ bool CreateOrUpdateShortcutLink(
 // properties are successfully read. Otherwise some reads have failed and
 // intermediate values written to |properties| should be ignored.
 bool ResolveShortcutProperties(const FilePath& shortcut_path,
-                                           uint32_t options,
-                                           ShortcutProperties* properties);
+                               uint32_t options,
+                               ShortcutProperties* properties);
 
 // Resolves Windows shortcut (.LNK file).
 // This is a wrapper to ResolveShortcutProperties() to handle the common use
@@ -157,8 +156,8 @@ bool ResolveShortcutProperties(const FilePath& shortcut_path,
 // successfully. Callers can safely use the same variable for both
 // |shortcut_path| and |target_path|.
 bool ResolveShortcut(const FilePath& shortcut_path,
-                                 FilePath* target_path,
-                                 string16* args);
+                     FilePath* target_path,
+                     string16* args);
 
 // Pin to taskbar is only supported on Windows 7 and Windows 8. Returns true on
 // those platforms.

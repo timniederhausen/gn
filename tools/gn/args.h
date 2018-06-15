@@ -34,7 +34,7 @@ class Args {
 
     Value default_value;  // Default value given in declare_args.
 
-    bool has_override;  // True indicates override_value is valid.
+    bool has_override;     // True indicates override_value is valid.
     Value override_value;  // From .gn or the current build's "gn args".
   };
   using ValueWithOverrideMap = std::map<base::StringPiece, ValueWithOverride>;

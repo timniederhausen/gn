@@ -35,9 +35,7 @@ class StackMarker {
     ++(*depth_);
     DCHECK_LE(*depth_, max_depth_);
   }
-  ~StackMarker() {
-    --(*depth_);
-  }
+  ~StackMarker() { --(*depth_); }
 
   bool IsTooDeep() const { return *depth_ >= max_depth_; }
 
@@ -112,7 +110,7 @@ JSONReader::JsonParseError JSONParser::error_code() const {
 
 std::string JSONParser::GetErrorMessage() const {
   return FormatErrorMessage(error_line_, error_column_,
-      JSONReader::ErrorCodeToString(error_code_));
+                            JSONReader::ErrorCodeToString(error_code_));
 }
 
 int JSONParser::error_line() const {
@@ -454,8 +452,7 @@ bool JSONParser::ConsumeStringRaw(StringBuilder* out) {
   while (PeekChar()) {
     uint32_t next_char = 0;
     if (!ReadUnicodeCharacter(input_.data(),
-                              static_cast<int32_t>(input_.length()),
-                              &index_,
+                              static_cast<int32_t>(input_.length()), &index_,
                               &next_char) ||
         !IsValidCharacter(next_char)) {
       if ((options_ & JSON_REPLACE_INVALID_CHARACTERS) == 0) {
@@ -736,11 +733,12 @@ void JSONParser::ReportError(JSONReader::JsonParseError code,
 }
 
 // static
-std::string JSONParser::FormatErrorMessage(int line, int column,
+std::string JSONParser::FormatErrorMessage(int line,
+                                           int column,
                                            const std::string& description) {
   if (line || column) {
-    return StringPrintf("Line: %i, column: %i, %s",
-        line, column, description.c_str());
+    return StringPrintf("Line: %i, column: %i, %s", line, column,
+                        description.c_str());
   }
   return description;
 }

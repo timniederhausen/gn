@@ -34,13 +34,10 @@ MachLogMessage::MachLogMessage(const char* file_path,
                                int line,
                                LogSeverity severity,
                                mach_error_t mach_err)
-    : LogMessage(file_path, line, severity),
-      mach_err_(mach_err) {
-}
+    : LogMessage(file_path, line, severity), mach_err_(mach_err) {}
 
 MachLogMessage::~MachLogMessage() {
-  stream() << ": "
-           << mach_error_string(mach_err_)
+  stream() << ": " << mach_error_string(mach_err_)
            << FormatMachErrorNumber(mach_err_);
 }
 
@@ -50,13 +47,10 @@ BootstrapLogMessage::BootstrapLogMessage(const char* file_path,
                                          int line,
                                          LogSeverity severity,
                                          kern_return_t bootstrap_err)
-    : LogMessage(file_path, line, severity),
-      bootstrap_err_(bootstrap_err) {
-}
+    : LogMessage(file_path, line, severity), bootstrap_err_(bootstrap_err) {}
 
 BootstrapLogMessage::~BootstrapLogMessage() {
-  stream() << ": "
-           << bootstrap_strerror(bootstrap_err_);
+  stream() << ": " << bootstrap_strerror(bootstrap_err_);
 
   switch (bootstrap_err_) {
     case BOOTSTRAP_SUCCESS:

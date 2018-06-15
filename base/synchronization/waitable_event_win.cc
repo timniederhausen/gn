@@ -4,8 +4,8 @@
 
 #include "base/synchronization/waitable_event.h"
 
-#include <windows.h>
 #include <stddef.h>
+#include <windows.h>
 
 #include <algorithm>
 #include <utility>
@@ -127,8 +127,7 @@ size_t WaitableEvent::WaitMany(WaitableEvent** events, size_t count) {
 
   // The cast is safe because count is small - see the CHECK above.
   DWORD result =
-      WaitForMultipleObjects(static_cast<DWORD>(count),
-                             handles,
+      WaitForMultipleObjects(static_cast<DWORD>(count), handles,
                              FALSE,      // don't wait for all the objects
                              INFINITE);  // no timeout
   if (result >= WAIT_OBJECT_0 + count) {

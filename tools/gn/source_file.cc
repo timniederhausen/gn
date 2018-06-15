@@ -47,8 +47,7 @@ std::string SourceFile::GetName() const {
 
   DCHECK(value_.find('/') != std::string::npos);
   size_t last_slash = value_.rfind('/');
-  return std::string(&value_[last_slash + 1],
-                     value_.size() - last_slash - 1);
+  return std::string(&value_[last_slash + 1], value_.size() - last_slash - 1);
 }
 
 SourceDir SourceFile::GetDir() const {

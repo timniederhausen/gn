@@ -19,9 +19,7 @@ namespace internal {
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
 struct ScopedFDCloseTraits {
-  static int InvalidValue() {
-    return -1;
-  }
+  static int InvalidValue() { return -1; }
   static void Free(int fd);
 };
 #endif

@@ -20,8 +20,7 @@ OffsetAdjuster::Adjustment::Adjustment(size_t original_offset,
                                        size_t output_length)
     : original_offset(original_offset),
       original_length(original_length),
-      output_length(output_length) {
-}
+      output_length(output_length) {}
 
 // static
 void OffsetAdjuster::AdjustOffsets(const Adjustments& adjustments,
@@ -79,8 +78,7 @@ void OffsetAdjuster::UnadjustOffset(const Adjustments& adjustments,
     if (*offset + adjustment <= i->original_offset)
       break;
     adjustment += static_cast<int>(i->original_length - i->output_length);
-    if ((*offset + adjustment) <
-        (i->original_offset + i->original_length)) {
+    if ((*offset + adjustment) < (i->original_offset + i->original_length)) {
       *offset = string16::npos;
       return;
     }
@@ -138,8 +136,8 @@ void OffsetAdjuster::MergeSequentialAdjustments(
       // |adjusted_iter|, then incrementing |adjusted_iter| so it points to
       // the following element.
       shift += first_iter->original_length - first_iter->output_length;
-      adjusted_iter = adjustments_on_adjusted_string->insert(
-          adjusted_iter, *first_iter);
+      adjusted_iter =
+          adjustments_on_adjusted_string->insert(adjusted_iter, *first_iter);
       ++adjusted_iter;
       ++first_iter;
     } else {
@@ -158,7 +156,7 @@ void OffsetAdjuster::MergeSequentialAdjustments(
       // happened in |first_iter|, then advance to the next |first_adjustments|
       // because we dealt with the current one.
       const int collapse = static_cast<int>(first_iter->original_length) -
-          static_cast<int>(first_iter->output_length);
+                           static_cast<int>(first_iter->output_length);
       // This function does not know how to deal with a string that expands and
       // then gets modified, only strings that collapse and then get modified.
       DCHECK_GT(collapse, 0);
@@ -185,7 +183,7 @@ void OffsetAdjuster::MergeSequentialAdjustments(
 // the result.  If non-NULL, |adjustments| is set to reflect the all the
 // alterations to the string that are not one-character-to-one-character.
 // It will always be sorted by increasing offset.
-template<typename SrcChar, typename DestStdString>
+template <typename SrcChar, typename DestStdString>
 bool ConvertUnicode(const SrcChar* src,
                     size_t src_len,
                     DestStdString* output,

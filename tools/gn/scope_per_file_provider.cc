@@ -12,11 +12,8 @@
 #include "tools/gn/value.h"
 #include "tools/gn/variables.h"
 
-ScopePerFileProvider::ScopePerFileProvider(Scope* scope,
-                                           bool allow_target_vars)
-    : ProgrammaticProvider(scope),
-      allow_target_vars_(allow_target_vars) {
-}
+ScopePerFileProvider::ScopePerFileProvider(Scope* scope, bool allow_target_vars)
+    : ProgrammaticProvider(scope), allow_target_vars_(allow_target_vars) {}
 
 ScopePerFileProvider::~ScopePerFileProvider() = default;
 

@@ -135,10 +135,9 @@ bool IsValidCompileXCassetsSubstitution(SubstitutionType type);
 // Validates that each substitution type in the vector passes the given
 // is_valid_subst predicate. Returns true on success. On failure, fills in the
 // error object with an appropriate message and returns false.
-bool EnsureValidSubstitutions(
-    const std::vector<SubstitutionType>& types,
-    bool (*is_valid_subst)(SubstitutionType),
-    const ParseNode* origin,
-    Err* err);
+bool EnsureValidSubstitutions(const std::vector<SubstitutionType>& types,
+                              bool (*is_valid_subst)(SubstitutionType),
+                              const ParseNode* origin,
+                              Err* err);
 
 #endif  // TOOLS_GN_SUBSTITUTION_TYPE_H_

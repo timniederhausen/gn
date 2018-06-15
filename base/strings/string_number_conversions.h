@@ -145,8 +145,7 @@ bool HexStringToUInt64(StringPiece input, uint64_t* output);
 // |*output| will contain as many bytes as were successfully parsed prior to the
 // error.  There is no overflow, but input.size() must be evenly divisible by 2.
 // Leading 0x or +/- are not allowed.
-bool HexStringToBytes(StringPiece input,
-                                  std::vector<uint8_t>* output);
+bool HexStringToBytes(StringPiece input, std::vector<uint8_t>* output);
 
 }  // namespace base
 

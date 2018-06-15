@@ -7,8 +7,7 @@
 namespace switches {
 
 const char kArgs[] = "args";
-const char kArgs_HelpShort[] =
-    "--args: Specifies build arguments overrides.";
+const char kArgs_HelpShort[] = "--args: Specifies build arguments overrides.";
 const char kArgs_Help[] =
     R"(--args: Specifies build arguments overrides.
 
@@ -39,21 +38,20 @@ Examples
   gn desc out/Default --args="some_list=[1, false, \"foo\"]"
 )";
 
-#define COLOR_HELP_LONG \
-    "--[no]color: Forces colored output on or off.\n"\
-    "\n"\
-    "  Normally GN will try to detect whether it is outputting to a terminal\n"\
-    "  and will enable or disable color accordingly. Use of these switches\n"\
-    "  will override the default.\n"\
-    "\n"\
-    "Examples\n"\
-    "\n"\
-    "  gn gen out/Default --color\n"\
-    "\n"\
-    "  gn gen out/Default --nocolor\n"
+#define COLOR_HELP_LONG                                                       \
+  "--[no]color: Forces colored output on or off.\n"                           \
+  "\n"                                                                        \
+  "  Normally GN will try to detect whether it is outputting to a terminal\n" \
+  "  and will enable or disable color accordingly. Use of these switches\n"   \
+  "  will override the default.\n"                                            \
+  "\n"                                                                        \
+  "Examples\n"                                                                \
+  "\n"                                                                        \
+  "  gn gen out/Default --color\n"                                            \
+  "\n"                                                                        \
+  "  gn gen out/Default --nocolor\n"
 const char kColor[] = "color";
-const char kColor_HelpShort[] =
-    "--color: Force colored output.";
+const char kColor_HelpShort[] = "--color: Force colored output.";
 const char kColor_Help[] = COLOR_HELP_LONG;
 
 const char kDotfile[] = "dotfile";
@@ -101,8 +99,7 @@ const char kMarkdown_Help[] =
     "--markdown: Write help output in the Markdown format.\n";
 
 const char kNoColor[] = "nocolor";
-const char kNoColor_HelpShort[] =
-    "--nocolor: Force non-colored output.";
+const char kNoColor_HelpShort[] = "--nocolor: Force non-colored output.";
 const char kNoColor_Help[] = COLOR_HELP_LONG;
 
 const char kScriptExecutable[] = "script-executable";
@@ -127,8 +124,7 @@ const char kQuiet_Help[] =
 )";
 
 const char kRoot[] = "root";
-const char kRoot_HelpShort[] =
-    "--root: Explicitly specify source root.";
+const char kRoot_HelpShort[] = "--root: Explicitly specify source root.";
 const char kRoot_Help[] =
     R"(--root: Explicitly specify source root.
 
@@ -229,8 +225,7 @@ Examples
 )";
 
 const char kVerbose[] = "v";
-const char kVerbose_HelpShort[] =
-    "-v: Verbose logging.";
+const char kVerbose_HelpShort[] = "-v: Verbose logging.";
 const char kVerbose_Help[] =
     R"(-v: Verbose logging.
 
@@ -250,18 +245,13 @@ const char kAllToolchains[] = "all-toolchains";
 
 // -----------------------------------------------------------------------------
 
-SwitchInfo::SwitchInfo()
-    : short_help(""),
-      long_help("") {
-}
+SwitchInfo::SwitchInfo() : short_help(""), long_help("") {}
 
 SwitchInfo::SwitchInfo(const char* short_help, const char* long_help)
-    : short_help(short_help),
-      long_help(long_help) {
-}
+    : short_help(short_help), long_help(long_help) {}
 
 #define INSERT_VARIABLE(var) \
-    info_map[k##var] = SwitchInfo(k##var##_HelpShort, k##var##_Help);
+  info_map[k##var] = SwitchInfo(k##var##_HelpShort, k##var##_Help);
 
 const SwitchInfoMap& GetSwitches() {
   static SwitchInfoMap info_map;

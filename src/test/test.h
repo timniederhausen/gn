@@ -7,8 +7,8 @@
 
 #include <string.h>
 
-#include <string>
 #include <sstream>
+#include <string>
 
 // This is a minimal googletest-like testing framework. It's originally derived
 // from Ninja's src/test.h. You might prefer that one if you have different
@@ -54,9 +54,7 @@ class TestResult {
 class Message {
  public:
   Message() {}
-  ~Message() {
-    printf("%s\n\n", ss_.str().c_str());
-  }
+  ~Message() { printf("%s\n\n", ss_.str().c_str()); }
 
   template <typename T>
   inline Message& operator<<(const T& val) {
@@ -69,18 +67,18 @@ class Message {
 };
 
 class AssertHelper {
-  public:
-   AssertHelper(const char* file, int line, const TestResult& test_result)
-       : file_(file), line_(line), error_(test_result.error()) {}
+ public:
+  AssertHelper(const char* file, int line, const TestResult& test_result)
+      : file_(file), line_(line), error_(test_result.error()) {}
 
-   void operator=(const Message& message) const {
-     printf("\n*** FAILURE %s:%d: %s\n", file_, line_, error_);
-   }
+  void operator=(const Message& message) const {
+    printf("\n*** FAILURE %s:%d: %s\n", file_, line_, error_);
+  }
 
-  private:
-   const char* file_;
-   int line_;
-   const char* error_;
+ private:
+  const char* file_;
+  int line_;
+  const char* error_;
 };
 
 }  // namespace testing

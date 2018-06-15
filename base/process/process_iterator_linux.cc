@@ -47,8 +47,8 @@ bool GetProcCmdline(pid_t pid, std::vector<std::string>* proc_cmd_line_args) {
     return false;
   std::string delimiters;
   delimiters.push_back('\0');
-  *proc_cmd_line_args = SplitString(cmd_line, delimiters, KEEP_WHITESPACE,
-                                    SPLIT_WANT_NONEMPTY);
+  *proc_cmd_line_args =
+      SplitString(cmd_line, delimiters, KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY);
   return true;
 }
 

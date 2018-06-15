@@ -23,8 +23,7 @@ void BindStateBaseRefCountTraits::Destruct(const BindStateBase* bind_state) {
 
 BindStateBase::BindStateBase(InvokeFuncStorage polymorphic_invoke,
                              void (*destructor)(const BindStateBase*))
-    : BindStateBase(polymorphic_invoke, destructor, &ReturnFalse) {
-}
+    : BindStateBase(polymorphic_invoke, destructor, &ReturnFalse) {}
 
 BindStateBase::BindStateBase(InvokeFuncStorage polymorphic_invoke,
                              void (*destructor)(const BindStateBase*),

@@ -81,10 +81,10 @@ class Process {
   // Close the process handle. This will not terminate the process.
   void Close();
 
-  // Returns true if this process is still running. This is only safe on Windows
-  // (and maybe Fuchsia?), because the ProcessHandle will keep the zombie
-  // process information available until itself has been released. But on Posix,
-  // the OS may reuse the ProcessId.
+// Returns true if this process is still running. This is only safe on Windows
+// (and maybe Fuchsia?), because the ProcessHandle will keep the zombie
+// process information available until itself has been released. But on Posix,
+// the OS may reuse the ProcessId.
 #if defined(OS_WIN)
   bool IsRunning() const {
     return !WaitForExitWithTimeout(base::TimeDelta(), nullptr);

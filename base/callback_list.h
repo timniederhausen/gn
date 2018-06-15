@@ -76,9 +76,7 @@ class CallbackListBase {
    public:
     Subscription(CallbackListBase<CallbackType>* list,
                  typename std::list<CallbackType>::iterator iter)
-        : list_(list),
-          iter_(iter) {
-    }
+        : list_(list), iter_(iter) {}
 
     ~Subscription() {
       if (list_->active_iterator_count_) {
@@ -123,14 +121,12 @@ class CallbackListBase {
   class Iterator {
    public:
     explicit Iterator(CallbackListBase<CallbackType>* list)
-        : list_(list),
-          list_iter_(list_->callbacks_.begin()) {
+        : list_(list), list_iter_(list_->callbacks_.begin()) {
       ++list_->active_iterator_count_;
     }
 
     Iterator(const Iterator& iter)
-        : list_(iter.list_),
-          list_iter_(iter.list_iter_) {
+        : list_(iter.list_), list_iter_(iter.list_iter_) {
       ++list_->active_iterator_count_;
     }
 
@@ -166,9 +162,7 @@ class CallbackListBase {
 
   // Returns an instance of a CallbackListBase::Iterator which can be used
   // to run callbacks.
-  Iterator GetIterator() {
-    return Iterator(this);
-  }
+  Iterator GetIterator() { return Iterator(this); }
 
   // Compact the list: remove any entries which were nulled out during
   // iteration.
@@ -198,7 +192,8 @@ class CallbackListBase {
 
 }  // namespace internal
 
-template <typename Sig> class CallbackList;
+template <typename Sig>
+class CallbackList;
 
 template <typename... Args>
 class CallbackList<void(Args...)>

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "test/test.h"
 #include "tools/gn/ninja_group_target_writer.h"
+#include "test/test.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scope.h"
 
@@ -45,6 +45,7 @@ TEST(NinjaGroupTargetWriter, Run) {
   writer.Run();
 
   const char expected[] =
-      "build obj/foo/bar.stamp: stamp obj/foo/dep.stamp obj/foo/dep2.stamp || obj/foo/datadep.stamp\n";
+      "build obj/foo/bar.stamp: stamp obj/foo/dep.stamp obj/foo/dep2.stamp || "
+      "obj/foo/datadep.stamp\n";
   EXPECT_EQ(expected, out.str());
 }

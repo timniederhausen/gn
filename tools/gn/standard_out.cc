@@ -75,8 +75,8 @@ void WriteToStdOut(const std::string& output) {
 #endif  // !defined(OS_WIN)
 
 void OutputMarkdownDec(TextDecoration dec) {
-  // The markdown rendering turns "dim" text to italics and any
-  // other colored text to bold.
+// The markdown rendering turns "dim" text to italics and any
+// other colored text to bold.
 
 #if defined(OS_WIN)
   DWORD written = 0;
@@ -122,8 +122,7 @@ void OutputString(const std::string& output, TextDecoration dec) {
                                   FOREGROUND_BLUE | FOREGROUND_INTENSITY);
         break;
       case DECORATION_YELLOW:
-        ::SetConsoleTextAttribute(hstdout,
-                                  FOREGROUND_RED | FOREGROUND_GREEN);
+        ::SetConsoleTextAttribute(hstdout, FOREGROUND_RED | FOREGROUND_GREEN);
         break;
     }
   }
@@ -229,8 +228,7 @@ void PrintShortHelp(const std::string& line) {
     return;
 
   // See if the colon is followed by a " [" and if so, dim the contents of [ ].
-  if (first_normal > 0 &&
-      line.size() > first_normal + 2 &&
+  if (first_normal > 0 && line.size() > first_normal + 2 &&
       line[first_normal + 1] == ' ' && line[first_normal + 2] == '[') {
     size_t begin_bracket = first_normal + 2;
     OutputString(": ");
@@ -332,4 +330,3 @@ void PrintLongHelp(const std::string& text, const std::string& tag) {
   if (is_markdown && in_body)
     OutputString("```\n");
 }
-

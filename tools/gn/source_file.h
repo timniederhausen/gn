@@ -53,9 +53,7 @@ class SourceFile {
 
   // Returns true if this file starts with a single slash which indicates a
   // system-absolute path.
-  bool is_system_absolute() const {
-    return !is_source_absolute();
-  }
+  bool is_system_absolute() const { return !is_source_absolute(); }
 
   // Returns a source-absolute path starting with only one slash at the
   // beginning (normally source-absolute paths start with two slashes to mark
@@ -71,16 +69,12 @@ class SourceFile {
   bool operator==(const SourceFile& other) const {
     return value_ == other.value_;
   }
-  bool operator!=(const SourceFile& other) const {
-    return !operator==(other);
-  }
+  bool operator!=(const SourceFile& other) const { return !operator==(other); }
   bool operator<(const SourceFile& other) const {
     return value_ < other.value_;
   }
 
-  void swap(SourceFile& other) {
-    value_.swap(other.value_);
-  }
+  void swap(SourceFile& other) { value_.swap(other.value_); }
 
  private:
   friend class SourceDir;
@@ -92,7 +86,8 @@ class SourceFile {
 
 namespace std {
 
-template<> struct hash<SourceFile> {
+template <>
+struct hash<SourceFile> {
   std::size_t operator()(const SourceFile& v) const {
     hash<std::string> h;
     return h(v.value());

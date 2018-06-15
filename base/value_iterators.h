@@ -57,10 +57,8 @@ class dict_iterator {
   dict_iterator& operator--();
   dict_iterator operator--(int);
 
-  friend bool operator==(const dict_iterator& lhs,
-                                     const dict_iterator& rhs);
-  friend bool operator!=(const dict_iterator& lhs,
-                                     const dict_iterator& rhs);
+  friend bool operator==(const dict_iterator& lhs, const dict_iterator& rhs);
+  friend bool operator!=(const dict_iterator& lhs, const dict_iterator& rhs);
 
  private:
   DictStorage::iterator dict_iter_;
@@ -104,9 +102,9 @@ class const_dict_iterator {
   const_dict_iterator operator--(int);
 
   friend bool operator==(const const_dict_iterator& lhs,
-                                     const const_dict_iterator& rhs);
+                         const const_dict_iterator& rhs);
   friend bool operator!=(const const_dict_iterator& lhs,
-                                     const const_dict_iterator& rhs);
+                         const const_dict_iterator& rhs);
 
  private:
   DictStorage::const_iterator dict_iter_;

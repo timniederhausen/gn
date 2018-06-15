@@ -20,8 +20,8 @@ extern const char kLabelPattern_Help[];
 class LabelPattern {
  public:
   enum Type {
-    MATCH = 1,  // Exact match for a given target.
-    DIRECTORY,  // Only targets in the file in the given directory.
+    MATCH = 1,           // Exact match for a given target.
+    DIRECTORY,           // Only targets in the file in the given directory.
     RECURSIVE_DIRECTORY  // The given directory and any subdir.
                          // (also indicates "public" when dir is empty).
   };

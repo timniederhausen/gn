@@ -23,8 +23,8 @@ namespace base {
 
 namespace {
 
-const char* const kTypeNames[] = {"null",   "boolean", "integer",
-                                  "string", "binary",  "dictionary", "list"};
+const char* const kTypeNames[] = {"null",   "boolean",    "integer", "string",
+                                  "binary", "dictionary", "list"};
 static_assert(arraysize(kTypeNames) ==
                   static_cast<size_t>(Value::Type::LIST) + 1,
               "kTypeNames Has Wrong Size");
@@ -525,12 +525,11 @@ bool operator==(const Value& lhs, const Value& rhs) {
     case Value::Type::DICTIONARY:
       if (lhs.dict_.size() != rhs.dict_.size())
         return false;
-      return std::equal(std::begin(lhs.dict_), std::end(lhs.dict_),
-                        std::begin(rhs.dict_),
-                        [](const auto& u, const auto& v) {
-                          return std::tie(u.first, *u.second) ==
-                                 std::tie(v.first, *v.second);
-                        });
+      return std::equal(
+          std::begin(lhs.dict_), std::end(lhs.dict_), std::begin(rhs.dict_),
+          [](const auto& u, const auto& v) {
+            return std::tie(u.first, *u.second) == std::tie(v.first, *v.second);
+          });
     case Value::Type::LIST:
       return lhs.list_ == rhs.list_;
   }
@@ -738,8 +737,7 @@ Value* DictionaryValue::SetWithoutPathExpansion(
   return result.first->second.get();
 }
 
-bool DictionaryValue::Get(StringPiece path,
-                          const Value** out_value) const {
+bool DictionaryValue::Get(StringPiece path, const Value** out_value) const {
   DCHECK(IsStringUTF8(path));
   StringPiece current_path(path);
   const DictionaryValue* current_dictionary = this;
@@ -759,10 +757,9 @@ bool DictionaryValue::Get(StringPiece path,
   return current_dictionary->GetWithoutPathExpansion(current_path, out_value);
 }
 
-bool DictionaryValue::Get(StringPiece path, Value** out_value)  {
+bool DictionaryValue::Get(StringPiece path, Value** out_value) {
   return static_cast<const DictionaryValue&>(*this).Get(
-      path,
-      const_cast<const Value**>(out_value));
+      path, const_cast<const Value**>(out_value));
 }
 
 bool DictionaryValue::GetBoolean(StringPiece path, bool* bool_value) const {
@@ -847,8 +844,7 @@ bool DictionaryValue::GetDictionary(StringPiece path,
 bool DictionaryValue::GetDictionary(StringPiece path,
                                     DictionaryValue** out_value) {
   return static_cast<const DictionaryValue&>(*this).GetDictionary(
-      path,
-      const_cast<const DictionaryValue**>(out_value));
+      path, const_cast<const DictionaryValue**>(out_value));
 }
 
 bool DictionaryValue::GetList(StringPiece path,
@@ -866,8 +862,7 @@ bool DictionaryValue::GetList(StringPiece path,
 
 bool DictionaryValue::GetList(StringPiece path, ListValue** out_value) {
   return static_cast<const DictionaryValue&>(*this).GetList(
-      path,
-      const_cast<const ListValue**>(out_value));
+      path, const_cast<const ListValue**>(out_value));
 }
 
 bool DictionaryValue::GetWithoutPathExpansion(StringPiece key,
@@ -885,8 +880,7 @@ bool DictionaryValue::GetWithoutPathExpansion(StringPiece key,
 bool DictionaryValue::GetWithoutPathExpansion(StringPiece key,
                                               Value** out_value) {
   return static_cast<const DictionaryValue&>(*this).GetWithoutPathExpansion(
-      key,
-      const_cast<const Value**>(out_value));
+      key, const_cast<const Value**>(out_value));
 }
 
 bool DictionaryValue::GetBooleanWithoutPathExpansion(StringPiece key,
@@ -946,8 +940,7 @@ bool DictionaryValue::GetDictionaryWithoutPathExpansion(
   const DictionaryValue& const_this =
       static_cast<const DictionaryValue&>(*this);
   return const_this.GetDictionaryWithoutPathExpansion(
-          key,
-          const_cast<const DictionaryValue**>(out_value));
+      key, const_cast<const DictionaryValue**>(out_value));
 }
 
 bool DictionaryValue::GetListWithoutPathExpansion(
@@ -966,10 +959,8 @@ bool DictionaryValue::GetListWithoutPathExpansion(
 
 bool DictionaryValue::GetListWithoutPathExpansion(StringPiece key,
                                                   ListValue** out_value) {
-  return
-      static_cast<const DictionaryValue&>(*this).GetListWithoutPathExpansion(
-          key,
-          const_cast<const ListValue**>(out_value));
+  return static_cast<const DictionaryValue&>(*this).GetListWithoutPathExpansion(
+      key, const_cast<const ListValue**>(out_value));
 }
 
 bool DictionaryValue::Remove(StringPiece path,
@@ -1015,8 +1006,7 @@ bool DictionaryValue::RemovePath(StringPiece path,
   DictionaryValue* subdict = nullptr;
   if (!GetDictionary(subdict_path, &subdict))
     return false;
-  result = subdict->RemovePath(path.substr(delimiter_position + 1),
-                               out_value);
+  result = subdict->RemovePath(path.substr(delimiter_position + 1), out_value);
   if (result && subdict->empty())
     RemoveWithoutPathExpansion(subdict_path, nullptr);
 
@@ -1118,8 +1108,7 @@ bool ListValue::Get(size_t index, const Value** out_value) const {
 
 bool ListValue::Get(size_t index, Value** out_value) {
   return static_cast<const ListValue&>(*this).Get(
-      index,
-      const_cast<const Value**>(out_value));
+      index, const_cast<const Value**>(out_value));
 }
 
 bool ListValue::GetBoolean(size_t index, bool* bool_value) const {
@@ -1169,8 +1158,7 @@ bool ListValue::GetDictionary(size_t index,
 
 bool ListValue::GetDictionary(size_t index, DictionaryValue** out_value) {
   return static_cast<const ListValue&>(*this).GetDictionary(
-      index,
-      const_cast<const DictionaryValue**>(out_value));
+      index, const_cast<const DictionaryValue**>(out_value));
 }
 
 bool ListValue::GetList(size_t index, const ListValue** out_value) const {
@@ -1187,8 +1175,7 @@ bool ListValue::GetList(size_t index, const ListValue** out_value) const {
 
 bool ListValue::GetList(size_t index, ListValue** out_value) {
   return static_cast<const ListValue&>(*this).GetList(
-      index,
-      const_cast<const ListValue**>(out_value));
+      index, const_cast<const ListValue**>(out_value));
 }
 
 bool ListValue::Remove(size_t index, std::unique_ptr<Value>* out_value) {

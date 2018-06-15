@@ -7,8 +7,7 @@
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/scope.h"
 
-ParseNodeValueAdapter::ParseNodeValueAdapter() : ref_(nullptr) {
-}
+ParseNodeValueAdapter::ParseNodeValueAdapter() : ref_(nullptr) {}
 
 ParseNodeValueAdapter::~ParseNodeValueAdapter() = default;
 

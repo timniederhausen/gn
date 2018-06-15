@@ -12,8 +12,7 @@
 namespace base {
 
 ConditionVariable::ConditionVariable(Lock* user_lock)
-    : srwlock_(user_lock->lock_.native_handle())
-{
+    : srwlock_(user_lock->lock_.native_handle()) {
   DCHECK(user_lock);
   InitializeConditionVariable(reinterpret_cast<PCONDITION_VARIABLE>(&cv_));
 }

@@ -91,8 +91,7 @@ std::string GetSelfInvocationCommand(const BuildSettings* build_settings) {
     // since those will have been written to the file and will be used
     // implicitly in the future. Keeping --args would mean changes to the file
     // would be ignored.
-    if (i->first != switches::kQuiet &&
-        i->first != switches::kRoot &&
+    if (i->first != switches::kQuiet && i->first != switches::kRoot &&
         i->first != switches::kArgs) {
       std::string escaped_value =
           EscapeString(FilePathToUTF8(i->second), escape_shell, nullptr);
@@ -129,11 +128,14 @@ Err GetDuplicateOutputError(const std::vector<const Target*>& all_targets,
     matches_string += "  " + target->label().GetUserVisibleName(false) + "\n";
 
   Err result(matches[0]->defined_from(), "Duplicate output file.",
-      "Two or more targets generate the same output:\n  " +
-      bad_output.value() + "\n\n"
-      "This is can often be fixed by changing one of the target names, or by \n"
-      "setting an output_name on one of them.\n"
-      "\nCollisions:\n" + matches_string);
+             "Two or more targets generate the same output:\n  " +
+                 bad_output.value() +
+                 "\n\n"
+                 "This is can often be fixed by changing one of the target "
+                 "names, or by \n"
+                 "setting an output_name on one of them.\n"
+                 "\nCollisions:\n" +
+                 matches_string);
   for (size_t i = 1; i < matches.size(); i++)
     result.AppendSubErr(Err(matches[i]->defined_from(), "Collision."));
   return result;
@@ -144,11 +146,13 @@ Err GetDuplicateOutputError(const std::vector<const Target*>& all_targets,
 Err GetDuplicateToolchainError(const SourceFile& source_file,
                                const Toolchain* previous_toolchain,
                                const Toolchain* toolchain) {
-  Err result(toolchain->defined_from(), "Duplicate toolchain.",
+  Err result(
+      toolchain->defined_from(), "Duplicate toolchain.",
       "Two or more toolchains write to the same directory:\n  " +
-      source_file.GetDir().value() + "\n\n"
-      "This can be fixed by making sure that distinct toolchains have\n"
-      "distinct names.\n");
+          source_file.GetDir().value() +
+          "\n\n"
+          "This can be fixed by making sure that distinct toolchains have\n"
+          "distinct names.\n");
   result.AppendSubErr(
       Err(previous_toolchain->defined_from(), "Previous toolchain."));
   return result;
@@ -183,10 +187,9 @@ bool NinjaBuildWriter::Run(Err* err) {
 }
 
 // static
-bool NinjaBuildWriter::RunAndWriteFile(
-    const BuildSettings* build_settings,
-    const Builder& builder,
-    Err* err) {
+bool NinjaBuildWriter::RunAndWriteFile(const BuildSettings* build_settings,
+                                       const Builder& builder,
+                                       Err* err) {
   ScopedTrace trace(TraceItem::TRACE_FILE_WRITE, "build.ninja");
 
   std::vector<const Target*> all_targets = builder.GetAllResolvedTargets();
@@ -462,14 +465,14 @@ bool NinjaBuildWriter::WritePhonyAndAllRules(Err* err) {
 
     // Find targets in "important" directories.
     const std::string& dir_string = label.dir().value();
-    if (dir_string.size() == 2 &&
-        dir_string[0] == '/' && dir_string[1] == '/') {
+    if (dir_string.size() == 2 && dir_string[0] == '/' &&
+        dir_string[1] == '/') {
       toplevel_targets.push_back(target);
-    } else if (
-        dir_string.size() == label.name().size() + 3 &&  // Size matches.
-        dir_string[0] == '/' && dir_string[1] == '/' &&  // "//" at beginning.
-        dir_string[dir_string.size() - 1] == '/' &&  // "/" at end.
-        dir_string.compare(2, label.name().size(), label.name()) == 0) {
+    } else if (dir_string.size() == label.name().size() + 3 &&  // Size matches.
+               dir_string[0] == '/' &&
+               dir_string[1] == '/' &&  // "//" at beginning.
+               dir_string[dir_string.size() - 1] == '/' &&  // "/" at end.
+               dir_string.compare(2, label.name().size(), label.name()) == 0) {
       toplevel_dir_targets.push_back(target);
     }
 

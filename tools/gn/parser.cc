@@ -225,7 +225,7 @@ enum Precedence {
   PRECEDENCE_SUM = 6,
   PRECEDENCE_PREFIX = 7,
   PRECEDENCE_CALL = 8,
-  PRECEDENCE_DOT = 9,         // Highest precedence.
+  PRECEDENCE_DOT = 9,  // Highest precedence.
 };
 
 // The top-level for blocks/ifs is recursive descent, the expression parser is
@@ -238,7 +238,8 @@ enum Precedence {
 //
 // Refs:
 // - http://javascript.crockford.com/tdop/tdop.html
-// - http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
+// -
+// http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
 
 // Indexed by Token::Type.
 ParserHelper Parser::expressions_[] = {
@@ -377,7 +378,7 @@ bool Parser::Match(Token::Type type) {
 }
 
 const Token& Parser::Consume(Token::Type type, const char* error_message) {
-  Token::Type types[1] = { type };
+  Token::Type types[1] = {type};
   return Consume(types, 1, error_message);
 }
 
@@ -424,9 +425,8 @@ std::unique_ptr<ParseNode> Parser::ParseExpression(int precedence) {
   PrefixFunc prefix = expressions_[token.type()].prefix;
 
   if (prefix == nullptr) {
-    *err_ = Err(token,
-                std::string("Unexpected token '") + token.value().as_string() +
-                    std::string("'"));
+    *err_ = Err(token, std::string("Unexpected token '") +
+                           token.value().as_string() + std::string("'"));
     return std::unique_ptr<ParseNode>();
   }
 
@@ -567,8 +567,8 @@ std::unique_ptr<ParseNode> Parser::Assignment(std::unique_ptr<ParseNode> left,
                                               const Token& token) {
   if (left->AsIdentifier() == nullptr && left->AsAccessor() == nullptr) {
     *err_ = Err(left.get(),
-        "The left-hand side of an assignment must be an identifier, "
-        "scope access, or array access.");
+                "The left-hand side of an assignment must be an identifier, "
+                "scope access, or array access.");
     return std::unique_ptr<ParseNode>();
   }
   std::unique_ptr<ParseNode> value = ParseExpression(PRECEDENCE_ASSIGNMENT);
@@ -589,7 +589,8 @@ std::unique_ptr<ParseNode> Parser::Subscript(std::unique_ptr<ParseNode> left,
   // TODO: Maybe support more complex expressions like a[0][0]. This would
   // require work on the evaluator too.
   if (left->AsIdentifier() == nullptr) {
-    *err_ = Err(left.get(), "May only subscript identifiers.",
+    *err_ = Err(
+        left.get(), "May only subscript identifiers.",
         "The thing on the left hand side of the [] must be an identifier\n"
         "and not an expression. If you need this, you'll have to assign the\n"
         "value to a temporary before subscripting. Sorry.");
@@ -606,7 +607,8 @@ std::unique_ptr<ParseNode> Parser::Subscript(std::unique_ptr<ParseNode> left,
 std::unique_ptr<ParseNode> Parser::DotOperator(std::unique_ptr<ParseNode> left,
                                                const Token& token) {
   if (left->AsIdentifier() == nullptr) {
-    *err_ = Err(left.get(), "May only use \".\" for identifiers.",
+    *err_ = Err(
+        left.get(), "May only use \".\" for identifiers.",
         "The thing on the left hand side of the dot must be an identifier\n"
         "and not an expression. If you need this, you'll have to assign the\n"
         "value to a temporary first. Sorry.");
@@ -615,7 +617,8 @@ std::unique_ptr<ParseNode> Parser::DotOperator(std::unique_ptr<ParseNode> left,
 
   std::unique_ptr<ParseNode> right = ParseExpression(PRECEDENCE_DOT);
   if (!right || !right->AsIdentifier()) {
-    *err_ = Err(token, "Expected identifier for right-hand-side of \".\"",
+    *err_ = Err(
+        token, "Expected identifier for right-hand-side of \".\"",
         "Good: a.cookies\nBad: a.42\nLooks good but still bad: a.cookies()");
     return std::unique_ptr<ParseNode>();
   }
@@ -753,8 +756,8 @@ std::unique_ptr<ParseNode> Parser::ParseCondition() {
       BlockNode::DISCARDS_RESULT));
   if (Match(Token::ELSE)) {
     if (LookAhead(Token::LEFT_BRACE)) {
-      condition->set_if_false(ParseBlock(Consume(),
-                                         BlockNode::DISCARDS_RESULT));
+      condition->set_if_false(
+          ParseBlock(Consume(), BlockNode::DISCARDS_RESULT));
     } else if (LookAhead(Token::IF)) {
       condition->set_if_false(ParseStatement());
     } else {
@@ -846,8 +849,7 @@ void Parser::AssignComments(ParseNode* file) {
   // Assign suffix to syntax immediately before.
   cur_comment = static_cast<int>(suffix_comment_tokens_.size() - 1);
   for (std::vector<const ParseNode*>::const_reverse_iterator i = post.rbegin();
-       i != post.rend();
-       ++i) {
+       i != post.rend(); ++i) {
     // Don't assign suffix comments to the function, list, or block, but instead
     // to the last thing inside.
     if ((*i)->AsFunctionCall() || (*i)->AsList() || (*i)->AsBlock())

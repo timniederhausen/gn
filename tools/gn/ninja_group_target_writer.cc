@@ -12,8 +12,7 @@
 
 NinjaGroupTargetWriter::NinjaGroupTargetWriter(const Target* target,
                                                std::ostream& out)
-    : NinjaTargetWriter(target, out) {
-}
+    : NinjaTargetWriter(target, out) {}
 
 NinjaGroupTargetWriter::~NinjaGroupTargetWriter() = default;
 

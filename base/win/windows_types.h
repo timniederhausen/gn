@@ -68,7 +68,6 @@ typedef LONG_PTR SSIZE_T, *PSSIZE_T;
 typedef DWORD ACCESS_MASK;
 typedef ACCESS_MASK REGSAM;
 
-
 // Forward declare Windows compatible handles.
 
 #define CHROME_DECLARE_HANDLE(name) \
@@ -83,7 +82,6 @@ CHROME_DECLARE_HANDLE(HMENU);
 CHROME_DECLARE_HANDLE(HWND);
 typedef HINSTANCE HMODULE;
 #undef CHROME_DECLARE_HANDLE
-
 
 // Forward declare some Windows struct/typedef sets.
 
@@ -118,9 +116,10 @@ struct CHROME_CONDITION_VARIABLE {
   PVOID Ptr;
 };
 
-
 // Define some commonly used Windows constants. Note that the layout of these
 // macros - including internal spacing - must be 100% consistent with windows.h.
+
+// clang-format off
 
 #ifndef INVALID_HANDLE_VALUE
 // Work around there being two slightly different definitions in the SDK.
@@ -195,6 +194,8 @@ struct CHROME_CONDITION_VARIABLE {
 #define WINUSERAPI DECLSPEC_IMPORT
 #define WINAPI __stdcall
 #define CALLBACK __stdcall
+
+// clang-format on
 
 // Needed for optimal lock performance.
 WINBASEAPI _Releases_exclusive_lock_(*SRWLock) VOID WINAPI

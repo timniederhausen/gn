@@ -61,8 +61,7 @@ uint32_t GetUniqueIdForProcess();
 // WARNING: To avoid inconsistent results from GetUniqueIdForProcess, this
 // should only be called very early after process startup - ideally as soon
 // after process creation as possible.
-void InitUniqueIdForProcessInPidNamespace(
-    ProcessId pid_outside_of_namespace);
+void InitUniqueIdForProcessInPidNamespace(ProcessId pid_outside_of_namespace);
 #endif
 
 // Returns the ProcessHandle of the current process.

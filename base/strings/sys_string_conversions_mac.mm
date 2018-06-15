@@ -21,7 +21,7 @@ namespace {
 // an STL string of the template type.  Returns an empty string on failure.
 //
 // Do not assert in this function since it is used by the asssertion code!
-template<typename StringType>
+template <typename StringType>
 static StringType CFStringToSTLStringWithEncodingT(CFStringRef cfstring,
                                                    CFStringEncoding encoding) {
   CFIndex length = CFStringGetLength(cfstring);
@@ -30,9 +30,7 @@ static StringType CFStringToSTLStringWithEncodingT(CFStringRef cfstring,
 
   CFRange whole_string = CFRangeMake(0, length);
   CFIndex out_size;
-  CFIndex converted = CFStringGetBytes(cfstring,
-                                       whole_string,
-                                       encoding,
+  CFIndex converted = CFStringGetBytes(cfstring, whole_string, encoding,
                                        0,      // lossByte
                                        false,  // isExternalRepresentation
                                        NULL,   // buffer
@@ -50,14 +48,12 @@ static StringType CFStringToSTLStringWithEncodingT(CFStringRef cfstring,
       out_size * sizeof(UInt8) / sizeof(typename StringType::value_type) + 1;
 
   std::vector<typename StringType::value_type> out_buffer(elements);
-  converted = CFStringGetBytes(cfstring,
-                               whole_string,
-                               encoding,
-                               0,      // lossByte
-                               false,  // isExternalRepresentation
-                               reinterpret_cast<UInt8*>(&out_buffer[0]),
-                               out_size,
-                               NULL);  // usedBufLen
+  converted =
+      CFStringGetBytes(cfstring, whole_string, encoding,
+                       0,      // lossByte
+                       false,  // isExternalRepresentation
+                       reinterpret_cast<UInt8*>(&out_buffer[0]), out_size,
+                       NULL);  // usedBufLen
   if (converted == 0)
     return StringType();
 
@@ -70,7 +66,7 @@ static StringType CFStringToSTLStringWithEncodingT(CFStringRef cfstring,
 // |OutStringType| template type.  Returns an empty string on failure.
 //
 // Do not assert in this function since it is used by the asssertion code!
-template<typename InStringType, typename OutStringType>
+template <typename InStringType, typename OutStringType>
 static OutStringType STLStringToSTLStringWithEncodingsT(
     const InStringType& in,
     CFStringEncoding in_encoding,
@@ -80,11 +76,8 @@ static OutStringType STLStringToSTLStringWithEncodingsT(
     return OutStringType();
 
   base::ScopedCFTypeRef<CFStringRef> cfstring(CFStringCreateWithBytesNoCopy(
-      NULL,
-      reinterpret_cast<const UInt8*>(in.data()),
-      in_length * sizeof(typename InStringType::value_type),
-      in_encoding,
-      false,
+      NULL, reinterpret_cast<const UInt8*>(in.data()),
+      in_length * sizeof(typename InStringType::value_type), in_encoding, false,
       kCFAllocatorNull));
   if (!cfstring)
     return OutStringType();
@@ -95,7 +88,7 @@ static OutStringType STLStringToSTLStringWithEncodingsT(
 
 // Given an STL string |in| with an encoding specified by |in_encoding|,
 // return it as a CFStringRef.  Returns NULL on failure.
-template<typename StringType>
+template <typename StringType>
 static CFStringRef STLStringToCFStringWithEncodingsT(
     const StringType& in,
     CFStringEncoding in_encoding) {
@@ -103,12 +96,9 @@ static CFStringRef STLStringToCFStringWithEncodingsT(
   if (in_length == 0)
     return CFSTR("");
 
-  return CFStringCreateWithBytes(kCFAllocatorDefault,
-                                 reinterpret_cast<const UInt8*>(in.data()),
-                                 in_length *
-                                   sizeof(typename StringType::value_type),
-                                 in_encoding,
-                                 false);
+  return CFStringCreateWithBytes(
+      kCFAllocatorDefault, reinterpret_cast<const UInt8*>(in.data()),
+      in_length * sizeof(typename StringType::value_type), in_encoding, false);
 }
 
 // Specify the byte ordering explicitly, otherwise CFString will be confused
@@ -168,8 +158,7 @@ std::string SysCFStringRefToUTF8(CFStringRef ref) {
 }
 
 string16 SysCFStringRefToUTF16(CFStringRef ref) {
-  return CFStringToSTLStringWithEncodingT<string16>(ref,
-                                                    kMediumStringEncoding);
+  return CFStringToSTLStringWithEncodingT<string16>(ref, kMediumStringEncoding);
 }
 
 std::string SysNSStringToUTF8(NSString* nsstring) {

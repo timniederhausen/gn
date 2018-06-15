@@ -102,7 +102,6 @@ class ConditionVariable {
   void Signal();
 
  private:
-
 #if defined(OS_WIN)
   CHROME_CONDITION_VARIABLE cv_;
   CHROME_SRWLOCK* const srwlock_;

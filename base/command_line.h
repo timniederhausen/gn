@@ -174,8 +174,7 @@ class CommandLine {
   // Append a switch [with optional value] to the command line.
   // Note: Switches will precede arguments regardless of appending order.
   void AppendSwitch(const std::string& switch_string);
-  void AppendSwitchPath(const std::string& switch_string,
-                        const FilePath& path);
+  void AppendSwitchPath(const std::string& switch_string, const FilePath& path);
   void AppendSwitchNative(const std::string& switch_string,
                           const StringType& value);
   void AppendSwitchASCII(const std::string& switch_string,

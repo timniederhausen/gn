@@ -104,8 +104,7 @@ Value RunGetLabelInfo(Scope* scope,
 
   } else if (what == "target_gen_dir") {
     result.string_value() = DirectoryWithNoLastSlash(GetSubBuildDirAsSourceDir(
-        BuildDirContext(scope, label.GetToolchainLabel()),
-        label.dir(),
+        BuildDirContext(scope, label.GetToolchainLabel()), label.dir(),
         BuildDirType::GEN));
 
   } else if (what == "root_gen_dir") {
@@ -114,8 +113,7 @@ Value RunGetLabelInfo(Scope* scope,
 
   } else if (what == "target_out_dir") {
     result.string_value() = DirectoryWithNoLastSlash(GetSubBuildDirAsSourceDir(
-        BuildDirContext(scope, label.GetToolchainLabel()),
-        label.dir(),
+        BuildDirContext(scope, label.GetToolchainLabel()), label.dir(),
         BuildDirType::OBJ));
 
   } else if (what == "root_out_dir") {

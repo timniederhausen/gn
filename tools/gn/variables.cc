@@ -198,7 +198,7 @@ Possible values
 const char kCurrentCpu[] = "current_cpu";
 const char kCurrentCpu_HelpShort[] =
     "current_cpu: [string] The processor architecture of the current "
-        "toolchain.";
+    "toolchain.";
 const char kCurrentCpu_Help[] =
     R"(current_cpu: The processor architecture of the current toolchain.
 
@@ -271,9 +271,9 @@ const char kPythonPath_Help[] =
 
 const char kRootBuildDir[] = "root_build_dir";
 const char kRootBuildDir_HelpShort[] =
-  "root_build_dir: [string] Directory where build commands are run.";
+    "root_build_dir: [string] Directory where build commands are run.";
 const char kRootBuildDir_Help[] =
-  R"(root_build_dir: [string] Directory where build commands are run.
+    R"(root_build_dir: [string] Directory where build commands are run.
 
   This is the root build output directory which will be the current directory
   when executing all compilers and scripts.
@@ -421,8 +421,7 @@ const char kAllDependentConfigs_Help[] =
   target's headers.
 
   See also "public_configs".
-)"
-    COMMON_ORDERING_HELP;
+)" COMMON_ORDERING_HELP;
 
 const char kAllowCircularIncludesFrom[] = "allow_circular_includes_from";
 const char kAllowCircularIncludesFrom_HelpShort[] =
@@ -512,8 +511,7 @@ const char kArflags_Help[] =
   to other static libraries. Due to the nature of how arflags are typically
   used, you will normally want to apply them directly on static_library targets
   themselves.
-)"
-    COMMON_ORDERING_HELP;
+)" COMMON_ORDERING_HELP;
 
 const char kArgs[] = "args";
 const char kArgs_HelpShort[] =
@@ -602,7 +600,7 @@ Example
 const char kBundleContentsDir[] = "bundle_contents_dir";
 const char kBundleContentsDir_HelpShort[] =
     "bundle_contents_dir: "
-        "Expansion of {{bundle_contents_dir}} in create_bundle.";
+    "Expansion of {{bundle_contents_dir}} in create_bundle.";
 const char kBundleContentsDir_Help[] =
     R"(bundle_contents_dir: Expansion of {{bundle_contents_dir}} in
                              create_bundle.
@@ -619,7 +617,7 @@ const char kBundleContentsDir_Help[] =
 const char kBundleResourcesDir[] = "bundle_resources_dir";
 const char kBundleResourcesDir_HelpShort[] =
     "bundle_resources_dir: "
-        "Expansion of {{bundle_resources_dir}} in create_bundle.";
+    "Expansion of {{bundle_resources_dir}} in create_bundle.";
 const char kBundleResourcesDir_Help[] =
     R"(bundle_resources_dir: Expansion of {{bundle_resources_dir}} in
                              create_bundle.
@@ -669,7 +667,7 @@ Example
 const char kBundleExecutableDir[] = "bundle_executable_dir";
 const char kBundleExecutableDir_HelpShort[] =
     "bundle_executable_dir: "
-        "Expansion of {{bundle_executable_dir}} in create_bundle";
+    "Expansion of {{bundle_executable_dir}} in create_bundle";
 const char kBundleExecutableDir_Help[] =
     R"(bundle_executable_dir: Expansion of {{bundle_executable_dir}} in
                               create_bundle.
@@ -686,7 +684,7 @@ const char kBundleExecutableDir_Help[] =
 const char kBundlePlugInsDir[] = "bundle_plugins_dir";
 const char kBundlePlugInsDir_HelpShort[] =
     "bundle_plugins_dir: "
-        "Expansion of {{bundle_plugins_dir}} in create_bundle.";
+    "Expansion of {{bundle_plugins_dir}} in create_bundle.";
 const char kBundlePlugInsDir_Help[] =
     R"(bundle_plugins_dir: Expansion of {{bundle_plugins_dir}} in create_bundle.
 
@@ -716,8 +714,7 @@ const char kCommonCflagsHelp[] =
   "cflags".
 
   See also "asmflags" for flags for assembly-language files.
-)"
-    COMMON_ORDERING_HELP;
+)" COMMON_ORDERING_HELP;
 const char* kCflags_Help = kCommonCflagsHelp;
 
 const char kAsmflags[] = "asmflags";
@@ -730,8 +727,7 @@ const char* kAsmflags_Help =
 
   "asmflags" are passed to any invocation of a tool that takes an .asm or .S
   file as input.
-)"
-    COMMON_ORDERING_HELP;
+)" COMMON_ORDERING_HELP;
 
 const char kCflagsC[] = "cflags_c";
 const char kCflagsC_HelpShort[] =
@@ -915,9 +911,8 @@ Configs on a config
      listed as a sub-config that it is only used in that context. (Note that
      it's possible to fix this and de-dupe, but it's not normally relevant and
      complicates the implementation.)
-)"
-    COMMON_ORDERING_HELP
-R"(
+)" COMMON_ORDERING_HELP
+    R"(
 Example
 
   # Configs on a target.
@@ -1016,9 +1011,8 @@ const char kDefines_Help[] =
 
   These strings will be passed to the C/C++ compiler as #defines. The strings
   may or may not include an "=" to assign a value.
-)"
-    COMMON_ORDERING_HELP
-R"(
+)" COMMON_ORDERING_HELP
+    R"(
 Example
 
   defines = [ "AWESOME_FEATURE", "LOG_LEVEL=3" ]
@@ -1173,9 +1167,8 @@ const char kIncludeDirs_Help[] =
 
   The directories in this list will be added to the include path for the files
   in the affected target.
-)"
-    COMMON_ORDERING_HELP
-R"(
+)" COMMON_ORDERING_HELP
+    R"(
 Example
 
   include_dirs = [ "src/include", "//third_party/foo" ]
@@ -1263,22 +1256,21 @@ const char kLdflags_Help[] =
   static libraries will be a no-op. If you want to apply ldflags to dependent
   targets, put them in a config and set it in the all_dependent_configs or
   public_configs.
-)"
-    COMMON_ORDERING_HELP;
+)" COMMON_ORDERING_HELP;
 
-#define COMMON_LIB_INHERITANCE_HELP \
-    "\n" \
-    "  libs and lib_dirs work differently than other flags in two respects.\n" \
-    "  First, then are inherited across static library boundaries until a\n" \
-    "  shared library or executable target is reached. Second, they are\n" \
-    "  uniquified so each one is only passed once (the first instance of it\n" \
-    "  will be the one used).\n"
+#define COMMON_LIB_INHERITANCE_HELP                                          \
+  "\n"                                                                       \
+  "  libs and lib_dirs work differently than other flags in two respects.\n" \
+  "  First, then are inherited across static library boundaries until a\n"   \
+  "  shared library or executable target is reached. Second, they are\n"     \
+  "  uniquified so each one is only passed once (the first instance of it\n" \
+  "  will be the one used).\n"
 
-#define LIBS_AND_LIB_DIRS_ORDERING_HELP \
-    "\n" \
-    "  For \"libs\" and \"lib_dirs\" only, the values propagated from\n" \
-    "  dependencies (as described above) are applied last assuming they\n" \
-    "  are not already in the list.\n"
+#define LIBS_AND_LIB_DIRS_ORDERING_HELP                                  \
+  "\n"                                                                   \
+  "  For \"libs\" and \"lib_dirs\" only, the values propagated from\n"   \
+  "  dependencies (as described above) are applied last assuming they\n" \
+  "  are not already in the list.\n"
 
 const char kLibDirs[] = "lib_dirs";
 const char kLibDirs_HelpShort[] =
@@ -1291,11 +1283,9 @@ const char kLibDirs_Help[] =
   Specifies additional directories passed to the linker for searching for the
   required libraries. If an item is not an absolute path, it will be treated as
   being relative to the current build file.
-)"
-    COMMON_LIB_INHERITANCE_HELP
-    COMMON_ORDERING_HELP
-    LIBS_AND_LIB_DIRS_ORDERING_HELP
-R"(
+)" COMMON_LIB_INHERITANCE_HELP COMMON_ORDERING_HELP
+        LIBS_AND_LIB_DIRS_ORDERING_HELP
+    R"(
 Example
 
   lib_dirs = [ "/usr/lib/foo", "lib/doom_melon" ]
@@ -1311,9 +1301,8 @@ const char kLibs_Help[] =
 
   These libraries will be linked into the final binary (executable or shared
   library) containing the current target.
-)"
-    COMMON_LIB_INHERITANCE_HELP
-R"(
+)" COMMON_LIB_INHERITANCE_HELP
+    R"(
 Types of libs
 
   There are several different things that can be expressed in libs:
@@ -1338,10 +1327,8 @@ Types of libs
       "-framework" will be prepended instead of the lib_switch, and the
       ".framework" suffix will be trimmed. This is to support the way Mac links
       framework dependencies.
-)"
-    COMMON_ORDERING_HELP
-    LIBS_AND_LIB_DIRS_ORDERING_HELP
-R"(
+)" COMMON_ORDERING_HELP LIBS_AND_LIB_DIRS_ORDERING_HELP
+    R"(
 Examples
 
   On Windows:
@@ -1705,8 +1692,7 @@ const char kPublicConfigs_Help[] =
   target's headers.
 
   See also "all_dependent_configs".
-)"
-    COMMON_ORDERING_HELP;
+)" COMMON_ORDERING_HELP;
 
 const char kPublicDeps[] = "public_deps";
 const char kPublicDeps_HelpShort[] =
@@ -1761,7 +1747,7 @@ const char kResponseFileContents[] = "response_file_contents";
 const char kResponseFileContents_HelpShort[] =
     "response_file_contents: [string list] Contents of .rsp file for actions.";
 const char kResponseFileContents_Help[] =
-   R"*(response_file_contents: Contents of a response file for actions.
+    R"*(response_file_contents: Contents of a response file for actions.
 
   Sometimes the arguments passed to a script can be too long for the system's
   command-line capabilities. This is especially the case on Windows where the
@@ -1798,8 +1784,7 @@ Example
 )*";
 
 const char kScript[] = "script";
-const char kScript_HelpShort[] =
-    "script: [file name] Script file for actions.";
+const char kScript_HelpShort[] = "script: [file name] Script file for actions.";
 const char kScript_Help[] =
     R"(script: Script file for actions.
 
@@ -1984,18 +1969,13 @@ const char kXcodeExtraAttributes_Help[] =
 
 // -----------------------------------------------------------------------------
 
-VariableInfo::VariableInfo()
-    : help_short(""),
-      help("") {
-}
+VariableInfo::VariableInfo() : help_short(""), help("") {}
 
 VariableInfo::VariableInfo(const char* in_help_short, const char* in_help)
-    : help_short(in_help_short),
-      help(in_help) {
-}
+    : help_short(in_help_short), help(in_help) {}
 
 #define INSERT_VARIABLE(var) \
-    info_map[k##var] = VariableInfo(k##var##_HelpShort, k##var##_Help);
+  info_map[k##var] = VariableInfo(k##var##_HelpShort, k##var##_Help);
 
 const VariableInfoMap& GetBuiltinVariables() {
   static VariableInfoMap info_map;

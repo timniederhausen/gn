@@ -34,12 +34,8 @@ class NinjaBinaryTargetWriter::SourceFileTypeSet {
     memset(flags_, 0, sizeof(bool) * static_cast<int>(SOURCE_NUMTYPES));
   }
 
-  void Set(SourceFileType type) {
-    flags_[static_cast<int>(type)] = true;
-  }
-  bool Get(SourceFileType type) const {
-    return flags_[static_cast<int>(type)];
-  }
+  void Set(SourceFileType type) { flags_[static_cast<int>(type)] = true; }
+  bool Get(SourceFileType type) const { return flags_[static_cast<int>(type)]; }
 
  private:
   bool flags_[static_cast<int>(SOURCE_NUMTYPES)];
@@ -55,9 +51,7 @@ EscapeOptions GetFlagOptions() {
 }
 
 struct DefineWriter {
-  DefineWriter() {
-    options.mode = ESCAPE_NINJA_COMMAND;
-  }
+  DefineWriter() { options.mode = ESCAPE_NINJA_COMMAND; }
 
   void operator()(const std::string& s, std::ostream& out) const {
     out << " ";
@@ -68,8 +62,7 @@ struct DefineWriter {
 };
 
 struct IncludeWriter {
-  explicit IncludeWriter(PathOutput& path_output) : path_output_(path_output) {
-  }
+  explicit IncludeWriter(PathOutput& path_output) : path_output_(path_output) {}
   ~IncludeWriter() = default;
 
   void operator()(const SourceDir& d, std::ostream& out) const {
@@ -161,8 +154,8 @@ void GetPCHOutputFiles(const Target* target,
   if (!tool)
     return;
   SubstitutionWriter::ApplyListToCompilerAsOutputFile(
-      target, target->config_values().precompiled_source(),
-      tool->outputs(), outputs);
+      target, target->config_values().precompiled_source(), tool->outputs(),
+      outputs);
 
   if (outputs->empty())
     return;
@@ -192,8 +185,7 @@ void GetPCHOutputFiles(const Target* target,
       NOTREACHED() << "No outputs for no PCH type.";
       break;
   }
-  output_value.replace(extension_offset - 1,
-                       std::string::npos,
+  output_value.replace(extension_offset - 1, std::string::npos,
                        output_extension);
 }
 
@@ -239,8 +231,8 @@ void AddSourceSetObjectFiles(const Target* source_set,
       }
     }
     if (used_types.Get(SOURCE_MM)) {
-      const Tool* tool = source_set->toolchain()->GetTool(
-          Toolchain::TYPE_OBJCXX);
+      const Tool* tool =
+          source_set->toolchain()->GetTool(Toolchain::TYPE_OBJCXX);
       if (tool && tool->precompiled_header_type() == Tool::PCH_MSVC) {
         GetPCHOutputFiles(source_set, Toolchain::TYPE_OBJCXX, &tool_outputs);
         obj_files->Append(tool_outputs.begin(), tool_outputs.end());
@@ -255,8 +247,7 @@ NinjaBinaryTargetWriter::NinjaBinaryTargetWriter(const Target* target,
                                                  std::ostream& out)
     : NinjaTargetWriter(target, out),
       tool_(target->toolchain()->GetToolForTargetFinalOutput(target)),
-      rule_prefix_(GetNinjaRulePrefixForToolchain(settings_)) {
-}
+      rule_prefix_(GetNinjaRulePrefixForToolchain(settings_)) {}
 
 NinjaBinaryTargetWriter::~NinjaBinaryTargetWriter() = default;
 
@@ -311,8 +302,8 @@ void NinjaBinaryTargetWriter::Run() {
   std::vector<OutputFile> pch_other_files;
   WritePCHCommands(used_types, input_dep, order_only_deps, &pch_obj_files,
                    &pch_other_files);
-  std::vector<OutputFile>* pch_files = !pch_obj_files.empty() ?
-      &pch_obj_files : &pch_other_files;
+  std::vector<OutputFile>* pch_files =
+      !pch_obj_files.empty() ? &pch_obj_files : &pch_other_files;
 
   // Treat all pch output files as explicit dependencies of all
   // compiles that support them. Some notes:
@@ -359,8 +350,8 @@ void NinjaBinaryTargetWriter::WriteCompilerVars(
   // Defines.
   if (subst.used[SUBSTITUTION_DEFINES]) {
     out_ << kSubstitutionNinjaNames[SUBSTITUTION_DEFINES] << " =";
-    RecursiveTargetConfigToStream<std::string>(
-        target_, &ConfigValues::defines, DefineWriter(), out_);
+    RecursiveTargetConfigToStream<std::string>(target_, &ConfigValues::defines,
+                                               DefineWriter(), out_);
     out_ << std::endl;
   }
 
@@ -369,8 +360,7 @@ void NinjaBinaryTargetWriter::WriteCompilerVars(
     out_ << kSubstitutionNinjaNames[SUBSTITUTION_INCLUDE_DIRS] << " =";
     PathOutput include_path_output(
         path_output_.current_dir(),
-        settings_->build_settings()->root_path_utf8(),
-        ESCAPE_NINJA_COMMAND);
+        settings_->build_settings()->root_path_utf8(), ESCAPE_NINJA_COMMAND);
     RecursiveTargetConfigToStream<SourceDir>(
         target_, &ConfigValues::include_dirs,
         IncludeWriter(include_path_output), out_);
@@ -411,9 +401,8 @@ void NinjaBinaryTargetWriter::WriteCompilerVars(
 }
 
 OutputFile NinjaBinaryTargetWriter::WriteInputsStampAndGetDep() const {
-  CHECK(target_->toolchain())
-      << "Toolchain not set on target "
-      << target_->label().GetUserVisibleName(true);
+  CHECK(target_->toolchain()) << "Toolchain not set on target "
+                              << target_->label().GetUserVisibleName(true);
 
   std::vector<const SourceFile*> inputs;
   for (ConfigValuesIterator iter(target_); !iter.done(); iter.Next()) {
@@ -438,8 +427,7 @@ OutputFile NinjaBinaryTargetWriter::WriteInputsStampAndGetDep() const {
 
   out_ << "build ";
   path_output_.WriteFile(out_, input_stamp_file);
-  out_ << ": "
-       << GetNinjaRulePrefixForToolchain(settings_)
+  out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
        << Toolchain::ToolTypeToName(Toolchain::TYPE_STAMP);
 
   // File inputs.
@@ -456,7 +444,7 @@ void NinjaBinaryTargetWriter::WriteOneFlag(
     SubstitutionType subst_enum,
     bool has_precompiled_headers,
     Toolchain::ToolType tool_type,
-    const std::vector<std::string>& (ConfigValues::* getter)() const,
+    const std::vector<std::string>& (ConfigValues::*getter)() const,
     EscapeOptions flag_escape_options) {
   if (!target_->toolchain()->substitution_bits().used[subst_enum])
     return;
@@ -473,15 +461,15 @@ void NinjaBinaryTargetWriter::WriteOneFlag(
       // Enables precompiled headers and names the .h file. It's a string
       // rather than a file name (so no need to rebase or use path_output_).
       out_ << " /Yu" << target_->config_values().precompiled_header();
-      RecursiveTargetConfigStringsToStream(target_, getter,
-                                           flag_escape_options, out_);
+      RecursiveTargetConfigStringsToStream(target_, getter, flag_escape_options,
+                                           out_);
     } else if (tool && tool->precompiled_header_type() == Tool::PCH_GCC) {
       // The targets to build the .gch files should omit the -include flag
       // below. To accomplish this, each substitution flag is overwritten in the
       // target rule and these values are repeated. The -include flag is omitted
       // in place of the required -x <header lang> flag for .gch targets.
-      RecursiveTargetConfigStringsToStream(target_, getter,
-                                           flag_escape_options, out_);
+      RecursiveTargetConfigStringsToStream(target_, getter, flag_escape_options,
+                                           out_);
 
       // Compute the gch file (it will be language-specific).
       std::vector<OutputFile> outputs;
@@ -495,12 +483,12 @@ void NinjaBinaryTargetWriter::WriteOneFlag(
         out_ << " -include " << pch_file;
       }
     } else {
-      RecursiveTargetConfigStringsToStream(target_, getter,
-                                           flag_escape_options, out_);
+      RecursiveTargetConfigStringsToStream(target_, getter, flag_escape_options,
+                                           out_);
     }
   } else {
-    RecursiveTargetConfigStringsToStream(target_, getter,
-                                         flag_escape_options, out_);
+    RecursiveTargetConfigStringsToStream(target_, getter, flag_escape_options,
+                                         out_);
   }
   out_ << std::endl;
 }
@@ -515,16 +503,14 @@ void NinjaBinaryTargetWriter::WritePCHCommands(
     return;
 
   const Tool* tool_c = target_->toolchain()->GetTool(Toolchain::TYPE_CC);
-  if (tool_c &&
-      tool_c->precompiled_header_type() != Tool::PCH_NONE &&
+  if (tool_c && tool_c->precompiled_header_type() != Tool::PCH_NONE &&
       used_types.Get(SOURCE_C)) {
     WritePCHCommand(SUBSTITUTION_CFLAGS_C, Toolchain::TYPE_CC,
                     tool_c->precompiled_header_type(), input_dep,
                     order_only_deps, object_files, other_files);
   }
   const Tool* tool_cxx = target_->toolchain()->GetTool(Toolchain::TYPE_CXX);
-  if (tool_cxx &&
-      tool_cxx->precompiled_header_type() != Tool::PCH_NONE &&
+  if (tool_cxx && tool_cxx->precompiled_header_type() != Tool::PCH_NONE &&
       used_types.Get(SOURCE_CPP)) {
     WritePCHCommand(SUBSTITUTION_CFLAGS_CC, Toolchain::TYPE_CXX,
                     tool_cxx->precompiled_header_type(), input_dep,
@@ -532,8 +518,7 @@ void NinjaBinaryTargetWriter::WritePCHCommands(
   }
 
   const Tool* tool_objc = target_->toolchain()->GetTool(Toolchain::TYPE_OBJC);
-  if (tool_objc &&
-      tool_objc->precompiled_header_type() == Tool::PCH_GCC &&
+  if (tool_objc && tool_objc->precompiled_header_type() == Tool::PCH_GCC &&
       used_types.Get(SOURCE_M)) {
     WritePCHCommand(SUBSTITUTION_CFLAGS_OBJC, Toolchain::TYPE_OBJC,
                     tool_objc->precompiled_header_type(), input_dep,
@@ -542,8 +527,7 @@ void NinjaBinaryTargetWriter::WritePCHCommands(
 
   const Tool* tool_objcxx =
       target_->toolchain()->GetTool(Toolchain::TYPE_OBJCXX);
-  if (tool_objcxx &&
-      tool_objcxx->precompiled_header_type() == Tool::PCH_GCC &&
+  if (tool_objcxx && tool_objcxx->precompiled_header_type() == Tool::PCH_GCC &&
       used_types.Get(SOURCE_MM)) {
     WritePCHCommand(SUBSTITUTION_CFLAGS_OBJCC, Toolchain::TYPE_OBJCXX,
                     tool_objcxx->precompiled_header_type(), input_dep,
@@ -605,17 +589,17 @@ void NinjaBinaryTargetWriter::WriteGCCPCHCommand(
   // for .gch targets.
   EscapeOptions opts = GetFlagOptions();
   if (tool_type == Toolchain::TYPE_CC) {
-    RecursiveTargetConfigStringsToStream(target_,
-        &ConfigValues::cflags_c, opts, out_);
+    RecursiveTargetConfigStringsToStream(target_, &ConfigValues::cflags_c, opts,
+                                         out_);
   } else if (tool_type == Toolchain::TYPE_CXX) {
-    RecursiveTargetConfigStringsToStream(target_,
-        &ConfigValues::cflags_cc, opts, out_);
+    RecursiveTargetConfigStringsToStream(target_, &ConfigValues::cflags_cc,
+                                         opts, out_);
   } else if (tool_type == Toolchain::TYPE_OBJC) {
-    RecursiveTargetConfigStringsToStream(target_,
-        &ConfigValues::cflags_objc, opts, out_);
+    RecursiveTargetConfigStringsToStream(target_, &ConfigValues::cflags_objc,
+                                         opts, out_);
   } else if (tool_type == Toolchain::TYPE_OBJCXX) {
-    RecursiveTargetConfigStringsToStream(target_,
-        &ConfigValues::cflags_objcc, opts, out_);
+    RecursiveTargetConfigStringsToStream(target_, &ConfigValues::cflags_objcc,
+                                         opts, out_);
   }
 
   // Append the command to specify the language of the .gch file.
@@ -707,9 +691,9 @@ void NinjaBinaryTargetWriter::WriteSources(
           } else if (tool->precompiled_header_type() == Tool::PCH_GCC) {
             output_extension = GetGCCPCHOutputExtension(tool_type);
           }
-          if (output_value.compare(output_value.size() -
-              output_extension.size(), output_extension.size(),
-              output_extension) == 0) {
+          if (output_value.compare(
+                  output_value.size() - output_extension.size(),
+                  output_extension.size(), output_extension) == 0) {
             deps.push_back(dep);
           }
         }
@@ -930,8 +914,8 @@ void NinjaBinaryTargetWriter::WriteOutputSubstitutions() {
               target_, tool_, SUBSTITUTION_OUTPUT_EXTENSION);
   out_ << std::endl;
   out_ << "  output_dir = "
-       << SubstitutionWriter::GetLinkerSubstitution(
-              target_, tool_, SUBSTITUTION_OUTPUT_DIR);
+       << SubstitutionWriter::GetLinkerSubstitution(target_, tool_,
+                                                    SUBSTITUTION_OUTPUT_DIR);
   out_ << std::endl;
 }
 
@@ -974,14 +958,14 @@ void NinjaBinaryTargetWriter::GetDeps(
     UniqueVector<const Target*>* non_linkable_deps) const {
   // Normal public/private deps.
   for (const auto& pair : target_->GetDeps(Target::DEPS_LINKED)) {
-    ClassifyDependency(pair.ptr, extra_object_files,
-                       linkable_deps, non_linkable_deps);
+    ClassifyDependency(pair.ptr, extra_object_files, linkable_deps,
+                       non_linkable_deps);
   }
 
   // Inherited libraries.
   for (auto* inherited_target : target_->inherited_libraries().GetOrdered()) {
-    ClassifyDependency(inherited_target, extra_object_files,
-                       linkable_deps, non_linkable_deps);
+    ClassifyDependency(inherited_target, extra_object_files, linkable_deps,
+                       non_linkable_deps);
   }
 
   // Data deps.
@@ -1068,20 +1052,22 @@ bool NinjaBinaryTargetWriter::CheckForDuplicateObjectFiles(
   for (const auto& file : files) {
     if (!set.insert(file.value()).second) {
       Err err(
-          target_->defined_from(),
-          "Duplicate object file",
+          target_->defined_from(), "Duplicate object file",
           "The target " + target_->label().GetUserVisibleName(false) +
-          "\ngenerates two object files with the same name:\n  " +
-          file.value() + "\n"
-          "\n"
-          "It could be you accidentally have a file listed twice in the\n"
-          "sources. Or, depending on how your toolchain maps sources to\n"
-          "object files, two source files with the same name in different\n"
-          "directories could map to the same object file.\n"
-          "\n"
-          "In the latter case, either rename one of the files or move one of\n"
-          "the sources to a separate source_set to avoid them both being in\n"
-          "the same target.");
+              "\ngenerates two object files with the same name:\n  " +
+              file.value() +
+              "\n"
+              "\n"
+              "It could be you accidentally have a file listed twice in the\n"
+              "sources. Or, depending on how your toolchain maps sources to\n"
+              "object files, two source files with the same name in different\n"
+              "directories could map to the same object file.\n"
+              "\n"
+              "In the latter case, either rename one of the files or move one "
+              "of\n"
+              "the sources to a separate source_set to avoid them both being "
+              "in\n"
+              "the same target.");
       g_scheduler->FailWithError(err);
       return false;
     }

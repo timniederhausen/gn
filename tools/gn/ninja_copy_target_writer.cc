@@ -16,8 +16,7 @@
 
 NinjaCopyTargetWriter::NinjaCopyTargetWriter(const Target* target,
                                              std::ostream& out)
-    : NinjaTargetWriter(target, out) {
-}
+    : NinjaTargetWriter(target, out) {}
 
 NinjaCopyTargetWriter::~NinjaCopyTargetWriter() = default;
 
@@ -66,9 +65,8 @@ void NinjaCopyTargetWriter::WriteCopyRules(
       << "Should have one entry exactly.";
   const SubstitutionPattern& output_subst = output_subst_list.list()[0];
 
-  std::string tool_name =
-      GetNinjaRulePrefixForToolchain(settings_) +
-      Toolchain::ToolTypeToName(Toolchain::TYPE_COPY);
+  std::string tool_name = GetNinjaRulePrefixForToolchain(settings_) +
+                          Toolchain::ToolTypeToName(Toolchain::TYPE_COPY);
 
   size_t num_stamp_uses = target_->sources().size();
   std::vector<OutputFile> input_deps = WriteInputDepsStampAndGetDep(

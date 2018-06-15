@@ -226,7 +226,7 @@ File File::Duplicate() const {
                          GetPlatformFile(),
                          GetCurrentProcess(),  // hTargetProcessHandle
                          &other_handle,
-                         0,  // dwDesiredAccess ignored due to SAME_ACCESS
+                         0,      // dwDesiredAccess ignored due to SAME_ACCESS
                          FALSE,  // !bInheritHandle
                          DUPLICATE_SAME_ACCESS)) {
     return File(GetLastFileError());
@@ -355,8 +355,8 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
   if (flags & FLAG_SEQUENTIAL_SCAN)
     create_flags |= FILE_FLAG_SEQUENTIAL_SCAN;
 
-  file_.Set(CreateFile(path.value().c_str(), access, sharing, NULL,
-                       disposition, create_flags, NULL));
+  file_.Set(CreateFile(path.value().c_str(), access, sharing, NULL, disposition,
+                       create_flags, NULL));
 
   if (file_.IsValid()) {
     error_details_ = FILE_OK;

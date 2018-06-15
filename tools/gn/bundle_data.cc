@@ -120,9 +120,8 @@ void BundleData::GetOutputFiles(const Settings* settings,
     outputs->push_back(OutputFile(settings->build_settings(), source_file));
 }
 
-void BundleData::GetOutputsAsSourceFiles(
-    const Settings* settings,
-    SourceFiles* outputs_as_source) const {
+void BundleData::GetOutputsAsSourceFiles(const Settings* settings,
+                                         SourceFiles* outputs_as_source) const {
   for (const BundleFileRule& file_rule : file_rules_) {
     for (const SourceFile& source : file_rule.sources()) {
       outputs_as_source->push_back(

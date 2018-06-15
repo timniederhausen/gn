@@ -59,8 +59,7 @@ base::FilePath BuildSettings::GetFullPathSecondary(
   return file.Resolve(secondary_source_path_).NormalizePathSeparatorsTo('/');
 }
 
-base::FilePath BuildSettings::GetFullPathSecondary(
-    const SourceDir& dir) const {
+base::FilePath BuildSettings::GetFullPathSecondary(const SourceDir& dir) const {
   return dir.Resolve(secondary_source_path_).NormalizePathSeparatorsTo('/');
 }
 

@@ -26,15 +26,13 @@
 #include "tools/gn/target.h"
 #include "tools/gn/trace.h"
 
-NinjaTargetWriter::NinjaTargetWriter(const Target* target,
-                                     std::ostream& out)
+NinjaTargetWriter::NinjaTargetWriter(const Target* target, std::ostream& out)
     : settings_(target->settings()),
       target_(target),
       out_(out),
       path_output_(settings_->build_settings()->build_dir(),
                    settings_->build_settings()->root_path_utf8(),
-                   ESCAPE_NINJA) {
-}
+                   ESCAPE_NINJA) {}
 
 NinjaTargetWriter::~NinjaTargetWriter() = default;
 
@@ -108,7 +106,7 @@ std::string NinjaTargetWriter::RunAndWriteFile(const Target* target) {
     std::string result = "subninja ";
     result.append(EscapeString(
         OutputFile(target->settings()->build_settings(), ninja_file).value(),
-                   options, nullptr));
+        options, nullptr));
     result.push_back('\n');
     return result;
   }
@@ -122,9 +120,8 @@ void NinjaTargetWriter::WriteEscapedSubstitution(SubstitutionType type) {
   opts.mode = ESCAPE_NINJA;
 
   out_ << kSubstitutionNinjaNames[type] << " = ";
-  EscapeStringToStream(out_,
-      SubstitutionWriter::GetTargetSubstitution(target_, type),
-      opts);
+  EscapeStringToStream(
+      out_, SubstitutionWriter::GetTargetSubstitution(target_, type), opts);
   out_ << std::endl;
 }
 
@@ -182,9 +179,8 @@ void NinjaTargetWriter::WriteSharedVars(const SubstitutionBits& bits) {
 std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
     const std::vector<const Target*>& extra_hard_deps,
     size_t num_stamp_uses) const {
-  CHECK(target_->toolchain())
-      << "Toolchain not set on target "
-      << target_->label().GetUserVisibleName(true);
+  CHECK(target_->toolchain()) << "Toolchain not set on target "
+                              << target_->label().GetUserVisibleName(true);
 
   // ----------
   // Collect all input files that are input deps of this target. Knowing the
@@ -293,8 +289,7 @@ std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
 
   out_ << "build ";
   path_output_.WriteFile(out_, input_stamp_file);
-  out_ << ": "
-       << GetNinjaRulePrefixForToolchain(settings_)
+  out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
        << Toolchain::ToolTypeToName(Toolchain::TYPE_STAMP);
   path_output_.WriteFiles(out_, outs);
 
@@ -317,8 +312,7 @@ void NinjaTargetWriter::WriteStampForTarget(
   out_ << "build ";
   path_output_.WriteFile(out_, stamp_file);
 
-  out_ << ": "
-       << GetNinjaRulePrefixForToolchain(settings_)
+  out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
        << Toolchain::ToolTypeToName(Toolchain::TYPE_STAMP);
   path_output_.WriteFiles(out_, files);
 

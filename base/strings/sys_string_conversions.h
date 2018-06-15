@@ -47,8 +47,7 @@ std::wstring SysNativeMBToWide(StringPiece native_mb);
 // code page identifier is one accepted by the Windows function
 // MultiByteToWideChar().
 std::wstring SysMultiByteToWide(StringPiece mb, uint32_t code_page);
-std::string SysWideToMultiByte(const std::wstring& wide,
-                                           uint32_t code_page);
+std::string SysWideToMultiByte(const std::wstring& wide, uint32_t code_page);
 
 #endif  // defined(OS_WIN)
 

@@ -27,6 +27,7 @@
 
 #if defined(OS_WIN)
 #include <windows.h>
+
 #include <shellapi.h>
 #endif
 
@@ -81,7 +82,7 @@ void GetContextForValue(const Value& value,
                         std::string* location_str,
                         int* line_no,
                         std::string* comment,
-                        bool pad_comment=true) {
+                        bool pad_comment = true) {
   Location location = value.origin()->GetRange().begin();
   const InputFile* file = location.file();
   if (!file)
@@ -144,8 +145,8 @@ void PrintArgHelp(const base::StringPiece& name,
       int line_no;
       std::string location, comment;
       GetContextForValue(val.override_value, &location, &line_no, &comment);
-      OutputString("      From " + location + ":" + base::IntToString(line_no)
-                   + "\n");
+      OutputString("      From " + location + ":" + base::IntToString(line_no) +
+                   "\n");
     }
     OutputString("    Overridden from the default = ");
     PrintDefaultValueInfo(name, val.default_value);
@@ -218,8 +219,10 @@ int ListArgs(const std::string& build_dir) {
     auto found = args.find(list_value);
     if (found == args.end()) {
       Err(Location(), "Unknown build argument.",
-          "You asked for \"" + list_value + "\" which I didn't find in any "
-          "build file\nassociated with this build.").PrintToStdout();
+          "You asked for \"" + list_value +
+              "\" which I didn't find in any "
+              "build file\nassociated with this build.")
+          .PrintToStdout();
       return 1;
     }
 
@@ -290,8 +293,8 @@ bool RunEditor(const base::FilePath& file_to_edit) {
   info.lpClass = L".txt";
   if (!::ShellExecuteEx(&info)) {
     Err(Location(), "Couldn't run editor.",
-        "Just edit \"" + FilePathToUTF8(file_to_edit) +
-        "\" manually instead.").PrintToStdout();
+        "Just edit \"" + FilePathToUTF8(file_to_edit) + "\" manually instead.")
+        .PrintToStdout();
     return false;
   }
 
@@ -331,8 +334,7 @@ bool RunEditor(const base::FilePath& file_to_edit) {
   cmd.append(escaped_name);
   cmd.push_back('"');
 
-  OutputString("Waiting for editor on \"" + file_to_edit.value() +
-               "\"...\n");
+  OutputString("Waiting for editor on \"" + file_to_edit.value() + "\"...\n");
   return system(cmd.c_str()) == 0;
 }
 
@@ -381,8 +383,8 @@ int EditArgsFile(const std::string& build_dir) {
 #if defined(OS_WIN)
       // Use Windows lineendings for this file since it will often open in
       // Notepad which can't handle Unix ones.
-      base::ReplaceSubstringsAfterOffset(
-          &argfile_default_contents, 0, "\n", "\r\n");
+      base::ReplaceSubstringsAfterOffset(&argfile_default_contents, 0, "\n",
+                                         "\r\n");
 #endif
       base::CreateDirectory(arg_file.DirName());
       base::WriteFile(arg_file, argfile_default_contents.c_str(),
@@ -492,7 +494,8 @@ int RunArgs(const std::vector<std::string>& args) {
   if (args.size() != 1) {
     Err(Location(), "Exactly one build dir needed.",
         "Usage: \"gn args <out_dir>\"\n"
-        "Or see \"gn help args\" for more variants.").PrintToStdout();
+        "Or see \"gn help args\" for more variants.")
+        .PrintToStdout();
     return 1;
   }
 

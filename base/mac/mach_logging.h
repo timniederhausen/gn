@@ -49,23 +49,23 @@ class MachLogMessage : public logging::LogMessage {
 }  // namespace logging
 
 #define MACH_LOG_STREAM(severity, mach_err) \
-    COMPACT_GOOGLE_LOG_EX_ ## severity(MachLogMessage, mach_err).stream()
+  COMPACT_GOOGLE_LOG_EX_##severity(MachLogMessage, mach_err).stream()
 
 #define MACH_LOG(severity, mach_err) \
-    LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), LOG_IS_ON(severity))
+  LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), LOG_IS_ON(severity))
 #define MACH_LOG_IF(severity, condition, mach_err) \
-    LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), \
-                LOG_IS_ON(severity) && (condition))
+  LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), \
+              LOG_IS_ON(severity) && (condition))
 
-#define MACH_CHECK(condition, mach_err) \
-    LAZY_STREAM(MACH_LOG_STREAM(FATAL, mach_err), !(condition)) \
-    << "Check failed: " # condition << ". "
+#define MACH_CHECK(condition, mach_err)                       \
+  LAZY_STREAM(MACH_LOG_STREAM(FATAL, mach_err), !(condition)) \
+      << "Check failed: " #condition << ". "
 
 #define MACH_DLOG(severity, mach_err) \
-    LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), DLOG_IS_ON(severity))
+  LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), DLOG_IS_ON(severity))
 #define MACH_DLOG_IF(severity, condition, mach_err) \
-    LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err), \
-                DLOG_IS_ON(severity) && (condition))
+  LAZY_STREAM(MACH_LOG_STREAM(severity, mach_err),  \
+              DLOG_IS_ON(severity) && (condition))
 
 #define MACH_DCHECK(condition, mach_err)        \
   LAZY_STREAM(MACH_LOG_STREAM(FATAL, mach_err), \
@@ -93,25 +93,24 @@ class BootstrapLogMessage : public logging::LogMessage {
 }  // namespace logging
 
 #define BOOTSTRAP_LOG_STREAM(severity, bootstrap_err) \
-    COMPACT_GOOGLE_LOG_EX_ ## severity(BootstrapLogMessage, \
-                                       bootstrap_err).stream()
-#define BOOTSTRAP_LOG(severity, bootstrap_err) \
-    LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, \
-                                     bootstrap_err), LOG_IS_ON(severity))
+  COMPACT_GOOGLE_LOG_EX_##severity(BootstrapLogMessage, bootstrap_err).stream()
+#define BOOTSTRAP_LOG(severity, bootstrap_err)               \
+  LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, bootstrap_err), \
+              LOG_IS_ON(severity))
 #define BOOTSTRAP_LOG_IF(severity, condition, bootstrap_err) \
-    LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, bootstrap_err), \
-                LOG_IS_ON(severity) && (condition))
+  LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, bootstrap_err), \
+              LOG_IS_ON(severity) && (condition))
 
-#define BOOTSTRAP_CHECK(condition, bootstrap_err) \
-    LAZY_STREAM(BOOTSTRAP_LOG_STREAM(FATAL, bootstrap_err), !(condition)) \
-    << "Check failed: " # condition << ". "
+#define BOOTSTRAP_CHECK(condition, bootstrap_err)                       \
+  LAZY_STREAM(BOOTSTRAP_LOG_STREAM(FATAL, bootstrap_err), !(condition)) \
+      << "Check failed: " #condition << ". "
 
-#define BOOTSTRAP_DLOG(severity, bootstrap_err) \
-    LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, bootstrap_err), \
-                DLOG_IS_ON(severity))
+#define BOOTSTRAP_DLOG(severity, bootstrap_err)              \
+  LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, bootstrap_err), \
+              DLOG_IS_ON(severity))
 #define BOOTSTRAP_DLOG_IF(severity, condition, bootstrap_err) \
-    LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, bootstrap_err), \
-                DLOG_IS_ON(severity) && (condition))
+  LAZY_STREAM(BOOTSTRAP_LOG_STREAM(severity, bootstrap_err),  \
+              DLOG_IS_ON(severity) && (condition))
 
 #define BOOTSTRAP_DCHECK(condition, bootstrap_err)        \
   LAZY_STREAM(BOOTSTRAP_LOG_STREAM(FATAL, bootstrap_err), \

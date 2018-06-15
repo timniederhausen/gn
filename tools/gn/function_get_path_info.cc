@@ -37,13 +37,15 @@ SourceDir DirForInput(const Settings* settings,
 
   if (!input_string.empty() && input_string[input_string.size() - 1] == '/') {
     // Input is a directory.
-    return current_dir.ResolveRelativeDir(input, err,
-        settings->build_settings()->root_path_utf8());
+    return current_dir.ResolveRelativeDir(
+        input, err, settings->build_settings()->root_path_utf8());
   }
 
   // Input is a file.
-  return current_dir.ResolveRelativeFile(input, err,
-      settings->build_settings()->root_path_utf8()).GetDir();
+  return current_dir
+      .ResolveRelativeFile(input, err,
+                           settings->build_settings()->root_path_utf8())
+      .GetDir();
 }
 
 std::string GetOnePathInfo(const Settings* settings,
@@ -90,14 +92,12 @@ std::string GetOnePathInfo(const Settings* settings,
     case WHAT_GEN_DIR: {
       return DirectoryWithNoLastSlash(GetSubBuildDirAsSourceDir(
           BuildDirContext(settings),
-          DirForInput(settings, current_dir, input, err),
-          BuildDirType::GEN));
+          DirForInput(settings, current_dir, input, err), BuildDirType::GEN));
     }
     case WHAT_OUT_DIR: {
       return DirectoryWithNoLastSlash(GetSubBuildDirAsSourceDir(
           BuildDirContext(settings),
-          DirForInput(settings, current_dir, input, err),
-          BuildDirType::OBJ));
+          DirForInput(settings, current_dir, input, err), BuildDirType::OBJ));
     }
     case WHAT_ABSPATH: {
       bool as_dir =
@@ -235,7 +235,8 @@ Value RunGetPathInfo(Scope* scope,
     const std::vector<Value>& input_list = args[0].list_value();
     Value result(function, Value::LIST);
     for (const auto& cur : input_list) {
-      result.list_value().push_back(Value(function,
+      result.list_value().push_back(Value(
+          function,
           GetOnePathInfo(scope->settings(), current_dir, what, cur, err)));
       if (err->has_error())
         return Value();

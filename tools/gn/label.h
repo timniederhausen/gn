@@ -69,9 +69,7 @@ class Label {
            toolchain_dir_ == other.toolchain_dir_ &&
            toolchain_name_ == other.toolchain_name_;
   }
-  bool operator!=(const Label& other) const {
-    return !operator==(other);
-  }
+  bool operator!=(const Label& other) const { return !operator==(other); }
   bool operator<(const Label& other) const {
     if (int c = dir_.value().compare(other.dir_.value()))
       return c < 0;
@@ -106,12 +104,13 @@ class Label {
 
 namespace std {
 
-template<> struct hash<Label> {
+template <>
+struct hash<Label> {
   std::size_t operator()(const Label& v) const {
     hash<std::string> stringhash;
-    return ((stringhash(v.dir().value()) * 131 +
-             stringhash(v.name())) * 131 +
-            stringhash(v.toolchain_dir().value())) * 131 +
+    return ((stringhash(v.dir().value()) * 131 + stringhash(v.name())) * 131 +
+            stringhash(v.toolchain_dir().value())) *
+               131 +
            stringhash(v.toolchain_name());
   }
 };

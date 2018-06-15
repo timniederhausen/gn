@@ -75,8 +75,7 @@ ValueDestination::ValueDestination()
       scope_(nullptr),
       name_token_(nullptr),
       list_(nullptr),
-      index_(0) {
-}
+      index_(0) {}
 
 bool ValueDestination::Init(Scope* exec_scope,
                             const ParseNode* dest,
@@ -103,13 +102,14 @@ bool ValueDestination::Init(Scope* exec_scope,
 
   // Known to be an accessor.
   base::StringPiece base_str = dest_accessor->base().value();
-  Value* base = exec_scope->GetMutableValue(
-      base_str, Scope::SEARCH_CURRENT, false);
+  Value* base =
+      exec_scope->GetMutableValue(base_str, Scope::SEARCH_CURRENT, false);
   if (!base) {
     // Base is either undefined or it's defined but not in the current scope.
     // Make a good error message.
     if (exec_scope->GetValue(base_str, false)) {
-      *err = Err(dest_accessor->base(), "Suspicious in-place modification.",
+      *err = Err(
+          dest_accessor->base(), "Suspicious in-place modification.",
           "This variable exists in a containing scope. Normally, writing to it "
           "would\nmake a copy of it into the current scope with the modified "
           "version. But\nhere you're modifying only an element of a scope or "
@@ -117,8 +117,10 @@ bool ValueDestination::Init(Scope* exec_scope,
           "to modify this part of it.\n"
           "\n"
           "If you really wanted to do this, do:\n"
-          "  " + base_str.as_string() + " = " + base_str.as_string() + "\n"
-          "to copy it into the current scope before doing this operation.");
+          "  " +
+              base_str.as_string() + " = " + base_str.as_string() +
+              "\n"
+              "to copy it into the current scope before doing this operation.");
     } else {
       *err = Err(dest_accessor->base(), "Undefined identifier.");
     }
@@ -164,8 +166,8 @@ const Value* ValueDestination::GetExistingValue() const {
 Value* ValueDestination::GetExistingMutableValueIfExists(
     const ParseNode* origin) {
   if (type_ == SCOPE) {
-    Value* value = scope_->GetMutableValue(
-        name_token_->value(), Scope::SEARCH_CURRENT, false);
+    Value* value = scope_->GetMutableValue(name_token_->value(),
+                                           Scope::SEARCH_CURRENT, false);
     if (value) {
       // The value will be written to, reset its tracking information.
       value->set_origin(origin);
@@ -210,8 +212,7 @@ void ValueDestination::MakeUndefinedIdentifierForModifyError(Err* err) {
 }
 
 // Computes an error message for overwriting a nonempty list/scope with another.
-Err MakeOverwriteError(const BinaryOpNode* op_node,
-                       const Value& old_value) {
+Err MakeOverwriteError(const BinaryOpNode* op_node, const Value& old_value) {
   std::string type_name;
   std::string empty_def;
 
@@ -226,13 +227,15 @@ Err MakeOverwriteError(const BinaryOpNode* op_node,
   }
 
   Err result(op_node->left()->GetRange(),
-      "Replacing nonempty " + type_name + ".",
-      "This overwrites a previously-defined nonempty " + type_name +
-      " with another nonempty " + type_name + ".");
-  result.AppendSubErr(Err(old_value, "for previous definition",
+             "Replacing nonempty " + type_name + ".",
+             "This overwrites a previously-defined nonempty " + type_name +
+                 " with another nonempty " + type_name + ".");
+  result.AppendSubErr(Err(
+      old_value, "for previous definition",
       "Did you mean to append/modify instead? If you really want to overwrite, "
       "do:\n"
-      "  foo = " + empty_def + "\nbefore reassigning."));
+      "  foo = " +
+          empty_def + "\nbefore reassigning."));
   return result;
 }
 
@@ -241,13 +244,14 @@ Err MakeOverwriteError(const BinaryOpNode* op_node,
 Err MakeIncompatibleTypeError(const BinaryOpNode* op_node,
                               const Value& left,
                               const Value& right) {
-  std::string msg =
-      std::string("You can't do <") + Value::DescribeType(left.type()) + "> " +
-      op_node->op().value().as_string() +
-      " <" + Value::DescribeType(right.type()) + ">.";
+  std::string msg = std::string("You can't do <") +
+                    Value::DescribeType(left.type()) + "> " +
+                    op_node->op().value().as_string() + " <" +
+                    Value::DescribeType(right.type()) + ">.";
   if (left.type() == Value::LIST) {
     // Append extra hint for list stuff.
-    msg += "\n\nHint: If you're attempting to add or remove a single item from "
+    msg +=
+        "\n\nHint: If you're attempting to add or remove a single item from "
         " a list, use \"foo + [ bar ]\".";
   }
   return Err(op_node, "Incompatible types for binary operator.", msg);
@@ -262,8 +266,7 @@ Value GetValueOrFillError(const BinaryOpNode* op_node,
   if (err->has_error())
     return Value();
   if (value.type() == Value::NONE) {
-    *err = Err(op_node->op(),
-               "Operator requires a value.",
+    *err = Err(op_node->op(), "Operator requires a value.",
                "This thing on the " + std::string(name) +
                    " does not evaluate to a value.");
     err->AppendRange(node->GetRange());
@@ -292,8 +295,8 @@ void RemoveMatchesFromList(const BinaryOpNode* op_node,
       }
       if (!found_match) {
         *err = Err(to_remove.origin()->GetRange(), "Item not found",
-            "You were trying to remove " + to_remove.ToString(true) +
-            "\nfrom the list but it wasn't there.");
+                   "You were trying to remove " + to_remove.ToString(true) +
+                       "\nfrom the list but it wasn't there.");
       }
       break;
     }
@@ -350,9 +353,7 @@ Value ExecuteEquals(Scope* exec_scope,
     std::vector<Value>& list_value = written_value->list_value();
     auto first_deleted = std::remove_if(
         list_value.begin(), list_value.end(),
-        [filter](const Value& v) {
-          return filter->MatchesValue(v);
-        });
+        [filter](const Value& v) { return filter->MatchesValue(v); });
     list_value.erase(first_deleted, list_value.end());
   }
   return Value();
@@ -374,9 +375,8 @@ Value ExecutePlus(const BinaryOpNode* op_node,
       return Value(op_node, left.int_value() + right.int_value());
     } else if (right.type() == Value::STRING && allow_left_type_conversion) {
       // Int + string -> string concat.
-      return Value(
-          op_node,
-          base::Int64ToString(left.int_value()) + right.string_value());
+      return Value(op_node, base::Int64ToString(left.int_value()) +
+                                right.string_value());
     }
     *err = MakeIncompatibleTypeError(op_node, left, right);
     return Value();
@@ -386,8 +386,8 @@ Value ExecutePlus(const BinaryOpNode* op_node,
   if (left.type() == Value::STRING) {
     if (right.type() == Value::INTEGER) {
       // String + int -> string concat.
-      return Value(op_node,
-          left.string_value() + base::Int64ToString(right.int_value()));
+      return Value(op_node, left.string_value() +
+                                base::Int64ToString(right.int_value()));
     } else if (right.type() == Value::STRING) {
       // String + string -> string concat. Since the left is passed by copy
       // we can avoid realloc if there is enough buffer by appending to left
@@ -469,8 +469,9 @@ void ExecutePlusEquals(Scope* exec_scope,
     if (existing_value->type() != Value::STRING &&
         existing_value->type() != Value::LIST) {
       // Case #4 above.
-      dest->SetValue(ExecutePlus(op_node, *existing_value,
-                                 std::move(right), false, err), op_node);
+      dest->SetValue(
+          ExecutePlus(op_node, *existing_value, std::move(right), false, err),
+          op_node);
       return;
     }
 
@@ -479,8 +480,9 @@ void ExecutePlusEquals(Scope* exec_scope,
   } else if (mutable_dest->type() != Value::STRING &&
              mutable_dest->type() != Value::LIST) {
     // Case #2 above.
-    dest->SetValue(ExecutePlus(op_node, *mutable_dest,
-                               std::move(right), false, err), op_node);
+    dest->SetValue(
+        ExecutePlus(op_node, *mutable_dest, std::move(right), false, err),
+        op_node);
     return;
   }  // "else" is case #1 above.
 
@@ -515,7 +517,7 @@ void ExecutePlusEquals(Scope* exec_scope,
       }
     } else {
       *err = Err(op_node->op(), "Incompatible types to add.",
-          "To append a single item to a list do \"foo += [ bar ]\".");
+                 "To append a single item to a list do \"foo += [ bar ]\".");
     }
   }
 }
@@ -632,8 +634,8 @@ Value ExecuteOr(Scope* scope,
     return Value();
   if (left.type() != Value::BOOLEAN) {
     *err = Err(op_node->left(), "Left side of || operator is not a boolean.",
-        "Type is \"" + std::string(Value::DescribeType(left.type())) +
-        "\" instead.");
+               "Type is \"" + std::string(Value::DescribeType(left.type())) +
+                   "\" instead.");
     return Value();
   }
   if (left.boolean_value())
@@ -644,8 +646,8 @@ Value ExecuteOr(Scope* scope,
     return Value();
   if (right.type() != Value::BOOLEAN) {
     *err = Err(op_node->right(), "Right side of || operator is not a boolean.",
-        "Type is \"" + std::string(Value::DescribeType(right.type())) +
-        "\" instead.");
+               "Type is \"" + std::string(Value::DescribeType(right.type())) +
+                   "\" instead.");
     return Value();
   }
 
@@ -662,8 +664,8 @@ Value ExecuteAnd(Scope* scope,
     return Value();
   if (left.type() != Value::BOOLEAN) {
     *err = Err(op_node->left(), "Left side of && operator is not a boolean.",
-        "Type is \"" + std::string(Value::DescribeType(left.type())) +
-        "\" instead.");
+               "Type is \"" + std::string(Value::DescribeType(left.type())) +
+                   "\" instead.");
     return Value();
   }
   if (!left.boolean_value())
@@ -674,8 +676,8 @@ Value ExecuteAnd(Scope* scope,
     return Value();
   if (right.type() != Value::BOOLEAN) {
     *err = Err(op_node->right(), "Right side of && operator is not a boolean.",
-        "Type is \"" + std::string(Value::DescribeType(right.type())) +
-        "\" instead.");
+               "Type is \"" + std::string(Value::DescribeType(right.type())) +
+                   "\" instead.");
     return Value();
   }
   return Value(op_node, left.boolean_value() && right.boolean_value());
@@ -693,8 +695,8 @@ Value ExecuteUnaryOperator(Scope* scope,
 
   if (expr.type() != Value::BOOLEAN) {
     *err = Err(op_node, "Operand of ! operator is not a boolean.",
-        "Type is \"" + std::string(Value::DescribeType(expr.type())) +
-        "\" instead.");
+               "Type is \"" + std::string(Value::DescribeType(expr.type())) +
+                   "\" instead.");
     return Value();
   }
   // TODO(scottmg): Why no unary minus?
@@ -709,8 +711,7 @@ Value ExecuteBinaryOperator(Scope* scope,
   const Token& op = op_node->op();
 
   // First handle the ones that take an lvalue.
-  if (op.type() == Token::EQUAL ||
-      op.type() == Token::PLUS_EQUALS ||
+  if (op.type() == Token::EQUAL || op.type() == Token::PLUS_EQUALS ||
       op.type() == Token::MINUS_EQUALS) {
     // Compute the left side.
     ValueDestination dest;

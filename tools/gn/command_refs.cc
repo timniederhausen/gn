@@ -42,9 +42,9 @@ void FillDepMap(Setup* setup, DepMap* dep_map) {
 
 // Forward declaration for function below.
 size_t RecursivePrintTargetDeps(const DepMap& dep_map,
-                               const Target* target,
-                               TargetSet* seen_targets,
-                               int indent_level);
+                                const Target* target,
+                                TargetSet* seen_targets,
+                                int indent_level);
 
 // Prints the target and its dependencies in tree form. If the set is non-null,
 // new targets encountered will be added to the set, and if a ref is in the set
@@ -53,15 +53,15 @@ size_t RecursivePrintTargetDeps(const DepMap& dep_map,
 //
 // Returns the number of items printed.
 size_t RecursivePrintTarget(const DepMap& dep_map,
-                          const Target* target,
-                          TargetSet* seen_targets,
-                          int indent_level) {
+                            const Target* target,
+                            TargetSet* seen_targets,
+                            int indent_level) {
   std::string indent(indent_level * 2, ' ');
   size_t count = 1;
 
   // Only print the toolchain for non-default-toolchain targets.
   OutputString(indent + target->label().GetUserVisibleName(
-      !target->settings()->is_default()));
+                            !target->settings()->is_default()));
 
   bool print_children = true;
   if (seen_targets) {
@@ -89,14 +89,14 @@ size_t RecursivePrintTarget(const DepMap& dep_map,
 // Prints refs of the given target (not the target itself). See
 // RecursivePrintTarget.
 size_t RecursivePrintTargetDeps(const DepMap& dep_map,
-                              const Target* target,
-                              TargetSet* seen_targets,
-                              int indent_level) {
+                                const Target* target,
+                                TargetSet* seen_targets,
+                                int indent_level) {
   DepMap::const_iterator dep_begin = dep_map.lower_bound(target);
   DepMap::const_iterator dep_end = dep_map.upper_bound(target);
   size_t count = 0;
-  for (DepMap::const_iterator cur_dep = dep_begin;
-       cur_dep != dep_end; cur_dep++) {
+  for (DepMap::const_iterator cur_dep = dep_begin; cur_dep != dep_end;
+       cur_dep++) {
     count += RecursivePrintTarget(dep_map, cur_dep->second, seen_targets,
                                   indent_level);
   }
@@ -124,8 +124,8 @@ void RecursiveCollectChildRefs(const DepMap& dep_map,
                                TargetSet* results) {
   DepMap::const_iterator dep_begin = dep_map.lower_bound(target);
   DepMap::const_iterator dep_end = dep_map.upper_bound(target);
-  for (DepMap::const_iterator cur_dep = dep_begin;
-       cur_dep != dep_end; cur_dep++)
+  for (DepMap::const_iterator cur_dep = dep_begin; cur_dep != dep_end;
+       cur_dep++)
     RecursiveCollectRefs(dep_map, cur_dep->second, results);
 }
 
@@ -273,8 +273,8 @@ size_t DoDirectListOutput(
   for (const Target* target : implicit_target_matches) {
     DepMap::const_iterator dep_begin = dep_map.lower_bound(target);
     DepMap::const_iterator dep_end = dep_map.upper_bound(target);
-    for (DepMap::const_iterator cur_dep = dep_begin;
-         cur_dep != dep_end; cur_dep++)
+    for (DepMap::const_iterator cur_dep = dep_begin; cur_dep != dep_end;
+         cur_dep++)
       results.insert(cur_dep->second);
   }
 
@@ -290,8 +290,7 @@ size_t DoDirectListOutput(
 }  // namespace
 
 const char kRefs[] = "refs";
-const char kRefs_HelpShort[] =
-    "refs: Find stuff referencing a target or file.";
+const char kRefs_HelpShort[] = "refs: Find stuff referencing a target or file.";
 const char kRefs_Help[] =
     R"(gn refs <out_dir> (<label_pattern>|<label>|<file>|@<response_file>)*
         [--all] [--all-toolchains] [--as=...] [--testonly=...] [--type=...]
@@ -330,20 +329,18 @@ Options
       When used with --tree, turns off eliding to show a complete tree.
 )"
 
-ALL_TOOLCHAINS_SWITCH_HELP
-"\n"
-TARGET_PRINTING_MODE_COMMAND_LINE_HELP
+    ALL_TOOLCHAINS_SWITCH_HELP "\n" TARGET_PRINTING_MODE_COMMAND_LINE_HELP
 
-R"(
+    R"(
   -q
      Quiet. If nothing matches, don't print any output. Without this option, if
      there are no matches there will be an informational message printed which
      might interfere with scripts processing the output.
 )"
 
-TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP
+    TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP
 
-R"(
+    R"(
   --tree
       Outputs a reverse dependency tree from the given target. Duplicates will
       be elided. Combine with --all to see a full dependency tree.
@@ -352,9 +349,9 @@ R"(
       --type, --testonly.
 )"
 
-TARGET_TYPE_FILTER_COMMAND_LINE_HELP
+    TARGET_TYPE_FILTER_COMMAND_LINE_HELP
 
-R"(
+    R"(
 
 Examples (target input)
 
@@ -420,8 +417,8 @@ int RunRefs(const std::vector<std::string>& args) {
     if (args[i][0] == '@') {
       // The argument is as a path to a response file.
       std::string contents;
-      bool ret = base::ReadFileToString(UTF8ToFilePath(args[i].substr(1)),
-                                        &contents);
+      bool ret =
+          base::ReadFileToString(UTF8ToFilePath(args[i].substr(1)), &contents);
       if (!ret) {
         Err(Location(), "Response file " + args[i].substr(1) + " not found.")
             .PrintToStdout();
@@ -471,8 +468,8 @@ int RunRefs(const std::vector<std::string>& args) {
   // converted to targets also, but there could be no targets referencing the
   // config, which is different than no config with that name.
   bool quiet = cmdline->HasSwitch("q");
-  if (!quiet && config_matches.empty() &&
-      explicit_target_matches.empty() && target_matches.empty()) {
+  if (!quiet && config_matches.empty() && explicit_target_matches.empty() &&
+      target_matches.empty()) {
     OutputString("The input matches no targets, configs, or files.\n",
                  DECORATION_YELLOW);
     return 1;

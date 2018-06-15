@@ -20,7 +20,7 @@ class Target;
 // the pointers on another thread from where we compute the labels, so this
 // structure lets us save them separately. This also allows us to store the
 // location of the thing that added this dependency.
-template<typename T>
+template <typename T>
 struct LabelPtrPair {
   typedef T DestType;
 
@@ -55,7 +55,7 @@ typedef std::vector<LabelTargetPair> LabelTargetVector;
 
 // To do a brute-force search by label:
 // std::find_if(vect.begin(), vect.end(), LabelPtrLabelEquals<Config>(label));
-template<typename T>
+template <typename T>
 struct LabelPtrLabelEquals {
   explicit LabelPtrLabelEquals(const Label& l) : label(l) {}
 
@@ -68,20 +68,18 @@ struct LabelPtrLabelEquals {
 
 // To do a brute-force search by object pointer:
 // std::find_if(vect.begin(), vect.end(), LabelPtrPtrEquals<Config>(config));
-template<typename T>
+template <typename T>
 struct LabelPtrPtrEquals {
   explicit LabelPtrPtrEquals(const T* p) : ptr(p) {}
 
-  bool operator()(const LabelPtrPair<T>& arg) const {
-    return arg.ptr == ptr;
-  }
+  bool operator()(const LabelPtrPair<T>& arg) const { return arg.ptr == ptr; }
 
   const T* ptr;
 };
 
 // To sort by label:
 // std::sort(vect.begin(), vect.end(), LabelPtrLabelLess<Config>());
-template<typename T>
+template <typename T>
 struct LabelPtrLabelLess {
   bool operator()(const LabelPtrPair<T>& a, const LabelPtrPair<T>& b) const {
     return a.label < b.label;
@@ -93,19 +91,20 @@ struct LabelPtrLabelLess {
 // The default hash and comparison operators operate on the label, which should
 // always be valid, whereas the pointer is sometimes null.
 
-template<typename T> inline bool operator==(const LabelPtrPair<T>& a,
-                                            const LabelPtrPair<T>& b) {
+template <typename T>
+inline bool operator==(const LabelPtrPair<T>& a, const LabelPtrPair<T>& b) {
   return a.label == b.label;
 }
 
-template<typename T> inline bool operator<(const LabelPtrPair<T>& a,
-                                           const LabelPtrPair<T>& b) {
+template <typename T>
+inline bool operator<(const LabelPtrPair<T>& a, const LabelPtrPair<T>& b) {
   return a.label < b.label;
 }
 
 namespace std {
 
-template<typename T> struct hash< LabelPtrPair<T> > {
+template <typename T>
+struct hash<LabelPtrPair<T>> {
   std::size_t operator()(const LabelPtrPair<T>& v) const {
     hash<Label> h;
     return h(v.label);

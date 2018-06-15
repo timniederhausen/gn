@@ -107,7 +107,7 @@ std::wstring SysNativeMBToWide(StringPiece native_mb) {
   // without writing the output, counting the number of wide characters.
   size_t num_out_chars = 0;
   memset(&ps, 0, sizeof(ps));
-  for (size_t i = 0; i < native_mb.size(); ) {
+  for (size_t i = 0; i < native_mb.size();) {
     const char* src = native_mb.data() + i;
     size_t res = mbrtowc(nullptr, src, native_mb.size() - i, &ps);
     switch (res) {

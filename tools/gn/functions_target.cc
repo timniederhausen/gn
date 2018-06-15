@@ -14,9 +14,8 @@
 #include "tools/gn/variables.h"
 
 #define DEPENDENT_CONFIG_VARS \
-    "  Dependent configs: all_dependent_configs, public_configs\n"
-#define DEPS_VARS \
-    "  Deps: data_deps, deps, public_deps\n"
+  "  Dependent configs: all_dependent_configs, public_configs\n"
+#define DEPS_VARS "  Deps: data_deps, deps, public_deps\n"
 #define GENERAL_TARGET_VARS                                                  \
   "  General: check_includes, configs, data, friend, inputs, output_name,\n" \
   "           output_extension, public, sources, testonly, visibility\n"
@@ -39,16 +38,16 @@ Value ExecuteGenericTarget(const char* target_type,
       !EnsureNotProcessingBuildConfig(function, scope, err))
     return Value();
   Scope block_scope(scope);
-  if (!FillTargetBlockScope(scope, function, target_type, block,
-                            args, &block_scope, err))
+  if (!FillTargetBlockScope(scope, function, target_type, block, args,
+                            &block_scope, err))
     return Value();
 
   block->Execute(&block_scope, err);
   if (err->has_error())
     return Value();
 
-  TargetGenerator::GenerateTarget(&block_scope, function, args,
-                                  target_type, err);
+  TargetGenerator::GenerateTarget(&block_scope, function, args, target_type,
+                                  err);
   if (err->has_error())
     return Value();
 
@@ -119,24 +118,24 @@ Inputs
   variable.
 )"
 
-  ACTION_DEPS
+    ACTION_DEPS
 
-R"(
+    R"(
 Outputs
 
   You should specify files created by your script by specifying them in the
   "outputs".
 )"
 
-  SCRIPT_EXECUTION_CONTEXT
+    SCRIPT_EXECUTION_CONTEXT
 
-R"(
+    R"(
 File name handling
 )"
 
-  SCRIPT_EXECUTION_OUTPUTS
+    SCRIPT_EXECUTION_OUTPUTS
 
-R"(
+    R"(
 Variables
 
   args, data, data_deps, depfile, deps, inputs, outputs*, pool,
@@ -165,8 +164,8 @@ Value RunAction(Scope* scope,
                 const std::vector<Value>& args,
                 BlockNode* block,
                 Err* err) {
-  return ExecuteGenericTarget(functions::kAction, scope, function, args,
-                              block, err);
+  return ExecuteGenericTarget(functions::kAction, scope, function, args, block,
+                              err);
 }
 
 // action_foreach --------------------------------------------------------------
@@ -199,17 +198,14 @@ Inputs
   You can dynamically write input dependencies (for incremental rebuilds if an
   input file changes) by writing a depfile when the script is run (see "gn help
   depfile"). This is more flexible than "inputs".
-)"
-  ACTION_DEPS
-R"(
+)" ACTION_DEPS
+    R"(
 Outputs
-)"
-  SCRIPT_EXECUTION_CONTEXT
-R"(
+)" SCRIPT_EXECUTION_CONTEXT
+    R"(
 File name handling
-)"
-  SCRIPT_EXECUTION_OUTPUTS
-R"(
+)" SCRIPT_EXECUTION_OUTPUTS
+    R"(
 Variables
 
   args, data, data_deps, depfile, deps, inputs, outputs*, pool,
@@ -481,8 +477,7 @@ Value RunCreateBundle(Scope* scope,
 // copy ------------------------------------------------------------------------
 
 const char kCopy[] = "copy";
-const char kCopy_HelpShort[] =
-    "copy: Declare a target that copies files.";
+const char kCopy_HelpShort[] = "copy: Declare a target that copies files.";
 const char kCopy_Help[] =
     R"(copy: Declare a target that copies files.
 
@@ -540,11 +535,7 @@ const char kExecutable_Help[] =
 
 Variables
 
-)"
-    CONFIG_VALUES_VARS_HELP
-    DEPS_VARS
-    DEPENDENT_CONFIG_VARS
-    GENERAL_TARGET_VARS;
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS;
 
 Value RunExecutable(Scope* scope,
                     const FunctionCallNode* function,
@@ -558,8 +549,7 @@ Value RunExecutable(Scope* scope,
 // group -----------------------------------------------------------------------
 
 const char kGroup[] = "group";
-const char kGroup_HelpShort[] =
-    "group: Declare a named group of targets.";
+const char kGroup_HelpShort[] = "group: Declare a named group of targets.";
 const char kGroup_Help[] =
     R"(group: Declare a named group of targets.
 
@@ -569,11 +559,9 @@ const char kGroup_Help[] =
 
 Variables
 
-)"
-    DEPS_VARS
-    DEPENDENT_CONFIG_VARS
+)" DEPS_VARS DEPENDENT_CONFIG_VARS
 
-R"(
+    R"(
 Example
 
   group("all") {
@@ -589,8 +577,8 @@ Value RunGroup(Scope* scope,
                const std::vector<Value>& args,
                BlockNode* block,
                Err* err) {
-  return ExecuteGenericTarget(functions::kGroup, scope, function, args,
-                              block, err);
+  return ExecuteGenericTarget(functions::kGroup, scope, function, args, block,
+                              err);
 }
 
 // loadable_module -------------------------------------------------------------
@@ -611,17 +599,13 @@ const char kLoadableModule_Help[] =
 
 Variables
 
-)"
-    CONFIG_VALUES_VARS_HELP
-    DEPS_VARS
-    DEPENDENT_CONFIG_VARS
-    GENERAL_TARGET_VARS;
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS;
 
 Value RunLoadableModule(Scope* scope,
-                       const FunctionCallNode* function,
-                       const std::vector<Value>& args,
-                       BlockNode* block,
-                       Err* err) {
+                        const FunctionCallNode* function,
+                        const std::vector<Value>& args,
+                        BlockNode* block,
+                        Err* err) {
   return ExecuteGenericTarget(functions::kLoadableModule, scope, function, args,
                               block, err);
 }
@@ -642,11 +626,7 @@ const char kSharedLibrary_Help[] =
 
 Variables
 
-)"
-    CONFIG_VALUES_VARS_HELP
-    DEPS_VARS
-    DEPENDENT_CONFIG_VARS
-    GENERAL_TARGET_VARS;
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS;
 
 Value RunSharedLibrary(Scope* scope,
                        const FunctionCallNode* function,
@@ -715,11 +695,7 @@ const char kStaticLibrary_Help[] =
 Variables
 
   complete_static_lib
-)"
-    CONFIG_VALUES_VARS_HELP
-    DEPS_VARS
-    DEPENDENT_CONFIG_VARS
-    GENERAL_TARGET_VARS;
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS;
 
 Value RunStaticLibrary(Scope* scope,
                        const FunctionCallNode* function,

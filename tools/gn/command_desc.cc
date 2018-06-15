@@ -343,9 +343,9 @@ Possibilities for <what to show>
 Shared flags
 )"
 
-ALL_TOOLCHAINS_SWITCH_HELP
+    ALL_TOOLCHAINS_SWITCH_HELP
 
-R"(
+    R"(
   --format=json
       Format the output as JSON instead of text.
 
@@ -382,10 +382,9 @@ Printing deps
 )"
 
     TARGET_PRINTING_MODE_COMMAND_LINE_HELP
-"\n"
-    TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP
+    "\n" TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP
 
-R"(
+    R"(
   --tree
       Print a dependency tree. By default, duplicates will be elided with "..."
       but when --all and -tree are used together, no eliding will be performed.
@@ -397,9 +396,9 @@ R"(
       --type, --testonly.
 )"
 
-TARGET_TYPE_FILTER_COMMAND_LINE_HELP
+    TARGET_TYPE_FILTER_COMMAND_LINE_HELP
 
-R"(Note
+    R"(Note
 
   This command will show the full name of directories and source files, but
   when directories and source paths are written to the build file, they will be
@@ -457,8 +456,9 @@ int RunDesc(const std::vector<std::string>& args) {
   bool json = cmdline->GetSwitchValueASCII("format") == "json";
 
   if (target_matches.empty() && config_matches.empty()) {
-    OutputString("The input " + args[1] +
-                 " matches no targets, configs or files.\n", DECORATION_YELLOW);
+    OutputString(
+        "The input " + args[1] + " matches no targets, configs or files.\n",
+        DECORATION_YELLOW);
     return 1;
   }
 

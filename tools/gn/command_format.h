@@ -24,4 +24,3 @@ bool FormatStringToString(const std::string& input,
 }  // namespace commands
 
 #endif  // TOOLS_GN_COMAND_FORMAT_H_
-

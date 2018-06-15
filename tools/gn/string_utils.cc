@@ -20,18 +20,18 @@ namespace {
 
 // Constructs an Err indicating a range inside a string. We assume that the
 // token has quotes around it that are not counted by the offset.
-Err ErrInsideStringToken(const Token& token, size_t offset, size_t size,
+Err ErrInsideStringToken(const Token& token,
+                         size_t offset,
+                         size_t size,
                          const std::string& msg,
                          const std::string& help = std::string()) {
   // The "+1" is skipping over the " at the beginning of the token.
   int int_offset = static_cast<int>(offset);
-  Location begin_loc(token.location().file(),
-                     token.location().line_number(),
+  Location begin_loc(token.location().file(), token.location().line_number(),
                      token.location().column_number() + int_offset + 1,
                      token.location().byte() + int_offset + 1);
   Location end_loc(
-      token.location().file(),
-      token.location().line_number(),
+      token.location().file(), token.location().line_number(),
       token.location().column_number() + int_offset + 1 +
           static_cast<int>(size),
       token.location().byte() + int_offset + 1 + static_cast<int>(size));
@@ -89,7 +89,8 @@ bool AppendInterpolatedExpression(Scope* scope,
     return false;
   }
   if (!(node->AsIdentifier() || node->AsAccessor())) {
-    *err = ErrInsideStringToken(token, begin_offset, end_offset - begin_offset,
+    *err = ErrInsideStringToken(
+        token, begin_offset, end_offset - begin_offset,
         "Invalid string interpolation.",
         "The thing inside the ${} must be an identifier ${foo},\n"
         "a scope access ${foo.bar}, or a list access ${foo[0]}.");
@@ -116,8 +117,7 @@ bool AppendInterpolatedIdentifier(Scope* scope,
                                   size_t end_offset,
                                   std::string* output,
                                   Err* err) {
-  base::StringPiece identifier(&input[begin_offset],
-                               end_offset - begin_offset);
+  base::StringPiece identifier(&input[begin_offset], end_offset - begin_offset);
   const Value* value = scope->GetValue(identifier, true);
   if (!value) {
     // We assume the input points inside the token.
@@ -142,7 +142,8 @@ bool AppendInterpolatedIdentifier(Scope* scope,
 // result of the interpolation to |*output|.
 bool AppendStringInterpolation(Scope* scope,
                                const Token& token,
-                               const char* input, size_t size,
+                               const char* input,
+                               size_t size,
                                size_t* i,
                                std::string* output,
                                Err* err) {
@@ -172,8 +173,8 @@ bool AppendStringInterpolation(Scope* scope,
     // simple identifier. Avoid all the complicated parsing of accessors
     // in this case.
     if (!has_non_ident_chars) {
-      return AppendInterpolatedIdentifier(scope, token, input, begin_offset,
-                                          *i, output, err);
+      return AppendInterpolatedIdentifier(scope, token, input, begin_offset, *i,
+                                          output, err);
     }
     return AppendInterpolatedExpression(scope, token, input, begin_offset, *i,
                                         output, err);
@@ -182,10 +183,9 @@ bool AppendStringInterpolation(Scope* scope,
   // Simple identifier.
   // The first char of an identifier is more restricted.
   if (!Tokenizer::IsIdentifierFirstChar(input[*i])) {
-    *err = ErrInsideStringToken(
-        token, dollars_index, *i - dollars_index + 1,
-        "$ not followed by an identifier char.",
-        "It you want a literal $ use \"\\$\".");
+    *err = ErrInsideStringToken(token, dollars_index, *i - dollars_index + 1,
+                                "$ not followed by an identifier char.",
+                                "It you want a literal $ use \"\\$\".");
     return false;
   }
   size_t begin_offset = *i;
@@ -210,7 +210,8 @@ bool AppendStringInterpolation(Scope* scope,
 // char with the given hex value to |*output|.
 bool AppendHexByte(Scope* scope,
                    const Token& token,
-                   const char* input, size_t size,
+                   const char* input,
+                   size_t size,
                    size_t* i,
                    std::string* output,
                    Err* err) {
@@ -241,7 +242,7 @@ bool ExpandStringLiteral(Scope* scope,
                          Value* result,
                          Err* err) {
   DCHECK(literal.type() == Token::STRING);
-  DCHECK(literal.value().size() > 1);  // Should include quotes.
+  DCHECK(literal.value().size() > 1);       // Should include quotes.
   DCHECK(result->type() == Value::STRING);  // Should be already set.
 
   // The token includes the surrounding quotes, so strip those off.
@@ -268,7 +269,8 @@ bool ExpandStringLiteral(Scope* scope,
     } else if (input[i] == '$') {
       i++;
       if (i == size) {
-        *err = ErrInsideStringToken(literal, i - 1, 1, "$ at end of string.",
+        *err = ErrInsideStringToken(
+            literal, i - 1, 1, "$ at end of string.",
             "I was expecting an identifier, 0xFF, or {...} after the $.");
         return false;
       }
@@ -276,7 +278,7 @@ bool ExpandStringLiteral(Scope* scope,
         if (!AppendHexByte(scope, literal, input, size, &i, &output, err))
           return false;
       } else if (!AppendStringInterpolation(scope, literal, input, size, &i,
-                                     &output, err))
+                                            &output, err))
         return false;
     } else {
       output.push_back(input[i]);

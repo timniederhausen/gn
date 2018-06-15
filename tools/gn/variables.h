@@ -311,8 +311,7 @@ extern const char kXcodeExtraAttributes_Help[];
 
 struct VariableInfo {
   VariableInfo();
-  VariableInfo(const char* in_help_short,
-               const char* in_help);
+  VariableInfo(const char* in_help_short, const char* in_help);
 
   const char* help_short;
   const char* help;

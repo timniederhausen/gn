@@ -12,13 +12,9 @@ namespace base {
 namespace win {
 
 EnumVariant::EnumVariant(unsigned long count)
-    : items_(new VARIANT[count]),
-      count_(count),
-      current_index_(0) {
-}
+    : items_(new VARIANT[count]), count_(count), current_index_(0) {}
 
-EnumVariant::~EnumVariant() {
-}
+EnumVariant::~EnumVariant() {}
 
 VARIANT* EnumVariant::ItemAt(unsigned long index) {
   DCHECK(index < count_);

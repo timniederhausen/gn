@@ -49,7 +49,8 @@ class OutputFile {
 
 namespace std {
 
-template<> struct hash<OutputFile> {
+template <>
+struct hash<OutputFile> {
   std::size_t operator()(const OutputFile& v) const {
     hash<std::string> h;
     return h(v.value());

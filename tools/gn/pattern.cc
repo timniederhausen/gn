@@ -55,8 +55,7 @@ void ParsePattern(const std::string& s, std::vector<Pattern::Subrange>* out) {
 Pattern::Pattern(const std::string& s) {
   ParsePattern(s, &subranges_);
   is_suffix_ =
-      (subranges_.size() == 2 &&
-       subranges_[0].type == Subrange::ANYTHING &&
+      (subranges_.size() == 2 && subranges_[0].type == Subrange::ANYTHING &&
        subranges_[1].type == Subrange::LITERAL);
 }
 

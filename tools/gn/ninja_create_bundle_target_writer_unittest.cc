@@ -175,7 +175,6 @@ TEST(NinjaCreateBundleTargetWriter, JustPartialInfoPlist) {
   EXPECT_EQ(expected, out_str);
 }
 
-
 // Tests multiple files from asset catalog.
 TEST(NinjaCreateBundleTargetWriter, AssetCatalog) {
   Err err;

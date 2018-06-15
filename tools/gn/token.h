@@ -12,8 +12,8 @@ class Token {
  public:
   enum Type {
     INVALID,
-    INTEGER,    // 123
-    STRING,     // "blah"
+    INTEGER,     // 123
+    STRING,      // "blah"
     TRUE_TOKEN,  // Not "TRUE" to avoid collisions with #define in windows.h.
     FALSE_TOKEN,
 
@@ -43,13 +43,13 @@ class Token {
 
     IF,
     ELSE,
-    IDENTIFIER, // foo
-    COMMA,  // ,
+    IDENTIFIER,            // foo
+    COMMA,                 // ,
     UNCLASSIFIED_COMMENT,  // #...\n, of unknown style (will be converted
                            // to one below)
-    LINE_COMMENT,      // #...\n on a line alone.
-    SUFFIX_COMMENT,    // #...\n on a line following other code.
-    BLOCK_COMMENT,     // #...\n line comment, but free-standing.
+    LINE_COMMENT,          // #...\n on a line alone.
+    SUFFIX_COMMENT,        // #...\n on a line following other code.
+    BLOCK_COMMENT,         // #...\n line comment, but free-standing.
 
     UNCLASSIFIED_OPERATOR,
 
@@ -67,8 +67,7 @@ class Token {
   LocationRange range() const {
     return LocationRange(
         location_,
-        Location(location_.file(),
-                 location_.line_number(),
+        Location(location_.file(), location_.line_number(),
                  location_.column_number() + static_cast<int>(value_.size()),
                  location_.byte() + static_cast<int>(value_.size())));
   }

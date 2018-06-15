@@ -5,9 +5,9 @@
 #include "base/win/shortcut.h"
 
 #include <objbase.h>
+#include <propkey.h>
 #include <shellapi.h>
 #include <shlobj.h>
-#include <propkey.h>
 #include <wrl/client.h>
 
 #include "base/files/file_util.h"
@@ -44,14 +44,12 @@ void InitializeShortcutInterfaces(const wchar_t* shortcut,
 }  // namespace
 
 ShortcutProperties::ShortcutProperties()
-    : icon_index(-1), dual_mode(false), options(0U) {
-}
+    : icon_index(-1), dual_mode(false), options(0U) {}
 
 ShortcutProperties::ShortcutProperties(const ShortcutProperties& other) =
     default;
 
-ShortcutProperties::~ShortcutProperties() {
-}
+ShortcutProperties::~ShortcutProperties() {}
 
 bool CreateOrUpdateShortcutLink(const FilePath& shortcut_path,
                                 const ShortcutProperties& properties,
@@ -114,8 +112,8 @@ bool CreateOrUpdateShortcutLink(const FilePath& shortcut_path,
       return false;
   } else if (old_i_persist_file.Get()) {
     wchar_t current_arguments[MAX_PATH] = {0};
-    if (SUCCEEDED(old_i_shell_link->GetArguments(current_arguments,
-                                                 MAX_PATH))) {
+    if (SUCCEEDED(
+            old_i_shell_link->GetArguments(current_arguments, MAX_PATH))) {
       i_shell_link->SetArguments(current_arguments);
     }
   }
@@ -144,15 +142,13 @@ bool CreateOrUpdateShortcutLink(const FilePath& shortcut_path,
         !property_store.Get())
       return false;
 
-    if (has_app_id &&
-        !SetAppIdForPropertyStore(property_store.Get(),
-                                  properties.app_id.c_str())) {
+    if (has_app_id && !SetAppIdForPropertyStore(property_store.Get(),
+                                                properties.app_id.c_str())) {
       return false;
     }
-    if (has_dual_mode &&
-        !SetBooleanValueForPropertyStore(property_store.Get(),
-                                         PKEY_AppUserModel_IsDualMode,
-                                         properties.dual_mode)) {
+    if (has_dual_mode && !SetBooleanValueForPropertyStore(
+                             property_store.Get(), PKEY_AppUserModel_IsDualMode,
+                             properties.dual_mode)) {
       return false;
     }
     if (has_toast_activator_clsid &&
@@ -262,8 +258,8 @@ bool ResolveShortcutProperties(const FilePath& shortcut_path,
 
     if (options & ShortcutProperties::PROPERTIES_APP_ID) {
       ScopedPropVariant pv_app_id;
-      if (property_store->GetValue(PKEY_AppUserModel_ID,
-                                   pv_app_id.Receive()) != S_OK) {
+      if (property_store->GetValue(PKEY_AppUserModel_ID, pv_app_id.Receive()) !=
+          S_OK) {
         return false;
       }
       switch (pv_app_id.get().vt) {

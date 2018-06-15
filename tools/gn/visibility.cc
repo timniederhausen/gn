@@ -41,16 +41,14 @@ bool Visibility::Set(const SourceDir& current_dir,
 
 void Visibility::SetPublic() {
   patterns_.clear();
-  patterns_.push_back(
-      LabelPattern(LabelPattern::RECURSIVE_DIRECTORY, SourceDir(),
-      std::string(), Label()));
+  patterns_.push_back(LabelPattern(LabelPattern::RECURSIVE_DIRECTORY,
+                                   SourceDir(), std::string(), Label()));
 }
 
 void Visibility::SetPrivate(const SourceDir& current_dir) {
   patterns_.clear();
-  patterns_.push_back(
-      LabelPattern(LabelPattern::DIRECTORY, current_dir, std::string(),
-      Label()));
+  patterns_.push_back(LabelPattern(LabelPattern::DIRECTORY, current_dir,
+                                   std::string(), Label()));
 }
 
 bool Visibility::CanSeeMe(const Label& label) const {
@@ -94,10 +92,14 @@ bool Visibility::CheckItemVisibility(const Item* from,
   if (!to->visibility().CanSeeMe(from->label())) {
     std::string to_label = to->label().GetUserVisibleName(false);
     *err = Err(from->defined_from(), "Dependency not allowed.",
-        "The item " + from->label().GetUserVisibleName(false) + "\n"
-        "can not depend on " + to_label + "\n"
-        "because it is not in " + to_label + "'s visibility list: " +
-                   to->visibility().Describe(0, true));
+               "The item " + from->label().GetUserVisibleName(false) +
+                   "\n"
+                   "can not depend on " +
+                   to_label +
+                   "\n"
+                   "because it is not in " +
+                   to_label +
+                   "'s visibility list: " + to->visibility().Describe(0, true));
     return false;
   }
   return true;

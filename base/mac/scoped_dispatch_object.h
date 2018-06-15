@@ -20,12 +20,10 @@ struct ScopedDispatchObjectTraits {
     dispatch_retain(object);
     return object;
   }
-  static void Release(T object) {
-    dispatch_release(object);
-  }
+  static void Release(T object) { dispatch_release(object); }
 };
 
-}  // namepsace internal
+}  // namespace internal
 
 template <typename T>
 using ScopedDispatchObject =

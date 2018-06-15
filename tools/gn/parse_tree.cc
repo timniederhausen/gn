@@ -93,17 +93,39 @@ ParseNode::ParseNode() = default;
 
 ParseNode::~ParseNode() = default;
 
-const AccessorNode* ParseNode::AsAccessor() const { return nullptr; }
-const BinaryOpNode* ParseNode::AsBinaryOp() const { return nullptr; }
-const BlockCommentNode* ParseNode::AsBlockComment() const { return nullptr; }
-const BlockNode* ParseNode::AsBlock() const { return nullptr; }
-const ConditionNode* ParseNode::AsConditionNode() const { return nullptr; }
-const EndNode* ParseNode::AsEnd() const { return nullptr; }
-const FunctionCallNode* ParseNode::AsFunctionCall() const { return nullptr; }
-const IdentifierNode* ParseNode::AsIdentifier() const { return nullptr; }
-const ListNode* ParseNode::AsList() const { return nullptr; }
-const LiteralNode* ParseNode::AsLiteral() const { return nullptr; }
-const UnaryOpNode* ParseNode::AsUnaryOp() const { return nullptr; }
+const AccessorNode* ParseNode::AsAccessor() const {
+  return nullptr;
+}
+const BinaryOpNode* ParseNode::AsBinaryOp() const {
+  return nullptr;
+}
+const BlockCommentNode* ParseNode::AsBlockComment() const {
+  return nullptr;
+}
+const BlockNode* ParseNode::AsBlock() const {
+  return nullptr;
+}
+const ConditionNode* ParseNode::AsConditionNode() const {
+  return nullptr;
+}
+const EndNode* ParseNode::AsEnd() const {
+  return nullptr;
+}
+const FunctionCallNode* ParseNode::AsFunctionCall() const {
+  return nullptr;
+}
+const IdentifierNode* ParseNode::AsIdentifier() const {
+  return nullptr;
+}
+const ListNode* ParseNode::AsList() const {
+  return nullptr;
+}
+const LiteralNode* ParseNode::AsLiteral() const {
+  return nullptr;
+}
+const UnaryOpNode* ParseNode::AsUnaryOp() const {
+  return nullptr;
+}
 
 Comments* ParseNode::comments_mutable() {
   if (!comments_)
@@ -193,8 +215,8 @@ Value AccessorNode::ExecuteScopeAccess(Scope* scope, Err* err) const {
   const Value* result = nullptr;
 
   // Look up the value in the scope named by "base_".
-  Value* mutable_base_value = scope->GetMutableValue(
-      base_.value(), Scope::SEARCH_NESTED, true);
+  Value* mutable_base_value =
+      scope->GetMutableValue(base_.value(), Scope::SEARCH_NESTED, true);
   if (mutable_base_value) {
     // Common case: base value is mutable so we can track variable accesses
     // for unused value warnings.
@@ -218,8 +240,8 @@ Value AccessorNode::ExecuteScopeAccess(Scope* scope, Err* err) const {
   }
 
   if (!result) {
-    *err = Err(member_.get(), "No value named \"" +
-        member_->value().value() + "\" in scope \"" + base_.value() + "\"");
+    *err = Err(member_.get(), "No value named \"" + member_->value().value() +
+                                  "\" in scope \"" + base_.value() + "\"");
     return Value();
   }
   return *result;
@@ -244,7 +266,7 @@ bool AccessorNode::ComputeAndValidateListIndex(Scope* scope,
   int64_t index_int = index_value.int_value();
   if (index_int < 0) {
     *err = Err(index_->GetRange(), "Negative array subscript.",
-        "You gave me " + base::Int64ToString(index_int) + ".");
+               "You gave me " + base::Int64ToString(index_int) + ".");
     return false;
   }
   size_t index_sizet = static_cast<size_t>(index_int);
@@ -292,8 +314,7 @@ void BinaryOpNode::Print(std::ostream& out, int indent) const {
 
 // BlockNode ------------------------------------------------------------------
 
-BlockNode::BlockNode(ResultMode result_mode) : result_mode_(result_mode) {
-}
+BlockNode::BlockNode(ResultMode result_mode) : result_mode_(result_mode) {}
 
 BlockNode::~BlockNode() = default;
 
@@ -388,8 +409,7 @@ Value ConditionNode::Execute(Scope* scope, Err* err) const {
     *err = condition_->MakeErrorDescribing(
         "Condition does not evaluate to a boolean value.",
         std::string("This is a value of type \"") +
-            Value::DescribeType(condition_result.type()) +
-            "\" instead.");
+            Value::DescribeType(condition_result.type()) + "\" instead.");
     err->AppendRange(if_token_.range());
     return Value();
   }
@@ -463,8 +483,7 @@ void FunctionCallNode::Print(std::ostream& out, int indent) const {
 
 IdentifierNode::IdentifierNode() = default;
 
-IdentifierNode::IdentifierNode(const Token& token) : value_(token) {
-}
+IdentifierNode::IdentifierNode(const Token& token) : value_(token) {}
 
 IdentifierNode::~IdentifierNode() = default;
 
@@ -474,8 +493,8 @@ const IdentifierNode* IdentifierNode::AsIdentifier() const {
 
 Value IdentifierNode::Execute(Scope* scope, Err* err) const {
   const Scope* found_in_scope = nullptr;
-  const Value* value = scope->GetValueWithScope(value_.value(), true,
-                                                &found_in_scope);
+  const Value* value =
+      scope->GetValueWithScope(value_.value(), true, &found_in_scope);
   Value result;
   if (!value) {
     *err = MakeErrorDescribing("Undefined identifier");
@@ -512,8 +531,7 @@ void IdentifierNode::SetNewLocation(int line_number) {
 
 // ListNode -------------------------------------------------------------------
 
-ListNode::ListNode() : prefer_multiline_(false) {
-}
+ListNode::ListNode() : prefer_multiline_(false) {}
 
 ListNode::~ListNode() = default;
 
@@ -533,9 +551,8 @@ Value ListNode::Execute(Scope* scope, Err* err) const {
     if (err->has_error())
       return Value();
     if (results.back().type() == Value::NONE) {
-      *err = cur->MakeErrorDescribing(
-          "This does not evaluate to a value.",
-          "I can't do something with nothing.");
+      *err = cur->MakeErrorDescribing("This does not evaluate to a value.",
+                                      "I can't do something with nothing.");
       return Value();
     }
   }
@@ -543,8 +560,7 @@ Value ListNode::Execute(Scope* scope, Err* err) const {
 }
 
 LocationRange ListNode::GetRange() const {
-  return LocationRange(begin_token_.location(),
-                       end_->value().location());
+  return LocationRange(begin_token_.location(), end_->value().location());
 }
 
 Err ListNode::MakeErrorDescribing(const std::string& msg,
@@ -707,8 +723,7 @@ std::vector<ListNode::SortRange> ListNode::GetSortRanges() const {
 
 LiteralNode::LiteralNode() = default;
 
-LiteralNode::LiteralNode(const Token& token) : value_(token) {
-}
+LiteralNode::LiteralNode(const Token& token) : value_(token) {}
 
 LiteralNode::~LiteralNode() = default;
 
@@ -831,8 +846,7 @@ void BlockCommentNode::Print(std::ostream& out, int indent) const {
 
 // EndNode ---------------------------------------------------------------------
 
-EndNode::EndNode(const Token& token) : value_(token) {
-}
+EndNode::EndNode(const Token& token) : value_(token) {}
 
 EndNode::~EndNode() = default;
 
@@ -849,7 +863,7 @@ LocationRange EndNode::GetRange() const {
 }
 
 Err EndNode::MakeErrorDescribing(const std::string& msg,
-                                        const std::string& help) const {
+                                 const std::string& help) const {
   return Err(value_, msg, help);
 }
 

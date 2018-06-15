@@ -59,8 +59,7 @@ bool ValidateResolveInput(bool as_file,
 
 SourceDir::SourceDir() = default;
 
-SourceDir::SourceDir(const base::StringPiece& p)
-    : value_(p.data(), p.size()) {
+SourceDir::SourceDir(const base::StringPiece& p) : value_(p.data(), p.size()) {
   if (!EndsWithSlash(value_))
     value_.push_back('/');
   AssertValueSourceDirString(value_);

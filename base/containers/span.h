@@ -267,9 +267,9 @@ class span {
   template <size_t Offset, size_t Count = dynamic_extent>
   constexpr span<T,
                  (Count != dynamic_extent
-                     ? Count
-                     : (Extent != dynamic_extent ? Extent - Offset
-                                                 : dynamic_extent))>
+                      ? Count
+                      : (Extent != dynamic_extent ? Extent - Offset
+                                                  : dynamic_extent))>
   subspan() const noexcept {
     static_assert(Extent == dynamic_extent || Offset <= Extent,
                   "Offset must not exceed Extent");

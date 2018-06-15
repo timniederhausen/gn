@@ -76,8 +76,7 @@ bool VerifySpecificPathControlledByUser(const FilePath& path,
                                         const std::set<gid_t>& group_gids) {
   stat_wrapper_t stat_info;
   if (CallLstat(path.value().c_str(), &stat_info) != 0) {
-    DPLOG(ERROR) << "Failed to get information on path "
-                 << path.value();
+    DPLOG(ERROR) << "Failed to get information on path " << path.value();
     return false;
   }
 
@@ -297,11 +296,11 @@ bool DoCopyDirectory(const FilePath& from_path,
       open_flags |= O_EXCL;
     else
       open_flags |= O_TRUNC | O_NONBLOCK;
-    // Each platform has different default file opening modes for CopyFile which
-    // we want to replicate here. On OS X, we use copyfile(3) which takes the
-    // source file's permissions into account. On the other platforms, we just
-    // use the base::File constructor. On Chrome OS, base::File uses a different
-    // set of permissions than it does on other POSIX platforms.
+// Each platform has different default file opening modes for CopyFile which
+// we want to replicate here. On OS X, we use copyfile(3) which takes the
+// source file's permissions into account. On the other platforms, we just
+// use the base::File constructor. On Chrome OS, base::File uses a different
+// set of permissions than it does on other POSIX platforms.
 #if defined(OS_MACOSX)
     int mode = 0600 | (stat_at_use.st_mode & 0177);
 #else
@@ -367,8 +366,8 @@ bool DeleteFile(const FilePath& path, bool recursive) {
   stack<std::string> directories;
   directories.push(path.value());
   FileEnumerator traversal(path, true,
-      FileEnumerator::FILES | FileEnumerator::DIRECTORIES |
-      FileEnumerator::SHOW_SYM_LINKS);
+                           FileEnumerator::FILES | FileEnumerator::DIRECTORIES |
+                               FileEnumerator::SHOW_SYM_LINKS);
   for (FilePath current = traversal.Next(); !current.empty();
        current = traversal.Next()) {
     if (traversal.GetInfo().IsDirectory())
@@ -503,8 +502,8 @@ bool CreateSymbolicLink(const FilePath& target_path,
                         const FilePath& symlink_path) {
   DCHECK(!symlink_path.empty());
   DCHECK(!target_path.empty());
-  return ::symlink(target_path.value().c_str(),
-                   symlink_path.value().c_str()) != -1;
+  return ::symlink(target_path.value().c_str(), symlink_path.value().c_str()) !=
+         -1;
 }
 
 bool ReadSymbolicLink(const FilePath& symlink_path, FilePath* target_path) {
@@ -535,8 +534,7 @@ bool GetPosixFilePermissions(const FilePath& path, int* mode) {
   return true;
 }
 
-bool SetPosixFilePermissions(const FilePath& path,
-                             int mode) {
+bool SetPosixFilePermissions(const FilePath& path, int mode) {
   DCHECK_EQ(mode & ~FILE_PERMISSION_MASK, 0);
 
   // Calls stat() so that we can preserve the higher bits like S_ISGID.
@@ -668,15 +666,14 @@ bool CreateNewTempDirectory(const FilePath::StringType& prefix,
   return CreateTemporaryDirInDirImpl(tmpdir, TempFileName(), new_temp_path);
 }
 
-bool CreateDirectoryAndGetError(const FilePath& full_path,
-                                File::Error* error) {
+bool CreateDirectoryAndGetError(const FilePath& full_path, File::Error* error) {
   std::vector<FilePath> subpaths;
 
   // Collect a list of all parent directories.
   FilePath last_path = full_path;
   subpaths.push_back(full_path);
-  for (FilePath path = full_path.DirName();
-       path.value() != last_path.value(); path = path.DirName()) {
+  for (FilePath path = full_path.DirName(); path.value() != last_path.value();
+       path = path.DirName()) {
     subpaths.push_back(path);
     last_path = path;
   }
@@ -800,9 +797,8 @@ bool WriteFileDescriptor(const int fd, const char* data, int size) {
   ssize_t bytes_written_total = 0;
   for (ssize_t bytes_written_partial = 0; bytes_written_total < size;
        bytes_written_total += bytes_written_partial) {
-    bytes_written_partial =
-        HANDLE_EINTR(write(fd, data + bytes_written_total,
-                           size - bytes_written_total));
+    bytes_written_partial = HANDLE_EINTR(
+        write(fd, data + bytes_written_total, size - bytes_written_total));
     if (bytes_written_partial < 0)
       return false;
   }
@@ -850,9 +846,9 @@ bool VerifyPathControlledByUser(const FilePath& base,
                                 uid_t owner_uid,
                                 const std::set<gid_t>& group_gids) {
   if (base != path && !base.IsParent(path)) {
-     DLOG(ERROR) << "|base| must be a subdirectory of |path|.  base = \""
-                 << base.value() << "\", path = \"" << path.value() << "\"";
-     return false;
+    DLOG(ERROR) << "|base| must be a subdirectory of |path|.  base = \""
+                << base.value() << "\", path = \"" << path.value() << "\"";
+    return false;
   }
 
   std::vector<FilePath::StringType> base_components;
@@ -877,8 +873,8 @@ bool VerifyPathControlledByUser(const FilePath& base,
 
   for (; ip != path_components.end(); ++ip) {
     current_path = current_path.Append(*ip);
-    if (!VerifySpecificPathControlledByUser(
-            current_path, owner_uid, group_gids))
+    if (!VerifySpecificPathControlledByUser(current_path, owner_uid,
+                                            group_gids))
       return false;
   }
   return true;
@@ -890,14 +886,11 @@ bool VerifyPathControlledByAdmin(const FilePath& path) {
   const FilePath kFileSystemRoot("/");
 
   // The name of the administrator group on mac os.
-  const char* const kAdminGroupNames[] = {
-    "admin",
-    "wheel"
-  };
+  const char* const kAdminGroupNames[] = {"admin", "wheel"};
 
   std::set<gid_t> allowed_group_ids;
   for (int i = 0, ie = arraysize(kAdminGroupNames); i < ie; ++i) {
-    struct group *group_record = getgrnam(kAdminGroupNames[i]);
+    struct group* group_record = getgrnam(kAdminGroupNames[i]);
     if (!group_record) {
       DPLOG(ERROR) << "Could not get the group ID of group \""
                    << kAdminGroupNames[i] << "\".";
@@ -907,8 +900,8 @@ bool VerifyPathControlledByAdmin(const FilePath& path) {
     allowed_group_ids.insert(group_record->gr_gid);
   }
 
-  return VerifyPathControlledByUser(
-      kFileSystemRoot, path, kRootUid, allowed_group_ids);
+  return VerifyPathControlledByUser(kFileSystemRoot, path, kRootUid,
+                                    allowed_group_ids);
 }
 #endif  // defined(OS_MACOSX) && !defined(OS_IOS)
 

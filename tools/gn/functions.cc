@@ -38,10 +38,11 @@ bool VerifyNoBlockForFunctionCall(const FunctionCallNode* function,
   if (!block)
     return true;
 
-  *err = Err(block, "Unexpected '{'.",
-      "This function call doesn't take a {} block following it, and you\n"
-      "can't have a {} block that's not connected to something like an if\n"
-      "statement or a target declaration.");
+  *err =
+      Err(block, "Unexpected '{'.",
+          "This function call doesn't take a {} block following it, and you\n"
+          "can't have a {} block that's not connected to something like an if\n"
+          "statement or a target declaration.");
   err->AppendRange(function->function().range());
   return false;
 }
@@ -49,10 +50,9 @@ bool VerifyNoBlockForFunctionCall(const FunctionCallNode* function,
 // This key is set as a scope property on the scope of a declare_args() block,
 // in order to prevent reading a variable defined earlier in the same call
 // (see `gn help declare_args` for more).
-const void *kInDeclareArgsKey = nullptr;
+const void* kInDeclareArgsKey = nullptr;
 
 }  // namespace
-
 
 bool EnsureNotReadingFromSameDeclareArgs(const ParseNode* node,
                                          const Scope* cur_scope,
@@ -70,11 +70,12 @@ bool EnsureNotReadingFromSameDeclareArgs(const ParseNode* node,
   if (!val_args_scope || !cur_args_scope || (val_args_scope != cur_args_scope))
     return true;
 
-  *err = Err(node,
-      "Reading a variable defined in the same declare_args() call.\n"
-      "\n"
-      "If you need to set the value of one arg based on another, put\n"
-      "them in two separate declare_args() calls, one after the other.\n");
+  *err =
+      Err(node,
+          "Reading a variable defined in the same declare_args() call.\n"
+          "\n"
+          "If you need to set the value of one arg based on another, put\n"
+          "them in two separate declare_args() calls, one after the other.\n");
   return false;
 }
 
@@ -82,10 +83,11 @@ bool EnsureNotProcessingImport(const ParseNode* node,
                                const Scope* scope,
                                Err* err) {
   if (scope->IsProcessingImport()) {
-    *err = Err(node, "Not valid from an import.",
-        "Imports are for defining defaults, variables, and rules. The\n"
-        "appropriate place for this kind of thing is really in a normal\n"
-        "BUILD file.");
+    *err =
+        Err(node, "Not valid from an import.",
+            "Imports are for defining defaults, variables, and rules. The\n"
+            "appropriate place for this kind of thing is really in a normal\n"
+            "BUILD file.");
     return false;
   }
   return true;
@@ -96,8 +98,8 @@ bool EnsureNotProcessingBuildConfig(const ParseNode* node,
                                     Err* err) {
   if (scope->IsProcessingBuildConfig()) {
     *err = Err(node, "Not valid from the build config.",
-        "You can't do this kind of thing from the build config script, "
-        "silly!\nPut it in a regular BUILD file.");
+               "You can't do this kind of thing from the build config script, "
+               "silly!\nPut it in a regular BUILD file.");
     return false;
   }
   return true;
@@ -141,8 +143,8 @@ bool FillTargetBlockScope(const Scope* scope,
 
 void FillNeedsBlockError(const FunctionCallNode* function, Err* err) {
   *err = Err(function->function(), "This function call requires a block.",
-      "The block's \"{\" must be on the same line as the function "
-      "call's \")\".");
+             "The block's \"{\" must be on the same line as the function "
+             "call's \")\".");
 }
 
 bool EnsureSingleStringArg(const FunctionCallNode* function,
@@ -171,15 +173,13 @@ Label MakeLabelForScope(const Scope* scope,
 // static
 const int NonNestableBlock::kKey = 0;
 
-NonNestableBlock::NonNestableBlock(
-    Scope* scope,
-    const FunctionCallNode* function,
-    const char* type_description)
+NonNestableBlock::NonNestableBlock(Scope* scope,
+                                   const FunctionCallNode* function,
+                                   const char* type_description)
     : scope_(scope),
       function_(function),
       type_description_(type_description),
-      key_added_(false) {
-}
+      key_added_(false) {}
 
 NonNestableBlock::~NonNestableBlock() {
   if (key_added_)
@@ -193,8 +193,8 @@ bool NonNestableBlock::Enter(Err* err) {
     const NonNestableBlock* existing =
         reinterpret_cast<const NonNestableBlock*>(scope_value);
     *err = Err(function_, "Can't nest these things.",
-        std::string("You are trying to nest a ") + type_description_ +
-        " inside a " + existing->type_description_ + ".");
+               std::string("You are trying to nest a ") + type_description_ +
+                   " inside a " + existing->type_description_ + ".");
     err->AppendSubErr(Err(existing->function_, "The enclosing block."));
     return false;
   }
@@ -241,10 +241,10 @@ Value RunAssert(Scope* scope,
       // Optional string message.
       if (args[1].type() != Value::STRING) {
         *err = Err(function->function(), "Assertion failed.",
-            "<<<ERROR MESSAGE IS NOT A STRING>>>");
+                   "<<<ERROR MESSAGE IS NOT A STRING>>>");
       } else {
         *err = Err(function->function(), "Assertion failed.",
-            args[1].string_value());
+                   args[1].string_value());
       }
     } else {
       *err = Err(function->function(), "Assertion failed.");
@@ -264,8 +264,8 @@ Value RunAssert(Scope* scope,
       if (origin_location.file() != function->function().location().file() ||
           origin_location.line_number() !=
               function->function().location().line_number()) {
-        err->AppendSubErr(Err(args[0].origin()->GetRange(), "",
-                              "This is where it was set."));
+        err->AppendSubErr(
+            Err(args[0].origin()->GetRange(), "", "This is where it was set."));
       }
     }
   }
@@ -275,8 +275,7 @@ Value RunAssert(Scope* scope,
 // config ----------------------------------------------------------------------
 
 const char kConfig[] = "config";
-const char kConfig_HelpShort[] =
-    "config: Defines a configuration object.";
+const char kConfig_HelpShort[] = "config: Defines a configuration object.";
 const char kConfig_Help[] =
     R"(config: Defines a configuration object.
 
@@ -302,7 +301,7 @@ Variables valid in a config definition
 
     CONFIG_VALUES_VARS_HELP
 
-R"(  Nested configs: configs
+    R"(  Nested configs: configs
 
 Variables on a target used to apply configs
 
@@ -355,8 +354,8 @@ Value RunConfig(const FunctionCallNode* function,
   const Value* configs_value = scope->GetValue(variables::kConfigs, true);
   if (configs_value) {
     ExtractListOfUniqueLabels(*configs_value, scope->GetSourceDir(),
-                              ToolchainLabelForScope(scope),
-                              &config->configs(), err);
+                              ToolchainLabelForScope(scope), &config->configs(),
+                              err);
   }
   if (err->has_error())
     return Value();
@@ -375,8 +374,7 @@ Value RunConfig(const FunctionCallNode* function,
 // declare_args ----------------------------------------------------------------
 
 const char kDeclareArgs[] = "declare_args";
-const char kDeclareArgs_HelpShort[] =
-    "declare_args: Declare build arguments.";
+const char kDeclareArgs_HelpShort[] = "declare_args: Declare build arguments.";
 const char kDeclareArgs_Help[] =
     R"(declare_args: Declare build arguments.
 
@@ -456,8 +454,8 @@ Value RunDeclareArgs(Scope* scope,
   // the block_scope, and arguments passed into the build).
   Scope::KeyValueMap values;
   block_scope.GetCurrentScopeValues(&values);
-  scope->settings()->build_settings()->build_args().DeclareArgs(
-      values, scope, err);
+  scope->settings()->build_settings()->build_args().DeclareArgs(values, scope,
+                                                                err);
   return Value();
 }
 
@@ -540,15 +538,14 @@ Value RunDefined(Scope* scope,
 
   // Argument is invalid.
   *err = Err(function, "Bad thing passed to defined().",
-      "It should be of the form defined(foo) or defined(foo.bar).");
+             "It should be of the form defined(foo) or defined(foo.bar).");
   return Value();
 }
 
 // getenv ----------------------------------------------------------------------
 
 const char kGetEnv[] = "getenv";
-const char kGetEnv_HelpShort[] =
-    "getenv: Get an environment variable.";
+const char kGetEnv_HelpShort[] = "getenv: Get an environment variable.";
 const char kGetEnv_Help[] =
     R"(getenv: Get an environment variable.
 
@@ -630,13 +627,12 @@ Value RunImport(Scope* scope,
     return Value();
 
   const SourceDir& input_dir = scope->GetSourceDir();
-  SourceFile import_file =
-      input_dir.ResolveRelativeFile(args[0], err,
-          scope->settings()->build_settings()->root_path_utf8());
+  SourceFile import_file = input_dir.ResolveRelativeFile(
+      args[0], err, scope->settings()->build_settings()->root_path_utf8());
   scope->AddBuildDependencyFile(import_file);
   if (!err->has_error()) {
-    scope->settings()->import_manager().DoImport(import_file, function,
-                                                 scope, err);
+    scope->settings()->import_manager().DoImport(import_file, function, scope,
+                                                 err);
   }
   return Value();
 }
@@ -842,8 +838,7 @@ Value RunSetSourcesAssignmentFilter(Scope* scope,
 // pool ------------------------------------------------------------------------
 
 const char kPool[] = "pool";
-const char kPool_HelpShort[] =
-    "pool: Defines a pool object.";
+const char kPool_HelpShort[] = "pool: Defines a pool object.";
 const char kPool_Help[] =
     R"*(pool: Defines a pool object.
 
@@ -957,8 +952,7 @@ Value RunPool(const FunctionCallNode* function,
 // print -----------------------------------------------------------------------
 
 const char kPrint[] = "print";
-const char kPrint_HelpShort[] =
-    "print: Prints to the console.";
+const char kPrint_HelpShort[] = "print: Prints to the console.";
 const char kPrint_Help[] =
     R"(print: Prints to the console.
 
@@ -1094,8 +1088,7 @@ FunctionInfo::FunctionInfo()
       no_block_runner(nullptr),
       help_short(nullptr),
       help(nullptr),
-      is_target(false) {
-}
+      is_target(false) {}
 
 FunctionInfo::FunctionInfo(SelfEvaluatingArgsFunction seaf,
                            const char* in_help_short,
@@ -1107,8 +1100,7 @@ FunctionInfo::FunctionInfo(SelfEvaluatingArgsFunction seaf,
       no_block_runner(nullptr),
       help_short(in_help_short),
       help(in_help),
-      is_target(in_is_target) {
-}
+      is_target(in_is_target) {}
 
 FunctionInfo::FunctionInfo(GenericBlockFunction gbf,
                            const char* in_help_short,
@@ -1120,8 +1112,7 @@ FunctionInfo::FunctionInfo(GenericBlockFunction gbf,
       no_block_runner(nullptr),
       help_short(in_help_short),
       help(in_help),
-      is_target(in_is_target) {
-}
+      is_target(in_is_target) {}
 
 FunctionInfo::FunctionInfo(ExecutedBlockFunction ebf,
                            const char* in_help_short,
@@ -1133,8 +1124,7 @@ FunctionInfo::FunctionInfo(ExecutedBlockFunction ebf,
       no_block_runner(nullptr),
       help_short(in_help_short),
       help(in_help),
-      is_target(in_is_target) {
-}
+      is_target(in_is_target) {}
 
 FunctionInfo::FunctionInfo(NoBlockFunction nbf,
                            const char* in_help_short,
@@ -1146,8 +1136,7 @@ FunctionInfo::FunctionInfo(NoBlockFunction nbf,
       no_block_runner(nbf),
       help_short(in_help_short),
       help(in_help),
-      is_target(in_is_target) {
-}
+      is_target(in_is_target) {}
 
 // Setup the function map via a static initializer. We use this because it
 // avoids race conditions without having to do some global setup function or
@@ -1158,11 +1147,9 @@ struct FunctionInfoInitializer {
   FunctionInfoMap map;
 
   FunctionInfoInitializer() {
-    #define INSERT_FUNCTION(command, is_target) \
-        map[k##command] = FunctionInfo(&Run##command, \
-                                       k##command##_HelpShort, \
-                                       k##command##_Help, \
-                                       is_target);
+#define INSERT_FUNCTION(command, is_target)                             \
+  map[k##command] = FunctionInfo(&Run##command, k##command##_HelpShort, \
+                                 k##command##_Help, is_target);
 
     INSERT_FUNCTION(Action, true)
     INSERT_FUNCTION(ActionForEach, true)
@@ -1204,7 +1191,7 @@ struct FunctionInfoInitializer {
     INSERT_FUNCTION(Toolchain, false)
     INSERT_FUNCTION(WriteFile, false)
 
-    #undef INSERT_FUNCTION
+#undef INSERT_FUNCTION
   }
 };
 const FunctionInfoInitializer function_info;
@@ -1247,8 +1234,8 @@ Value RunFunction(Scope* scope,
       if (!VerifyNoBlockForFunctionCall(function, block, err))
         return Value();
     }
-    return found_function->second.self_evaluating_args_runner(
-        scope, function, args_list, err);
+    return found_function->second.self_evaluating_args_runner(scope, function,
+                                                              args_list, err);
   }
 
   // All other function types take a pre-executed set of args.

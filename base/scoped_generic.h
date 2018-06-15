@@ -51,7 +51,7 @@ namespace base {
 //   };
 //
 //   typedef ScopedGeneric<int, FooScopedTraits> ScopedFoo;
-template<typename T, typename Traits>
+template <typename T, typename Traits>
 class ScopedGeneric {
  private:
   // This must be first since it's used inline below.
@@ -78,17 +78,13 @@ class ScopedGeneric {
 
   // Constructor. Allows initialization of a stateful traits object.
   ScopedGeneric(const element_type& value, const traits_type& traits)
-      : data_(value, traits) {
-  }
+      : data_(value, traits) {}
 
   // Move constructor. Allows initialization from a ScopedGeneric rvalue.
   ScopedGeneric(ScopedGeneric<T, Traits>&& rvalue)
-      : data_(rvalue.release(), rvalue.get_traits()) {
-  }
+      : data_(rvalue.release(), rvalue.get_traits()) {}
 
-  ~ScopedGeneric() {
-    FreeIfNecessary();
-  }
+  ~ScopedGeneric() { FreeIfNecessary(); }
 
   // operator=. Allows assignment from a ScopedGeneric rvalue.
   ScopedGeneric& operator=(ScopedGeneric<T, Traits>&& rvalue) {
@@ -158,28 +154,28 @@ class ScopedGeneric {
   // Forbid comparison. If U != T, it totally doesn't make sense, and if U ==
   // T, it still doesn't make sense because you should never have the same
   // object owned by two different ScopedGenerics.
-  template <typename T2, typename Traits2> bool operator==(
-      const ScopedGeneric<T2, Traits2>& p2) const;
-  template <typename T2, typename Traits2> bool operator!=(
-      const ScopedGeneric<T2, Traits2>& p2) const;
+  template <typename T2, typename Traits2>
+  bool operator==(const ScopedGeneric<T2, Traits2>& p2) const;
+  template <typename T2, typename Traits2>
+  bool operator!=(const ScopedGeneric<T2, Traits2>& p2) const;
 
   Data data_;
 
   DISALLOW_COPY_AND_ASSIGN(ScopedGeneric);
 };
 
-template<class T, class Traits>
+template <class T, class Traits>
 void swap(const ScopedGeneric<T, Traits>& a,
           const ScopedGeneric<T, Traits>& b) {
   a.swap(b);
 }
 
-template<class T, class Traits>
+template <class T, class Traits>
 bool operator==(const T& value, const ScopedGeneric<T, Traits>& scoped) {
   return value == scoped.get();
 }
 
-template<class T, class Traits>
+template <class T, class Traits>
 bool operator!=(const T& value, const ScopedGeneric<T, Traits>& scoped) {
   return value != scoped.get();
 }

@@ -48,16 +48,13 @@ const char kLabelPattern_Help[] =
         toolchain.
 )*";
 
-LabelPattern::LabelPattern() : type_(MATCH) {
-}
+LabelPattern::LabelPattern() : type_(MATCH) {}
 
 LabelPattern::LabelPattern(Type type,
                            const SourceDir& dir,
                            const base::StringPiece& name,
                            const Label& toolchain_label)
-    : toolchain_(toolchain_label),
-      type_(type),
-      dir_(dir) {
+    : toolchain_(toolchain_label), type_(type), dir_(dir) {
   name.CopyToString(&name_);
 }
 
@@ -165,10 +162,11 @@ LabelPattern LabelPattern::GetPattern(const SourceDir& current_dir,
 
     if (!path.empty() && path[path.size() - 1] != '/') {
       // The input was "foo*" which is invalid.
-      *err = Err(value, "'*' must match full directories in a label pattern.",
-          "You did \"foo*\" but this thing doesn't do general pattern\n"
-          "matching. Instead, you have to add a slash: \"foo/*\" to match\n"
-          "all targets in a directory hierarchy.");
+      *err =
+          Err(value, "'*' must match full directories in a label pattern.",
+              "You did \"foo*\" but this thing doesn't do general pattern\n"
+              "matching. Instead, you have to add a slash: \"foo/*\" to match\n"
+              "all targets in a directory hierarchy.");
       return LabelPattern();
     }
   }
@@ -178,7 +176,7 @@ LabelPattern LabelPattern::GetPattern(const SourceDir& current_dir,
     // The non-wildcard stuff better not have a wildcard.
     if (path.find('*') != base::StringPiece::npos) {
       *err = Err(value, "Label patterns only support wildcard suffixes.",
-          "The pattern contained a '*' that wasn't at the end.");
+                 "The pattern contained a '*' that wasn't at the end.");
       return LabelPattern();
     }
 
@@ -191,7 +189,8 @@ LabelPattern LabelPattern::GetPattern(const SourceDir& current_dir,
   // Resolve the name. At this point, we're doing wildcard matches so the
   // name should either be empty ("foo/*") or a wildcard ("foo:*");
   if (colon != std::string::npos && name != "*") {
-    *err = Err(value, "Invalid label pattern.",
+    *err = Err(
+        value, "Invalid label pattern.",
         "You seem to be using the wildcard more generally that is supported.\n"
         "Did you mean \"foo:*\" to match everything in the file, or\n"
         "\"./*\" to recursively match everything in the currend subtree.");
@@ -234,8 +233,8 @@ bool LabelPattern::Matches(const Label& label) const {
       return label.dir() == dir_;
     case RECURSIVE_DIRECTORY:
       // Our directory must be a prefix of the input label for recursive.
-      return label.dir().value().compare(0, dir_.value().size(), dir_.value())
-          == 0;
+      return label.dir().value().compare(0, dir_.value().size(),
+                                         dir_.value()) == 0;
     default:
       NOTREACHED();
       return false;

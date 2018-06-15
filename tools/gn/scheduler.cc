@@ -10,9 +10,7 @@
 #include "tools/gn/standard_out.h"
 #include "tools/gn/target.h"
 
-namespace {
-
-}  // namespace
+namespace {}  // namespace
 
 Scheduler* g_scheduler = nullptr;
 
@@ -124,8 +122,8 @@ bool Scheduler::IsFileGeneratedByWriteRuntimeDeps(
   return false;
 }
 
-std::multimap<SourceFile, const Target*>
-    Scheduler::GetUnknownGeneratedInputs() const {
+std::multimap<SourceFile, const Target*> Scheduler::GetUnknownGeneratedInputs()
+    const {
   base::AutoLock lock(lock_);
 
   // Remove all unknown inputs that were written files. These are OK as inputs

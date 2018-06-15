@@ -45,14 +45,17 @@ void MergeAllDependentConfigsFrom(const Target* from_target,
 }
 
 Err MakeTestOnlyError(const Target* from, const Target* to) {
-  return Err(from->defined_from(), "Test-only dependency not allowed.",
-      from->label().GetUserVisibleName(false) + "\n"
-      "which is NOT marked testonly can't depend on\n" +
-      to->label().GetUserVisibleName(false) + "\n"
-      "which is marked testonly. Only targets with \"testonly = true\"\n"
-      "can depend on other test-only targets.\n"
-      "\n"
-      "Either mark it test-only or don't do this dependency.");
+  return Err(
+      from->defined_from(), "Test-only dependency not allowed.",
+      from->label().GetUserVisibleName(false) +
+          "\n"
+          "which is NOT marked testonly can't depend on\n" +
+          to->label().GetUserVisibleName(false) +
+          "\n"
+          "which is marked testonly. Only targets with \"testonly = true\"\n"
+          "can depend on other test-only targets.\n"
+          "\n"
+          "Either mark it test-only or don't do this dependency.");
 }
 
 // Set check_private_deps to true for the first invocation since a target
@@ -393,10 +396,8 @@ bool Target::OnResolved(Err* err) {
 }
 
 bool Target::IsBinary() const {
-  return output_type_ == EXECUTABLE ||
-         output_type_ == SHARED_LIBRARY ||
-         output_type_ == LOADABLE_MODULE ||
-         output_type_ == STATIC_LIBRARY ||
+  return output_type_ == EXECUTABLE || output_type_ == SHARED_LIBRARY ||
+         output_type_ == LOADABLE_MODULE || output_type_ == STATIC_LIBRARY ||
          output_type_ == SOURCE_SET;
 }
 
@@ -405,32 +406,29 @@ bool Target::IsLinkable() const {
 }
 
 bool Target::IsFinal() const {
-  return output_type_ == EXECUTABLE ||
-         output_type_ == SHARED_LIBRARY ||
-         output_type_ == LOADABLE_MODULE ||
-         output_type_ == ACTION ||
-         output_type_ == ACTION_FOREACH ||
-         output_type_ == COPY_FILES ||
+  return output_type_ == EXECUTABLE || output_type_ == SHARED_LIBRARY ||
+         output_type_ == LOADABLE_MODULE || output_type_ == ACTION ||
+         output_type_ == ACTION_FOREACH || output_type_ == COPY_FILES ||
          output_type_ == CREATE_BUNDLE ||
          (output_type_ == STATIC_LIBRARY && complete_static_lib_);
 }
 
 DepsIteratorRange Target::GetDeps(DepsIterationType type) const {
   if (type == DEPS_LINKED) {
-    return DepsIteratorRange(DepsIterator(
-        &public_deps_, &private_deps_, nullptr));
+    return DepsIteratorRange(
+        DepsIterator(&public_deps_, &private_deps_, nullptr));
   }
   // All deps.
-  return DepsIteratorRange(DepsIterator(
-      &public_deps_, &private_deps_, &data_deps_));
+  return DepsIteratorRange(
+      DepsIterator(&public_deps_, &private_deps_, &data_deps_));
 }
 
 std::string Target::GetComputedOutputName() const {
   DCHECK(toolchain_)
       << "Toolchain must be specified before getting the computed output name.";
 
-  const std::string& name = output_name_.empty() ? label().name()
-                                                 : output_name_;
+  const std::string& name =
+      output_name_.empty() ? label().name() : output_name_;
 
   std::string result;
   const Tool* tool = toolchain_->GetToolForTargetFinalOutput(this);
@@ -457,18 +455,20 @@ bool Target::SetToolchain(const Toolchain* toolchain, Err* err) {
 
   // Tool not specified for this target type.
   if (err) {
-    *err = Err(defined_from(), "This target uses an undefined tool.",
-        base::StringPrintf(
-            "The target %s\n"
-            "of type \"%s\"\n"
-            "uses toolchain %s\n"
-            "which doesn't have the tool \"%s\" defined.\n\n"
-            "Alas, I can not continue.",
-            label().GetUserVisibleName(false).c_str(),
-            GetStringForOutputType(output_type_),
-            label().GetToolchainLabel().GetUserVisibleName(false).c_str(),
-            Toolchain::ToolTypeToName(
-                toolchain->GetToolTypeForTargetFinalOutput(this)).c_str()));
+    *err =
+        Err(defined_from(), "This target uses an undefined tool.",
+            base::StringPrintf(
+                "The target %s\n"
+                "of type \"%s\"\n"
+                "uses toolchain %s\n"
+                "which doesn't have the tool \"%s\" defined.\n\n"
+                "Alas, I can not continue.",
+                label().GetUserVisibleName(false).c_str(),
+                GetStringForOutputType(output_type_),
+                label().GetToolchainLabel().GetUserVisibleName(false).c_str(),
+                Toolchain::ToolTypeToName(
+                    toolchain->GetToolTypeForTargetFinalOutput(this))
+                    .c_str()));
   }
   return false;
 }
@@ -496,8 +496,8 @@ bool Target::GetOutputFilesForSource(const SourceFile& source,
     return false;  // Tool does not apply for this toolchain.file.
 
   // Figure out what output(s) this compiler produces.
-  SubstitutionWriter::ApplyListToCompilerAsOutputFile(
-      this, source, tool->outputs(), outputs);
+  SubstitutionWriter::ApplyListToCompilerAsOutputFile(this, source,
+                                                      tool->outputs(), outputs);
   return !outputs->empty();
 }
 
@@ -518,8 +518,7 @@ void Target::PullDependentTargetConfigs() {
 void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
   // Direct dependent libraries.
   if (dep->output_type() == STATIC_LIBRARY ||
-      dep->output_type() == SHARED_LIBRARY ||
-      dep->output_type() == SOURCE_SET)
+      dep->output_type() == SHARED_LIBRARY || dep->output_type() == SOURCE_SET)
     inherited_libraries_.Append(dep, is_public);
 
   if (dep->output_type() == SHARED_LIBRARY) {
@@ -542,8 +541,8 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     // Static libraries and source sets aren't inherited across shared
     // library boundaries because they will be linked into the shared
     // library.
-    inherited_libraries_.AppendPublicSharedLibraries(
-        dep->inherited_libraries(), is_public);
+    inherited_libraries_.AppendPublicSharedLibraries(dep->inherited_libraries(),
+                                                     is_public);
   } else if (!dep->IsFinal()) {
     // The current target isn't linked, so propogate linked deps and
     // libraries up the dependency tree.
@@ -757,18 +756,21 @@ bool Target::ResolvePrecompiledHeaders(Err* err) {
       // Already have a precompiled header values, the settings must match.
       if (config_values_.precompiled_header() != cur.precompiled_header() ||
           config_values_.precompiled_source() != cur.precompiled_source()) {
-        *err = Err(defined_from(),
-            "Precompiled header setting conflict.",
-            "The target " + label().GetUserVisibleName(false) + "\n"
-            "has conflicting precompiled header settings.\n"
-            "\n"
-            "From " + pch_header_settings_from->GetUserVisibleName(false) +
-            "\n  header: " + config_values_.precompiled_header() +
-            "\n  source: " + config_values_.precompiled_source().value() +
-            "\n\n"
-            "From " + config->label().GetUserVisibleName(false) +
-            "\n  header: " + cur.precompiled_header() +
-            "\n  source: " + cur.precompiled_source().value());
+        *err = Err(
+            defined_from(), "Precompiled header setting conflict.",
+            "The target " + label().GetUserVisibleName(false) +
+                "\n"
+                "has conflicting precompiled header settings.\n"
+                "\n"
+                "From " +
+                pch_header_settings_from->GetUserVisibleName(false) +
+                "\n  header: " + config_values_.precompiled_header() +
+                "\n  source: " + config_values_.precompiled_source().value() +
+                "\n\n"
+                "From " +
+                config->label().GetUserVisibleName(false) +
+                "\n  header: " + cur.precompiled_header() +
+                "\n  source: " + cur.precompiled_source().value());
         return false;
       }
     } else {
@@ -817,12 +819,11 @@ bool Target::CheckAssertNoDeps(Err* err) const {
 
   if (!RecursiveCheckAssertNoDeps(this, false, assert_no_deps_, &visited,
                                   &failure_path_str, &failure_pattern)) {
-    *err = Err(defined_from(), "assert_no_deps failed.",
+    *err = Err(
+        defined_from(), "assert_no_deps failed.",
         label().GetUserVisibleName(false) +
-        " has an assert_no_deps entry:\n  " +
-        failure_pattern->Describe() +
-        "\nwhich fails for the dependency path:\n" +
-        failure_path_str);
+            " has an assert_no_deps entry:\n  " + failure_pattern->Describe() +
+            "\nwhich fails for the dependency path:\n" + failure_path_str);
     return false;
   }
   return true;

@@ -48,8 +48,7 @@ std::string ExtractGNBuildCommands(const base::FilePath& build_ninja_file) {
 namespace commands {
 
 const char kClean[] = "clean";
-const char kClean_HelpShort[] =
-    "clean: Cleans the output directory.";
+const char kClean_HelpShort[] = "clean: Cleans the output directory.";
 const char kClean_Help[] =
     "gn clean <out_dir>\n"
     "\n"
@@ -58,8 +57,8 @@ const char kClean_Help[] =
 
 int RunClean(const std::vector<std::string>& args) {
   if (args.size() != 1) {
-    Err(Location(), "You're holding it wrong.",
-        "Usage: \"gn clean <out_dir>\"").PrintToStdout();
+    Err(Location(), "You're holding it wrong.", "Usage: \"gn clean <out_dir>\"")
+        .PrintToStdout();
     return 1;
   }
 

@@ -6,16 +6,10 @@
 
 #include "base/logging.h"
 
-Token::Token() : type_(INVALID), value_() {
-}
+Token::Token() : type_(INVALID), value_() {}
 
-Token::Token(const Location& location,
-             Type t,
-             const base::StringPiece& v)
-    : type_(t),
-      value_(v),
-      location_(location) {
-}
+Token::Token(const Location& location, Type t, const base::StringPiece& v)
+    : type_(t), value_(v), location_(location) {}
 
 Token::Token(const Token& other) = default;
 

@@ -62,7 +62,7 @@ class BindStateBase
  public:
   REQUIRE_ADOPTION_FOR_REFCOUNTED_TYPE();
 
-  using InvokeFuncStorage = void(*)();
+  using InvokeFuncStorage = void (*)();
 
  private:
   BindStateBase(InvokeFuncStorage polymorphic_invoke,
@@ -84,9 +84,7 @@ class BindStateBase
   friend struct BindState;
   friend struct ::base::FakeBindState;
 
-  bool IsCancelled() const {
-    return is_cancelled_(this);
-  }
+  bool IsCancelled() const { return is_cancelled_(this); }
 
   // In C++, it is safe to cast function pointers to function pointers of
   // another type. It is not okay to use void*. We create a InvokeFuncStorage

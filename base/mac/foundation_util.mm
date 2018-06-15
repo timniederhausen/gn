@@ -94,8 +94,8 @@ bool IsBackgroundOnlyProcess() {
 
 FilePath PathForFrameworkBundleResource(CFStringRef resourceName) {
   NSBundle* bundle = base::mac::FrameworkBundle();
-  NSString* resourcePath = [bundle pathForResource:(NSString*)resourceName
-                                            ofType:nil];
+  NSString* resourcePath =
+      [bundle pathForResource:(NSString*)resourceName ofType:nil];
   return NSStringToFilePath(resourcePath);
 }
 
@@ -192,9 +192,7 @@ FilePath GetAppBundlePath(const FilePath& exec_name) {
 }
 
 #define TYPE_NAME_FOR_CF_TYPE_DEFN(TypeCF) \
-std::string TypeNameForCFType(TypeCF##Ref) { \
-  return #TypeCF; \
-}
+  std::string TypeNameForCFType(TypeCF##Ref) { return #TypeCF; }
 
 TYPE_NAME_FOR_CF_TYPE_DEFN(CFArray);
 TYPE_NAME_FOR_CF_TYPE_DEFN(CFBag);
@@ -222,12 +220,12 @@ TYPE_NAME_FOR_CF_TYPE_DEFN(SecPolicy);
 #undef TYPE_NAME_FOR_CF_TYPE_DEFN
 
 void NSObjectRetain(void* obj) {
-  id<NSObject> nsobj = static_cast<id<NSObject> >(obj);
+  id<NSObject> nsobj = static_cast<id<NSObject>>(obj);
   [nsobj retain];
 }
 
 void NSObjectRelease(void* obj) {
-  id<NSObject> nsobj = static_cast<id<NSObject> >(obj);
+  id<NSObject> nsobj = static_cast<id<NSObject>>(obj);
   [nsobj release];
 }
 
@@ -265,36 +263,36 @@ void SetBaseBundleID(const char* new_base_bundle_id) {
 
 // Definitions for the corresponding CF_TO_NS_CAST_DECL macros in
 // foundation_util.h.
-#define CF_TO_NS_CAST_DEFN(TypeCF, TypeNS) \
-\
-TypeNS* CFToNSCast(TypeCF##Ref cf_val) { \
-  DCHECK(!cf_val || TypeCF##GetTypeID() == CFGetTypeID(cf_val)); \
-  TypeNS* ns_val = \
-      const_cast<TypeNS*>(reinterpret_cast<const TypeNS*>(cf_val)); \
-  return ns_val; \
-} \
-\
-TypeCF##Ref NSToCFCast(TypeNS* ns_val) { \
-  TypeCF##Ref cf_val = reinterpret_cast<TypeCF##Ref>(ns_val); \
-  DCHECK(!cf_val || TypeCF##GetTypeID() == CFGetTypeID(cf_val)); \
-  return cf_val; \
-}
+#define CF_TO_NS_CAST_DEFN(TypeCF, TypeNS)                            \
+                                                                      \
+  TypeNS* CFToNSCast(TypeCF##Ref cf_val) {                            \
+    DCHECK(!cf_val || TypeCF##GetTypeID() == CFGetTypeID(cf_val));    \
+    TypeNS* ns_val =                                                  \
+        const_cast<TypeNS*>(reinterpret_cast<const TypeNS*>(cf_val)); \
+    return ns_val;                                                    \
+  }                                                                   \
+                                                                      \
+  TypeCF##Ref NSToCFCast(TypeNS* ns_val) {                            \
+    TypeCF##Ref cf_val = reinterpret_cast<TypeCF##Ref>(ns_val);       \
+    DCHECK(!cf_val || TypeCF##GetTypeID() == CFGetTypeID(cf_val));    \
+    return cf_val;                                                    \
+  }
 
-#define CF_TO_NS_MUTABLE_CAST_DEFN(name) \
-CF_TO_NS_CAST_DEFN(CF##name, NS##name) \
-\
-NSMutable##name* CFToNSCast(CFMutable##name##Ref cf_val) { \
-  DCHECK(!cf_val || CF##name##GetTypeID() == CFGetTypeID(cf_val)); \
-  NSMutable##name* ns_val = reinterpret_cast<NSMutable##name*>(cf_val); \
-  return ns_val; \
-} \
-\
-CFMutable##name##Ref NSToCFCast(NSMutable##name* ns_val) { \
-  CFMutable##name##Ref cf_val = \
-      reinterpret_cast<CFMutable##name##Ref>(ns_val); \
-  DCHECK(!cf_val || CF##name##GetTypeID() == CFGetTypeID(cf_val)); \
-  return cf_val; \
-}
+#define CF_TO_NS_MUTABLE_CAST_DEFN(name)                                  \
+  CF_TO_NS_CAST_DEFN(CF##name, NS##name)                                  \
+                                                                          \
+  NSMutable##name* CFToNSCast(CFMutable##name##Ref cf_val) {              \
+    DCHECK(!cf_val || CF##name##GetTypeID() == CFGetTypeID(cf_val));      \
+    NSMutable##name* ns_val = reinterpret_cast<NSMutable##name*>(cf_val); \
+    return ns_val;                                                        \
+  }                                                                       \
+                                                                          \
+  CFMutable##name##Ref NSToCFCast(NSMutable##name* ns_val) {              \
+    CFMutable##name##Ref cf_val =                                         \
+        reinterpret_cast<CFMutable##name##Ref>(ns_val);                   \
+    DCHECK(!cf_val || CF##name##GetTypeID() == CFGetTypeID(cf_val));      \
+    return cf_val;                                                        \
+  }
 
 CF_TO_NS_MUTABLE_CAST_DEFN(Array);
 CF_TO_NS_MUTABLE_CAST_DEFN(AttributedString);
@@ -321,10 +319,8 @@ CF_TO_NS_CAST_DEFN(CTFont, UIFont);
 // checking, so do some special-casing.
 // http://www.openradar.me/15341349 rdar://15341349
 NSFont* CFToNSCast(CTFontRef cf_val) {
-  NSFont* ns_val =
-      const_cast<NSFont*>(reinterpret_cast<const NSFont*>(cf_val));
-  DCHECK(!cf_val ||
-         CTFontGetTypeID() == CFGetTypeID(cf_val) ||
+  NSFont* ns_val = const_cast<NSFont*>(reinterpret_cast<const NSFont*>(cf_val));
+  DCHECK(!cf_val || CTFontGetTypeID() == CFGetTypeID(cf_val) ||
          (_CFIsObjC(CTFontGetTypeID(), cf_val) &&
           [ns_val isKindOfClass:[NSFont class]]));
   return ns_val;
@@ -332,8 +328,7 @@ NSFont* CFToNSCast(CTFontRef cf_val) {
 
 CTFontRef NSToCFCast(NSFont* ns_val) {
   CTFontRef cf_val = reinterpret_cast<CTFontRef>(ns_val);
-  DCHECK(!cf_val ||
-         CTFontGetTypeID() == CFGetTypeID(cf_val) ||
+  DCHECK(!cf_val || CTFontGetTypeID() == CFGetTypeID(cf_val) ||
          [ns_val isKindOfClass:[NSFont class]]);
   return cf_val;
 }
@@ -342,24 +337,24 @@ CTFontRef NSToCFCast(NSFont* ns_val) {
 #undef CF_TO_NS_CAST_DEFN
 #undef CF_TO_NS_MUTABLE_CAST_DEFN
 
-#define CF_CAST_DEFN(TypeCF) \
-template<> TypeCF##Ref \
-CFCast<TypeCF##Ref>(const CFTypeRef& cf_val) { \
-  if (cf_val == NULL) { \
-    return NULL; \
-  } \
-  if (CFGetTypeID(cf_val) == TypeCF##GetTypeID()) { \
-    return (TypeCF##Ref)(cf_val); \
-  } \
-  return NULL; \
-} \
-\
-template<> TypeCF##Ref \
-CFCastStrict<TypeCF##Ref>(const CFTypeRef& cf_val) { \
-  TypeCF##Ref rv = CFCast<TypeCF##Ref>(cf_val); \
-  DCHECK(cf_val == NULL || rv); \
-  return rv; \
-}
+#define CF_CAST_DEFN(TypeCF)                                       \
+  template <>                                                      \
+  TypeCF##Ref CFCast<TypeCF##Ref>(const CFTypeRef& cf_val) {       \
+    if (cf_val == NULL) {                                          \
+      return NULL;                                                 \
+    }                                                              \
+    if (CFGetTypeID(cf_val) == TypeCF##GetTypeID()) {              \
+      return (TypeCF##Ref)(cf_val);                                \
+    }                                                              \
+    return NULL;                                                   \
+  }                                                                \
+                                                                   \
+  template <>                                                      \
+  TypeCF##Ref CFCastStrict<TypeCF##Ref>(const CFTypeRef& cf_val) { \
+    TypeCF##Ref rv = CFCast<TypeCF##Ref>(cf_val);                  \
+    DCHECK(cf_val == NULL || rv);                                  \
+    return rv;                                                     \
+  }
 
 CF_CAST_DEFN(CFArray);
 CF_CAST_DEFN(CFBag);
@@ -385,8 +380,8 @@ CF_CAST_DEFN(CTFont);
 // The NSFont/CTFont toll-free bridging is broken when it comes to type
 // checking, so do some special-casing.
 // http://www.openradar.me/15341349 rdar://15341349
-template<> CTFontRef
-CFCast<CTFontRef>(const CFTypeRef& cf_val) {
+template <>
+CTFontRef CFCast<CTFontRef>(const CFTypeRef& cf_val) {
   if (cf_val == NULL) {
     return NULL;
   }
@@ -404,8 +399,8 @@ CFCast<CTFontRef>(const CFTypeRef& cf_val) {
   return NULL;
 }
 
-template<> CTFontRef
-CFCastStrict<CTFontRef>(const CFTypeRef& cf_val) {
+template <>
+CTFontRef CFCastStrict<CTFontRef>(const CFTypeRef& cf_val) {
   CTFontRef rv = CFCast<CTFontRef>(cf_val);
   DCHECK(cf_val == NULL || rv);
   return rv;
@@ -421,17 +416,14 @@ CF_CAST_DEFN(SecTrustedApplication);
 
 #undef CF_CAST_DEFN
 
-std::string GetValueFromDictionaryErrorMessage(
-    CFStringRef key, const std::string& expected_type, CFTypeRef value) {
+std::string GetValueFromDictionaryErrorMessage(CFStringRef key,
+                                               const std::string& expected_type,
+                                               CFTypeRef value) {
   ScopedCFTypeRef<CFStringRef> actual_type_ref(
       CFCopyTypeIDDescription(CFGetTypeID(value)));
-  return "Expected value for key " +
-      base::SysCFStringRefToUTF8(key) +
-      " to be " +
-      expected_type +
-      " but it was " +
-      base::SysCFStringRefToUTF8(actual_type_ref) +
-      " instead";
+  return "Expected value for key " + base::SysCFStringRefToUTF8(key) +
+         " to be " + expected_type + " but it was " +
+         base::SysCFStringRefToUTF8(actual_type_ref) + " instead";
 }
 
 NSString* FilePathToNSString(const FilePath& path) {
@@ -474,10 +466,9 @@ std::ostream& operator<<(std::ostream& o, const CFErrorRef err) {
     errorDesc = reinterpret_cast<CFStringRef>(
         CFDictionaryGetValue(user_info.get(), kCFErrorDescriptionKey));
   }
-  o << "Code: " << CFErrorGetCode(err)
-    << " Domain: " << CFErrorGetDomain(err)
+  o << "Code: " << CFErrorGetCode(err) << " Domain: " << CFErrorGetDomain(err)
     << " Desc: " << desc.get();
-  if(errorDesc) {
+  if (errorDesc) {
     o << "(" << errorDesc << ")";
   }
   return o;

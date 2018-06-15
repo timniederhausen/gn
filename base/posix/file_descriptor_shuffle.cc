@@ -4,17 +4,17 @@
 
 #include "base/posix/file_descriptor_shuffle.h"
 
-#include <unistd.h>
 #include <stddef.h>
+#include <unistd.h>
 #include <ostream>
 
-#include "base/posix/eintr_wrapper.h"
 #include "base/logging.h"
+#include "base/posix/eintr_wrapper.h"
 
 namespace base {
 
-bool PerformInjectiveMultimapDestructive(
-    InjectiveMultimap* m, InjectionDelegate* delegate) {
+bool PerformInjectiveMultimapDestructive(InjectiveMultimap* m,
+                                         InjectionDelegate* delegate) {
   static const size_t kMaxExtraFDs = 16;
   int extra_fds[kMaxExtraFDs];
   unsigned next_extra_fd = 0;
@@ -29,8 +29,8 @@ bool PerformInjectiveMultimapDestructive(
     // We DCHECK the injectiveness of the mapping.
     for (size_t j_index = i_index + 1; j_index < m->size(); ++j_index) {
       InjectiveMultimap::value_type* j = &(*m)[j_index];
-      DCHECK(i->dest != j->dest) << "Both fd " << i->source
-          << " and " << j->source << " map to " << i->dest;
+      DCHECK(i->dest != j->dest) << "Both fd " << i->source << " and "
+                                 << j->source << " map to " << i->dest;
     }
 
     const bool is_identity = i->source == i->dest;
@@ -44,8 +44,9 @@ bool PerformInjectiveMultimapDestructive(
           if (next_extra_fd < kMaxExtraFDs) {
             extra_fds[next_extra_fd++] = temp_fd;
           } else {
-            RAW_LOG(ERROR, "PerformInjectiveMultimapDestructive overflowed "
-                           "extra_fds. Leaking file descriptors!");
+            RAW_LOG(ERROR,
+                    "PerformInjectiveMultimapDestructive overflowed "
+                    "extra_fds. Leaking file descriptors!");
           }
         }
 

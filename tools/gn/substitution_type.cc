@@ -116,8 +116,7 @@ const char* kSubstitutionNinjaNames[SUBSTITUTION_NUM_TYPES] = {
     "rspfile",  // SUBSTITUTION_RSP_FILE_NAME
 };
 
-SubstitutionBits::SubstitutionBits() : used() {
-}
+SubstitutionBits::SubstitutionBits() : used() {}
 
 void SubstitutionBits::MergeFrom(const SubstitutionBits& other) {
   for (size_t i = 0; i < SUBSTITUTION_NUM_TYPES; i++)
@@ -161,8 +160,7 @@ bool IsValidBundleDataSubstitution(SubstitutionType type) {
 }
 
 bool IsValidSourceSubstitution(SubstitutionType type) {
-  return type == SUBSTITUTION_LITERAL ||
-         type == SUBSTITUTION_SOURCE ||
+  return type == SUBSTITUTION_LITERAL || type == SUBSTITUTION_SOURCE ||
          type == SUBSTITUTION_SOURCE_NAME_PART ||
          type == SUBSTITUTION_SOURCE_FILE_PART ||
          type == SUBSTITUTION_SOURCE_DIR ||
@@ -173,15 +171,12 @@ bool IsValidSourceSubstitution(SubstitutionType type) {
 }
 
 bool IsValidScriptArgsSubstitution(SubstitutionType type) {
-  return IsValidSourceSubstitution(type) ||
-      type == SUBSTITUTION_RSP_FILE_NAME;
+  return IsValidSourceSubstitution(type) || type == SUBSTITUTION_RSP_FILE_NAME;
 }
 
 bool IsValidToolSubstitution(SubstitutionType type) {
-  return type == SUBSTITUTION_LITERAL ||
-         type == SUBSTITUTION_OUTPUT ||
-         type == SUBSTITUTION_LABEL ||
-         type == SUBSTITUTION_LABEL_NAME ||
+  return type == SUBSTITUTION_LITERAL || type == SUBSTITUTION_OUTPUT ||
+         type == SUBSTITUTION_LABEL || type == SUBSTITUTION_LABEL_NAME ||
          type == SUBSTITUTION_ROOT_GEN_DIR ||
          type == SUBSTITUTION_ROOT_OUT_DIR ||
          type == SUBSTITUTION_TARGET_GEN_DIR ||
@@ -190,16 +185,11 @@ bool IsValidToolSubstitution(SubstitutionType type) {
 }
 
 bool IsValidCompilerSubstitution(SubstitutionType type) {
-  return IsValidToolSubstitution(type) ||
-         IsValidSourceSubstitution(type) ||
-         type == SUBSTITUTION_SOURCE ||
-         type == SUBSTITUTION_ASMFLAGS ||
-         type == SUBSTITUTION_CFLAGS ||
-         type == SUBSTITUTION_CFLAGS_C ||
-         type == SUBSTITUTION_CFLAGS_CC ||
-         type == SUBSTITUTION_CFLAGS_OBJC ||
-         type == SUBSTITUTION_CFLAGS_OBJCC ||
-         type == SUBSTITUTION_DEFINES ||
+  return IsValidToolSubstitution(type) || IsValidSourceSubstitution(type) ||
+         type == SUBSTITUTION_SOURCE || type == SUBSTITUTION_ASMFLAGS ||
+         type == SUBSTITUTION_CFLAGS || type == SUBSTITUTION_CFLAGS_C ||
+         type == SUBSTITUTION_CFLAGS_CC || type == SUBSTITUTION_CFLAGS_OBJC ||
+         type == SUBSTITUTION_CFLAGS_OBJCC || type == SUBSTITUTION_DEFINES ||
          type == SUBSTITUTION_INCLUDE_DIRS;
 }
 
@@ -210,14 +200,11 @@ bool IsValidCompilerOutputsSubstitution(SubstitutionType type) {
 }
 
 bool IsValidLinkerSubstitution(SubstitutionType type) {
-  return IsValidToolSubstitution(type) ||
-         type == SUBSTITUTION_LINKER_INPUTS ||
+  return IsValidToolSubstitution(type) || type == SUBSTITUTION_LINKER_INPUTS ||
          type == SUBSTITUTION_LINKER_INPUTS_NEWLINE ||
-         type == SUBSTITUTION_LDFLAGS ||
-         type == SUBSTITUTION_LIBS ||
+         type == SUBSTITUTION_LDFLAGS || type == SUBSTITUTION_LIBS ||
          type == SUBSTITUTION_OUTPUT_DIR ||
-         type == SUBSTITUTION_OUTPUT_EXTENSION ||
-         type == SUBSTITUTION_SOLIBS;
+         type == SUBSTITUTION_OUTPUT_EXTENSION || type == SUBSTITUTION_SOLIBS;
 }
 
 bool IsValidLinkerOutputsSubstitution(SubstitutionType type) {
@@ -228,17 +215,14 @@ bool IsValidLinkerOutputsSubstitution(SubstitutionType type) {
 }
 
 bool IsValidALinkSubstitution(SubstitutionType type) {
-  return IsValidToolSubstitution(type) ||
-         type == SUBSTITUTION_LINKER_INPUTS ||
+  return IsValidToolSubstitution(type) || type == SUBSTITUTION_LINKER_INPUTS ||
          type == SUBSTITUTION_LINKER_INPUTS_NEWLINE ||
-         type == SUBSTITUTION_ARFLAGS ||
-         type == SUBSTITUTION_OUTPUT_DIR ||
+         type == SUBSTITUTION_ARFLAGS || type == SUBSTITUTION_OUTPUT_DIR ||
          type == SUBSTITUTION_OUTPUT_EXTENSION;
 }
 
 bool IsValidCopySubstitution(SubstitutionType type) {
-  return IsValidToolSubstitution(type) ||
-         type == SUBSTITUTION_SOURCE;
+  return IsValidToolSubstitution(type) || type == SUBSTITUTION_SOURCE;
 }
 
 bool IsValidCompileXCassetsSubstitution(SubstitutionType type) {
@@ -254,9 +238,9 @@ bool EnsureValidSubstitutions(const std::vector<SubstitutionType>& types,
   for (SubstitutionType type : types) {
     if (!is_valid_subst(type)) {
       *err = Err(origin, "Invalid substitution type.",
-          "The substitution " + std::string(kSubstitutionNames[type]) +
-          " isn't valid for something\n"
-          "operating on a source file such as this.");
+                 "The substitution " + std::string(kSubstitutionNames[type]) +
+                     " isn't valid for something\n"
+                     "operating on a source file such as this.");
       return false;
     }
   }

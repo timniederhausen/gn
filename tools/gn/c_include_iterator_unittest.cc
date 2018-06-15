@@ -12,7 +12,9 @@
 namespace {
 
 bool RangeIs(const LocationRange& range,
-             int line, int begin_char, int end_char) {
+             int line,
+             int begin_char,
+             int end_char) {
   return range.begin().line_number() == line &&
          range.end().line_number() == line &&
          range.begin().column_number() == begin_char &&

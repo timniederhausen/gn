@@ -74,9 +74,7 @@ class BuilderRecord {
   bool resolved() const { return resolved_; }
   void set_resolved(bool r) { resolved_ = r; }
 
-  bool can_resolve() const {
-    return item_ && unresolved_deps_.empty();
-  }
+  bool can_resolve() const { return item_ && unresolved_deps_.empty(); }
 
   // All records this one is depending on.
   BuilderRecordSet& all_deps() { return all_deps_; }

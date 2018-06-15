@@ -238,8 +238,7 @@ TEST_F(RuntimeDeps, ActionOutputs) {
   Target dep(setup.settings(), Label(SourceDir("//"), "dep"));
   InitTargetWithType(setup, &dep, Target::ACTION);
   dep.data().push_back("//dep.data");
-  dep.action_values().outputs() =
-      SubstitutionList::MakeForTest("//dep.output");
+  dep.action_values().outputs() = SubstitutionList::MakeForTest("//dep.output");
   ASSERT_TRUE(dep.OnResolved(&err));
 
   Target dep_copy(setup.settings(), Label(SourceDir("//"), "dep_copy"));
@@ -431,8 +430,8 @@ TEST_F(RuntimeDeps, WriteRuntimeDepsVariable) {
 
   // Should fail for garbage inputs.
   err = Err();
-  EXPECT_FALSE(setup.ExecuteSnippet(
-      "group(\"foo\") { write_runtime_deps = 0 }", &err));
+  EXPECT_FALSE(
+      setup.ExecuteSnippet("group(\"foo\") { write_runtime_deps = 0 }", &err));
 
   // Should be able to write inside the out dir, and shouldn't write the one
   // in the else clause.
@@ -442,7 +441,8 @@ TEST_F(RuntimeDeps, WriteRuntimeDepsVariable) {
       "  group(\"foo\") { write_runtime_deps = \"//out/Debug/foo.txt\" }\n"
       "} else {\n"
       "  group(\"bar\") { write_runtime_deps = \"//out/Debug/bar.txt\" }\n"
-      "}", &err));
+      "}",
+      &err));
   EXPECT_EQ(1U, setup.items().size());
   EXPECT_EQ(1U, scheduler().GetWriteRuntimeDepsTargets().size());
 }

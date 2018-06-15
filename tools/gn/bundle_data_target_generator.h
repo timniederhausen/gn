@@ -23,9 +23,8 @@ class BundleDataTargetGenerator : public TargetGenerator {
  private:
   bool FillOutputs();
 
-  bool EnsureSubstitutionIsInBundleDir(
-      const SubstitutionPattern& pattern,
-      const Value& original_value);
+  bool EnsureSubstitutionIsInBundleDir(const SubstitutionPattern& pattern,
+                                       const Value& original_value);
 
   DISALLOW_COPY_AND_ASSIGN(BundleDataTargetGenerator);
 };

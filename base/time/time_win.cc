@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 // Windows Timer Primer
 //
 // A good article:  http://www.ddj.com/windows/184416651
@@ -34,6 +33,7 @@
 #include "base/time/time.h"
 
 #include <windows.h>
+
 #include <mmsystem.h>
 #include <stdint.h>
 
@@ -58,7 +58,7 @@ int64_t FileTimeToMicroseconds(const FILETIME& ft) {
 
 void MicrosecondsToFileTime(int64_t us, FILETIME* ft) {
   DCHECK_GE(us, 0LL) << "Time is less than 0, negative values are not "
-      "representable in FILETIME";
+                        "representable in FILETIME";
 
   // Multiply by 10 to convert microseconds to 100-nanoseconds. Bit_cast will
   // handle alignment problems. This only works on little-endian machines.
@@ -467,7 +467,7 @@ TimeTicks InitialNowFunction() {
   return g_time_ticks_now_ignoring_override_function();
 }
 
-}  // namespace
+}  // namespace base
 
 namespace subtle {
 TimeTicks TimeTicksNowIgnoringOverride() {
@@ -488,7 +488,8 @@ bool TimeTicks::IsConsistentAcrossProcesses() {
   // Vista. So if we are using QPC then we are consistent which is the same as
   // being high resolution.
   //
-  // [1] https://msdn.microsoft.com/en-us/library/windows/desktop/dn553408(v=vs.85).aspx
+  // [1]
+  // https://msdn.microsoft.com/en-us/library/windows/desktop/dn553408(v=vs.85).aspx
   //
   // "In general, the performance counter results are consistent across all
   // processors in multi-core and multi-processor systems, even when measured on
@@ -504,8 +505,8 @@ bool TimeTicks::IsConsistentAcrossProcesses() {
 
 // static
 TimeTicks::Clock TimeTicks::GetClock() {
-  return IsHighResolution() ?
-      Clock::WIN_QPC : Clock::WIN_ROLLOVER_PROTECTED_TIME_GET_TIME;
+  return IsHighResolution() ? Clock::WIN_QPC
+                            : Clock::WIN_ROLLOVER_PROTECTED_TIME_GET_TIME;
 }
 
 // ThreadTicks ----------------------------------------------------------------

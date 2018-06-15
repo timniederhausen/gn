@@ -141,7 +141,7 @@ base::StringPiece Scope::GetStorageKey(const base::StringPiece& ident) const {
 }
 
 const Value* Scope::GetValue(const base::StringPiece& ident) const {
-  const Scope *found_in_scope = nullptr;
+  const Scope* found_in_scope = nullptr;
   return GetValueWithScope(ident, &found_in_scope);
 }
 
@@ -256,12 +256,12 @@ bool Scope::CheckForUnusedVars(Err* err) const {
       const BinaryOpNode* binary = pair.second.value.origin()->AsBinaryOp();
       if (binary && binary->op().type() == Token::EQUAL) {
         // Make a nicer error message for normal var sets.
-        *err = Err(binary->left()->GetRange(), "Assignment had no effect.",
-                   help);
+        *err =
+            Err(binary->left()->GetRange(), "Assignment had no effect.", help);
       } else {
         // This will happen for internally-generated variables.
-        *err = Err(pair.second.value.origin(), "Assignment had no effect.",
-                   help);
+        *err =
+            Err(pair.second.value.origin(), "Assignment had no effect.", help);
       }
       return false;
     }

@@ -10,8 +10,7 @@
 namespace functions {
 
 const char kForEach[] = "foreach";
-const char kForEach_HelpShort[] =
-    "foreach: Iterate over a list.";
+const char kForEach_HelpShort[] = "foreach: Iterate over a list.";
 const char kForEach_Help[] =
     R"(foreach: Iterate over a list.
 

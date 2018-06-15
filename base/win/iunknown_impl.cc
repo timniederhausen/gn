@@ -7,12 +7,9 @@
 namespace base {
 namespace win {
 
-IUnknownImpl::IUnknownImpl()
-    : ref_count_(0) {
-}
+IUnknownImpl::IUnknownImpl() : ref_count_(0) {}
 
-IUnknownImpl::~IUnknownImpl() {
-}
+IUnknownImpl::~IUnknownImpl() {}
 
 ULONG STDMETHODCALLTYPE IUnknownImpl::AddRef() {
   ref_count_.Increment();

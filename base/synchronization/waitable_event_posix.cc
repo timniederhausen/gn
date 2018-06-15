@@ -107,9 +107,7 @@ class SyncWaiter : public WaitableEvent::Waiter {
     return true;
   }
 
-  WaitableEvent* signaling_event() const {
-    return signaling_event_;
-  }
+  WaitableEvent* signaling_event() const { return signaling_event_; }
 
   // ---------------------------------------------------------------------------
   // These waiters are always stack allocated and don't delete themselves. Thus
@@ -120,26 +118,18 @@ class SyncWaiter : public WaitableEvent::Waiter {
   // ---------------------------------------------------------------------------
   // Called with lock held.
   // ---------------------------------------------------------------------------
-  bool fired() const {
-    return fired_;
-  }
+  bool fired() const { return fired_; }
 
   // ---------------------------------------------------------------------------
   // During a TimedWait, we need a way to make sure that an auto-reset
   // WaitableEvent doesn't think that this event has been signaled between
   // unlocking it and removing it from the wait-list. Called with lock held.
   // ---------------------------------------------------------------------------
-  void Disable() {
-    fired_ = true;
-  }
+  void Disable() { fired_ = true; }
 
-  base::Lock* lock() {
-    return &lock_;
-  }
+  base::Lock* lock() { return &lock_; }
 
-  base::ConditionVariable* cv() {
-    return &cv_;
-  }
+  base::ConditionVariable* cv() { return &cv_; }
 
  private:
   bool fired_;
@@ -222,20 +212,19 @@ bool WaitableEvent::TimedWaitUntil(const TimeTicks& end_time) {
 // Synchronous waiting on multiple objects.
 
 static bool  // StrictWeakOrdering
-cmp_fst_addr(const std::pair<WaitableEvent*, unsigned> &a,
-             const std::pair<WaitableEvent*, unsigned> &b) {
+cmp_fst_addr(const std::pair<WaitableEvent*, unsigned>& a,
+             const std::pair<WaitableEvent*, unsigned>& b) {
   return a.first < b.first;
 }
 
 // static
-size_t WaitableEvent::WaitMany(WaitableEvent** raw_waitables,
-                               size_t count) {
+size_t WaitableEvent::WaitMany(WaitableEvent** raw_waitables, size_t count) {
   DCHECK(count) << "Cannot wait on no events";
 
   // We need to acquire the locks in a globally consistent order. Thus we sort
   // the array of waitables by address. We actually sort a pairs so that we can
   // map back to the original index values later.
-  std::vector<std::pair<WaitableEvent*, size_t> > waitables;
+  std::vector<std::pair<WaitableEvent*, size_t>> waitables;
   waitables.reserve(count);
   for (size_t i = 0; i < count; ++i)
     waitables.push_back(std::make_pair(raw_waitables[i], i));
@@ -248,7 +237,7 @@ size_t WaitableEvent::WaitMany(WaitableEvent** raw_waitables,
   // address, we can check this cheaply by comparing pairs of consecutive
   // elements.
   for (size_t i = 0; i < waitables.size() - 1; ++i) {
-    DCHECK(waitables[i].first != waitables[i+1].first);
+    DCHECK(waitables[i].first != waitables[i + 1].first);
   }
 
   SyncWaiter sw;
@@ -263,21 +252,21 @@ size_t WaitableEvent::WaitMany(WaitableEvent** raw_waitables,
   // At this point, we hold the locks on all the WaitableEvents and we have
   // enqueued our waiter in them all.
   sw.lock()->Acquire();
-    // Release the WaitableEvent locks in the reverse order
-    for (size_t i = 0; i < count; ++i) {
-      waitables[count - (1 + i)].first->kernel_->lock_.Release();
-    }
+  // Release the WaitableEvent locks in the reverse order
+  for (size_t i = 0; i < count; ++i) {
+    waitables[count - (1 + i)].first->kernel_->lock_.Release();
+  }
 
-    for (;;) {
-      if (sw.fired())
-        break;
+  for (;;) {
+    if (sw.fired())
+      break;
 
-      sw.cv()->Wait();
-    }
+    sw.cv()->Wait();
+  }
   sw.lock()->Release();
 
   // The address of the WaitableEvent which fired is stored in the SyncWaiter.
-  WaitableEvent *const signaled_event = sw.signaling_event();
+  WaitableEvent* const signaled_event = sw.signaling_event();
   // This will store the index of the raw_waitables which fired.
   size_t signaled_index = 0;
 
@@ -286,10 +275,10 @@ size_t WaitableEvent::WaitMany(WaitableEvent** raw_waitables,
   for (size_t i = 0; i < count; ++i) {
     if (raw_waitables[i] != signaled_event) {
       raw_waitables[i]->kernel_->lock_.Acquire();
-        // There's no possible ABA issue with the address of the SyncWaiter here
-        // because it lives on the stack. Thus the tag value is just the pointer
-        // value again.
-        raw_waitables[i]->kernel_->Dequeue(&sw, &sw);
+      // There's no possible ABA issue with the address of the SyncWaiter here
+      // because it lives on the stack. Thus the tag value is just the pointer
+      // value again.
+      raw_waitables[i]->kernel_->Dequeue(&sw, &sw);
       raw_waitables[i]->kernel_->lock_.Release();
     } else {
       // By taking this lock here we ensure that |Signal| has completed by the
@@ -353,7 +342,6 @@ size_t WaitableEvent::EnqueueMany(std::pair<WaitableEvent*, size_t>* waitables,
 
 // -----------------------------------------------------------------------------
 
-
 // -----------------------------------------------------------------------------
 // Private functions...
 
@@ -371,8 +359,8 @@ WaitableEvent::WaitableEventKernel::~WaitableEventKernel() = default;
 bool WaitableEvent::SignalAll() {
   bool signaled_at_least_one = false;
 
-  for (std::list<Waiter*>::iterator
-       i = kernel_->waiters_.begin(); i != kernel_->waiters_.end(); ++i) {
+  for (std::list<Waiter*>::iterator i = kernel_->waiters_.begin();
+       i != kernel_->waiters_.end(); ++i) {
     if ((*i)->Fire(this))
       signaled_at_least_one = true;
   }
@@ -409,8 +397,8 @@ void WaitableEvent::Enqueue(Waiter* waiter) {
 // actually removed. Called with lock held.
 // -----------------------------------------------------------------------------
 bool WaitableEvent::WaitableEventKernel::Dequeue(Waiter* waiter, void* tag) {
-  for (std::list<Waiter*>::iterator
-       i = waiters_.begin(); i != waiters_.end(); ++i) {
+  for (std::list<Waiter*>::iterator i = waiters_.begin(); i != waiters_.end();
+       ++i) {
     if (*i == waiter && (*i)->Compare(tag)) {
       waiters_.erase(i);
       return true;

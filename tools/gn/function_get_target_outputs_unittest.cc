@@ -14,9 +14,7 @@ namespace {
 
 class GetTargetOutputsTest : public testing::Test {
  public:
-  GetTargetOutputsTest() {
-    setup_.scope()->set_item_collector(&items_);
-  }
+  GetTargetOutputsTest() { setup_.scope()->set_item_collector(&items_); }
 
   Value GetTargetOutputs(const std::string& name, Err* err) {
     FunctionCallNode function;
@@ -79,9 +77,8 @@ TEST_F(GetTargetOutputsTest, Action) {
   auto action =
       std::make_unique<Target>(setup_.settings(), GetLabel("//foo/", "bar"));
   action->set_output_type(Target::ACTION);
-  action->action_values().outputs() = SubstitutionList::MakeForTest(
-      "//output1.txt",
-      "//output2.txt");
+  action->action_values().outputs() =
+      SubstitutionList::MakeForTest("//output1.txt", "//output2.txt");
 
   items_.push_back(std::move(action));
 
@@ -96,9 +93,9 @@ TEST_F(GetTargetOutputsTest, ActionForeach) {
       std::make_unique<Target>(setup_.settings(), GetLabel("//foo/", "bar"));
   action->set_output_type(Target::ACTION_FOREACH);
   action->sources().push_back(SourceFile("//file.txt"));
-  action->action_values().outputs() = SubstitutionList::MakeForTest(
-      "//out/Debug/{{source_file_part}}.one",
-      "//out/Debug/{{source_file_part}}.two");
+  action->action_values().outputs() =
+      SubstitutionList::MakeForTest("//out/Debug/{{source_file_part}}.one",
+                                    "//out/Debug/{{source_file_part}}.two");
 
   items_.push_back(std::move(action));
 

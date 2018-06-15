@@ -16,7 +16,7 @@ struct TokenExpectation {
   const char* value;
 };
 
-template<size_t len>
+template <size_t len>
 bool CheckTokenizer(const char* input, const TokenExpectation (&expect)[len]) {
   InputFile input_file(SourceFile("/test"));
   input_file.SetContents(input);
@@ -53,84 +53,69 @@ TEST(Tokenizer, Empty) {
 }
 
 TEST(Tokenizer, Identifier) {
-  TokenExpectation one_ident[] = {
-    { Token::IDENTIFIER, "foo" }
-  };
+  TokenExpectation one_ident[] = {{Token::IDENTIFIER, "foo"}};
   EXPECT_TRUE(CheckTokenizer("  foo ", one_ident));
 }
 
 TEST(Tokenizer, Integer) {
-  TokenExpectation integers[] = {
-    { Token::INTEGER, "123" },
-    { Token::INTEGER, "-123" }
-  };
+  TokenExpectation integers[] = {{Token::INTEGER, "123"},
+                                 {Token::INTEGER, "-123"}};
   EXPECT_TRUE(CheckTokenizer("  123 -123 ", integers));
 }
 
 TEST(Tokenizer, IntegerNoSpace) {
-  TokenExpectation integers[] = {
-    { Token::INTEGER, "123" },
-    { Token::INTEGER, "-123" }
-  };
+  TokenExpectation integers[] = {{Token::INTEGER, "123"},
+                                 {Token::INTEGER, "-123"}};
   EXPECT_TRUE(CheckTokenizer("  123-123 ", integers));
 }
 
 TEST(Tokenizer, String) {
-  TokenExpectation strings[] = {
-    { Token::STRING, "\"foo\"" },
-    { Token::STRING, "\"bar\\\"baz\"" },
-    { Token::STRING, "\"asdf\\\\\"" }
-  };
-  EXPECT_TRUE(CheckTokenizer("  \"foo\" \"bar\\\"baz\" \"asdf\\\\\" ",
-              strings));
+  TokenExpectation strings[] = {{Token::STRING, "\"foo\""},
+                                {Token::STRING, "\"bar\\\"baz\""},
+                                {Token::STRING, "\"asdf\\\\\""}};
+  EXPECT_TRUE(
+      CheckTokenizer("  \"foo\" \"bar\\\"baz\" \"asdf\\\\\" ", strings));
 }
 
 TEST(Tokenizer, Operator) {
   TokenExpectation operators[] = {
-    { Token::MINUS, "-" },
-    { Token::PLUS, "+" },
-    { Token::EQUAL, "=" },
-    { Token::PLUS_EQUALS, "+=" },
-    { Token::MINUS_EQUALS, "-=" },
-    { Token::NOT_EQUAL, "!=" },
-    { Token::EQUAL_EQUAL, "==" },
-    { Token::LESS_THAN, "<" },
-    { Token::GREATER_THAN, ">" },
-    { Token::LESS_EQUAL, "<=" },
-    { Token::GREATER_EQUAL, ">=" },
-    { Token::BANG, "!" },
-    { Token::BOOLEAN_OR, "||" },
-    { Token::BOOLEAN_AND, "&&" },
-    { Token::DOT, "." },
-    { Token::COMMA, "," },
+      {Token::MINUS, "-"},
+      {Token::PLUS, "+"},
+      {Token::EQUAL, "="},
+      {Token::PLUS_EQUALS, "+="},
+      {Token::MINUS_EQUALS, "-="},
+      {Token::NOT_EQUAL, "!="},
+      {Token::EQUAL_EQUAL, "=="},
+      {Token::LESS_THAN, "<"},
+      {Token::GREATER_THAN, ">"},
+      {Token::LESS_EQUAL, "<="},
+      {Token::GREATER_EQUAL, ">="},
+      {Token::BANG, "!"},
+      {Token::BOOLEAN_OR, "||"},
+      {Token::BOOLEAN_AND, "&&"},
+      {Token::DOT, "."},
+      {Token::COMMA, ","},
   };
-  EXPECT_TRUE(CheckTokenizer("- + = += -= != ==  < > <= >= ! || && . ,",
-              operators));
+  EXPECT_TRUE(
+      CheckTokenizer("- + = += -= != ==  < > <= >= ! || && . ,", operators));
 }
 
 TEST(Tokenizer, Scoper) {
   TokenExpectation scopers[] = {
-    { Token::LEFT_BRACE, "{" },
-    { Token::LEFT_BRACKET, "[" },
-    { Token::RIGHT_BRACKET, "]" },
-    { Token::RIGHT_BRACE, "}" },
-    { Token::LEFT_PAREN, "(" },
-    { Token::RIGHT_PAREN, ")" },
+      {Token::LEFT_BRACE, "{"},    {Token::LEFT_BRACKET, "["},
+      {Token::RIGHT_BRACKET, "]"}, {Token::RIGHT_BRACE, "}"},
+      {Token::LEFT_PAREN, "("},    {Token::RIGHT_PAREN, ")"},
   };
   EXPECT_TRUE(CheckTokenizer("{[ ]} ()", scopers));
 }
 
 TEST(Tokenizer, FunctionCall) {
   TokenExpectation fn[] = {
-    { Token::IDENTIFIER, "fun" },
-    { Token::LEFT_PAREN, "(" },
-    { Token::STRING, "\"foo\"" },
-    { Token::RIGHT_PAREN, ")" },
-    { Token::LEFT_BRACE, "{" },
-    { Token::IDENTIFIER, "foo" },
-    { Token::EQUAL, "=" },
-    { Token::INTEGER, "12" },
-    { Token::RIGHT_BRACE, "}" },
+      {Token::IDENTIFIER, "fun"}, {Token::LEFT_PAREN, "("},
+      {Token::STRING, "\"foo\""}, {Token::RIGHT_PAREN, ")"},
+      {Token::LEFT_BRACE, "{"},   {Token::IDENTIFIER, "foo"},
+      {Token::EQUAL, "="},        {Token::INTEGER, "12"},
+      {Token::RIGHT_BRACE, "}"},
   };
   EXPECT_TRUE(CheckTokenizer("fun(\"foo\") {\nfoo = 12}", fn));
 }
@@ -167,27 +152,27 @@ TEST(Tokenizer, ByteOffsetOfNthLine) {
 
 TEST(Tokenizer, Comments) {
   TokenExpectation fn[] = {
-    { Token::LINE_COMMENT, "# Stuff" },
-    { Token::IDENTIFIER, "fun" },
-    { Token::LEFT_PAREN, "(" },
-    { Token::STRING, "\"foo\"" },
-    { Token::RIGHT_PAREN, ")" },
-    { Token::LEFT_BRACE, "{" },
-    { Token::SUFFIX_COMMENT, "# Things" },
-    { Token::LINE_COMMENT, "#Wee" },
-    { Token::IDENTIFIER, "foo" },
-    { Token::EQUAL, "=" },
-    { Token::INTEGER, "12" },
-    { Token::SUFFIX_COMMENT, "#Zip" },
-    { Token::RIGHT_BRACE, "}" },
+      {Token::LINE_COMMENT, "# Stuff"},
+      {Token::IDENTIFIER, "fun"},
+      {Token::LEFT_PAREN, "("},
+      {Token::STRING, "\"foo\""},
+      {Token::RIGHT_PAREN, ")"},
+      {Token::LEFT_BRACE, "{"},
+      {Token::SUFFIX_COMMENT, "# Things"},
+      {Token::LINE_COMMENT, "#Wee"},
+      {Token::IDENTIFIER, "foo"},
+      {Token::EQUAL, "="},
+      {Token::INTEGER, "12"},
+      {Token::SUFFIX_COMMENT, "#Zip"},
+      {Token::RIGHT_BRACE, "}"},
   };
-  EXPECT_TRUE(CheckTokenizer(
-      "# Stuff\n"
-      "fun(\"foo\") {  # Things\n"
-      "#Wee\n"
-      "foo = 12 #Zip\n"
-      "}",
-      fn));
+  EXPECT_TRUE(
+      CheckTokenizer("# Stuff\n"
+                     "fun(\"foo\") {  # Things\n"
+                     "#Wee\n"
+                     "foo = 12 #Zip\n"
+                     "}",
+                     fn));
 }
 
 TEST(Tokenizer, CommentsContinued) {
@@ -195,30 +180,22 @@ TEST(Tokenizer, CommentsContinued) {
   // considered separate. In the second test, they are, so "B" is a
   // continuation of "A" (another SUFFIX comment).
   TokenExpectation fn1[] = {
-    { Token::IDENTIFIER, "fun" },
-    { Token::LEFT_PAREN, "(" },
-    { Token::STRING, "\"foo\"" },
-    { Token::RIGHT_PAREN, ")" },
-    { Token::LEFT_BRACE, "{" },
-    { Token::SUFFIX_COMMENT, "# A" },
-    { Token::LINE_COMMENT, "# B" },
-    { Token::RIGHT_BRACE, "}" },
+      {Token::IDENTIFIER, "fun"},   {Token::LEFT_PAREN, "("},
+      {Token::STRING, "\"foo\""},   {Token::RIGHT_PAREN, ")"},
+      {Token::LEFT_BRACE, "{"},     {Token::SUFFIX_COMMENT, "# A"},
+      {Token::LINE_COMMENT, "# B"}, {Token::RIGHT_BRACE, "}"},
   };
-  EXPECT_TRUE(CheckTokenizer(
-      "fun(\"foo\") {  # A\n"
-      "  # B\n"
-      "}",
-      fn1));
+  EXPECT_TRUE(
+      CheckTokenizer("fun(\"foo\") {  # A\n"
+                     "  # B\n"
+                     "}",
+                     fn1));
 
   TokenExpectation fn2[] = {
-    { Token::IDENTIFIER, "fun" },
-    { Token::LEFT_PAREN, "(" },
-    { Token::STRING, "\"foo\"" },
-    { Token::RIGHT_PAREN, ")" },
-    { Token::LEFT_BRACE, "{" },
-    { Token::SUFFIX_COMMENT, "# A" },
-    { Token::SUFFIX_COMMENT, "# B" },
-    { Token::RIGHT_BRACE, "}" },
+      {Token::IDENTIFIER, "fun"},     {Token::LEFT_PAREN, "("},
+      {Token::STRING, "\"foo\""},     {Token::RIGHT_PAREN, ")"},
+      {Token::LEFT_BRACE, "{"},       {Token::SUFFIX_COMMENT, "# A"},
+      {Token::SUFFIX_COMMENT, "# B"}, {Token::RIGHT_BRACE, "}"},
   };
   EXPECT_TRUE(CheckTokenizer(
       "fun(\"foo\") {  # A\n"

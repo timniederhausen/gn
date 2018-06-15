@@ -91,10 +91,12 @@ bool CreateBundleTargetGenerator::FillBundleDir(
     return false;
   if (str != bundle_root_dir.value() &&
       !IsStringInOutputDir(bundle_root_dir, str)) {
-    *err_ = Err(value->origin(), "Path is not in bundle root dir.",
+    *err_ = Err(
+        value->origin(), "Path is not in bundle root dir.",
         "The given file should be in the bundle root directory or below.\n"
         "Normally you would do \"$bundle_root_dir/foo\". I interpreted this\n"
-        "as \"" + str + "\".");
+        "as \"" +
+            str + "\".");
     return false;
   }
   bundle_dir->SwapValue(&str);

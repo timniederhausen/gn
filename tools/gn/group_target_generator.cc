@@ -12,8 +12,7 @@ GroupTargetGenerator::GroupTargetGenerator(
     Scope* scope,
     const FunctionCallNode* function_call,
     Err* err)
-    : TargetGenerator(target, scope, function_call, err) {
-}
+    : TargetGenerator(target, scope, function_call, err) {}
 
 GroupTargetGenerator::~GroupTargetGenerator() = default;
 

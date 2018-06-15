@@ -64,8 +64,7 @@ class OffsetAdjuster {
 
   // Adjusts the single |offset| to reflect the reverse of the adjustments
   // recorded in |adjustments|.
-  static void UnadjustOffset(const Adjustments& adjustments,
-                             size_t* offset);
+  static void UnadjustOffset(const Adjustments& adjustments, size_t* offset);
 
   // Combines two sequential sets of adjustments, storing the combined revised
   // adjustments in |adjustments_on_adjusted_string|.  That is, suppose a
@@ -90,11 +89,10 @@ class OffsetAdjuster {
 // Like the conversions in utf_string_conversions.h, but also fills in an
 // |adjustments| parameter that reflects the alterations done to the string.
 // It may be NULL.
-bool UTF8ToUTF16WithAdjustments(
-    const char* src,
-    size_t src_len,
-    string16* output,
-    base::OffsetAdjuster::Adjustments* adjustments);
+bool UTF8ToUTF16WithAdjustments(const char* src,
+                                size_t src_len,
+                                string16* output,
+                                base::OffsetAdjuster::Adjustments* adjustments);
 string16 UTF8ToUTF16WithAdjustments(
     const base::StringPiece& utf8,
     base::OffsetAdjuster::Adjustments* adjustments);

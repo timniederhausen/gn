@@ -78,10 +78,7 @@ class HeaderChecker : public base::RefCountedThreadSafe<HeaderChecker> {
   struct TargetInfo {
     TargetInfo() : target(nullptr), is_public(false), is_generated(false) {}
     TargetInfo(const Target* t, bool is_pub, bool is_gen)
-        : target(t),
-          is_public(is_pub),
-          is_generated(is_gen) {
-    }
+        : target(t), is_public(is_pub), is_generated(is_gen) {}
 
     const Target* target;
 

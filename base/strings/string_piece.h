@@ -51,100 +51,58 @@ void CopyToString(const StringPiece16& self, string16* target);
 void AppendToString(const StringPiece& self, std::string* target);
 void AppendToString(const StringPiece16& self, string16* target);
 
-size_t copy(const StringPiece& self,
-                        char* buf,
-                        size_t n,
-                        size_t pos);
-size_t copy(const StringPiece16& self,
-                        char16* buf,
-                        size_t n,
-                        size_t pos);
+size_t copy(const StringPiece& self, char* buf, size_t n, size_t pos);
+size_t copy(const StringPiece16& self, char16* buf, size_t n, size_t pos);
 
-size_t find(const StringPiece& self,
-                        const StringPiece& s,
-                        size_t pos);
-size_t find(const StringPiece16& self,
-                        const StringPiece16& s,
-                        size_t pos);
-size_t find(const StringPiece& self,
-                        char c,
-                        size_t pos);
-size_t find(const StringPiece16& self,
-                        char16 c,
-                        size_t pos);
+size_t find(const StringPiece& self, const StringPiece& s, size_t pos);
+size_t find(const StringPiece16& self, const StringPiece16& s, size_t pos);
+size_t find(const StringPiece& self, char c, size_t pos);
+size_t find(const StringPiece16& self, char16 c, size_t pos);
 
-size_t rfind(const StringPiece& self,
+size_t rfind(const StringPiece& self, const StringPiece& s, size_t pos);
+size_t rfind(const StringPiece16& self, const StringPiece16& s, size_t pos);
+size_t rfind(const StringPiece& self, char c, size_t pos);
+size_t rfind(const StringPiece16& self, char16 c, size_t pos);
+
+size_t find_first_of(const StringPiece& self, const StringPiece& s, size_t pos);
+size_t find_first_of(const StringPiece16& self,
+                     const StringPiece16& s,
+                     size_t pos);
+
+size_t find_first_not_of(const StringPiece& self,
                          const StringPiece& s,
                          size_t pos);
-size_t rfind(const StringPiece16& self,
+size_t find_first_not_of(const StringPiece16& self,
                          const StringPiece16& s,
                          size_t pos);
-size_t rfind(const StringPiece& self,
-                         char c,
-                         size_t pos);
-size_t rfind(const StringPiece16& self,
-                         char16 c,
-                         size_t pos);
+size_t find_first_not_of(const StringPiece& self, char c, size_t pos);
+size_t find_first_not_of(const StringPiece16& self, char16 c, size_t pos);
 
-size_t find_first_of(const StringPiece& self,
-                                 const StringPiece& s,
-                                 size_t pos);
-size_t find_first_of(const StringPiece16& self,
-                                 const StringPiece16& s,
-                                 size_t pos);
-
-size_t find_first_not_of(const StringPiece& self,
-                                     const StringPiece& s,
-                                     size_t pos);
-size_t find_first_not_of(const StringPiece16& self,
-                                     const StringPiece16& s,
-                                     size_t pos);
-size_t find_first_not_of(const StringPiece& self,
-                                     char c,
-                                     size_t pos);
-size_t find_first_not_of(const StringPiece16& self,
-                                     char16 c,
-                                     size_t pos);
-
-size_t find_last_of(const StringPiece& self,
-                                const StringPiece& s,
-                                size_t pos);
+size_t find_last_of(const StringPiece& self, const StringPiece& s, size_t pos);
 size_t find_last_of(const StringPiece16& self,
-                                const StringPiece16& s,
-                                size_t pos);
-size_t find_last_of(const StringPiece& self,
-                                char c,
-                                size_t pos);
-size_t find_last_of(const StringPiece16& self,
-                                char16 c,
-                                size_t pos);
+                    const StringPiece16& s,
+                    size_t pos);
+size_t find_last_of(const StringPiece& self, char c, size_t pos);
+size_t find_last_of(const StringPiece16& self, char16 c, size_t pos);
 
 size_t find_last_not_of(const StringPiece& self,
-                                    const StringPiece& s,
-                                    size_t pos);
+                        const StringPiece& s,
+                        size_t pos);
 size_t find_last_not_of(const StringPiece16& self,
-                                    const StringPiece16& s,
-                                    size_t pos);
-size_t find_last_not_of(const StringPiece16& self,
-                                    char16 c,
-                                    size_t pos);
-size_t find_last_not_of(const StringPiece& self,
-                                    char c,
-                                    size_t pos);
+                        const StringPiece16& s,
+                        size_t pos);
+size_t find_last_not_of(const StringPiece16& self, char16 c, size_t pos);
+size_t find_last_not_of(const StringPiece& self, char c, size_t pos);
 
-StringPiece substr(const StringPiece& self,
-                               size_t pos,
-                               size_t n);
-StringPiece16 substr(const StringPiece16& self,
-                                 size_t pos,
-                                 size_t n);
+StringPiece substr(const StringPiece& self, size_t pos, size_t n);
+StringPiece16 substr(const StringPiece16& self, size_t pos, size_t n);
 
 #if DCHECK_IS_ON()
 // Asserts that begin <= end to catch some errors with iterator usage.
 void AssertIteratorsInOrder(std::string::const_iterator begin,
-                                        std::string::const_iterator end);
+                            std::string::const_iterator end);
 void AssertIteratorsInOrder(string16::const_iterator begin,
-                                        string16::const_iterator end);
+                            string16::const_iterator end);
 #endif
 
 }  // namespace internal
@@ -157,7 +115,8 @@ void AssertIteratorsInOrder(string16::const_iterator begin,
 //
 // This is templatized by string class type rather than character type, so
 // BasicStringPiece<std::string> or BasicStringPiece<base::string16>.
-template <typename STRING_TYPE> class BasicStringPiece {
+template <typename STRING_TYPE>
+class BasicStringPiece {
  public:
   // Standard STL container boilerplate.
   typedef size_t size_type;
@@ -252,8 +211,10 @@ template <typename STRING_TYPE> class BasicStringPiece {
     int r = CharTraits<value_type>::compare(
         ptr_, x.ptr_, (length_ < x.length_ ? length_ : x.length_));
     if (r == 0) {
-      if (length_ < x.length_) r = -1;
-      else if (length_ > x.length_) r = +1;
+      if (length_ < x.length_)
+        r = -1;
+      else if (length_ > x.length_)
+        r = +1;
     }
     return r;
   }
@@ -271,9 +232,7 @@ template <typename STRING_TYPE> class BasicStringPiece {
   const_reverse_iterator rbegin() const {
     return const_reverse_iterator(ptr_ + length_);
   }
-  const_reverse_iterator rend() const {
-    return const_reverse_iterator(ptr_);
-  }
+  const_reverse_iterator rend() const { return const_reverse_iterator(ptr_); }
 
   size_type max_size() const { return length_; }
   size_type capacity() const { return length_; }
@@ -326,8 +285,7 @@ template <typename STRING_TYPE> class BasicStringPiece {
   }
 
   // find_first_of: Find the first occurence of one of a set of characters.
-  size_type find_first_of(const BasicStringPiece& s,
-                          size_type pos = 0) const {
+  size_type find_first_of(const BasicStringPiece& s, size_type pos = 0) const {
     return internal::find_first_of(*this, s, pos);
   }
   size_type find_first_of(value_type c, size_type pos = 0) const {
@@ -376,8 +334,8 @@ template <typename STRING_TYPE> class BasicStringPiece {
 
 template <typename STRING_TYPE>
 const typename BasicStringPiece<STRING_TYPE>::size_type
-BasicStringPiece<STRING_TYPE>::npos =
-    typename BasicStringPiece<STRING_TYPE>::size_type(-1);
+    BasicStringPiece<STRING_TYPE>::npos =
+        typename BasicStringPiece<STRING_TYPE>::size_type(-1);
 
 // MSVC doesn't like complex extern templates and DLLs.
 #if !defined(COMPILER_MSVC)
@@ -443,8 +401,7 @@ inline bool operator>=(const StringPiece16& x, const StringPiece16& y) {
   return !(x < y);
 }
 
-std::ostream& operator<<(std::ostream& o,
-                                     const StringPiece& piece);
+std::ostream& operator<<(std::ostream& o, const StringPiece& piece);
 
 // Hashing ---------------------------------------------------------------------
 

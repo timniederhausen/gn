@@ -42,33 +42,29 @@ struct PublicGeneratedPair {
 LocationRange CreatePersistentRange(const InputFile& input_file,
                                     const LocationRange& range) {
   InputFile* clone_input_file;
-  std::vector<Token>* tokens;  // Don't care about this.
+  std::vector<Token>* tokens;              // Don't care about this.
   std::unique_ptr<ParseNode>* parse_root;  // Don't care about this.
 
   g_scheduler->input_file_manager()->AddDynamicInput(
       input_file.name(), &clone_input_file, &tokens, &parse_root);
   clone_input_file->SetContents(input_file.contents());
 
-  return LocationRange(Location(clone_input_file,
-                                range.begin().line_number(),
-                                range.begin().column_number(),
-                                -1 /* TODO(scottmg) */),
-                       Location(clone_input_file,
-                                range.end().line_number(),
-                                range.end().column_number(),
-                                -1 /* TODO(scottmg) */));
+  return LocationRange(
+      Location(clone_input_file, range.begin().line_number(),
+               range.begin().column_number(), -1 /* TODO(scottmg) */),
+      Location(clone_input_file, range.end().line_number(),
+               range.end().column_number(), -1 /* TODO(scottmg) */));
 }
 
 // Given a reverse dependency chain where the target chain[0]'s includes are
 // being used by chain[end] and not all deps are public, returns the string
 // describing the error.
-std::string GetDependencyChainPublicError(
-    const HeaderChecker::Chain& chain) {
-  std::string ret = "The target:\n  " +
+std::string GetDependencyChainPublicError(const HeaderChecker::Chain& chain) {
+  std::string ret =
+      "The target:\n  " +
       chain[chain.size() - 1].target->label().GetUserVisibleName(false) +
       "\nis including a file from the target:\n  " +
-      chain[0].target->label().GetUserVisibleName(false) +
-      "\n";
+      chain[0].target->label().GetUserVisibleName(false) + "\n";
 
   // Invalid chains should always be 0 (no chain) or more than two
   // (intermediate private dependencies). 1 and 2 are impossible because a
@@ -78,7 +74,8 @@ std::string GetDependencyChainPublicError(
     ret += "There is no dependency chain between these targets.";
   } else {
     // Indirect dependency chain, print the chain.
-    ret += "\nIt's usually best to depend directly on the destination target.\n"
+    ret +=
+        "\nIt's usually best to depend directly on the destination target.\n"
         "In some cases, the destination target is considered a subcomponent\n"
         "of an intermediate target. In this case, the intermediate target\n"
         "should depend publicly on the destination to forward the ability\n"
@@ -230,8 +227,8 @@ void HeaderChecker::AddTargetToFileMap(const Target* target, FileMap* dest) {
 
   // Add the merged list to the master list of all files.
   for (const auto& cur : files_to_public) {
-    (*dest)[cur.first].push_back(TargetInfo(
-        target, cur.second.is_public, cur.second.is_generated));
+    (*dest)[cur.first].push_back(
+        TargetInfo(target, cur.second.is_public, cur.second.is_generated));
   }
 }
 
@@ -278,10 +275,11 @@ bool HeaderChecker::CheckFile(const Target* from_target,
   base::FilePath path = build_settings_->GetFullPath(file);
   std::string contents;
   if (!base::ReadFileToString(path, &contents)) {
-    *err = Err(from_target->defined_from(), "Source file not found.",
-        "The target:\n  " + from_target->label().GetUserVisibleName(false) +
-        "\nhas a source file:\n  " + file.value() +
-        "\nwhich was not found.");
+    *err =
+        Err(from_target->defined_from(), "Source file not found.",
+            "The target:\n  " + from_target->label().GetUserVisibleName(false) +
+                "\nhas a source file:\n  " + file.value() +
+                "\nwhich was not found.");
     return false;
   }
 
@@ -405,16 +403,15 @@ bool HeaderChecker::CheckInclude(const Target* from_target,
                          "This file is private to the target " +
                              target.target->label().GetUserVisibleName(false));
       } else if (!is_permitted_chain) {
-        last_error = Err(
-            CreatePersistentRange(source_file, range),
-            "Can't include this header from here.",
-                GetDependencyChainPublicError(chain));
+        last_error = Err(CreatePersistentRange(source_file, range),
+                         "Can't include this header from here.",
+                         GetDependencyChainPublicError(chain));
       } else {
         NOTREACHED();
       }
-    } else if (
-        to_target->allow_circular_includes_from().find(from_target->label()) !=
-        to_target->allow_circular_includes_from().end()) {
+    } else if (to_target->allow_circular_includes_from().find(
+                   from_target->label()) !=
+               to_target->allow_circular_includes_from().end()) {
       // Not a dependency, but this include is whitelisted from the destination.
       found_dependency = true;
       last_error = Err();
@@ -542,11 +539,10 @@ bool HeaderChecker::IsDependencyOf(const Target* search_for,
   return false;
 }
 
-Err HeaderChecker::MakeUnreachableError(
-    const InputFile& source_file,
-    const LocationRange& range,
-    const Target* from_target,
-    const TargetVector& targets) {
+Err HeaderChecker::MakeUnreachableError(const InputFile& source_file,
+                                        const LocationRange& range,
+                                        const Target* from_target,
+                                        const TargetVector& targets) {
   // Normally the toolchains will all match, but when cross-compiling, we can
   // get targets with more than one toolchain in the list of possibilities.
   std::vector<const Target*> targets_with_matching_toolchains;
@@ -584,18 +580,19 @@ Err HeaderChecker::MakeUnreachableError(
   bool include_toolchain = !targets_with_other_toolchains.empty();
 
   std::string msg = "It is not in any dependency of\n  " +
-      from_target->label().GetUserVisibleName(include_toolchain);
+                    from_target->label().GetUserVisibleName(include_toolchain);
   msg += "\nThe include file is in the target(s):\n";
   for (auto* target : targets_with_matching_toolchains)
     msg += "  " + target->label().GetUserVisibleName(include_toolchain) + "\n";
   for (auto* target : targets_with_other_toolchains)
     msg += "  " + target->label().GetUserVisibleName(include_toolchain) + "\n";
   if (targets_with_other_toolchains.size() +
-      targets_with_matching_toolchains.size() > 1)
+          targets_with_matching_toolchains.size() >
+      1)
     msg += "at least one of ";
   msg += "which should somehow be reachable.";
 
   // Danger: must call CreatePersistentRange to put in Err.
-  return Err(CreatePersistentRange(source_file, range),
-             "Include not allowed.", msg);
+  return Err(CreatePersistentRange(source_file, range), "Include not allowed.",
+             msg);
 }

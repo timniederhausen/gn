@@ -89,14 +89,13 @@ bool ParseProcStats(const std::string& stats_data,
   // PID.
   proc_stats->push_back(stats_data.substr(0, open_parens_idx));
   // Process name without parentheses.
-  proc_stats->push_back(
-      stats_data.substr(open_parens_idx + 1,
-                        close_parens_idx - (open_parens_idx + 1)));
+  proc_stats->push_back(stats_data.substr(
+      open_parens_idx + 1, close_parens_idx - (open_parens_idx + 1)));
 
   // Split the rest.
-  std::vector<std::string> other_stats = SplitString(
-      stats_data.substr(close_parens_idx + 2), " ",
-      base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
+  std::vector<std::string> other_stats =
+      SplitString(stats_data.substr(close_parens_idx + 2), " ",
+                  base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
   for (size_t i = 0; i < other_stats.size(); ++i)
     proc_stats->push_back(other_stats[i]);
   return true;
@@ -150,8 +149,7 @@ int64_t ReadProcSelfStatsAndGetFieldAsInt64(ProcStatsFields field_num) {
   return ReadStatFileAndGetFieldAsInt64(stat_file, field_num);
 }
 
-size_t ReadProcStatsAndGetFieldAsSizeT(pid_t pid,
-                                       ProcStatsFields field_num) {
+size_t ReadProcStatsAndGetFieldAsSizeT(pid_t pid, ProcStatsFields field_num) {
   std::string stats_data;
   if (!ReadProcStats(pid, &stats_data))
     return 0;
@@ -214,8 +212,8 @@ TimeDelta ClockTicksToTimeDelta(int clock_ticks) {
   // It may be the case that this value is always 100.
   static const int kHertz = sysconf(_SC_CLK_TCK);
 
-  return TimeDelta::FromMicroseconds(
-      Time::kMicrosecondsPerSecond * clock_ticks / kHertz);
+  return TimeDelta::FromMicroseconds(Time::kMicrosecondsPerSecond *
+                                     clock_ticks / kHertz);
 }
 
 }  // namespace internal

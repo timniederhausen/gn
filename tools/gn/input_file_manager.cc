@@ -49,10 +49,10 @@ bool DoLoadFile(const LocationRange& origin,
           build_settings->GetFullPathSecondary(name);
       if (!file->Load(secondary_path)) {
         *err = Err(origin, "Can't load input file.",
-                   "Unable to load:\n  " +
-                   FilePathToUTF8(primary_path) + "\n"
-                   "I also checked in the secondary tree for:\n  " +
-                   FilePathToUTF8(secondary_path));
+                   "Unable to load:\n  " + FilePathToUTF8(primary_path) +
+                       "\n"
+                       "I also checked in the secondary tree for:\n  " +
+                       FilePathToUTF8(secondary_path));
         return false;
       }
     } else {
@@ -82,10 +82,7 @@ bool DoLoadFile(const LocationRange& origin,
 }  // namespace
 
 InputFileManager::InputFileData::InputFileData(const SourceFile& file_name)
-    : file(file_name),
-      loaded(false),
-      sync_invocation(false) {
-}
+    : file(file_name), loaded(false), sync_invocation(false) {}
 
 InputFileManager::InputFileData::~InputFileData() = default;
 
@@ -125,11 +122,14 @@ bool InputFileManager::AsyncLoadFile(const LocationRange& origin,
       if (data->sync_invocation) {
         g_scheduler->FailWithError(Err(
             origin, "Load type mismatch.",
-            "The file \"" + file_name.value() + "\" was previously loaded\n"
-            "synchronously (via an import) and now you're trying to load it "
-            "asynchronously\n(via a deps rule). This is a class 2 misdemeanor: "
-            "a single input file must\nbe loaded the same way each time to "
-            "avoid blowing my tiny, tiny mind."));
+            "The file \"" + file_name.value() +
+                "\" was previously loaded\n"
+                "synchronously (via an import) and now you're trying to load "
+                "it "
+                "asynchronously\n(via a deps rule). This is a class 2 "
+                "misdemeanor: "
+                "a single input file must\nbe loaded the same way each time to "
+                "avoid blowing my tiny, tiny mind."));
         return false;
       }
 
@@ -187,13 +187,16 @@ const ParseNode* InputFileManager::SyncLoadFile(
       // I have no practical way to test this, and generally we should have
       // all include files processed synchronously and all build files
       // processed asynchronously, so it doesn't happen in practice.
-      *err = Err(
-          origin, "Load type mismatch.",
-          "The file \"" + file_name.value() + "\" was previously loaded\n"
-          "asynchronously (via a deps rule) and now you're trying to load it "
-          "synchronously.\nThis is a class 2 misdemeanor: a single input file "
-          "must be loaded the same way\neach time to avoid blowing my tiny, "
-          "tiny mind.");
+      *err = Err(origin, "Load type mismatch.",
+                 "The file \"" + file_name.value() +
+                     "\" was previously loaded\n"
+                     "asynchronously (via a deps rule) and now you're trying "
+                     "to load it "
+                     "synchronously.\nThis is a class 2 misdemeanor: a single "
+                     "input file "
+                     "must be loaded the same way\neach time to avoid blowing "
+                     "my tiny, "
+                     "tiny mind.");
       return nullptr;
     }
 
@@ -269,8 +272,8 @@ bool InputFileManager::LoadFile(const LocationRange& origin,
                                 Err* err) {
   std::vector<Token> tokens;
   std::unique_ptr<ParseNode> root;
-  bool success = DoLoadFile(origin, build_settings, name, file,
-                            &tokens, &root, err);
+  bool success =
+      DoLoadFile(origin, build_settings, name, file, &tokens, &root, err);
   // Can't return early. We have to ensure that the completion event is
   // signaled in all cases bacause another thread could be blocked on this one.
 

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "tools/gn/visibility.h"
 #include "test/test.h"
 #include "tools/gn/err.h"
 #include "tools/gn/label.h"
 #include "tools/gn/scope.h"
 #include "tools/gn/value.h"
-#include "tools/gn/visibility.h"
 
 TEST(Visibility, CanSeeMe) {
   Value list(nullptr, Value::LIST);

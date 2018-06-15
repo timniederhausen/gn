@@ -29,18 +29,16 @@ namespace {
 //
 // If all_toolchains is false, a pattern with an unspecified toolchain will
 // match the default toolchain only. If true, all toolchains will be matched.
-bool ResolveTargetsFromCommandLinePattern(
-    Setup* setup,
-    const std::string& label_pattern,
-    bool all_toolchains,
-    std::vector<const Target*>* matches) {
+bool ResolveTargetsFromCommandLinePattern(Setup* setup,
+                                          const std::string& label_pattern,
+                                          bool all_toolchains,
+                                          std::vector<const Target*>* matches) {
   Value pattern_value(nullptr, label_pattern);
 
   Err err;
   LabelPattern pattern = LabelPattern::GetPattern(
       SourceDirForCurrentDirectory(setup->build_settings().root_path()),
-      pattern_value,
-      &err);
+      pattern_value, &err);
   if (err.has_error()) {
     err.PrintToStdout();
     return false;
@@ -62,7 +60,6 @@ bool ResolveTargetsFromCommandLinePattern(
                           pattern_vector, matches);
   return true;
 }
-
 
 // If there's an error, it will be printed and false will be returned.
 bool ResolveStringFromCommandLineInput(
@@ -89,9 +86,9 @@ bool ResolveStringFromCommandLineInput(
 
   // Try to figure out what this thing is.
   Err err;
-  Label label = Label::Resolve(current_dir,
-                               setup->loader()->default_toolchain_label(),
-                               Value(nullptr, input), &err);
+  Label label =
+      Label::Resolve(current_dir, setup->loader()->default_toolchain_label(),
+                     Value(nullptr, input), &err);
   if (err.has_error()) {
     // Not a valid label, assume this must be a file.
     err = Err();
@@ -160,7 +157,9 @@ bool GetTargetPrintingMode(TargetPrintingMode* mode) {
 
   Err(Location(), "Invalid value for \"--as\".",
       "I was expecting \"buildfile\", \"label\", or \"output\" but you\n"
-      "said \"" + value + "\".").PrintToStdout();
+      "said \"" +
+          value + "\".")
+      .PrintToStdout();
   return false;
 }
 
@@ -218,7 +217,6 @@ bool GetTargetTypeFilter(Target::OutputType* type) {
   Err(Location(), "Invalid value for \"--type\".").PrintToStdout();
   return false;
 }
-
 
 // Applies any testonly filtering specified on the command line to the given
 // target set. On failure, prints an error and returns false.
@@ -303,8 +301,7 @@ void PrintTargetsAsLabels(const std::vector<const Target*>& targets,
     unique_labels.insert(target->label());
 
   // Grab the label of the default toolchain from the first target.
-  Label default_tc_label =
-      targets[0]->settings()->default_toolchain_label();
+  Label default_tc_label = targets[0]->settings()->default_toolchain_label();
 
   for (const Label& label : unique_labels) {
     // Print toolchain only for ones not in the default toolchain.
@@ -329,11 +326,10 @@ void PrintTargetsAsOutputs(const std::vector<const Target*>& targets,
     if (output_file.value().empty())
       output_file = target->dependency_output_file();
 
-    SourceFile output_as_source =
-        output_file.AsSourceFile(build_settings);
-    std::string result = RebasePath(output_as_source.value(),
-                                    build_settings->build_dir(),
-                                    build_settings->root_path_utf8());
+    SourceFile output_as_source = output_file.AsSourceFile(build_settings);
+    std::string result =
+        RebasePath(output_as_source.value(), build_settings->build_dir(),
+                   build_settings->root_path_utf8());
     out->AppendString(result);
   }
 }
@@ -366,30 +362,21 @@ inline std::string FixGitBashLabelEdit(const std::string& label) {
 }
 #endif
 
-
 }  // namespace
 
 CommandInfo::CommandInfo()
-    : help_short(nullptr),
-      help(nullptr),
-      runner(nullptr) {
-}
+    : help_short(nullptr), help(nullptr), runner(nullptr) {}
 
 CommandInfo::CommandInfo(const char* in_help_short,
                          const char* in_help,
                          CommandRunner in_runner)
-    : help_short(in_help_short),
-      help(in_help),
-      runner(in_runner) {
-}
+    : help_short(in_help_short), help(in_help), runner(in_runner) {}
 
 const CommandInfoMap& GetCommands() {
   static CommandInfoMap info_map;
   if (info_map.empty()) {
-    #define INSERT_COMMAND(cmd) \
-        info_map[k##cmd] = CommandInfo(k##cmd##_HelpShort, \
-                                       k##cmd##_Help, \
-                                       &Run##cmd);
+#define INSERT_COMMAND(cmd) \
+  info_map[k##cmd] = CommandInfo(k##cmd##_HelpShort, k##cmd##_Help, &Run##cmd);
 
     INSERT_COMMAND(Analyze)
     INSERT_COMMAND(Args)
@@ -403,7 +390,7 @@ const CommandInfoMap& GetCommands() {
     INSERT_COMMAND(Path)
     INSERT_COMMAND(Refs)
 
-    #undef INSERT_COMMAND
+#undef INSERT_COMMAND
   }
   return info_map;
 }
@@ -415,9 +402,9 @@ const Target* ResolveTargetFromCommandLineString(
   Label default_toolchain = setup->loader()->default_toolchain_label();
   Value arg_value(nullptr, FixGitBashLabelEdit(label_string));
   Err err;
-  Label label = Label::Resolve(SourceDirForCurrentDirectory(
-                                   setup->build_settings().root_path()),
-                               default_toolchain, arg_value, &err);
+  Label label = Label::Resolve(
+      SourceDirForCurrentDirectory(setup->build_settings().root_path()),
+      default_toolchain, arg_value, &err);
   if (err.has_error()) {
     err.PrintToStdout();
     return nullptr;
@@ -426,16 +413,20 @@ const Target* ResolveTargetFromCommandLineString(
   const Item* item = setup->builder().GetItem(label);
   if (!item) {
     Err(Location(), "Label not found.",
-        label.GetUserVisibleName(false) + " not found.").PrintToStdout();
+        label.GetUserVisibleName(false) + " not found.")
+        .PrintToStdout();
     return nullptr;
   }
 
   const Target* target = item->AsTarget();
   if (!target) {
     Err(Location(), "Not a target.",
-        "The \"" + label.GetUserVisibleName(false) + "\" thing\n"
-        "is not a target. Somebody should probably implement this command for "
-        "other\nitem types.").PrintToStdout();
+        "The \"" + label.GetUserVisibleName(false) +
+            "\" thing\n"
+            "is not a target. Somebody should probably implement this command "
+            "for "
+            "other\nitem types.")
+        .PrintToStdout();
     return nullptr;
   }
 
@@ -459,10 +450,9 @@ bool ResolveFromCommandLineInput(
   SourceDir cur_dir =
       SourceDirForCurrentDirectory(setup->build_settings().root_path());
   for (const auto& cur : input) {
-    if (!ResolveStringFromCommandLineInput(setup, cur_dir, cur,
-                                           all_toolchains, target_matches,
-                                           config_matches, toolchain_matches,
-                                           file_matches))
+    if (!ResolveStringFromCommandLineInput(setup, cur_dir, cur, all_toolchains,
+                                           target_matches, config_matches,
+                                           toolchain_matches, file_matches))
       return false;
   }
   return true;

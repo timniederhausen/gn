@@ -42,14 +42,13 @@ void ParseCompilerOption(const std::string& cflag, CompilerOptions* options) {
     switch (cflag[1]) {
       case 'F':
         AppendOption(cflag.size() > 3 && cflag[2] == 'I', forced_include_files,
-                     cflag.substr(3), ';')
-        break;
+                     cflag.substr(3), ';') break;
 
       case 'G':
         if (cflag[2] == 'S') {
           SetOption(cflag.size() == 3, buffer_security_check, "true")
-          SetOption(cflag.size() == 4 && cflag[3] == '-',
-                    buffer_security_check, "false")
+              SetOption(cflag.size() == 4 && cflag[3] == '-',
+                        buffer_security_check, "false")
         }
         break;
 
@@ -57,35 +56,29 @@ void ParseCompilerOption(const std::string& cflag, CompilerOptions* options) {
         switch (cflag[2]) {
           case 'D':
             SetOption(cflag.size() == 3, runtime_library, "MultiThreadedDLL")
-            SetOption(cflag.size() == 4 && cflag[3] == 'd', runtime_library,
-                      "MultiThreadedDebugDLL")
-            break;
+                SetOption(cflag.size() == 4 && cflag[3] == 'd', runtime_library,
+                          "MultiThreadedDebugDLL") break;
 
           case 'T':
             SetOption(cflag.size() == 3, runtime_library, "MultiThreaded")
-            SetOption(cflag.size() == 4 && cflag[3] == 'd', runtime_library,
-                      "MultiThreadedDebug")
-            break;
+                SetOption(cflag.size() == 4 && cflag[3] == 'd', runtime_library,
+                          "MultiThreadedDebug") break;
         }
         break;
 
       case 'O':
         switch (cflag[2]) {
           case '1':
-            SetOption(cflag.size() == 3, optimization, "MinSpace")
-            break;
+            SetOption(cflag.size() == 3, optimization, "MinSpace") break;
 
           case '2':
-            SetOption(cflag.size() == 3, optimization, "MaxSpeed")
-            break;
+            SetOption(cflag.size() == 3, optimization, "MaxSpeed") break;
 
           case 'd':
-            SetOption(cflag.size() == 3, optimization, "Disabled")
-            break;
+            SetOption(cflag.size() == 3, optimization, "Disabled") break;
 
           case 'x':
-            SetOption(cflag.size() == 3, optimization, "Full")
-              break;
+            SetOption(cflag.size() == 3, optimization, "Full") break;
         }
         break;
 
@@ -103,19 +96,16 @@ void ParseCompilerOption(const std::string& cflag, CompilerOptions* options) {
           case '3':
           case '4':
             SetOption(cflag.size() == 3, warning_level,
-                      std::string("Level") + cflag[2])
-            break;
+                      std::string("Level") + cflag[2]) break;
 
           case 'X':
-            SetOption(cflag.size() == 3, treat_warning_as_error, "true")
-            break;
+            SetOption(cflag.size() == 3, treat_warning_as_error, "true") break;
         }
         break;
 
       case 'w':
         AppendOption(cflag.size() > 3 && cflag[2] == 'd',
-                     disable_specific_warnings, cflag.substr(3), ';')
-        break;
+                     disable_specific_warnings, cflag.substr(3), ';') break;
     }
   }
 
@@ -125,12 +115,10 @@ void ParseCompilerOption(const std::string& cflag, CompilerOptions* options) {
 
 // Parses |ldflags| value and stores it in |options|.
 void ParseLinkerOption(const std::string& ldflag, LinkerOptions* options) {
-  const char kSubsytemPrefix[] ="/SUBSYSTEM:";
-  if (base::StartsWith(ldflag, kSubsytemPrefix,
-                       base::CompareCase::SENSITIVE)) {
+  const char kSubsytemPrefix[] = "/SUBSYSTEM:";
+  if (base::StartsWith(ldflag, kSubsytemPrefix, base::CompareCase::SENSITIVE)) {
     const std::string subsystem(
-        ldflag.begin() + std::string(kSubsytemPrefix).length(),
-        ldflag.end());
+        ldflag.begin() + std::string(kSubsytemPrefix).length(), ldflag.end());
     const std::vector<std::string> tokens = base::SplitString(
         subsystem, ",", base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
     if (!tokens.empty())

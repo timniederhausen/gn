@@ -54,8 +54,7 @@ bool RecursiveFindCycle(const BuilderRecord* search_in,
 
 }  // namespace
 
-Builder::Builder(Loader* loader) : loader_(loader) {
-}
+Builder::Builder(Loader* loader) : loader_(loader) {}
 
 Builder::~Builder() = default;
 
@@ -76,10 +75,10 @@ void Builder::ItemDefined(std::unique_ptr<Item> item) {
   // Check that it's not been already defined.
   if (record->item()) {
     err = Err(item->defined_from(), "Duplicate definition.",
-        "The item\n  " + item->label().GetUserVisibleName(false) +
-        "\nwas already defined.");
-    err.AppendSubErr(Err(record->item()->defined_from(),
-                         "Previous definition:"));
+              "The item\n  " + item->label().GetUserVisibleName(false) +
+                  "\nwas already defined.");
+    err.AppendSubErr(
+        Err(record->item()->defined_from(), "Previous definition:"));
     g_scheduler->FailWithError(err);
     return;
   }
@@ -195,8 +194,8 @@ bool Builder::CheckForBadItems(Err* err) const {
       // Check dependencies.
       for (auto* dest : src->unresolved_deps()) {
         if (!dest->item()) {
-          depstring += src->label().GetUserVisibleName(true) +
-              "\n  needs " + dest->label().GetUserVisibleName(true) + "\n";
+          depstring += src->label().GetUserVisibleName(true) + "\n  needs " +
+                       dest->label().GetUserVisibleName(true) + "\n";
         }
       }
     }
@@ -213,11 +212,12 @@ bool Builder::CheckForBadItems(Err* err) const {
     depstring = CheckForCircularDependencies(bad_records);
     if (depstring.empty()) {
       // Something's very wrong, just dump out the bad nodes.
-      depstring = "I have no idea what went wrong, but these are unresolved, "
+      depstring =
+          "I have no idea what went wrong, but these are unresolved, "
           "possibly due to an\ninternal error:";
       for (auto* bad_record : bad_records) {
-        depstring += "\n\"" +
-            bad_record->label().GetUserVisibleName(false) + "\"";
+        depstring +=
+            "\n\"" + bad_record->label().GetUserVisibleName(false) + "\"";
       }
       *err = Err(Location(), "", depstring);
     } else {
@@ -316,16 +316,16 @@ BuilderRecord* Builder::GetOrCreateRecordOfType(const Label& label,
   // Check types.
   if (record->type() != type) {
     std::string msg =
-        "The type of " + label.GetUserVisibleName(false) +
-        "\nhere is a " + BuilderRecord::GetNameForType(type) +
-        " but was previously seen as a " +
-        BuilderRecord::GetNameForType(record->type()) + ".\n\n"
+        "The type of " + label.GetUserVisibleName(false) + "\nhere is a " +
+        BuilderRecord::GetNameForType(type) + " but was previously seen as a " +
+        BuilderRecord::GetNameForType(record->type()) +
+        ".\n\n"
         "The most common cause is that the label of a config was put in the\n"
         "in the deps section of a target (or vice-versa).";
     *err = Err(request_from, "Item type does not match.", msg);
     if (record->originally_referenced_from()) {
-      err->AppendSubErr(Err(record->originally_referenced_from(),
-                            std::string()));
+      err->AppendSubErr(
+          Err(record->originally_referenced_from(), std::string()));
     }
     return nullptr;
   }
@@ -340,24 +340,27 @@ BuilderRecord* Builder::GetResolvedRecordOfType(const Label& label,
   BuilderRecord* record = GetRecord(label);
   if (!record) {
     *err = Err(origin, "Item not found",
-        "\"" + label.GetUserVisibleName(false) + "\" doesn't\n"
-        "refer to an existent thing.");
+               "\"" + label.GetUserVisibleName(false) +
+                   "\" doesn't\n"
+                   "refer to an existent thing.");
     return nullptr;
   }
 
   const Item* item = record->item();
   if (!item) {
-    *err = Err(origin, "Item not resolved.",
+    *err = Err(
+        origin, "Item not resolved.",
         "\"" + label.GetUserVisibleName(false) + "\" hasn't been resolved.\n");
     return nullptr;
   }
 
   if (!BuilderRecord::IsItemOfType(item, type)) {
-    *err = Err(origin,
-        std::string("This is not a ") + BuilderRecord::GetNameForType(type),
-        "\"" + label.GetUserVisibleName(false) + "\" refers to a " +
-        item->GetItemTypeName() + " instead of a " +
-        BuilderRecord::GetNameForType(type) + ".");
+    *err =
+        Err(origin,
+            std::string("This is not a ") + BuilderRecord::GetNameForType(type),
+            "\"" + label.GetUserVisibleName(false) + "\" refers to a " +
+                item->GetItemTypeName() + " instead of a " +
+                BuilderRecord::GetNameForType(type) + ".");
     return nullptr;
   }
   return record;
@@ -431,8 +434,7 @@ bool Builder::AddToolchainDep(BuilderRecord* record,
   return true;
 }
 
-void Builder::RecursiveSetShouldGenerate(BuilderRecord* record,
-                                         bool force) {
+void Builder::RecursiveSetShouldGenerate(BuilderRecord* record, bool force) {
   if (!record->should_generate()) {
     record->set_should_generate(true);
 
@@ -453,8 +455,7 @@ void Builder::RecursiveSetShouldGenerate(BuilderRecord* record,
 
 void Builder::ScheduleItemLoadIfNecessary(BuilderRecord* record) {
   const ParseNode* origin = record->originally_referenced_from();
-  loader_->Load(record->label(),
-                origin ? origin->GetRange() : LocationRange());
+  loader_->Load(record->label(), origin ? origin->GetRange() : LocationRange());
 }
 
 bool Builder::ResolveItem(BuilderRecord* record, Err* err) {
@@ -536,10 +537,10 @@ bool Builder::ResolveToolchain(Target* target, Err* err) {
       target->settings()->toolchain_label(), target->defined_from(),
       BuilderRecord::ITEM_TOOLCHAIN, err);
   if (!record) {
-    *err = Err(target->defined_from(),
-        "Toolchain for target not defined.",
+    *err = Err(
+        target->defined_from(), "Toolchain for target not defined.",
         "I was hoping to find a toolchain " +
-        target->settings()->toolchain_label().GetUserVisibleName(false));
+            target->settings()->toolchain_label().GetUserVisibleName(false));
     return false;
   }
 

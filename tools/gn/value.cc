@@ -12,32 +12,22 @@
 #include "tools/gn/scope.h"
 
 Value::Value()
-    : type_(NONE),
-      boolean_value_(false),
-      int_value_(0),
-      origin_(nullptr) {
-}
+    : type_(NONE), boolean_value_(false), int_value_(0), origin_(nullptr) {}
 
 Value::Value(const ParseNode* origin, Type t)
-    : type_(t),
-      boolean_value_(false),
-      int_value_(0),
-      origin_(origin) {
-}
+    : type_(t), boolean_value_(false), int_value_(0), origin_(origin) {}
 
 Value::Value(const ParseNode* origin, bool bool_val)
     : type_(BOOLEAN),
       boolean_value_(bool_val),
       int_value_(0),
-      origin_(origin) {
-}
+      origin_(origin) {}
 
 Value::Value(const ParseNode* origin, int64_t int_val)
     : type_(INTEGER),
       boolean_value_(false),
       int_value_(int_val),
-      origin_(origin) {
-}
+      origin_(origin) {}
 
 Value::Value(const ParseNode* origin, std::string str_val)
     : type_(STRING),
@@ -51,8 +41,7 @@ Value::Value(const ParseNode* origin, const char* str_val)
       string_value_(str_val),
       boolean_value_(false),
       int_value_(0),
-      origin_(origin) {
-}
+      origin_(origin) {}
 
 Value::Value(const ParseNode* origin, std::unique_ptr<Scope> scope)
     : type_(SCOPE),
@@ -181,10 +170,9 @@ bool Value::VerifyTypeIs(Type t, Err* err) const {
   if (type_ == t)
     return true;
 
-  *err = Err(origin(),
-             std::string("This is not a ") + DescribeType(t) + ".",
+  *err = Err(origin(), std::string("This is not a ") + DescribeType(t) + ".",
              std::string("Instead I see a ") + DescribeType(type_) + " = " +
-             ToString(true));
+                 ToString(true));
   return false;
 }
 

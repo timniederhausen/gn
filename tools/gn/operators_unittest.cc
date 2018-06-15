@@ -32,21 +32,15 @@ bool IsValueStringEqualing(const Value& v, const char* s) {
 // Execute().
 class TestParseNode : public ParseNode {
  public:
-  TestParseNode(const Value& v) : value_(v) {
-  }
+  TestParseNode(const Value& v) : value_(v) {}
 
-  Value Execute(Scope* scope, Err* err) const override {
-    return value_;
-  }
-  LocationRange GetRange() const override {
-    return LocationRange();
-  }
+  Value Execute(Scope* scope, Err* err) const override { return value_; }
+  LocationRange GetRange() const override { return LocationRange(); }
   Err MakeErrorDescribing(const std::string& msg,
                           const std::string& help) const override {
     return Err(this, msg);
   }
-  void Print(std::ostream& out, int indent) const override {
-  }
+  void Print(std::ostream& out, int indent) const override {}
 
  private:
   Value value_;
@@ -56,8 +50,7 @@ class TestParseNode : public ParseNode {
 class TestBinaryOpNode : public BinaryOpNode {
  public:
   // Input token value string must outlive class.
-  TestBinaryOpNode(Token::Type op_token_type,
-                   const char* op_token_value)
+  TestBinaryOpNode(Token::Type op_token_type, const char* op_token_value)
       : BinaryOpNode(),
         op_token_ownership_(Location(), op_token_type, op_token_value) {
     set_op(op_token_ownership_);
@@ -221,8 +214,8 @@ TEST(Operators, ListRemove) {
 
   // Subtract a list consisting of "foo".
   node.SetRightToListOfValue(Value(nullptr, foo_str));
-  Value result = ExecuteBinaryOperator(
-      setup.scope(), &node, node.left(), node.right(), &err);
+  Value result = ExecuteBinaryOperator(setup.scope(), &node, node.left(),
+                                       node.right(), &err);
   EXPECT_FALSE(err.has_error());
 
   // -= returns an empty value to reduce the possibility of writing confusing

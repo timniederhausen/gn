@@ -41,7 +41,8 @@ bool CheckExecScriptPermissions(const BuildSettings* build_settings,
     return true;  // Whitelisted, this is OK.
 
   // Disallowed case.
-  *err = Err(function, "Disallowed exec_script call.",
+  *err = Err(
+      function, "Disallowed exec_script call.",
       "The use of exec_script use is restricted in this build. exec_script\n"
       "is discouraged because it can slow down the GN run and is easily\n"
       "abused.\n"
@@ -243,7 +244,8 @@ Value RunExecScript(Scope* scope,
   }
 
   if (exit_code != 0) {
-    std::string msg = "Current dir: " + FilePathToUTF8(startup_dir) +
+    std::string msg =
+        "Current dir: " + FilePathToUTF8(startup_dir) +
         "\nCommand: " + FilePathToUTF8(cmdline.GetCommandLineString()) +
         "\nReturned " + base::IntToString(exit_code);
     if (!output.empty())
@@ -253,8 +255,8 @@ Value RunExecScript(Scope* scope,
     if (!stderr_output.empty())
       msg += "\nstderr:\n\n" + stderr_output;
 
-    *err = Err(function->function(), "Script returned non-zero exit code.",
-               msg);
+    *err =
+        Err(function->function(), "Script returned non-zero exit code.", msg);
     return Value();
   }
 

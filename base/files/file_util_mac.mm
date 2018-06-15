@@ -19,8 +19,8 @@ namespace base {
 bool CopyFile(const FilePath& from_path, const FilePath& to_path) {
   if (from_path.ReferencesParent() || to_path.ReferencesParent())
     return false;
-  return (copyfile(from_path.value().c_str(),
-                   to_path.value().c_str(), NULL, COPYFILE_DATA) == 0);
+  return (copyfile(from_path.value().c_str(), to_path.value().c_str(), NULL,
+                   COPYFILE_DATA) == 0);
 }
 
 bool GetTempDir(base::FilePath* path) {

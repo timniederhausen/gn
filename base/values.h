@@ -460,8 +460,7 @@ class DictionaryValue : public Value {
   // DEPRECATED, use Value::FindPath(path) and Value::GetBlob() instead.
   bool GetBinary(StringPiece path, Value** out_value);
   // DEPRECATED, use Value::FindPath(path) and Value's Dictionary API instead.
-  bool GetDictionary(StringPiece path,
-                     const DictionaryValue** out_value) const;
+  bool GetDictionary(StringPiece path, const DictionaryValue** out_value) const;
   // DEPRECATED, use Value::FindPath(path) and Value's Dictionary API instead.
   bool GetDictionary(StringPiece path, DictionaryValue** out_value);
   // DEPRECATED, use Value::FindPath(path) and Value::GetList() instead.
@@ -742,18 +741,16 @@ class ValueDeserializer {
 std::ostream& operator<<(std::ostream& out, const Value& value);
 
 inline std::ostream& operator<<(std::ostream& out,
-                                            const DictionaryValue& value) {
+                                const DictionaryValue& value) {
   return out << static_cast<const Value&>(value);
 }
 
-inline std::ostream& operator<<(std::ostream& out,
-                                            const ListValue& value) {
+inline std::ostream& operator<<(std::ostream& out, const ListValue& value) {
   return out << static_cast<const Value&>(value);
 }
 
 // Stream operator so that enum class Types can be used in log statements.
-std::ostream& operator<<(std::ostream& out,
-                                     const Value::Type& type);
+std::ostream& operator<<(std::ostream& out, const Value::Type& type);
 
 }  // namespace base
 

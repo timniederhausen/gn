@@ -34,7 +34,8 @@ class PathOutput {
     DIR_NO_LAST_SLASH,
   };
 
-  PathOutput(const SourceDir& current_dir, const base::StringPiece& source_root,
+  PathOutput(const SourceDir& current_dir,
+             const base::StringPiece& source_root,
              EscapingMode escaping);
   ~PathOutput();
 

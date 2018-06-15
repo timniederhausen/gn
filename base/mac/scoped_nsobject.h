@@ -191,7 +191,7 @@ class scoped_nsobject : public scoped_nsprotocol<NST*> {
 };
 
 // Specialization to make scoped_nsobject<id> work.
-template<>
+template <>
 class scoped_nsobject<id> : public scoped_nsprotocol<id> {
  public:
   using Traits = typename scoped_nsprotocol<id>::Traits;

@@ -48,23 +48,23 @@ class OSStatusLogMessage : public logging::LogMessage {
 }  // namespace logging
 
 #define OSSTATUS_LOG_STREAM(severity, status) \
-    COMPACT_GOOGLE_LOG_EX_ ## severity(OSStatusLogMessage, status).stream()
+  COMPACT_GOOGLE_LOG_EX_##severity(OSStatusLogMessage, status).stream()
 
 #define OSSTATUS_LOG(severity, status) \
-    LAZY_STREAM(OSSTATUS_LOG_STREAM(severity, status), LOG_IS_ON(severity))
+  LAZY_STREAM(OSSTATUS_LOG_STREAM(severity, status), LOG_IS_ON(severity))
 #define OSSTATUS_LOG_IF(severity, condition, status) \
-    LAZY_STREAM(OSSTATUS_LOG_STREAM(severity, status), \
-                LOG_IS_ON(severity) && (condition))
+  LAZY_STREAM(OSSTATUS_LOG_STREAM(severity, status), \
+              LOG_IS_ON(severity) && (condition))
 
-#define OSSTATUS_CHECK(condition, status) \
-    LAZY_STREAM(OSSTATUS_LOG_STREAM(FATAL, status), !(condition)) \
-    << "Check failed: " # condition << ". "
+#define OSSTATUS_CHECK(condition, status)                       \
+  LAZY_STREAM(OSSTATUS_LOG_STREAM(FATAL, status), !(condition)) \
+      << "Check failed: " #condition << ". "
 
 #define OSSTATUS_DLOG(severity, status) \
-    LAZY_STREAM(OSSTATUS_LOG_STREAM(severity, status), DLOG_IS_ON(severity))
+  LAZY_STREAM(OSSTATUS_LOG_STREAM(severity, status), DLOG_IS_ON(severity))
 #define OSSTATUS_DLOG_IF(severity, condition, status) \
-    LAZY_STREAM(OSSTATUS_LOG_STREAM(severity, status), \
-                DLOG_IS_ON(severity) && (condition))
+  LAZY_STREAM(OSSTATUS_LOG_STREAM(severity, status),  \
+              DLOG_IS_ON(severity) && (condition))
 
 #define OSSTATUS_DCHECK(condition, status)        \
   LAZY_STREAM(OSSTATUS_LOG_STREAM(FATAL, status), \

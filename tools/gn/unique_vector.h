@@ -23,40 +23,31 @@ namespace internal {
 //
 // It also caches the hash value which allows us to query and then insert
 // without recomputing the hash.
-template<typename T>
+template <typename T>
 class UniquifyRef {
  public:
   UniquifyRef()
       : value_(nullptr),
         vect_(nullptr),
         index_(static_cast<size_t>(-1)),
-        hash_val_(0) {
-  }
+        hash_val_(0) {}
 
   // Initialize with a pointer to a value.
   explicit UniquifyRef(const T* v)
-      : value_(v),
-        vect_(nullptr),
-        index_(static_cast<size_t>(-1)) {
+      : value_(v), vect_(nullptr), index_(static_cast<size_t>(-1)) {
     FillHashValue();
   }
 
   // Initialize with an array + index.
   UniquifyRef(const std::vector<T>* v, size_t i)
-      : value_(nullptr),
-        vect_(v),
-        index_(i) {
+      : value_(nullptr), vect_(v), index_(i) {
     FillHashValue();
   }
 
   // Initialize with an array + index and a known hash value to prevent
   // re-hashing.
   UniquifyRef(const std::vector<T>* v, size_t i, size_t hash_value)
-      : value_(nullptr),
-        vect_(v),
-        index_(i),
-        hash_val_(hash_value) {
-  }
+      : value_(nullptr), vect_(v), index_(i), hash_val_(hash_value) {}
 
   const T& value() const { return value_ ? *value_ : (*vect_)[index_]; }
   size_t hash_val() const { return hash_val_; }
@@ -78,13 +69,13 @@ class UniquifyRef {
   size_t hash_val_;
 };
 
-template<typename T> inline bool operator==(const UniquifyRef<T>& a,
-                                            const UniquifyRef<T>& b) {
+template <typename T>
+inline bool operator==(const UniquifyRef<T>& a, const UniquifyRef<T>& b) {
   return a.value() == b.value();
 }
 
-template<typename T> inline bool operator<(const UniquifyRef<T>& a,
-                                           const UniquifyRef<T>& b) {
+template <typename T>
+inline bool operator<(const UniquifyRef<T>& a, const UniquifyRef<T>& b) {
   return a.value() < b.value();
 }
 
@@ -92,7 +83,8 @@ template<typename T> inline bool operator<(const UniquifyRef<T>& a,
 
 namespace std {
 
-template<typename T> struct hash< internal::UniquifyRef<T> > {
+template <typename T>
+struct hash<internal::UniquifyRef<T>> {
   std::size_t operator()(const internal::UniquifyRef<T>& v) const {
     return v.hash_val();
   }
@@ -103,7 +95,7 @@ template<typename T> struct hash< internal::UniquifyRef<T> > {
 // An ordered set optimized for GN's usage. Such sets are used to store lists
 // of configs and libraries, and are appended to but not randomly inserted
 // into.
-template<typename T>
+template <typename T>
 class UniqueVector {
  public:
   typedef std::vector<T> Vector;
@@ -113,7 +105,10 @@ class UniqueVector {
   const Vector& vector() const { return vector_; }
   size_t size() const { return vector_.size(); }
   bool empty() const { return vector_.empty(); }
-  void clear() { vector_.clear(); set_.clear(); }
+  void clear() {
+    vector_.clear();
+    set_.clear();
+  }
   void reserve(size_t s) { vector_.reserve(s); }
 
   const T& operator[](size_t index) const { return vector_[index]; }
@@ -151,7 +146,8 @@ class UniqueVector {
   }
 
   // Appends a range of items from an iterator.
-  template<typename iter> void Append(const iter& begin, const iter& end) {
+  template <typename iter>
+  void Append(const iter& begin, const iter& end) {
     for (iter i = begin; i != end; ++i)
       push_back(*i);
   }

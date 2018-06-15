@@ -10,7 +10,6 @@
 
 #import <CoreGraphics/CoreGraphics.h>
 
-
 namespace base {
 
 class FilePath;
@@ -59,8 +58,7 @@ void ReleaseFullScreen(FullScreenMode mode);
 // Convenience method to switch the current fullscreen mode.  This has the same
 // net effect as a ReleaseFullScreen(from_mode) call followed immediately by a
 // RequestFullScreen(to_mode).  Must be called on the main thread.
-void SwitchFullScreenModes(FullScreenMode from_mode,
-                                       FullScreenMode to_mode);
+void SwitchFullScreenModes(FullScreenMode from_mode, FullScreenMode to_mode);
 
 // Excludes the file given by |file_path| from being backed up by Time Machine.
 bool SetFileBackupExclusion(const FilePath& file_path);
@@ -171,9 +169,9 @@ std::string GetModelIdentifier();
 // Parse a model identifier string; for example, into ("MacBookPro", 6, 1).
 // If any error occurs, none of the input pointers are touched.
 bool ParseModelIdentifier(const std::string& ident,
-                                      std::string* type,
-                                      int32_t* major,
-                                      int32_t* minor);
+                          std::string* type,
+                          int32_t* major,
+                          int32_t* minor);
 
 }  // namespace mac
 }  // namespace base
