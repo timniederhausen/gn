@@ -6,6 +6,7 @@
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/strings/string_split.h"
+#include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/err.h"
@@ -98,8 +99,8 @@ int RunClean(const std::vector<std::string>& args) {
       base::FileEnumerator::FILES | base::FileEnumerator::DIRECTORIES);
   for (base::FilePath current = traversal.Next(); !current.empty();
        current = traversal.Next()) {
-    if (!base::FilePath::CompareEqualIgnoreCase(current.BaseName().value(),
-                                                FILE_PATH_LITERAL("args.gn"))) {
+    if (base::ToLowerASCII(current.BaseName().value()) !=
+        FILE_PATH_LITERAL("args.gn")) {
       base::DeleteFile(current, true);
     }
   }

@@ -297,10 +297,6 @@ class FilePath {
   // Returns "" if BaseName() == "." or "..".
   FilePath ReplaceExtension(StringPieceType extension) const WARN_UNUSED_RESULT;
 
-  // Returns true if the file path matches the specified extension. The test is
-  // case insensitive. Don't forget the leading period if appropriate.
-  bool MatchesExtension(StringPieceType extension) const;
-
   // Returns a FilePath by appending a separator and the supplied path
   // component to this object's path.  Append takes care to avoid adding
   // excessive separators if this object's path already ends with a separator.
@@ -388,41 +384,6 @@ class FilePath {
   // Normalize all path separattors to given type on Windows
   // (if FILE_PATH_USES_WIN_SEPARATORS is true), or do nothing on POSIX systems.
   FilePath NormalizePathSeparatorsTo(CharType separator) const;
-
-  // Compare two strings in the same way the file system does.
-  // Note that these always ignore case, even on file systems that are case-
-  // sensitive. If case-sensitive comparison is ever needed, add corresponding
-  // methods here.
-  // The methods are written as a static method so that they can also be used
-  // on parts of a file path, e.g., just the extension.
-  // CompareIgnoreCase() returns -1, 0 or 1 for less-than, equal-to and
-  // greater-than respectively.
-  static int CompareIgnoreCase(StringPieceType string1,
-                               StringPieceType string2);
-  static bool CompareEqualIgnoreCase(StringPieceType string1,
-                                     StringPieceType string2) {
-    return CompareIgnoreCase(string1, string2) == 0;
-  }
-  static bool CompareLessIgnoreCase(StringPieceType string1,
-                                    StringPieceType string2) {
-    return CompareIgnoreCase(string1, string2) < 0;
-  }
-
-#if defined(OS_MACOSX)
-  // Returns the string in the special canonical decomposed form as defined for
-  // HFS, which is close to, but not quite, decomposition form D. See
-  // http://developer.apple.com/mac/library/technotes/tn/tn1150.html#UnicodeSubtleties
-  // for further comments.
-  // Returns the epmty string if the conversion failed.
-  static StringType GetHFSDecomposedForm(StringPieceType string);
-
-  // Special UTF-8 version of FastUnicodeCompare. Cf:
-  // http://developer.apple.com/mac/library/technotes/tn/tn1150.html#StringComparisonAlgorithm
-  // IMPORTANT: The input strings must be in the special HFS decomposed form!
-  // (cf. above GetHFSDecomposedForm method)
-  static int HFSFastUnicodeCompare(StringPieceType string1,
-                                   StringPieceType string2);
-#endif
 
  private:
   // Remove trailing separators from this object.  If the path is absolute, it
