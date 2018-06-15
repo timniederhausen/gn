@@ -127,6 +127,12 @@ def RunSteps(api):
           # Windows requires the environment modifications when building too.
           api.step('ninja', [cipd_dir.join('ninja'), '-C', src_dir.join('out')])
 
+        if api.platform.name == 'win':
+          # Swarming won't be able to tidy up after the compiler leaves this
+          # daemon running, so we have to manually kill it.
+          api.step('taskkill mspdbsrv',
+                   ['taskkill.exe', '/f', '/t', '/im', 'mspdbsrv.exe'])
+
         api.step('test', [src_dir.join('out', 'gn_unittests')])
 
 

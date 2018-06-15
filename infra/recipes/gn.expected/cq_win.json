@@ -228,6 +228,19 @@
   },
   {
     "cmd": [
+      "taskkill.exe",
+      "/f",
+      "/t",
+      "/im",
+      "mspdbsrv.exe"
+    ],
+    "name": "debug.build.taskkill mspdbsrv",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@2@@@"
+    ]
+  },
+  {
+    "cmd": [
       "[START_DIR]\\gn\\out\\gn_unittests"
     ],
     "name": "debug.build.test",
@@ -286,6 +299,19 @@
       ]
     },
     "name": "release.build.ninja",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@2@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "taskkill.exe",
+      "/f",
+      "/t",
+      "/im",
+      "mspdbsrv.exe"
+    ],
+    "name": "release.build.taskkill mspdbsrv",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
     ]
