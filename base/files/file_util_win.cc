@@ -23,7 +23,6 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/process/process_handle.h"
-#include "base/rand_util.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
@@ -32,6 +31,13 @@
 #include "base/time/time.h"
 #include "base/win/scoped_handle.h"
 #include "base/win/windows_version.h"
+
+// #define needed to link in RtlGenRandom(), a.k.a. SystemFunction036.  See the
+// "Community Additions" comment on MSDN here:
+// http://msdn.microsoft.com/en-us/library/windows/desktop/aa387694.aspx
+#define SystemFunction036 NTAPI SystemFunction036
+#include <NTSecAPI.h>
+#undef SystemFunction036
 
 namespace base {
 
@@ -258,11 +264,24 @@ std::string RandomDataToGUIDString(const uint64_t bytes[2]) {
       bytes[1] & 0x0000ffff'ffffffffULL);
 }
 
+void RandBytes(void* output, size_t output_length) {
+  char* output_ptr = static_cast<char*>(output);
+  while (output_length > 0) {
+    const ULONG output_bytes_this_pass = static_cast<ULONG>(std::min(
+        output_length, static_cast<size_t>(std::numeric_limits<ULONG>::max())));
+    const bool success =
+        RtlGenRandom(output_ptr, output_bytes_this_pass) != FALSE;
+    CHECK(success);
+    output_length -= output_bytes_this_pass;
+    output_ptr += output_bytes_this_pass;
+  }
+}
+
 std::string GenerateGUID() {
   uint64_t sixteen_bytes[2];
   // Use base::RandBytes instead of crypto::RandBytes, because crypto calls the
   // base version directly, and to prevent the dependency from base/ to crypto/.
-  base::RandBytes(&sixteen_bytes, sizeof(sixteen_bytes));
+  RandBytes(&sixteen_bytes, sizeof(sixteen_bytes));
 
   // Set the GUID to version 4 as described in RFC 4122, section 4.4.
   // The format of GUID version 4 must be xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx,
@@ -488,8 +507,7 @@ bool CreateTemporaryDirInDir(const FilePath& base_dir,
     new_dir_name.assign(prefix);
     new_dir_name.append(IntToString16(GetCurrentProcId()));
     new_dir_name.push_back('_');
-    new_dir_name.append(
-        IntToString16(RandInt(0, std::numeric_limits<int16_t>::max())));
+    new_dir_name.append(UTF8ToUTF16(GenerateGUID()));
 
     path_to_create = base_dir.Append(new_dir_name);
     if (::CreateDirectory(path_to_create.value().c_str(), NULL)) {

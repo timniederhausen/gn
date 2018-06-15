@@ -14,7 +14,6 @@
 #include "base/macros.h"
 #include "base/no_destructor.h"
 #include "base/strings/stringprintf.h"
-#include "base/third_party/nspr/prtime.h"
 #include "base/time/time_override.h"
 #include "build_config.h"
 
@@ -288,27 +287,6 @@ Time Time::LocalMidnight() const {
   // This function must not fail.
   NOTREACHED();
   return Time();
-}
-
-// static
-bool Time::FromStringInternal(const char* time_string,
-                              bool is_local,
-                              Time* parsed_time) {
-  DCHECK((time_string != nullptr) && (parsed_time != nullptr));
-
-  if (time_string[0] == '\0')
-    return false;
-
-  PRTime result_time = 0;
-  PRStatus result = PR_ParseTimeString(time_string,
-                                       is_local ? PR_FALSE : PR_TRUE,
-                                       &result_time);
-  if (PR_SUCCESS != result)
-    return false;
-
-  result_time += kTimeTToMicrosecondsOffset;
-  *parsed_time = Time(result_time);
-  return true;
 }
 
 // static

@@ -65,23 +65,6 @@ Process Process::OpenWithAccess(ProcessId pid, DWORD desired_access) {
 }
 
 // static
-Process Process::DeprecatedGetProcessFromHandle(ProcessHandle handle) {
-  DCHECK_NE(handle, ::GetCurrentProcess());
-  ProcessHandle out_handle;
-  if (!::DuplicateHandle(GetCurrentProcess(), handle,
-                         GetCurrentProcess(), &out_handle,
-                         0, FALSE, DUPLICATE_SAME_ACCESS)) {
-    return Process();
-  }
-  return Process(out_handle);
-}
-
-// static
-bool Process::CanBackgroundProcesses() {
-  return true;
-}
-
-// static
 void Process::TerminateCurrentProcessImmediately(int exit_code) {
   ::TerminateProcess(GetCurrentProcess(), exit_code);
   // There is some ambiguity over whether the call above can return. Rather than
@@ -180,31 +163,6 @@ bool Process::WaitForExitWithTimeout(TimeDelta timeout, int* exit_code) const {
 }
 
 void Process::Exited(int exit_code) const {
-}
-
-bool Process::IsProcessBackgrounded() const {
-  DCHECK(IsValid());
-  DWORD priority = GetPriority();
-  if (priority == 0)
-    return false;  // Failure case.
-  return ((priority == BELOW_NORMAL_PRIORITY_CLASS) ||
-          (priority == IDLE_PRIORITY_CLASS));
-}
-
-bool Process::SetProcessBackgrounded(bool value) {
-  DCHECK(IsValid());
-  // Vista and above introduce a real background mode, which not only
-  // sets the priority class on the threads but also on the IO generated
-  // by it. Unfortunately it can only be set for the calling process.
-  DWORD priority;
-  if (is_current()) {
-    priority = value ? PROCESS_MODE_BACKGROUND_BEGIN :
-                       PROCESS_MODE_BACKGROUND_END;
-  } else {
-    priority = value ? IDLE_PRIORITY_CLASS : NORMAL_PRIORITY_CLASS;
-  }
-
-  return (::SetPriorityClass(Handle(), priority) != 0);
 }
 
 int Process::GetPriority() const {

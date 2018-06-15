@@ -619,23 +619,6 @@ class BASE_EXPORT Time : public time_internal::TimeBase<Time> {
     return FromExploded(true, exploded, time);
   }
 
-  // Converts a string representation of time to a Time object.
-  // An example of a time string which is converted is as below:-
-  // "Tue, 15 Nov 1994 12:45:26 GMT". If the timezone is not specified
-  // in the input string, FromString assumes local time and FromUTCString
-  // assumes UTC. A timezone that cannot be parsed (e.g. "UTC" which is not
-  // specified in RFC822) is treated as if the timezone is not specified.
-  // TODO(iyengar) Move the FromString/FromTimeT/ToTimeT/FromFileTime to
-  // a new time converter class.
-  static bool FromString(const char* time_string,
-                         Time* parsed_time) WARN_UNUSED_RESULT {
-    return FromStringInternal(time_string, true, parsed_time);
-  }
-  static bool FromUTCString(const char* time_string,
-                            Time* parsed_time) WARN_UNUSED_RESULT {
-    return FromStringInternal(time_string, false, parsed_time);
-  }
-
   // Fills the given exploded structure with either the local time or UTC from
   // this time structure (containing UTC).
   void UTCExplode(Exploded* exploded) const {
@@ -674,17 +657,6 @@ class BASE_EXPORT Time : public time_internal::TimeBase<Time> {
   static bool FromExploded(bool is_local,
                            const Exploded& exploded,
                            Time* time) WARN_UNUSED_RESULT;
-
-  // Converts a string representation of time to a Time object.
-  // An example of a time string which is converted is as below:-
-  // "Tue, 15 Nov 1994 12:45:26 GMT". If the timezone is not specified
-  // in the input string, local time |is_local = true| or
-  // UTC |is_local = false| is assumed. A timezone that cannot be parsed
-  // (e.g. "UTC" which is not specified in RFC822) is treated as if the
-  // timezone is not specified.
-  static bool FromStringInternal(const char* time_string,
-                                 bool is_local,
-                                 Time* parsed_time) WARN_UNUSED_RESULT;
 
   // Comparison does not consider |day_of_week| when doing the operation.
   static bool ExplodedMostlyEquals(const Exploded& lhs,
@@ -866,12 +838,6 @@ class BASE_EXPORT TimeTicks : public time_internal::TimeBase<TimeTicks> {
     return TimeTicks(us);
   }
 
-#if defined(OS_WIN)
- protected:
-  typedef DWORD (*TickFunctionType)(void);
-  static TickFunctionType SetMockTickFunction(TickFunctionType ticker);
-#endif
-
  private:
   friend class time_internal::TimeBase<TimeTicks>;
 
@@ -896,10 +862,8 @@ class BASE_EXPORT ThreadTicks : public time_internal::TimeBase<ThreadTicks> {
   static bool IsSupported() WARN_UNUSED_RESULT {
 #if (defined(_POSIX_THREAD_CPUTIME) && (_POSIX_THREAD_CPUTIME >= 0)) || \
     (defined(OS_MACOSX) && !defined(OS_IOS)) || defined(OS_ANDROID) ||  \
-    defined(OS_FUCHSIA)
+    defined(OS_FUCHSIA) || defined(OS_WIN)
     return true;
-#elif defined(OS_WIN)
-    return IsSupportedWin();
 #else
     return false;
 #endif
@@ -956,7 +920,6 @@ class BASE_EXPORT ThreadTicks : public time_internal::TimeBase<ThreadTicks> {
   // allow testing.
   static double TSCTicksPerSecond();
 
-  static bool IsSupportedWin() WARN_UNUSED_RESULT;
   static void WaitUntilInitializedWin();
 #endif
 };

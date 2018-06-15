@@ -15,10 +15,6 @@
 #include "base/win/scoped_handle.h"
 #endif
 
-#if defined(OS_MACOSX)
-#include "base/process/port_provider_mac.h"
-#endif
-
 namespace base {
 
 // Provides a move-only encapsulation of a process.
@@ -63,15 +59,6 @@ class BASE_EXPORT Process {
   // See ::OpenProcess documentation for valid |desired_access|.
   static Process OpenWithAccess(ProcessId pid, DWORD desired_access);
 #endif
-
-  // Creates an object from a |handle| owned by someone else.
-  // Don't use this for new code. It is only intended to ease the migration to
-  // a strict ownership model.
-  // TODO(rvargas) crbug.com/417532: Remove this code.
-  static Process DeprecatedGetProcessFromHandle(ProcessHandle handle);
-
-  // Returns true if processes can be backgrounded.
-  static bool CanBackgroundProcesses();
 
   // Terminates the current process immediately with |exit_code|.
   [[noreturn]] static void TerminateCurrentProcessImmediately(int exit_code);
@@ -132,38 +119,6 @@ class BASE_EXPORT Process {
   // process though that should be avoided.
   void Exited(int exit_code) const;
 
-#if defined(OS_MACOSX)
-  // The Mac needs a Mach port in order to manipulate a process's priority,
-  // and there's no good way to get that from base given the pid. These Mac
-  // variants of the IsProcessBackgrounded and SetProcessBackgrounded API take
-  // a port provider for this reason. See crbug.com/460102
-  //
-  // A process is backgrounded when its task priority is
-  // |TASK_BACKGROUND_APPLICATION|.
-  //
-  // Returns true if the port_provider can locate a task port for the process
-  // and it is backgrounded. If port_provider is null, returns false.
-  bool IsProcessBackgrounded(PortProvider* port_provider) const;
-
-  // Set the process as backgrounded. If value is
-  // true, the priority of the associated task will be set to
-  // TASK_BACKGROUND_APPLICATION. If value is false, the
-  // priority of the process will be set to TASK_FOREGROUND_APPLICATION.
-  //
-  // Returns true if the priority was changed, false otherwise. If
-  // |port_provider| is null, this is a no-op and it returns false.
-  bool SetProcessBackgrounded(PortProvider* port_provider, bool value);
-#else
-  // A process is backgrounded when it's priority is lower than normal.
-  // Return true if this process is backgrounded, false otherwise.
-  bool IsProcessBackgrounded() const;
-
-  // Set a process as backgrounded. If value is true, the priority of the
-  // process will be lowered. If value is false, the priority of the process
-  // will be made "normal" - equivalent to default process priority.
-  // Returns true if the priority was changed, false otherwise.
-  bool SetProcessBackgrounded(bool value);
-#endif  // defined(OS_MACOSX)
   // Returns an integer representing the priority of a process. The meaning
   // of this value is OS dependent.
   int GetPriority() const;

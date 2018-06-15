@@ -4,8 +4,6 @@
 
 #include "base/memory/ref_counted.h"
 
-#include "base/threading/thread_collision_warner.h"
-
 namespace base {
 
 namespace subtle {

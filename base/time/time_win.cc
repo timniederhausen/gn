@@ -39,7 +39,6 @@
 
 #include "base/atomicops.h"
 #include "base/bit_cast.h"
-#include "base/cpu.h"
 #include "base/logging.h"
 #include "base/synchronization/lock.h"
 #include "base/threading/platform_thread.h"
@@ -361,81 +360,6 @@ void Time::Explode(bool is_local, Exploded* exploded) const {
 
 namespace {
 
-// We define a wrapper to adapt between the __stdcall and __cdecl call of the
-// mock function, and to avoid a static constructor.  Assigning an import to a
-// function pointer directly would require setup code to fetch from the IAT.
-DWORD timeGetTimeWrapper() {
-  return timeGetTime();
-}
-
-DWORD (*g_tick_function)(void) = &timeGetTimeWrapper;
-
-// A structure holding the most significant bits of "last seen" and a
-// "rollover" counter.
-union LastTimeAndRolloversState {
-  // The state as a single 32-bit opaque value.
-  subtle::Atomic32 as_opaque_32;
-
-  // The state as usable values.
-  struct {
-    // The top 8-bits of the "last" time. This is enough to check for rollovers
-    // and the small bit-size means fewer CompareAndSwap operations to store
-    // changes in state, which in turn makes for fewer retries.
-    uint8_t last_8;
-    // A count of the number of detected rollovers. Using this as bits 47-32
-    // of the upper half of a 64-bit value results in a 48-bit tick counter.
-    // This extends the total rollover period from about 49 days to about 8800
-    // years while still allowing it to be stored with last_8 in a single
-    // 32-bit value.
-    uint16_t rollovers;
-  } as_values;
-};
-subtle::Atomic32 g_last_time_and_rollovers = 0;
-static_assert(
-    sizeof(LastTimeAndRolloversState) <= sizeof(g_last_time_and_rollovers),
-    "LastTimeAndRolloversState does not fit in a single atomic word");
-
-// We use timeGetTime() to implement TimeTicks::Now().  This can be problematic
-// because it returns the number of milliseconds since Windows has started,
-// which will roll over the 32-bit value every ~49 days.  We try to track
-// rollover ourselves, which works if TimeTicks::Now() is called at least every
-// 48.8 days (not 49 days because only changes in the top 8 bits get noticed).
-TimeTicks RolloverProtectedNow() {
-  LastTimeAndRolloversState state;
-  DWORD now;  // DWORD is always unsigned 32 bits.
-
-  while (true) {
-    // Fetch the "now" and "last" tick values, updating "last" with "now" and
-    // incrementing the "rollovers" counter if the tick-value has wrapped back
-    // around. Atomic operations ensure that both "last" and "rollovers" are
-    // always updated together.
-    int32_t original = subtle::Acquire_Load(&g_last_time_and_rollovers);
-    state.as_opaque_32 = original;
-    now = g_tick_function();
-    uint8_t now_8 = static_cast<uint8_t>(now >> 24);
-    if (now_8 < state.as_values.last_8)
-      ++state.as_values.rollovers;
-    state.as_values.last_8 = now_8;
-
-    // If the state hasn't changed, exit the loop.
-    if (state.as_opaque_32 == original)
-      break;
-
-    // Save the changed state. If the existing value is unchanged from the
-    // original, exit the loop.
-    int32_t check = subtle::Release_CompareAndSwap(
-        &g_last_time_and_rollovers, original, state.as_opaque_32);
-    if (check == original)
-      break;
-
-    // Another thread has done something in between so retry from the top.
-  }
-
-  return TimeTicks() +
-         TimeDelta::FromMilliseconds(
-             now + (static_cast<uint64_t>(state.as_values.rollovers) << 32));
-}
-
 // Discussion of tick counter options on Windows:
 //
 // (1) CPU cycle counter. (Retrieved via RDTSC)
@@ -511,35 +435,12 @@ TimeTicks QPCNow() {
   return TimeTicks() + QPCValueToTimeDelta(QPCNowRaw());
 }
 
-bool IsBuggyAthlon(const CPU& cpu) {
-  // On Athlon X2 CPUs (e.g. model 15) QueryPerformanceCounter is unreliable.
-  return cpu.vendor_name() == "AuthenticAMD" && cpu.family() == 15;
-}
-
 void InitializeNowFunctionPointer() {
   LARGE_INTEGER ticks_per_sec = {};
   if (!QueryPerformanceFrequency(&ticks_per_sec))
     ticks_per_sec.QuadPart = 0;
 
-  // If Windows cannot provide a QPC implementation, TimeTicks::Now() must use
-  // the low-resolution clock.
-  //
-  // If the QPC implementation is expensive and/or unreliable, TimeTicks::Now()
-  // will still use the low-resolution clock. A CPU lacking a non-stop time
-  // counter will cause Windows to provide an alternate QPC implementation that
-  // works, but is expensive to use. Certain Athlon CPUs are known to make the
-  // QPC implementation unreliable.
-  //
-  // Otherwise, Now uses the high-resolution QPC clock. As of 21 August 2015,
-  // ~72% of users fall within this category.
-  TimeTicksNowFunction now_function;
-  CPU cpu;
-  if (ticks_per_sec.QuadPart <= 0 ||
-      !cpu.has_non_stop_time_stamp_counter() || IsBuggyAthlon(cpu)) {
-    now_function = &RolloverProtectedNow;
-  } else {
-    now_function = &QPCNow;
-  }
+  TimeTicksNowFunction now_function = &QPCNow;
 
   // Threading note 1: In an unlikely race condition, it's possible for two or
   // more threads to enter InitializeNowFunctionPointer() in parallel. This is
@@ -568,15 +469,6 @@ TimeTicks InitialNowFunction() {
 }
 
 }  // namespace
-
-// static
-TimeTicks::TickFunctionType TimeTicks::SetMockTickFunction(
-    TickFunctionType ticker) {
-  TickFunctionType old = g_tick_function;
-  g_tick_function = ticker;
-  subtle::NoBarrier_Store(&g_last_time_and_rollovers, 0);
-  return old;
-}
 
 namespace subtle {
 TimeTicks TimeTicksNowIgnoringOverride() {
@@ -643,13 +535,6 @@ ThreadTicks ThreadTicks::GetForThread(
   double thread_time_seconds = thread_cycle_time / tsc_ticks_per_second;
   return ThreadTicks(
       static_cast<int64_t>(thread_time_seconds * Time::kMicrosecondsPerSecond));
-}
-
-// static
-bool ThreadTicks::IsSupportedWin() {
-  static bool is_supported =
-      CPU().has_non_stop_time_stamp_counter() && !IsBuggyAthlon(CPU());
-  return is_supported;
 }
 
 // static

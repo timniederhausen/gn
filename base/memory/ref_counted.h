@@ -15,7 +15,6 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/scoped_refptr.h"
-#include "base/threading/thread_collision_warner.h"
 #include "build_config.h"
 
 namespace base {
