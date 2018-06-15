@@ -136,6 +136,13 @@
       "-C",
       "[START_DIR]/gn/out"
     ],
+    "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-static-libstdc++ -ldl -lpthread"
+    },
     "name": "debug.build.ninja",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -145,10 +152,9 @@
     "cmd": [
       "[START_DIR]/gn/out/gn_unittests"
     ],
-    "cwd": "[START_DIR]/gn",
-    "name": "debug.test",
+    "name": "debug.build.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
+      "@@@STEP_NEST_LEVEL@2@@@"
     ]
   },
   {
@@ -186,6 +192,13 @@
       "-C",
       "[START_DIR]/gn/out"
     ],
+    "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-static-libstdc++ -ldl -lpthread"
+    },
     "name": "release.build.ninja",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -195,10 +208,9 @@
     "cmd": [
       "[START_DIR]/gn/out/gn_unittests"
     ],
-    "cwd": "[START_DIR]/gn",
-    "name": "release.test",
+    "name": "release.build.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
+      "@@@STEP_NEST_LEVEL@2@@@"
     ]
   },
   {

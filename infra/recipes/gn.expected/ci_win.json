@@ -49,7 +49,7 @@
       "-root",
       "[START_DIR]\\cipd",
       "-ensure-file",
-      "chrome_internal/third_party/sdk/windows latest\ninfra/ninja/${platform} version:1.8.2",
+      "chrome_internal/third_party/sdk/windows uploaded:2018-06-13\ninfra/ninja/${platform} version:1.8.2",
       "-json-output",
       "/path/to/tmp/json"
     ],
@@ -60,7 +60,7 @@
       "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
       "@@@STEP_LOG_LINE@json.output@    \"\": [@@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",
-      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-latest----------\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-uploaded:2018-06\", @@@",
       "@@@STEP_LOG_LINE@json.output@        \"package\": \"chrome_internal/third_party/sdk/windows\"@@@",
       "@@@STEP_LOG_LINE@json.output@      }, @@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",
@@ -183,6 +183,17 @@
       "-C",
       "[START_DIR]\\gn\\out"
     ],
+    "cwd": "[START_DIR]\\gn",
+    "env": {
+      "INCLUDE": "[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\um;[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\shared;[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\winrt",
+      "VSINSTALLDIR": "[START_DIR]\\cipd"
+    },
+    "env_prefixes": {
+      "PATH": [
+        "[START_DIR]\\cipd\\win_sdk\\bin\\10.0.17134.0\\x64",
+        "[START_DIR]\\cipd\\VC\\Tools\\MSVC\\14.14.26428\\bin\\HostX64\\x64"
+      ]
+    },
     "name": "debug.build.ninja",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -192,10 +203,9 @@
     "cmd": [
       "[START_DIR]\\gn\\out\\gn_unittests"
     ],
-    "cwd": "[START_DIR]\\gn",
-    "name": "debug.test",
+    "name": "debug.build.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
+      "@@@STEP_NEST_LEVEL@2@@@"
     ]
   },
   {
@@ -237,6 +247,17 @@
       "-C",
       "[START_DIR]\\gn\\out"
     ],
+    "cwd": "[START_DIR]\\gn",
+    "env": {
+      "INCLUDE": "[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\um;[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\shared;[START_DIR]\\cipd\\win_sdk\\Include\\10.0.17134.0\\winrt",
+      "VSINSTALLDIR": "[START_DIR]\\cipd"
+    },
+    "env_prefixes": {
+      "PATH": [
+        "[START_DIR]\\cipd\\win_sdk\\bin\\10.0.17134.0\\x64",
+        "[START_DIR]\\cipd\\VC\\Tools\\MSVC\\14.14.26428\\bin\\HostX64\\x64"
+      ]
+    },
     "name": "release.build.ninja",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -246,10 +267,9 @@
     "cmd": [
       "[START_DIR]\\gn\\out\\gn_unittests"
     ],
-    "cwd": "[START_DIR]\\gn",
-    "name": "release.test",
+    "name": "release.build.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
+      "@@@STEP_NEST_LEVEL@2@@@"
     ]
   },
   {

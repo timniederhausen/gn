@@ -124,9 +124,9 @@ def RunSteps(api):
                      src_dir.join('build', 'gen.py'),
                      args=config['args'])
 
-        api.step('ninja', [cipd_dir.join('ninja'), '-C', src_dir.join('out')])
+          # Windows requires the environment modifications when building too.
+          api.step('ninja', [cipd_dir.join('ninja'), '-C', src_dir.join('out')])
 
-      with api.context(cwd=src_dir):
         api.step('test', [src_dir.join('out', 'gn_unittests')])
 
 
