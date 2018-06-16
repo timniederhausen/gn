@@ -216,9 +216,9 @@
     "cmd": [
       "[START_DIR]\\gn\\out\\gn_unittests"
     ],
-    "name": "debug.build.test",
+    "name": "debug.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@2@@@"
+      "@@@STEP_NEST_LEVEL@1@@@"
     ]
   },
   {
@@ -293,9 +293,9 @@
     "cmd": [
       "[START_DIR]\\gn\\out\\gn_unittests"
     ],
-    "name": "release.build.test",
+    "name": "release.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@2@@@"
+      "@@@STEP_NEST_LEVEL@1@@@"
     ]
   },
   {

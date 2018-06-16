@@ -133,7 +133,7 @@ def RunSteps(api):
           api.step('taskkill mspdbsrv',
                    ['taskkill.exe', '/f', '/t', '/im', 'mspdbsrv.exe'])
 
-        api.step('test', [src_dir.join('out', 'gn_unittests')])
+      api.step('test', [src_dir.join('out', 'gn_unittests')])
 
 
 def GenTests(api):
