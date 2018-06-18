@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <mutex>
+
 #include "base/bind.h"
 #include "base/command_line.h"
 #include "base/strings/string_number_conversions.h"
@@ -50,7 +52,7 @@ const char kSwitchJsonIdeScriptArgs[] = "json-ide-script-args";
 
 // Collects Ninja rules for each toolchain. The lock protectes the rules.
 struct TargetWriteInfo {
-  base::Lock lock;
+  std::mutex lock;
   NinjaWriter::PerToolchainRules rules;
 };
 
@@ -60,7 +62,7 @@ void BackgroundDoWrite(TargetWriteInfo* write_info, const Target* target) {
   DCHECK(!rule.empty());
 
   {
-    base::AutoLock lock(write_info->lock);
+    std::lock_guard<std::mutex> lock(write_info->lock);
     write_info->rules[target->toolchain()].emplace_back(target,
                                                         std::move(rule));
   }
