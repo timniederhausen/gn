@@ -120,7 +120,7 @@ bool FriendMatches(const Target* annotation_on,
 
 HeaderChecker::HeaderChecker(const BuildSettings* build_settings,
                              const std::vector<const Target*>& targets)
-    : build_settings_(build_settings), task_count_cv_(&lock_) {
+    : build_settings_(build_settings), lock_(), task_count_cv_() {
   for (auto* target : targets)
     AddTargetToFileMap(target, &file_map_);
 }
@@ -174,22 +174,22 @@ void HeaderChecker::RunCheckOverFiles(const FileMap& files, bool force_check) {
   }
 
   // Wait for all tasks posted by this method to complete.
-  base::AutoLock auto_lock(lock_);
+  std::unique_lock<std::mutex> auto_lock(lock_);
   while (!task_count_.IsZero())
-    task_count_cv_.Wait();
+    task_count_cv_.wait(auto_lock);
 }
 
 void HeaderChecker::DoWork(const Target* target, const SourceFile& file) {
   Err err;
   if (!CheckFile(target, file, &err)) {
-    base::AutoLock lock(lock_);
+    std::lock_guard<std::mutex> lock(lock_);
     errors_.push_back(err);
   }
 
   if (!task_count_.Decrement()) {
     // Signal |task_count_cv_| when |task_count_| becomes zero.
-    base::AutoLock auto_lock(lock_);
-    task_count_cv_.Signal();
+    std::unique_lock<std::mutex> auto_lock(lock_);
+    task_count_cv_.notify_one();
   }
 }
 
