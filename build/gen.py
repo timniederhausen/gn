@@ -528,7 +528,6 @@ def write_gn_ninja(path, options):
         'base/win/registry.cc',
         'base/win/scoped_handle.cc',
         'base/win/scoped_process_information.cc',
-        'base/win/startup_information.cc',
     ])
 
     libs.extend([
