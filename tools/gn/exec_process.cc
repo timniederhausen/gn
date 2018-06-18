@@ -11,8 +11,6 @@
 #include "base/command_line.h"
 #include "base/files/file_util.h"
 #include "base/logging.h"
-#include "base/process/kill.h"
-#include "base/process/process.h"
 #include "build_config.h"
 
 #if defined(OS_WIN)
@@ -23,6 +21,7 @@
 #else
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "base/posix/eintr_wrapper.h"
@@ -33,6 +32,15 @@ namespace internal {
 
 #if defined(OS_WIN)
 bool ExecProcess(const base::CommandLine& cmdline,
+                 const base::FilePath& startup_dir,
+                 std::string* std_out,
+                 std::string* std_err,
+                 int* exit_code) {
+  return ExecProcess(cmdline.GetCommandLineString(), startup_dir, std_out,
+                     std_err, exit_code);
+}
+
+bool ExecProcess(const base::string16& cmdline_str,
                  const base::FilePath& startup_dir,
                  std::string* std_out,
                  std::string* std_err,
@@ -65,15 +73,13 @@ bool ExecProcess(const base::CommandLine& cmdline,
 
   // Ensure the read handle to the pipe for STDOUT/STDERR is not inherited.
   if (!SetHandleInformation(out_read, HANDLE_FLAG_INHERIT, 0)) {
-    NOTREACHED() << "Failed to disabled pipe inheritance";
+    NOTREACHED() << "Failed to disable pipe inheritance";
     return false;
   }
   if (!SetHandleInformation(err_read, HANDLE_FLAG_INHERIT, 0)) {
-    NOTREACHED() << "Failed to disabled pipe inheritance";
+    NOTREACHED() << "Failed to disable pipe inheritance";
     return false;
   }
-
-  base::FilePath::StringType cmdline_str(cmdline.GetCommandLineString());
 
   STARTUPINFO start_info = {};
 
@@ -86,9 +92,11 @@ bool ExecProcess(const base::CommandLine& cmdline,
   start_info.hStdError = GetStdHandle(STD_ERROR_HANDLE);
   start_info.dwFlags |= STARTF_USESTDHANDLES;
 
+  base::string16 cmdline_writable = cmdline_str;
+
   // Create the child process.
   PROCESS_INFORMATION temp_process_info = {};
-  if (!CreateProcess(nullptr, &cmdline_str[0], nullptr, nullptr,
+  if (!CreateProcess(nullptr, &cmdline_writable[0], nullptr, nullptr,
                      TRUE,  // Handles are inherited.
                      NORMAL_PRIORITY_CLASS, nullptr,
                      startup_dir.value().c_str(), &start_info,
@@ -97,8 +105,8 @@ bool ExecProcess(const base::CommandLine& cmdline,
   }
   base::win::ScopedProcessInformation proc_info(temp_process_info);
 
-  // Close our writing end of pipes now. Otherwise later read would not be able
-  // to detect end of child's output.
+  // Close our writing end of pipes now. Otherwise later read would not be
+  // able to detect end of child's output.
   scoped_out_write.Close();
   scoped_err_write.Close();
 
@@ -141,6 +149,24 @@ bool ReadFromPipe(int fd, std::string* output) {
   }
   output->append(buffer, bytes_read);
   return true;
+}
+
+bool WaitForExit(int pid, int *exit_code) {
+  int status;
+  if (waitpid(pid, &status, 0) < 0) {
+    PLOG(ERROR) << "waitpid";
+    return false;
+  }
+
+  if (WIFEXITED(status)) {
+    *exit_code = WEXITSTATUS(status);
+    return true;
+  } else if (WIFSIGNALED(status)) {
+    if (WTERMSIG(status) == SIGINT || WTERMSIG(status) == SIGTERM
+        || WTERMSIG(status) == SIGHUP)
+      return false;
+  }
+  return false;
 }
 
 bool ExecProcess(const base::CommandLine& cmdline,
@@ -243,8 +269,7 @@ bool ExecProcess(const base::CommandLine& cmdline,
           err_open = ReadFromPipe(err_read.get(), std_err);
       }
 
-      base::Process process(pid);
-      return process.WaitForExit(exit_code);
+      return WaitForExit(pid, exit_code);
     }
   }
 

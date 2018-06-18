@@ -4,7 +4,6 @@
 
 #include "base/files/file.h"
 #include "base/files/file_path.h"
-#include "base/timer/elapsed_timer.h"
 #include "build_config.h"
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
