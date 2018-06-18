@@ -5,13 +5,13 @@
 #ifndef TOOLS_GN_SCHEDULER_H_
 #define TOOLS_GN_SCHEDULER_H_
 
+#include <condition_variable>
 #include <map>
+#include <mutex>
 
 #include "base/atomic_ref_count.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
-#include "base/synchronization/condition_variable.h"
-#include "base/synchronization/lock.h"
 #include "msg_loop.h"
 #include "task.h"
 #include "tools/gn/input_file_manager.h"
@@ -118,10 +118,10 @@ class Scheduler {
   base::AtomicRefCount pool_work_count_;
 
   // Lock for |pool_work_count_cv_|.
-  base::Lock pool_work_count_lock_;
+  std::mutex pool_work_count_lock_;
 
   // Condition variable signaled when |pool_work_count_| reaches zero.
-  base::ConditionVariable pool_work_count_cv_;
+  std::condition_variable pool_work_count_cv_;
 
   WorkerPool worker_pool_;
 

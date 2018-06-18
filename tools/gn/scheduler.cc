@@ -18,7 +18,8 @@ Scheduler::Scheduler()
     : main_thread_run_loop_(MsgLoop::Current()),
       input_file_manager_(new InputFileManager),
       verbose_logging_(false),
-      pool_work_count_cv_(&pool_work_count_lock_),
+      pool_work_count_lock_(),
+      pool_work_count_cv_(),
       worker_pool_(),
       is_failed_(false),
       suppress_output_for_testing_(false),
@@ -72,8 +73,8 @@ void Scheduler::ScheduleWork(Task work) {
         std::move(work).Run();
         self->DecrementWorkCount();
         if (!self->pool_work_count_.Decrement()) {
-          base::AutoLock auto_lock(self->pool_work_count_lock_);
-          self->pool_work_count_cv_.Signal();
+          std::unique_lock<std::mutex> auto_lock(self->pool_work_count_lock_);
+          self->pool_work_count_cv_.notify_one();
         }
       },
       this, std::move(work)));
@@ -179,7 +180,7 @@ void Scheduler::OnComplete() {
 }
 
 void Scheduler::WaitForPoolTasks() {
-  base::AutoLock lock(pool_work_count_lock_);
+  std::unique_lock<std::mutex> lock(pool_work_count_lock_);
   while (!pool_work_count_.IsZero())
-    pool_work_count_cv_.Wait();
+    pool_work_count_cv_.wait(lock);
 }
