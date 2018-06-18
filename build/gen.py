@@ -525,20 +525,10 @@ def write_gn_ninja(path, options):
         'base/synchronization/waitable_event_win.cc',
         'base/threading/platform_thread_win.cc',
         'base/time/time_win.cc',
-        'base/win/core_winrt_util.cc',
-        'base/win/enum_variant.cc',
-        'base/win/iat_patch_function.cc',
-        'base/win/iunknown_impl.cc',
-        'base/win/pe_image.cc',
-        'base/win/process_startup_helper.cc',
         'base/win/registry.cc',
-        'base/win/resource_util.cc',
         'base/win/scoped_handle.cc',
         'base/win/scoped_process_information.cc',
-        'base/win/shortcut.cc',
         'base/win/startup_information.cc',
-        'base/win/win_util.cc',
-        'base/win/windows_version.cc',
     ])
 
     libs.extend([

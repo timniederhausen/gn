@@ -11,7 +11,6 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/strings/string_util.h"
-#include "base/win/windows_version.h"
 
 namespace base {
 namespace win {
