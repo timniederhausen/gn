@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SYS_INFO_H_
-#define SYS_INFO_H_
+#ifndef UTIL_SYS_INFO_H_
+#define UTIL_SYS_INFO_H_
 
 #include <string>
 
 std::string OperatingSystemArchitecture();
 int NumberOfProcessors();
 
-#endif  // SYS_INFO_H_
+#endif  // UTIL_SYS_INFO_H_

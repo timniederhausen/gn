@@ -15,7 +15,6 @@
 #include "base/json/json_writer.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
-#include "build_config.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/input_file.h"
@@ -24,6 +23,7 @@
 #include "tools/gn/standard_out.h"
 #include "tools/gn/tokenizer.h"
 #include "tools/gn/trace.h"
+#include "util/build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

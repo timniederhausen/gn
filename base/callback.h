@@ -78,7 +78,7 @@ class OnceCallback<R(Args...)> : public internal::CallbackBase {
 
   bool Equals(const OnceCallback& other) const { return EqualsInternal(other); }
 
-  R Run(Args... args) const & {
+  R Run(Args... args) const& {
     static_assert(!sizeof(*this),
                   "OnceCallback::Run() may only be invoked on a non-const "
                   "rvalue, i.e. std::move(callback).Run().");
@@ -119,7 +119,7 @@ class RepeatingCallback<R(Args...)> : public internal::CallbackBaseCopyable {
     return EqualsInternal(other);
   }
 
-  R Run(Args... args) const & {
+  R Run(Args... args) const& {
     PolymorphicInvoke f =
         reinterpret_cast<PolymorphicInvoke>(this->polymorphic_invoke());
     return f(this->bind_state_.get(), std::forward<Args>(args)...);

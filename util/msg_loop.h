@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef RUN_LOOP_H_
-#define RUN_LOOP_H_
+#ifndef UTIL_RUN_LOOP_H_
+#define UTIL_RUN_LOOP_H_
 
 #include "base/macros.h"
-#include "task.h"
+#include "util/task.h"
 
 #include <condition_variable>
 #include <mutex>
@@ -44,4 +44,4 @@ class MsgLoop {
   DISALLOW_COPY_AND_ASSIGN(MsgLoop);
 };
 
-#endif  // RUN_LOOP_H_
+#endif  // UTIL_RUN_LOOP_H_

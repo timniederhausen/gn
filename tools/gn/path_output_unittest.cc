@@ -5,12 +5,12 @@
 #include <sstream>
 
 #include "base/files/file_path.h"
-#include "build_config.h"
-#include "test/test.h"
 #include "tools/gn/output_file.h"
 #include "tools/gn/path_output.h"
 #include "tools/gn/source_dir.h"
 #include "tools/gn/source_file.h"
+#include "util/build_config.h"
+#include "util/test/test.h"
 
 TEST(PathOutput, Basic) {
   SourceDir build_dir("//out/Debug/");

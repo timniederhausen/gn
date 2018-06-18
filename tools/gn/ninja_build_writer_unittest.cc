@@ -4,13 +4,13 @@
 
 #include <sstream>
 
-#include "test/test.h"
 #include "tools/gn/ninja_build_writer.h"
 #include "tools/gn/pool.h"
 #include "tools/gn/scheduler.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scheduler.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 using NinjaBuildWriterTest = TestWithScheduler;
 

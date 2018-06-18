@@ -8,7 +8,7 @@
 #include <string>
 
 #include "base/strings/string16.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 namespace base {
 class CommandLine;

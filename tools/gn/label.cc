@@ -6,11 +6,11 @@
 
 #include "base/logging.h"
 #include "base/strings/string_util.h"
-#include "build_config.h"
 #include "tools/gn/err.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/value.h"
+#include "util/build_config.h"
 
 namespace {
 

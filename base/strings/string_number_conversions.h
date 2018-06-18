@@ -13,7 +13,7 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 // ----------------------------------------------------------------------------
 // IMPORTANT MESSAGE FROM YOUR SPONSOR

@@ -12,7 +12,7 @@
 #include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
@@ -216,7 +216,7 @@ std::unique_ptr<char* []> AlterEnvironment(const char* const* const env,
   size_t pointer_count_required =
       result_indices.size() + 1 +  // Null-terminated array of pointers.
       (value_storage.size() + sizeof(char*) - 1) / sizeof(char*);  // Buffer.
-  std::unique_ptr<char* []> result(new char*[pointer_count_required]);
+  std::unique_ptr<char*[]> result(new char*[pointer_count_required]);
 
   // The string storage goes after the array of pointers.
   char* storage_data =

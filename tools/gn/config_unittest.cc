@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "tools/gn/config.h"
-#include "test/test.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 // Tests that the "resolved" values are the same as "own" values when there
 // are no subconfigs.

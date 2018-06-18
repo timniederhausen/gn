@@ -10,7 +10,7 @@
 #include <string>
 
 #include "base/compiler_specific.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 namespace base {
 

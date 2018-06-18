@@ -7,11 +7,11 @@
 #include "base/files/file.h"
 #include "base/files/file_util.h"
 #include "base/files/scoped_temp_dir.h"
-#include "test/test.h"
 #include "tools/gn/functions.h"
 #include "tools/gn/scheduler.h"
 #include "tools/gn/test_with_scheduler.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 namespace {
 

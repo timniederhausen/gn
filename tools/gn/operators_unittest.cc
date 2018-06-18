@@ -9,10 +9,10 @@
 #include <memory>
 #include <utility>
 
-#include "test/test.h"
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/pattern.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 namespace {
 

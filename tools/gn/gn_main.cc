@@ -7,14 +7,14 @@
 
 #include "base/command_line.h"
 #include "base/strings/utf_string_conversions.h"
-#include "build_config.h"
-#include "msg_loop.h"
-#include "sys_info.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/err.h"
 #include "tools/gn/location.h"
 #include "tools/gn/standard_out.h"
 #include "tools/gn/switches.h"
+#include "util/build_config.h"
+#include "util/msg_loop.h"
+#include "util/sys_info.h"
 
 // Only the GN-generated build makes this header for now.
 // TODO(brettw) consider adding this if we need it in GYP.

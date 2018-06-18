@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-#include "test/test.h"
+#include "util/test/test.h"
 
 namespace {
 

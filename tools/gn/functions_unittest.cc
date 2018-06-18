@@ -7,10 +7,10 @@
 #include <memory>
 #include <utility>
 
-#include "test/test.h"
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/test_with_scope.h"
 #include "tools/gn/value.h"
+#include "util/test/test.h"
 
 TEST(Functions, Defined) {
   TestWithScope setup;

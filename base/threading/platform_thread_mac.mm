@@ -16,7 +16,7 @@
 #include "base/logging.h"
 #include "base/mac/foundation_util.h"
 #include "base/mac/mach_logging.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 namespace base {
 

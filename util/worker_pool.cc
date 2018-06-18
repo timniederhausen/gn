@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "worker_pool.h"
+#include "util/worker_pool.h"
 
 #include "base/command_line.h"
 #include "base/strings/string_number_conversions.h"
-#include "sys_info.h"
 #include "tools/gn/switches.h"
+#include "util/sys_info.h"
 
 namespace {
 
@@ -45,8 +45,7 @@ int GetThreadCount() {
 
 WorkerPool::WorkerPool() : WorkerPool(GetThreadCount()) {}
 
-WorkerPool::WorkerPool(size_t thread_count)
-    : should_stop_processing_(false) {
+WorkerPool::WorkerPool(size_t thread_count) : should_stop_processing_(false) {
   threads_.reserve(thread_count);
   for (size_t i = 0; i < thread_count; ++i)
     threads_.emplace_back([this]() { Worker(); });

@@ -11,7 +11,7 @@
 
 #include "base/logging.h"
 #include "base/scoped_generic.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 namespace base {
 

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "base/strings/string_number_conversions.h"
-#include "test/test.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 TEST(Template, Basic) {
   TestWithScope setup;

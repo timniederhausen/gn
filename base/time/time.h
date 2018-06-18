@@ -60,7 +60,7 @@
 #include "base/compiler_specific.h"
 #include "base/logging.h"
 #include "base/numerics/safe_math.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_MACOSX)
 #include <CoreFoundation/CoreFoundation.h>
@@ -588,29 +588,6 @@ class Time : public time_internal::TimeBase<Time> {
   static double GetHighResolutionTimerUsage();
 #endif  // defined(OS_WIN)
 
-  // Converts an exploded structure representing either the local time or UTC
-  // into a Time class. Returns false on a failure when, for example, a day of
-  // month is set to 31 on a 28-30 day month. Returns Time(0) on overflow.
-  static bool FromUTCExploded(const Exploded& exploded,
-                              Time* time) WARN_UNUSED_RESULT {
-    return FromExploded(false, exploded, time);
-  }
-  static bool FromLocalExploded(const Exploded& exploded,
-                                Time* time) WARN_UNUSED_RESULT {
-    return FromExploded(true, exploded, time);
-  }
-
-  // Fills the given exploded structure with either the local time or UTC from
-  // this time structure (containing UTC).
-  void UTCExplode(Exploded* exploded) const { return Explode(false, exploded); }
-  void LocalExplode(Exploded* exploded) const {
-    return Explode(true, exploded);
-  }
-
-  // Rounds this time down to the nearest day in local time. It will represent
-  // midnight on that day.
-  Time LocalMidnight() const;
-
   // Converts an integer value representing Time to a class. This may be used
   // when deserializing a |Time| structure, using a value known to be
   // compatible. It is not provided as a constructor because the integer type
@@ -624,22 +601,6 @@ class Time : public time_internal::TimeBase<Time> {
   friend class time_internal::TimeBase<Time>;
 
   constexpr explicit Time(int64_t us) : TimeBase(us) {}
-
-  // Explodes the given time to either local time |is_local = true| or UTC
-  // |is_local = false|.
-  void Explode(bool is_local, Exploded* exploded) const;
-
-  // Unexplodes a given time assuming the source is either local time
-  // |is_local = true| or UTC |is_local = false|. Function returns false on
-  // failure and sets |time| to Time(0). Otherwise returns true and sets |time|
-  // to non-exploded time.
-  static bool FromExploded(bool is_local,
-                           const Exploded& exploded,
-                           Time* time) WARN_UNUSED_RESULT;
-
-  // Comparison does not consider |day_of_week| when doing the operation.
-  static bool ExplodedMostlyEquals(const Exploded& lhs,
-                                   const Exploded& rhs) WARN_UNUSED_RESULT;
 };
 
 // static

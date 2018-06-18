@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "tools/gn/analyzer.h"
-#include "test/test.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/builder.h"
 #include "tools/gn/config.h"
@@ -15,6 +14,7 @@
 #include "tools/gn/target.h"
 #include "tools/gn/tool.h"
 #include "tools/gn/toolchain.h"
+#include "util/test/test.h"
 
 namespace gn_analyzer_unittest {
 

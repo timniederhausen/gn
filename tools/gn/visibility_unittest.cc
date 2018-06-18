@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 #include "tools/gn/visibility.h"
-#include "test/test.h"
 #include "tools/gn/err.h"
 #include "tools/gn/label.h"
 #include "tools/gn/scope.h"
 #include "tools/gn/value.h"
+#include "util/test/test.h"
 
 TEST(Visibility, CanSeeMe) {
   Value list(nullptr, Value::LIST);

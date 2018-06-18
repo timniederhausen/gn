@@ -17,7 +17,7 @@
 #ifndef BASE_POSIX_EINTR_WRAPPER_H_
 #define BASE_POSIX_EINTR_WRAPPER_H_
 
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_POSIX) && !defined(OS_FUCHSIA)
 

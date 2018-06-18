@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "build_config.h"
-#include "test/test.h"
 #include "tools/gn/functions.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/build_config.h"
+#include "util/test/test.h"
 
 namespace {
 

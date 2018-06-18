@@ -4,11 +4,11 @@
 
 #include "tools/gn/args.h"
 
-#include "build_config.h"
-#include "sys_info.h"
 #include "tools/gn/source_file.h"
 #include "tools/gn/string_utils.h"
 #include "tools/gn/variables.h"
+#include "util/build_config.h"
+#include "util/sys_info.h"
 
 const char kBuildArgs_Help[] =
     R"(Build Arguments Overview

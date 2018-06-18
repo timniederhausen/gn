@@ -6,11 +6,11 @@
 
 #include "base/files/file_util.h"
 #include "base/strings/string_util.h"
-#include "exe_path.h"
-#include "test/test.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/setup.h"
 #include "tools/gn/test_with_scheduler.h"
+#include "util/exe_path.h"
+#include "util/test/test.h"
 
 using FormatTest = TestWithScheduler;
 

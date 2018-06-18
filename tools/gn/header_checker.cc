@@ -21,7 +21,7 @@
 #include "tools/gn/source_file_type.h"
 #include "tools/gn/target.h"
 #include "tools/gn/trace.h"
-#include "worker_pool.h"
+#include "util/worker_pool.h"
 
 namespace {
 

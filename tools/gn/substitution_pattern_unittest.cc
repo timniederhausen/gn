@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "tools/gn/substitution_pattern.h"
-#include "test/test.h"
 #include "tools/gn/err.h"
+#include "util/test/test.h"
 
 TEST(SubstitutionPattern, ParseLiteral) {
   SubstitutionPattern pattern;

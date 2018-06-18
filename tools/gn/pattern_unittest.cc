@@ -5,8 +5,8 @@
 #include <stddef.h>
 
 #include "base/macros.h"
-#include "test/test.h"
 #include "tools/gn/pattern.h"
+#include "util/test/test.h"
 
 namespace {
 

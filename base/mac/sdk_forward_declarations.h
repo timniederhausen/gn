@@ -266,7 +266,7 @@ extern NSString* const CIDetectorTypeText;
 @class VNRequest;
 typedef void (^VNRequestCompletionHandler)(VNRequest* request, NSError* error);
 
-@interface VNRequest : NSObject<NSCopying>
+@interface VNRequest : NSObject <NSCopying>
 - (instancetype)initWithCompletionHandler:
     (VNRequestCompletionHandler)completionHandler NS_DESIGNATED_INITIALIZER;
 @property(readonly, nonatomic, copy) NSArray* results;
@@ -276,11 +276,11 @@ typedef void (^VNRequestCompletionHandler)(VNRequest* request, NSError* error);
 @interface VNImageBasedRequest : VNRequest
 @end
 
-@protocol VNFaceObservationAccepting<NSObject>
+@protocol VNFaceObservationAccepting <NSObject>
 @end
 
 @interface VNDetectFaceLandmarksRequest
-    : VNImageBasedRequest<VNFaceObservationAccepting>
+    : VNImageBasedRequest <VNFaceObservationAccepting>
 @end
 
 // VNImageRequestHandler forward declarations.
@@ -310,7 +310,7 @@ typedef NSString* VNImageOption NS_STRING_ENUM;
 @end
 
 // VNFaceObservation forward declarations.
-@interface VNObservation : NSObject<NSCopying, NSSecureCoding>
+@interface VNObservation : NSObject <NSCopying, NSSecureCoding>
 @end
 
 @interface VNDetectedObjectObservation : VNObservation

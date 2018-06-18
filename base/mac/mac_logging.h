@@ -7,7 +7,7 @@
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_IOS)
 #include <MacTypes.h>

@@ -37,9 +37,10 @@
 #include <mmsystem.h>
 #include <stdint.h>
 
+#include <mutex>
+
 #include "base/bit_cast.h"
 #include "base/logging.h"
-#include "base/synchronization/lock.h"
 #include "base/threading/platform_thread.h"
 #include "base/time/time_override.h"
 
@@ -101,8 +102,8 @@ TimeDelta g_high_res_timer_usage;
 // is used to calculate the cumulative usage.
 TimeTicks g_high_res_timer_last_activation;
 // The lock to control access to the above two variables.
-Lock* GetHighResLock() {
-  static auto* lock = new Lock();
+std::mutex* GetHighResLock() {
+  static auto* lock = new std::mutex();
   return lock;
 }
 
@@ -190,7 +191,7 @@ FILETIME Time::ToFileTime() const {
 
 // static
 void Time::EnableHighResolutionTimer(bool enable) {
-  AutoLock lock(*GetHighResLock());
+  std::lock_guard<std::mutex> lock(*GetHighResLock());
   if (g_high_res_timer_enabled == enable)
     return;
   g_high_res_timer_enabled = enable;
@@ -217,7 +218,7 @@ bool Time::ActivateHighResolutionTimer(bool activating) {
   // called.
   const uint32_t max = std::numeric_limits<uint32_t>::max();
 
-  AutoLock lock(*GetHighResLock());
+  std::lock_guard<std::mutex> lock(*GetHighResLock());
   UINT period = g_high_res_timer_enabled ? kMinTimerIntervalHighResMs
                                          : kMinTimerIntervalLowResMs;
   if (activating) {
@@ -241,13 +242,13 @@ bool Time::ActivateHighResolutionTimer(bool activating) {
 
 // static
 bool Time::IsHighResolutionTimerInUse() {
-  AutoLock lock(*GetHighResLock());
+  std::lock_guard<std::mutex> lock(*GetHighResLock());
   return g_high_res_timer_enabled && g_high_res_timer_count > 0;
 }
 
 // static
 void Time::ResetHighResolutionTimerUsage() {
-  AutoLock lock(*GetHighResLock());
+  std::lock_guard<std::mutex> lock(*GetHighResLock());
   g_high_res_timer_usage = TimeDelta();
   g_high_res_timer_usage_start = subtle::TimeTicksNowIgnoringOverride();
   if (g_high_res_timer_count > 0)
@@ -256,7 +257,7 @@ void Time::ResetHighResolutionTimerUsage() {
 
 // static
 double Time::GetHighResolutionTimerUsage() {
-  AutoLock lock(*GetHighResLock());
+  std::lock_guard<std::mutex> lock(*GetHighResLock());
   TimeTicks now = subtle::TimeTicksNowIgnoringOverride();
   TimeDelta elapsed_time = now - g_high_res_timer_usage_start;
   if (elapsed_time.is_zero()) {
@@ -272,87 +273,6 @@ double Time::GetHighResolutionTimerUsage() {
     used_time += now - g_high_res_timer_last_activation;
   }
   return used_time.InMillisecondsF() / elapsed_time.InMillisecondsF() * 100;
-}
-
-// static
-bool Time::FromExploded(bool is_local, const Exploded& exploded, Time* time) {
-  // Create the system struct representing our exploded time. It will either be
-  // in local time or UTC.If casting from int to WORD results in overflow,
-  // fail and return Time(0).
-  SYSTEMTIME st;
-  if (!SafeConvertToWord(exploded.year, &st.wYear) ||
-      !SafeConvertToWord(exploded.month, &st.wMonth) ||
-      !SafeConvertToWord(exploded.day_of_week, &st.wDayOfWeek) ||
-      !SafeConvertToWord(exploded.day_of_month, &st.wDay) ||
-      !SafeConvertToWord(exploded.hour, &st.wHour) ||
-      !SafeConvertToWord(exploded.minute, &st.wMinute) ||
-      !SafeConvertToWord(exploded.second, &st.wSecond) ||
-      !SafeConvertToWord(exploded.millisecond, &st.wMilliseconds)) {
-    *time = Time(0);
-    return false;
-  }
-
-  FILETIME ft;
-  bool success = true;
-  // Ensure that it's in UTC.
-  if (is_local) {
-    SYSTEMTIME utc_st;
-    success = TzSpecificLocalTimeToSystemTime(nullptr, &st, &utc_st) &&
-              SystemTimeToFileTime(&utc_st, &ft);
-  } else {
-    success = !!SystemTimeToFileTime(&st, &ft);
-  }
-
-  if (!success) {
-    *time = Time(0);
-    return false;
-  }
-
-  *time = Time(FileTimeToMicroseconds(ft));
-  return true;
-}
-
-void Time::Explode(bool is_local, Exploded* exploded) const {
-  if (us_ < 0LL) {
-    // We are not able to convert it to FILETIME.
-    ZeroMemory(exploded, sizeof(*exploded));
-    return;
-  }
-
-  // FILETIME in UTC.
-  FILETIME utc_ft;
-  MicrosecondsToFileTime(us_, &utc_ft);
-
-  // FILETIME in local time if necessary.
-  bool success = true;
-  // FILETIME in SYSTEMTIME (exploded).
-  SYSTEMTIME st = {0};
-  if (is_local) {
-    SYSTEMTIME utc_st;
-    // We don't use FileTimeToLocalFileTime here, since it uses the current
-    // settings for the time zone and daylight saving time. Therefore, if it is
-    // daylight saving time, it will take daylight saving time into account,
-    // even if the time you are converting is in standard time.
-    success = FileTimeToSystemTime(&utc_ft, &utc_st) &&
-              SystemTimeToTzSpecificLocalTime(nullptr, &utc_st, &st);
-  } else {
-    success = !!FileTimeToSystemTime(&utc_ft, &st);
-  }
-
-  if (!success) {
-    NOTREACHED() << "Unable to convert time, don't know why";
-    ZeroMemory(exploded, sizeof(*exploded));
-    return;
-  }
-
-  exploded->year = st.wYear;
-  exploded->month = st.wMonth;
-  exploded->day_of_week = st.wDayOfWeek;
-  exploded->day_of_month = st.wDay;
-  exploded->hour = st.wHour;
-  exploded->minute = st.wMinute;
-  exploded->second = st.wSecond;
-  exploded->millisecond = st.wMilliseconds;
 }
 
 // TimeTicks ------------------------------------------------------------------
@@ -467,7 +387,7 @@ TimeTicks InitialNowFunction() {
   return g_time_ticks_now_ignoring_override_function();
 }
 
-}  // namespace base
+}  // namespace
 
 namespace subtle {
 TimeTicks TimeTicksNowIgnoringOverride() {

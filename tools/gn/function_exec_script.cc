@@ -8,7 +8,6 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
-#include "build_config.h"
 #include "tools/gn/err.h"
 #include "tools/gn/exec_process.h"
 #include "tools/gn/filesystem_utils.h"
@@ -19,6 +18,7 @@
 #include "tools/gn/scheduler.h"
 #include "tools/gn/trace.h"
 #include "tools/gn/value.h"
+#include "util/build_config.h"
 
 namespace functions {
 

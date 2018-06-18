@@ -9,9 +9,9 @@
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/platform_thread.h"
-#include "build_config.h"
-#include "test/test.h"
 #include "tools/gn/target.h"
+#include "util/build_config.h"
+#include "util/test/test.h"
 
 TEST(FilesystemUtils, FileExtensionOffset) {
   EXPECT_EQ(std::string::npos, FindExtensionOffset(""));

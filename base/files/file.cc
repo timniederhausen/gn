@@ -4,7 +4,7 @@
 
 #include "base/files/file.h"
 #include "base/files/file_path.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include <errno.h>

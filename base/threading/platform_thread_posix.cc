@@ -16,7 +16,7 @@
 #include <memory>
 
 #include "base/logging.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_LINUX)
 #include <sys/syscall.h>

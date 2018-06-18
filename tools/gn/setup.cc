@@ -20,7 +20,6 @@
 #include "base/strings/string_util.h"
 #include "base/strings/sys_string_conversions.h"
 #include "base/strings/utf_string_conversions.h"
-#include "build_config.h"
 #include "tools/gn/command_format.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/exec_process.h"
@@ -36,6 +35,7 @@
 #include "tools/gn/trace.h"
 #include "tools/gn/value.h"
 #include "tools/gn/value_extractors.h"
+#include "util/build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

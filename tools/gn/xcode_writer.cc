@@ -36,7 +36,10 @@ using TargetToTarget = std::unordered_map<const Target*, const Target*>;
 using TargetToPBXTarget = std::unordered_map<const Target*, PBXTarget*>;
 
 const char* kXCTestFileSuffixes[] = {
-    "egtest.m", "egtest.mm", "xctest.m", "xctest.mm",
+    "egtest.m",
+    "egtest.mm",
+    "xctest.m",
+    "xctest.mm",
 };
 
 const char kXCTestModuleTargetNamePostfix[] = "_module";

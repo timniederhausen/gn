@@ -15,8 +15,6 @@
 #include "base/files/file_util.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
-#include "build_config.h"
-#include "exe_path.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/builder.h"
 #include "tools/gn/err.h"
@@ -30,6 +28,8 @@
 #include "tools/gn/switches.h"
 #include "tools/gn/target.h"
 #include "tools/gn/trace.h"
+#include "util/build_config.h"
+#include "util/exe_path.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

@@ -11,7 +11,7 @@
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/strings/string_number_conversions.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if !defined(OS_NACL) && !defined(OS_AIX)
 #include <pthread.h>

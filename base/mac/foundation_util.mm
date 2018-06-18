@@ -15,7 +15,7 @@
 #include "base/macros.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/strings/sys_string_conversions.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if !defined(OS_IOS)
 #import <AppKit/AppKit.h>

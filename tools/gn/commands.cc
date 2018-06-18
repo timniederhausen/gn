@@ -8,7 +8,6 @@
 #include "base/environment.h"
 #include "base/strings/string_split.h"
 #include "base/values.h"
-#include "build_config.h"
 #include "tools/gn/builder.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/item.h"
@@ -17,6 +16,7 @@
 #include "tools/gn/setup.h"
 #include "tools/gn/standard_out.h"
 #include "tools/gn/target.h"
+#include "util/build_config.h"
 
 namespace commands {
 

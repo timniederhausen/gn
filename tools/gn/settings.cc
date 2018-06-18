@@ -5,8 +5,8 @@
 #include "tools/gn/settings.h"
 
 #include "base/logging.h"
-#include "build_config.h"
 #include "tools/gn/filesystem_utils.h"
+#include "util/build_config.h"
 
 Settings::Settings(const BuildSettings* build_settings,
                    const std::string& output_subdir_name)

@@ -12,7 +12,7 @@
 
 #include "base/logging.h"
 #include "base/mac/scoped_cftyperef.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(__OBJC__)
 #import <Foundation/Foundation.h>

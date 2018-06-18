@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "tools/gn/escape.h"
-#include "test/test.h"
+#include "util/test/test.h"
 
 TEST(Escape, Ninja) {
   EscapeOptions opts;

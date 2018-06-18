@@ -18,8 +18,8 @@
 #include <string.h>
 
 #include "base/command_line.h"
-#include "build_config.h"
-#include "test.h"
+#include "util/build_config.h"
+#include "util/test/test.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

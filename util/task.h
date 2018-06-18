@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TASK_H_
-#define TASK_H_
+#ifndef UTIL_TASK_H_
+#define UTIL_TASK_H_
 
 #include "base/bind.h"
 #include "base/callback.h"
 
 using Task = base::OnceClosure;
 
-#endif  // TASK_H_
+#endif  // UTIL_TASK_H_

@@ -6,13 +6,13 @@
 #include <vector>
 
 #include "base/bind.h"
-#include "test/test.h"
 #include "tools/gn/config.h"
 #include "tools/gn/header_checker.h"
 #include "tools/gn/scheduler.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scheduler.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 namespace {
 

@@ -4,9 +4,9 @@
 
 #include <stdint.h>
 
-#include "test/test.h"
 #include "tools/gn/test_with_scope.h"
 #include "tools/gn/value.h"
+#include "util/test/test.h"
 
 TEST(Value, ToString) {
   Value strval(nullptr, "hi\" $me\\you\\$\\\"");

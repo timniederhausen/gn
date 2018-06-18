@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <sstream>
 
-#include "test/test.h"
 #include "tools/gn/ninja_copy_target_writer.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 // Tests multiple files with an output pattern and no toolchain dependency.
 TEST(NinjaCopyTargetWriter, Run) {

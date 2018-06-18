@@ -5,13 +5,13 @@
 #include <algorithm>
 #include <sstream>
 
-#include "build_config.h"
-#include "test/test.h"
 #include "tools/gn/ninja_action_target_writer.h"
 #include "tools/gn/pool.h"
 #include "tools/gn/substitution_list.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/build_config.h"
+#include "util/test/test.h"
 
 TEST(NinjaActionTargetWriter, WriteOutputFilesForBuildLine) {
   Err err;

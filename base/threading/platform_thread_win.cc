@@ -155,7 +155,7 @@ bool PlatformThread::Create(size_t stack_size,
 // static
 bool PlatformThread::CreateNonJoinable(size_t stack_size, Delegate* delegate) {
   return CreateThreadInternal(stack_size, delegate, nullptr /* non-joinable */
-                              );
+  );
 }
 
 // static

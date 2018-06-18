@@ -9,7 +9,7 @@
 
 #include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 namespace base {
 

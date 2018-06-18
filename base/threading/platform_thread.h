@@ -13,7 +13,7 @@
 
 #include "base/macros.h"
 #include "base/time/time.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_WIN)
 #include "base/win/windows_types.h"

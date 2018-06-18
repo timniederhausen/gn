@@ -5,10 +5,10 @@
 #include "tools/gn/path_output.h"
 
 #include "base/strings/string_util.h"
-#include "build_config.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/output_file.h"
 #include "tools/gn/string_utils.h"
+#include "util/build_config.h"
 
 PathOutput::PathOutput(const SourceDir& current_dir,
                        const base::StringPiece& source_root,

@@ -19,7 +19,7 @@
 #include "base/macros.h"
 #include "base/strings/string_piece_forward.h"
 #include "base/template_util.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 //
 // Optional message capabilities
@@ -103,96 +103,6 @@
 
 namespace logging {
 
-// TODO(avi): do we want to do a unification of character types here?
-#if defined(OS_WIN)
-typedef wchar_t PathChar;
-#elif defined(OS_POSIX) || defined(OS_FUCHSIA)
-typedef char PathChar;
-#endif
-
-// Where to record logging output? A flat file and/or system debug log
-// via OutputDebugString.
-enum LoggingDestination {
-  LOG_NONE = 0,
-  LOG_TO_FILE = 1 << 0,
-  LOG_TO_SYSTEM_DEBUG_LOG = 1 << 1,
-
-  LOG_TO_ALL = LOG_TO_FILE | LOG_TO_SYSTEM_DEBUG_LOG,
-
-// On Windows, use a file next to the exe; on POSIX platforms, where
-// it may not even be possible to locate the executable on disk, use
-// stderr.
-#if defined(OS_WIN)
-  LOG_DEFAULT = LOG_TO_FILE,
-#elif defined(OS_POSIX) || defined(OS_FUCHSIA)
-  LOG_DEFAULT = LOG_TO_SYSTEM_DEBUG_LOG,
-#endif
-};
-
-// Indicates that the log file should be locked when being written to.
-// Unless there is only one single-threaded process that is logging to
-// the log file, the file should be locked during writes to make each
-// log output atomic. Other writers will block.
-//
-// All processes writing to the log file must have their locking set for it to
-// work properly. Defaults to LOCK_LOG_FILE.
-enum LogLockingState { LOCK_LOG_FILE, DONT_LOCK_LOG_FILE };
-
-// On startup, should we delete or append to an existing log file (if any)?
-// Defaults to APPEND_TO_OLD_LOG_FILE.
-enum OldFileDeletionState { DELETE_OLD_LOG_FILE, APPEND_TO_OLD_LOG_FILE };
-
-struct LoggingSettings {
-  // The defaults values are:
-  //
-  //  logging_dest: LOG_DEFAULT
-  //  log_file:     NULL
-  //  lock_log:     LOCK_LOG_FILE
-  //  delete_old:   APPEND_TO_OLD_LOG_FILE
-  LoggingSettings();
-
-  LoggingDestination logging_dest;
-
-  // The three settings below have an effect only when LOG_TO_FILE is
-  // set in |logging_dest|.
-  const PathChar* log_file;
-  LogLockingState lock_log;
-  OldFileDeletionState delete_old;
-};
-
-// Define different names for the BaseInitLoggingImpl() function depending on
-// whether NDEBUG is defined or not so that we'll fail to link if someone tries
-// to compile logging.cc with NDEBUG but includes logging.h without defining it,
-// or vice versa.
-#if defined(NDEBUG)
-#define BaseInitLoggingImpl BaseInitLoggingImpl_built_with_NDEBUG
-#else
-#define BaseInitLoggingImpl BaseInitLoggingImpl_built_without_NDEBUG
-#endif
-
-// Implementation of the InitLogging() method declared below.  We use a
-// more-specific name so we can #define it above without affecting other code
-// that has named stuff "InitLogging".
-bool BaseInitLoggingImpl(const LoggingSettings& settings);
-
-// Sets the log file name and other global logging state. Calling this function
-// is recommended, and is normally done at the beginning of application init.
-// If you don't call it, all the flags will be initialized to their default
-// values, and there is a race condition that may leak a critical section
-// object if two threads try to do the first log at the same time.
-// See the definition of the enums above for descriptions and default values.
-//
-// The default log file is initialized to "debug.log" in the application
-// directory. You probably don't want this, especially since the program
-// directory may not be writable on an enduser's system.
-//
-// This function may be called a second time to re-direct logging (e.g after
-// loging in to a user partition), however it should never be called more than
-// twice.
-inline bool InitLogging(const LoggingSettings& settings) {
-  return BaseInitLoggingImpl(settings);
-}
-
 // Sets the log level. Anything at or above this level will be written to the
 // log file/displayed to the user (if applicable). Anything below this level
 // will be silently ignored. The log level defaults to 0 (everything is logged
@@ -204,32 +114,6 @@ int GetMinLogLevel();
 
 // Used by LOG_IS_ON to lazy-evaluate stream arguments.
 bool ShouldCreateLogMessage(int severity);
-
-// Sets the common items you want to be prepended to each log message.
-// process and thread IDs default to off, the timestamp defaults to on.
-// If this function is not called, logging defaults to writing the timestamp
-// only.
-void SetLogItems(bool enable_process_id,
-                 bool enable_thread_id,
-                 bool enable_timestamp,
-                 bool enable_tickcount);
-
-// Sets whether or not you'd like to see fatal debug messages popped up in
-// a dialog box or not.
-// Dialogs are not shown by default.
-void SetShowErrorDialogs(bool enable_dialogs);
-
-// Sets the Log Message Handler that gets passed every log message before
-// it's sent to other log destinations (if any).
-// Returns true to signal that it handled the message and the message
-// should not be sent to other log destinations.
-typedef bool (*LogMessageHandlerFunction)(int severity,
-                                          const char* file,
-                                          int line,
-                                          size_t message_start,
-                                          const std::string& str);
-void SetLogMessageHandler(LogMessageHandlerFunction handler);
-LogMessageHandlerFunction GetLogMessageHandler();
 
 // The ANALYZER_ASSUME_TRUE(bool arg) macro adds compiler-specific hints
 // to Clang which control what code paths are statically analyzed,

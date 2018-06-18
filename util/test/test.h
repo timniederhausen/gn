@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TEST_TEST_H_
-#define TEST_TEST_H_
+#ifndef UTIL_TEST_TEST_H_
+#define UTIL_TEST_TEST_H_
 
 #include <string.h>
 
@@ -192,4 +192,4 @@ void RegisterTest(testing::Test* (*)(), const char*);
   TEST_ASSERT_(::testing::TestResult(strcmp(a, b) == 0, #a " str== " #b), \
                TEST_FATAL_FAILURE_)
 
-#endif  // TEST_TEST_H_
+#endif  // UTIL_TEST_TEST_H_

@@ -6,7 +6,7 @@
 #define BASE_FILES_PLATFORM_FILE_H_
 
 #include "base/files/scoped_file.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_WIN)
 #include "base/win/scoped_handle.h"
@@ -38,6 +38,6 @@ constexpr PlatformFile kInvalidPlatformFile = -1;
 
 #endif
 
-}  // namespace
+}  // namespace base
 
 #endif  // BASE_FILES_PLATFORM_FILE_H_

@@ -7,7 +7,6 @@
 #include <memory>
 #include <utility>
 
-#include "test/test.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/config.h"
 #include "tools/gn/scheduler.h"
@@ -15,6 +14,7 @@
 #include "tools/gn/test_with_scheduler.h"
 #include "tools/gn/test_with_scope.h"
 #include "tools/gn/toolchain.h"
+#include "util/test/test.h"
 
 namespace {
 

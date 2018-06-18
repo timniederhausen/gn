@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 #include "tools/gn/builder.h"
-#include "test/test.h"
 #include "tools/gn/config.h"
 #include "tools/gn/loader.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scope.h"
 #include "tools/gn/toolchain.h"
+#include "util/test/test.h"
 
 namespace gn_builder_unittest {
 

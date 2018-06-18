@@ -7,7 +7,7 @@
 #include <stddef.h>
 
 #include "base/logging.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 namespace {
 

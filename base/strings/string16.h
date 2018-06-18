@@ -33,7 +33,7 @@
 #include <functional>
 #include <string>
 
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(WCHAR_T_IS_UTF16)
 

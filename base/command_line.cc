@@ -15,7 +15,7 @@
 #include "base/strings/string_tokenizer.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

@@ -32,7 +32,8 @@ void FailWithMissingToolError(Toolchain::ToolType tool, const Target* target) {
 
 bool EnsureAllToolsAvailable(const Target* target) {
   const Toolchain::ToolType kRequiredTools[] = {
-      Toolchain::TYPE_COPY_BUNDLE_DATA, Toolchain::TYPE_COMPILE_XCASSETS,
+      Toolchain::TYPE_COPY_BUNDLE_DATA,
+      Toolchain::TYPE_COMPILE_XCASSETS,
       Toolchain::TYPE_STAMP,
   };
 

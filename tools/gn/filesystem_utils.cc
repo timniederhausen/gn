@@ -10,10 +10,10 @@
 #include "base/logging.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
-#include "build_config.h"
 #include "tools/gn/location.h"
 #include "tools/gn/settings.h"
 #include "tools/gn/source_dir.h"
+#include "util/build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

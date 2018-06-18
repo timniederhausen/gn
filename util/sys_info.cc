@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sys_info.h"
+#include "util/sys_info.h"
 
 #include "base/logging.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_POSIX)
 #include <sys/utsname.h>

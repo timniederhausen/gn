@@ -9,10 +9,10 @@
 #include <memory>
 #include <utility>
 
-#include "test/test.h"
 #include "tools/gn/input_file.h"
 #include "tools/gn/scope.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 TEST(ParseTree, Accessor) {
   TestWithScope setup;

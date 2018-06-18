@@ -4,9 +4,9 @@
 
 #include <sstream>
 
-#include "test/test.h"
 #include "tools/gn/ninja_toolchain_writer.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 TEST(NinjaToolchainWriter, WriteToolRule) {
   TestWithScope setup;

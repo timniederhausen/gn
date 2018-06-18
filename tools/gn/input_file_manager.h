@@ -15,11 +15,11 @@
 #include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
-#include "base/synchronization/waitable_event.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/input_file.h"
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/settings.h"
+#include "util/auto_reset_event.h"
 
 class Err;
 class LocationRange;
@@ -111,7 +111,7 @@ class InputFileManager : public base::RefCountedThreadSafe<InputFileManager> {
     // Event to signal when the load is complete (or fails). This is lazily
     // created only when a thread is synchronously waiting for this load (which
     // only happens for imports).
-    std::unique_ptr<base::WaitableEvent> completion_event;
+    std::unique_ptr<AutoResetEvent> completion_event;
 
     std::vector<Token> tokens;
 

@@ -15,7 +15,7 @@
 #include "base/no_destructor.h"
 #include "base/strings/stringprintf.h"
 #include "base/time/time_override.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 namespace base {
 
@@ -270,39 +270,6 @@ Time Time::UnixEpoch() {
   Time time;
   time.us_ = kTimeTToMicrosecondsOffset;
   return time;
-}
-
-Time Time::LocalMidnight() const {
-  Exploded exploded;
-  LocalExplode(&exploded);
-  exploded.hour = 0;
-  exploded.minute = 0;
-  exploded.second = 0;
-  exploded.millisecond = 0;
-  Time out_time;
-  if (FromLocalExploded(exploded, &out_time))
-    return out_time;
-  // This function must not fail.
-  NOTREACHED();
-  return Time();
-}
-
-// static
-bool Time::ExplodedMostlyEquals(const Exploded& lhs, const Exploded& rhs) {
-  return lhs.year == rhs.year && lhs.month == rhs.month &&
-         lhs.day_of_month == rhs.day_of_month && lhs.hour == rhs.hour &&
-         lhs.minute == rhs.minute && lhs.second == rhs.second &&
-         lhs.millisecond == rhs.millisecond;
-}
-
-std::ostream& operator<<(std::ostream& os, Time time) {
-  Time::Exploded exploded;
-  time.UTCExplode(&exploded);
-  // Use StringPrintf because iostreams formatting is painful.
-  return os << StringPrintf(
-             "%04d-%02d-%02d %02d:%02d:%02d.%03d UTC", exploded.year,
-             exploded.month, exploded.day_of_month, exploded.hour,
-             exploded.minute, exploded.second, exploded.millisecond);
 }
 
 // TimeTicks ------------------------------------------------------------------

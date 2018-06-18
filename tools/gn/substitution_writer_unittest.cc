@@ -4,8 +4,6 @@
 
 #include <sstream>
 
-#include "build_config.h"
-#include "test/test.h"
 #include "tools/gn/err.h"
 #include "tools/gn/escape.h"
 #include "tools/gn/substitution_list.h"
@@ -13,6 +11,8 @@
 #include "tools/gn/substitution_writer.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/build_config.h"
+#include "util/test/test.h"
 
 TEST(SubstitutionWriter, GetListAs) {
   TestWithScope setup;

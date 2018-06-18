@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef WORKER_POOL_H_
-#define WORKER_POOL_H_
+#ifndef UTIL_WORKER_POOL_H_
+#define UTIL_WORKER_POOL_H_
 
 #include <condition_variable>
 #include <mutex>
@@ -12,7 +12,7 @@
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "task.h"
+#include "util/task.h"
 
 class WorkerPool {
  public:
@@ -34,4 +34,4 @@ class WorkerPool {
   DISALLOW_COPY_AND_ASSIGN(WorkerPool);
 };
 
-#endif  // WORKER_POOL_H_
+#endif  // UTIL_WORKER_POOL_H_

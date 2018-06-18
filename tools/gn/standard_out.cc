@@ -13,8 +13,8 @@
 #include "base/strings/string_piece.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
-#include "build_config.h"
 #include "tools/gn/switches.h"
+#include "util/build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
@@ -75,8 +75,8 @@ void WriteToStdOut(const std::string& output) {
 #endif  // !defined(OS_WIN)
 
 void OutputMarkdownDec(TextDecoration dec) {
-// The markdown rendering turns "dim" text to italics and any
-// other colored text to bold.
+  // The markdown rendering turns "dim" text to italics and any
+  // other colored text to bold.
 
 #if defined(OS_WIN)
   DWORD written = 0;

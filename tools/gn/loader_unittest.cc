@@ -8,8 +8,6 @@
 #include <vector>
 
 #include "base/bind.h"
-#include "msg_loop.h"
-#include "test/test.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/err.h"
 #include "tools/gn/loader.h"
@@ -18,6 +16,8 @@
 #include "tools/gn/scheduler.h"
 #include "tools/gn/test_with_scheduler.h"
 #include "tools/gn/tokenizer.h"
+#include "util/msg_loop.h"
+#include "util/test/test.h"
 
 namespace {
 

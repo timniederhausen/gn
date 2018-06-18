@@ -12,13 +12,13 @@
 #include "base/atomic_ref_count.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
-#include "msg_loop.h"
-#include "task.h"
 #include "tools/gn/input_file_manager.h"
 #include "tools/gn/label.h"
 #include "tools/gn/source_file.h"
 #include "tools/gn/token.h"
-#include "worker_pool.h"
+#include "util/msg_loop.h"
+#include "util/task.h"
+#include "util/worker_pool.h"
 
 class Target;
 

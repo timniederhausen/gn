@@ -4,7 +4,6 @@
 
 #include "tools/gn/input_conversion.h"
 
-#include "test/test.h"
 #include "tools/gn/err.h"
 #include "tools/gn/input_file.h"
 #include "tools/gn/parse_tree.h"
@@ -12,6 +11,7 @@
 #include "tools/gn/test_with_scheduler.h"
 #include "tools/gn/test_with_scope.h"
 #include "tools/gn/value.h"
+#include "util/test/test.h"
 
 namespace {
 
@@ -247,7 +247,8 @@ TEST_F(InputConversionTest, ValueError) {
       "233105-1",
 
       // Non-literals hidden in arrays are not allowed.
-      "[233105 - 1]", "[rebase_path(\"//\")]",
+      "[233105 - 1]",
+      "[rebase_path(\"//\")]",
   };
 
   for (auto* test : kTests) {

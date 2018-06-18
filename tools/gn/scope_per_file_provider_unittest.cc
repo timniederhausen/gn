@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 #include "tools/gn/scope_per_file_provider.h"
-#include "test/test.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/settings.h"
 #include "tools/gn/test_with_scope.h"
 #include "tools/gn/toolchain.h"
 #include "tools/gn/variables.h"
+#include "util/test/test.h"
 
 TEST(ScopePerFileProvider, Expected) {
   TestWithScope test;

@@ -37,7 +37,7 @@
 #include "base/strings/sys_string_conversions.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_MACOSX)
 #include <AvailabilityMacros.h>

@@ -4,11 +4,11 @@
 
 #include <sstream>
 
-#include "test/test.h"
 #include "tools/gn/config.h"
 #include "tools/gn/config_values_extractors.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 namespace {
 

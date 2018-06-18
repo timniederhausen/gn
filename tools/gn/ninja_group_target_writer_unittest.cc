@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 #include "tools/gn/ninja_group_target_writer.h"
-#include "test/test.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scope.h"
+#include "util/test/test.h"
 
 TEST(NinjaGroupTargetWriter, Run) {
   Err err;

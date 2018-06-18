@@ -5,7 +5,7 @@
 #include "tools/gn/visual_studio_utils.h"
 
 #include "base/strings/string_util.h"
-#include "test/test.h"
+#include "util/test/test.h"
 
 TEST(VisualStudioUtils, MakeGuid) {
   std::string pattern = "{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}";

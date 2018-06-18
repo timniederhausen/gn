@@ -11,7 +11,7 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 namespace base {
 
@@ -76,8 +76,8 @@ typedef std::map<NativeEnvironmentString, NativeEnvironmentString>
 // returned array will have appended to it the storage for the array itself so
 // there is only one pointer to manage, but this means that you can't copy the
 // array without keeping the original around.
-std::unique_ptr<char* []> AlterEnvironment(const char* const* env,
-                                           const EnvironmentMap& changes);
+std::unique_ptr<char*[]> AlterEnvironment(const char* const* env,
+                                          const EnvironmentMap& changes);
 
 #endif
 

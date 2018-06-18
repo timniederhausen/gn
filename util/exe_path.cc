@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "exe_path.h"
+#include "util/exe_path.h"
 
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/strings/string_util.h"
-#include "build_config.h"
+#include "util/build_config.h"
 
 #if defined(OS_MACOSX)
 #include <mach-o/dyld.h>

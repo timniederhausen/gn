@@ -214,9 +214,7 @@ const ParseNode* InputFileManager::SyncLoadFile(
     if (!data->loaded) {
       // Wait for the already-pending sync load to complete.
       if (!data->completion_event) {
-        data->completion_event = std::make_unique<base::WaitableEvent>(
-            base::WaitableEvent::ResetPolicy::AUTOMATIC,
-            base::WaitableEvent::InitialState::NOT_SIGNALED);
+        data->completion_event = std::make_unique<AutoResetEvent>();
       }
       {
         ScopedUnlock unlock(lock);

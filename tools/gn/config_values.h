@@ -45,10 +45,10 @@ class ConfigValues {
   DIR_VALUES_ACCESSOR(include_dirs)
   STRING_VALUES_ACCESSOR(ldflags)
   DIR_VALUES_ACCESSOR(lib_dirs)
-// =================================================================
-// IMPORTANT: If you add a new one, be sure to update AppendValues()
-//            and command_desc.cc.
-// =================================================================
+  // =================================================================
+  // IMPORTANT: If you add a new one, be sure to update AppendValues()
+  //            and command_desc.cc.
+  // =================================================================
 
 #undef STRING_VALUES_ACCESSOR
 #undef DIR_VALUES_ACCESSOR

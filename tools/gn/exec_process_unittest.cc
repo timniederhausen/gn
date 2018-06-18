@@ -7,8 +7,8 @@
 #include "base/command_line.h"
 #include "base/files/scoped_temp_dir.h"
 #include "base/strings/string_util.h"
-#include "build_config.h"
-#include "test/test.h"
+#include "util/build_config.h"
+#include "util/test/test.h"
 
 #if defined(OS_WIN)
 #include "base/strings/utf_string_conversions.h"
