@@ -18,6 +18,17 @@
 
 namespace {
 
+// The opposite of std::lock_guard.
+struct ScopedUnlock {
+  ScopedUnlock(std::unique_lock<std::mutex>& lock) : lock_(lock) {
+    lock_.unlock();
+  }
+  ~ScopedUnlock() { lock_.lock(); }
+
+ private:
+  std::unique_lock<std::mutex>& lock_;
+};
+
 void InvokeFileLoadCallback(const InputFileManager::FileLoadCallback& cb,
                             const ParseNode* node) {
   cb.Run(node);
@@ -102,7 +113,7 @@ bool InputFileManager::AsyncLoadFile(const LocationRange& origin,
   // after we leave the lock.
   Task schedule_this;
   {
-    base::AutoLock lock(lock_);
+    std::lock_guard<std::mutex> lock(lock_);
 
     InputFileMap::const_iterator found = input_files_.find(file_name);
     if (found == input_files_.end()) {
@@ -153,7 +164,7 @@ const ParseNode* InputFileManager::SyncLoadFile(
     const BuildSettings* build_settings,
     const SourceFile& file_name,
     Err* err) {
-  base::AutoLock lock(lock_);
+  std::unique_lock<std::mutex> lock(lock_);
 
   InputFileData* data = nullptr;
   InputFileMap::iterator found = input_files_.find(file_name);
@@ -165,7 +176,7 @@ const ParseNode* InputFileManager::SyncLoadFile(
     data->sync_invocation = true;
     input_files_[file_name] = std::move(new_data);
 
-    base::AutoUnlock unlock(lock_);
+    ScopedUnlock unlock(lock);
     if (!LoadFile(origin, build_settings, file_name, &data->file, err))
       return nullptr;
   } else {
@@ -208,7 +219,7 @@ const ParseNode* InputFileManager::SyncLoadFile(
             base::WaitableEvent::InitialState::NOT_SIGNALED);
       }
       {
-        base::AutoUnlock unlock(lock_);
+        ScopedUnlock unlock(lock);
         data->completion_event->Wait();
       }
       // If there were multiple waiters on the same event, we now need to wake
@@ -236,19 +247,19 @@ void InputFileManager::AddDynamicInput(
   *tokens = &data->tokens;
   *parse_root = &data->parsed_root;
   {
-    base::AutoLock lock(lock_);
+    std::lock_guard<std::mutex> lock(lock_);
     dynamic_inputs_.push_back(std::move(data));
   }
 }
 
 int InputFileManager::GetInputFileCount() const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   return static_cast<int>(input_files_.size());
 }
 
 void InputFileManager::GetAllPhysicalInputFileNames(
     std::vector<base::FilePath>* result) const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   result->reserve(input_files_.size());
   for (const auto& file : input_files_) {
     if (!file.second->file.physical_name().empty())
@@ -283,7 +294,7 @@ bool InputFileManager::LoadFile(const LocationRange& origin,
 
   std::vector<FileLoadCallback> callbacks;
   {
-    base::AutoLock lock(lock_);
+    std::lock_guard<std::mutex> lock(lock_);
     DCHECK(input_files_.find(name) != input_files_.end());
 
     InputFileData* data = input_files_[name].get();

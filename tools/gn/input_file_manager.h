@@ -5,6 +5,7 @@
 #ifndef TOOLS_GN_INPUT_FILE_MANAGER_H_
 #define TOOLS_GN_INPUT_FILE_MANAGER_H_
 
+#include <mutex>
 #include <set>
 #include <unordered_map>
 #include <utility>
@@ -14,7 +15,6 @@
 #include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
-#include "base/synchronization/lock.h"
 #include "base/synchronization/waitable_event.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/input_file.h"
@@ -134,7 +134,7 @@ class InputFileManager : public base::RefCountedThreadSafe<InputFileManager> {
                 InputFile* file,
                 Err* err);
 
-  mutable base::Lock lock_;
+  mutable std::mutex lock_;
 
   // Maps repo-relative filenames to the corresponding owned pointer.
   typedef std::unordered_map<SourceFile, std::unique_ptr<InputFileData>>
