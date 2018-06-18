@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <map>
+#include <mutex>
 #include <sstream>
 #include <vector>
 
@@ -18,7 +19,6 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/strings/stringprintf.h"
-#include "base/synchronization/lock.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/label.h"
 
@@ -30,7 +30,7 @@ class TraceLog {
   // Trace items leaked intentionally.
 
   void Add(TraceItem* item) {
-    base::AutoLock lock(lock_);
+    std::lock_guard<std::mutex> lock(lock_);
     events_.push_back(item);
   }
 
@@ -38,7 +38,7 @@ class TraceLog {
   std::vector<TraceItem*> events() const { return events_; }
 
  private:
-  base::Lock lock_;
+  std::mutex lock_;
 
   std::vector<TraceItem*> events_;
 
