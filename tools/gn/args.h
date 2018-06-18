@@ -6,11 +6,11 @@
 #define TOOLS_GN_ARGS_H_
 
 #include <map>
+#include <mutex>
 #include <set>
 #include <unordered_map>
 
 #include "base/macros.h"
-#include "base/synchronization/lock.h"
 #include "tools/gn/scope.h"
 
 class Err;
@@ -120,7 +120,7 @@ class Args {
   // this is not protected by the lock. It should be set only during init.
   Scope::KeyValueMap overrides_;
 
-  mutable base::Lock lock_;
+  mutable std::mutex lock_;
 
   // Maintains a list of all overrides we've ever seen. This is the main
   // |overrides_| as well as toolchain overrides. Tracking this allows us to

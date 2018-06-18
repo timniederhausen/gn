@@ -105,14 +105,14 @@ Args::Args(const Args& other)
 Args::~Args() = default;
 
 void Args::AddArgOverride(const char* name, const Value& value) {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
 
   overrides_[base::StringPiece(name)] = value;
   all_overrides_[base::StringPiece(name)] = value;
 }
 
 void Args::AddArgOverrides(const Scope::KeyValueMap& overrides) {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
 
   for (const auto& cur_override : overrides) {
     overrides_[cur_override.first] = cur_override.second;
@@ -121,13 +121,13 @@ void Args::AddArgOverrides(const Scope::KeyValueMap& overrides) {
 }
 
 void Args::AddDefaultArgOverrides(const Scope::KeyValueMap& overrides) {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   for (const auto& cur_override : overrides)
     overrides_[cur_override.first] = cur_override.second;
 }
 
 const Value* Args::GetArgOverride(const char* name) const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
 
   Scope::KeyValueMap::const_iterator found =
       all_overrides_.find(base::StringPiece(name));
@@ -138,7 +138,7 @@ const Value* Args::GetArgOverride(const char* name) const {
 
 void Args::SetupRootScope(Scope* dest,
                           const Scope::KeyValueMap& toolchain_overrides) const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
 
   SetSystemVarsLocked(dest);
 
@@ -155,7 +155,7 @@ void Args::SetupRootScope(Scope* dest,
 bool Args::DeclareArgs(const Scope::KeyValueMap& args,
                        Scope* scope_to_set,
                        Err* err) const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
 
   Scope::KeyValueMap& declared_arguments(
       DeclaredArgumentsForToolchainLocked(scope_to_set));
@@ -229,7 +229,7 @@ bool Args::DeclareArgs(const Scope::KeyValueMap& args,
 }
 
 bool Args::VerifyAllOverridesUsed(Err* err) const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   Scope::KeyValueMap unused_overrides(all_overrides_);
   for (const auto& map_pair : declared_arguments_per_toolchain_)
     RemoveDeclaredOverrides(map_pair.second, &unused_overrides);
@@ -265,7 +265,7 @@ bool Args::VerifyAllOverridesUsed(Err* err) const {
 Args::ValueWithOverrideMap Args::GetAllArguments() const {
   ValueWithOverrideMap result;
 
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
 
   // Default values.
   for (const auto& map_pair : declared_arguments_per_toolchain_) {
@@ -286,8 +286,6 @@ Args::ValueWithOverrideMap Args::GetAllArguments() const {
 }
 
 void Args::SetSystemVarsLocked(Scope* dest) const {
-  lock_.AssertAcquired();
-
   // Host OS.
   const char* os = nullptr;
 #if defined(OS_WIN)
@@ -374,8 +372,6 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
 
 void Args::ApplyOverridesLocked(const Scope::KeyValueMap& values,
                                 Scope* scope) const {
-  lock_.AssertAcquired();
-
   const Scope::KeyValueMap& declared_arguments(
       DeclaredArgumentsForToolchainLocked(scope));
 
@@ -392,18 +388,15 @@ void Args::ApplyOverridesLocked(const Scope::KeyValueMap& values,
 }
 
 void Args::SaveOverrideRecordLocked(const Scope::KeyValueMap& values) const {
-  lock_.AssertAcquired();
   for (const auto& val : values)
     all_overrides_[val.first] = val.second;
 }
 
 Scope::KeyValueMap& Args::DeclaredArgumentsForToolchainLocked(
     Scope* scope) const {
-  lock_.AssertAcquired();
   return declared_arguments_per_toolchain_[scope->settings()];
 }
 
 Scope::KeyValueMap& Args::OverridesForToolchainLocked(Scope* scope) const {
-  lock_.AssertAcquired();
   return toolchain_overrides_[scope->settings()];
 }
