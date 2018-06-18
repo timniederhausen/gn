@@ -36,7 +36,7 @@ bool Scheduler::Run() {
   main_thread_run_loop_->Run();
   bool local_is_failed;
   {
-    base::AutoLock lock(lock_);
+    std::lock_guard<std::mutex> lock(lock_);
     local_is_failed = is_failed();
     has_been_shutdown_ = true;
   }
@@ -54,7 +54,7 @@ void Scheduler::Log(const std::string& verb, const std::string& msg) {
 void Scheduler::FailWithError(const Err& err) {
   DCHECK(err.has_error());
   {
-    base::AutoLock lock(lock_);
+    std::lock_guard<std::mutex> lock(lock_);
 
     if (is_failed_ || has_been_shutdown_)
       return;  // Ignore errors once we see one.
@@ -81,39 +81,39 @@ void Scheduler::ScheduleWork(Task work) {
 }
 
 void Scheduler::AddGenDependency(const base::FilePath& file) {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   gen_dependencies_.push_back(file);
 }
 
 std::vector<base::FilePath> Scheduler::GetGenDependencies() const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   return gen_dependencies_;
 }
 
 void Scheduler::AddWrittenFile(const SourceFile& file) {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   written_files_.push_back(file);
 }
 
 void Scheduler::AddUnknownGeneratedInput(const Target* target,
                                          const SourceFile& file) {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   unknown_generated_inputs_.insert(std::make_pair(file, target));
 }
 
 void Scheduler::AddWriteRuntimeDepsTarget(const Target* target) {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   write_runtime_deps_targets_.push_back(target);
 }
 
 std::vector<const Target*> Scheduler::GetWriteRuntimeDepsTargets() const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   return write_runtime_deps_targets_;
 }
 
 bool Scheduler::IsFileGeneratedByWriteRuntimeDeps(
     const OutputFile& file) const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   // Number of targets should be quite small, so brute-force search is fine.
   for (const Target* target : write_runtime_deps_targets_) {
     if (file == target->write_runtime_deps_output()) {
@@ -125,7 +125,7 @@ bool Scheduler::IsFileGeneratedByWriteRuntimeDeps(
 
 std::multimap<SourceFile, const Target*> Scheduler::GetUnknownGeneratedInputs()
     const {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
 
   // Remove all unknown inputs that were written files. These are OK as inputs
   // to build steps since they were written as a side-effect of running GN.
@@ -140,7 +140,7 @@ std::multimap<SourceFile, const Target*> Scheduler::GetUnknownGeneratedInputs()
 }
 
 void Scheduler::ClearUnknownGeneratedInputsAndWrittenFiles() {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   unknown_generated_inputs_.clear();
   written_files_.clear();
 }
@@ -157,7 +157,7 @@ void Scheduler::DecrementWorkCount() {
 }
 
 void Scheduler::SuppressOutputForTesting(bool suppress) {
-  base::AutoLock lock(lock_);
+  std::lock_guard<std::mutex> lock(lock_);
   suppress_output_for_testing_ = suppress;
 }
 

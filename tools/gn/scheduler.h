@@ -125,7 +125,7 @@ class Scheduler {
 
   WorkerPool worker_pool_;
 
-  mutable base::Lock lock_;
+  mutable std::mutex lock_;
   bool is_failed_;
 
   bool suppress_output_for_testing_;
