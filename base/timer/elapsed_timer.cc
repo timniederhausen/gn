@@ -7,7 +7,7 @@
 namespace base {
 
 ElapsedTimer::ElapsedTimer() {
-  begin_ = TimeTicks::Now();
+  begin_ = TicksNow();
 }
 
 ElapsedTimer::ElapsedTimer(ElapsedTimer&& other) {
@@ -18,8 +18,8 @@ void ElapsedTimer::operator=(ElapsedTimer&& other) {
   begin_ = other.begin_;
 }
 
-TimeDelta ElapsedTimer::Elapsed() const {
-  return TimeTicks::Now() - begin_;
+TickDelta ElapsedTimer::Elapsed() const {
+  return TicksDelta(TicksNow(), begin_);
 }
 
 }  // namespace base

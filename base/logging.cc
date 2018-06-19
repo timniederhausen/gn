@@ -7,6 +7,8 @@
 #include <limits.h>
 #include <stdint.h>
 
+#include <thread>
+
 #include "base/macros.h"
 #include "util/build_config.h"
 
@@ -19,6 +21,7 @@
 #define STDERR_FILENO 2
 
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
+#include <sys/time.h>
 #include <time.h>
 #endif
 
@@ -49,7 +52,6 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/sys_string_conversions.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/threading/platform_thread.h"
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include "base/posix/safe_strerror.h"
@@ -195,7 +197,7 @@ void LogMessage::Init(const char* file, int line) {
   // TODO(darin): It might be nice if the columns were fixed width.
 
   stream_ << '[';
-  stream_ << base::PlatformThread::CurrentId() << ':';
+  stream_ << std::this_thread::get_id() << ':';
 #if defined(OS_WIN)
   SYSTEMTIME local_time;
   GetLocalTime(&local_time);

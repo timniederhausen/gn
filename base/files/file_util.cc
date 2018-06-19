@@ -218,23 +218,6 @@ bool GetFileSize(const FilePath& file_path, int64_t* file_size) {
   return true;
 }
 
-bool TouchFile(const FilePath& path,
-               const Time& last_accessed,
-               const Time& last_modified) {
-  int flags = File::FLAG_OPEN | File::FLAG_WRITE_ATTRIBUTES;
-
-#if defined(OS_WIN)
-  // On Windows, FILE_FLAG_BACKUP_SEMANTICS is needed to open a directory.
-  if (DirectoryExists(path))
-    flags |= File::FLAG_BACKUP_SEMANTICS;
-#endif  // OS_WIN
-
-  File file(path, flags);
-  if (!file.IsValid())
-    return false;
-
-  return file.SetTimes(last_accessed, last_modified);
-}
 #endif  // !defined(OS_NACL_NONSFI)
 
 bool CloseFile(FILE* file) {

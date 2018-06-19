@@ -455,7 +455,7 @@ int RunGen(const std::vector<std::string>& args) {
     return 1;
   }
 
-  base::TimeDelta elapsed_time = timer.Elapsed();
+  TickDelta elapsed_time = timer.Elapsed();
 
   if (!command_line->HasSwitch(switches::kQuiet)) {
     OutputString("Done. ", DECORATION_GREEN);

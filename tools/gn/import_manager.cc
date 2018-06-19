@@ -11,6 +11,7 @@
 #include "tools/gn/scheduler.h"
 #include "tools/gn/scope_per_file_provider.h"
 #include "tools/gn/trace.h"
+#include "util/ticks.h"
 
 namespace {
 
@@ -75,8 +76,9 @@ bool ImportManager::DoImport(const SourceFile& file,
                              Scope* scope,
                              Err* err) {
   // Key for the current import on the current thread in imports_in_progress_.
-  std::string key =
-      std::to_string(base::PlatformThread::CurrentId()) + file.value();
+  std::stringstream ss;
+  ss << std::this_thread::get_id() << file.value();
+  std::string key = ss.str();
 
   // See if we have a cached import, but be careful to actually do the scope
   // copying outside of the lock.
@@ -101,7 +103,7 @@ bool ImportManager::DoImport(const SourceFile& file,
   // is already processing the import.
   const Scope* import_scope = nullptr;
   {
-    base::TimeTicks import_block_begin = base::TimeTicks::Now();
+    Ticks import_block_begin = TicksNow();
     std::lock_guard<std::mutex> lock(import_info->load_lock);
 
     if (!import_info->scope) {
@@ -117,14 +119,14 @@ bool ImportManager::DoImport(const SourceFile& file,
     } else {
       // Add trace if this thread was blocked for a long period of time and did
       // not load the import itself.
-      base::TimeTicks import_block_end = base::TimeTicks::Now();
-      constexpr auto kImportBlockTraceThreshold =
-          base::TimeDelta::FromMilliseconds(20);
+      Ticks import_block_end = TicksNow();
+      constexpr auto kImportBlockTraceThresholdMS = 20;
       if (TracingEnabled() &&
-          import_block_end - import_block_begin > kImportBlockTraceThreshold) {
+          TicksDelta(import_block_end, import_block_begin).InMilliseconds() >
+              kImportBlockTraceThresholdMS) {
         auto* import_block_trace =
             new TraceItem(TraceItem::TRACE_IMPORT_BLOCK, file.value(),
-                          base::PlatformThread::CurrentId());
+                          std::this_thread::get_id());
         import_block_trace->set_begin(import_block_begin);
         import_block_trace->set_end(import_block_end);
         AddTrace(import_block_trace);

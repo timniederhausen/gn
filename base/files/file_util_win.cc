@@ -28,7 +28,6 @@
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/time/time.h"
 #include "base/win/scoped_handle.h"
 
 // #define needed to link in RtlGenRandom(), a.k.a. SystemFunction036.  See the
@@ -704,9 +703,9 @@ bool GetFileInfo(const FilePath& file_path, File::Info* results) {
 
   results->is_directory =
       (attr.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-  results->last_modified = Time::FromFileTime(attr.ftLastWriteTime);
-  results->last_accessed = Time::FromFileTime(attr.ftLastAccessTime);
-  results->creation_time = Time::FromFileTime(attr.ftCreationTime);
+  results->last_modified = *reinterpret_cast<uint64_t*>(&attr.ftLastWriteTime);
+  results->last_accessed = *reinterpret_cast<uint64_t*>(&attr.ftLastAccessTime);
+  results->creation_time = *reinterpret_cast<uint64_t*>(&attr.ftCreationTime);
 
   return true;
 }

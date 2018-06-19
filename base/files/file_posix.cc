@@ -46,23 +46,6 @@ int CallFtruncate(PlatformFile file, int64_t length) {
   return HANDLE_EINTR(ftruncate(file, length));
 }
 
-int CallFutimes(PlatformFile file, const struct timeval times[2]) {
-#ifdef __USE_XOPEN2K8
-  // futimens should be available, but futimes might not be
-  // http://pubs.opengroup.org/onlinepubs/9699919799/
-
-  timespec ts_times[2];
-  ts_times[0].tv_sec = times[0].tv_sec;
-  ts_times[0].tv_nsec = times[0].tv_usec * 1000;
-  ts_times[1].tv_sec = times[1].tv_sec;
-  ts_times[1].tv_nsec = times[1].tv_usec * 1000;
-
-  return futimens(file, ts_times);
-#else
-  return futimes(file, times);
-#endif
-}
-
 #if !defined(OS_FUCHSIA)
 File::Error CallFcntlFlock(PlatformFile file, bool do_lock) {
   struct flock lock;
@@ -87,11 +70,6 @@ bool IsOpenAppend(PlatformFile file) {
 
 int CallFtruncate(PlatformFile file, int64_t length) {
   NOTIMPLEMENTED();  // NaCl doesn't implement ftruncate.
-  return 0;
-}
-
-int CallFutimes(PlatformFile file, const struct timeval times[2]) {
-  NOTIMPLEMENTED();  // NaCl doesn't implement futimes.
   return 0;
 }
 
@@ -126,17 +104,10 @@ void File::Info::FromStat(const stat_wrapper_t& stat_info) {
 #error
 #endif
 
-  last_modified = Time::FromTimeT(last_modified_sec) +
-                  TimeDelta::FromMicroseconds(last_modified_nsec /
-                                              Time::kNanosecondsPerMicrosecond);
-
-  last_accessed = Time::FromTimeT(last_accessed_sec) +
-                  TimeDelta::FromMicroseconds(last_accessed_nsec /
-                                              Time::kNanosecondsPerMicrosecond);
-
-  creation_time = Time::FromTimeT(creation_time_sec) +
-                  TimeDelta::FromMicroseconds(creation_time_nsec /
-                                              Time::kNanosecondsPerMicrosecond);
+  constexpr uint64_t kNano = 1'000'000'000;
+  last_modified = last_modified_sec * kNano + last_modified_nsec;
+  last_accessed = last_accessed_sec * kNano + last_accessed_nsec;
+  creation_time = creation_time_sec * kNano + creation_time_nsec;
 }
 
 bool File::IsValid() const {
@@ -279,16 +250,6 @@ bool File::SetLength(int64_t length) {
   DCHECK(IsValid());
 
   return !CallFtruncate(file_.get(), length);
-}
-
-bool File::SetTimes(Time last_access_time, Time last_modified_time) {
-  DCHECK(IsValid());
-
-  timeval times[2];
-  times[0] = last_access_time.ToTimeVal();
-  times[1] = last_modified_time.ToTimeVal();
-
-  return !CallFutimes(file_.get(), times);
 }
 
 bool File::GetInfo(Info* info) {

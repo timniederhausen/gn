@@ -7,7 +7,6 @@
 #include "base/logging.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/time/time.h"
 #include "tools/gn/err.h"
 #include "tools/gn/exec_process.h"
 #include "tools/gn/filesystem_utils.h"
@@ -19,6 +18,7 @@
 #include "tools/gn/trace.h"
 #include "tools/gn/value.h"
 #include "util/build_config.h"
+#include "util/ticks.h"
 
 namespace functions {
 
@@ -198,7 +198,7 @@ Value RunExecScript(Scope* scope,
 
   // Log command line for debugging help.
   trace.SetCommandLine(cmdline);
-  base::TimeTicks begin_exec;
+  Ticks begin_exec = 0;
   if (g_scheduler->verbose_logging()) {
 #if defined(OS_WIN)
     g_scheduler->Log("Pythoning",
@@ -206,7 +206,7 @@ Value RunExecScript(Scope* scope,
 #else
     g_scheduler->Log("Pythoning", cmdline.GetCommandLineString());
 #endif
-    begin_exec = base::TimeTicks::Now();
+    begin_exec = TicksNow();
   }
 
   base::FilePath startup_dir =
@@ -239,7 +239,7 @@ Value RunExecScript(Scope* scope,
         "Pythoning",
         script_source_path + " took " +
             base::Int64ToString(
-                (base::TimeTicks::Now() - begin_exec).InMilliseconds()) +
+                TicksDelta(TicksNow(), begin_exec).InMilliseconds()) +
             "ms");
   }
 

@@ -36,7 +36,6 @@
 namespace base {
 
 class Environment;
-class Time;
 
 //-----------------------------------------------------------------------------
 // Functions that involve filesystem access or modification:
@@ -321,11 +320,6 @@ bool IsLink(const FilePath& file_path);
 
 // Returns information about the given file path.
 bool GetFileInfo(const FilePath& file_path, File::Info* info);
-
-// Sets the time of the last access and the time of the last modification.
-bool TouchFile(const FilePath& path,
-               const Time& last_accessed,
-               const Time& last_modified);
 
 // Wrapper for fopen-like calls. Returns non-NULL FILE* on success. The
 // underlying file descriptor (POSIX) or handle (Windows) is unconditionally

@@ -6,7 +6,6 @@
 
 #include <algorithm>
 
-#include "base/time/time.h"
 #include "tools/gn/unique_vector.h"
 #include "util/test/test.h"
 

@@ -49,8 +49,8 @@ int64_t FileEnumerator::FileInfo::GetSize() const {
   return stat_.st_size;
 }
 
-base::Time FileEnumerator::FileInfo::GetLastModifiedTime() const {
-  return base::Time::FromTimeT(stat_.st_mtime);
+Ticks FileEnumerator::FileInfo::GetLastModifiedTime() const {
+  return stat_.st_mtime;
 }
 
 // FileEnumerator --------------------------------------------------------------

@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 #include "tools/gn/filesystem_utils.h"
+
+#include <thread>
+
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/files/scoped_temp_dir.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/threading/platform_thread.h"
 #include "tools/gn/target.h"
 #include "util/build_config.h"
 #include "util/test/test.h"
@@ -645,15 +647,17 @@ TEST(FilesystemUtils, WriteFileIfChanged) {
 
   base::File::Info file_info;
   ASSERT_TRUE(base::GetFileInfo(file_path, &file_info));
-  base::Time last_modified = file_info.last_modified;
+  Ticks last_modified = file_info.last_modified;
 
+  {
+    using namespace std::chrono_literals;
 #if defined(OS_MACOSX)
-  // Modification times are in seconds in HFS on Mac.
-  base::TimeDelta sleep_time = base::TimeDelta::FromSeconds(1);
+    // Modification times are in seconds in HFS on Mac.
+    std::this_thread::sleep_for(1s);
 #else
-  base::TimeDelta sleep_time = base::TimeDelta::FromMilliseconds(1);
+    std::this_thread::sleep_for(1ms);
 #endif
-  base::PlatformThread::Sleep(sleep_time);
+  }
 
   // Don't write if contents is the same.
   EXPECT_TRUE(WriteFileIfChanged(file_path, data, nullptr));

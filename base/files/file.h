@@ -13,8 +13,8 @@
 #include "base/files/platform_file.h"
 #include "base/files/scoped_file.h"
 #include "base/macros.h"
-#include "base/time/time.h"
 #include "util/build_config.h"
+#include "util/ticks.h"
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include <sys/stat.h>
@@ -132,13 +132,13 @@ class File {
     bool is_symbolic_link;
 
     // The last modified time of a file.
-    Time last_modified;
+    Ticks last_modified;
 
     // The last accessed time of a file.
-    Time last_accessed;
+    Ticks last_accessed;
 
     // The creation time of a file.
-    Time creation_time;
+    Ticks creation_time;
   };
 
   File();
@@ -248,9 +248,6 @@ class File {
   //  0.1 %   > 1.8 seconds
   //  0.01 %  > 7.6 seconds
   bool Flush();
-
-  // Updates the file times.
-  bool SetTimes(Time last_access_time, Time last_modified_time);
 
   // Returns some basic information for the given file.
   bool GetInfo(Info* info);

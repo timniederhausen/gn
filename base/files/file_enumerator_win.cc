@@ -54,8 +54,8 @@ int64_t FileEnumerator::FileInfo::GetSize() const {
   return static_cast<int64_t>(size.QuadPart);
 }
 
-base::Time FileEnumerator::FileInfo::GetLastModifiedTime() const {
-  return base::Time::FromFileTime(find_data_.ftLastWriteTime);
+Ticks FileEnumerator::FileInfo::GetLastModifiedTime() const {
+  return *reinterpret_cast<const uint64_t*>(&find_data_.ftLastWriteTime);
 }
 
 // FileEnumerator --------------------------------------------------------------

@@ -13,8 +13,8 @@
 #include "base/containers/stack.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
-#include "base/time/time.h"
 #include "util/build_config.h"
+#include "util/ticks.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
@@ -52,7 +52,7 @@ class FileEnumerator {
     FilePath GetName() const;
 
     int64_t GetSize() const;
-    Time GetLastModifiedTime() const;
+    Ticks GetLastModifiedTime() const;
 
 #if defined(OS_WIN)
     // Note that the cAlternateFileName (used to hold the "short" 8.3 name)

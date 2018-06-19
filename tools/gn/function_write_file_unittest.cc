@@ -70,13 +70,21 @@ TEST_F(WriteFileTest, WithData) {
   EXPECT_EQ("line 1\n2\n", result_contents);
 
   // Test that the file is not rewritten if the contents are not changed.
-  // Start by setting the modified time to something old to avoid clock
-  // resolution issues.
-  base::Time old_time = base::Time::Now() - base::TimeDelta::FromDays(1);
   base::File foo_file(foo_name, base::File::FLAG_OPEN | base::File::FLAG_READ |
                                     base::File::FLAG_WRITE);
   ASSERT_TRUE(foo_file.IsValid());
-  foo_file.SetTimes(old_time, old_time);
+
+  // Start by setting the modified time to something old to avoid clock
+  // resolution issues.
+#if defined(OS_WIN)
+  FILETIME last_access_filetime = {};
+  FILETIME last_modified_filetime = {};
+  ASSERT_TRUE(::SetFileTime(foo_file.GetPlatformFile(), nullptr,
+                            &last_access_filetime, &last_modified_filetime));
+#else
+  timespec ts_times[2] = {};
+  ASSERT_EQ(futimens(foo_file.GetPlatformFile(), ts_times), 0);
+#endif
 
   // Read the current time to avoid timer resolution issues when comparing
   // below.

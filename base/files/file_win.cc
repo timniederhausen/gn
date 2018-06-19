@@ -169,15 +169,6 @@ bool File::SetLength(int64_t length) {
            FALSE));
 }
 
-bool File::SetTimes(Time last_access_time, Time last_modified_time) {
-  DCHECK(IsValid());
-
-  FILETIME last_access_filetime = last_access_time.ToFileTime();
-  FILETIME last_modified_filetime = last_modified_time.ToFileTime();
-  return (::SetFileTime(file_.Get(), NULL, &last_access_filetime,
-                        &last_modified_filetime) != FALSE);
-}
-
 bool File::GetInfo(Info* info) {
   DCHECK(IsValid());
 
@@ -192,9 +183,11 @@ bool File::GetInfo(Info* info) {
   info->is_directory =
       (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
   info->is_symbolic_link = false;  // Windows doesn't have symbolic links.
-  info->last_modified = Time::FromFileTime(file_info.ftLastWriteTime);
-  info->last_accessed = Time::FromFileTime(file_info.ftLastAccessTime);
-  info->creation_time = Time::FromFileTime(file_info.ftCreationTime);
+  info->last_modified =
+      *reinterpret_cast<uint64_t*>(&file_info.ftLastWriteTime);
+  info->last_accessed =
+      *reinterpret_cast<uint64_t*>(&file_info.ftLastAccessTime);
+  info->creation_time = *reinterpret_cast<uint64_t*>(&file_info.ftCreationTime);
   return true;
 }
 
