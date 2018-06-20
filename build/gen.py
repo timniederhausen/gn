@@ -237,7 +237,6 @@ def write_gn_ninja(path, options):
         'base/files/scoped_temp_dir.cc',
         'base/json/json_parser.cc',
         'base/json/json_reader.cc',
-        'base/json/json_string_value_serializer.cc',
         'base/json/json_writer.cc',
         'base/json/string_escape.cc',
         'base/logging.cc',
@@ -487,11 +486,7 @@ def write_gn_ninja(path, options):
     static_libraries['base']['sources'].extend([
         'base/files/file_util_mac.mm',
         'base/mac/bundle_locations.mm',
-        'base/mac/dispatch_source_mach.cc',
         'base/mac/foundation_util.mm',
-        'base/mac/mach_logging.cc',
-        'base/mac/scoped_mach_port.cc',
-        'base/mac/scoped_nsautorelease_pool.mm',
         'base/strings/sys_string_conversions_mac.mm',
     ])
 
