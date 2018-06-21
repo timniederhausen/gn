@@ -2,17 +2,49 @@
 # Package documentation for [gn]()
 ## Table of Contents
 
+**[Recipe Modules](#Recipe-Modules)**
+  * [windows_sdk](#recipe_modules-windows_sdk)
+
 **[Recipes](#Recipes)**
   * [gn](#recipes-gn) &mdash; Recipe for building GN.
+  * [windows_sdk:examples/full](#recipes-windows_sdk_examples_full)
+## Recipe Modules
+
+### *recipe_modules* / [windows\_sdk](/infra/recipe_modules/windows_sdk)
+
+[DEPS](/infra/recipe_modules/windows_sdk/__init__.py#5): [recipe\_engine/cipd][recipe_engine/recipe_modules/cipd], [recipe\_engine/context][recipe_engine/recipe_modules/context], [recipe\_engine/json][recipe_engine/recipe_modules/json], [recipe\_engine/path][recipe_engine/recipe_modules/path], [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/step][recipe_engine/recipe_modules/step]
+
+#### **class [WindowsSDKApi](/infra/recipe_modules/windows_sdk/api.py#10)([RecipeApi][recipe_engine/wkt/RecipeApi]):**
+
+API for using Windows SDK distributed via CIPD.
+
+&emsp; **@contextmanager**<br>&mdash; **def [\_\_call\_\_](/infra/recipe_modules/windows_sdk/api.py#18)(self, path=None, version=None, enabled=True):**
+
+Setups the SDK environment when enabled.
+
+Args:
+  path (path): Path to a directory where to install the SDK
+    (default is '[start_dir]/cipd/windows_sdk')
+  version (str): CIPD instance ID, tag or ref of the SDK
+    (default is set via $infra/windows_sdk.version property)
+  enabled (bool): Whether the SDK should be used or not.
+
+Raises:
+    StepFailure or InfraFailure.
 ## Recipes
 
 ### *recipes* / [gn](/infra/recipes/gn.py)
 
-[DEPS](/infra/recipes/gn.py#6): [recipe\_engine/buildbucket][recipe_engine/recipe_modules/buildbucket], [recipe\_engine/cipd][recipe_engine/recipe_modules/cipd], [recipe\_engine/context][recipe_engine/recipe_modules/context], [recipe\_engine/json][recipe_engine/recipe_modules/json], [recipe\_engine/path][recipe_engine/recipe_modules/path], [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/properties][recipe_engine/recipe_modules/properties], [recipe\_engine/python][recipe_engine/recipe_modules/python], [recipe\_engine/step][recipe_engine/recipe_modules/step]
+[DEPS](/infra/recipes/gn.py#6): [windows\_sdk](#recipe_modules-windows_sdk), [recipe\_engine/buildbucket][recipe_engine/recipe_modules/buildbucket], [recipe\_engine/cipd][recipe_engine/recipe_modules/cipd], [recipe\_engine/context][recipe_engine/recipe_modules/context], [recipe\_engine/json][recipe_engine/recipe_modules/json], [recipe\_engine/path][recipe_engine/recipe_modules/path], [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/properties][recipe_engine/recipe_modules/properties], [recipe\_engine/python][recipe_engine/recipe_modules/python], [recipe\_engine/step][recipe_engine/recipe_modules/step]
 
 Recipe for building GN.
 
-&mdash; **def [RunSteps](/infra/recipes/gn.py#19)(api):**
+&mdash; **def [RunSteps](/infra/recipes/gn.py#20)(api):**
+### *recipes* / [windows\_sdk:examples/full](/infra/recipe_modules/windows_sdk/examples/full.py)
+
+[DEPS](/infra/recipe_modules/windows_sdk/examples/full.py#5): [windows\_sdk](#recipe_modules-windows_sdk), [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/properties][recipe_engine/recipe_modules/properties], [recipe\_engine/step][recipe_engine/recipe_modules/step]
+
+&mdash; **def [RunSteps](/infra/recipe_modules/windows_sdk/examples/full.py#13)(api):**
 
 [recipe_engine/recipe_modules/buildbucket]: https://chromium.googlesource.com/infra/luci/recipes-py.git/+/40699af88c76d65ef1b3d364de221611603e2dc6/README.recipes.md#recipe_modules-buildbucket
 [recipe_engine/recipe_modules/cipd]: https://chromium.googlesource.com/infra/luci/recipes-py.git/+/40699af88c76d65ef1b3d364de221611603e2dc6/README.recipes.md#recipe_modules-cipd
@@ -23,3 +55,4 @@ Recipe for building GN.
 [recipe_engine/recipe_modules/properties]: https://chromium.googlesource.com/infra/luci/recipes-py.git/+/40699af88c76d65ef1b3d364de221611603e2dc6/README.recipes.md#recipe_modules-properties
 [recipe_engine/recipe_modules/python]: https://chromium.googlesource.com/infra/luci/recipes-py.git/+/40699af88c76d65ef1b3d364de221611603e2dc6/README.recipes.md#recipe_modules-python
 [recipe_engine/recipe_modules/step]: https://chromium.googlesource.com/infra/luci/recipes-py.git/+/40699af88c76d65ef1b3d364de221611603e2dc6/README.recipes.md#recipe_modules-step
+[recipe_engine/wkt/RecipeApi]: https://chromium.googlesource.com/infra/luci/recipes-py.git/+/40699af88c76d65ef1b3d364de221611603e2dc6/recipe_engine/recipe_api.py#1006
