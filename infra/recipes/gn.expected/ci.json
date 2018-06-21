@@ -20,7 +20,7 @@
       "git",
       "fetch",
       "https://gn.googlesource.com/gn",
-      "refs/heads/master"
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     ],
     "cwd": "[START_DIR]\\gn",
     "infra_step": true,
@@ -38,33 +38,6 @@
     "cwd": "[START_DIR]\\gn",
     "infra_step": true,
     "name": "git.checkout",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
-    ]
-  },
-  {
-    "cmd": [
-      "git",
-      "fetch",
-      "https://gn-review.googlesource.com/gn",
-      "refs/changes/00/1000/1"
-    ],
-    "cwd": "[START_DIR]\\gn",
-    "infra_step": true,
-    "name": "git.fetch 1000/1",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
-    ]
-  },
-  {
-    "cmd": [
-      "git",
-      "cherry-pick",
-      "FETCH_HEAD"
-    ],
-    "cwd": "[START_DIR]\\gn",
-    "infra_step": true,
-    "name": "git.cherry-pick 1000/1",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
     ]
@@ -369,6 +342,28 @@
     "name": "release.test",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "cipd.bat",
+      "pkg-build",
+      "-pkg-def",
+      "{\"data\": [{\"file\": \"gn.exe\"}, {\"version_file\": \".versions/gn.exe.cipd_version\"}], \"install_mode\": \"copy\", \"package\": \"gn/gn/${platform}\", \"root\": \"[START_DIR]\\\\gn\\\\out\"}",
+      "-out",
+      "[CLEANUP]\\gn.cipd",
+      "-json-output",
+      "/path/to/tmp/json"
+    ],
+    "name": "build gn/gn/${platform}",
+    "~followup_annotations": [
+      "@@@STEP_LOG_LINE@json.output@{@@@",
+      "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
+      "@@@STEP_LOG_LINE@json.output@    \"instance_id\": \"40-chars-fake-of-the-package-instance_id\", @@@",
+      "@@@STEP_LOG_LINE@json.output@    \"package\": \"gn/gn/${platform}\"@@@",
+      "@@@STEP_LOG_LINE@json.output@  }@@@",
+      "@@@STEP_LOG_LINE@json.output@}@@@",
+      "@@@STEP_LOG_END@json.output@@@"
     ]
   },
   {

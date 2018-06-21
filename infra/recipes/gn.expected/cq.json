@@ -20,7 +20,7 @@
       "git",
       "fetch",
       "https://gn.googlesource.com/gn",
-      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      "refs/heads/master"
     ],
     "cwd": "[START_DIR]\\gn",
     "infra_step": true,
@@ -38,6 +38,33 @@
     "cwd": "[START_DIR]\\gn",
     "infra_step": true,
     "name": "git.checkout",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "git",
+      "fetch",
+      "https://gn.googlesource.com/gn",
+      "refs/changes/00/1000/1"
+    ],
+    "cwd": "[START_DIR]\\gn",
+    "infra_step": true,
+    "name": "git.fetch 1000/1",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "git",
+      "cherry-pick",
+      "FETCH_HEAD"
+    ],
+    "cwd": "[START_DIR]\\gn",
+    "infra_step": true,
+    "name": "git.cherry-pick 1000/1",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
     ]
