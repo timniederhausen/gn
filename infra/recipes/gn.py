@@ -100,7 +100,19 @@ def RunSteps(api, repository):
   if build_input.gerrit_changes:
     return
 
-  cipd_pkg_name = 'gn/gn/${platform}'
+  # TODO: Use ${platform} after crbug.com/855703 is fixed and deployed.
+  platform = '%s-%s' % (api.platform.name.replace('win', 'windows'), {
+      'intel': {
+          32: '386',
+          64: 'amd64',
+      },
+      'arm': {
+          32: 'armv6',
+          64: 'arm64',
+      },
+  }[api.platform.arch][api.platform.bits])
+
+  cipd_pkg_name = 'gn/gn/' + platform
   gn = 'gn' + ('.exe' if api.platform.is_win else '')
 
   pkg_def = api.cipd.PackageDefinition(
@@ -158,8 +170,8 @@ def GenTests(api):
       git_repo='gn.googlesource.com/gn',
       revision=REVISION,
   ) + api.step_data('rev-parse', api.raw_io.stream_output(REVISION)) +
-         api.step_data('cipd search gn/gn/${platform} git_revision:' + REVISION,
-                       api.cipd.example_search('gn/gn/${platform}',
+         api.step_data('cipd search gn/gn/linux-amd64 git_revision:' + REVISION,
+                       api.cipd.example_search('gn/gn/linux-amd64',
                                                ['git_revision:' + REVISION])))
 
   yield (api.test('cipd_register') + api.buildbucket.ci_build(
@@ -167,5 +179,5 @@ def GenTests(api):
       git_repo='gn.googlesource.com/gn',
       revision=REVISION,
   ) + api.step_data('rev-parse', api.raw_io.stream_output(REVISION)) +
-         api.step_data('cipd search gn/gn/${platform} git_revision:' + REVISION,
-                       api.cipd.example_search('gn/gn/${platform}', [])))
+         api.step_data('cipd search gn/gn/linux-amd64 git_revision:' + REVISION,
+                       api.cipd.example_search('gn/gn/linux-amd64', [])))

@@ -39,7 +39,7 @@ Raises:
 
 Recipe for building GN.
 
-&mdash; **def [RunSteps](/infra/recipes/gn.py#29)(api, repository):**
+&mdash; **def [RunSteps](/infra/recipes/gn.py#28)(api, repository):**
 ### *recipes* / [windows\_sdk:examples/full](/infra/recipe_modules/windows_sdk/examples/full.py)
 
 [DEPS](/infra/recipe_modules/windows_sdk/examples/full.py#5): [windows\_sdk](#recipe_modules-windows_sdk), [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/properties][recipe_engine/recipe_modules/properties], [recipe\_engine/step][recipe_engine/recipe_modules/step]
