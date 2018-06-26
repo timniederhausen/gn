@@ -156,10 +156,10 @@ def write_gn_ninja(path, options):
     ld = os.environ.get('LD', 'link.exe')
     ar = os.environ.get('AR', 'lib.exe')
   else:
-    cc = os.environ.get('CC', 'cc')
-    cxx = os.environ.get('CXX', 'c++')
+    cc = os.environ.get('CC', 'clang')
+    cxx = os.environ.get('CXX', 'clang++')
     ld = cxx
-    ar = os.environ.get('AR', 'ar')
+    ar = os.environ.get('AR', 'llvm-ar')
 
   cflags = os.environ.get('CFLAGS', '').split()
   cflags_cc = os.environ.get('CXXFLAGS', '').split()
@@ -172,20 +172,17 @@ def write_gn_ninja(path, options):
     if options.debug:
       cflags.extend(['-O0', '-g'])
     else:
-      # The linux::ppc64 BE binary doesn't "work" when
-      # optimization level is set to 2 (0 works fine).
-      # Note that the current bootstrap script has no way to detect host_cpu.
-      # This can be easily fixed once we start building using a GN binary,
-      # as the optimization flag can then just be set using the
-      # logic inside //build/toolchain.
-      cflags.extend(['-O2', '-g0'])
+      cflags.extend(['-O3', '-flto'])
+      ldflags.append('-Wl,-S' if is_mac else '-Wl,-strip-all')
+      ldflags.append('-flto')
 
     cflags.extend([
         '-D_FILE_OFFSET_BITS=64',
         '-D__STDC_CONSTANT_MACROS', '-D__STDC_FORMAT_MACROS',
         '-pthread',
         '-pipe',
-        '-fno-exceptions'
+        '-fno-exceptions',
+        '-fno-rtti',
     ])
     cflags_cc.extend(['-std=c++14', '-Wno-c++11-narrowing'])
   elif is_win:
