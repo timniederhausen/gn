@@ -172,7 +172,7 @@ def write_gn_ninja(path, options):
     if options.debug:
       cflags.extend(['-O0', '-g'])
     else:
-      cflags.extend(['-O3', '-flto'])
+      cflags.extend(['-O3', '-flto', '-DNDEBUG'])
       ldflags.append('-Wl,-S' if is_mac else '-Wl,-strip-all')
       ldflags.append('-flto')
 
