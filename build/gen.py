@@ -7,7 +7,6 @@
 
 import contextlib
 import errno
-import logging
 import optparse
 import os
 import platform
@@ -15,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib2
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(SCRIPT_DIR)
@@ -30,20 +30,62 @@ def main(argv):
   parser = optparse.OptionParser(description=sys.modules[__name__].__doc__)
   parser.add_option('-d', '--debug', action='store_true',
                     help='Do a debug build. Defaults to release build.')
-  parser.add_option('-v', '--verbose', action='store_true',
-                    help='Log more details')
   options, args = parser.parse_args(argv)
 
   if args:
     parser.error('Unrecognized command line arguments: %s.' % ', '.join(args))
 
-  logging.basicConfig(level=logging.DEBUG if options.verbose else logging.ERROR)
+  linux_sysroot = UpdateLinuxSysroot() if is_linux else None
 
   out_dir = os.path.join(REPO_ROOT, 'out')
   if not os.path.isdir(out_dir):
     os.makedirs(out_dir)
-  write_gn_ninja(os.path.join(out_dir, 'build.ninja'), options)
+  write_gn_ninja(os.path.join(out_dir, 'build.ninja'), options, linux_sysroot)
   return 0
+
+
+def UpdateLinuxSysroot():
+  # Sysroot revision from:
+  # https://cs.chromium.org/chromium/src/build/linux/sysroot_scripts/sysroots.json
+  server = 'https://commondatastorage.googleapis.com'
+  path = 'chrome-linux-sysroot/toolchain'
+  revision = '1015a998c2adf188813cca60b558b0ea1a0b6ced'
+  filename = 'debian_sid_amd64_sysroot.tar.xz'
+
+  url = '%s/%s/%s/%s' % (server, path, revision, filename)
+
+  sysroot = os.path.join(SCRIPT_DIR, os.pardir, '.linux-sysroot')
+
+  stamp = os.path.join(sysroot, '.stamp')
+  if os.path.exists(stamp):
+    with open(stamp) as s:
+      if s.read() == url:
+        return sysroot
+
+  print 'Installing Debian root image from %s' % url
+
+  if os.path.isdir(sysroot):
+    shutil.rmtree(sysroot)
+  os.mkdir(sysroot)
+  tarball = os.path.join(sysroot, filename)
+  print 'Downloading %s' % url
+
+  for _ in range(3):
+    response = urllib2.urlopen(url)
+    with open(tarball, 'wb') as f:
+      f.write(response.read())
+    break
+  else:
+    raise Exception('Failed to download %s' % url)
+
+  subprocess.check_call(['tar', 'xf', tarball, '-C', sysroot])
+
+  os.remove(tarball)
+
+  with open(stamp, 'w') as s:
+    s.write(url)
+
+  return sysroot
 
 
 def write_generic_ninja(path, static_libraries, executables,
@@ -149,7 +191,7 @@ def write_generic_ninja(path, static_libraries, executables,
             os.path.relpath(template_filename, os.path.dirname(path)) + '\n')
 
 
-def write_gn_ninja(path, options):
+def write_gn_ninja(path, options, linux_sysroot):
   if is_win:
     cc = os.environ.get('CC', 'cl.exe')
     cxx = os.environ.get('CXX', 'cl.exe')
@@ -185,6 +227,18 @@ def write_gn_ninja(path, options):
         '-fno-rtti',
     ])
     cflags_cc.extend(['-std=c++14', '-Wno-c++11-narrowing'])
+
+    if is_linux:
+      # Use the sid sysroot that UpdateLinuxSysroot() downloads. We need to
+      # force the used of libstdc++ for now because libc++ is not in that
+      # sysroot and we don't currently have a local build of that. We should
+      # probably resolve this and (re-)add a way to build against libc++.
+      cflags.extend(['--sysroot=' + linux_sysroot,
+                     '-stdlib=libstdc++'])
+      ldflags.extend(['--sysroot=' + linux_sysroot,
+                      '-rtlib=libgcc',
+                      '-static-libstdc++',
+                      '-stdlib=libstdc++'])
   elif is_win:
     if not options.debug:
       cflags.extend(['/Ox', '/DNDEBUG', '/GL'])
