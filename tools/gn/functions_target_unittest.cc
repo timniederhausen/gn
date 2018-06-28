@@ -88,6 +88,27 @@ TEST_F(FunctionsTarget, CheckNotNeeded) {
   error_input.parsed()->Execute(setup.scope(), &err);
   ASSERT_TRUE(err.has_error());
   EXPECT_EQ("Not supported with a variable list.", err.message());
+
+  TestParseInput template_input(
+      R"(# Test that not_needed() propagates through templates correctly;
+      # no error should arise from not using "a".
+      template("inner_templ") {
+        source_set(target_name) {
+          not_needed(invoker, [ "a" ])
+        }
+      }
+      template("outer_templ") {
+        inner_templ(target_name) {
+          forward_variables_from(invoker, "*")
+        }
+      }
+      outer_templ("foo") {
+        a = 1
+      })");
+  ASSERT_FALSE(template_input.has_error());
+  err = Err();
+  template_input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message();
 }
 
 // Checks that the defaults applied to a template invoked by target() use
