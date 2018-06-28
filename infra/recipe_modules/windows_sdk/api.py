@@ -55,8 +55,9 @@ class WindowsSDKApi(recipe_api.RecipeApi):
       version (str): CIPD instance ID, tag or ref.
     """
     with self.m.context(infra_steps=True):
-      sdk_package = 'chrome_internal/third_party/sdk/windows'
-      self.m.cipd.ensure(sdk_dir, {sdk_package: sdk_version})
+      pkgs = self.m.cipd.EnsureFile()
+      pkgs.add_package('chrome_internal/third_party/sdk/windows', sdk_version)
+      self.m.cipd.ensure(sdk_dir, pkgs)
       return sdk_dir
 
   def _sdk_env(self, sdk_dir):

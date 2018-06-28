@@ -49,7 +49,7 @@
       "-root",
       "[START_DIR]/cipd",
       "-ensure-file",
-      "fuchsia/clang/${platform} goma\ninfra/ninja/${platform} version:1.8.2",
+      "infra/ninja/${platform} version:1.8.2\nfuchsia/clang/${platform} goma",
       "-json-output",
       "/path/to/tmp/json"
     ],

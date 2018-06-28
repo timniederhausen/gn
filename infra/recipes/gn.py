@@ -49,17 +49,11 @@ def RunSteps(api, repository):
 
   with api.context(infra_steps=True):
     cipd_dir = api.path['start_dir'].join('cipd')
-    packages = {
-        'infra/ninja/${platform}': 'version:1.8.2',
-    }
-    packages.update({
-        'linux': {
-            'fuchsia/clang/${platform}': 'goma',
-        },
-        'mac': {},
-        'win': {},
-    }[api.platform.name])
-    api.cipd.ensure(cipd_dir, packages)
+    pkgs = api.cipd.EnsureFile()
+    pkgs.add_package('infra/ninja/${platform}', 'version:1.8.2')
+    if api.platform.is_linux:
+      pkgs.add_package('fuchsia/clang/${platform}', 'goma')
+    api.cipd.ensure(cipd_dir, pkgs)
 
   env = {
       'linux': {
