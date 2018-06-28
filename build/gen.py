@@ -245,6 +245,11 @@ def write_gn_ninja(path, options, linux_sysroot):
           '-lgcc_s',
           '-lpthread',
       ])
+    elif is_mac:
+      min_mac_version_flag = '-mmacosx-version-min=10.9'
+      cflags.append(min_mac_version_flag)
+      ldflags.append(min_mac_version_flag)
+
   elif is_win:
     if not options.debug:
       cflags.extend(['/Ox', '/DNDEBUG', '/GL'])

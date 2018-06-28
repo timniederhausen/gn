@@ -13,6 +13,10 @@
 #include "tools/gn/test_with_scope.h"
 #include "util/test/test.h"
 
+#if defined(OS_LINUX) || defined(OS_MACOSX)
+#include <sys/time.h>
+#endif
+
 namespace {
 
 // Returns true on success, false if write_file signaled an error.
@@ -82,8 +86,8 @@ TEST_F(WriteFileTest, WithData) {
   ASSERT_TRUE(::SetFileTime(foo_file.GetPlatformFile(), nullptr,
                             &last_access_filetime, &last_modified_filetime));
 #else
-  timespec ts_times[2] = {};
-  ASSERT_EQ(futimens(foo_file.GetPlatformFile(), ts_times), 0);
+  struct timeval times[2] = {};
+  ASSERT_EQ(futimes(foo_file.GetPlatformFile(), times), 0);
 #endif
 
   // Read the current time to avoid timer resolution issues when comparing
