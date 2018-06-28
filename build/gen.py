@@ -234,11 +234,17 @@ def write_gn_ninja(path, options, linux_sysroot):
       # sysroot and we don't currently have a local build of that. We should
       # probably resolve this and (re-)add a way to build against libc++.
       cflags.extend(['--sysroot=' + linux_sysroot,
-                     '-stdlib=libstdc++'])
+                     '-stdlib=libstdc++',
+                    ])
       ldflags.extend(['--sysroot=' + linux_sysroot,
-                      '-rtlib=libgcc',
                       '-static-libstdc++',
-                      '-stdlib=libstdc++'])
+                      '-stdlib=libstdc++',
+                      '-Wl,--as-needed',
+                     ])
+      libs.extend([
+          '-lgcc_s',
+          '-lpthread',
+      ])
   elif is_win:
     if not options.debug:
       cflags.extend(['/Ox', '/DNDEBUG', '/GL'])
@@ -523,14 +529,6 @@ def write_gn_ninja(path, options, linux_sysroot):
   if is_linux:
     static_libraries['base']['sources'].extend([
         'base/strings/sys_string_conversions_posix.cc',
-    ])
-    libs.extend([
-        '-lc',
-        '-lgcc_s',
-        '-lm',
-        '-lpthread',
-        '-lrt',
-        '-latomic',
     ])
 
   if is_mac:
