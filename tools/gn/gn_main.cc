@@ -16,13 +16,7 @@
 #include "util/msg_loop.h"
 #include "util/sys_info.h"
 
-// Only the GN-generated build makes this header for now.
-// TODO(brettw) consider adding this if we need it in GYP.
-#if defined(GN_BUILD)
-#include "tools/gn/last_commit_position.h"
-#else
-#define LAST_COMMIT_POSITION "UNKNOWN"
-#endif
+#include "out/last_commit_position.h"
 
 namespace {
 
