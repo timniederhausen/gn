@@ -19,6 +19,7 @@
     "cmd": [
       "git",
       "fetch",
+      "--tags",
       "https://gn.googlesource.com/gn",
       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     ],

@@ -36,7 +36,8 @@ def RunSteps(api, repository):
       ref = (
           build_input.gitiles_commit.id
           if build_input.gitiles_commit else 'refs/heads/master')
-      api.step('fetch', ['git', 'fetch', repository, ref])
+      # Fetch tags so `git describe` works.
+      api.step('fetch', ['git', 'fetch', '--tags', repository, ref])
       api.step('checkout', ['git', 'checkout', 'FETCH_HEAD'])
       for change in build_input.gerrit_changes:
         api.step('fetch %s/%s' % (change.change, change.patchset), [
