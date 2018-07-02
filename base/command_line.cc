@@ -72,10 +72,12 @@ bool IsSwitch(const CommandLine::StringType& string,
   return true;
 }
 
-// Append switches and arguments, keeping switches before arguments.
+// Append switches and arguments, keeping switches before arguments
+// if handle_switches is true.
 void AppendSwitchesAndArguments(CommandLine* command_line,
-                                const CommandLine::StringVector& argv) {
-  bool parse_switches = true;
+                                const CommandLine::StringVector& argv,
+                                bool handle_switches) {
+  bool parse_switches = handle_switches;
   for (size_t i = 1; i < argv.size(); ++i) {
     CommandLine::StringType arg = argv[i];
 #if defined(OS_WIN)
@@ -155,18 +157,21 @@ string16 QuoteForCommandLineToArgvW(const string16& arg,
 
 }  // namespace
 
-CommandLine::CommandLine(NoProgram no_program) : argv_(1), begin_args_(1) {}
+CommandLine::CommandLine(NoProgram no_program)
+    : argv_(1), begin_args_(1), parse_switches_(true) {}
 
-CommandLine::CommandLine(const FilePath& program) : argv_(1), begin_args_(1) {
+CommandLine::CommandLine(const FilePath& program)
+    : argv_(1), begin_args_(1), parse_switches_(true) {
   SetProgram(program);
 }
 
 CommandLine::CommandLine(int argc, const CommandLine::CharType* const* argv)
-    : argv_(1), begin_args_(1) {
+    : argv_(1), begin_args_(1), parse_switches_(true) {
   InitFromArgv(argc, argv);
 }
 
-CommandLine::CommandLine(const StringVector& argv) : argv_(1), begin_args_(1) {
+CommandLine::CommandLine(const StringVector& argv)
+    : argv_(1), begin_args_(1), parse_switches_(true) {
   InitFromArgv(argv);
 }
 
@@ -257,7 +262,7 @@ void CommandLine::InitFromArgv(const StringVector& argv) {
   switches_.clear();
   begin_args_ = 1;
   SetProgram(argv.empty() ? FilePath() : FilePath(argv[0]));
-  AppendSwitchesAndArguments(this, argv);
+  AppendSwitchesAndArguments(this, argv, parse_switches_);
 }
 
 FilePath CommandLine::GetProgram() const {
@@ -395,7 +400,7 @@ void CommandLine::AppendArguments(const CommandLine& other,
                                   bool include_program) {
   if (include_program)
     SetProgram(other.GetProgram());
-  AppendSwitchesAndArguments(this, other.argv());
+  AppendSwitchesAndArguments(this, other.argv(), parse_switches_);
 }
 
 void CommandLine::PrependWrapper(const CommandLine::StringType& wrapper) {
@@ -451,7 +456,7 @@ CommandLine::StringType CommandLine::GetArgumentsStringInternal(
     bool quote_placeholders) const {
   StringType params;
   // Append switches and arguments.
-  bool parse_switches = true;
+  bool parse_switches = parse_switches_;
   for (size_t i = 1; i < argv_.size(); ++i) {
     StringType arg = argv_[i];
     StringType switch_string;

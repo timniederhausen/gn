@@ -153,6 +153,13 @@ class CommandLine {
   FilePath GetProgram() const;
   void SetProgram(const FilePath& program);
 
+  // Enables/disables the parsing of switches for future argument appending.
+  // True by default, but can be set to false to ensure that no re-ordering
+  // is done.
+  void SetParseSwitches(bool parse_switches) {
+    parse_switches_ = parse_switches;
+  }
+
   // Returns true if this command line contains the given switch.
   // Switch names must be lowercase.
   // The second override provides an optimized version to avoid inlining codegen
@@ -238,6 +245,9 @@ class CommandLine {
 
   // The index after the program and switches, any arguments start here.
   size_t begin_args_;
+
+  // Whether or not to parse arguments that look like switches as switches.
+  bool parse_switches_;
 };
 
 }  // namespace base
