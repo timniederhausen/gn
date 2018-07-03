@@ -72,9 +72,14 @@ std::string StripHashFromLine(const base::StringPiece& line, bool pad) {
   // normal comment that has a space after the # will be indented 4 spaces
   // (which makes our formatting come out nicely). If the comment is indented
   // from there, we want to preserve that indenting.
+  std::string line_stripped = line.substr(line.find('#') + 1).as_string();
   if (pad)
-    return "   " + line.substr(line.find('#') + 1).as_string();
-  return line.substr(line.find('#') + 1).as_string();
+    return "   " + line_stripped;
+
+  // If not padding, strip the leading space if present.
+  if (!line_stripped.empty() && line_stripped[0] == ' ')
+    return line_stripped.substr(1);
+  return line_stripped;
 }
 
 // Tries to find the comment before the setting of the given value.
