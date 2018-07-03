@@ -11,6 +11,7 @@
 #include "base/timer/elapsed_timer.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/commands.h"
+#include "tools/gn/compile_commands_writer.h"
 #include "tools/gn/eclipse_writer.h"
 #include "tools/gn/json_project_writer.h"
 #include "tools/gn/ninja_target_writer.h"
@@ -49,6 +50,7 @@ const char kSwitchWorkspace[] = "workspace";
 const char kSwitchJsonFileName[] = "json-file-name";
 const char kSwitchJsonIdeScript[] = "json-ide-script";
 const char kSwitchJsonIdeScriptArgs[] = "json-ide-script-args";
+const char kSwitchExportCompileCommands[] = "export-compile-commands";
 
 // Collects Ninja rules for each toolchain. The lock protectes the rules.
 struct TargetWriteInfo {
@@ -279,6 +281,26 @@ bool RunIdeWriter(const std::string& ide,
   return false;
 }
 
+bool RunCompileCommandsWriter(const BuildSettings* build_settings,
+                              const Builder& builder,
+                              Err* err) {
+  const base::CommandLine* command_line =
+      base::CommandLine::ForCurrentProcess();
+  bool quiet = command_line->HasSwitch(switches::kQuiet);
+  base::ElapsedTimer timer;
+
+  std::string file_name = "compile_commands.json";
+
+  bool res = CompileCommandsWriter::RunAndWriteFiles(build_settings, builder,
+                                                     file_name, quiet, err);
+  if (res && !quiet) {
+    OutputString("Generating compile_commands took " +
+                 base::Int64ToString(timer.Elapsed().InMilliseconds()) +
+                 "ms\n");
+  }
+  return res;
+}
+
 }  // namespace
 
 const char kGen[] = "gen";
@@ -451,6 +473,13 @@ int RunGen(const std::vector<std::string>& args) {
   if (command_line->HasSwitch(kSwitchIde) &&
       !RunIdeWriter(command_line->GetSwitchValueASCII(kSwitchIde),
                     &setup->build_settings(), setup->builder(), &err)) {
+    err.PrintToStdout();
+    return 1;
+  }
+
+  if (command_line->HasSwitch(kSwitchExportCompileCommands) &&
+      !RunCompileCommandsWriter(&setup->build_settings(), setup->builder(),
+                                &err)) {
     err.PrintToStdout();
     return 1;
   }

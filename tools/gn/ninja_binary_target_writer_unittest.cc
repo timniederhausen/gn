@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "tools/gn/config.h"
+#include "tools/gn/ninja_target_command_util.h"
 #include "tools/gn/scheduler.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scheduler.h"

@@ -37,21 +37,6 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   // will be empty if there are no inputs.
   OutputFile WriteInputsStampAndGetDep() const;
 
-  // has_precompiled_headers is set when this substitution matches a tool type
-  // that supports precompiled headers, and this target supports precompiled
-  // headers. It doesn't indicate if the tool has precompiled headers (this
-  // will be looked up by this function).
-  //
-  // The tool_type indicates the corresponding tool for flags that are
-  // tool-specific (e.g. "cflags_c"). For non-tool-specific flags (e.g.
-  // "defines") tool_type should be TYPE_NONE.
-  void WriteOneFlag(SubstitutionType subst_enum,
-                    bool has_precompiled_headers,
-                    Toolchain::ToolType tool_type,
-                    const std::vector<std::string>& (ConfigValues::*getter)()
-                        const,
-                    EscapeOptions flag_escape_options);
-
   // Writes build lines required for precompiled headers. Any generated
   // object files will be appended to the |object_files|. Any generated
   // non-object files (for instance, .gch files from a GCC toolchain, are
@@ -140,9 +125,6 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   void WriteOrderOnlyDependencies(
       const UniqueVector<const Target*>& non_linkable_deps);
 
-  // Returns the computed name of the Windows .pch file for the given
-  // tool type. The tool must support precompiled headers.
-  OutputFile GetWindowsPCHFile(Toolchain::ToolType tool_type) const;
 
   // Checks for duplicates in the given list of output files. If any duplicates
   // are found, throws an error and return false.
