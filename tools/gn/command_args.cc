@@ -181,11 +181,8 @@ void BuildArgJson(base::Value& dict,
       std::string location, comment;
       GetContextForValue(arg.override_value, &location, &line_no, &comment,
                          /*pad_comment=*/false);
-      // Omit file and line if set with --args (i.e. no file)
-      if (!location.empty()) {
-        override_dict.SetKey("file", base::Value(location));
-        override_dict.SetKey("line", base::Value(line_no));
-      }
+      override_dict.SetKey("file", base::Value(location));
+      override_dict.SetKey("line", base::Value(line_no));
     }
     dict.SetKey("current", std::move(override_dict));
   }
@@ -199,11 +196,8 @@ void BuildArgJson(base::Value& dict,
     std::string location;
     GetContextForValue(arg.default_value, &location, &line_no, &comment,
                        /*pad_comment=*/false);
-    // Only emit file and line if the value is overridden.
-    if (arg.has_override) {
-      default_dict.SetKey("file", base::Value(location));
-      default_dict.SetKey("line", base::Value(line_no));
-    }
+    default_dict.SetKey("file", base::Value(location));
+    default_dict.SetKey("line", base::Value(line_no));
   }
   dict.SetKey("default", std::move(default_dict));
   if (!comment.empty() && !short_only)
