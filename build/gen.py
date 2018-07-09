@@ -246,9 +246,8 @@ def WriteGNNinja(path, options, linux_sysroot):
     if options.debug:
       cflags.extend(['-O0', '-g'])
     else:
-      cflags.extend(['-O3', '-flto', '-DNDEBUG'])
+      cflags.extend(['-O3', '-DNDEBUG'])
       ldflags.append('-Wl,-S' if is_mac else '-Wl,-strip-all')
-      ldflags.append('-flto')
 
     cflags.extend([
         '-D_FILE_OFFSET_BITS=64',
