@@ -249,7 +249,7 @@ def WriteGNNinja(path, options, linux_sysroot):
   cflags_cc = os.environ.get('CXXFLAGS', '').split()
   ldflags = os.environ.get('LDFLAGS', '').split()
   libflags = os.environ.get('LIBFLAGS', '').split()
-  include_dirs = [REPO_ROOT]
+  include_dirs = [REPO_ROOT, os.path.dirname(path)]
   libs = []
 
   if is_posix:
@@ -269,16 +269,16 @@ def WriteGNNinja(path, options, linux_sysroot):
     ])
     cflags_cc.extend(['-std=c++14', '-Wno-c++11-narrowing'])
 
-    if linux_sysroot:
-      # Use the sid sysroot that UpdateLinuxSysroot() downloads. We need to
-      # force the used of libstdc++ for now because libc++ is not in that
-      # sysroot and we don't currently have a local build of that. We should
-      # probably resolve this and (re-)add a way to build against libc++.
-      cflags.extend(['--sysroot=' + linux_sysroot,
-                     '-stdlib=libstdc++',
-                    ])
-      ldflags.extend(['--sysroot=' + linux_sysroot,
-                      '-static-libstdc++',
+    if is_linux:
+      if linux_sysroot:
+        # Use the sid sysroot that UpdateLinuxSysroot() downloads. We need to
+        # force the used of libstdc++ for now because libc++ is not in that
+        # sysroot and we don't currently have a local build of that. We should
+        # probably resolve this and (re-)add a way to build against libc++.
+        cflags.append('--sysroot=' + linux_sysroot)
+        ldflags.append('--sysroot=' + linux_sysroot)
+      cflags.append('-stdlib=libstdc++')
+      ldflags.extend(['-static-libstdc++',
                       '-stdlib=libstdc++',
                       '-Wl,--as-needed',
                      ])
