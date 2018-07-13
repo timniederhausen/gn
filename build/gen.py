@@ -31,17 +31,26 @@ def main(argv):
   parser = optparse.OptionParser(description=sys.modules[__name__].__doc__)
   parser.add_option('-d', '--debug', action='store_true',
                     help='Do a debug build. Defaults to release build.')
+  parser.add_option('--no-sysroot', action='store_true',
+                    help='(Linux only) Do not build with the Debian sysroot.')
+  parser.add_option('--no-last-commit-position', action='store_true',
+                    help='Do not generate last_commit_position.h.')
+  parser.add_option('--out-path',
+                    help='The path to generate the build files in.')
   options, args = parser.parse_args(argv)
 
   if args:
     parser.error('Unrecognized command line arguments: %s.' % ', '.join(args))
 
-  linux_sysroot = UpdateLinuxSysroot() if is_linux else None
+  linux_sysroot = None
+  if is_linux and not options.no_sysroot:
+    linux_sysroot = UpdateLinuxSysroot()
 
-  out_dir = os.path.join(REPO_ROOT, 'out')
+  out_dir = options.out_path or os.path.join(REPO_ROOT, 'out')
   if not os.path.isdir(out_dir):
     os.makedirs(out_dir)
-  GenerateLastCommitPosition(os.path.join(out_dir, 'last_commit_position.h'))
+  if not options.no_last_commit_position:
+    GenerateLastCommitPosition(os.path.join(out_dir, 'last_commit_position.h'))
   WriteGNNinja(os.path.join(out_dir, 'build.ninja'), options, linux_sysroot)
   return 0
 
@@ -49,7 +58,8 @@ def main(argv):
 def GenerateLastCommitPosition(header):
   ROOT_TAG = 'initial-commit'
   describe_output = subprocess.check_output(
-      ['git', 'describe', 'HEAD', '--match', ROOT_TAG], shell=is_win)
+      ['git', 'describe', 'HEAD', '--match', ROOT_TAG], shell=is_win,
+      cwd=REPO_ROOT)
   mo = re.match(ROOT_TAG + '-(\d+)-g([0-9a-f]+)', describe_output)
   if not mo:
     raise ValueError(
@@ -259,7 +269,7 @@ def WriteGNNinja(path, options, linux_sysroot):
     ])
     cflags_cc.extend(['-std=c++14', '-Wno-c++11-narrowing'])
 
-    if is_linux:
+    if linux_sysroot:
       # Use the sid sysroot that UpdateLinuxSysroot() downloads. We need to
       # force the used of libstdc++ for now because libc++ is not in that
       # sysroot and we don't currently have a local build of that. We should
