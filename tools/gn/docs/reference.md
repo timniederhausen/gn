@@ -3398,7 +3398,7 @@
   toolchain definitions to ensure that it always reflects the appropriate
   value.
 
-  This value is not used internally by GN for any purpose. It is set it to the
+  This value is not used internally by GN for any purpose. It is set to the
   empty string ("") by default but is declared so that it can be overridden on
   the command line if so desired.
 
@@ -3412,7 +3412,7 @@
   toolchain definitions to ensure that it always reflects the appropriate
   value.
 
-  This value is not used internally by GN for any purpose. It is set it to the
+  This value is not used internally by GN for any purpose. It is set to the
   empty string ("") by default but is declared so that it can be overridden on
   the command line if so desired.
 
