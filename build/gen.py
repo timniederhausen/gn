@@ -31,6 +31,8 @@ def main(argv):
   parser = optparse.OptionParser(description=sys.modules[__name__].__doc__)
   parser.add_option('-d', '--debug', action='store_true',
                     help='Do a debug build. Defaults to release build.')
+  parser.add_option('--use-lto', action='store_true',
+                    help='Enable the use of LTO')
   parser.add_option('--no-sysroot', action='store_true',
                     help='(Linux only) Do not build with the Debian sysroot.')
   parser.add_option('--no-last-commit-position', action='store_true',
@@ -290,6 +292,10 @@ def WriteGNNinja(path, options, linux_sysroot):
       min_mac_version_flag = '-mmacosx-version-min=10.9'
       cflags.append(min_mac_version_flag)
       ldflags.append(min_mac_version_flag)
+
+    if options.use_lto:
+      cflags.extend(['-flto', '-fwhole-program-vtables'])
+      ldflags.extend(['-flto', '-fwhole-program-vtables'])
 
   elif is_win:
     if not options.debug:
