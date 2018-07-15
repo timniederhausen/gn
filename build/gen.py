@@ -258,7 +258,16 @@ def WriteGNNinja(path, options, linux_sysroot):
     if options.debug:
       cflags.extend(['-O0', '-g'])
     else:
-      cflags.extend(['-O3', '-DNDEBUG'])
+      cflags.append('-DNDEBUG')
+      cflags.append('-O3')
+      ldflags.append('-O3')
+      # Use -fdata-sections and -ffunction-sections to place each function
+      # or data item into its own section so --gc-sections can eliminate any
+      # unused functions and data items.
+      cflags.extend(['-fdata-sections', '-ffunction-sections'])
+      ldflags.extend(['-fdata-sections', '-ffunction-sections'])
+      ldflags.append('-Wl,-dead_strip' if is_mac else '-Wl,--gc-sections')
+      # Omit all symbol information from the output file.
       ldflags.append('-Wl,-S' if is_mac else '-Wl,-strip-all')
 
     cflags.extend([
