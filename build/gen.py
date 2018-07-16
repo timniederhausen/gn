@@ -269,6 +269,9 @@ def WriteGNNinja(path, options, linux_sysroot):
       ldflags.append('-Wl,-dead_strip' if is_mac else '-Wl,--gc-sections')
       # Omit all symbol information from the output file.
       ldflags.append('-Wl,-S' if is_mac else '-Wl,-strip-all')
+      # Enable identical code-folding.
+      if is_linux:
+        ldflags.append('-Wl,--icf=all')
 
     cflags.extend([
         '-D_FILE_OFFSET_BITS=64',
