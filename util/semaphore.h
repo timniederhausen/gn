@@ -15,7 +15,7 @@
 #include <windows.h>
 #elif defined(OS_MACOSX)
 #include <mach/mach.h>
-#elif defined(OS_LINUX)
+#elif defined(OS_LINUX) || defined(OS_AIX)
 #include <semaphore.h>
 #else
 #error Port.
@@ -35,7 +35,7 @@ class Semaphore {
 
 #if defined(OS_MACOSX)
   typedef semaphore_t NativeHandle;
-#elif defined(OS_LINUX)
+#elif defined(OS_LINUX) || defined(OS_AIX)
   typedef sem_t NativeHandle;
 #elif defined(OS_WIN)
   typedef HANDLE NativeHandle;

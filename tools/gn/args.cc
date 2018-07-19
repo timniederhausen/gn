@@ -294,6 +294,8 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
   os = "mac";
 #elif defined(OS_LINUX)
   os = "linux";
+#elif defined(OS_AIX)
+  os = "aix";
 #else
 #error Unknown OS type.
 #endif

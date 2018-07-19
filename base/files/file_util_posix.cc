@@ -47,6 +47,12 @@
 #include <grp.h>
 #endif
 
+// We need to do this on AIX due to some inconsistencies in how AIX
+// handles XOPEN_SOURCE and ALL_SOURCE.
+#if defined(OS_AIX)
+extern "C" char* mkdtemp(char* path);
+#endif
+
 namespace base {
 
 namespace {
