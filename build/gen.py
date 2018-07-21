@@ -33,6 +33,8 @@ def main(argv):
                     help='Do a debug build. Defaults to release build.')
   parser.add_option('--use-lto', action='store_true',
                     help='Enable the use of LTO')
+  parser.add_option('--use-icf', action='store_true',
+                    help='Enable the use of Identical Code Folding')
   parser.add_option('--no-sysroot', action='store_true',
                     help='(Linux only) Do not build with the Debian sysroot.')
   parser.add_option('--no-last-commit-position', action='store_true',
@@ -270,7 +272,7 @@ def WriteGNNinja(path, options, linux_sysroot):
       # Omit all symbol information from the output file.
       ldflags.append('-Wl,-S' if is_mac else '-Wl,-strip-all')
       # Enable identical code-folding.
-      if is_linux:
+      if options.use_icf:
         ldflags.append('-Wl,--icf=all')
 
     cflags.extend([
