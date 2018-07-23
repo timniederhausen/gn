@@ -39,4 +39,13 @@ When revising a change, use:
 which will add the new changes to the existing code review, rather than creating
 a new one.
 
-TODO: AUTHORS, CLA, etc.
+We ask that all contributors
+[sign Google's Contributor License Agreement](https://cla.developers.google.com/)
+(either individual or corporate as appropriate, select 'any other Google
+project').
+
+## Community
+
+You may ask questions and follow along w/ GN's development on Chromium's
+[gn-dev@](https://groups.google.com/a/chromium.org/forum/#!forum/gn-dev)
+Google Group.
