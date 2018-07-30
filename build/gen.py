@@ -247,7 +247,7 @@ def WriteGNNinja(path, options, linux_sysroot):
     cc = os.environ.get('CC', 'clang')
     cxx = os.environ.get('CXX', 'clang++')
     ld = cxx
-    ar = os.environ.get('AR', 'llvm-ar')
+    ar = os.environ.get('AR', 'ar')
 
   cflags = os.environ.get('CFLAGS', '').split()
   cflags_cc = os.environ.get('CXXFLAGS', '').split()
