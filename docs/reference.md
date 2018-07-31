@@ -745,6 +745,17 @@
   --json-ide-script-args=<argument>
       Optional second argument that will passed to executed script.
 ```
+
+#### **Compilation Database**
+
+```
+  --export-compile-commands
+      Produces a compile_commands.json file in the root of the build directory
+      containing an array of “command objects”, where each command object
+      specifies one way a translation unit is compiled in the project. This is
+      used for various Clang-based tooling, allowing for the replay of individual
+      compilations independent of the build system.
+```
 ### <a name="help"></a>**gn help <anything>**
 
 ```
