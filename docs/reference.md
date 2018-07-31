@@ -428,8 +428,8 @@
 #### **[\--format=json]**
 
 ```
-  Displays information about a given target or config. The build build
-  parameters will be taken for the build in the given <out_dir>.
+  Displays information about a given target or config. The build parameters
+  will be taken for the build in the given <out_dir>.
 
   The <label or pattern> can be a target label, a config label, or a label
   pattern (see "gn help label_pattern"). A label pattern will only match
@@ -446,8 +446,8 @@
   arflags [--blame]
   args
   cflags [--blame]
+  cflags_c [--blame]
   cflags_cc [--blame]
-  cflags_cxx [--blame]
   check_includes
   configs [--tree] (see below)
   defines [--blame]
@@ -496,7 +496,7 @@
 ```
   --blame
       Used with any value specified on a config, this will name the config that
-      cause that target to get the flag. This doesn't currently work for libs
+      causes that target to get the flag. This doesn't currently work for libs
       and lib_dirs because those are inherited and are more complicated to
       figure out the blame (patches welcome).
 ```
@@ -1039,6 +1039,7 @@
   It is recommended you put inputs to your script in the "sources" variable,
   and stuff like other Python files required to run your script in the "inputs"
   variable.
+
   The "deps" and "public_deps" for an action will always be
   completed before any part of the action is run so it can depend on
   the output of previous steps. The "data_deps" will be built if the
@@ -1052,6 +1053,7 @@
 ```
   You should specify files created by your script by specifying them in the
   "outputs".
+
   The script will be executed with the given arguments with the current
   directory being that of the root build directory. If you pass files
   to your script, see "gn help rebase_path" for how to convert
@@ -1061,6 +1063,7 @@
 ```
 
 #### **File name handling**
+
 ```
   All output files must be inside the output directory of the build.
   You would generally use |$target_out_dir| or |$target_gen_dir| to
@@ -1120,6 +1123,7 @@
   You can dynamically write input dependencies (for incremental rebuilds if an
   input file changes) by writing a depfile when the script is run (see "gn help
   depfile"). This is more flexible than "inputs".
+
   The "deps" and "public_deps" for an action will always be
   completed before any part of the action is run so it can depend on
   the output of previous steps. The "data_deps" will be built if the
@@ -1129,6 +1133,7 @@
 ```
 
 #### **Outputs**
+
 ```
   The script will be executed with the given arguments with the current
   directory being that of the root build directory. If you pass files
@@ -1139,6 +1144,7 @@
 ```
 
 #### **File name handling**
+
 ```
   All output files must be inside the output directory of the build.
   You would generally use |$target_out_dir| or |$target_gen_dir| to
@@ -1525,7 +1531,7 @@
   code elimination to delete code not reachable from exported functions.
 
   A source set will not do this code elimination since there is no link step.
-  This allows you to link many sources sets into a shared library and have the
+  This allows you to link many source sets into a shared library and have the
   "exported symbol" notation indicate "export from the final shared library and
   not from the intermediate targets." There is no way to express this concept
   when linking multiple static libraries into a shared library.
@@ -1889,8 +1895,7 @@
   template("my_test") {
     action(target_name) {
       forward_variables_from(invoker, [ "data_deps", "deps",
-                                        "public_deps", "visibility" "
-                                                                    "])
+                                        "public_deps", "visibility"])
       # Add our test code to the dependencies.
       # "deps" may or may not be defined at this point.
       if (defined(deps)) {
@@ -1901,8 +1906,8 @@
     }
   }
 
-  # This is a template around either a target whose type depends on a global
-  # variable. It forwards all values from the invoker.
+  # This is a template around a target whose type depends on a global variable.
+  # It forwards all values from the invoker.
   template("my_wrapper") {
     target(my_wrapper_target_type, target_name) {
       forward_variables_from(invoker, "*")
@@ -2208,6 +2213,13 @@
   As the file containing the pool definition may be executed in the
   context of more than one toolchain it is recommended to specify an
   explicit toolchain when defining and referencing a pool.
+
+  A pool named "console" defined in the root build file represents Ninja's
+  console pool. Targets using this pool will have access to the console's
+  stdin and stdout, and output will not be buffered. This special pool must
+  have a depth of 1. Pools not defined in the root must not be named "console".
+  The console pool can only be defined for the default toolchain.
+  Refer to the Ninja documentation on the console pool for more info.
 
   A pool is referenced by its label just like a target.
 ```
@@ -2663,7 +2675,7 @@
 
     template("shared_library") {
       shared_library(shlib) {
-        forward_variables_from(invoker, [ "*" ])
+        forward_variables_from(invoker, "*")
         ...
       }
     }
@@ -3060,7 +3072,7 @@
         same directory as the target is declared in, they will will be the same
         as the "target" versions above. Example: "gen/base/test"
 
-  Linker tools have multiple inputs and (potentially) multiple outputs The
+  Linker tools have multiple inputs and (potentially) multiple outputs. The
   static library tool ("alink") is not considered a linker tool. The following
   expansions are available:
 
@@ -3261,10 +3273,10 @@
 
 ```
   tool()
-    The tool() function call specifies the commands commands to run for a given
-    step. See "gn help tool".
+    The tool() function call specifies the commands to run for a given step. See
+    "gn help tool".
 
-  toolchain_args
+  toolchain_args [scope]
     Overrides for build arguments to pass to the toolchain when invoking it.
     This is a variable of type "scope" where the variable names correspond to
     variables in declare_args() blocks.
@@ -3283,7 +3295,25 @@
 
     See also "gn help buildargs" for an overview of these arguments.
 
-  deps
+  propagates_configs [boolean, default=false]
+    Determines whether public_configs and all_dependent_configs in this
+    toolchain propagate to targets in other toolchains.
+
+    When false (the default), this toolchain will not propagate any configs to
+    targets in other toolchains that depend on it targets inside this
+    toolchain. This matches the most common usage of toolchains where they
+    represent different architectures or compilers and the settings that apply
+    to one won't necessarily apply to others.
+
+    When true, configs (public and all-dependent) will cross the boundary out
+    of this toolchain as if the toolchain boundary wasn't there. This only
+    affects one direction of dependencies: a toolchain can't control whether
+    it accepts such configs, only whether it pushes them. The build is
+    responsible for ensuring that any external targets depending on targets in
+    this toolchain are compatible with the compiler flags, etc. that may be
+    propagated.
+
+  deps [string list]
     Dependencies of this toolchain. These dependencies will be resolved before
     any target in the toolchain is compiled. To avoid circular dependencies
     these must be targets defined in another toolchain.
@@ -3386,7 +3416,7 @@
   toolchain definitions to ensure that it always reflects the appropriate
   value.
 
-  This value is not used internally by GN for any purpose. It is set it to the
+  This value is not used internally by GN for any purpose. It is set to the
   empty string ("") by default but is declared so that it can be overridden on
   the command line if so desired.
 
@@ -3400,7 +3430,7 @@
   toolchain definitions to ensure that it always reflects the appropriate
   value.
 
-  This value is not used internally by GN for any purpose. It is set it to the
+  This value is not used internally by GN for any purpose. It is set to the
   empty string ("") by default but is declared so that it can be overridden on
   the command line if so desired.
 
@@ -4689,10 +4719,10 @@
 #### **Inputs for binary targets**
 
 ```
-  Any input dependencies will be resolved before compiling any sources.
-  Normally, all actions that a target depends on will be run before any files
-  in a target are compiled. So if you depend on generated headers, you do not
-  typically need to list them in the inputs section.
+  Any input dependencies will be resolved before compiling any sources or
+  linking the target. Normally, all actions that a target depends on will be run
+  before any files in a target are compiled. So if you depend on generated
+  headers, you do not typically need to list them in the inputs section.
 
   Inputs for binary targets will be treated as implicit dependencies, meaning
   that changes in any of the inputs will force all sources in the target to be
@@ -5136,6 +5166,17 @@
   associated code. In this case, list the test target in the "friend" list of
   the target that owns the private header to allow the inclusion. See
   "gn help friend" for more.
+
+  When a binary target has no explicit or implicit public headers (a "public"
+  list is defined but is empty), GN assumes that the target can not propagate
+  any compile-time dependencies up the dependency tree. In this case, the build
+  can be parallelized more efficiently.
+  Say there are dependencies:
+    A (shared library) -> B (shared library) -> C (action).
+  Normally C must complete before any source files in A can compile (because
+  there might be generated includes). But when B explicitly declares no public
+  headers, C can execute in parallel with A's compile steps. C must still be
+  complete before any dependents link.
 ```
 
 #### **Examples**
@@ -5145,6 +5186,7 @@
     public = [ "foo.h", "bar.h" ]
 
   No files are public (no targets may include headers from this one):
+    # This allows starting compilation in dependent targets earlier.
     public = []
 ```
 ### <a name="public_configs"></a>**public_configs**: Configs to be applied on dependents.
@@ -5154,15 +5196,71 @@
 
   Targets directly depending on this one will have the configs listed in this
   variable added to them. These configs will also apply to the current target.
+  Generally, public configs are used to apply defines and include directories
+  necessary to compile this target's header files.
 
-  This addition happens in a second phase once a target and all of its
-  dependencies have been resolved. Therefore, a target will not see these
+  See also "gn help all_dependent_configs".
+```
+
+#### **Propagation of public configs**
+
+```
+  Public configs are applied to all targets that depend directly on this one.
+  These dependant targets can further push this target's public configs
+  higher in the dependency tree by depending on it via public_deps (see "gn
+  help public_deps").
+
+    static_library("toplevel") {
+      # This target will get "my_config" applied to it. However, since this
+      # target uses "deps" and not "public_deps", targets that depend on this
+      # one won't get it.
+      deps = [ ":intermediate" ]
+    }
+
+    static_library("intermediate") {
+      # Depending on "lower" in any way will apply "my_config" to this target.
+      # Additionall, since this target depends on "lower" via public_deps,
+      # targets that depend on this one will also get "my_config".
+      public_deps = [ ":lower" ]
+    }
+
+    static_library("lower") {
+      # This will get applied to all targets that depend on this one.
+      public_configs = [ ":my_config" ]
+    }
+
+  Public config propagation happens in a second phase once a target and all of
+  its dependencies have been resolved. Therefore, a target will not see these
   force-added configs in their "configs" variable while the script is running,
   and they can not be removed. As a result, this capability should generally
-  only be used to add defines and include directories necessary to compile a
-  target's headers.
+  only be used to add defines and include directories rather than setting
+  complicated flags that some targets may not want.
 
-  See also "all_dependent_configs".
+  Public configs may or may not be propagated across toolchain boundaries
+  depending on the value of the propagates_configs flag (see "gn help
+  toolchain") on the toolchain of the target declaring the public_config.
+```
+
+#### **Avoiding applying public configs to this target**
+
+```
+  If you want the config to apply to targets that depend on this one, but NOT
+  this one, define an extra layer of indirection using a group:
+
+    # External targets depend on this group.
+    group("my_target") {
+      # Config to apply to all targets that depend on this one.
+      public_configs = [ ":external_settings" ]
+      deps = [ ":internal_target" ]
+    }
+
+    # Internal target to actually compile the sources.
+    static_library("internal_target") {
+      # Force all external targets to depend on the group instead of directly
+      # on this so the "external_settings" config will get applied.
+      visibility = [ ":my_target" ]
+      ...
+    }
 ```
 
 #### **Ordering of flags and values**
@@ -5200,6 +5298,8 @@
     - If the current target is a shared library, other shared libraries that it
       publicly depends on (directly or indirectly) are propagated up the
       dependency tree to dependents for linking.
+
+  See also "gn help public_configs".
 ```
 
 #### **Discussion**
@@ -5429,7 +5529,7 @@
   See "gn help create_bundle" for more information.
 ```
 
-#### **Exmaple**
+#### **Example**
 
 ```
   create_bundle("chrome_xctest") {
@@ -6003,11 +6103,12 @@
        "//foo/bar/*"  (all targets in any subdir of //foo/bar)
        "./*"  (all targets in the current build file or sub dirs)
 
-  Any of the above forms can additionally take an explicit toolchain. In this
-  case, the toolchain must be fully qualified (no wildcards are supported in
-  the toolchain name).
+  Any of the above forms can additionally take an explicit toolchain
+  in parenthesis at the end of the label pattern. In this case, the
+  toolchain must be fully qualified (no wildcards are supported in the
+  toolchain name).
 
-    "//foo:bar(//build/toochain:mac)"
+    "//foo:bar(//build/toolchain:mac)"
         An explicit target in an explicit toolchain.
 
     ":*(//build/toolchain/linux:32bit)"

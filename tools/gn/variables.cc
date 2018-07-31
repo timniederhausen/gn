@@ -1669,7 +1669,7 @@ Examples
     public = [ "foo.h", "bar.h" ]
 
   No files are public (no targets may include headers from this one):
-    # This allows starting compile in dependent targets earlier.
+    # This allows starting compilation in dependent targets earlier.
     public = []
 )";
 
@@ -1683,15 +1683,68 @@ const char kPublicConfigs_Help[] =
 
   Targets directly depending on this one will have the configs listed in this
   variable added to them. These configs will also apply to the current target.
+  Generally, public configs are used to apply defines and include directories
+  necessary to compile this target's header files.
 
-  This addition happens in a second phase once a target and all of its
-  dependencies have been resolved. Therefore, a target will not see these
+  See also "gn help all_dependent_configs".
+
+Propagation of public configs
+
+  Public configs are applied to all targets that depend directly on this one.
+  These dependant targets can further push this target's public configs
+  higher in the dependency tree by depending on it via public_deps (see "gn
+  help public_deps").
+
+    static_library("toplevel") {
+      # This target will get "my_config" applied to it. However, since this
+      # target uses "deps" and not "public_deps", targets that depend on this
+      # one won't get it.
+      deps = [ ":intermediate" ]
+    }
+
+    static_library("intermediate") {
+      # Depending on "lower" in any way will apply "my_config" to this target.
+      # Additionall, since this target depends on "lower" via public_deps,
+      # targets that depend on this one will also get "my_config".
+      public_deps = [ ":lower" ]
+    }
+
+    static_library("lower") {
+      # This will get applied to all targets that depend on this one.
+      public_configs = [ ":my_config" ]
+    }
+
+  Public config propagation happens in a second phase once a target and all of
+  its dependencies have been resolved. Therefore, a target will not see these
   force-added configs in their "configs" variable while the script is running,
   and they can not be removed. As a result, this capability should generally
-  only be used to add defines and include directories necessary to compile a
-  target's headers.
+  only be used to add defines and include directories rather than setting
+  complicated flags that some targets may not want.
 
-  See also "all_dependent_configs".
+  Public configs may or may not be propagated across toolchain boundaries
+  depending on the value of the propagates_configs flag (see "gn help
+  toolchain") on the toolchain of the target declaring the public_config.
+
+Avoiding applying public configs to this target
+
+  If you want the config to apply to targets that depend on this one, but NOT
+  this one, define an extra layer of indirection using a group:
+
+    # External targets depend on this group.
+    group("my_target") {
+      # Config to apply to all targets that depend on this one.
+      public_configs = [ ":external_settings" ]
+      deps = [ ":internal_target" ]
+    }
+
+    # Internal target to actually compile the sources.
+    static_library("internal_target") {
+      # Force all external targets to depend on the group instead of directly
+      # on this so the "external_settings" config will get applied.
+      visibility = [ ":my_target" ]
+      ...
+    }
+
 )" COMMON_ORDERING_HELP;
 
 const char kPublicDeps[] = "public_deps";
@@ -1715,6 +1768,8 @@ const char kPublicDeps_Help[] =
     - If the current target is a shared library, other shared libraries that it
       publicly depends on (directly or indirectly) are propagated up the
       dependency tree to dependents for linking.
+
+  See also "gn help public_configs".
 
 Discussion
 

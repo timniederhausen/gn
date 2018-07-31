@@ -73,7 +73,7 @@
       <key>comment</key>
       <string>functions</string>
       <key>match</key>
-      <string>\b(?:assert|config|declare_args|defined|exec_script|foreach|get_label_info|get_path_info|get_target_outputs|getenv|import|print|process_file_template|read_file|rebase_path|set_default_toolchain|set_defaults|set_sources_assignment_filter|template|tool|toolchain|toolchain_args|write_file)\b</string>
+      <string>\b(?:assert|config|declare_args|defined|exec_script|foreach|get_label_info|get_path_info|get_target_outputs|getenv|import|print|process_file_template|read_file|rebase_path|set_default_toolchain|set_defaults|set_sources_assignment_filter|template|tool|toolchain|toolchain_args|propagates_configs|write_file)\b</string>
       <key>name</key>
       <string>entity.name.function.gn</string>
     </dict>

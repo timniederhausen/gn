@@ -37,7 +37,7 @@ syn keyword     gnFunctions get_target_outputs getenv import print
 syn keyword     gnFunctions process_file_template read_file rebase_path
 syn keyword     gnFunctions set_default_toolchain set_defaults
 syn keyword     gnFunctions set_sources_assignment_filter template tool
-syn keyword     gnFunctions toolchain toolchain_args write_file
+syn keyword     gnFunctions toolchain toolchain_args propagates_configs write_file
 hi def link     gnFunctions         Macro
 
 " Variables

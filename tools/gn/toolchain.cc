@@ -31,7 +31,7 @@ const char* Toolchain::kToolAction = "action";
 Toolchain::Toolchain(const Settings* settings,
                      const Label& label,
                      const std::set<SourceFile>& build_dependency_files)
-    : Item(settings, label, build_dependency_files), setup_complete_(false) {}
+    : Item(settings, label, build_dependency_files) {}
 
 Toolchain::~Toolchain() = default;
 

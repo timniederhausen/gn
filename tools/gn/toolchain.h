@@ -115,6 +115,13 @@ class Toolchain : public Item {
   Scope::KeyValueMap& args() { return args_; }
   const Scope::KeyValueMap& args() const { return args_; }
 
+  // Specifies whether public_configs and all_dependent_configs in this
+  // toolchain propagate to targets in other toolchains.
+  bool propagates_configs() const { return propagates_configs_; }
+  void set_propagates_configs(bool propagates_configs) {
+    propagates_configs_ = propagates_configs;
+  }
+
   // Returns the tool for compiling the given source file type.
   static ToolType GetToolTypeForSourceType(SourceFileType type);
   const Tool* GetToolForSourceType(SourceFileType type);
@@ -134,13 +141,14 @@ class Toolchain : public Item {
  private:
   std::unique_ptr<Tool> tools_[TYPE_NUMTYPES];
 
-  bool setup_complete_;
+  bool setup_complete_ = false;
 
   // Substitutions used by the tools in this toolchain.
   SubstitutionBits substitution_bits_;
 
   LabelTargetVector deps_;
   Scope::KeyValueMap args_;
+  bool propagates_configs_ = false;
 };
 
 #endif  // TOOLS_GN_TOOLCHAIN_H_

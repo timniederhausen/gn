@@ -346,7 +346,7 @@ Functions and variables
     The tool() function call specifies the commands to run for a given step. See
     "gn help tool".
 
-  toolchain_args
+  toolchain_args [scope]
     Overrides for build arguments to pass to the toolchain when invoking it.
     This is a variable of type "scope" where the variable names correspond to
     variables in declare_args() blocks.
@@ -365,7 +365,25 @@ Functions and variables
 
     See also "gn help buildargs" for an overview of these arguments.
 
-  deps
+  propagates_configs [boolean, default=false]
+    Determines whether public_configs and all_dependent_configs in this
+    toolchain propagate to targets in other toolchains.
+
+    When false (the default), this toolchain will not propagate any configs to
+    targets in other toolchains that depend on it targets inside this
+    toolchain. This matches the most common usage of toolchains where they
+    represent different architectures or compilers and the settings that apply
+    to one won't necessarily apply to others.
+
+    When true, configs (public and all-dependent) will cross the boundary out
+    of this toolchain as if the toolchain boundary wasn't there. This only
+    affects one direction of dependencies: a toolchain can't control whether
+    it accepts such configs, only whether it pushes them. The build is
+    responsible for ensuring that any external targets depending on targets in
+    this toolchain are compatible with the compiler flags, etc. that may be
+    propagated.
+
+  deps [string list]
     Dependencies of this toolchain. These dependencies will be resolved before
     any target in the toolchain is compiled. To avoid circular dependencies
     these must be targets defined in another toolchain.
@@ -480,6 +498,15 @@ Value RunToolchain(Scope* scope,
     Scope::KeyValueMap values;
     toolchain_args->scope_value()->GetCurrentScopeValues(&values);
     toolchain->args() = values;
+  }
+
+  // Read propagates_configs (if present).
+  const Value* propagates_configs =
+      block_scope.GetValue("propagates_configs", true);
+  if (propagates_configs) {
+    if (!propagates_configs->VerifyTypeIs(Value::BOOLEAN, err))
+      return Value();
+    toolchain->set_propagates_configs(propagates_configs->boolean_value());
   }
 
   if (!block_scope.CheckForUnusedVars(err))

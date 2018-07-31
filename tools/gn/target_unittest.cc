@@ -196,6 +196,50 @@ TEST_F(TargetTest, NoDependentConfigsBetweenToolchains) {
   ASSERT_EQ(0u, a.all_dependent_configs().size());
 }
 
+// Tests that dependent configs propagate between toolchains if
+// propagates_configs is set.
+TEST_F(TargetTest, DependentConfigsBetweenToolchainsWhenSet) {
+  TestWithScope setup;
+  Err err;
+
+  // Create another toolchain.
+  Toolchain other_toolchain(setup.settings(),
+                            Label(SourceDir("//other/"), "toolchain"));
+  TestWithScope::SetupToolchain(&other_toolchain);
+  other_toolchain.set_propagates_configs(true);
+
+  // Set up a dependency chain of |a| -> |b| where |b| has a different
+  // toolchain (with propagate_configs set).
+  TestTarget a(setup, "//foo:a", Target::EXECUTABLE);
+  Target b(setup.settings(),
+           Label(SourceDir("//foo/"), "b", other_toolchain.label().dir(),
+                 other_toolchain.label().name()));
+  b.visibility().SetPublic();
+  b.set_output_type(Target::SHARED_LIBRARY);
+  EXPECT_TRUE(b.SetToolchain(&other_toolchain, &err));
+  a.private_deps().push_back(LabelTargetPair(&b));
+
+  // All dependent config.
+  Config all_dependent(setup.settings(), Label(SourceDir("//foo/"), "all"));
+  ASSERT_TRUE(all_dependent.OnResolved(&err));
+  b.all_dependent_configs().push_back(LabelConfigPair(&all_dependent));
+
+  // Public config.
+  Config public_config(setup.settings(), Label(SourceDir("//foo/"), "public"));
+  ASSERT_TRUE(public_config.OnResolved(&err));
+  b.public_configs().push_back(LabelConfigPair(&public_config));
+
+  ASSERT_TRUE(b.OnResolved(&err));
+  ASSERT_TRUE(a.OnResolved(&err));
+
+  // A should have gotten the configs from B.
+  ASSERT_EQ(2u, a.configs().size());
+  EXPECT_EQ(&all_dependent, a.configs()[0].ptr);
+  EXPECT_EQ(&public_config, a.configs()[1].ptr);
+  ASSERT_EQ(1u, a.all_dependent_configs().size());
+  EXPECT_EQ(&all_dependent, a.all_dependent_configs()[0].ptr);
+}
+
 TEST_F(TargetTest, InheritLibs) {
   TestWithScope setup;
   Err err;

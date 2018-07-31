@@ -353,10 +353,10 @@ bool Target::OnResolved(Err* err) {
   // private deps. This step re-exports them as public configs for targets that
   // depend on this one.
   for (const auto& dep : public_deps_) {
-    if (dep.ptr->toolchain() == toolchain()) {
+    if (dep.ptr->toolchain() == toolchain() ||
+        dep.ptr->toolchain()->propagates_configs())
       public_configs_.Append(dep.ptr->public_configs().begin(),
                              dep.ptr->public_configs().end());
-    }
   }
 
   // Copy our own libs and lib_dirs to the final set. This will be from our
@@ -503,15 +503,15 @@ bool Target::GetOutputFilesForSource(const SourceFile& source,
 
 void Target::PullDependentTargetConfigs() {
   for (const auto& pair : GetDeps(DEPS_LINKED)) {
-    if (pair.ptr->toolchain() == toolchain()) {
+    if (pair.ptr->toolchain() == toolchain() ||
+        pair.ptr->toolchain()->propagates_configs())
       MergeAllDependentConfigsFrom(pair.ptr, &configs_,
                                    &all_dependent_configs_);
-    }
   }
   for (const auto& pair : GetDeps(DEPS_LINKED)) {
-    if (pair.ptr->toolchain() == toolchain()) {
+    if (pair.ptr->toolchain() == toolchain() ||
+        pair.ptr->toolchain()->propagates_configs())
       MergePublicConfigsFrom(pair.ptr, &configs_);
-    }
   }
 }
 
