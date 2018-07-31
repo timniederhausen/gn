@@ -240,51 +240,87 @@ Value DoConvertInputToValue(const Settings* settings,
 
 }  // namespace
 
-const char kInputConversion_Help[] =
-    R"(input_conversion: Specifies how to transform input to a variable.
-
-  input_conversion is an argument to read_file and exec_script that specifies
-  how the result of the read operation should be converted into a variable.
+const char kInputOutputConversion_Help[] =
+    R"(Input and output conversions are arguments to file and process functions
+that specify how to convert data to or from external formats. The possible
+values for parameters specifying conversions are:
 
   "" (the default)
-      Discard the result and return None.
+      input: Discard the result and return None.
+
+      output: If value is a list, then "list lines"; otherwise "value".
 
   "list lines"
-      Return the file contents as a list, with a string for each line. The
-      newlines will not be present in the result. The last line may or may not
-      end in a newline.
+      input:
+        Return the file contents as a list, with a string for each line. The
+        newlines will not be present in the result. The last line may or may not
+        end in a newline.
 
-      After splitting, each individual line will be trimmed of whitespace on
-      both ends.
+        After splitting, each individual line will be trimmed of whitespace on
+        both ends.
+
+      output:
+        Renders the value contents as a list, with a string for each line. The
+        newlines will not be present in the result. The last line will end in with
+        a newline.
 
   "scope"
-      Execute the block as GN code and return a scope with the resulting values
-      in it. If the input was:
-        a = [ "hello.cc", "world.cc" ]
-        b = 26
-      and you read the result into a variable named "val", then you could
-      access contents the "." operator on "val":
-        sources = val.a
-        some_count = val.b
+      input:
+        Execute the block as GN code and return a scope with the resulting values
+        in it. If the input was:
+          a = [ "hello.cc", "world.cc" ]
+          b = 26
+        and you read the result into a variable named "val", then you could
+        access contents the "." operator on "val":
+          sources = val.a
+          some_count = val.b
+
+      output:
+        Renders the value contents as a GN code block, reversing the input
+        result above.
 
   "string"
-      Return the file contents into a single string.
+      input: Return the file contents into a single string.
+
+      output:
+        Render the value contents into a single string. The output is:
+        a string renders with quotes, e.g. "str"
+        an integer renders as a stringified integer, e.g. "6"
+        a boolean renders as the associated string, e.g. "true"
+        a list renders as a representation of its contents, e.g. "[\"str\", 6]"
+        a scope renders as a GN code block of its values. If the Value was:
+            Value val;
+            val.a = [ "hello.cc", "world.cc" ];
+            val.b = 26
+          the resulting output would be:
+            "{
+                a = [ \"hello.cc\", \"world.cc\" ]
+                b = 26
+            }"
 
   "value"
-      Parse the input as if it was a literal rvalue in a buildfile. Examples of
-      typical program output using this mode:
-        [ "foo", "bar" ]     (result will be a list)
-      or
-        "foo bar"            (result will be a string)
-      or
-        5                    (result will be an integer)
+      input:
+        Parse the input as if it was a literal rvalue in a buildfile. Examples of
+        typical program output using this mode:
+          [ "foo", "bar" ]     (result will be a list)
+        or
+          "foo bar"            (result will be a string)
+        or
+          5                    (result will be an integer)
 
-      Note that if the input is empty, the result will be a null value which
-      will produce an error if assigned to a variable.
+        Note that if the input is empty, the result will be a null value which
+        will produce an error if assigned to a variable.
+
+      output:
+        Render the value contents as a literal rvalue. Strings render with escaped
+        quotes.
 
   "json"
-      Parse the input as a JSON and convert it to equivalent GN rvalue. The data
-      type mapping is:
+      input: Parse the input as a JSON and convert it to equivalent GN rvalue.
+
+      output: Convert the Value to equivalent JSON value.
+
+      The data type mapping is:
         a string in JSON maps to string in GN
         an integer in JSON maps to integer in GN
         a float in JSON is unsupported and will result in an error
@@ -293,10 +329,10 @@ const char kInputConversion_Help[] =
         a boolean in JSON maps to boolean in GN
         a null in JSON is unsupported and will result in an error
 
-      Nota that the dictionary keys have to be valid GN identifiers otherwise
-      they will produce an error.
+      Nota that the input dictionary keys have to be valid GN identifiers
+      otherwise they will produce an error.
 
-  "trim ..."
+  "trim ..." (input only)
       Prefixing any of the other transformations with the word "trim" will
       result in whitespace being trimmed from the beginning and end of the
       result before processing.

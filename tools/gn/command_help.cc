@@ -14,6 +14,7 @@
 #include "tools/gn/label.h"
 #include "tools/gn/label_pattern.h"
 #include "tools/gn/ninja_build_writer.h"
+#include "tools/gn/output_conversion.h"
 #include "tools/gn/parser.h"
 #include "tools/gn/runtime_deps.h"
 #include "tools/gn/setup.h"
@@ -71,6 +72,8 @@ void PrintToplevelHelp() {
   PrintShortHelp("labels: About labels.");
   PrintShortHelp("ninja_rules: How Ninja build rules are named.");
   PrintShortHelp("nogncheck: Annotating includes for checking.");
+  PrintShortHelp(
+      "output_conversion: Specifies how to transform a value to output.");
   PrintShortHelp("runtime_deps: How runtime dependency computation works.");
   PrintShortHelp("source_expansion: Map sources to outputs for scripts.");
   PrintShortHelp("switches: Show available command-line switches.");
@@ -158,11 +161,12 @@ void PrintAllHelp() {
   PrintLongHelp(kDotfile_Help, "dotfile");
   PrintLongHelp(kExecution_Help, "execution");
   PrintLongHelp(kGrammar_Help, "grammar");
-  PrintLongHelp(kInputConversion_Help, "input_conversion");
+  PrintLongHelp(kInputOutputConversion_Help, "input_conversion");
   PrintLongHelp(kLabelPattern_Help, "label_pattern");
   PrintLongHelp(kLabels_Help, "labels");
   PrintLongHelp(kNinjaRules_Help, "ninja_rules");
   PrintLongHelp(kNoGnCheck_Help, "nogncheck");
+  PrintLongHelp(kInputOutputConversion_Help, "output_conversion");
   PrintLongHelp(kRuntimeDeps_Help, "runtime_deps");
   PrintLongHelp(kSourceExpansion_Help, "source_expansion");
 
@@ -281,12 +285,15 @@ int RunHelp(const std::vector<std::string>& args) {
   random_topics["dotfile"] = []() { PrintLongHelp(kDotfile_Help); };
   random_topics["grammar"] = []() { PrintLongHelp(kGrammar_Help); };
   random_topics["input_conversion"] = []() {
-    PrintLongHelp(kInputConversion_Help);
+    PrintLongHelp(kInputOutputConversion_Help);
   };
   random_topics["label_pattern"] = []() { PrintLongHelp(kLabelPattern_Help); };
   random_topics["labels"] = []() { PrintLongHelp(kLabels_Help); };
   random_topics["ninja_rules"] = []() { PrintLongHelp(kNinjaRules_Help); };
   random_topics["nogncheck"] = []() { PrintLongHelp(kNoGnCheck_Help); };
+  random_topics["output_conversion"] = []() {
+    PrintLongHelp(kInputOutputConversion_Help);
+  };
   random_topics["runtime_deps"] = []() { PrintLongHelp(kRuntimeDeps_Help); };
   random_topics["source_expansion"] = []() {
     PrintLongHelp(kSourceExpansion_Help);

@@ -13,6 +13,7 @@
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/functions.h"
 #include "tools/gn/input_file.h"
+#include "tools/gn/output_conversion.h"
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/scheduler.h"
 #include "util/build_config.h"
@@ -24,7 +25,7 @@ const char kWriteFile_HelpShort[] = "write_file: Write a file to disk.";
 const char kWriteFile_Help[] =
     R"(write_file: Write a file to disk.
 
-  write_file(filename, data)
+  write_file(filename, data, output_conversion = "")
 
   If data is a list, the list will be written one-item-per-line with no quoting
   or brackets.
@@ -37,9 +38,6 @@ const char kWriteFile_Help[] =
   be too long for the command line. However, it is preferable to use response
   files for this purpose. See "gn help response_file_contents".
 
-  TODO(brettw) we probably need an optional third argument to control list
-  formatting.
-
 Arguments
 
   filename
@@ -47,15 +45,18 @@ Arguments
 
   data
       The list or string to write.
+
+  output_conversion
+    Controls how the output is written. See "gn help output_conversion".
 )";
 
 Value RunWriteFile(Scope* scope,
                    const FunctionCallNode* function,
                    const std::vector<Value>& args,
                    Err* err) {
-  if (args.size() != 2) {
+  if (args.size() != 3 && args.size() != 2) {
     *err = Err(function->function(), "Wrong number of arguments to write_file",
-               "I expected two arguments.");
+               "I expected two or three arguments.");
     return Value();
   }
 
@@ -79,15 +80,19 @@ Value RunWriteFile(Scope* scope,
   g_scheduler->AddGenDependency(
       scope->settings()->build_settings()->GetFullPath(source_file));
 
+  // Extract conversion value.
+  Value output_conversion;
+  if (args.size() != 3)
+    output_conversion = Value();
+  else
+    output_conversion = args[2];
+
   // Compute output.
   std::ostringstream contents;
-  if (args[1].type() == Value::LIST) {
-    const std::vector<Value>& list = args[1].list_value();
-    for (const auto& cur : list)
-      contents << cur.ToString(false) << std::endl;
-  } else {
-    contents << args[1].ToString(false);
-  }
+  ConvertValueToOutput(scope->settings(), args[1], output_conversion, contents,
+                       err);
+  if (err->has_error())
+    return Value();
 
   base::FilePath file_path =
       scope->settings()->build_settings()->GetFullPath(source_file);

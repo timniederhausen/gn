@@ -12,7 +12,7 @@ class ParseNode;
 class Settings;
 class Value;
 
-extern const char kInputConversion_Help[];
+extern const char kInputOutputConversion_Help[];
 
 // Converts the given input string (is read from a file or output from a
 // script) to a Value. Conversions as specified in the input_conversion string
