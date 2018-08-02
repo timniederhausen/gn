@@ -544,6 +544,7 @@ def WriteGNNinja(path, options, linux_sysroot):
         'tools/gn/builder_unittest.cc',
         'tools/gn/c_include_iterator_unittest.cc',
         'tools/gn/command_format_unittest.cc',
+        'tools/gn/compile_commands_writer_unittest.cc',
         'tools/gn/config_unittest.cc',
         'tools/gn/config_values_extractors_unittest.cc',
         'tools/gn/escape_unittest.cc',

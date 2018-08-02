@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "base/json/string_escape.h"
 #include "base/strings/stringprintf.h"
 #include "tools/gn/builder.h"
 #include "tools/gn/config_values_extractors.h"
@@ -55,43 +56,44 @@ void SetupCompileFlags(const Target* target,
   RecursiveTargetConfigToStream<std::string>(
       target, &ConfigValues::defines,
       DefineWriter(ESCAPE_NINJA_PREFORMATTED_COMMAND, true), defines_out);
-  flags.defines = defines_out.str();
+  base::EscapeJSONString(defines_out.str(), false, &flags.defines);
 
   std::ostringstream includes_out;
   RecursiveTargetConfigToStream<SourceDir>(target, &ConfigValues::include_dirs,
                                            IncludeWriter(path_output),
                                            includes_out);
-  flags.includes = includes_out.str();
+  base::EscapeJSONString(includes_out.str(), false, &flags.includes);
 
   std::ostringstream cflags_out;
   WriteOneFlag(target, SUBSTITUTION_CFLAGS, false, Toolchain::TYPE_NONE,
                &ConfigValues::cflags, opts, path_output, cflags_out,
                /*write_substitution=*/false);
-  flags.cflags = cflags_out.str();
+  base::EscapeJSONString(cflags_out.str(), false, &flags.cflags);
 
   std::ostringstream cflags_c_out;
   WriteOneFlag(target, SUBSTITUTION_CFLAGS_C, has_precompiled_headers,
                Toolchain::TYPE_CC, &ConfigValues::cflags_c, opts, path_output,
                cflags_c_out, /*write_substitution=*/false);
-  flags.cflags_c = cflags_c_out.str();
+  base::EscapeJSONString(cflags_c_out.str(), false, &flags.cflags_c);
 
   std::ostringstream cflags_cc_out;
   WriteOneFlag(target, SUBSTITUTION_CFLAGS_CC, has_precompiled_headers,
                Toolchain::TYPE_CXX, &ConfigValues::cflags_cc, opts, path_output,
                cflags_cc_out, /*write_substitution=*/false);
-  flags.cflags_cc = cflags_cc_out.str();
+  base::EscapeJSONString(cflags_cc_out.str(), false, &flags.cflags_cc);
 
   std::ostringstream cflags_objc_out;
   WriteOneFlag(target, SUBSTITUTION_CFLAGS_OBJC, has_precompiled_headers,
                Toolchain::TYPE_OBJC, &ConfigValues::cflags_objc, opts,
-               path_output, cflags_objc_out, /*write_substitution=*/false);
-  flags.cflags_objc = cflags_objc_out.str();
+               path_output, cflags_objc_out,
+               /*write_substitution=*/false);
+  base::EscapeJSONString(cflags_objc_out.str(), false, &flags.cflags_objc);
 
   std::ostringstream cflags_objcc_out;
   WriteOneFlag(target, SUBSTITUTION_CFLAGS_OBJCC, has_precompiled_headers,
                Toolchain::TYPE_OBJCXX, &ConfigValues::cflags_objcc, opts,
                path_output, cflags_objcc_out, /*write_substitution=*/false);
-  flags.cflags_objcc = cflags_objcc_out.str();
+  base::EscapeJSONString(cflags_objcc_out.str(), false, &flags.cflags_objcc);
 }
 
 void WriteFile(const SourceFile& source,
@@ -193,10 +195,11 @@ void WriteCommand(const Target* target,
   compile_commands->append(command_out.str());
 }
 
-void RenderJSON(const BuildSettings* build_settings,
-                const Builder& builder,
-                std::vector<const Target*>& all_targets,
-                std::string* compile_commands) {
+}  // namespace
+
+void CompileCommandsWriter::RenderJSON(const BuildSettings* build_settings,
+                                       std::vector<const Target*>& all_targets,
+                                       std::string* compile_commands) {
   // TODO: Determine out an appropriate size to reserve.
   compile_commands->reserve(all_targets.size() * 100);
   compile_commands->append("[");
@@ -259,8 +262,6 @@ void RenderJSON(const BuildSettings* build_settings,
   compile_commands->append(kPrettyPrintLineEnding);
 }
 
-}  // namespace
-
 bool CompileCommandsWriter::RunAndWriteFiles(
     const BuildSettings* build_settings,
     const Builder& builder,
@@ -277,7 +278,7 @@ bool CompileCommandsWriter::RunAndWriteFiles(
   std::vector<const Target*> all_targets = builder.GetAllResolvedTargets();
 
   std::string json;
-  RenderJSON(build_settings, builder, all_targets, &json);
+  RenderJSON(build_settings, all_targets, &json);
   if (!WriteFileIfChanged(output_path, json, err))
     return false;
   return true;

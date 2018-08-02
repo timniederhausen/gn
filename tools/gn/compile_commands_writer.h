@@ -18,6 +18,9 @@ class CompileCommandsWriter {
                                const std::string& file_name,
                                bool quiet,
                                Err* err);
+  static void RenderJSON(const BuildSettings* build_settings,
+                         std::vector<const Target*>& all_targets,
+                         std::string* compile_commands);
 };
 
 #endif  // TOOLS_GN_COMPILE_COMMANDS_WRITER_H_
