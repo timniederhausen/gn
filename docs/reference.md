@@ -52,6 +52,7 @@
     *   [set_defaults: Set default values for a target type.](#set_defaults)
     *   [set_sources_assignment_filter: Set a pattern to filter source files.](#set_sources_assignment_filter)
     *   [split_list: Splits a list into N different sub-lists.](#split_list)
+    *   [string_replace: Replaces substring in the given string.](#string_replace)
     *   [template: Define a template rule.](#template)
     *   [tool: Specify arguments to a toolchain tool.](#tool)
     *   [toolchain: Defines a toolchain.](#toolchain)
@@ -2604,6 +2605,27 @@
 
   Will print:
     [[1, 2], [3, 4], [5, 6]
+```
+### <a name="string_replace"></a>**string_replace**: Replaces substring in the given string.
+
+```
+  result = string_replace(str, old, new[, max])
+
+  Returns a copy of the string str in which the occurrences of old have been
+  replaced with new, optionally restricting the number of replacements. The
+  replacement is performed sequentially, so if new contains old, it won't be
+  replaced.
+```
+
+#### **Example**
+
+```
+  The code:
+    mystr = "Hello, world!"
+    print(string_replace(mystr, "world", "GN"))
+
+  Will print:
+    Hello, GN!
 ```
 ### <a name="template"></a>**template**: Define a template rule.
 

@@ -329,6 +329,14 @@ Value RunStaticLibrary(Scope* scope,
                        BlockNode* block,
                        Err* err);
 
+extern const char kReplaceSubstr[];
+extern const char kReplaceSubstr_HelpShort[];
+extern const char kReplaceSubstr_Help[];
+Value RunReplaceSubstr(Scope* scope,
+                       const FunctionCallNode* function,
+                       const std::vector<Value>& args_list,
+                       Err* err);
+
 extern const char kTarget[];
 extern const char kTarget_HelpShort[];
 extern const char kTarget_Help[];
