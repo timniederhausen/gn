@@ -53,6 +53,7 @@ class VisualStudioWriter {
   FRIEND_TEST_ALL_PREFIXES(VisualStudioWriterTest, ResolveSolutionFolders);
   FRIEND_TEST_ALL_PREFIXES(VisualStudioWriterTest,
                            ResolveSolutionFolders_AbsPath);
+  FRIEND_TEST_ALL_PREFIXES(VisualStudioWriterTest, NoDotSlash);
 
   // Solution project or folder.
   struct SolutionEntry {

@@ -163,3 +163,38 @@ TEST_F(VisualStudioWriterTest, ResolveSolutionFolders_AbsPath) {
   ASSERT_EQ(writer.folders_[0].get(), writer.projects_[2]->parent_folder);
   ASSERT_EQ(writer.folders_[1].get(), writer.projects_[3]->parent_folder);
 }
+
+TEST_F(VisualStudioWriterTest, NoDotSlash) {
+  VisualStudioWriter writer(setup_.build_settings(), "Win32",
+                            VisualStudioWriter::Version::Vs2015,
+                            "10.0.17134.0");
+
+  std::string path = MakeTestPath("blah.vcxproj");
+  writer.projects_.push_back(
+      std::make_unique<VisualStudioWriter::SolutionProject>(
+          "base", path, MakeGuid(path, "project"), MakeTestPath("/foo"),
+          "Win32"));
+
+  std::unique_ptr<Tool> tool = std::make_unique<Tool>();
+  tool->set_outputs(SubstitutionList::MakeForTest(
+      "{{root_out_dir}}/{{target_output_name}}{{output_extension}}", ""));
+
+  Toolchain toolchain(setup_.settings(), Label(SourceDir("//tc/"), "tc"));
+  toolchain.SetTool(Toolchain::TYPE_ALINK, std::move(tool));
+
+  Target target(setup_.settings(), Label(SourceDir("//baz/"), "baz"));
+  target.set_output_type(Target::STATIC_LIBRARY);
+  target.SetToolchain(&toolchain);
+
+  Err err;
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  VisualStudioWriter::SourceFileCompileTypePairs source_types;
+
+  std::stringstream file_contents;
+  writer.WriteProjectFileContents(file_contents, *writer.projects_.back(),
+                                  &target, "", &source_types, &err);
+
+  // Should find args of a ninja clean command, with no ./ before the file name.
+  ASSERT_NE(file_contents.str().find("-tclean baz"), std::string::npos);
+}
