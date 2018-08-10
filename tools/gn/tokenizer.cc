@@ -259,8 +259,7 @@ void Tokenizer::AdvanceToEndOfToken(const Location& location,
         char c = cur_char();
         if (!IsCurrentWhitespace() && !CouldBeOperator(c) && !IsScoperChar(c) &&
             c != ',') {
-          *err_ = Err(GetCurrentLocation(), "This is not a valid number.",
-                      "Learn to count.");
+          *err_ = Err(GetCurrentLocation(), "This is not a valid number.");
           // Highlight the number.
           err_->AppendRange(LocationRange(location, GetCurrentLocation()));
         }
