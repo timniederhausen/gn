@@ -205,7 +205,8 @@ void CompileCommandsWriter::RenderJSON(const BuildSettings* build_settings,
   compile_commands->append("[");
   compile_commands->append(kPrettyPrintLineEnding);
   bool first = true;
-  auto build_dir = build_settings->GetFullPath(build_settings->build_dir());
+  auto build_dir = build_settings->GetFullPath(build_settings->build_dir())
+                       .StripTrailingSeparators();
   std::vector<OutputFile> tool_outputs;  // Prevent reallocation in loop.
 
   EscapeOptions opts;
