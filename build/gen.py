@@ -305,19 +305,16 @@ def WriteGNNinja(path, options, linux_sysroot):
 
     if is_linux:
       if linux_sysroot:
-        # Use the sid sysroot that UpdateLinuxSysroot() downloads. We need to
-        # force the used of libstdc++ for now because libc++ is not in that
-        # sysroot and we don't currently have a local build of that. We should
-        # probably resolve this and (re-)add a way to build against libc++.
+        # Use the sid sysroot that UpdateLinuxSysroot() downloads.
         cflags.append('--sysroot=' + linux_sysroot)
         ldflags.append('--sysroot=' + linux_sysroot)
-      cflags.append('-stdlib=libstdc++')
-      ldflags.extend(['-static-libstdc++',
-                      '-stdlib=libstdc++',
-                      '-Wl,--as-needed',
-                     ])
+      ldflags.extend([
+          '-static-libstdc++',
+          '-Wl,--as-needed',
+      ])
       libs.extend([
-          '-lgcc_s',
+          # These are needed by libc++.
+          '-ldl',
           '-lpthread',
       ])
     elif is_mac:
