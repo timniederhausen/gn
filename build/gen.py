@@ -21,17 +21,68 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(SCRIPT_DIR)
 GN_ROOT = os.path.join(REPO_ROOT, 'tools', 'gn')
 
-is_win = sys.platform.startswith('win')
-is_linux = sys.platform.startswith('linux')
-is_mac = sys.platform.startswith('darwin')
-is_aix = sys.platform.startswith('aix')
-is_posix = is_linux or is_mac or is_aix
+
+class Platform(object):
+  """Represents a host/target platform."""
+  def __init__(self, platform):
+    self._platform = platform
+    if self._platform is not None:
+      return
+    self._platform = sys.platform
+    if self._platform.startswith('linux'):
+      self._platform = 'linux'
+    elif self._platform.startswith('darwin'):
+      self._platform = 'darwin'
+    elif self._platform.startswith('mingw'):
+      self._platform = 'mingw'
+    elif self._platform.startswith('win'):
+      self._platform = 'msvc'
+    elif self._platform.startswith('aix'):
+      self._platform = 'aix'
+    elif self._platform.startswith('fuchsia'):
+      self._platform = 'fuchsia'
+
+  @staticmethod
+  def known_platforms():
+    return ['linux', 'darwin', 'msvc', 'aix', 'fuchsia']
+
+  def platform(self):
+    return self._platform
+
+  def is_linux(self):
+    return self._platform == 'linux'
+
+  def is_mingw(self):
+    return self._platform == 'mingw'
+
+  def is_msvc(self):
+    return self._platform == 'msvc'
+
+  def is_windows(self):
+    return self.is_mingw() or self.is_msvc()
+
+  def is_darwin(self):
+    return self._platform == 'darwin'
+
+  def is_aix(self):
+    return self._platform == 'aix'
+
+  def is_posix(self):
+    return self._platform in ['linux', 'darwin', 'aix']
 
 
 def main(argv):
   parser = optparse.OptionParser(description=sys.modules[__name__].__doc__)
   parser.add_option('-d', '--debug', action='store_true',
                     help='Do a debug build. Defaults to release build.')
+  parser.add_option('--platform',
+                    help='target platform (' +
+                         '/'.join(Platform.known_platforms()) + ')',
+                    choices=Platform.known_platforms())
+  parser.add_option('--host',
+                    help='host platform (' +
+                         '/'.join(Platform.known_platforms()) + ')',
+                    choices=Platform.known_platforms())
   parser.add_option('--use-lto', action='store_true',
                     help='Enable the use of LTO')
   parser.add_option('--use-icf', action='store_true',
@@ -47,23 +98,31 @@ def main(argv):
   if args:
     parser.error('Unrecognized command line arguments: %s.' % ', '.join(args))
 
+  platform = Platform(options.platform)
+  if options.host:
+    host = Platform(options.host)
+  else:
+    host = platform
+
   linux_sysroot = None
-  if is_linux and not options.no_sysroot:
+  if platform.is_linux() and not options.no_sysroot:
     linux_sysroot = UpdateLinuxSysroot()
 
   out_dir = options.out_path or os.path.join(REPO_ROOT, 'out')
   if not os.path.isdir(out_dir):
     os.makedirs(out_dir)
   if not options.no_last_commit_position:
-    GenerateLastCommitPosition(os.path.join(out_dir, 'last_commit_position.h'))
-  WriteGNNinja(os.path.join(out_dir, 'build.ninja'), options, linux_sysroot)
+    GenerateLastCommitPosition(host,
+                               os.path.join(out_dir, 'last_commit_position.h'))
+  WriteGNNinja(os.path.join(out_dir, 'build.ninja'), platform, host, options,
+               linux_sysroot)
   return 0
 
 
-def GenerateLastCommitPosition(header):
+def GenerateLastCommitPosition(host, header):
   ROOT_TAG = 'initial-commit'
   describe_output = subprocess.check_output(
-      ['git', 'describe', 'HEAD', '--match', ROOT_TAG], shell=is_win,
+      ['git', 'describe', 'HEAD', '--match', ROOT_TAG], shell=host.is_windows(),
       cwd=REPO_ROOT)
   mo = re.match(ROOT_TAG + '-(\d+)-g([0-9a-f]+)', describe_output)
   if not mo:
@@ -136,7 +195,7 @@ def UpdateLinuxSysroot():
 
 
 def WriteGenericNinja(path, static_libraries, executables,
-                      cc, cxx, ar, ld, options,
+                      cc, cxx, ar, ld, platform, host, options,
                       cflags=[], cflags_cc=[], ldflags=[], libflags=[],
                       include_dirs=[], solibs=[]):
   ninja_header_lines = [
@@ -158,16 +217,16 @@ def WriteGenericNinja(path, static_libraries, executables,
 
 
   template_filename = os.path.join(SCRIPT_DIR, {
-      'win32': 'build_win.ninja.template',
+      'msvc': 'build_win.ninja.template',
       'darwin': 'build_mac.ninja.template',
-      'linux2': 'build_linux.ninja.template',
-      'aix6': 'build_aix.ninja.template'
-  }[sys.platform])
+      'linux': 'build_linux.ninja.template',
+      'aix': 'build_aix.ninja.template',
+  }[platform.platform()])
 
   with open(template_filename) as f:
     ninja_template = f.read()
 
-  if is_win:
+  if platform.is_windows():
     executable_ext = '.exe'
     library_ext = '.lib'
     object_ext = '.obj'
@@ -239,13 +298,13 @@ def WriteGenericNinja(path, static_libraries, executables,
             os.path.relpath(template_filename, os.path.dirname(path)) + '\n')
 
 
-def WriteGNNinja(path, options, linux_sysroot):
-  if is_win:
+def WriteGNNinja(path, platform, host, options, linux_sysroot):
+  if platform.is_msvc():
     cc = os.environ.get('CC', 'cl.exe')
     cxx = os.environ.get('CXX', 'cl.exe')
     ld = os.environ.get('LD', 'link.exe')
     ar = os.environ.get('AR', 'lib.exe')
-  elif is_aix:
+  elif platform.is_aix():
     cc = os.environ.get('CC', 'gcc')
     cxx = os.environ.get('CXX', 'g++')
     ld = os.environ.get('LD', 'g++')
@@ -263,7 +322,7 @@ def WriteGNNinja(path, options, linux_sysroot):
   include_dirs = [REPO_ROOT, os.path.dirname(path)]
   libs = []
 
-  if is_posix:
+  if not platform.is_msvc():
     if options.debug:
       cflags.extend(['-O0', '-g'])
     else:
@@ -275,16 +334,16 @@ def WriteGNNinja(path, options, linux_sysroot):
       # unused functions and data items.
       cflags.extend(['-fdata-sections', '-ffunction-sections'])
       ldflags.extend(['-fdata-sections', '-ffunction-sections'])
-      if is_mac:
+      if platform.is_darwin():
         ldflags.append('-Wl,-dead_strip')
-      elif not is_aix:
+      elif not platform.is_aix():
         # Garbage collection is done by default on aix.
         ldflags.append('-Wl,--gc-sections')
 
       # Omit all symbol information from the output file.
-      if is_mac:
+      if platform.is_darwin():
         ldflags.append('-Wl,-S')
-      elif is_aix:
+      elif platform.is_aix():
         ldflags.append('-Wl,-s')
       else:
         ldflags.append('-Wl,-strip-all')
@@ -303,7 +362,7 @@ def WriteGNNinja(path, options, linux_sysroot):
     ])
     cflags_cc.extend(['-std=c++14', '-Wno-c++11-narrowing'])
 
-    if is_linux:
+    if platform.is_linux():
       if linux_sysroot:
         # Use the sid sysroot that UpdateLinuxSysroot() downloads.
         cflags.append('--sysroot=' + linux_sysroot)
@@ -317,11 +376,11 @@ def WriteGNNinja(path, options, linux_sysroot):
           '-ldl',
           '-lpthread',
       ])
-    elif is_mac:
+    elif platform.is_darwin():
       min_mac_version_flag = '-mmacosx-version-min=10.9'
       cflags.append(min_mac_version_flag)
       ldflags.append(min_mac_version_flag)
-    elif is_aix:
+    elif platform.is_aix():
       cflags_cc.append('-maix64')
       ldflags.extend(['-maix64', '-pthread'])
 
@@ -329,7 +388,7 @@ def WriteGNNinja(path, options, linux_sysroot):
       cflags.extend(['-flto', '-fwhole-program-vtables'])
       ldflags.extend(['-flto', '-fwhole-program-vtables'])
 
-  elif is_win:
+  elif platform.is_msvc():
     if not options.debug:
       cflags.extend(['/Ox', '/DNDEBUG', '/GL'])
       libflags.extend(['/LTCG'])
@@ -605,7 +664,7 @@ def WriteGNNinja(path, options, linux_sysroot):
       ], 'tool': 'cxx', 'include_dirs': [], 'libs': []},
   }
 
-  if is_posix:
+  if platform.is_posix():
     static_libraries['base']['sources'].extend([
         'base/files/file_enumerator_posix.cc',
         'base/files/file_posix.cc',
@@ -615,12 +674,12 @@ def WriteGNNinja(path, options, linux_sysroot):
         'base/strings/string16.cc',
     ])
 
-  if is_linux or is_aix:
+  if platform.is_linux() or platform.is_aix():
     static_libraries['base']['sources'].extend([
         'base/strings/sys_string_conversions_posix.cc',
     ])
 
-  if is_mac:
+  if platform.is_darwin():
     static_libraries['base']['sources'].extend([
         'base/files/file_util_mac.mm',
         'base/mac/bundle_locations.mm',
@@ -635,7 +694,7 @@ def WriteGNNinja(path, options, linux_sysroot):
         '-framework', 'Security',
     ])
 
-  if is_win:
+  if platform.is_windows():
     static_libraries['base']['sources'].extend([
         'base/files/file_enumerator_win.cc',
         'base/files/file_util_win.cc',
@@ -665,8 +724,8 @@ def WriteGNNinja(path, options, linux_sysroot):
   executables['gn_unittests']['libs'].extend(static_libraries.keys())
 
   WriteGenericNinja(path, static_libraries, executables, cc, cxx, ar, ld,
-                    options, cflags, cflags_cc, ldflags, libflags, include_dirs,
-                    libs)
+                    platform, host, options, cflags, cflags_cc, ldflags,
+                    libflags, include_dirs, libs)
 
 
 if __name__ == '__main__':
