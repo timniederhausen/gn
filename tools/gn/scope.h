@@ -38,8 +38,7 @@ class Template;
 // variables. So you should use a non-const containing scope whenever possible.
 class Scope {
  public:
-  typedef std::unordered_map<base::StringPiece, Value, base::StringPieceHash>
-      KeyValueMap;
+  typedef std::map<base::StringPiece, Value> KeyValueMap;
   // Holds an owning list of Items.
   typedef std::vector<std::unique_ptr<Item>> ItemVector;
 
@@ -348,7 +347,7 @@ class Scope {
   // scope, or a const containing scope. The reason is that when we're doing
   // a new target, we want to refer to the base_config scope which will be read
   // by multiple threads at the same time, so we REALLY want it to be const.
-  // When you jsut do a nested {}, however, we sometimes want to be able to
+  // When you just do a nested {}, however, we sometimes want to be able to
   // change things (especially marking unused vars).
   const Scope* const_containing_;
   Scope* mutable_containing_;

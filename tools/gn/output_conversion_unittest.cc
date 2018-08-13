@@ -107,7 +107,7 @@ TEST_F(OutputConversionTest, StringScope) {
   ConvertValueToOutput(settings(), Value(nullptr, std::move(new_scope)),
                        Value(nullptr, "string"), result, &err);
   EXPECT_FALSE(err.has_error());
-  EXPECT_EQ(result.str(), "\"{\n  v = \"hello\"\n  _private = \"hello\"\n}\"");
+  EXPECT_EQ(result.str(), "\"{\n  _private = \"hello\"\n  v = \"hello\"\n}\"");
 }
 
 TEST_F(OutputConversionTest, ValueString) {
@@ -171,7 +171,7 @@ TEST_F(OutputConversionTest, ValueScope) {
   ConvertValueToOutput(settings(), Value(nullptr, std::move(new_scope)),
                        Value(nullptr, "value"), result, &err);
   EXPECT_FALSE(err.has_error());
-  EXPECT_EQ(result.str(), "{\n  v = \"hello\"\n  _private = \"hello\"\n}");
+  EXPECT_EQ(result.str(), "{\n  _private = \"hello\"\n  v = \"hello\"\n}");
 }
 
 TEST_F(OutputConversionTest, JSON) {
