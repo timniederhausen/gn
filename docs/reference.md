@@ -2513,7 +2513,7 @@
     configs = [ "//tools/mything:settings" ]
   }
 
-  static_library("mylib")
+  static_library("mylib") {
     # The configs will be auto-populated as above. You can remove it if
     # you don't want the default for a particular default:
     configs -= [ "//tools/mything:settings" ]
@@ -3768,7 +3768,6 @@
   action("myscript") {
     # Pass the output dir to the script.
     args = [ "-o", rebase_path(target_out_dir, root_build_dir) ]"
-
   }
 ```
 ## <a name="target_variables"></a>Variables you set in targets
