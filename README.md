@@ -1,7 +1,8 @@
 # GN
 
 GN is a meta-build system that generates build files for
-[Ninja](https://ninja-build.org).
+[Ninja](https://ninja-build.org). There is documentation in
+[docs/](https://gn.googlesource.com/gn/+/master/docs/).
 
 ## Getting started
 
@@ -9,6 +10,8 @@ GN is a meta-build system that generates build files for
     cd gn
     python build/gen.py
     ninja -C out
+    # To run tests:
+    out/gn_unittests
 
 On Windows, it is expected that `cl.exe`, `link.exe`, and `lib.exe` can be found
 in `PATH`, so you'll want to run from a Visual Studio command prompt, or
