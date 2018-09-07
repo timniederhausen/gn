@@ -284,3 +284,13 @@ value
 
 `foo_use_bar` - prefixes can be used to indicate a limited scope for an argument
 (e.g. `rtc_use_h264`, `v8_use_snapshot`)
+
+#### Variables
+
+Prefix top-level local variables within `.gni` files with an underscore. This
+prefix causes variables to be unavailable to importing scripts.
+
+```
+_this_var_will_not_be_exported = 1
+but_this_one_will = 2
+```
