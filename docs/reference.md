@@ -1790,14 +1790,18 @@
   directory. If you are passing file names, you will want to use the
   rebase_path() function to make file names relative to this path (see "gn help
   rebase_path").
+
+  The default script interpreter is Python ("python" on POSIX, "python.exe" or
+  "python.bat" on Windows). This can be configured by the script_executable
+  variable, see "gn help dotfile".
 ```
 
 #### **Arguments**:
 
 ```
   filename:
-      File name of python script to execute. Non-absolute names will be treated
-      as relative to the current build file.
+      File name of script to execute. Non-absolute names will be treated as
+      relative to the current build file.
 
   arguments:
       A list of strings to be passed to the script as arguments. May be
