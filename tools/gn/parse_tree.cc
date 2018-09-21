@@ -269,12 +269,18 @@ bool AccessorNode::ComputeAndValidateListIndex(Scope* scope,
                "You gave me " + base::Int64ToString(index_int) + ".");
     return false;
   }
+  if (max_len == 0) {
+    *err = Err(index_->GetRange(), "Array subscript out of range.",
+               "You gave me " + base::Int64ToString(index_int) + " but the " +
+               "array has no elements.");
+    return false;
+  }
   size_t index_sizet = static_cast<size_t>(index_int);
   if (index_sizet >= max_len) {
     *err = Err(index_->GetRange(), "Array subscript out of range.",
                "You gave me " + base::Int64ToString(index_int) +
                    " but I was expecting something from 0 to " +
-                   base::NumberToString(max_len) + ", inclusive.");
+                   base::NumberToString(max_len - 1) + ", inclusive.");
     return false;
   }
 
