@@ -214,6 +214,11 @@ Scopes
 
     myvalues.foo += 2
     empty_scope.new_thing = [ 1, 2, 3 ]
+
+  Scope equality is defined as single-level scopes identical within the current
+  scope. That is, all values in the first scope must be present and identical
+  within the second, and vice versa. Note that this means inherited scopes are
+  always unequal by definition.
 )*";
 
 enum Precedence {

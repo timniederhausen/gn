@@ -113,7 +113,9 @@ class Value {
   // false and sets the error.
   bool VerifyTypeIs(Type t, Err* err) const;
 
-  // Compares values. Only the "value" is compared, not the origin.
+  // Compares values. Only the "value" is compared, not the origin. Scope
+  // values check only the contents of the current scope, and do not go to
+  // parent scopes.
   bool operator==(const Value& other) const;
   bool operator!=(const Value& other) const;
 

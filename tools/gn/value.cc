@@ -196,10 +196,7 @@ bool Value::operator==(const Value& other) const {
       }
       return true;
     case Value::SCOPE:
-      // Scopes are always considered not equal because there's currently
-      // no use case for comparing them, and it requires a bunch of complex
-      // iteration code.
-      return false;
+      return scope_value()->CheckCurrentScopeValuesEqual(other.scope_value());
     default:
       return false;
   }
