@@ -677,6 +677,7 @@ Value RunNotNeeded(Scope* scope,
 
   Value* value = nullptr;  // Value to use, may point to result_value.
   Value result_value;      // Storage for the "evaluate" case.
+  Value scope_value;       // Storage for an evaluated scope.
   const IdentifierNode* identifier = (*args_cur)->AsIdentifier();
   if (identifier) {
     // Optimize the common case where the input scope is an identifier. This
@@ -699,7 +700,13 @@ Value RunNotNeeded(Scope* scope,
   // Extract the source scope if different from current one.
   Scope* source = scope;
   if (value->type() == Value::SCOPE) {
-    source = value->scope_value();
+    // Copy the scope value if it will be overridden.
+    if (value == &result_value) {
+      scope_value = Value(nullptr, value->scope_value()->MakeClosure());
+      source = scope_value.scope_value();
+    } else {
+      source = value->scope_value();
+    }
     result_value = (*args_cur)->Execute(scope, err);
     if (err->has_error())
       return Value();
