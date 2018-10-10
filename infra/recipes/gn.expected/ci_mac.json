@@ -50,7 +50,7 @@
       "-root",
       "[START_DIR]/cipd",
       "-ensure-file",
-      "infra/ninja/${platform} version:1.8.2",
+      "infra/ninja/${platform} version:1.8.2\nfuchsia/clang/${platform} goma",
       "-json-output",
       "/path/to/tmp/json"
     ],
@@ -60,6 +60,10 @@
       "@@@STEP_LOG_LINE@json.output@{@@@",
       "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
       "@@@STEP_LOG_LINE@json.output@    \"\": [@@@",
+      "@@@STEP_LOG_LINE@json.output@      {@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-goma------------\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"package\": \"fuchsia/clang/${platform}\"@@@",
+      "@@@STEP_LOG_LINE@json.output@      }, @@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",
       "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-version:1.8.2---\", @@@",
       "@@@STEP_LOG_LINE@json.output@        \"package\": \"infra/ninja/${platform}\"@@@",
@@ -93,6 +97,12 @@
       "/path/to/tmp/json"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "infra_step": true,
     "name": "debug.build.ensure_installed",
     "~followup_annotations": [
@@ -122,6 +132,12 @@
       "[CACHE]/macos_sdk/XCode.app"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "infra_step": true,
     "name": "debug.build.install xcode",
     "~followup_annotations": [
@@ -136,6 +152,12 @@
       "[CACHE]/macos_sdk/XCode.app"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "infra_step": true,
     "name": "debug.build.select XCode",
     "~followup_annotations": [
@@ -150,6 +172,12 @@
       "-d"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "name": "debug.build.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -162,6 +190,12 @@
       "[START_DIR]/gn/out"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "name": "debug.build.ninja",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -174,6 +208,12 @@
       "--reset"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "infra_step": true,
     "name": "debug.build.reset XCode",
     "~followup_annotations": [
@@ -212,6 +252,12 @@
       "/path/to/tmp/json"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "infra_step": true,
     "name": "release.build.ensure_installed",
     "~followup_annotations": [
@@ -241,6 +287,12 @@
       "[CACHE]/macos_sdk/XCode.app"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "infra_step": true,
     "name": "release.build.install xcode",
     "~followup_annotations": [
@@ -255,6 +307,12 @@
       "[CACHE]/macos_sdk/XCode.app"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "infra_step": true,
     "name": "release.build.select XCode",
     "~followup_annotations": [
@@ -268,6 +326,12 @@
       "[START_DIR]/gn/build/gen.py"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "name": "release.build.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -280,6 +344,12 @@
       "[START_DIR]/gn/out"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "name": "release.build.ninja",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -292,6 +362,12 @@
       "--reset"
     ],
     "cwd": "[START_DIR]/gn",
+    "env": {
+      "AR": "[START_DIR]/cipd/bin/llvm-ar",
+      "CC": "[START_DIR]/cipd/bin/clang",
+      "CXX": "[START_DIR]/cipd/bin/clang++",
+      "LDFLAGS": "-nostdlib++ [START_DIR]/cipd/lib/libc++.a [START_DIR]/cipd/lib/libc++abi.a [START_DIR]/cipd/lib/libunwind.a"
+    },
     "infra_step": true,
     "name": "release.build.reset XCode",
     "~followup_annotations": [

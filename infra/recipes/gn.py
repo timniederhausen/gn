@@ -53,10 +53,13 @@ def RunSteps(api, repository):
     cipd_dir = api.path['start_dir'].join('cipd')
     pkgs = api.cipd.EnsureFile()
     pkgs.add_package('infra/ninja/${platform}', 'version:1.8.2')
-    if api.platform.is_linux:
+    if api.platform.is_linux or api.platform.is_mac:
       pkgs.add_package('fuchsia/clang/${platform}', 'goma')
     api.cipd.ensure(cipd_dir, pkgs)
 
+  stdlib = '%s %s %s' % (cipd_dir.join('lib', 'libc++.a'),
+                         cipd_dir.join('lib', 'libc++abi.a'),
+                         cipd_dir.join('lib', 'libunwind.a'))
   env = {
       'linux': {
           'CC': cipd_dir.join('bin', 'clang'),
@@ -64,7 +67,12 @@ def RunSteps(api, repository):
           'AR': cipd_dir.join('bin', 'llvm-ar'),
           'LDFLAGS': '-static-libstdc++ -ldl -lpthread',
       },
-      'mac': {},
+      'mac': {
+          'CC': cipd_dir.join('bin', 'clang'),
+          'CXX': cipd_dir.join('bin', 'clang++'),
+          'AR': cipd_dir.join('bin', 'llvm-ar'),
+          'LDFLAGS': '-nostdlib++ ' + stdlib,
+      },
       'win': {},
   }[api.platform.name]
 
