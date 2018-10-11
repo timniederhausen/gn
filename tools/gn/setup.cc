@@ -18,7 +18,6 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
-#include "base/strings/sys_string_conversions.h"
 #include "base/strings/utf_string_conversions.h"
 #include "tools/gn/command_format.h"
 #include "tools/gn/commands.h"
@@ -191,6 +190,24 @@ void DecrementWorkCount() {
 
 #if defined(OS_WIN)
 
+std::wstring SysMultiByteToWide(base::StringPiece mb) {
+  if (mb.empty())
+    return std::wstring();
+
+  int mb_length = static_cast<int>(mb.length());
+  // Compute the length of the buffer.
+  int charcount =
+      MultiByteToWideChar(CP_ACP, 0, mb.data(), mb_length, NULL, 0);
+  if (charcount == 0)
+    return std::wstring();
+
+  std::wstring wide;
+  wide.resize(charcount);
+  MultiByteToWideChar(CP_ACP, 0, mb.data(), mb_length, &wide[0], charcount);
+
+  return wide;
+}
+
 // Given the path to a batch file that runs Python, extracts the name of the
 // executable actually implementing Python. Generally people write a batch file
 // to put something named "python" on the path, which then just redirects to
@@ -216,7 +233,7 @@ base::FilePath PythonBatToExe(const base::FilePath& bat_path) {
     base::TrimWhitespaceASCII(python_path, base::TRIM_ALL, &python_path);
 
     // Python uses the system multibyte code page for sys.executable.
-    base::FilePath exe_path(base::SysNativeMBToWide(python_path));
+    base::FilePath exe_path(SysMultiByteToWide(python_path));
 
     // Check for reasonable output, cmd may have output an error message.
     if (base::PathExists(exe_path))
