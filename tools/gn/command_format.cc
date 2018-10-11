@@ -1082,7 +1082,7 @@ int RunFormat(const std::vector<std::string>& args) {
       std::string original_contents;
       if (!base::ReadFileToString(to_write, &original_contents)) {
         Err(Location(), std::string("Couldn't read \"") +
-                            to_write.AsUTF8Unsafe() +
+                            FilePathToUTF8(to_write) +
                             std::string("\" for comparison."))
             .PrintToStdout();
         return 1;
@@ -1094,11 +1094,11 @@ int RunFormat(const std::vector<std::string>& args) {
                             static_cast<int>(output_string.size())) == -1) {
           Err(Location(),
               std::string("Failed to write formatted output back to \"") +
-                  to_write.AsUTF8Unsafe() + std::string("\"."))
+                  FilePathToUTF8(to_write) + std::string("\"."))
               .PrintToStdout();
           return 1;
         }
-        printf("Wrote formatted to '%s'.\n", to_write.AsUTF8Unsafe().c_str());
+        printf("Wrote formatted to '%s'.\n", FilePathToUTF8(to_write).c_str());
       }
     }
   }
