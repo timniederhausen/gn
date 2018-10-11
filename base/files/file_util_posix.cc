@@ -111,15 +111,7 @@ bool VerifySpecificPathControlledByUser(const FilePath& path,
 }
 
 std::string TempFileName() {
-#if defined(OS_MACOSX)
-  return StringPrintf(".%s.XXXXXX", base::mac::BaseBundleID());
-#endif
-
-#if defined(GOOGLE_CHROME_BUILD)
-  return std::string(".com.google.Chrome.XXXXXX");
-#else
   return std::string(".org.chromium.Chromium.XXXXXX");
-#endif
 }
 
 #if defined(OS_LINUX) || defined(OS_AIX)
@@ -578,8 +570,6 @@ bool ExecutableExistsInPath(Environment* env,
 
 #endif  // !OS_FUCHSIA
 
-#if !defined(OS_MACOSX)
-// This is implemented in file_util_mac.mm for Mac.
 bool GetTempDir(FilePath* path) {
   const char* tmp = getenv("TMPDIR");
   if (tmp) {
@@ -590,7 +580,6 @@ bool GetTempDir(FilePath* path) {
   *path = FilePath("/tmp");
   return true;
 }
-#endif  // !defined(OS_MACOSX)
 
 #if !defined(OS_MACOSX)  // Mac implementation is in file_util_mac.mm.
 FilePath GetHomeDir() {
