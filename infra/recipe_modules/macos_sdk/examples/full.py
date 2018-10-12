@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 DEPS = [
-    'windows_sdk',
+    'macos_sdk',
     'recipe_engine/platform',
     'recipe_engine/properties',
     'recipe_engine/step',
@@ -11,15 +11,12 @@ DEPS = [
 
 
 def RunSteps(api):
-  with api.windows_sdk():
+  with api.macos_sdk():
     api.step('gn', ['gn', 'gen', 'out/Release'])
     api.step('ninja', ['ninja', '-C', 'out/Release'])
 
 
 def GenTests(api):
   for platform in ('linux', 'mac', 'win'):
-    properties = {
-        'buildername': 'test_builder',
-    }
     yield (api.test(platform) + api.platform.name(platform) +
-           api.properties.generic(**properties))
+           api.properties.generic(buildername='test_builder'))

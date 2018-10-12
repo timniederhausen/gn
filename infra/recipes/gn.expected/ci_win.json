@@ -21,7 +21,7 @@
       "fetch",
       "--tags",
       "https://gn.googlesource.com/gn",
-      "refs/heads/master"
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     ],
     "cwd": "[START_DIR]\\gn",
     "infra_step": true,
@@ -39,33 +39,6 @@
     "cwd": "[START_DIR]\\gn",
     "infra_step": true,
     "name": "git.checkout",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
-    ]
-  },
-  {
-    "cmd": [
-      "git",
-      "fetch",
-      "https://gn.googlesource.com/gn",
-      "refs/changes/00/1000/1"
-    ],
-    "cwd": "[START_DIR]\\gn",
-    "infra_step": true,
-    "name": "git.fetch 1000/1",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
-    ]
-  },
-  {
-    "cmd": [
-      "git",
-      "cherry-pick",
-      "FETCH_HEAD"
-    ],
-    "cwd": "[START_DIR]\\gn",
-    "infra_step": true,
-    "name": "git.cherry-pick 1000/1",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
     ]
@@ -113,7 +86,7 @@
       "cipd.bat",
       "ensure",
       "-root",
-      "[START_DIR]\\cipd\\windows_sdk",
+      "[CACHE]\\windows_sdk",
       "-ensure-file",
       "chrome_internal/third_party/sdk/windows uploaded:2018-06-13",
       "-json-output",
@@ -142,7 +115,7 @@
       "python",
       "-u",
       "\nimport shutil\nimport sys\nshutil.copy(sys.argv[1], sys.argv[2])\n",
-      "[START_DIR]\\cipd\\windows_sdk\\win_sdk\\bin\\SetEnv.x64.json",
+      "[CACHE]\\windows_sdk\\win_sdk\\bin\\SetEnv.x64.json",
       "/path/to/tmp/json"
     ],
     "cwd": "[START_DIR]\\gn",
@@ -180,11 +153,11 @@
     ],
     "cwd": "[START_DIR]\\gn",
     "env": {
-      "VSINSTALLDIR": "[START_DIR]\\cipd\\windows_sdk"
+      "VSINSTALLDIR": "[CACHE]\\windows_sdk"
     },
     "env_prefixes": {
       "PATH": [
-        "[START_DIR]\\cipd\\windows_sdk\\win_sdk\\bin\\x64"
+        "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
     "name": "debug.build.generate",
@@ -200,11 +173,11 @@
     ],
     "cwd": "[START_DIR]\\gn",
     "env": {
-      "VSINSTALLDIR": "[START_DIR]\\cipd\\windows_sdk"
+      "VSINSTALLDIR": "[CACHE]\\windows_sdk"
     },
     "env_prefixes": {
       "PATH": [
-        "[START_DIR]\\cipd\\windows_sdk\\win_sdk\\bin\\x64"
+        "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
     "name": "debug.build.ninja",
@@ -251,7 +224,7 @@
       "cipd.bat",
       "ensure",
       "-root",
-      "[START_DIR]\\cipd\\windows_sdk",
+      "[CACHE]\\windows_sdk",
       "-ensure-file",
       "chrome_internal/third_party/sdk/windows uploaded:2018-06-13",
       "-json-output",
@@ -280,7 +253,7 @@
       "python",
       "-u",
       "\nimport shutil\nimport sys\nshutil.copy(sys.argv[1], sys.argv[2])\n",
-      "[START_DIR]\\cipd\\windows_sdk\\win_sdk\\bin\\SetEnv.x64.json",
+      "[CACHE]\\windows_sdk\\win_sdk\\bin\\SetEnv.x64.json",
       "/path/to/tmp/json"
     ],
     "cwd": "[START_DIR]\\gn",
@@ -317,11 +290,11 @@
     ],
     "cwd": "[START_DIR]\\gn",
     "env": {
-      "VSINSTALLDIR": "[START_DIR]\\cipd\\windows_sdk"
+      "VSINSTALLDIR": "[CACHE]\\windows_sdk"
     },
     "env_prefixes": {
       "PATH": [
-        "[START_DIR]\\cipd\\windows_sdk\\win_sdk\\bin\\x64"
+        "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
     "name": "release.build.generate",
@@ -337,11 +310,11 @@
     ],
     "cwd": "[START_DIR]\\gn",
     "env": {
-      "VSINSTALLDIR": "[START_DIR]\\cipd\\windows_sdk"
+      "VSINSTALLDIR": "[CACHE]\\windows_sdk"
     },
     "env_prefixes": {
       "PATH": [
-        "[START_DIR]\\cipd\\windows_sdk\\win_sdk\\bin\\x64"
+        "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
     "name": "release.build.ninja",
@@ -370,6 +343,28 @@
     "name": "release.test",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "cipd.bat",
+      "pkg-build",
+      "-pkg-def",
+      "{\"data\": [{\"file\": \"gn.exe\"}, {\"version_file\": \".versions/gn.exe.cipd_version\"}], \"install_mode\": \"copy\", \"package\": \"gn/gn/windows-amd64\", \"root\": \"[START_DIR]\\\\gn\\\\out\"}",
+      "-out",
+      "[CLEANUP]\\gn.cipd",
+      "-json-output",
+      "/path/to/tmp/json"
+    ],
+    "name": "build gn/gn/windows-amd64",
+    "~followup_annotations": [
+      "@@@STEP_LOG_LINE@json.output@{@@@",
+      "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
+      "@@@STEP_LOG_LINE@json.output@    \"instance_id\": \"40-chars-fake-of-the-package-instance_id\", @@@",
+      "@@@STEP_LOG_LINE@json.output@    \"package\": \"gn/gn/windows-amd64\"@@@",
+      "@@@STEP_LOG_LINE@json.output@  }@@@",
+      "@@@STEP_LOG_LINE@json.output@}@@@",
+      "@@@STEP_LOG_END@json.output@@@"
     ]
   },
   {

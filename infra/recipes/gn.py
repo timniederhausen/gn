@@ -17,6 +17,7 @@ DEPS = [
     'recipe_engine/python',
     'recipe_engine/raw_io',
     'recipe_engine/step',
+    'macos_sdk',
     'windows_sdk',
 ]
 
@@ -83,7 +84,7 @@ def RunSteps(api, repository):
     with api.step.nest(config['name']):
       with api.step.nest('build'):
         with api.context(
-            env=env, cwd=src_dir), api.windows_sdk(enabled=api.platform.is_win):
+            env=env, cwd=src_dir), api.macos_sdk(), api.windows_sdk():
           api.python(
               'generate', src_dir.join('build', 'gen.py'), args=config['args'])
 
@@ -149,16 +150,19 @@ def RunSteps(api, repository):
 def GenTests(api):
   REVISION = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
-  yield (api.test('ci') + api.platform.name('win') + api.buildbucket.ci_build(
-      git_repo='gn.googlesource.com/gn',
-      revision=REVISION,
-  ))
+  for platform in ('linux', 'mac', 'win'):
+    yield (api.test('ci_' + platform) + api.platform.name(platform) +
+           api.buildbucket.ci_build(
+               git_repo='gn.googlesource.com/gn',
+               revision=REVISION,
+           ))
 
-  yield (api.test('cq') + api.platform.name('win') + api.buildbucket.try_build(
-      gerrit_host='gn-review.googlesource.com',
-      change_number=1000,
-      patch_set=1,
-  ))
+    yield (api.test('cq_' + platform) + api.platform.name(platform) +
+           api.buildbucket.try_build(
+               gerrit_host='gn-review.googlesource.com',
+               change_number=1000,
+               patch_set=1,
+           ))
 
   yield (api.test('cipd_exists') + api.buildbucket.ci_build(
       project='infra-internal',
