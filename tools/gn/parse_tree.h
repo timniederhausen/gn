@@ -334,6 +334,8 @@ class FunctionCallNode : public ParseNode {
   const BlockNode* block() const { return block_.get(); }
   void set_block(std::unique_ptr<BlockNode> b) { block_ = std::move(b); }
 
+  void SetNewLocation(int line_number);
+
  private:
   Token function_;
   std::unique_ptr<ListNode> args_;
@@ -385,6 +387,7 @@ class ListNode : public ParseNode {
   void Print(std::ostream& out, int indent) const override;
 
   void set_begin_token(const Token& t) { begin_token_ = t; }
+  const Token& Begin() const { return begin_token_; }
   void set_end(std::unique_ptr<EndNode> e) { end_ = std::move(e); }
   const EndNode* End() const { return end_.get(); }
 

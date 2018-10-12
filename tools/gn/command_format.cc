@@ -111,7 +111,6 @@ class Printer {
   // Format a list of values using the given style.
   enum SequenceStyle {
     kSequenceStyleList,
-    kSequenceStyleBlock,
     kSequenceStyleBracedBlock,
   };
 
@@ -147,6 +146,11 @@ class Printer {
   // are sorted putting first the relative targets and then the global ones
   // (both sorted alphabetically).
   void SortIfSourcesOrDeps(const BinaryOpNode* binop);
+
+  // Sort contiguous import() function calls in the given ordered list of
+  // statements (the body of a block or scope).
+  template <class PARSENODE>
+  void SortImports(std::vector<std::unique_ptr<PARSENODE>>& statements);
 
   // Heuristics to decide if there should be a blank line added between two
   // items. For various "small" items, it doesn't look nice if there's too much
@@ -343,6 +347,90 @@ void Printer::SortIfSourcesOrDeps(const BinaryOpNode* binop) {
   }
 }
 
+template <class PARSENODE>
+void Printer::SortImports(std::vector<std::unique_ptr<PARSENODE>>& statements) {
+  // Build a set of ranges by indices of FunctionCallNode's that are imports.
+
+  std::vector<std::vector<size_t>> import_statements;
+
+  auto is_import = [](const PARSENODE* p) {
+    const FunctionCallNode* func_call = p->AsFunctionCall();
+    return func_call && func_call->function().value() == "import";
+  };
+
+  std::vector<size_t> current_group;
+  for (size_t i = 0; i < statements.size(); ++i) {
+    if (is_import(statements[i].get())) {
+      if (i > 0 && (!is_import(statements[i - 1].get()) ||
+                    ShouldAddBlankLineInBetween(statements[i - 1].get(),
+                                                statements[i].get()))) {
+        if (!current_group.empty()) {
+          import_statements.push_back(current_group);
+          current_group.clear();
+        }
+      }
+      current_group.push_back(i);
+    }
+  }
+
+  if (!current_group.empty())
+    import_statements.push_back(current_group);
+
+  struct CompareByImportFile {
+    bool operator()(const std::unique_ptr<PARSENODE>& a,
+                    const std::unique_ptr<PARSENODE>& b) const {
+      const auto& a_args = a->AsFunctionCall()->args()->contents();
+      const auto& b_args = b->AsFunctionCall()->args()->contents();
+      base::StringPiece a_name;
+      base::StringPiece b_name;
+      if (!a_args.empty())
+        a_name = a_args[0]->AsLiteral()->value().value();
+      if (!b_args.empty())
+        b_name = b_args[0]->AsLiteral()->value().value();
+
+      auto is_absolute = [](base::StringPiece import) {
+        return import.size() >= 3 && import[0] == '"' && import[1] == '/' &&
+               import[2] == '/';
+      };
+      int a_is_rel = !is_absolute(a_name);
+      int b_is_rel = !is_absolute(b_name);
+
+      return std::tie(a_is_rel, a_name) < std::tie(b_is_rel, b_name);
+    }
+  };
+
+  int line_after_previous = -1;
+
+  for (const auto& group : import_statements) {
+    size_t begin = group[0];
+    size_t end = group.back() + 1;
+
+    // Save the original line number so that ranges can be re-assigned. They're
+    // contiguous because of the partitioning code above. Later formatting
+    // relies on correct line number to know whether to insert blank lines,
+    // which is why these need to be fixed up. Additionally, to handle multiple
+    // imports on one line, they're assigned sequential line numbers, and
+    // subsequent blocks will be gapped from them.
+    int start_line =
+        std::max(statements[begin]->GetRange().begin().line_number(),
+                 line_after_previous + 1);
+
+    std::sort(statements.begin() + begin, statements.begin() + end,
+              CompareByImportFile());
+
+    const PARSENODE* prev = nullptr;
+    for (size_t i = begin; i < end; ++i) {
+      const PARSENODE* node = statements[i].get();
+      int line_number =
+          prev ? prev->GetRange().end().line_number() + 1 : start_line;
+      const_cast<FunctionCallNode*>(node->AsFunctionCall())
+          ->SetNewLocation(line_number);
+      prev = node;
+      line_after_previous = line_number + 1;
+    }
+  }
+}
+
 bool Printer::ShouldAddBlankLineInBetween(const ParseNode* a,
                                           const ParseNode* b) {
   LocationRange a_range = a->GetRange();
@@ -381,6 +469,9 @@ void Printer::Block(const ParseNode* root) {
       Newline();
     }
   }
+
+  SortImports(const_cast<std::vector<std::unique_ptr<ParseNode>>&>(
+      block->statements()));
 
   size_t i = 0;
   for (const auto& stmt : block->statements()) {
@@ -692,8 +783,10 @@ void Printer::Sequence(SequenceStyle style,
   else if (style == kSequenceStyleBracedBlock)
     Print("{");
 
-  if (style == kSequenceStyleBlock || style == kSequenceStyleBracedBlock)
+  if (style == kSequenceStyleBracedBlock) {
     force_multiline = true;
+    SortImports(const_cast<std::vector<std::unique_ptr<PARSENODE>>&>(list));
+  }
 
   force_multiline |= ListWillBeMultiline(list, end);
 

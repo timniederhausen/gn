@@ -485,6 +485,21 @@ void FunctionCallNode::Print(std::ostream& out, int indent) const {
     block_->Print(out, indent + 1);
 }
 
+void FunctionCallNode::SetNewLocation(int line_number) {
+  Location func_old_loc = function_.location();
+  Location func_new_loc =
+      Location(func_old_loc.file(), line_number, func_old_loc.column_number(),
+               func_old_loc.byte());
+  function_.set_location(func_new_loc);
+
+  Location args_old_loc = args_->Begin().location();
+  Location args_new_loc =
+      Location(args_old_loc.file(), line_number, args_old_loc.column_number(),
+               args_old_loc.byte());
+  const_cast<Token&>(args_->Begin()).set_location(args_new_loc);
+  const_cast<Token&>(args_->End()->value()).set_location(args_new_loc);
+}
+
 // IdentifierNode --------------------------------------------------------------
 
 IdentifierNode::IdentifierNode() = default;
