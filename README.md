@@ -21,6 +21,11 @@ On Linux and Mac, the default compiler is `clang++`, a recent version is
 expected to be found in `PATH`. This can be overridden by setting `CC`, `CXX`,
 and `AR`.
 
+## Reporting bugs
+
+If you find a bug, you can see if it is known or report it in the [bug
+database](https://bugs.chromium.org/p/gn/issues/list).
+
 ## Sending patches
 
 GN uses [Gerrit](https://www.gerritcodereview.com/) for code review. The short
