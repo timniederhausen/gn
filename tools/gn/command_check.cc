@@ -76,9 +76,9 @@ Command-specific switches
 
 What gets checked
 
-  The .gn file may specify a list of targets to be checked. Only these targets
-  will be checked if no label_pattern is specified on the command line.
-  Otherwise, the command-line list is used instead. See "gn help dotfile".
+  The .gn file may specify a list of targets to be checked in the list
+  check_targets (see "gn help dotfile"). If a label pattern is specified
+  on the command line, check_targets is not used.
 
   Targets can opt-out from checking with "check_includes = false" (see
   "gn help check_includes").

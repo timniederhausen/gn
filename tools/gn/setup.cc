@@ -71,7 +71,8 @@ Variables
   check_targets [optional]
       A list of labels and label patterns that should be checked when running
       "gn check" or "gn gen --check". If unspecified, all targets will be
-      checked. If it is the empty list, no targets will be checked.
+      checked. If it is the empty list, no targets will be checked. To
+      bypass this list, request an explicit check of targets, like "//*".
 
       The format of this list is identical to that of "visibility" so see "gn
       help visibility" for examples.
