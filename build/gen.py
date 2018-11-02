@@ -87,8 +87,6 @@ def main(argv):
                     help='Enable the use of LTO')
   parser.add_option('--use-icf', action='store_true',
                     help='Enable the use of Identical Code Folding')
-  parser.add_option('--no-sysroot', action='store_true',
-                    help='(Linux only) Do not build with the Debian sysroot.')
   parser.add_option('--no-last-commit-position', action='store_true',
                     help='Do not generate last_commit_position.h.')
   parser.add_option('--out-path',
@@ -104,18 +102,13 @@ def main(argv):
   else:
     host = platform
 
-  linux_sysroot = None
-  if platform.is_linux() and not options.no_sysroot:
-    linux_sysroot = UpdateLinuxSysroot()
-
   out_dir = options.out_path or os.path.join(REPO_ROOT, 'out')
   if not os.path.isdir(out_dir):
     os.makedirs(out_dir)
   if not options.no_last_commit_position:
     GenerateLastCommitPosition(host,
                                os.path.join(out_dir, 'last_commit_position.h'))
-  WriteGNNinja(os.path.join(out_dir, 'build.ninja'), platform, host, options,
-               linux_sysroot)
+  WriteGNNinja(os.path.join(out_dir, 'build.ninja'), platform, host, options)
   return 0
 
 
@@ -298,7 +291,7 @@ def WriteGenericNinja(path, static_libraries, executables,
             os.path.relpath(template_filename, os.path.dirname(path)) + '\n')
 
 
-def WriteGNNinja(path, platform, host, options, linux_sysroot):
+def WriteGNNinja(path, platform, host, options):
   if platform.is_msvc():
     cc = os.environ.get('CC', 'cl.exe')
     cxx = os.environ.get('CXX', 'cl.exe')
@@ -364,10 +357,6 @@ def WriteGNNinja(path, platform, host, options, linux_sysroot):
     cflags_cc.extend(['-std=c++14', '-Wno-c++11-narrowing'])
 
     if platform.is_linux():
-      if linux_sysroot:
-        # Use the sid sysroot that UpdateLinuxSysroot() downloads.
-        cflags.append('--sysroot=' + linux_sysroot)
-        ldflags.append('--sysroot=' + linux_sysroot)
       ldflags.extend([
           '-static-libstdc++',
           '-Wl,--as-needed',
