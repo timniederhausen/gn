@@ -11,11 +11,9 @@ import optparse
 import os
 import platform
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
-import urllib2
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(SCRIPT_DIR)
@@ -141,50 +139,6 @@ def GenerateLastCommitPosition(host, header):
   if old_contents != contents:
     with open(header, 'wb') as f:
       f.write(contents)
-
-
-def UpdateLinuxSysroot():
-  # Sysroot revision from:
-  # https://cs.chromium.org/chromium/src/build/linux/sysroot_scripts/sysroots.json
-  server = 'https://commondatastorage.googleapis.com'
-  path = 'chrome-linux-sysroot/toolchain'
-  revision = '1015a998c2adf188813cca60b558b0ea1a0b6ced'
-  filename = 'debian_sid_amd64_sysroot.tar.xz'
-
-  url = '%s/%s/%s/%s' % (server, path, revision, filename)
-
-  sysroot = os.path.join(SCRIPT_DIR, os.pardir, '.linux-sysroot')
-
-  stamp = os.path.join(sysroot, '.stamp')
-  if os.path.exists(stamp):
-    with open(stamp) as s:
-      if s.read() == url:
-        return sysroot
-
-  print 'Installing Debian root image from %s' % url
-
-  if os.path.isdir(sysroot):
-    shutil.rmtree(sysroot)
-  os.mkdir(sysroot)
-  tarball = os.path.join(sysroot, filename)
-  print 'Downloading %s' % url
-
-  for _ in range(3):
-    response = urllib2.urlopen(url)
-    with open(tarball, 'wb') as f:
-      f.write(response.read())
-    break
-  else:
-    raise Exception('Failed to download %s' % url)
-
-  subprocess.check_call(['tar', 'xf', tarball, '-C', sysroot])
-
-  os.remove(tarball)
-
-  with open(stamp, 'w') as s:
-    s.write(url)
-
-  return sysroot
 
 
 def WriteGenericNinja(path, static_libraries, executables,
