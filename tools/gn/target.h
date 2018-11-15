@@ -20,6 +20,7 @@
 #include "tools/gn/label_pattern.h"
 #include "tools/gn/label_ptr.h"
 #include "tools/gn/lib_file.h"
+#include "tools/gn/metadata.h"
 #include "tools/gn/ordered_set.h"
 #include "tools/gn/output_file.h"
 #include "tools/gn/source_file.h"
@@ -143,6 +144,10 @@ class Target : public Item {
     DCHECK_EQ(STATIC_LIBRARY, output_type_);
     complete_static_lib_ = complete;
   }
+
+  // Metadata. Target takes ownership of the resulting scope.
+  const Metadata& metadata() const { return metadata_; }
+  Metadata& metadata() { return metadata_; }
 
   bool testonly() const { return testonly_; }
   void set_testonly(bool value) { testonly_ = value; }
@@ -387,6 +392,8 @@ class Target : public Item {
   OutputFile link_output_file_;
   OutputFile dependency_output_file_;
   std::vector<OutputFile> runtime_outputs_;
+
+  Metadata metadata_;
 
   DISALLOW_COPY_AND_ASSIGN(Target);
 };

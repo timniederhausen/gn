@@ -16,9 +16,10 @@
 #define DEPENDENT_CONFIG_VARS \
   "  Dependent configs: all_dependent_configs, public_configs\n"
 #define DEPS_VARS "  Deps: data_deps, deps, public_deps\n"
-#define GENERAL_TARGET_VARS                                                  \
-  "  General: check_includes, configs, data, friend, inputs, output_name,\n" \
-  "           output_extension, public, sources, testonly, visibility\n"
+#define GENERAL_TARGET_VARS                                                \
+  "  General: check_includes, configs, data, friend, inputs, metadata,\n"  \
+  "           output_name, output_extension, public, sources, testonly,\n" \
+  "           visibility\n"
 
 namespace functions {
 
@@ -138,7 +139,7 @@ File name handling
     R"(
 Variables
 
-  args, data, data_deps, depfile, deps, inputs, outputs*, pool,
+  args, data, data_deps, depfile, deps, inputs, metadata, outputs*, pool,
   response_file_contents, script*, sources
   * = required
 
@@ -208,7 +209,7 @@ File name handling
     R"(
 Variables
 
-  args, data, data_deps, depfile, deps, inputs, outputs*, pool,
+  args, data, data_deps, depfile, deps, inputs, metadata, outputs*, pool,
   response_file_contents, script*, sources*
   * = required
 
@@ -272,7 +273,7 @@ const char kBundleData_Help[] =
 
 Variables
 
-  sources*, outputs*, deps, data_deps, public_deps, visibility
+  sources*, outputs*, deps, data_deps, metadata, public_deps, visibility
   * = required
 
 Examples
@@ -361,7 +362,8 @@ Variables
   bundle_executable_dir*, bundle_plugins_dir*, bundle_deps_filter, deps,
   data_deps, public_deps, visibility, product_type, code_signing_args,
   code_signing_script, code_signing_sources, code_signing_outputs,
-  xcode_extra_attributes, xcode_test_application_name, partial_info_plist
+  xcode_extra_attributes, xcode_test_application_name, partial_info_plist,
+  metadata
   * = required
 
 Example

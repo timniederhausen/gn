@@ -568,6 +568,7 @@ def WriteGNNinja(path, platform, host, options):
         'tools/gn/label_pattern_unittest.cc',
         'tools/gn/label_unittest.cc',
         'tools/gn/loader_unittest.cc',
+        'tools/gn/metadata_unittest.cc',
         'tools/gn/ninja_action_target_writer_unittest.cc',
         'tools/gn/ninja_binary_target_writer_unittest.cc',
         'tools/gn/ninja_build_writer_unittest.cc',
