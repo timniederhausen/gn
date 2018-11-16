@@ -5,6 +5,7 @@
 #include <memory>
 #include <set>
 
+#include "base/json/json_writer.h"
 #include "base/strings/string_number_conversions.h"
 #include "tools/gn/commands.h"
 #include "tools/gn/config.h"
@@ -14,7 +15,9 @@
 #include "tools/gn/input_file.h"
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/runtime_deps.h"
+#include "tools/gn/scope.h"
 #include "tools/gn/settings.h"
+#include "tools/gn/standard_out.h"
 #include "tools/gn/substitution_writer.h"
 #include "tools/gn/variables.h"
 
@@ -47,6 +50,7 @@
 //   "deps : [ list of target dependencies ],
 //   "libs" : [ list of libraries ],
 //   "lib_dirs" : [ list of library directories ]
+//   "metadata" : [ dictionary of target metadata values ]
 // }
 //
 // Optionally, if "what" is specified while generating description, two other
@@ -142,6 +146,42 @@ class BaseDescBuilder {
     if (lib.is_source_file())
       return RenderValue(lib.source_file());
     return RenderValue(lib.value());
+  }
+
+  template <typename T>
+  base::Value ToBaseValue(const std::vector<T>& vector) {
+    base::ListValue res;
+    for (const auto& v : vector)
+      res.GetList().emplace_back(ToBaseValue(v));
+    return std::move(res);
+  }
+
+  base::Value ToBaseValue(const Scope* scope) {
+    base::DictionaryValue res;
+    Scope::KeyValueMap map;
+    scope->GetCurrentScopeValues(&map);
+    for (const auto& v : map)
+      res.SetKey(v.first, ToBaseValue(v.second));
+    return std::move(res);
+  }
+
+  base::Value ToBaseValue(const Value& val) {
+    switch (val.type()) {
+      case Value::STRING:
+        return base::Value(val.string_value());
+      case Value::INTEGER:
+        return base::Value(int(val.int_value()));
+      case Value::BOOLEAN:
+        return base::Value(val.boolean_value());
+      case Value::SCOPE:
+        return ToBaseValue(val.scope_value());
+      case Value::LIST:
+        return ToBaseValue(val.list_value());
+      case Value::NONE:
+        return base::Value();
+    }
+    NOTREACHED();
+    return base::Value();
   }
 
   template <class VectorType>
@@ -273,6 +313,14 @@ class TargetDescBuilder : public BaseDescBuilder {
     }
 
     // General target meta variables.
+
+    if (what(variables::kMetadata)) {
+      base::DictionaryValue metadata;
+      for (const auto& v : target_->metadata().contents())
+        metadata.SetKey(v.first, ToBaseValue(v.second));
+      res->SetKey(variables::kMetadata, std::move(metadata));
+    }
+
     if (what(variables::kVisibility))
       res->SetWithoutPathExpansion(variables::kVisibility,
                                    target_->visibility().AsValue());
