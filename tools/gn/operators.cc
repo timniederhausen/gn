@@ -312,7 +312,7 @@ void RemoveMatchesFromList(const BinaryOpNode* op_node,
       }
       break;
 
-    default:
+    case Value::NONE:
       break;
   }
 }

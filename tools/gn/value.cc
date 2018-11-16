@@ -197,7 +197,10 @@ bool Value::operator==(const Value& other) const {
       return true;
     case Value::SCOPE:
       return scope_value()->CheckCurrentScopeValuesEqual(other.scope_value());
+    case Value::NONE:
+      return false;
     default:
+      NOTREACHED();
       return false;
   }
 }
