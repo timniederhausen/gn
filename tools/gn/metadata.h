@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "tools/gn/build_settings.h"
 #include "tools/gn/scope.h"
 #include "tools/gn/source_dir.h"
 
@@ -43,6 +44,19 @@ class Metadata {
   const SourceDir& source_dir() const { return source_dir_; }
   SourceDir& source_dir() { return source_dir_; }
   void set_source_dir(const SourceDir& d) { source_dir_ = d; }
+
+  // Collect the specified metadata from this instance.
+  //
+  // Calling this will populate `next_walk_keys` with the values of targets to
+  // be walked next (with the empty string "" indicating that the target should
+  // walk all of its deps and data_deps).
+  bool WalkStep(const BuildSettings* settings,
+                const std::vector<std::string>& keys_to_extract,
+                const std::vector<std::string>& keys_to_walk,
+                bool rebase_files,
+                std::vector<Value>* next_walk_keys,
+                std::vector<Value>* result,
+                Err* err) const;
 
  private:
   const ParseNode* origin_;

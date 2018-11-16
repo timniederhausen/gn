@@ -469,6 +469,7 @@ def WriteGNNinja(path, platform, host, options):
         'tools/gn/lib_file.cc',
         'tools/gn/loader.cc',
         'tools/gn/location.cc',
+        'tools/gn/metadata.cc',
         'tools/gn/ninja_action_target_writer.cc',
         'tools/gn/ninja_binary_target_writer.cc',
         'tools/gn/ninja_build_writer.cc',
