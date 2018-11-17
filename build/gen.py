@@ -334,7 +334,7 @@ def WriteGNNinja(path, platform, host, options):
 
   elif platform.is_msvc():
     if not options.debug:
-      cflags.extend(['/Ox', '/DNDEBUG', '/GL'])
+      cflags.extend(['/O2', '/DNDEBUG', '/GL'])
       libflags.extend(['/LTCG'])
       ldflags.extend(['/LTCG', '/OPT:REF', '/OPT:ICF'])
 
@@ -348,7 +348,6 @@ def WriteGNNinja(path, platform, host, options):
         '/D_UNICODE',
         '/D_WIN32_WINNT=0x0A00',
         '/FS',
-        '/Gy',
         '/W4',
         '/WX',
         '/Zi',
