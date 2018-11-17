@@ -561,19 +561,21 @@ bool Setup::FillSourceDir(const base::CommandLine& cmdline) {
     // When --root is specified, an alternate --dotfile can also be set.
     // --dotfile should be a real file path and not a "//foo" source-relative
     // path.
-    base::FilePath dot_file_path =
+    base::FilePath dotfile_path =
         cmdline.GetSwitchValuePath(switches::kDotfile);
-    if (dot_file_path.empty()) {
+    if (dotfile_path.empty()) {
       dotfile_name_ = root_path.Append(kGnFile);
     } else {
-      dotfile_name_ = base::MakeAbsoluteFilePath(dot_file_path);
+      dotfile_name_ = base::MakeAbsoluteFilePath(dotfile_path);
       if (dotfile_name_.empty()) {
         Err(Location(), "Could not load dotfile.",
-            "The file \"" + FilePathToUTF8(dot_file_path) +
+            "The file \"" + FilePathToUTF8(dotfile_path) +
                 "\" couldn't be loaded.")
             .PrintToStdout();
         return false;
       }
+      // Only set dotfile_name if it was passed explicitly.
+      build_settings_.set_dotfile_name(dotfile_name_);
     }
   } else {
     // In the default case, look for a dotfile and that also tells us where the

@@ -63,9 +63,6 @@ const char kDotfile_Help[] =
   Normally GN loads the ".gn"file  from the source root for some basic
   configuration (see "gn help dotfile"). This flag allows you to
   use a different file.
-
-  Note that this interacts with "--root" in a possibly incorrect way.
-  It would be nice to test the edge cases and document or fix.
 )";
 
 const char kFailOnUnusedArgs[] = "fail-on-unused-args";
