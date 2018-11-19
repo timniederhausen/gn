@@ -586,6 +586,7 @@ def WriteGNNinja(path, platform, host, options):
         'tools/gn/runtime_deps_unittest.cc',
         'tools/gn/scope_per_file_provider_unittest.cc',
         'tools/gn/scope_unittest.cc',
+        'tools/gn/setup_unittest.cc',
         'tools/gn/source_dir_unittest.cc',
         'tools/gn/source_file_unittest.cc',
         'tools/gn/string_utils_unittest.cc',

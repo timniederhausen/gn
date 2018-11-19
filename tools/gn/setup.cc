@@ -315,20 +315,25 @@ Setup::Setup()
 Setup::~Setup() = default;
 
 bool Setup::DoSetup(const std::string& build_dir, bool force_create) {
-  base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
+  return DoSetup(build_dir, force_create,
+                 *base::CommandLine::ForCurrentProcess());
+}
 
-  scheduler_.set_verbose_logging(cmdline->HasSwitch(switches::kVerbose));
-  if (cmdline->HasSwitch(switches::kTime) ||
-      cmdline->HasSwitch(switches::kTracelog))
+bool Setup::DoSetup(const std::string& build_dir,
+                    bool force_create,
+                    const base::CommandLine& cmdline) {
+  scheduler_.set_verbose_logging(cmdline.HasSwitch(switches::kVerbose));
+  if (cmdline.HasSwitch(switches::kTime) ||
+      cmdline.HasSwitch(switches::kTracelog))
     EnableTracing();
 
   ScopedTrace setup_trace(TraceItem::TRACE_SETUP, "DoSetup");
 
-  if (!FillSourceDir(*cmdline))
+  if (!FillSourceDir(cmdline))
     return false;
   if (!RunConfigFile())
     return false;
-  if (!FillOtherConfig(*cmdline))
+  if (!FillOtherConfig(cmdline))
     return false;
 
   // Must be after FillSourceDir to resolve.
@@ -344,10 +349,10 @@ bool Setup::DoSetup(const std::string& build_dir, bool force_create) {
   }
 
   if (fill_arguments_) {
-    if (!FillArguments(*cmdline))
+    if (!FillArguments(cmdline))
       return false;
   }
-  if (!FillPythonPath(*cmdline))
+  if (!FillPythonPath(cmdline))
     return false;
 
   // Check for unused variables in the .gn file.
@@ -361,10 +366,14 @@ bool Setup::DoSetup(const std::string& build_dir, bool force_create) {
 }
 
 bool Setup::Run() {
+  return Run(*base::CommandLine::ForCurrentProcess());
+}
+
+bool Setup::Run(const base::CommandLine& cmdline) {
   RunPreMessageLoop();
   if (!scheduler_.Run())
     return false;
-  return RunPostMessageLoop();
+  return RunPostMessageLoop(cmdline);
 }
 
 SourceFile Setup::GetBuildArgFile() const {
@@ -379,7 +388,7 @@ void Setup::RunPreMessageLoop() {
   loader_->Load(root_build_file_, LocationRange(), Label());
 }
 
-bool Setup::RunPostMessageLoop() {
+bool Setup::RunPostMessageLoop(const base::CommandLine& cmdline) {
   Err err;
   if (!builder_.CheckForBadItems(&err)) {
     err.PrintToStdout();
@@ -387,8 +396,7 @@ bool Setup::RunPostMessageLoop() {
   }
 
   if (!build_settings_.build_args().VerifyAllOverridesUsed(&err)) {
-    if (base::CommandLine::ForCurrentProcess()->HasSwitch(
-            switches::kFailOnUnusedArgs)) {
+    if (cmdline.HasSwitch(switches::kFailOnUnusedArgs)) {
       err.PrintToStdout();
       return false;
     }
@@ -416,11 +424,10 @@ bool Setup::RunPostMessageLoop() {
   }
 
   // Write out tracing and timing if requested.
-  const base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
-  if (cmdline->HasSwitch(switches::kTime))
+  if (cmdline.HasSwitch(switches::kTime))
     PrintLongHelp(SummarizeTraces());
-  if (cmdline->HasSwitch(switches::kTracelog))
-    SaveTraces(cmdline->GetSwitchValuePath(switches::kTracelog));
+  if (cmdline.HasSwitch(switches::kTracelog))
+    SaveTraces(cmdline.GetSwitchValuePath(switches::kTracelog));
 
   return true;
 }
@@ -715,6 +722,12 @@ bool Setup::RunConfigFile() {
     return false;
   }
 
+  // Add a dependency on the build arguments file. If this changes, we want
+  // to re-generate the build. This causes the dotfile to make it into
+  // build.ninja.d.
+  g_scheduler->AddGenDependency(dotfile_name_);
+
+  // Also add a build dependency to the scope, which is used by `gn analyze`.
   dotfile_scope_.AddBuildDependencyFile(SourceFile("//.gn"));
   dotfile_root_->Execute(&dotfile_scope_, &err);
   if (err.has_error()) {

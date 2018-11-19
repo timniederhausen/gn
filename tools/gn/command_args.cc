@@ -205,6 +205,7 @@ void BuildArgJson(base::Value& dict,
 }
 
 int ListArgs(const std::string& build_dir) {
+  // Deliberately leaked to avoid expensive process teardown.
   Setup* setup = new Setup;
   if (!setup->DoSetup(build_dir, false) || !setup->Run())
     return 1;
