@@ -421,6 +421,7 @@ def WriteGNNinja(path, platform, host, options):
         'tools/gn/command_format.cc',
         'tools/gn/command_gen.cc',
         'tools/gn/command_help.cc',
+        'tools/gn/command_meta.cc',
         'tools/gn/command_ls.cc',
         'tools/gn/command_path.cc',
         'tools/gn/command_refs.cc',

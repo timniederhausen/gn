@@ -69,6 +69,11 @@ extern const char kHelp_HelpShort[];
 extern const char kHelp_Help[];
 int RunHelp(const std::vector<std::string>& args);
 
+extern const char kMeta[];
+extern const char kMeta_HelpShort[];
+extern const char kMeta_Help[];
+int RunMeta(const std::vector<std::string>& args);
+
 extern const char kLs[];
 extern const char kLs_HelpShort[];
 extern const char kLs_Help[];
