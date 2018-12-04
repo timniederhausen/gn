@@ -155,6 +155,7 @@ class Target : public Item {
   bool GetMetadata(const std::vector<std::string>& keys_to_extract,
                    const std::vector<std::string>& keys_to_walk,
                    const SourceDir& rebase_dir,
+                   bool deps_only,
                    std::vector<Value>* result,
                    std::set<const Target*>* targets_walked,
                    Err* err) const;
@@ -167,7 +168,7 @@ class Target : public Item {
   const Value& output_conversion() const { return output_conversion_; }
   void set_output_conversion(const Value& value) { output_conversion_ = value; }
 
-  // Metadata collection methods for WriteData targets.
+  // Metadata collection methods for GeneratedFile targets.
   const SourceDir& rebase() const { return rebase_; }
   void set_rebase(const SourceDir& value) { rebase_ = value; }
   const std::vector<std::string>& data_keys() const { return data_keys_; }

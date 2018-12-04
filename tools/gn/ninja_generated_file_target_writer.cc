@@ -42,6 +42,28 @@ void NinjaGeneratedFileTargetWriter::Run() {
 }
 
 void NinjaGeneratedFileTargetWriter::GenerateFile() {
+  Err err;
+
+  // If this is a metadata target, populate the write value with the appropriate
+  // data.
+  Value contents;
+  if (target_->contents().type() == Value::NONE) {
+    // Origin is set to the outputs location, so that errors with this value
+    // get flagged on the right target.
+    CHECK(target_->action_values().outputs().list().size() == 1U);
+    contents = Value(target_->action_values().outputs().list()[0].origin(),
+                     Value::LIST);
+    std::set<const Target*> targets_walked;
+    if (!target_->GetMetadata(target_->data_keys(), target_->walk_keys(),
+                              target_->rebase(), /*deps_only = */ true,
+                              &contents.list_value(), &targets_walked, &err)) {
+      g_scheduler->FailWithError(err);
+      return;
+    }
+  } else {
+    contents = target_->contents();
+  }
+
   std::vector<SourceFile> outputs_as_sources;
   target_->action_values().GetOutputsAsSourceFiles(target_,
                                                    &outputs_as_sources);
@@ -52,17 +74,16 @@ void NinjaGeneratedFileTargetWriter::GenerateFile() {
   ScopedTrace trace(TraceItem::TRACE_FILE_WRITE, outputs_as_sources[0].value());
 
   // Compute output.
-  Err err;
-  std::ostringstream contents;
-  ConvertValueToOutput(settings_, target_->contents(),
-                       target_->output_conversion(), contents, &err);
+  std::ostringstream out;
+  ConvertValueToOutput(settings_, contents, target_->output_conversion(), out,
+                       &err);
 
   if (err.has_error()) {
     g_scheduler->FailWithError(err);
     return;
   }
 
-  WriteFileIfChanged(output, contents.str(), &err);
+  WriteFileIfChanged(output, out.str(), &err);
 
   if (err.has_error()) {
     g_scheduler->FailWithError(err);

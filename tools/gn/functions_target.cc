@@ -789,11 +789,107 @@ const char kGeneratedFile_Help[] =
   The `output_conversion` variable specified the format to write the
   value. See `gn help output_conversion`.
 
-  One of `data` or `data_keys` must be specified; use of `data` will write the
-  contents of that value to file, while use of `data_keys` will trigger a
+  One of `contents` or `data_keys` must be specified; use of `data` will write
+  the contents of that value to file, while use of `data_keys` will trigger a
   metadata collection walk based on the dependencies of the target and the
   optional values of the `rebase` and `walk_keys` variables. See
   `gn help metadata`.
+
+Example (metadata collection)
+
+  Given the following targets defined in //base/BUILD.gn, where A -> B and B -> C and D:
+
+    group("a") {
+      metadata = {
+        doom_melon = [ "enable" ]
+        my_files = [ "foo.cpp" ]
+
+        // Note: this is functionally equivalent to not defining `my_barrier`
+        // at all in this target's metadata.
+        my_barrier = [ "" ]
+      }
+
+      deps = [ ":b" ]
+    }
+
+    group("c") {
+      metadata = {
+        my_files = [ "bar.cpp" ]
+        my_barrier = [ ":c" ]
+      }
+
+      deps = [ ":c", ":d" ]
+    }
+
+    group("c") {
+      metadata = {
+        doom_melon = [ "disable" ]
+        my_files = [ "baz.cpp" ]
+      }
+    }
+
+    group("d") {
+      metadata = {
+        my_files = [ "missing.cpp" ]
+      }
+    }
+
+  If the following generated_file target is defined:
+
+    generated_file("my_files_metadata") {
+      outputs = [ "$root_build_dir/my_files.json" ]
+      data_keys = [ "my_files" ]
+
+      deps = [ "//base:a" ]
+    }
+
+  The following will be written to "$root_build_dir/my_files.json" (less the
+  comments):
+    [
+      "foo.cpp",  // from //base:a
+      "bar.cpp",  // from //base:b via //base:a
+      "baz.cpp",  // from //base:c via //base:b
+      "missing.cpp"  // from //base:d via //base:b
+    ]
+
+  Alternatively, as an example of using walk_keys, if the following
+  generated_file target is defined:
+
+  generated_file("my_files_metadata") {
+    outputs = [ "$root_build_dir/my_files.json" ]
+    data_keys = [ "my_files" ]
+    walk_keys = [ "my_barrier" ]
+
+    deps = [ "//base:a" ]
+  }
+
+  The following will be written to "$root_build_dir/my_files.json" (again less
+  the comments):
+    [
+      "foo.cpp",  // from //base:a
+      "bar.cpp",  // from //base:b via //base:a
+      "baz.cpp",  // from //base:c via //base:b
+    ]
+
+  If `rebase` is used in the following generated_file target:
+
+  generated_file("my_files_metadata") {
+    outputs = [ "$root_build_dir/my_files.json" ]
+    data_keys = [ "my_files" ]
+    walk_keys = [ "my_barrier" ]
+    rebase = root_build_dir
+
+    deps = [ "//base:a" ]
+  }
+
+  The following will be written to "$root_build_dir/my_files.json" (again less
+  the comments) (assuming root_build_dir = "//out"):
+    [
+      "../base/foo.cpp",  // from //base:a
+      "../base/bar.cpp",  // from //base:b via //base:a
+      "../base/baz.cpp",  // from //base:c via //base:b
+    ]
+
 
 Variables
 
