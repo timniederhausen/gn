@@ -303,6 +303,14 @@ extern const char kVisibility[];
 extern const char kVisibility_HelpShort[];
 extern const char kVisibility_Help[];
 
+extern const char kWriteValueContents[];
+extern const char kWriteValueContents_HelpShort[];
+extern const char kWriteValueContents_Help[];
+
+extern const char kWriteOutputConversion[];
+extern const char kWriteOutputConversion_HelpShort[];
+extern const char kWriteOutputConversion_Help[];
+
 extern const char kWriteRuntimeDeps[];
 extern const char kWriteRuntimeDeps_HelpShort[];
 extern const char kWriteRuntimeDeps_Help[];

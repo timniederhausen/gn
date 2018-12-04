@@ -772,4 +772,44 @@ Value RunTarget(Scope* scope,
                               block, err);
 }
 
+const char kGeneratedFile[] = "generated_file";
+const char kGeneratedFile_HelpShort[] =
+    "generated_file: Declare a generated_file target.";
+const char kGeneratedFile_Help[] =
+    R"(generated_file: Declare a generated_file target.
+
+  Writes data value(s) to disk on resolution. This target type mirrors some
+  functionality of the write_file() function, but also provides the ability to
+  collect metadata from its dependencies on resolution rather than writing out
+  parse time.
+
+  The `outputs` variable is required to be a list with a single element,
+  specifying the intended location of the output file.
+
+  The `output_conversion` variable specified the format to write the
+  value. See `gn help output_conversion`.
+
+  One of `data` or `data_keys` must be specified; use of `data` will write the
+  contents of that value to file, while use of `data_keys` will trigger a
+  metadata collection walk based on the dependencies of the target and the
+  optional values of the `rebase` and `walk_keys` variables. See
+  `gn help metadata`.
+
+Variables
+
+  data_keys
+  rebase
+  walk_keys
+  output_conversion
+)" DEPS_VARS DEPENDENT_CONFIG_VARS;
+
+Value RunGeneratedFile(Scope* scope,
+                       const FunctionCallNode* function,
+                       const std::vector<Value>& args,
+                       BlockNode* block,
+                       Err* err) {
+  return ExecuteGenericTarget(functions::kGeneratedFile, scope, function, args,
+                              block, err);
+}
+
 }  // namespace functions

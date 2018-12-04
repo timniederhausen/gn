@@ -19,6 +19,7 @@
 #include "tools/gn/err.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/functions.h"
+#include "tools/gn/generated_file_target_generator.h"
 #include "tools/gn/group_target_generator.h"
 #include "tools/gn/metadata.h"
 #include "tools/gn/parse_tree.h"
@@ -138,6 +139,10 @@ void TargetGenerator::GenerateTarget(Scope* scope,
   } else if (output_type == functions::kStaticLibrary) {
     BinaryTargetGenerator generator(target.get(), scope, function_call,
                                     Target::STATIC_LIBRARY, err);
+    generator.Run();
+  } else if (output_type == functions::kGeneratedFile) {
+    GeneratedFileTargetGenerator generator(target.get(), scope, function_call,
+                                           Target::GENERATED_FILE, err);
     generator.Run();
   } else {
     *err = Err(function_call, "Not a known target type",

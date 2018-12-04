@@ -318,6 +318,8 @@ const char* Target::GetStringForOutputType(OutputType type) {
       return functions::kBundleData;
     case CREATE_BUNDLE:
       return functions::kCreateBundle;
+    case GENERATED_FILE:
+      return functions::kGeneratedFile;
     default:
       return "";
   }
@@ -631,7 +633,8 @@ void Target::FillOutputFiles() {
     case SOURCE_SET:
     case COPY_FILES:
     case ACTION:
-    case ACTION_FOREACH: {
+    case ACTION_FOREACH:
+    case GENERATED_FILE: {
       // These don't get linked to and use stamps which should be the first
       // entry in the outputs. These stamps are named
       // "<target_out_dir>/<targetname>.stamp".

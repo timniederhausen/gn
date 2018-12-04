@@ -287,7 +287,8 @@ std::map<std::string, DescHandlerFunc> GetHandlers() {
           {variables::kPrecompiledSource, DefaultHandler},
           {variables::kDeps, DepsHandler},
           {variables::kLibs, DefaultHandler},
-          {variables::kLibDirs, DefaultHandler}};
+          {variables::kLibDirs, DefaultHandler},
+          {variables::kWriteOutputConversion, DefaultHandler}};
 }
 
 void HandleProperty(const std::string& what,
@@ -364,6 +365,7 @@ bool PrintTarget(const Target* target,
   HandleProperty(variables::kDeps, handler_map, v, dict);
   HandleProperty(variables::kLibs, handler_map, v, dict);
   HandleProperty(variables::kLibDirs, handler_map, v, dict);
+  HandleProperty(variables::kWriteOutputConversion, handler_map, v, dict);
 
 #undef HandleProperty
 
@@ -468,6 +470,7 @@ Possibilities for <what to show>
   lib_dirs
   libs
   metadata
+  output_conversion
   outputs
   public_configs
   public

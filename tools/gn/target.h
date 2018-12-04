@@ -46,6 +46,7 @@ class Target : public Item {
     ACTION_FOREACH,
     BUNDLE_DATA,
     CREATE_BUNDLE,
+    GENERATED_FILE,
   };
 
   enum DepsIterationType {
@@ -149,7 +150,7 @@ class Target : public Item {
   const Metadata& metadata() const { return metadata_; }
   Metadata& metadata() { return metadata_; }
 
-  // Collect metadata from this target and its dependencies. This is intended to
+  // Get metadata from this target and its dependencies. This is intended to
   // be called after the target is resolved.
   bool GetMetadata(const std::vector<std::string>& keys_to_extract,
                    const std::vector<std::string>& keys_to_walk,
@@ -157,6 +158,14 @@ class Target : public Item {
                    std::vector<Value>* result,
                    std::set<const Target*>* targets_walked,
                    Err* err) const;
+
+  // GeneratedFile-related methods.
+  bool GenerateFile(Err* err) const;
+
+  const Value& contents() const { return contents_; }
+  void set_contents(const Value& value) { contents_ = value; }
+  const Value& output_conversion() const { return output_conversion_; }
+  void set_output_conversion(const Value& value) { output_conversion_ = value; }
 
   bool testonly() const { return testonly_; }
   void set_testonly(bool value) { testonly_ = value; }
@@ -184,7 +193,7 @@ class Target : public Item {
   bool hard_dep() const {
     return output_type_ == ACTION || output_type_ == ACTION_FOREACH ||
            output_type_ == COPY_FILES || output_type_ == CREATE_BUNDLE ||
-           output_type_ == BUNDLE_DATA;
+           output_type_ == BUNDLE_DATA || output_type_ == GENERATED_FILE;
   }
 
   // Returns the iterator range which can be used in range-based for loops
@@ -403,6 +412,10 @@ class Target : public Item {
   std::vector<OutputFile> runtime_outputs_;
 
   Metadata metadata_;
+
+  // GenerateFile values.
+  Value output_conversion_;
+  Value contents_;  // Value::NONE if metadata collection should occur.
 
   DISALLOW_COPY_AND_ASSIGN(Target);
 };
