@@ -51,6 +51,9 @@
 //   "libs" : [ list of libraries ],
 //   "lib_dirs" : [ list of library directories ]
 //   "metadata" : [ dictionary of target metadata values ]
+//   "data_keys" : [ list of target data keys ]
+//   "walk_keys" : [ list of target walk keys ]
+//   "rebase" : true or false
 //   "output_conversion" : "string for output conversion"
 // }
 //
@@ -465,6 +468,22 @@ class TargetDescBuilder : public BaseDescBuilder {
       if (what(variables::kWriteOutputConversion)) {
         res->SetKey(variables::kWriteOutputConversion,
                     std::move(ToBaseValue(target_->output_conversion())));
+      }
+      if (what(variables::kDataKeys)) {
+        base::ListValue keys;
+        for (const auto& k : target_->data_keys())
+          keys.GetList().push_back(base::Value(k));
+        res->SetKey(variables::kDataKeys, std::move(keys));
+      }
+      if (what(variables::kRebase)) {
+        res->SetKey(variables::kRebase,
+                    std::move(base::Value(target_->rebase())));
+      }
+      if (what(variables::kWalkKeys)) {
+        base::ListValue keys;
+        for (const auto& k : target_->walk_keys())
+          keys.GetList().push_back(base::Value(k));
+        res->SetKey(variables::kWalkKeys, std::move(keys));
       }
     }
 

@@ -17,7 +17,10 @@ GeneratedFileTargetGenerator::GeneratedFileTargetGenerator(
     const FunctionCallNode* function_call,
     Target::OutputType type,
     Err* err)
-    : TargetGenerator(target, scope, function_call, err), output_type_(type) {}
+    : TargetGenerator(target, scope, function_call, err),
+      output_type_(type),
+      contents_defined_(false),
+      data_keys_defined_(false) {}
 
 GeneratedFileTargetGenerator::~GeneratedFileTargetGenerator() = default;
 
@@ -34,12 +37,25 @@ void GeneratedFileTargetGenerator::DoRun() {
     return;
   }
 
-  if (!FillContents()) {
-    *err_ = Err(function_call_, "Contents should be set.",
-                "The generated_file target requires the \"contents\" variable "
-                "be set. See \"gn help generated_file\".");
+  if (!FillContents())
+    return;
+  if (!FillDataKeys())
+    return;
+
+  // One of data and data_keys should be defined.
+  if (!contents_defined_ && !data_keys_defined_) {
+    *err_ = Err(
+        function_call_, "Either contents or data_keys should be set.",
+        "The generated_file target requires either the \"contents\" variable "
+        "or the \"data_keys\" variable be set. See \"gn help "
+        "generated_file\".");
     return;
   }
+
+  if (!FillRebase())
+    return;
+  if (!FillWalkKeys())
+    return;
 
   if (!FillOutputConversion())
     return;
@@ -48,8 +64,23 @@ void GeneratedFileTargetGenerator::DoRun() {
 bool GeneratedFileTargetGenerator::FillContents() {
   const Value* value = scope_->GetValue(variables::kWriteValueContents, true);
   if (!value)
-    return false;
+    return true;
   target_->set_contents(*value);
+  contents_defined_ = true;
+  return true;
+}
+
+bool GeneratedFileTargetGenerator::IsMetadataCollectionTarget(
+    const base::StringPiece& variable,
+    const ParseNode* origin) {
+  if (contents_defined_) {
+    *err_ =
+        Err(origin, variable.as_string() + " won't be used.",
+            "\"contents\" is defined on this target, and so setting " +
+                variable.as_string() +
+                " will have no effect as no metdata collection will occur.");
+    return false;
+  }
   return true;
 }
 
@@ -65,5 +96,63 @@ bool GeneratedFileTargetGenerator::FillOutputConversion() {
 
   // Otherwise, the value itself will be checked when the conversion is done.
   target_->set_output_conversion(*value);
+  return true;
+}
+
+bool GeneratedFileTargetGenerator::FillRebase() {
+  const Value* value = scope_->GetValue(variables::kRebase, true);
+  if (!value)
+    return true;
+  if (!IsMetadataCollectionTarget(variables::kRebase, value->origin()))
+    return false;
+  if (!value->VerifyTypeIs(Value::BOOLEAN, err_))
+    return false;
+  target_->set_rebase(value->boolean_value());
+  return true;
+}
+
+bool GeneratedFileTargetGenerator::FillDataKeys() {
+  const Value* value = scope_->GetValue(variables::kDataKeys, true);
+  if (!value)
+    return true;
+  if (!IsMetadataCollectionTarget(variables::kDataKeys, value->origin()))
+    return false;
+  if (!value->VerifyTypeIs(Value::LIST, err_))
+    return false;
+
+  for (const Value& v : value->list_value()) {
+    // Keys must be strings.
+    if (!v.VerifyTypeIs(Value::STRING, err_))
+      return false;
+    target_->data_keys().push_back(v.string_value());
+  }
+
+  data_keys_defined_ = true;
+  return true;
+}
+
+bool GeneratedFileTargetGenerator::FillWalkKeys() {
+  const Value* value = scope_->GetValue(variables::kWalkKeys, true);
+  // If we define this and contents, that's an error.
+  if (value &&
+      !IsMetadataCollectionTarget(variables::kWalkKeys, value->origin()))
+    return false;
+
+  // If we don't define it, we want the default value which is a list
+  // containing the empty string.
+  if (!value) {
+    target_->walk_keys().push_back("");
+    return true;
+  }
+
+  // Otherwise, pull and validate the specified value.
+  if (!value->VerifyTypeIs(Value::LIST, err_))
+    return false;
+  for (const Value& v : value->list_value()) {
+    // Keys must be strings.
+    if (!v.VerifyTypeIs(Value::STRING, err_))
+      return false;
+    target_->walk_keys().push_back(v.string_value());
+  }
   return true;
 }

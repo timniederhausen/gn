@@ -167,6 +167,14 @@ class Target : public Item {
   const Value& output_conversion() const { return output_conversion_; }
   void set_output_conversion(const Value& value) { output_conversion_ = value; }
 
+  // Metadata collection methods for WriteData targets.
+  bool rebase() const { return rebase_; }
+  void set_rebase(bool value) { rebase_ = value; }
+  const std::vector<std::string>& data_keys() const { return data_keys_; }
+  std::vector<std::string>& data_keys() { return data_keys_; }
+  const std::vector<std::string>& walk_keys() const { return walk_keys_; }
+  std::vector<std::string>& walk_keys() { return walk_keys_; }
+
   bool testonly() const { return testonly_; }
   void set_testonly(bool value) { testonly_ = value; }
 
@@ -413,9 +421,14 @@ class Target : public Item {
 
   Metadata metadata_;
 
-  // GenerateFile values.
+  // GeneratedFile values.
   Value output_conversion_;
   Value contents_;  // Value::NONE if metadata collection should occur.
+
+  // GeneratedFile as metadata collection values.
+  bool rebase_;
+  std::vector<std::string> data_keys_;
+  std::vector<std::string> walk_keys_;
 
   DISALLOW_COPY_AND_ASSIGN(Target);
 };

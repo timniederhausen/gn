@@ -287,7 +287,8 @@ Target::Target(const Settings* settings,
       check_includes_(true),
       complete_static_lib_(false),
       testonly_(false),
-      toolchain_(nullptr) {}
+      toolchain_(nullptr),
+      rebase_(false) {}
 
 Target::~Target() = default;
 

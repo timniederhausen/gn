@@ -1000,6 +1000,19 @@ Example
   }
 )";
 
+const char kDataKeys[] = "data_keys";
+const char kDataKeys_HelpShort[] =
+    "data_keys: [string list] Keys from which to collect metadata.";
+const char kDataKeys_Help[] =
+    R"(data_keys: Keys from which to collect metadata.
+
+  These keys are used to identify metadata to collect. If a walked target
+  defines this key in its metadata, its value will be appended to the resulting
+  collection.
+
+  See "gn help generated_file".
+)";
+
 const char kDefines[] = "defines";
 const char kDefines_HelpShort[] =
     "defines: [string list] C preprocessor defines.";
@@ -1822,6 +1835,26 @@ Example
   }
 )";
 
+const char kRebase[] = "rebase";
+const char kRebase_HelpShort[] =
+    "rebase: [boolean] Rebase collected metadata as files.";
+const char kRebase_Help[] =
+    R"(rebase: Rebase collected metadata as files.
+
+  A boolean that triggers a rebase of collected metadata strings based on their
+  declared file. Defaults to false.
+
+  Metadata generally declares files as strings relative to the local build file.
+  However, this data is often used in other contexts, and so setting this flag
+  will force the metadata collection to be rebased according to the local build
+  file's location and thus allow the filename to be used anywhere.
+
+  Setting this flag will raise an error if any target's specified metadata is
+  not a string value.
+
+  See also "gn help generated_file".
+)";
+
 const char kResponseFileContents[] = "response_file_contents";
 const char kResponseFileContents_HelpShort[] =
     "response_file_contents: [string list] Contents of .rsp file for actions.";
@@ -2009,6 +2042,25 @@ Examples
     visibility = [ "./*", "//bar/*" ]
 )";
 
+const char kWalkKeys[] = "walk_keys";
+const char kWalkKeys_HelpShort[] =
+    "walk_keys: [string list] Key(s) for managing the metadata collection "
+    "walk.";
+const char kWalkKeys_Help[] =
+    R"(walk_keys: Key(s) for managing the metadata collection walk.
+
+  Defaults to [].
+
+  These keys are used to control the next step in a collection walk, acting as
+  barriers. If a specified key is defined in a target's metadata, the walk will
+  use the targets listed in that value to determine which targets are walked.
+
+  If no walk_keys are specified for a generated_file target (i.e. "[]"), the
+  walk will touch all deps and data_deps of the specified target recursively.
+
+  See "gn help generated_file".
+)";
+
 const char kWriteValueContents[] = "contents";
 const char kWriteValueContents_HelpShort[] =
     "contents: Contents to write to file.";
@@ -2128,6 +2180,7 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(Configs)
     INSERT_VARIABLE(Data)
     INSERT_VARIABLE(DataDeps)
+    INSERT_VARIABLE(DataKeys)
     INSERT_VARIABLE(Defines)
     INSERT_VARIABLE(Depfile)
     INSERT_VARIABLE(Deps)
@@ -2152,12 +2205,14 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(Public)
     INSERT_VARIABLE(PublicConfigs)
     INSERT_VARIABLE(PublicDeps)
+    INSERT_VARIABLE(Rebase)
     INSERT_VARIABLE(ResponseFileContents)
     INSERT_VARIABLE(Script)
     INSERT_VARIABLE(Sources)
     INSERT_VARIABLE(XcodeTestApplicationName)
     INSERT_VARIABLE(Testonly)
     INSERT_VARIABLE(Visibility)
+    INSERT_VARIABLE(WalkKeys)
     INSERT_VARIABLE(WriteOutputConversion)
     INSERT_VARIABLE(WriteValueContents)
     INSERT_VARIABLE(WriteRuntimeDeps)

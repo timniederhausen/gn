@@ -93,7 +93,7 @@ variable name or the '{{' and '}}' which surround it."
     "precompiled_header_type" "precompiled_source" "product_type" "public"
     "public_configs" "public_deps" "response_file_contents" "script" "sources"
     "testonly" "visibility" "write_runtime_deps" "bundle_contents_dir"
-    "contents" "output_conversion"))
+    "contents" "output_conversion" "rebase" "data_keys" "walk_keys"))
 
 (defconst gn-font-lock-keywords
   `((,(regexp-opt gn-font-lock-reserved-keywords 'words) .

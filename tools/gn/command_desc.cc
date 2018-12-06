@@ -288,6 +288,9 @@ std::map<std::string, DescHandlerFunc> GetHandlers() {
           {variables::kDeps, DepsHandler},
           {variables::kLibs, DefaultHandler},
           {variables::kLibDirs, DefaultHandler},
+          {variables::kDataKeys, DefaultHandler},
+          {variables::kRebase, DefaultHandler},
+          {variables::kWalkKeys, DefaultHandler},
           {variables::kWriteOutputConversion, DefaultHandler}};
 }
 
@@ -365,6 +368,9 @@ bool PrintTarget(const Target* target,
   HandleProperty(variables::kDeps, handler_map, v, dict);
   HandleProperty(variables::kLibs, handler_map, v, dict);
   HandleProperty(variables::kLibDirs, handler_map, v, dict);
+  HandleProperty(variables::kDataKeys, handler_map, v, dict);
+  HandleProperty(variables::kRebase, handler_map, v, dict);
+  HandleProperty(variables::kWalkKeys, handler_map, v, dict);
   HandleProperty(variables::kWriteOutputConversion, handler_map, v, dict);
 
 #undef HandleProperty
@@ -461,6 +467,7 @@ Possibilities for <what to show>
   cflags_cc [--blame]
   check_includes
   configs [--tree] (see below)
+  data_keys
   defines [--blame]
   depfile
   deps [--all] [--tree] (see below)
@@ -474,10 +481,12 @@ Possibilities for <what to show>
   outputs
   public_configs
   public
+  rebase
   script
   sources
   testonly
   visibility
+  walk_keys
 
   runtime_deps
       Compute all runtime deps for the given target. This is a computed list

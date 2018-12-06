@@ -26,6 +26,20 @@ class GeneratedFileTargetGenerator : public TargetGenerator {
   bool FillGeneratedFileOutput();
   bool FillOutputConversion();
   bool FillContents();
+  bool FillDataKeys();
+  bool FillWalkKeys();
+  bool FillRebase();
+
+  // Returns false if `contents` is defined (i.e. if this target was provided
+  // with explicit contents to write). Returns false otherwise, indicating that
+  // it is okay to set metadata collection variables on this target.
+  //
+  // Should be called before FillContents().
+  bool IsMetadataCollectionTarget(const base::StringPiece& variable,
+                                  const ParseNode* origin);
+
+  bool contents_defined_;
+  bool data_keys_defined_;
 
   Target::OutputType output_type_;
 

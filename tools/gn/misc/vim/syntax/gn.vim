@@ -48,7 +48,8 @@ syn keyword     gnVariable configs data data_deps defines depfile deps
 syn keyword     gnVariable include_dirs inputs ldflags lib_dirs libs
 syn keyword     gnVariable output_extension output_name outputs public
 syn keyword     gnVariable public_configs public_deps scripte sources testonly
-syn keyword     gnVariable visibility contents output_conversion
+syn keyword     gnVariable visibility contents output_conversion rebase
+syn keyword     gnVariable data_keys walk_keys
 hi def link     gnVariable          Keyword
 
 " Strings
