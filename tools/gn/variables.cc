@@ -516,7 +516,7 @@ const char kArgs[] = "args";
 const char kArgs_HelpShort[] =
     "args: [string list] Arguments passed to an action.";
 const char kArgs_Help[] =
-    R"(args: Arguments passed to an action.
+    R"(args: (target variable) Arguments passed to an action.
 
   For action and action_foreach targets, args is the list of arguments to pass
   to the script. Typically you would use source expansion (see "gn help
@@ -1945,10 +1945,9 @@ Sources for non-binary targets
 
 const char kXcodeTestApplicationName[] = "xcode_test_application_name";
 const char kXcodeTestApplicationName_HelpShort[] =
-    "test_application_name: [string] Test application name for unit or ui test "
-    "target.";
+    "xcode_test_application_name: [string] Name for Xcode test target.";
 const char kXcodeTestApplicationName_Help[] =
-    R"(test_application_name: Test application name for unit or ui test target.
+    R"(xcode_test_application_name: Name for Xcode test target.
 
   Each unit and ui test target must have a test application target, and this
   value is used to specify the relationship. Only meaningful to Xcode (used as
