@@ -328,11 +328,15 @@ void Printer::AnnotatePreferredMultilineAssignment(const BinaryOpNode* binop) {
 }
 
 void Printer::SortIfSourcesOrDeps(const BinaryOpNode* binop) {
-  if (binop->comments() && !binop->comments()->before().empty() &&
-      binop->comments()->before()[0].value().as_string() == "# NOSORT") {
-    // Allow disabling of sort for specific actions that might be
-    // order-sensitive.
-    return;
+  if (const Comments* comments = binop->comments()) {
+    const std::vector<Token>& before = comments->before();
+    if (!before.empty() &&
+        (before.front().value().as_string() == "# NOSORT" ||
+         before.back().value().as_string() == "# NOSORT")) {
+      // Allow disabling of sort for specific actions that might be
+      // order-sensitive.
+      return;
+    }
   }
   const IdentifierNode* ident = binop->left()->AsIdentifier();
   const ListNode* list = binop->right()->AsList();
