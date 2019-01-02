@@ -8,14 +8,14 @@ std::vector<Value> WalkMetadata(
     const UniqueVector<const Target*>& targets_to_walk,
     const std::vector<std::string>& keys_to_extract,
     const std::vector<std::string>& keys_to_walk,
-    bool rebase_files,
+    const SourceDir& rebase_dir,
     std::set<const Target*>* targets_walked,
     Err* err) {
   std::vector<Value> result;
   for (const auto* target : targets_to_walk) {
     auto pair = targets_walked->insert(target);
     if (pair.second) {
-      if (!target->GetMetadata(keys_to_extract, keys_to_walk, rebase_files,
+      if (!target->GetMetadata(keys_to_extract, keys_to_walk, rebase_dir,
                                &result, targets_walked, err))
         return std::vector<Value>();
     }

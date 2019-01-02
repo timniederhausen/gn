@@ -154,7 +154,7 @@ class Target : public Item {
   // be called after the target is resolved.
   bool GetMetadata(const std::vector<std::string>& keys_to_extract,
                    const std::vector<std::string>& keys_to_walk,
-                   bool rebase_files,
+                   const SourceDir& rebase_dir,
                    std::vector<Value>* result,
                    std::set<const Target*>* targets_walked,
                    Err* err) const;
@@ -168,8 +168,8 @@ class Target : public Item {
   void set_output_conversion(const Value& value) { output_conversion_ = value; }
 
   // Metadata collection methods for WriteData targets.
-  bool rebase() const { return rebase_; }
-  void set_rebase(bool value) { rebase_ = value; }
+  const SourceDir& rebase() const { return rebase_; }
+  void set_rebase(const SourceDir& value) { rebase_ = value; }
   const std::vector<std::string>& data_keys() const { return data_keys_; }
   std::vector<std::string>& data_keys() { return data_keys_; }
   const std::vector<std::string>& walk_keys() const { return walk_keys_; }
@@ -426,7 +426,7 @@ class Target : public Item {
   Value contents_;  // Value::NONE if metadata collection should occur.
 
   // GeneratedFile as metadata collection values.
-  bool rebase_;
+  SourceDir rebase_;
   std::vector<std::string> data_keys_;
   std::vector<std::string> walk_keys_;
 

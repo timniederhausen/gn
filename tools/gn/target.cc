@@ -287,8 +287,7 @@ Target::Target(const Settings* settings,
       check_includes_(true),
       complete_static_lib_(false),
       testonly_(false),
-      toolchain_(nullptr),
-      rebase_(false) {}
+      toolchain_(nullptr) {}
 
 Target::~Target() = default;
 
@@ -880,13 +879,13 @@ void Target::CheckSourceGenerated(const SourceFile& source) const {
 
 bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
                          const std::vector<std::string>& keys_to_walk,
-                         bool rebase_files,
+                         const SourceDir& rebase_dir,
                          std::vector<Value>* result,
                          std::set<const Target*>* targets_walked,
                          Err* err) const {
   std::vector<Value> next_walk_keys;
   if (!metadata_.WalkStep(settings()->build_settings(), keys_to_extract,
-                          keys_to_walk, rebase_files, &next_walk_keys, result,
+                          keys_to_walk, rebase_dir, &next_walk_keys, result,
                           err))
     return false;
 
@@ -905,7 +904,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
         // If we haven't walked this dep yet, go down into it.
         auto pair = targets_walked->insert(dep.ptr);
         if (pair.second) {
-          if (!dep.ptr->GetMetadata(keys_to_extract, keys_to_walk, rebase_files,
+          if (!dep.ptr->GetMetadata(keys_to_extract, keys_to_walk, rebase_dir,
                                     result, targets_walked, err))
             return false;
         }
@@ -924,7 +923,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
         // If we haven't walked this dep yet, go down into it.
         auto pair = targets_walked->insert(dep.ptr);
         if (pair.second) {
-          if (!dep.ptr->GetMetadata(keys_to_extract, keys_to_walk, rebase_files,
+          if (!dep.ptr->GetMetadata(keys_to_extract, keys_to_walk, rebase_dir,
                                     result, targets_walked, err))
             return false;
         }

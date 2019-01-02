@@ -58,8 +58,8 @@ TEST(MetadataTest, Walk) {
 
   Err err;
   EXPECT_TRUE(metadata.WalkStep(setup.settings()->build_settings(), data_keys,
-                                walk_keys, false, &next_walk_keys, &results,
-                                &err));
+                                walk_keys, SourceDir(), &next_walk_keys,
+                                &results, &err));
   EXPECT_FALSE(err.has_error());
   EXPECT_EQ(next_walk_keys, expected_walk_keys);
   EXPECT_EQ(results, expected);
@@ -84,16 +84,16 @@ TEST(MetadataTest, WalkWithRebase) {
   std::vector<Value> results;
 
   std::vector<Value> expected;
-  expected.emplace_back(Value(nullptr, "/usr/home/files/foo.cpp"));
-  expected.emplace_back(Value(nullptr, "/usr/home/files/foo/bar.h"));
+  expected.emplace_back(Value(nullptr, "../home/files/foo.cpp"));
+  expected.emplace_back(Value(nullptr, "../home/files/foo/bar.h"));
 
   std::vector<Value> expected_walk_keys;
   expected_walk_keys.emplace_back(nullptr, "");
 
   Err err;
   EXPECT_TRUE(metadata.WalkStep(setup.settings()->build_settings(), data_keys,
-                                walk_keys, true, &next_walk_keys, &results,
-                                &err));
+                                walk_keys, SourceDir("/usr/foo_dir/"),
+                                &next_walk_keys, &results, &err));
   EXPECT_FALSE(err.has_error());
   EXPECT_EQ(next_walk_keys, expected_walk_keys);
   EXPECT_EQ(results, expected);
@@ -119,8 +119,8 @@ TEST(MetadataTest, WalkWithRebaseError) {
 
   Err err;
   EXPECT_FALSE(metadata.WalkStep(setup.settings()->build_settings(), data_keys,
-                                 walk_keys, true, &next_walk_keys, &results,
-                                 &err));
+                                 walk_keys, SourceDir("/foo_dir/"),
+                                 &next_walk_keys, &results, &err));
   EXPECT_TRUE(err.has_error());
 }
 
@@ -146,8 +146,8 @@ TEST(MetadataTest, WalkKeysToWalk) {
 
   Err err;
   EXPECT_TRUE(metadata.WalkStep(setup.settings()->build_settings(), data_keys,
-                                walk_keys, true, &next_walk_keys, &results,
-                                &err));
+                                walk_keys, SourceDir(), &next_walk_keys,
+                                &results, &err));
   EXPECT_FALSE(err.has_error());
   EXPECT_EQ(next_walk_keys, expected_walk_keys);
   EXPECT_TRUE(results.empty());
@@ -168,8 +168,8 @@ TEST(MetadataTest, WalkNoContents) {
 
   Err err;
   EXPECT_TRUE(metadata.WalkStep(setup.settings()->build_settings(), data_keys,
-                                walk_keys, true, &next_walk_keys, &results,
-                                &err));
+                                walk_keys, SourceDir(), &next_walk_keys,
+                                &results, &err));
   EXPECT_FALSE(err.has_error());
   EXPECT_EQ(next_walk_keys, expected_walk_keys);
   EXPECT_TRUE(results.empty());
@@ -196,8 +196,8 @@ TEST(MetadataTest, WalkNoKeysWithContents) {
 
   Err err;
   EXPECT_TRUE(metadata.WalkStep(setup.settings()->build_settings(), data_keys,
-                                walk_keys, true, &next_walk_keys, &results,
-                                &err));
+                                walk_keys, SourceDir(), &next_walk_keys,
+                                &results, &err));
   EXPECT_FALSE(err.has_error());
   EXPECT_EQ(next_walk_keys, expected_walk_keys);
   EXPECT_TRUE(results.empty());

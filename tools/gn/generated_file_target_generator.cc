@@ -105,9 +105,19 @@ bool GeneratedFileTargetGenerator::FillRebase() {
     return true;
   if (!IsMetadataCollectionTarget(variables::kRebase, value->origin()))
     return false;
-  if (!value->VerifyTypeIs(Value::BOOLEAN, err_))
+  if (!value->VerifyTypeIs(Value::STRING, err_))
     return false;
-  target_->set_rebase(value->boolean_value());
+
+  if (value->string_value().empty())
+    return true;  // Treat empty string as the default and do nothing.
+
+  const BuildSettings* build_settings = scope_->settings()->build_settings();
+  SourceDir dir = scope_->GetSourceDir().ResolveRelativeDir(
+      *value, err_, build_settings->root_path_utf8());
+  if (err_->has_error())
+    return false;
+
+  target_->set_rebase(dir);
   return true;
 }
 

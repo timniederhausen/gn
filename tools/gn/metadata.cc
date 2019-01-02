@@ -4,10 +4,12 @@
 
 #include "tools/gn/metadata.h"
 
+#include "tools/gn/filesystem_utils.h"
+
 bool Metadata::WalkStep(const BuildSettings* settings,
                         const std::vector<std::string>& keys_to_extract,
                         const std::vector<std::string>& keys_to_walk,
-                        bool rebase_files,
+                        const SourceDir& rebase_dir,
                         std::vector<Value>* next_walk_keys,
                         std::vector<Value>* result,
                         Err* err) const {
@@ -24,22 +26,22 @@ bool Metadata::WalkStep(const BuildSettings* settings,
       continue;
     assert(iter->second.type() == Value::LIST);
 
-    if (rebase_files) {
+    if (!rebase_dir.is_null()) {
       for (const auto& val : iter->second.list_value()) {
         if (!val.VerifyTypeIs(Value::STRING, err))
           return false;
-        // TODO(juliehockett): Do we want to consider absolute paths here? In
-        // which case we'd need to propagate the root_path_utf8 from
-        // build_settings as well.
         std::string filename = source_dir_.ResolveRelativeAs(
             /*as_file = */ true, val, err, settings->root_path_utf8());
         if (err->has_error())
           return false;
-        result->emplace_back(val.origin(), std::move(filename));
+
+        result->emplace_back(
+            val.origin(),
+            RebasePath(filename, rebase_dir, settings->root_path_utf8()));
       }
     } else {
       result->insert(result->end(), iter->second.list_value().begin(),
-                    iter->second.list_value().end());
+                     iter->second.list_value().end());
     }
   }
 

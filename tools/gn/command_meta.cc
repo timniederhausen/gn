@@ -20,10 +20,35 @@ const char kMeta[] = "meta";
 const char kMeta_HelpShort[] = "meta: List target metadata collection results.";
 const char kMeta_Help[] =
     R"(gn meta <out_dir> <target>* --data=<key>[,<key>*]* [--walk=<key>[,<key>*]*]
-       [--rebase]
+       [--rebase=<dest dir>]
 
   Lists collected metaresults of all given targets for the given data key(s),
   collecting metadata dependencies as specified by the given walk key(s).
+
+  See `gn help generated_file` for more information on the walk.
+
+Arguments
+
+  <target(s)>
+    A list of target labels from which to initiate the walk.
+
+  --data
+    A list of keys from which to extract data. In each target walked, its metadata
+    scope is checked for the presence of these keys. If present, the contents of
+    those variable in the scope are appended to the results list.
+
+  --walk (optional)
+    A list of keys from which to control the walk. In each target walked, its
+    metadata scope is checked for the presence of any of these keys. If present,
+    the contents of those variables is checked to ensure that it is a label of
+    a valid dependency of the target and then added to the set of targets to walk.
+    If the empty string ("") is present in any of these keys, all deps and data_deps
+    are added to the walk set.
+
+  --rebase (optional)
+    A destination directory onto which to rebase any paths found. If set, all
+    collected metadata will be rebased onto this path. This option will throw errors
+    if collected metadata is not a list of strings.
 
 Examples
 
@@ -39,17 +64,17 @@ Examples
       Lists collected metaresults for the `files` key in the //base/foo:foo
       target and all of the dependencies listed in the `stop` key (and so on).
 
-  gn meta out/Debug "//base/foo" --data=files --rebase-files
+  gn meta out/Debug "//base/foo" --data=files --rebase="/"
       Lists collected metaresults for the `files` key in the //base/foo:foo
       target and all of its dependency tree, rebasing the strings in the `files`
-      key onto the source directory of the target's declaration.
+      key onto the source directory of the target's declaration relative to "/".
 )";
 
 int RunMeta(const std::vector<std::string>& args) {
   if (args.size() == 0) {
     Err(Location(), "You're holding it wrong.",
         "Usage: \"gn meta <out_dir> <target>* --data=<key>[,<key>*] "
-        "[--walk=<key>[,<key>*]*] [--rebase-files]\"")
+        "[--walk=<key>[,<key>*]*] [--rebase=<dest dir>]\"")
         .PrintToStdout();
     return 1;
   }
@@ -59,7 +84,8 @@ int RunMeta(const std::vector<std::string>& args) {
     return 1;
 
   const base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
-  bool rebase_files = cmdline->HasSwitch(switches::kMetaRebaseFiles);
+  std::string rebase_dir =
+      cmdline->GetSwitchValueASCII(switches::kMetaRebaseFiles);
   std::string data_keys_str =
       cmdline->GetSwitchValueASCII(switches::kMetaDataKeys);
   std::string walk_keys_str =
@@ -86,8 +112,9 @@ int RunMeta(const std::vector<std::string>& args) {
       walk_keys_str, ",", base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
   Err err;
   std::set<const Target*> targets_walked;
-  std::vector<Value> result = WalkMetadata(targets, data_keys, walk_keys,
-                                           rebase_files, &targets_walked, &err);
+  std::vector<Value> result =
+      WalkMetadata(targets, data_keys, walk_keys, SourceDir(rebase_dir),
+                   &targets_walked, &err);
   if (err.has_error()) {
     err.PrintToStdout();
     return 1;

@@ -19,7 +19,7 @@ std::vector<Value> WalkMetadata(
     const UniqueVector<const Target*>& targets_to_walk,
     const std::vector<std::string>& keys_to_extract,
     const std::vector<std::string>& keys_to_walk,
-    bool rebase_files,
+    const SourceDir& rebase_dir,
     std::set<const Target*>* targets_walked,
     Err* err);
 

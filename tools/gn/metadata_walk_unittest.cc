@@ -51,8 +51,8 @@ TEST(MetadataWalkTest, CollectNoRecurse) {
 
   Err err;
   std::set<const Target*> targets_walked;
-  std::vector<Value> result =
-      WalkMetadata(targets, data_keys, walk_keys, false, &targets_walked, &err);
+  std::vector<Value> result = WalkMetadata(targets, data_keys, walk_keys,
+                                           SourceDir(), &targets_walked, &err);
   EXPECT_FALSE(err.has_error());
 
   std::vector<Value> expected;
@@ -101,8 +101,8 @@ TEST(MetadataWalkTest, CollectWithRecurse) {
 
   Err err;
   std::set<const Target*> targets_walked;
-  std::vector<Value> result =
-      WalkMetadata(targets, data_keys, walk_keys, false, &targets_walked, &err);
+  std::vector<Value> result = WalkMetadata(targets, data_keys, walk_keys,
+                                           SourceDir(), &targets_walked, &err);
   EXPECT_FALSE(err.has_error());
 
   std::vector<Value> expected;
@@ -158,8 +158,8 @@ TEST(MetadataWalkTest, CollectWithBarrier) {
 
   Err err;
   std::set<const Target*> targets_walked;
-  std::vector<Value> result =
-      WalkMetadata(targets, data_keys, walk_keys, false, &targets_walked, &err);
+  std::vector<Value> result = WalkMetadata(targets, data_keys, walk_keys,
+                                           SourceDir(), &targets_walked, &err);
   EXPECT_FALSE(err.has_error()) << err.message();
 
   std::vector<Value> expected;
@@ -198,8 +198,8 @@ TEST(MetadataWalkTest, CollectWithError) {
 
   Err err;
   std::set<const Target*> targets_walked;
-  std::vector<Value> result =
-      WalkMetadata(targets, data_keys, walk_keys, false, &targets_walked, &err);
+  std::vector<Value> result = WalkMetadata(targets, data_keys, walk_keys,
+                                           SourceDir(), &targets_walked, &err);
   EXPECT_TRUE(result.empty());
   EXPECT_TRUE(err.has_error());
   EXPECT_EQ(err.message(),

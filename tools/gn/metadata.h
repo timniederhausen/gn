@@ -53,7 +53,7 @@ class Metadata {
   bool WalkStep(const BuildSettings* settings,
                 const std::vector<std::string>& keys_to_extract,
                 const std::vector<std::string>& keys_to_walk,
-                bool rebase_files,
+                const SourceDir& rebase_dir,
                 std::vector<Value>* next_walk_keys,
                 std::vector<Value>* result,
                 Err* err) const;

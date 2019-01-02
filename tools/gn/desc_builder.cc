@@ -476,8 +476,8 @@ class TargetDescBuilder : public BaseDescBuilder {
         res->SetKey(variables::kDataKeys, std::move(keys));
       }
       if (what(variables::kRebase)) {
-        res->SetKey(variables::kRebase,
-                    std::move(base::Value(target_->rebase())));
+        res->SetWithoutPathExpansion(variables::kRebase,
+                                     RenderValue(target_->rebase()));
       }
       if (what(variables::kWalkKeys)) {
         base::ListValue keys;

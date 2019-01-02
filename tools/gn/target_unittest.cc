@@ -1118,7 +1118,7 @@ TEST(TargetTest, CollectMetadataNoRecurse) {
   Err err;
   std::vector<Value> result;
   std::set<const Target*> targets;
-  one.GetMetadata(data_keys, walk_keys, false, &result, &targets, &err);
+  one.GetMetadata(data_keys, walk_keys, SourceDir(), &result, &targets, &err);
   EXPECT_FALSE(err.has_error());
 
   std::vector<Value> expected;
@@ -1158,7 +1158,7 @@ TEST(TargetTest, CollectMetadataWithRecurse) {
   Err err;
   std::vector<Value> result;
   std::set<const Target*> targets;
-  one.GetMetadata(data_keys, walk_keys, false, &result, &targets, &err);
+  one.GetMetadata(data_keys, walk_keys, SourceDir(), &result, &targets, &err);
   EXPECT_FALSE(err.has_error());
 
   std::vector<Value> expected;
@@ -1207,7 +1207,7 @@ TEST(TargetTest, CollectMetadataWithBarrier) {
   Err err;
   std::vector<Value> result;
   std::set<const Target*> targets;
-  one.GetMetadata(data_keys, walk_keys, false, &result, &targets, &err);
+  one.GetMetadata(data_keys, walk_keys, SourceDir(), &result, &targets, &err);
   EXPECT_FALSE(err.has_error()) << err.message();
 
   std::vector<Value> expected;
@@ -1239,7 +1239,7 @@ TEST(TargetTest, CollectMetadataWithError) {
   Err err;
   std::vector<Value> result;
   std::set<const Target*> targets;
-  one.GetMetadata(data_keys, walk_keys, false, &result, &targets, &err);
+  one.GetMetadata(data_keys, walk_keys, SourceDir(), &result, &targets, &err);
   EXPECT_TRUE(err.has_error());
   EXPECT_EQ(err.message(),
             "I was expecting //foo:missing to be a dependency of "
