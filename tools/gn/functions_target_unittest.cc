@@ -89,6 +89,37 @@ TEST_F(FunctionsTarget, CheckNotNeeded) {
   ASSERT_TRUE(err.has_error());
   EXPECT_EQ("Not supported with a variable list.", err.message());
 
+  TestParseInput argcount_error_input(
+      "source_set(\"foo\") {\n"
+      "  not_needed()\n"
+      "}\n");
+  ASSERT_FALSE(argcount_error_input.has_error());
+  err = Err();
+  argcount_error_input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_TRUE(err.has_error());
+  EXPECT_EQ("Wrong number of arguments.", err.message());
+
+  TestParseInput scope_error_input(
+      "source_set(\"foo\") {\n"
+      "  a = {x = 1 y = 2}\n"
+      "  not_needed(a)\n"
+      "}\n");
+  ASSERT_FALSE(scope_error_input.has_error());
+  err = Err();
+  scope_error_input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_TRUE(err.has_error());
+  EXPECT_EQ("Wrong number of arguments.", err.message());
+
+  TestParseInput string_error_input(
+      "source_set(\"foo\") {\n"
+      "  not_needed(\"*\", {}, \"*\")\n"
+      "}\n");
+  ASSERT_FALSE(string_error_input.has_error());
+  err = Err();
+  string_error_input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_TRUE(err.has_error());
+  EXPECT_EQ("Wrong number of arguments.", err.message());
+
   TestParseInput template_input(
       R"(# Test that not_needed() propagates through templates correctly;
       # no error should arise from not using "a".
