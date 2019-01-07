@@ -893,6 +893,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
                          std::set<const Target*>* targets_walked,
                          Err* err) const {
   std::vector<Value> next_walk_keys;
+  std::vector<Value> current_result;
   // If deps_only, this is the top-level target and thus we don't want to
   // collect its metadata, only that of its deps and data_deps.
   if (deps_only) {
@@ -903,8 +904,8 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
   } else {
     // Otherwise, we walk this target and collect the appropriate data.
     if (!metadata_.WalkStep(settings()->build_settings(), keys_to_extract,
-                            keys_to_walk, rebase_dir, &next_walk_keys, result,
-                            err))
+                            keys_to_walk, rebase_dir, &next_walk_keys,
+                            &current_result, err))
       return false;
   }
 
@@ -963,5 +964,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
       return false;
     }
   }
+  result->insert(result->end(), std::make_move_iterator(current_result.begin()),
+                 std::make_move_iterator(current_result.end()));
   return true;
 }

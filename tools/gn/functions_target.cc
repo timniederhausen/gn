@@ -795,9 +795,13 @@ const char kGeneratedFile_Help[] =
   optional values of the `rebase` and `walk_keys` variables. See
   `gn help metadata`.
 
+  Collected metadata, if specified, will be returned in postorder of
+  dependencies. See the example for details.
+
 Example (metadata collection)
 
-  Given the following targets defined in //base/BUILD.gn, where A -> B and B -> C and D:
+  Given the following targets defined in //base/BUILD.gn, where A depends on B
+  and B depends on C and D:
 
     group("a") {
       metadata = {
@@ -846,10 +850,10 @@ Example (metadata collection)
   The following will be written to "$root_build_dir/my_files.json" (less the
   comments):
     [
-      "foo.cpp",  // from //base:a
-      "bar.cpp",  // from //base:b via //base:a
       "baz.cpp",  // from //base:c via //base:b
       "missing.cpp"  // from //base:d via //base:b
+      "bar.cpp",  // from //base:b via //base:a
+      "foo.cpp",  // from //base:a
     ]
 
   Alternatively, as an example of using walk_keys, if the following
@@ -866,9 +870,9 @@ Example (metadata collection)
   The following will be written to "$root_build_dir/my_files.json" (again less
   the comments):
     [
-      "foo.cpp",  // from //base:a
-      "bar.cpp",  // from //base:b via //base:a
       "baz.cpp",  // from //base:c via //base:b
+      "bar.cpp",  // from //base:b via //base:a
+      "foo.cpp",  // from //base:a
     ]
 
   If `rebase` is used in the following generated_file target:
@@ -885,9 +889,9 @@ Example (metadata collection)
   The following will be written to "$root_build_dir/my_files.json" (again less
   the comments) (assuming root_build_dir = "//out"):
     [
-      "../base/foo.cpp",  // from //base:a
-      "../base/bar.cpp",  // from //base:b via //base:a
       "../base/baz.cpp",  // from //base:c via //base:b
+      "../base/bar.cpp",  // from //base:b via //base:a
+      "../base/foo.cpp",  // from //base:a
     ]
 
 

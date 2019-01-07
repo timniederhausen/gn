@@ -106,9 +106,9 @@ TEST(MetadataWalkTest, CollectWithRecurse) {
   EXPECT_FALSE(err.has_error());
 
   std::vector<Value> expected;
+  expected.push_back(Value(nullptr, "bar"));
   expected.push_back(Value(nullptr, "foo"));
   expected.push_back(Value(nullptr, true));
-  expected.push_back(Value(nullptr, "bar"));
   EXPECT_EQ(result, expected);
 
   std::set<const Target*> expected_walked_targets;
@@ -163,8 +163,8 @@ TEST(MetadataWalkTest, CollectWithBarrier) {
   EXPECT_FALSE(err.has_error()) << err.message();
 
   std::vector<Value> expected;
-  expected.push_back(Value(nullptr, "foo"));
   expected.push_back(Value(nullptr, "bar"));
+  expected.push_back(Value(nullptr, "foo"));
   EXPECT_EQ(result, expected) << result.size();
 
   std::set<const Target*> expected_walked_targets;
