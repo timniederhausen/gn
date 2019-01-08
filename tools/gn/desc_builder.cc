@@ -538,8 +538,7 @@ class TargetDescBuilder : public BaseDescBuilder {
     std::vector<LabelTargetPair> sorted_deps;
     for (const auto& pair : target->GetDeps(Target::DEPS_ALL))
       sorted_deps.push_back(pair);
-    std::sort(sorted_deps.begin(), sorted_deps.end(),
-              LabelPtrLabelLess<Target>());
+    std::sort(sorted_deps.begin(), sorted_deps.end());
 
     std::string indent(indent_level * 2, ' ');
 
