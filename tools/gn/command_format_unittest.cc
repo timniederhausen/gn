@@ -31,6 +31,10 @@ using FormatTest = TestWithScheduler;
                                FILE_PATH_LITERAL(".golden")),               \
         &expected));                                                        \
     EXPECT_EQ(expected, out);                                               \
+    /* Make sure formatting the output doesn't cause further changes. */    \
+    std::string out_again;                                                  \
+    EXPECT_TRUE(commands::FormatStringToString(out, false, &out_again));    \
+    ASSERT_EQ(out, out_again);                                              \
   }
 
 // These are expanded out this way rather than a runtime loop so that
@@ -110,3 +114,4 @@ FORMAT_TEST(071)
 FORMAT_TEST(072)
 FORMAT_TEST(073)
 FORMAT_TEST(074)
+FORMAT_TEST(075)

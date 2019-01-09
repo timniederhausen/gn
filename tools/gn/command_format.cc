@@ -428,6 +428,8 @@ void Printer::SortImports(std::vector<std::unique_ptr<PARSENODE>>& statements) {
       const PARSENODE* node = statements[i].get();
       int line_number =
           prev ? prev->GetRange().end().line_number() + 1 : start_line;
+      if (node->comments() && !node->comments()->before().empty())
+        line_number++;
       const_cast<FunctionCallNode*>(node->AsFunctionCall())
           ->SetNewLocation(line_number);
       prev = node;
