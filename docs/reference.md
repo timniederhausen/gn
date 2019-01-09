@@ -14,6 +14,7 @@
     *   [gen: Generate ninja files.](#gen)
     *   [help: Does what you think.](#help)
     *   [ls: List matching targets.](#ls)
+    *   [meta: List target metadata collection results.](#meta)
     *   [path: Find paths between two targets.](#path)
     *   [refs: Find stuff referencing a target or file.](#refs)
 *   [Target declarations](#targets)
@@ -23,6 +24,7 @@
     *   [copy: Declare a target that copies files.](#copy)
     *   [create_bundle: [iOS/macOS] Build an iOS or macOS bundle.](#create_bundle)
     *   [executable: Declare an executable target.](#executable)
+    *   [generated_file: Declare a generated_file target.](#generated_file)
     *   [group: Declare a named group of targets.](#group)
     *   [loadable_module: Declare a loadable module target.](#loadable_module)
     *   [shared_library: Declare a shared library target.](#shared_library)
@@ -99,8 +101,10 @@
     *   [code_signing_sources: [file list] Sources for code signing step.](#code_signing_sources)
     *   [complete_static_lib: [boolean] Links all deps into a static library.](#complete_static_lib)
     *   [configs: [label list] Configs applying to this target or config.](#configs)
+    *   [contents: Contents to write to file.](#contents)
     *   [data: [file list] Runtime data file dependencies.](#data)
     *   [data_deps: [label list] Non-linked dependencies.](#data_deps)
+    *   [data_keys: [string list] Keys from which to collect metadata.](#data_keys)
     *   [defines: [string list] C preprocessor defines.](#defines)
     *   [depfile: [string] File name for input dependencies for actions.](#depfile)
     *   [deps: [label list] Private linked dependencies.](#deps)
@@ -110,6 +114,8 @@
     *   [ldflags: [string list] Flags passed to the linker.](#ldflags)
     *   [lib_dirs: [directory list] Additional library directories.](#lib_dirs)
     *   [libs: [string list] Additional libraries to link.](#libs)
+    *   [metadata: [scope] Metadata of this target.](#metadata)
+    *   [output_conversion: Data format for generated_file targets.](#output_conversion)
     *   [output_dir: [directory] Directory to put output file in.](#output_dir)
     *   [output_extension: [string] Value to use for the output's file extension.](#output_extension)
     *   [output_name: [string] Name for the output file other than the default.](#output_name)
@@ -124,11 +130,13 @@
     *   [public: [file list] Declare public header files for a target.](#public)
     *   [public_configs: [label list] Configs applied to dependents.](#public_configs)
     *   [public_deps: [label list] Declare public dependencies.](#public_deps)
+    *   [rebase: [boolean] Rebase collected metadata as files.](#rebase)
     *   [response_file_contents: [string list] Contents of .rsp file for actions.](#response_file_contents)
     *   [script: [file name] Script file for actions.](#script)
     *   [sources: [file list] Source files for a target.](#sources)
     *   [testonly: [boolean] Declares a target must only be used for testing.](#testonly)
     *   [visibility: [label list] A list of labels that can depend on a target.](#visibility)
+    *   [walk_keys: [string list] Key(s) for managing the metadata collection walk.](#walk_keys)
     *   [write_runtime_deps: Writes the target's runtime_deps to the given path.](#write_runtime_deps)
     *   [xcode_extra_attributes: [scope] Extra attributes for Xcode projects.](#xcode_extra_attributes)
     *   [test_application_name: [string] Test application name for unit or ui test target.](#test_application_name)
@@ -331,9 +339,9 @@
 #### **What gets checked**
 
 ```
-  The .gn file may specify a list of targets to be checked. Only these targets
-  will be checked if no label_pattern is specified on the command line.
-  Otherwise, the command-line list is used instead. See "gn help dotfile".
+  The .gn file may specify a list of targets to be checked in the list
+  check_targets (see "gn help dotfile"). If a label pattern is specified
+  on the command line, check_targets is not used.
 
   Targets can opt-out from checking with "check_includes = false" (see
   "gn help check_includes").
@@ -452,6 +460,7 @@
   cflags_cc [--blame]
   check_includes
   configs [--tree] (see below)
+  data_keys
   defines [--blame]
   depfile
   deps [--all] [--tree] (see below)
@@ -460,13 +469,17 @@
   ldflags [--blame]
   lib_dirs
   libs
+  metadata
+  output_conversion
   outputs
   public_configs
   public
+  rebase
   script
   sources
   testonly
   visibility
+  walk_keys
 
   runtime_deps
       Compute all runtime deps for the given target. This is a computed list
@@ -853,6 +866,61 @@
       Lists all variants of the target //base:base (it may be referenced
       in multiple toolchains).
 ```
+### <a name="meta"></a>**gn meta &lt;out_dir&gt; &lt;target&gt;* \--data=&lt;key&gt;[,&lt;key&gt;*]* [\--walk=&lt;key&gt;[,&lt;key&gt;*]*]**
+```
+       [--rebase=<dest dir>]
+
+  Lists collected metaresults of all given targets for the given data key(s),
+  collecting metadata dependencies as specified by the given walk key(s).
+
+  See `gn help generated_file` for more information on the walk.
+```
+
+#### **Arguments**
+
+```
+  <target(s)>
+    A list of target labels from which to initiate the walk.
+
+  --data
+    A list of keys from which to extract data. In each target walked, its metadata
+    scope is checked for the presence of these keys. If present, the contents of
+    those variable in the scope are appended to the results list.
+
+  --walk (optional)
+    A list of keys from which to control the walk. In each target walked, its
+    metadata scope is checked for the presence of any of these keys. If present,
+    the contents of those variables is checked to ensure that it is a label of
+    a valid dependency of the target and then added to the set of targets to walk.
+    If the empty string ("") is present in any of these keys, all deps and data_deps
+    are added to the walk set.
+
+  --rebase (optional)
+    A destination directory onto which to rebase any paths found. If set, all
+    collected metadata will be rebased onto this path. This option will throw errors
+    if collected metadata is not a list of strings.
+```
+
+#### **Examples**
+
+```
+  gn meta out/Debug "//base/foo" --data=files
+      Lists collected metaresults for the `files` key in the //base/foo:foo
+      target and all of its dependency tree.
+
+  gn meta out/Debug "//base/foo" --data=files --data=other
+      Lists collected metaresults for the `files` and `other` keys in the
+      //base/foo:foo target and all of its dependency tree.
+
+  gn meta out/Debug "//base/foo" --data=files --walk=stop
+      Lists collected metaresults for the `files` key in the //base/foo:foo
+      target and all of the dependencies listed in the `stop` key (and so on).
+
+  gn meta out/Debug "//base/foo" --data=files --rebase="/"
+      Lists collected metaresults for the `files` key in the //base/foo:foo
+      target and all of its dependency tree, rebasing the strings in the `files`
+      key onto the source directory of the target's declaration relative to "/".
+```
 ### <a name="path"></a>**gn path &lt;out_dir&gt; &lt;target_one&gt; &lt;target_two&gt;**
 
 ```
@@ -1087,7 +1155,7 @@
 #### **Variables**
 
 ```
-  args, data, data_deps, depfile, deps, inputs, outputs*, pool,
+  args, data, data_deps, depfile, deps, inputs, metadata, outputs*, pool,
   response_file_contents, script*, sources
   * = required
 ```
@@ -1168,7 +1236,7 @@
 #### **Variables**
 
 ```
-  args, data, data_deps, depfile, deps, inputs, outputs*, pool,
+  args, data, data_deps, depfile, deps, inputs, metadata, outputs*, pool,
   response_file_contents, script*, sources*
   * = required
 ```
@@ -1221,7 +1289,7 @@
 #### **Variables**
 
 ```
-  sources*, outputs*, deps, data_deps, public_deps, visibility
+  sources*, outputs*, deps, data_deps, metadata, public_deps, visibility
   * = required
 ```
 
@@ -1338,7 +1406,8 @@
   bundle_executable_dir*, bundle_plugins_dir*, bundle_deps_filter, deps,
   data_deps, public_deps, visibility, product_type, code_signing_args,
   code_signing_script, code_signing_sources, code_signing_outputs,
-  xcode_extra_attributes, xcode_test_application_name, partial_info_plist
+  xcode_extra_attributes, xcode_test_application_name, partial_info_plist,
+  metadata
   * = required
 ```
 
@@ -1453,8 +1522,141 @@
          libs, precompiled_header, precompiled_source
   Deps: data_deps, deps, public_deps
   Dependent configs: all_dependent_configs, public_configs
-  General: check_includes, configs, data, friend, inputs, output_name,
-           output_extension, public, sources, testonly, visibility
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_name, output_extension, public, sources, testonly,
+           visibility
+```
+### <a name="generated_file"></a>**generated_file**: Declare a generated_file target.
+
+```
+  Writes data value(s) to disk on resolution. This target type mirrors some
+  functionality of the write_file() function, but also provides the ability to
+  collect metadata from its dependencies on resolution rather than writing out
+  parse time.
+
+  The `outputs` variable is required to be a list with a single element,
+  specifying the intended location of the output file.
+
+  The `output_conversion` variable specified the format to write the
+  value. See `gn help output_conversion`.
+
+  One of `contents` or `data_keys` must be specified; use of `data` will write
+  the contents of that value to file, while use of `data_keys` will trigger a
+  metadata collection walk based on the dependencies of the target and the
+  optional values of the `rebase` and `walk_keys` variables. See
+  `gn help metadata`.
+
+  Collected metadata, if specified, will be returned in postorder of
+  dependencies. See the example for details.
+```
+
+#### **Example (metadata collection)**
+
+```
+  Given the following targets defined in //base/BUILD.gn, where A depends on B
+  and B depends on C and D:
+
+    group("a") {
+      metadata = {
+        doom_melon = [ "enable" ]
+        my_files = [ "foo.cpp" ]
+
+        // Note: this is functionally equivalent to not defining `my_barrier`
+        // at all in this target's metadata.
+        my_barrier = [ "" ]
+      }
+
+      deps = [ ":b" ]
+    }
+
+    group("c") {
+      metadata = {
+        my_files = [ "bar.cpp" ]
+        my_barrier = [ ":c" ]
+      }
+
+      deps = [ ":c", ":d" ]
+    }
+
+    group("c") {
+      metadata = {
+        doom_melon = [ "disable" ]
+        my_files = [ "baz.cpp" ]
+      }
+    }
+
+    group("d") {
+      metadata = {
+        my_files = [ "missing.cpp" ]
+      }
+    }
+
+  If the following generated_file target is defined:
+
+    generated_file("my_files_metadata") {
+      outputs = [ "$root_build_dir/my_files.json" ]
+      data_keys = [ "my_files" ]
+
+      deps = [ "//base:a" ]
+    }
+
+  The following will be written to "$root_build_dir/my_files.json" (less the
+  comments):
+    [
+      "baz.cpp",  // from //base:c via //base:b
+      "missing.cpp"  // from //base:d via //base:b
+      "bar.cpp",  // from //base:b via //base:a
+      "foo.cpp",  // from //base:a
+    ]
+
+  Alternatively, as an example of using walk_keys, if the following
+  generated_file target is defined:
+
+  generated_file("my_files_metadata") {
+    outputs = [ "$root_build_dir/my_files.json" ]
+    data_keys = [ "my_files" ]
+    walk_keys = [ "my_barrier" ]
+
+    deps = [ "//base:a" ]
+  }
+
+  The following will be written to "$root_build_dir/my_files.json" (again less
+  the comments):
+    [
+      "baz.cpp",  // from //base:c via //base:b
+      "bar.cpp",  // from //base:b via //base:a
+      "foo.cpp",  // from //base:a
+    ]
+
+  If `rebase` is used in the following generated_file target:
+
+  generated_file("my_files_metadata") {
+    outputs = [ "$root_build_dir/my_files.json" ]
+    data_keys = [ "my_files" ]
+    walk_keys = [ "my_barrier" ]
+    rebase = root_build_dir
+
+    deps = [ "//base:a" ]
+  }
+
+  The following will be written to "$root_build_dir/my_files.json" (again less
+  the comments) (assuming root_build_dir = "//out"):
+    [
+      "../base/baz.cpp",  // from //base:c via //base:b
+      "../base/bar.cpp",  // from //base:b via //base:a
+      "../base/foo.cpp",  // from //base:a
+    ]
+```
+
+#### **Variables**
+
+```
+  data_keys
+  rebase
+  walk_keys
+  output_conversion
+  Deps: data_deps, deps, public_deps
+  Dependent configs: all_dependent_configs, public_configs
 ```
 ### <a name="group"></a>**group**: Declare a named group of targets.
 
@@ -1501,8 +1703,9 @@
          libs, precompiled_header, precompiled_source
   Deps: data_deps, deps, public_deps
   Dependent configs: all_dependent_configs, public_configs
-  General: check_includes, configs, data, friend, inputs, output_name,
-           output_extension, public, sources, testonly, visibility
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_name, output_extension, public, sources, testonly,
+           visibility
 ```
 ### <a name="shared_library"></a>**shared_library**: Declare a shared library target.
 
@@ -1522,8 +1725,9 @@
          libs, precompiled_header, precompiled_source
   Deps: data_deps, deps, public_deps
   Dependent configs: all_dependent_configs, public_configs
-  General: check_includes, configs, data, friend, inputs, output_name,
-           output_extension, public, sources, testonly, visibility
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_name, output_extension, public, sources, testonly,
+           visibility
 ```
 ### <a name="source_set"></a>**source_set**: Declare a source set target.
 
@@ -1558,8 +1762,9 @@
          libs, precompiled_header, precompiled_source
   Deps: data_deps, deps, public_deps
   Dependent configs: all_dependent_configs, public_configs
-  General: check_includes, configs, data, friend, inputs, output_name,
-           output_extension, public, sources, testonly, visibility
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_name, output_extension, public, sources, testonly,
+           visibility
 ```
 ### <a name="static_library"></a>**static_library**: Declare a static library target.
 
@@ -1580,8 +1785,9 @@
          libs, precompiled_header, precompiled_source
   Deps: data_deps, deps, public_deps
   Dependent configs: all_dependent_configs, public_configs
-  General: check_includes, configs, data, friend, inputs, output_name,
-           output_extension, public, sources, testonly, visibility
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_name, output_extension, public, sources, testonly,
+           visibility
 ```
 ### <a name="target"></a>**target**: Declare an target with the given programmatic type.
 
@@ -4460,6 +4666,12 @@
     }
   }
 ```
+### <a name="contents"></a>**contents**: Contents to write to file.
+
+```
+  The contents of the file for a generated_file target.
+  See "gn help generated_file".
+```
 ### <a name="data"></a>**data**: Runtime data file dependencies.
 
 ```
@@ -4514,6 +4726,15 @@
     deps = [ "//base" ]
     data_deps = [ "//plugins:my_runtime_plugin" ]
   }
+```
+### <a name="data_keys"></a>**data_keys**: Keys from which to collect metadata.
+
+```
+  These keys are used to identify metadata to collect. If a walked target
+  defines this key in its metadata, its value will be appended to the resulting
+  collection.
+
+  See "gn help generated_file".
 ```
 ### <a name="defines"></a>**defines**: C preprocessor defines.
 
@@ -4929,6 +5150,34 @@
 
   On Linux:
     libs = [ "ld" ]
+```
+### <a name="metadata"></a>**metadata**: Metadata of this target.
+
+```
+  Metadata is a collection of keys and values relating to a particular target.
+  Generally, these keys will include three categories of strings: ordinary
+  strings, filenames intended to be rebased according to their particular
+  source directory, and target labels intended to be used as barriers to the
+  walk. Verfication of these categories occurs at walk time, not creation
+  time (since it is not clear until the walk which values are intended for
+  which purpose).
+
+  Example
+
+  group("doom_melon") {
+    metadata = {
+      # These keys are not built in to GN but are interpreted when consuming
+      # metadata.
+      my_barrier = []
+      my_files = [ "a.txt", "b.txt" ]
+    }
+  }
+```
+### <a name=""output_conversion"></a>**"output_conversion**: Data format for generated_file targets.
+
+```
+  Controls how the "contents" of a generated_file target is formatted.
+  See "gn help output_conversion".
 ```
 ### <a name="output_dir"></a>**output_dir**: [directory] Directory to put output file in.
 
@@ -5375,6 +5624,22 @@
     public_deps = [ ":c" ]
   }
 ```
+### <a name="rebase"></a>**rebase**: Rebase collected metadata as files.
+
+```
+  A boolean that triggers a rebase of collected metadata strings based on their
+  declared file. Defaults to false.
+
+  Metadata generally declares files as strings relative to the local build file.
+  However, this data is often used in other contexts, and so setting this flag
+  will force the metadata collection to be rebased according to the local build
+  file's location and thus allow the filename to be used anywhere.
+
+  Setting this flag will raise an error if any target's specified metadata is
+  not a string value.
+
+  See also "gn help generated_file".
+```
 ### <a name="response_file_contents"></a>**response_file_contents**: Contents of a response file for actions.
 
 ```
@@ -5534,6 +5799,20 @@
   any targets in "//bar/" and any subdirectory thereof.
     visibility = [ "./*", "//bar/*" ]
 ```
+### <a name="walk_keys"></a>**walk_keys**: Key(s) for managing the metadata collection walk.
+
+```
+  Defaults to [].
+
+  These keys are used to control the next step in a collection walk, acting as
+  barriers. If a specified key is defined in a target's metadata, the walk will
+  use the targets listed in that value to determine which targets are walked.
+
+  If no walk_keys are specified for a generated_file target (i.e. "[]"), the
+  walk will touch all deps and data_deps of the specified target recursively.
+
+  See "gn help generated_file".
+```
 ### <a name="write_runtime_deps"></a>**write_runtime_deps**: Writes the target's runtime_deps to the given path.
 
 ```
@@ -5678,8 +5957,8 @@
   check_targets [optional]
       A list of labels and label patterns that should be checked when running
       "gn check" or "gn gen --check". If unspecified, all targets will be
-      checked. If it is the empty list, no targets will be checked. To bypass
-      this list, request an explicit check of targets, for instance "//*".
+      checked. If it is the empty list, no targets will be checked. To
+      bypass this list, request an explicit check of targets, like "//*".
 
       The format of this list is identical to that of "visibility" so see "gn
       help visibility" for examples.
@@ -6060,6 +6339,11 @@
 
     myvalues.foo += 2
     empty_scope.new_thing = [ 1, 2, 3 ]
+
+  Scope equality is defined as single-level scopes identical within the current
+  scope. That is, all values in the first scope must be present and identical
+  within the second, and vice versa. Note that this means inherited scopes are
+  always unequal by definition.
 ```
 ### <a name="input_conversion"></a>**Input and output conversions are arguments to file and process functions**
 #### **that specify how to convert data to or from external formats. The possible**
