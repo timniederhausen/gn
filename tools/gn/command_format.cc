@@ -29,9 +29,9 @@ const char kSwitchDumpTree[] = "dump-tree";
 const char kSwitchStdin[] = "stdin";
 
 const char kFormat[] = "format";
-const char kFormat_HelpShort[] = "format: Format .gn file.";
+const char kFormat_HelpShort[] = "format: Format .gn files.";
 const char kFormat_Help[] =
-    R"(gn format [--dump-tree] (--stdin | <build_file>)
+    R"(gn format [--dump-tree] (--stdin | <list of build_files...>)
 
   Formats .gn file to a standard format.
 
@@ -64,7 +64,7 @@ Arguments
       in-place.
 
 Examples
-  gn format //some/BUILD.gn
+  gn format //some/BUILD.gn //some/other/BUILD.gn //and/another/BUILD.gn
   gn format some\\BUILD.gn
   gn format /abspath/some/BUILD.gn
   gn format --stdin
@@ -1157,10 +1157,8 @@ int RunFormat(const std::vector<std::string>& args) {
     return 0;
   }
 
-  // TODO(scottmg): Eventually, this should be a list/spec of files, and they
-  // should all be done in parallel.
-  if (args.size() != 1) {
-    Err(Location(), "Expecting exactly one argument, see `gn help format`.\n")
+  if (args.size() == 0) {
+    Err(Location(), "Expecting one or more arguments, see `gn help format`.\n")
         .PrintToStdout();
     return 1;
   }
@@ -1169,39 +1167,43 @@ int RunFormat(const std::vector<std::string>& args) {
   SourceDir source_dir =
       SourceDirForCurrentDirectory(setup.build_settings().root_path());
 
-  Err err;
-  SourceFile file =
-      source_dir.ResolveRelativeFile(Value(nullptr, args[0]), &err);
-  if (err.has_error()) {
-    err.PrintToStdout();
-    return 1;
-  }
+  // TODO(scottmg): Eventually, this list of files should be processed in
+  // parallel.
+  for (const auto& arg : args) {
+    Err err;
+    SourceFile file =
+        source_dir.ResolveRelativeFile(Value(nullptr, arg), &err);
+    if (err.has_error()) {
+      err.PrintToStdout();
+      return 1;
+    }
 
-  std::string output_string;
-  if (FormatFileToString(&setup, file, dump_tree, &output_string)) {
-    if (!dump_tree) {
-      // Update the file in-place.
-      base::FilePath to_write = setup.build_settings().GetFullPath(file);
-      std::string original_contents;
-      if (!base::ReadFileToString(to_write, &original_contents)) {
-        Err(Location(), std::string("Couldn't read \"") +
-                            FilePathToUTF8(to_write) +
-                            std::string("\" for comparison."))
-            .PrintToStdout();
-        return 1;
-      }
-      if (dry_run)
-        return original_contents == output_string ? 0 : 2;
-      if (original_contents != output_string) {
-        if (base::WriteFile(to_write, output_string.data(),
-                            static_cast<int>(output_string.size())) == -1) {
-          Err(Location(),
-              std::string("Failed to write formatted output back to \"") +
-                  FilePathToUTF8(to_write) + std::string("\"."))
+    std::string output_string;
+    if (FormatFileToString(&setup, file, dump_tree, &output_string)) {
+      if (!dump_tree) {
+        // Update the file in-place.
+        base::FilePath to_write = setup.build_settings().GetFullPath(file);
+        std::string original_contents;
+        if (!base::ReadFileToString(to_write, &original_contents)) {
+          Err(Location(), std::string("Couldn't read \"") +
+                              FilePathToUTF8(to_write) +
+                              std::string("\" for comparison."))
               .PrintToStdout();
           return 1;
         }
-        printf("Wrote formatted to '%s'.\n", FilePathToUTF8(to_write).c_str());
+        if (dry_run)
+          return original_contents == output_string ? 0 : 2;
+        if (original_contents != output_string) {
+          if (base::WriteFile(to_write, output_string.data(),
+                              static_cast<int>(output_string.size())) == -1) {
+            Err(Location(),
+                std::string("Failed to write formatted output back to \"") +
+                    FilePathToUTF8(to_write) + std::string("\"."))
+                .PrintToStdout();
+            return 1;
+          }
+          printf("Wrote formatted to '%s'.\n", FilePathToUTF8(to_write).c_str());
+        }
       }
     }
   }
