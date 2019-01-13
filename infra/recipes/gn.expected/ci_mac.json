@@ -45,12 +45,26 @@
   },
   {
     "cmd": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "[START_DIR]/gn",
+    "infra_step": true,
+    "name": "git.rev-parse",
+    "stdout": "/path/to/tmp/",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
       "cipd",
       "ensure",
       "-root",
       "[START_DIR]/cipd",
       "-ensure-file",
-      "infra/ninja/${platform} version:1.8.2\nfuchsia/clang/${platform} git_revision:b920a7f65b13237dc4d5b2b836b29a954fff440a",
+      "infra/ninja/${platform} version:1.8.2\nfuchsia/third_party/clang/${platform} integration",
       "-json-output",
       "/path/to/tmp/json"
     ],
@@ -61,8 +75,8 @@
       "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
       "@@@STEP_LOG_LINE@json.output@    \"\": [@@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",
-      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-git_revision:b92\", @@@",
-      "@@@STEP_LOG_LINE@json.output@        \"package\": \"fuchsia/clang/resolved-platform\"@@@",
+      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-integration-----\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"package\": \"fuchsia/third_party/clang/resolved-platform\"@@@",
       "@@@STEP_LOG_LINE@json.output@      }, @@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",
       "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-version:1.8.2---\", @@@",
@@ -126,26 +140,27 @@
     "name": "select XCode"
   },
   {
-    "cmd": [
-      "xcrun",
-      "--show-sdk-path"
-    ],
-    "name": "xcrun",
-    "stdout": "/path/to/tmp/",
-    "~followup_annotations": [
-      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
-      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
-    ]
-  },
-  {
     "cmd": [],
     "name": "debug"
   },
   {
     "cmd": [],
-    "name": "debug.build",
+    "name": "debug.mac-amd64",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "xcrun",
+      "--show-sdk-path"
+    ],
+    "name": "debug.mac-amd64.xcrun",
+    "stdout": "/path/to/tmp/",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@2@@@",
+      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
+      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
     ]
   },
   {
@@ -159,11 +174,11 @@
     "env": {
       "AR": "[START_DIR]/cipd/bin/llvm-ar",
       "CC": "[START_DIR]/cipd/bin/clang",
-      "CFLAGS": "--sysroot=/some/xcode/path",
+      "CFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path",
       "CXX": "[START_DIR]/cipd/bin/clang++",
-      "LDFLAGS": "--sysroot=/some/xcode/path -nostdlib++ [START_DIR]/cipd/lib/libc++.a"
+      "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path -nostdlib++ [START_DIR]/cipd/lib/libc++.a"
     },
-    "name": "debug.build.generate",
+    "name": "debug.mac-amd64.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
     ]
@@ -178,11 +193,11 @@
     "env": {
       "AR": "[START_DIR]/cipd/bin/llvm-ar",
       "CC": "[START_DIR]/cipd/bin/clang",
-      "CFLAGS": "--sysroot=/some/xcode/path",
+      "CFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path",
       "CXX": "[START_DIR]/cipd/bin/clang++",
-      "LDFLAGS": "--sysroot=/some/xcode/path -nostdlib++ [START_DIR]/cipd/lib/libc++.a"
+      "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path -nostdlib++ [START_DIR]/cipd/lib/libc++.a"
     },
-    "name": "debug.build.ninja",
+    "name": "debug.mac-amd64.build",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
     ]
@@ -191,9 +206,9 @@
     "cmd": [
       "[START_DIR]/gn/out/gn_unittests"
     ],
-    "name": "debug.test",
+    "name": "debug.mac-amd64.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
+      "@@@STEP_NEST_LEVEL@2@@@"
     ]
   },
   {
@@ -202,9 +217,22 @@
   },
   {
     "cmd": [],
-    "name": "release.build",
+    "name": "release.mac-amd64",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "xcrun",
+      "--show-sdk-path"
+    ],
+    "name": "release.mac-amd64.xcrun",
+    "stdout": "/path/to/tmp/",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@2@@@",
+      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
+      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
     ]
   },
   {
@@ -219,11 +247,11 @@
     "env": {
       "AR": "[START_DIR]/cipd/bin/llvm-ar",
       "CC": "[START_DIR]/cipd/bin/clang",
-      "CFLAGS": "--sysroot=/some/xcode/path",
+      "CFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path",
       "CXX": "[START_DIR]/cipd/bin/clang++",
-      "LDFLAGS": "--sysroot=/some/xcode/path -nostdlib++ [START_DIR]/cipd/lib/libc++.a"
+      "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path -nostdlib++ [START_DIR]/cipd/lib/libc++.a"
     },
-    "name": "release.build.generate",
+    "name": "release.mac-amd64.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
     ]
@@ -238,11 +266,11 @@
     "env": {
       "AR": "[START_DIR]/cipd/bin/llvm-ar",
       "CC": "[START_DIR]/cipd/bin/clang",
-      "CFLAGS": "--sysroot=/some/xcode/path",
+      "CFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path",
       "CXX": "[START_DIR]/cipd/bin/clang++",
-      "LDFLAGS": "--sysroot=/some/xcode/path -nostdlib++ [START_DIR]/cipd/lib/libc++.a"
+      "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path -nostdlib++ [START_DIR]/cipd/lib/libc++.a"
     },
-    "name": "release.build.ninja",
+    "name": "release.mac-amd64.build",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
     ]
@@ -251,9 +279,41 @@
     "cmd": [
       "[START_DIR]/gn/out/gn_unittests"
     ],
-    "name": "release.test",
+    "name": "release.mac-amd64.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
+      "@@@STEP_NEST_LEVEL@2@@@"
+    ]
+  },
+  {
+    "cmd": [],
+    "name": "release.mac-amd64.upload",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@2@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "cipd",
+      "pkg-build",
+      "-pkg-def",
+      "{\"data\": [{\"file\": \"gn\"}, {\"version_file\": \".versions/gn.cipd_version\"}], \"install_mode\": \"copy\", \"package\": \"gn/gn/mac-amd64\", \"root\": \"[START_DIR]/gn/out\"}",
+      "-out",
+      "[CLEANUP]/gn.cipd",
+      "-hash-algo",
+      "sha256",
+      "-json-output",
+      "/path/to/tmp/json"
+    ],
+    "name": "release.mac-amd64.upload.build gn/gn/mac-amd64",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@3@@@",
+      "@@@STEP_LOG_LINE@json.output@{@@@",
+      "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
+      "@@@STEP_LOG_LINE@json.output@    \"instance_id\": \"40-chars-fake-of-the-package-instance_id\", @@@",
+      "@@@STEP_LOG_LINE@json.output@    \"package\": \"gn/gn/mac-amd64\"@@@",
+      "@@@STEP_LOG_LINE@json.output@  }@@@",
+      "@@@STEP_LOG_LINE@json.output@}@@@",
+      "@@@STEP_LOG_END@json.output@@@"
     ]
   },
   {
@@ -264,30 +324,6 @@
     ],
     "infra_step": true,
     "name": "reset XCode"
-  },
-  {
-    "cmd": [
-      "cipd",
-      "pkg-build",
-      "-pkg-def",
-      "{\"data\": [{\"file\": \"gn\"}, {\"version_file\": \".versions/gn.cipd_version\"}], \"install_mode\": \"copy\", \"package\": \"gn/gn/${platform}\", \"root\": \"[START_DIR]/gn/out\"}",
-      "-out",
-      "[CLEANUP]/gn.cipd",
-      "-hash-algo",
-      "sha256",
-      "-json-output",
-      "/path/to/tmp/json"
-    ],
-    "name": "build gn/gn/${platform}",
-    "~followup_annotations": [
-      "@@@STEP_LOG_LINE@json.output@{@@@",
-      "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
-      "@@@STEP_LOG_LINE@json.output@    \"instance_id\": \"40-chars-fake-of-the-package-instance_id\", @@@",
-      "@@@STEP_LOG_LINE@json.output@    \"package\": \"gn/gn/resolved-platform\"@@@",
-      "@@@STEP_LOG_LINE@json.output@  }@@@",
-      "@@@STEP_LOG_LINE@json.output@}@@@",
-      "@@@STEP_LOG_END@json.output@@@"
-    ]
   },
   {
     "jsonResult": null,

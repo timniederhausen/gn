@@ -46,6 +46,20 @@
   {
     "cmd": [
       "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "[START_DIR]\\gn",
+    "infra_step": true,
+    "name": "git.rev-parse",
+    "stdout": "/path/to/tmp/",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "git",
       "fetch",
       "https://gn.googlesource.com/gn",
       "refs/changes/56/123456/7"
@@ -162,7 +176,7 @@
   },
   {
     "cmd": [],
-    "name": "debug.build",
+    "name": "debug.windows-amd64",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
     ]
@@ -183,7 +197,7 @@
         "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
-    "name": "debug.build.generate",
+    "name": "debug.windows-amd64.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
     ]
@@ -203,7 +217,7 @@
         "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
-    "name": "debug.build.ninja",
+    "name": "debug.windows-amd64.build",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
     ]
@@ -220,9 +234,9 @@
         "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
-    "name": "debug.test",
+    "name": "debug.windows-amd64.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
+      "@@@STEP_NEST_LEVEL@2@@@"
     ]
   },
   {
@@ -231,7 +245,7 @@
   },
   {
     "cmd": [],
-    "name": "release.build",
+    "name": "release.windows-amd64",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
     ]
@@ -253,7 +267,7 @@
         "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
-    "name": "release.build.generate",
+    "name": "release.windows-amd64.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
     ]
@@ -273,7 +287,7 @@
         "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
-    "name": "release.build.ninja",
+    "name": "release.windows-amd64.build",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
     ]
@@ -290,9 +304,9 @@
         "[CACHE]\\windows_sdk\\win_sdk\\bin\\x64"
       ]
     },
-    "name": "release.test",
+    "name": "release.windows-amd64.test",
     "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
+      "@@@STEP_NEST_LEVEL@2@@@"
     ]
   },
   {

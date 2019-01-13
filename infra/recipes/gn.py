@@ -17,6 +17,7 @@ DEPS = [
     'recipe_engine/python',
     'recipe_engine/raw_io',
     'recipe_engine/step',
+    'target',
     'macos_sdk',
     'windows_sdk',
 ]
@@ -40,6 +41,9 @@ def RunSteps(api, repository):
       # Fetch tags so `git describe` works.
       api.step('fetch', ['git', 'fetch', '--tags', repository, ref])
       api.step('checkout', ['git', 'checkout', 'FETCH_HEAD'])
+      revision = api.step(
+          'rev-parse', ['git', 'rev-parse', 'HEAD'],
+          stdout=api.raw_io.output()).stdout.strip()
       for change in build_input.gerrit_changes:
         api.step('fetch %s/%s' % (change.change, change.patchset), [
             'git', 'fetch', repository,
@@ -54,11 +58,10 @@ def RunSteps(api, repository):
     pkgs = api.cipd.EnsureFile()
     pkgs.add_package('infra/ninja/${platform}', 'version:1.8.2')
     if api.platform.is_linux or api.platform.is_mac:
-      pkgs.add_package('fuchsia/clang/${platform}',
-                       'git_revision:b920a7f65b13237dc4d5b2b836b29a954fff440a')
+      pkgs.add_package('fuchsia/third_party/clang/${platform}', 'integration')
     if api.platform.is_linux:
-      pkgs.add_package('fuchsia/sysroot/${platform}',
-                       'git_revision:a28dfa20af063e5ca00634024c85732e20220419',
+      pkgs.add_package('fuchsia/third_party/sysroot/linux',
+                       'git_revision:c912d089c3d46d8982fdef76a50514cca79b6132',
                        'sysroot')
     api.cipd.ensure(cipd_dir, pkgs)
 
@@ -66,93 +69,106 @@ def RunSteps(api, repository):
   configs = [
       {
           'name': 'debug',
-          'args': ['-d']
+          'args': ['-d'],
+          'targets': [api.target.host],
       },
       {
           'name': 'release',
-          'args': ['--use-lto', '--use-icf']
+          'args': ['--use-lto', '--use-icf'],
+          'targets': [api.target('linux-amd64'),
+                      api.target('linux-arm64')]
+                     if api.platform.is_linux else [api.target.host],
       },
   ]
 
   with api.macos_sdk(), api.windows_sdk():
-    if api.platform.is_linux:
-      sysroot = '--sysroot=%s' % cipd_dir.join('sysroot')
-      env = {
-          'CC': cipd_dir.join('bin', 'clang'),
-          'CXX': cipd_dir.join('bin', 'clang++'),
-          'AR': cipd_dir.join('bin', 'llvm-ar'),
-          'CFLAGS': sysroot,
-          'LDFLAGS': sysroot,
-      }
-    elif api.platform.is_mac:
-      sysroot = '--sysroot=%s' % api.step(
-          'xcrun', ['xcrun', '--show-sdk-path'],
-          stdout=api.raw_io.output(name='sdk-path', add_output_log=True),
-          step_test_data=
-          lambda: api.raw_io.test_api.stream_output('/some/xcode/path')
-      ).stdout.strip()
-      stdlib = '-nostdlib++ %s' % cipd_dir.join('lib', 'libc++.a')
-      env = {
-          'CC': cipd_dir.join('bin', 'clang'),
-          'CXX': cipd_dir.join('bin', 'clang++'),
-          'AR': cipd_dir.join('bin', 'llvm-ar'),
-          'CFLAGS': sysroot,
-          'LDFLAGS': '%s %s' % (sysroot, stdlib),
-      }
-    else:
-      env = {}
-
     for config in configs:
       with api.step.nest(config['name']):
-        with api.step.nest('build'), api.context(env=env, cwd=src_dir):
-          api.python(
-              'generate', src_dir.join('build', 'gen.py'), args=config['args'])
+        for target in config['targets']:
+          with api.step.nest(target.platform):
+            if target.is_linux:
+              triple = '--target=%s' % target.triple
+              sysroot = '--sysroot=%s' % cipd_dir.join('sysroot')
+              env = {
+                  'CC': cipd_dir.join('bin', 'clang'),
+                  'CXX': cipd_dir.join('bin', 'clang++'),
+                  'AR': cipd_dir.join('bin', 'llvm-ar'),
+                  'CFLAGS': '%s %s' % (triple, sysroot),
+                  'LDFLAGS': '%s %s -static-libstdc++' % (triple, sysroot),
+              }
+            elif target.is_mac:
+              triple = '--target=%s' % target.triple
+              sysroot = '--sysroot=%s' % api.step(
+                  'xcrun', ['xcrun', '--show-sdk-path'],
+                  stdout=api.raw_io.output(
+                      name='sdk-path', add_output_log=True),
+                  step_test_data=lambda: api.raw_io.test_api.stream_output(
+                      '/some/xcode/path')).stdout.strip()
+              stdlib = cipd_dir.join('lib', 'libc++.a')
+              env = {
+                  'CC': cipd_dir.join('bin', 'clang'),
+                  'CXX': cipd_dir.join('bin', 'clang++'),
+                  'AR': cipd_dir.join('bin', 'llvm-ar'),
+                  'CFLAGS': '%s %s' % (triple, sysroot),
+                  'LDFLAGS': '%s %s -nostdlib++ %s' % (triple, sysroot, stdlib),
+              }
+            else:
+              env = {}
 
-          # Windows requires the environment modifications when building too.
-          api.step('ninja', [cipd_dir.join('ninja'), '-C', src_dir.join('out')])
+            with api.context(env=env, cwd=src_dir):
+              api.python(
+                  'generate',
+                  src_dir.join('build', 'gen.py'),
+                  args=config['args'])
 
-        api.step('test', [src_dir.join('out', 'gn_unittests')])
+              # Windows requires the environment modifications when building too.
+              api.step('build',
+                       [cipd_dir.join('ninja'), '-C',
+                        src_dir.join('out')])
 
-  if build_input.gerrit_changes:
-    return
+            if target.is_host:
+              api.step('test', [src_dir.join('out', 'gn_unittests')])
 
-  cipd_pkg_name = 'gn/gn/${platform}'
-  gn = 'gn' + ('.exe' if api.platform.is_win else '')
+            if build_input.gerrit_changes:
+              continue
 
-  pkg_def = api.cipd.PackageDefinition(
-      package_name=cipd_pkg_name,
-      package_root=src_dir.join('out'),
-      install_mode='copy')
-  pkg_def.add_file(src_dir.join('out', gn))
-  pkg_def.add_version_file('.versions/%s.cipd_version' % gn)
+            if config['name'] != 'release':
+              continue
 
-  cipd_pkg_file = api.path['cleanup'].join('gn.cipd')
+            with api.step.nest('upload'):
+              cipd_pkg_name = 'gn/gn/%s' % target.platform
+              gn = 'gn' + ('.exe' if target.is_win else '')
 
-  api.cipd.build_from_pkg(
-      pkg_def=pkg_def,
-      output_package=cipd_pkg_file,
-  )
+              pkg_def = api.cipd.PackageDefinition(
+                  package_name=cipd_pkg_name,
+                  package_root=src_dir.join('out'),
+                  install_mode='copy')
+              pkg_def.add_file(src_dir.join('out', gn))
+              pkg_def.add_version_file('.versions/%s.cipd_version' % gn)
 
-  if api.buildbucket.builder_id.project == 'infra-internal':
-    with api.context(cwd=src_dir):
-      revision = api.step(
-          'rev-parse', ['git', 'rev-parse', 'HEAD'],
-          stdout=api.raw_io.output()).stdout.strip()
+              cipd_pkg_file = api.path['cleanup'].join('gn.cipd')
 
-    cipd_pin = api.cipd.search(cipd_pkg_name, 'git_revision:' + revision)
-    if cipd_pin:
-      api.step('Package is up-to-date', cmd=None)
-      return
+              api.cipd.build_from_pkg(
+                  pkg_def=pkg_def,
+                  output_package=cipd_pkg_file,
+              )
 
-    api.cipd.register(
-        package_name=cipd_pkg_name,
-        package_path=cipd_pkg_file,
-        refs=['latest'],
-        tags={
-            'git_repository': repository,
-            'git_revision': revision,
-        },
-    )
+              if api.buildbucket.builder_id.project == 'infra-internal':
+                cipd_pin = api.cipd.search(cipd_pkg_name,
+                                           'git_revision:' + revision)
+                if cipd_pin:
+                  api.step('Package is up-to-date', cmd=None)
+                  return
+
+                api.cipd.register(
+                    package_name=cipd_pkg_name,
+                    package_path=cipd_pkg_file,
+                    refs=['latest'],
+                    tags={
+                        'git_repository': repository,
+                        'git_revision': revision,
+                    },
+                )
 
 
 def GenTests(api):
@@ -173,15 +189,20 @@ def GenTests(api):
       project='infra-internal',
       git_repo='gn.googlesource.com/gn',
       revision='a' * 40,
-  ) + api.step_data('rev-parse', api.raw_io.stream_output('a' * 40)) +
-         api.step_data('cipd search gn/gn/${platform} git_revision:' + 'a' * 40,
-                       api.cipd.example_search('gn/gn/linux-amd64',
-                                               ['git_revision:' + 'a' * 40])))
+  ) + api.step_data(
+      'git.rev-parse', api.raw_io.stream_output('a' * 40)
+  ) + api.step_data(
+      'release.linux-amd64.upload.cipd search gn/gn/linux-amd64 git_revision:' +
+      'a' * 40,
+      api.cipd.example_search('gn/gn/linux-amd64',
+                              ['git_revision:' + 'a' * 40])))
 
   yield (api.test('cipd_register') + api.buildbucket.ci_build(
       project='infra-internal',
       git_repo='gn.googlesource.com/gn',
       revision='a' * 40,
-  ) + api.step_data('rev-parse', api.raw_io.stream_output('a' * 40)) +
-         api.step_data('cipd search gn/gn/${platform} git_revision:' + 'a' * 40,
-                       api.cipd.example_search('gn/gn/linux-amd64', [])))
+  ) + api.step_data(
+      'git.rev-parse', api.raw_io.stream_output('a' * 40)
+  ) + api.step_data(
+      'release.linux-amd64.upload.cipd search gn/gn/linux-amd64 git_revision:' +
+      'a' * 40, api.cipd.example_search('gn/gn/linux-amd64', [])))
