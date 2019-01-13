@@ -83,8 +83,6 @@ def main(argv):
                     choices=Platform.known_platforms())
   parser.add_option('--use-lto', action='store_true',
                     help='Enable the use of LTO')
-  parser.add_option('--use-icf', action='store_true',
-                    help='Enable the use of Identical Code Folding')
   parser.add_option('--no-last-commit-position', action='store_true',
                     help='Do not generate last_commit_position.h.')
   parser.add_option('--out-path',
@@ -301,7 +299,7 @@ def WriteGNNinja(path, platform, host, options):
           ldflags.append('-Wl,-strip-all')
 
       # Enable identical code-folding.
-      if options.use_icf:
+      if not platform.is_darwin():
         ldflags.append('-Wl,--icf=all')
 
     cflags.extend([
