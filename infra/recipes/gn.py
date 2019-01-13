@@ -69,7 +69,7 @@ def RunSteps(api, repository):
       },
       {
           'name': 'release',
-          'args': []
+          'args': ['--use-lto']
       },
   ]
 

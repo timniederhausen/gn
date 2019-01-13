@@ -154,7 +154,8 @@
     "cmd": [
       "python",
       "-u",
-      "[START_DIR]/gn/build/gen.py"
+      "[START_DIR]/gn/build/gen.py",
+      "--use-lto"
     ],
     "cwd": "[START_DIR]/gn",
     "env": {
