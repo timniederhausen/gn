@@ -2,6 +2,10 @@
 
 [TOC]
 
+Note: the gn repo has been ported from chromium, and the tutorial within this
+document has not yet been updated to reflect this. Building the tutorial files
+will require the chromium tree, even though gn is now independent of chromium.
+
 ## Running GN
 
 You just run `gn` from the command line. There is a script in
@@ -94,7 +98,8 @@ is_component_build = true
 
 ### Adding a build file
 
-Create a `tools/gn/tutorial/BUILD.gn` file and enter the following:
+Create a `tools/gn/tutorial/BUILD.gn` file [in the chromium repo](https://cs.chromium.org/chromium/src/tools/gn/tutorial/) and enter
+the following:
 
 ```
 executable("hello_world") {
@@ -134,9 +139,11 @@ ninja -C out/Default hello_world
 out/Default/hello_world
 ```
 
-GN encourages target names for static libraries that aren't globally
-unique. To build one of these, you can pass the label with no leading
-"//" to ninja:
+You should see "Hello, world." output to the console.
+
+Side note: GN encourages target names for static libraries that aren't globally
+unique. To build one of these, you can pass the label with its path (but no leading
+"//") to ninja:
 
 ```
 ninja -C out/Default tools/gn/tutorial:hello_world
