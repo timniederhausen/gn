@@ -192,12 +192,11 @@ void PrintAllHelp() {
   PrintLongHelp(kDotfile_Help, "dotfile");
   PrintLongHelp(kExecution_Help, "execution");
   PrintLongHelp(kGrammar_Help, "grammar");
-  PrintLongHelp(kInputOutputConversion_Help, "input_conversion");
+  PrintLongHelp(kInputOutputConversion_Help, "io_conversion");
   PrintLongHelp(kLabelPattern_Help, "label_pattern");
   PrintLongHelp(kLabels_Help, "labels");
   PrintLongHelp(kNinjaRules_Help, "ninja_rules");
   PrintLongHelp(kNoGnCheck_Help, "nogncheck");
-  PrintLongHelp(kInputOutputConversion_Help, "output_conversion");
   PrintLongHelp(kRuntimeDeps_Help, "runtime_deps");
   PrintLongHelp(kSourceExpansion_Help, "source_expansion");
 
@@ -331,16 +330,13 @@ int RunHelp(const std::vector<std::string>& args) {
   random_topics["buildargs"] = []() { PrintLongHelp(kBuildArgs_Help); };
   random_topics["dotfile"] = []() { PrintLongHelp(kDotfile_Help); };
   random_topics["grammar"] = []() { PrintLongHelp(kGrammar_Help); };
-  random_topics["input_conversion"] = []() {
+  random_topics["io_conversion"] = []() {
     PrintLongHelp(kInputOutputConversion_Help);
   };
   random_topics["label_pattern"] = []() { PrintLongHelp(kLabelPattern_Help); };
   random_topics["labels"] = []() { PrintLongHelp(kLabels_Help); };
   random_topics["ninja_rules"] = []() { PrintLongHelp(kNinjaRules_Help); };
   random_topics["nogncheck"] = []() { PrintLongHelp(kNoGnCheck_Help); };
-  random_topics["output_conversion"] = []() {
-    PrintLongHelp(kInputOutputConversion_Help);
-  };
   random_topics["runtime_deps"] = []() { PrintLongHelp(kRuntimeDeps_Help); };
   random_topics["source_expansion"] = []() {
     PrintLongHelp(kSourceExpansion_Help);

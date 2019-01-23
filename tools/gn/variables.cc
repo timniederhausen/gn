@@ -1356,14 +1356,15 @@ const char kMetadata_Help[] =
     R"(metadata: Metadata of this target.
 
   Metadata is a collection of keys and values relating to a particular target.
-  Generally, these keys will include three categories of strings: ordinary
-  strings, filenames intended to be rebased according to their particular
-  source directory, and target labels intended to be used as barriers to the
-  walk. Verfication of these categories occurs at walk time, not creation
-  time (since it is not clear until the walk which values are intended for
-  which purpose).
+  Values must be lists, allowing for sane and predictable collection behavior.
+  Generally, these keys will include three types of lists: lists of ordinary
+  strings, lists of filenames intended to be rebased according to their
+  particular source directory, and lists of target labels intended to be used
+  as barriers to the walk. Verfication of these categories occurs at walk time,
+  not creation time (since it is not clear until the walk which values are
+  intended for which purpose).
 
-  Example
+Example
 
   group("doom_melon") {
     metadata = {

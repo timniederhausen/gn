@@ -10,7 +10,7 @@
     *   [check: Check header dependencies.](#cmd_check)
     *   [clean: Cleans the output directory.](#cmd_clean)
     *   [desc: Show lots of insightful information about a target or config.](#cmd_desc)
-    *   [format: Format .gn file.](#cmd_format)
+    *   [format: Format .gn files.](#cmd_format)
     *   [gen: Generate ninja files.](#cmd_gen)
     *   [help: Does what you think.](#cmd_help)
     *   [ls: List matching targets.](#cmd_ls)
@@ -602,7 +602,7 @@
       Shows defines set for the //base:base target, annotated by where
       each one was set from.
 ```
-### <a name="cmd_format"></a>**gn format [\--dump-tree] (\--stdin | &lt;build_file&gt;)**
+### <a name="cmd_format"></a>**gn format [\--dump-tree] (\--stdin | &lt;list of build_files...&gt;)**
 
 ```
   Formats .gn file to a standard format.
@@ -629,9 +629,9 @@
       - Exit code 1: general failure (parse error, etc.)
       - Exit code 2: successful format, but differs from on disk.
 
-  --dump-tree
-      For debugging, dumps the parse tree to stdout and does not update the
-      file or print formatted output.
+  --dump-tree[=( text | json )]
+      Dumps the parse tree to stdout and does not update the file or print
+      formatted output. If no format is specified, text format will be used.
 
   --stdin
       Read input from stdin and write to stdout rather than update a file
@@ -640,7 +640,7 @@
 
 #### **Examples**
 ```
-  gn format //some/BUILD.gn
+  gn format //some/BUILD.gn //some/other/BUILD.gn //and/another/BUILD.gn
   gn format some\\BUILD.gn
   gn format /abspath/some/BUILD.gn
   gn format --stdin
@@ -1573,7 +1573,7 @@
       deps = [ ":b" ]
     }
 
-    group("c") {
+    group("b") {
       metadata = {
         my_files = [ "bar.cpp" ]
         my_barrier = [ ":c" ]
@@ -1655,6 +1655,7 @@
 #### **Variables**
 
 ```
+  contents
   data_keys
   rebase
   walk_keys
@@ -5159,15 +5160,18 @@
 
 ```
   Metadata is a collection of keys and values relating to a particular target.
-  Generally, these keys will include three categories of strings: ordinary
-  strings, filenames intended to be rebased according to their particular
-  source directory, and target labels intended to be used as barriers to the
-  walk. Verfication of these categories occurs at walk time, not creation
-  time (since it is not clear until the walk which values are intended for
-  which purpose).
+  Values must be lists, allowing for sane and predictable collection behavior.
+  Generally, these keys will include three types of lists: lists of ordinary
+  strings, lists of filenames intended to be rebased according to their
+  particular source directory, and lists of target labels intended to be used
+  as barriers to the walk. Verfication of these categories occurs at walk time,
+  not creation time (since it is not clear until the walk which values are
+  intended for which purpose).
+```
 
-  Example
+#### **Example**
 
+```
   group("doom_melon") {
     metadata = {
       # These keys are not built in to GN but are interpreted when consuming
@@ -6349,7 +6353,7 @@
   within the second, and vice versa. Note that this means inherited scopes are
   always unequal by definition.
 ```
-### <a name="input_conversion"></a>**Input and output conversion**
+### <a name="io_conversion"></a>**Input and output conversion**
 
 ```
   Input and output conversions are arguments to file and process functions
@@ -6634,110 +6638,6 @@
   The topic "gn help check" has general information on how checking works and
   advice on fixing problems. Targets can also opt-out of checking, see
   "gn help check_includes".
-```
-### <a name="output_conversion"></a>**Input and output conversion**
-
-```
-  Input and output conversions are arguments to file and process functions
-  that specify how to convert data to or from external formats. The possible
-  values for parameters specifying conversions are:
-
-  "" (the default)
-      input: Discard the result and return None.
-
-      output: If value is a list, then "list lines"; otherwise "value".
-
-  "list lines"
-      input:
-        Return the file contents as a list, with a string for each line. The
-        newlines will not be present in the result. The last line may or may
-        not end in a newline.
-
-        After splitting, each individual line will be trimmed of whitespace on
-        both ends.
-
-      output:
-        Renders the value contents as a list, with a string for each line. The
-        newlines will not be present in the result. The last line will end in
-        with a newline.
-
-  "scope"
-      input:
-        Execute the block as GN code and return a scope with the resulting
-        values in it. If the input was:
-          a = [ "hello.cc", "world.cc" ]
-          b = 26
-        and you read the result into a variable named "val", then you could
-        access contents the "." operator on "val":
-          sources = val.a
-          some_count = val.b
-
-      output:
-        Renders the value contents as a GN code block, reversing the input
-        result above.
-
-  "string"
-      input: Return the file contents into a single string.
-
-      output:
-        Render the value contents into a single string. The output is:
-        a string renders with quotes, e.g. "str"
-        an integer renders as a stringified integer, e.g. "6"
-        a boolean renders as the associated string, e.g. "true"
-        a list renders as a representation of its contents, e.g. "[\"str\", 6]"
-        a scope renders as a GN code block of its values. If the Value was:
-            Value val;
-            val.a = [ "hello.cc", "world.cc" ];
-            val.b = 26
-          the resulting output would be:
-            "{
-                a = [ \"hello.cc\", \"world.cc\" ]
-                b = 26
-            }"
-
-  "value"
-      input:
-        Parse the input as if it was a literal rvalue in a buildfile. Examples of
-        typical program output using this mode:
-          [ "foo", "bar" ]     (result will be a list)
-        or
-          "foo bar"            (result will be a string)
-        or
-          5                    (result will be an integer)
-
-        Note that if the input is empty, the result will be a null value which
-        will produce an error if assigned to a variable.
-
-      output:
-        Render the value contents as a literal rvalue. Strings render with
-        escaped quotes.
-
-  "json"
-      input: Parse the input as a JSON and convert it to equivalent GN rvalue.
-
-      output: Convert the Value to equivalent JSON value.
-
-      The data type mapping is:
-        a string in JSON maps to string in GN
-        an integer in JSON maps to integer in GN
-        a float in JSON is unsupported and will result in an error
-        an object in JSON maps to scope in GN
-        an array in JSON maps to list in GN
-        a boolean in JSON maps to boolean in GN
-        a null in JSON is unsupported and will result in an error
-
-      Nota that the input dictionary keys have to be valid GN identifiers
-      otherwise they will produce an error.
-
-  "trim ..." (input only)
-      Prefixing any of the other transformations with the word "trim" will
-      result in whitespace being trimmed from the beginning and end of the
-      result before processing.
-
-      Examples: "trim string" or "trim list lines"
-
-      Note that "trim value" is useless because the value parser skips
-      whitespace anyway.
 ```
 ### <a name="runtime_deps"></a>**Runtime dependencies**
 
