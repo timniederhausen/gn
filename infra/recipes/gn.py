@@ -69,7 +69,7 @@ def RunSteps(api, repository):
       },
       {
           'name': 'release',
-          'args': ['--use-lto']
+          'args': ['--use-lto', '--use-icf']
       },
   ]
 
