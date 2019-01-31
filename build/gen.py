@@ -593,7 +593,7 @@ def WriteGNNinja(path, platform, host, options, args_list):
 
     win_manifest = os.path.relpath(
       os.path.join(REPO_ROOT, "build/windows.manifest.xml"), options.out_path)
-    ldflags.extend(['/DEBUG', '/MACHINE:x64', '/MANIFEST:EMBED',
+    ldflags.extend(['/DEBUG', '/MANIFEST:EMBED',
                     f'/MANIFESTINPUT:{win_manifest}'])
 
   static_libraries = {
