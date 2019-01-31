@@ -51,6 +51,9 @@ void ActionTargetGenerator::DoRun() {
   if (!FillResponseFileContents())
     return;
 
+  if (!FillDescription())
+    return;
+
   if (!FillOutputs(output_type_ == Target::ACTION_FOREACH))
     return;
 
@@ -139,6 +142,19 @@ bool ActionTargetGenerator::FillResponseFileContents() {
           &IsValidSourceSubstitution, value->origin(), err_))
     return false;
 
+  return true;
+}
+
+bool ActionTargetGenerator::FillDescription() {
+  const Value* value = scope_->GetValue(variables::kDescription, true);
+  if (!value)
+    return true;
+
+  SubstitutionPattern description;
+  if (!description.Parse(*value, err_))
+    return false;
+
+  target_->action_values().set_description(description);
   return true;
 }
 

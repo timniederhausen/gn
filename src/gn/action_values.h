@@ -52,6 +52,13 @@ class ActionValues {
   }
   bool uses_rsp_file() const { return !rsp_file_contents_.list().empty(); }
 
+  // Command description.
+  const SubstitutionPattern& description() const { return description_; }
+  bool has_description() const { return !description_.ranges().empty(); }
+  void set_description(const SubstitutionPattern& description) {
+    description_ = description;
+  }
+
   // Pool option
   const LabelPtrPair<Pool>& pool() const { return pool_; }
   void set_pool(LabelPtrPair<Pool> pool) { pool_ = std::move(pool); }
@@ -62,6 +69,7 @@ class ActionValues {
   SubstitutionList outputs_;
   SubstitutionPattern depfile_;
   SubstitutionList rsp_file_contents_;
+  SubstitutionPattern description_;
   LabelPtrPair<Pool> pool_;
 
   DISALLOW_COPY_AND_ASSIGN(ActionValues);
