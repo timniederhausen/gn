@@ -473,3 +473,55 @@ TEST(NinjaActionTargetWriter, NoTransitiveHardDeps) {
     EXPECT_EQ(expected_linux, out.str());
   }
 }
+
+TEST(NinjaActionTargetWriter, ForEachWithDescription) {
+  TestWithScope setup;
+  Err err;
+
+  setup.build_settings()->SetBuildDir(SourceDir("//out/Debug/"));
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::ACTION_FOREACH);
+
+  target.sources().push_back(SourceFile("//foo/input1.txt"));
+  target.action_values().set_script(SourceFile("//foo/script.py"));
+
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  SubstitutionPattern description;
+  ASSERT_TRUE(
+      description.Parse("COMPILE {{source}}", nullptr, &err));
+  target.action_values().set_description(description);
+
+  // Make sure we get interesting substitutions for both the args and the
+  // response file contents.
+  target.action_values().args() = SubstitutionList::MakeForTest(
+      "{{source}}",
+      "{{source_file_part}}");
+
+  target.action_values().outputs() = SubstitutionList::MakeForTest(
+      "//out/Debug/{{source_name_part}}.out");
+
+  setup.build_settings()->set_python_path(base::FilePath(FILE_PATH_LITERAL(
+      "/usr/bin/python")));
+
+  std::ostringstream out;
+  NinjaActionTargetWriter writer(&target, out);
+  writer.Run();
+
+  const char expected[] =
+      "rule __foo_bar___rule\n"
+      // These come from the args.
+      "  command = /usr/bin/python ../../foo/script.py ${in} "
+          "${source_file_part}\n"
+      "  description = COMPILE ${in}\n"
+      "  restat = 1\n"
+      "\n"
+      "build input1.out: __foo_bar___rule ../../foo/input1.txt"
+          " | ../../foo/script.py\n"
+      // Substitution for the args.
+      "  source_file_part = input1.txt\n"
+      "\n"
+      "build obj/foo/bar.stamp: stamp input1.out\n";
+  EXPECT_EQ(expected, out.str());
+}

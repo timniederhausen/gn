@@ -202,6 +202,10 @@ extern const char kExterns[];
 extern const char kExterns_HelpShort[];
 extern const char kExterns_Help[];
 
+extern const char kDescription[];
+extern const char kDescription_HelpShort[];
+extern const char kDescription_Help[];
+
 extern const char kFriend[];
 extern const char kFriend_HelpShort[];
 extern const char kFriend_Help[];

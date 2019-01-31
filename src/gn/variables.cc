@@ -1134,6 +1134,30 @@ Examples
   `--extern bar=path/to/bar.rlib`.
 )";
 
+const char kDescription[] = "description";
+const char kDescription_HelpShort[] =
+    "description: [string] Command description for actions.";
+const char kDescription_Help[] =
+    R"(description: Command description for actions."
+
+  A string, possibly containing substitution patterns.
+
+  If nonempty, this string specifies the command description of the
+  current action or action_foreach target (i.e. what is shown when
+  the action's script is executed).
+
+Example
+
+  action_foreach("myscript_target") {
+    script = "myscript.py"
+    sources = [ ... ]
+
+    description = "Compiling {{source}}"
+
+    args = [ "{{source}}" ]
+  }
+)";
+
 const char kFriend[] = "friend";
 const char kFriend_HelpShort[] =
     "friend: [label pattern list] Allow targets to include private headers.";
@@ -2251,6 +2275,7 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(Depfile)
     INSERT_VARIABLE(Deps)
     INSERT_VARIABLE(Externs)
+    INSERT_VARIABLE(Description)
     INSERT_VARIABLE(Friend)
     INSERT_VARIABLE(FrameworkDirs)
     INSERT_VARIABLE(Frameworks)
