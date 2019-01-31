@@ -55,12 +55,20 @@ class ActionValues {
   }
   bool uses_rsp_file() const { return !rsp_file_contents_.list().empty(); }
 
+  // Command description.
+  const SubstitutionPattern& description() const { return description_; }
+  bool has_description() const { return !description_.ranges().empty(); }
+  void set_description(const SubstitutionPattern& description) {
+    description_ = description;
+  }
+
  private:
   SourceFile script_;
   SubstitutionList args_;
   SubstitutionList outputs_;
   SubstitutionPattern depfile_;
   SubstitutionList rsp_file_contents_;
+  SubstitutionPattern description_;
   std::string mnemonic_;
 
   ActionValues(const ActionValues&) = delete;

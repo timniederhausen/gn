@@ -29,7 +29,7 @@
   "  Action variables: args, bridge_header, configs, data, depfile,\n"         \
   "                    framework_dirs, inputs, mnemonic, module_deps,\n"       \
   "                    module_name, outputs*, pool, response_file_contents,\n" \
-  "                    script*, sources\n"
+  "                    script*, sources, description\n"
 
 namespace functions {
 

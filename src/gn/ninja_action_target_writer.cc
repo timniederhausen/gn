@@ -182,10 +182,22 @@ std::string NinjaActionTargetWriter::WriteRuleDefinition() {
     SubstitutionWriter::WriteWithNinjaVariables(arg, args_escape_options, out_);
   }
   out_ << std::endl;
-  auto mnemonic = target_->action_values().mnemonic();
-  if (mnemonic.empty())
-    mnemonic = "ACTION";
-  out_ << "  description = " << mnemonic << " " << target_label << std::endl;
+
+  if (target_->action_values().has_description()) {
+    EscapeOptions escape_options;
+    escape_options.mode = ESCAPE_NINJA_PREFORMATTED_COMMAND;
+
+    out_ << "  description = ";
+      SubstitutionWriter::WriteWithNinjaVariables(
+          target_->action_values().description(), escape_options, out_);
+    out_ << std::endl;
+  } else {
+    auto mnemonic = target_->action_values().mnemonic();
+    if (mnemonic.empty())
+      mnemonic = "ACTION";
+    out_ << "  description = " << mnemonic << " " << target_label << std::endl;
+  }
+
   out_ << "  restat = 1" << std::endl;
   const Tool* tool =
       target_->toolchain()->GetTool(GeneralTool::kGeneralToolAction);
