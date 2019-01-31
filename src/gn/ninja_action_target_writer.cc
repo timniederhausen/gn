@@ -144,7 +144,19 @@ std::string NinjaActionTargetWriter::WriteRuleDefinition() {
     SubstitutionWriter::WriteWithNinjaVariables(arg, args_escape_options, out_);
   }
   out_ << std::endl;
-  out_ << "  description = ACTION " << target_label << std::endl;
+
+  if (target_->action_values().has_description()) {
+    EscapeOptions escape_options;
+    escape_options.mode = ESCAPE_NINJA_PREFORMATTED_COMMAND;
+
+    out_ << "  description = ";
+      SubstitutionWriter::WriteWithNinjaVariables(
+          target_->action_values().description(), escape_options, out_);
+    out_ << std::endl;
+  } else {
+    out_ << "  description = ACTION " << target_label << std::endl;
+  }
+
   out_ << "  restat = 1" << std::endl;
   const Tool* tool = target_->toolchain()->GetTool(GeneralTool::kGeneralToolAction);
   if (tool && tool->pool().ptr) {
