@@ -6,7 +6,7 @@
       "-root",
       "[CACHE]/macos_sdk",
       "-ensure-file",
-      "infra/tools/mac_toolchain/${platform} git_revision:796d2b92cff93fc2059623ce0a66284373ceea0a",
+      "infra/tools/mac_toolchain/${platform} git_revision:434f5462a77e7103f9d610fa5cabc426bb21502e",
       "-json-output",
       "/path/to/tmp/json"
     ],
@@ -17,7 +17,7 @@
       "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
       "@@@STEP_LOG_LINE@json.output@    \"\": [@@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",
-      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-git_revision:796\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-git_revision:434\", @@@",
       "@@@STEP_LOG_LINE@json.output@        \"package\": \"infra/tools/mac_toolchain/${platform}\"@@@",
       "@@@STEP_LOG_LINE@json.output@      }@@@",
       "@@@STEP_LOG_LINE@json.output@    ]@@@",
@@ -33,7 +33,7 @@
       "-kind",
       "mac",
       "-xcode-version",
-      "9c40b",
+      "10b61",
       "-output-dir",
       "[CACHE]/macos_sdk/XCode.app"
     ],
