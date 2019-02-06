@@ -39,6 +39,8 @@ class Platform(object):
       self._platform = 'aix'
     elif self._platform.startswith('fuchsia'):
       self._platform = 'fuchsia'
+    elif self._platform.startswith('freebsd'):
+      self._platform = 'freebsd'
 
   @staticmethod
   def known_platforms():
@@ -66,7 +68,7 @@ class Platform(object):
     return self._platform == 'aix'
 
   def is_posix(self):
-    return self._platform in ['linux', 'darwin', 'aix']
+    return self._platform in ['linux', 'freebsd', 'darwin', 'aix']
 
 
 def main(argv):
@@ -169,6 +171,7 @@ def WriteGenericNinja(path, static_libraries, executables,
       'msvc': 'build_win.ninja.template',
       'darwin': 'build_mac.ninja.template',
       'linux': 'build_linux.ninja.template',
+      'freebsd': 'build_linux.ninja.template',
       'aix': 'build_aix.ninja.template',
   }[platform.platform()])
 
@@ -320,18 +323,18 @@ def WriteGNNinja(path, platform, host, options):
           '-static-libstdc++',
           '-Wl,--as-needed',
       ])
-      libs.extend([
-          # These are needed by libc++.
-          '-ldl',
-          '-lpthread',
-      ])
+      # This is needed by libc++.
+      libs.append('-ldl')
     elif platform.is_darwin():
       min_mac_version_flag = '-mmacosx-version-min=10.9'
       cflags.append(min_mac_version_flag)
       ldflags.append(min_mac_version_flag)
     elif platform.is_aix():
       cflags_cc.append('-maix64')
-      ldflags.extend(['-maix64', '-pthread'])
+      ldflags.append('-maix64')
+
+    if platform.is_posix():
+      ldflags.append('-pthread')
 
     if options.use_lto:
       cflags.extend(['-flto', '-fwhole-program-vtables'])
