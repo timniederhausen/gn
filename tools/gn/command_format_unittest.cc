@@ -23,8 +23,8 @@ using FormatTest = TestWithScheduler;
         GetExePath().DirName().Append(FILE_PATH_LITERAL(".."));             \
     base::SetCurrentDirectory(src_dir);                                     \
     EXPECT_TRUE(commands::FormatFileToString(                               \
-        &setup, SourceFile("//tools/gn/format_test_data/" #n ".gn"), false, \
-        &out));                                                             \
+        &setup, SourceFile("//tools/gn/format_test_data/" #n ".gn"),        \
+        commands::TreeDumpMode::kInactive, &out));                          \
     ASSERT_TRUE(base::ReadFileToString(                                     \
         base::FilePath(FILE_PATH_LITERAL("tools/gn/format_test_data/")      \
                            FILE_PATH_LITERAL(#n)                            \
@@ -33,7 +33,8 @@ using FormatTest = TestWithScheduler;
     EXPECT_EQ(expected, out);                                               \
     /* Make sure formatting the output doesn't cause further changes. */    \
     std::string out_again;                                                  \
-    EXPECT_TRUE(commands::FormatStringToString(out, false, &out_again));    \
+    EXPECT_TRUE(commands::FormatStringToString(out,                         \
+        commands::TreeDumpMode::kInactive, &out_again));                    \
     ASSERT_EQ(out, out_again);                                              \
   }
 

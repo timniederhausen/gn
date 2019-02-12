@@ -527,7 +527,7 @@ bool Setup::SaveArgsToFile() {
   base::CreateDirectory(build_arg_file.DirName());
 
   std::string contents = args_input_file_->contents();
-  commands::FormatStringToString(contents, false, &contents);
+  commands::FormatStringToString(contents, commands::TreeDumpMode::kInactive, &contents);
 #if defined(OS_WIN)
   // Use Windows lineendings for this file since it will often open in
   // Notepad which can't handle Unix ones.

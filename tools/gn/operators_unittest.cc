@@ -40,7 +40,9 @@ class TestParseNode : public ParseNode {
                           const std::string& help) const override {
     return Err(this, msg);
   }
-  void Print(std::ostream& out, int indent) const override {}
+  base::Value GetJSONNode() const override {
+    return base::Value();
+  }
 
  private:
   Value value_;

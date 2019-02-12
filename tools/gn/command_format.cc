@@ -10,6 +10,7 @@
 
 #include "base/command_line.h"
 #include "base/files/file_util.h"
+#include "base/json/json_writer.h"
 #include "base/macros.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
@@ -26,6 +27,8 @@ namespace commands {
 
 const char kSwitchDryRun[] = "dry-run";
 const char kSwitchDumpTree[] = "dump-tree";
+const char kSwitchDumpTreeText[] = "text";
+const char kSwitchDumpTreeJSON[] = "json";
 const char kSwitchStdin[] = "stdin";
 
 const char kFormat[] = "format";
@@ -55,9 +58,9 @@ Arguments
       - Exit code 1: general failure (parse error, etc.)
       - Exit code 2: successful format, but differs from on disk.
 
-  --dump-tree
-      For debugging, dumps the parse tree to stdout and does not update the
-      file or print formatted output.
+  --dump-tree[=( text | json )]
+      Dumps the parse tree to stdout and does not update the file or print
+      formatted output. If no format is specified, text format will be used.
 
   --stdin
       Read input from stdin and write to stdout rather than update a file
@@ -1059,12 +1062,19 @@ bool Printer::ListWillBeMultiline(
   return false;
 }
 
-void DoFormat(const ParseNode* root, bool dump_tree, std::string* output) {
-  if (dump_tree) {
+void DoFormat(const ParseNode* root, TreeDumpMode dump_tree,
+              std::string* output) {
+  if (dump_tree == TreeDumpMode::kPlainText) {
     std::ostringstream os;
-    root->Print(os, 0);
+    RenderToText(root->GetJSONNode(), 0, os);
     fprintf(stderr, "%s", os.str().c_str());
+  } else if (dump_tree == TreeDumpMode::kJSON) {
+    std::string os;
+    base::JSONWriter::WriteWithOptions(root->GetJSONNode(),
+        base::JSONWriter::OPTIONS_PRETTY_PRINT, &os);
+    fprintf(stderr, "%s", os.c_str());
   }
+
   Printer pr;
   pr.Block(root);
   *output = pr.String();
@@ -1091,7 +1101,7 @@ std::string ReadStdin() {
 
 bool FormatFileToString(Setup* setup,
                         const SourceFile& file,
-                        bool dump_tree,
+                        TreeDumpMode dump_tree,
                         std::string* output) {
   Err err;
   const ParseNode* parse_node =
@@ -1106,7 +1116,7 @@ bool FormatFileToString(Setup* setup,
 }
 
 bool FormatStringToString(const std::string& input,
-                          bool dump_tree,
+                          TreeDumpMode dump_tree,
                           std::string* output) {
   SourceFile source_file;
   InputFile file(source_file);
@@ -1133,8 +1143,23 @@ bool FormatStringToString(const std::string& input,
 int RunFormat(const std::vector<std::string>& args) {
   bool dry_run =
       base::CommandLine::ForCurrentProcess()->HasSwitch(kSwitchDryRun);
-  bool dump_tree =
-      base::CommandLine::ForCurrentProcess()->HasSwitch(kSwitchDumpTree);
+  TreeDumpMode dump_tree = TreeDumpMode::kInactive;
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(kSwitchDumpTree)) {
+    std::string tree_type = base::CommandLine::ForCurrentProcess()->
+        GetSwitchValueASCII(kSwitchDumpTree);
+    if (tree_type == kSwitchDumpTreeJSON) {
+      dump_tree = TreeDumpMode::kJSON;
+    } else if (tree_type.empty() || tree_type == kSwitchDumpTreeText) {
+      dump_tree = TreeDumpMode::kPlainText;
+    } else {
+      Err(Location(),
+          tree_type + " is an invalid value for --dump-tree. Specify "
+          "\"" + kSwitchDumpTreeText + "\" or \"" + kSwitchDumpTreeJSON +
+          "\".\n")
+          .PrintToStdout();
+      return 1;
+    }
+  }
   bool from_stdin =
       base::CommandLine::ForCurrentProcess()->HasSwitch(kSwitchStdin);
 
@@ -1180,7 +1205,7 @@ int RunFormat(const std::vector<std::string>& args) {
 
     std::string output_string;
     if (FormatFileToString(&setup, file, dump_tree, &output_string)) {
-      if (!dump_tree) {
+      if (dump_tree == TreeDumpMode::kInactive) {
         // Update the file in-place.
         base::FilePath to_write = setup.build_settings().GetFullPath(file);
         std::string original_contents;
