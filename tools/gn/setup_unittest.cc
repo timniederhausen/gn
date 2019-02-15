@@ -14,7 +14,8 @@
 using SetupTest = TestWithScheduler;
 
 static void WriteFile(const base::FilePath& file, const std::string& data) {
-  CHECK(data.size() == base::WriteFile(file, data.data(), data.size()));
+  CHECK_EQ(static_cast<int>(data.size()),  // Way smaller than INT_MAX.
+           base::WriteFile(file, data.data(), data.size()));
 }
 
 TEST_F(SetupTest, DotGNFileIsGenDep) {
