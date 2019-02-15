@@ -334,7 +334,7 @@ def WriteGNNinja(path, platform, host, options):
       ldflags.append('-maix64')
 
     if platform.is_posix():
-      ldflags.append('-pthread')
+      ldflags.append('-lpthread')
 
     if options.use_lto:
       cflags.extend(['-flto', '-fwhole-program-vtables'])
