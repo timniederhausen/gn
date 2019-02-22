@@ -81,7 +81,7 @@ def RunSteps(api, repository):
           'CXX': cipd_dir.join('bin', 'clang++'),
           'AR': cipd_dir.join('bin', 'llvm-ar'),
           'CFLAGS': sysroot,
-          'LDFLAGS': '%s -static-libstdc++ -ldl -lpthread' % sysroot,
+          'LDFLAGS': sysroot,
       }
     elif api.platform.is_mac:
       sysroot = '--sysroot=%s' % api.step(
