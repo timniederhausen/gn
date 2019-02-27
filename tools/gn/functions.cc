@@ -297,7 +297,24 @@ const char kConfig_Help[] =
    4. All dependent configs from a breadth-first traversal of the dependency
       tree in the order that the targets appear in "deps".
 
+More background
+
+  Configs solve a problem where the build system needs to have a higher-level
+  understanding of various compiler settings. For example, some compiler flags
+  have to appear in a certain order relative to each other, some settings like
+  defines and flags logically go together, and the build system needs to
+  de-duplicate flags even though raw command-line parameters can't always be
+  operated on in that way.
+
+  The config gives a name to a group of settings that can then be reasoned
+  about by GN. GN can know that configs with the same label are the same thing
+  so can be de-duplicated. It allows related settings to be grouped so they
+  are added or removed as a unit. And it allows targets to refer to settings
+  with conceptual names ("no_rtti", "enable_exceptions", etc.) rather than
+  having to hard-coding every compiler's flags each time they are referred to.
+
 Variables valid in a config definition
+
 )"
 
     CONFIG_VALUES_VARS_HELP
