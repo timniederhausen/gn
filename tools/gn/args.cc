@@ -298,6 +298,8 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
   os = "freebsd";
 #elif defined(OS_AIX)
   os = "aix";
+#elif defined(OS_OPENBSD)
+  os = "openbsd";
 #else
 #error Unknown OS type.
 #endif
