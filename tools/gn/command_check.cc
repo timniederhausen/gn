@@ -215,9 +215,10 @@ int RunCheck(const std::vector<std::string>& args) {
 
   const base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
   bool force = cmdline->HasSwitch("force");
+  bool check_generated = cmdline->HasSwitch("check-generated");
 
   if (!CheckPublicHeaders(&setup->build_settings(), all_targets,
-                          targets_to_check, force))
+                          targets_to_check, force, check_generated))
     return 1;
 
   if (!base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kQuiet)) {
@@ -237,11 +238,11 @@ int RunCheck(const std::vector<std::string>& args) {
 bool CheckPublicHeaders(const BuildSettings* build_settings,
                         const std::vector<const Target*>& all_targets,
                         const std::vector<const Target*>& to_check,
-                        bool force_check) {
+                        bool force_check, bool check_generated) {
   ScopedTrace trace(TraceItem::TRACE_CHECK_HEADERS, "Check headers");
 
   scoped_refptr<HeaderChecker> header_checker(
-      new HeaderChecker(build_settings, all_targets));
+      new HeaderChecker(build_settings, all_targets, check_generated));
 
   std::vector<Err> header_errors;
   header_checker->Run(to_check, force_check, &header_errors);

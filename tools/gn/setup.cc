@@ -418,7 +418,7 @@ bool Setup::RunPostMessageLoop(const base::CommandLine& cmdline) {
     }
 
     if (!commands::CheckPublicHeaders(&build_settings_, all_targets, to_check,
-                                      false)) {
+                                      false, false)) {
       return false;
     }
   }
