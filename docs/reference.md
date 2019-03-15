@@ -317,7 +317,7 @@
     given arguments set (which may affect the values of other
     arguments).
 ```
-### <a name="cmd_check"></a>**gn check &lt;out_dir&gt; [&lt;label_pattern&gt;] [\--force]**
+### <a name="cmd_check"></a>**gn check &lt;out_dir&gt; [&lt;label_pattern&gt;] [\--force] [\--check-generated]**
 
 ```
   GN's include header checker validates that the includes for C-like source
@@ -338,6 +338,11 @@
   --force
       Ignores specifications of "check_includes = false" and checks all
       target's files that match the target label.
+
+  --check-generated
+      Generated files are normally not checked since they do not exist
+      until after a build. With this flag, those generated files that
+      can be found on disk are also checked.
 ```
 
 #### **What gets checked**
@@ -354,6 +359,9 @@
 
     - GN opens all C-like source files in the targets to be checked and scans
       the top for includes.
+
+    - Generated files (that might not exist yet) are ignored unless
+      the --check-generated flag is provided.
 
     - Includes with a "nogncheck" annotation are skipped (see
       "gn help nogncheck").
@@ -1865,7 +1873,26 @@
       tree in the order that the targets appear in "deps".
 ```
 
+#### **More background**
+
+```
+  Configs solve a problem where the build system needs to have a higher-level
+  understanding of various compiler settings. For example, some compiler flags
+  have to appear in a certain order relative to each other, some settings like
+  defines and flags logically go together, and the build system needs to
+  de-duplicate flags even though raw command-line parameters can't always be
+  operated on in that way.
+
+  The config gives a name to a group of settings that can then be reasoned
+  about by GN. GN can know that configs with the same label are the same thing
+  so can be de-duplicated. It allows related settings to be grouped so they
+  are added or removed as a unit. And it allows targets to refer to settings
+  with conceptual names ("no_rtti", "enable_exceptions", etc.) rather than
+  having to hard-coding every compiler's flags each time they are referred to.
+```
+
 #### **Variables valid in a config definition**
+
 ```
   Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
          asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
@@ -2303,7 +2330,7 @@
   # result will be "//foo/bar"
 
   # Extract the source-absolute directory name,
-  result = get_path_info(get_path_info(path, "dir"), "abspath"
+  result = get_path_info(get_path_info(path, "dir"), "abspath")
 ```
 ### <a name="func_get_target_outputs"></a>**get_target_outputs**: [file list] Get the list of outputs from a target.
 
