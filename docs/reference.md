@@ -446,10 +446,12 @@
   Deletes the contents of the output directory except for args.gn and
   creates a Ninja build environment sufficient to regenerate the build.
 ```
-### <a name="cmd_desc"></a>**gn desc &lt;out_dir&gt; &lt;label or pattern&gt; [&lt;what to show&gt;] [\--blame] "**
-#### **[\--format=json]**
+### <a name="cmd_desc"></a>**gn desc**
 
 ```
+  gn desc <out_dir> <label or pattern> [<what to show>] [--blame]
+          [--format=json]
+
   Displays information about a given target or config. The build parameters
   will be taken for the build in the given <out_dir>.
 
@@ -878,9 +880,11 @@
       Lists all variants of the target //base:base (it may be referenced
       in multiple toolchains).
 ```
-### <a name="cmd_meta"></a>**gn meta &lt;out_dir&gt; &lt;target&gt;* \--data=&lt;key&gt;[,&lt;key&gt;*]* [\--walk=&lt;key&gt;[,&lt;key&gt;*]*]**
+### <a name="cmd_meta"></a>**gn meta**
+
 ```
-       [--rebase=<dest dir>]
+  gn meta <out_dir> <target>* --data=<key>[,<key>*]* [--walk=<key>[,<key>*]*]
+          [--rebase=<dest dir>]
 
   Lists collected metaresults of all given targets for the given data key(s),
   collecting metadata dependencies as specified by the given walk key(s).
@@ -978,9 +982,11 @@
 ```
   gn path out/Default //base //tools/gn
 ```
-### <a name="cmd_refs"></a>**gn refs &lt;out_dir&gt; (&lt;label_pattern&gt;|&lt;label&gt;|&lt;file&gt;|@&lt;response_file&gt;)***
+### <a name="cmd_refs"></a>**gn refs**
+
 ```
-        [--all] [--all-toolchains] [--as=...] [--testonly=...] [--type=...]
+  gn refs <out_dir> (<label_pattern>|<label>|<file>|@<response_file>)*
+          [--all] [--all-toolchains] [--as=...] [--testonly=...] [--type=...]
 
   Finds reverse dependencies (which targets reference something). The input is
   a list containing:
@@ -4281,10 +4287,9 @@
     ]
   }
 ```
-### <a name="var_bundle_executable_dir"></a>**bundle_executable_dir**: Expansion of {{bundle_executable_dir}} in
-```
-                              create_bundle.
+### <a name="var_bundle_executable_dir"></a>**bundle_executable_dir**: Expansion of {{bundle_executable_dir}} in create_bundle.
 
+```
   A string corresponding to a path in $root_build_dir.
 
   This string is used by the "create_bundle" target to expand the
@@ -4304,9 +4309,10 @@
 
   See "gn help bundle_root_dir" for examples.
 ```
-### <a name="var_bundle_resources_dir"></a>**bundle_resources_dir**: Expansion of {{bundle_resources_dir}} in
+### <a name="var_bundle_resources_dir"></a>**bundle_resources_dir**
+
 ```
-                             create_bundle.
+  bundle_resources_dir: Expansion of {{bundle_resources_dir}} in create_bundle.
 
   A string corresponding to a path in $root_build_dir.
 
