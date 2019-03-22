@@ -518,11 +518,7 @@ bool VisualStudioWriter::WriteProjectFileContents(
     std::unique_ptr<XmlElementWriter> properties =
         project.SubElement("PropertyGroup");
     {
-      std::unique_ptr<XmlElementWriter> out_dir =
-          properties->SubElement("OutDir");
-      path_output.WriteDir(out_dir->StartContent(false),
-                           build_settings_->build_dir(),
-                           PathOutput::DIR_INCLUDE_LAST_SLASH);
+      properties->SubElement("OutDir")->Text("$(SolutionDir)");
     }
     properties->SubElement("TargetName")->Text("$(ProjectName)");
     if (target->output_type() != Target::GROUP) {
