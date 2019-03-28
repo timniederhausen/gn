@@ -28,6 +28,10 @@ SourceFileType GetSourceFileType(const SourceFile& file) {
     return SOURCE_O;
   if (extension == "def")
     return SOURCE_DEF;
+  if (extension == "rs")
+    return SOURCE_RS;
+  if (extension == "go")
+    return SOURCE_GO;
 
   return SOURCE_UNKNOWN;
 }

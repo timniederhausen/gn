@@ -32,6 +32,8 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
     }
 
     bool CSourceUsed();
+    bool RustSourceUsed();
+    bool GoSourceUsed();
 
    private:
     bool flags_[static_cast<int>(SOURCE_NUMTYPES)];

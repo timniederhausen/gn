@@ -22,6 +22,9 @@ enum SourceFileType {
   SOURCE_O,  // Object files can be inputs, too. Also counts .obj.
   SOURCE_DEF,
 
+  SOURCE_RS,
+  SOURCE_GO,
+
   // Must be last.
   SOURCE_NUMTYPES,
 };
