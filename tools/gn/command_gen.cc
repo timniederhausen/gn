@@ -441,6 +441,10 @@ int RunGen(const std::vector<std::string>& args) {
 
   // Deliberately leaked to avoid expensive process teardown.
   Setup* setup = new Setup();
+  // Generate an empty args.gn file if it does not exists
+  if (!base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kArgs)) {
+    setup->set_gen_empty_args(true);
+  }
   if (!setup->DoSetup(args[0], true))
     return 1;
 
