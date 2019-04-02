@@ -11,23 +11,62 @@
 #include "base/macros.h"
 #include "tools/gn/label.h"
 #include "tools/gn/label_ptr.h"
+#include "tools/gn/scope.h"
+#include "tools/gn/source_file_type.h"
 #include "tools/gn/substitution_list.h"
 #include "tools/gn/substitution_pattern.h"
 
 class ParseNode;
 class Pool;
+class Target;
+class Toolchain;
 
+class CTool;
+class GeneralTool;
+
+// To add a new Tool category, create a subclass implementing SetComplete()
+// Add a new category to ToolCategories
+// Add a GetAs* function
 class Tool {
  public:
-  enum DepsFormat { DEPS_GCC = 0, DEPS_MSVC = 1 };
+  static const char* kToolNone;
 
-  enum PrecompiledHeaderType { PCH_NONE = 0, PCH_GCC = 1, PCH_MSVC = 2 };
+  virtual ~Tool();
 
-  Tool();
-  ~Tool();
+  // Manual RTTI and required functions ---------------------------------------
+  //
+  // To implement a new tool category to compile binaries in a different way,
+  // inherit this class, implement the following functions, and add the
+  // appropriate ToolTypes and RTTI getters. New tools will also need to
+  // implement a corresponding class inheriting NinjaBinaryTargetWriter that
+  // does the actual rule writing.
+
+  // Initialize tool from a scope. Child classes should override this function
+  // and call the parent.
+  bool InitTool(Scope* block_scope, Toolchain* toolchain, Err* err);
+
+  // Validate the char* passed to the creation.
+  virtual bool ValidateName(const char* name) const = 0;
+
+  // Called when the toolchain is saving this tool, after everything is filled
+  // in.
+  virtual void SetComplete() = 0;
+
+  // Validate substitutions in this tool.
+  virtual bool ValidateSubstitution(SubstitutionType sub_type) const = 0;
+
+  // Manual RTTI
+  virtual CTool* AsC();
+  virtual const CTool* AsC() const;
+  virtual GeneralTool* AsGeneral();
+  virtual const GeneralTool* AsGeneral() const;
+
+  // Basic information ---------------------------------------------------------
 
   const ParseNode* defined_from() const { return defined_from_; }
   void set_defined_from(const ParseNode* df) { defined_from_ = df; }
+
+  const char* name() const { return name_; }
 
   // Getters/setters ----------------------------------------------------------
   //
@@ -66,54 +105,16 @@ class Tool {
     depfile_ = std::move(df);
   }
 
-  DepsFormat depsformat() const { return depsformat_; }
-  void set_depsformat(DepsFormat f) {
-    DCHECK(!complete_);
-    depsformat_ = f;
-  }
-
-  PrecompiledHeaderType precompiled_header_type() const {
-    return precompiled_header_type_;
-  }
-  void set_precompiled_header_type(PrecompiledHeaderType pch_type) {
-    precompiled_header_type_ = pch_type;
-  }
-
   const SubstitutionPattern& description() const { return description_; }
   void set_description(SubstitutionPattern desc) {
     DCHECK(!complete_);
     description_ = std::move(desc);
   }
 
-  const std::string& lib_switch() const { return lib_switch_; }
-  void set_lib_switch(std::string s) {
-    DCHECK(!complete_);
-    lib_switch_ = std::move(s);
-  }
-
-  const std::string& lib_dir_switch() const { return lib_dir_switch_; }
-  void set_lib_dir_switch(std::string s) {
-    DCHECK(!complete_);
-    lib_dir_switch_ = std::move(s);
-  }
-
   const SubstitutionList& outputs() const { return outputs_; }
   void set_outputs(SubstitutionList out) {
     DCHECK(!complete_);
     outputs_ = std::move(out);
-  }
-
-  // Should match files in the outputs() if nonempty.
-  const SubstitutionPattern& link_output() const { return link_output_; }
-  void set_link_output(SubstitutionPattern link_out) {
-    DCHECK(!complete_);
-    link_output_ = std::move(link_out);
-  }
-
-  const SubstitutionPattern& depend_output() const { return depend_output_; }
-  void set_depend_output(SubstitutionPattern dep_out) {
-    DCHECK(!complete_);
-    depend_output_ = std::move(dep_out);
   }
 
   const SubstitutionList& runtime_outputs() const { return runtime_outputs_; }
@@ -153,15 +154,8 @@ class Tool {
 
   // Other functions ----------------------------------------------------------
 
-  // Called when the toolchain is saving this tool, after everything is filled
-  // in.
-  void SetComplete();
-
-  // Returns true if this tool has separate outputs for dependency tracking
-  // and linking.
-  bool has_separate_solink_files() const {
-    return !link_output_.empty() || !depend_output_.empty();
-  }
+  // Function for the above override to call to complete the tool.
+  void SetToolComplete();
 
   // Substitutions required by this tool.
   const SubstitutionBits& substitution_bits() const {
@@ -169,23 +163,56 @@ class Tool {
     return substitution_bits_;
   }
 
-  bool OnResolved(Err* err);
+  // Create a tool based on given features.
+  static std::unique_ptr<Tool> CreateTool(const std::string& name);
+  static std::unique_ptr<Tool> CreateTool(const std::string& name,
+                                          Scope* scope,
+                                          Toolchain* toolchain,
+                                          Err* err);
 
- private:
+  static const char* GetToolTypeForSourceType(SourceFileType type);
+  static const char* GetToolTypeForTargetFinalOutput(const Target* target);
+
+ protected:
+  explicit Tool(const char* t);
+
+  // Initialization functions -------------------------------------------------
+  //
+  // Initialization methods used by InitTool(). If successful, will set the
+  // field and return true, otherwise will return false. Must be called before
+  // SetComplete().
+  bool IsPatternInOutputList(const SubstitutionList& output_list,
+                             const SubstitutionPattern& pattern) const;
+  bool ValidateSubstitutionList(const std::vector<SubstitutionType>& list,
+                                const Value* origin,
+                                Err* err) const;
+  bool ValidateOutputs(Err* err) const;
+  bool ReadBool(Scope* scope, const char* var, bool* field, Err* err);
+  bool ReadString(Scope* scope, const char* var, std::string* field, Err* err);
+  bool ReadPattern(Scope* scope,
+                   const char* var,
+                   SubstitutionPattern* field,
+                   Err* err);
+  bool ReadPatternList(Scope* scope,
+                       const char* var,
+                       SubstitutionList* field,
+                       Err* err);
+  bool ReadLabel(Scope* scope,
+                 const char* var,
+                 const Label& current_toolchain,
+                 LabelPtrPair<Pool>* field,
+                 Err* err);
+  bool ReadOutputExtension(Scope* scope, Err* err);
+
   const ParseNode* defined_from_;
+  const char* name_;
 
   SubstitutionPattern command_;
   std::string default_output_extension_;
   SubstitutionPattern default_output_dir_;
   SubstitutionPattern depfile_;
-  DepsFormat depsformat_;
-  PrecompiledHeaderType precompiled_header_type_;
   SubstitutionPattern description_;
-  std::string lib_switch_;
-  std::string lib_dir_switch_;
   SubstitutionList outputs_;
-  SubstitutionPattern link_output_;
-  SubstitutionPattern depend_output_;
   SubstitutionList runtime_outputs_;
   std::string output_prefix_;
   bool restat_;

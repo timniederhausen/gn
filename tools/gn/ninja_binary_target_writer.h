@@ -6,6 +6,7 @@
 #define TOOLS_GN_NINJA_BINARY_TARGET_WRITER_H_
 
 #include "base/macros.h"
+#include "tools/gn/c_tool.h"
 #include "tools/gn/config_values.h"
 #include "tools/gn/ninja_target_writer.h"
 #include "tools/gn/toolchain.h"
@@ -52,21 +53,21 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
 
   // Writes a .pch compile build line for a language type.
   void WritePCHCommand(SubstitutionType flag_type,
-                       Toolchain::ToolType tool_type,
-                       Tool::PrecompiledHeaderType header_type,
+                       const char* tool_name,
+                       CTool::PrecompiledHeaderType header_type,
                        const OutputFile& input_dep,
                        const std::vector<OutputFile>& order_only_deps,
                        std::vector<OutputFile>* object_files,
                        std::vector<OutputFile>* other_files);
 
   void WriteGCCPCHCommand(SubstitutionType flag_type,
-                          Toolchain::ToolType tool_type,
+                          const char* tool_name,
                           const OutputFile& input_dep,
                           const std::vector<OutputFile>& order_only_deps,
                           std::vector<OutputFile>* gch_files);
 
   void WriteWindowsPCHCommand(SubstitutionType flag_type,
-                              Toolchain::ToolType tool_type,
+                              const char* tool_name,
                               const OutputFile& input_dep,
                               const std::vector<OutputFile>& order_only_deps,
                               std::vector<OutputFile>* object_files);
@@ -88,7 +89,7 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   void WriteCompilerBuildLine(const SourceFile& source,
                               const std::vector<OutputFile>& extra_deps,
                               const std::vector<OutputFile>& order_only_deps,
-                              Toolchain::ToolType tool_type,
+                              const char* tool_name,
                               const std::vector<OutputFile>& outputs);
 
   void WriteLinkerStuff(const std::vector<OutputFile>& object_files,
@@ -125,12 +126,11 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   void WriteOrderOnlyDependencies(
       const UniqueVector<const Target*>& non_linkable_deps);
 
-
   // Checks for duplicates in the given list of output files. If any duplicates
   // are found, throws an error and return false.
   bool CheckForDuplicateObjectFiles(const std::vector<OutputFile>& files) const;
 
-  const Tool* tool_;
+  const CTool* tool_;
 
   // Cached version of the prefix used for rule types for this toolchain.
   std::string rule_prefix_;

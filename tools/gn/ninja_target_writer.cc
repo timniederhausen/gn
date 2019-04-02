@@ -12,6 +12,7 @@
 #include "tools/gn/err.h"
 #include "tools/gn/escape.h"
 #include "tools/gn/filesystem_utils.h"
+#include "tools/gn/general_tool.h"
 #include "tools/gn/ninja_action_target_writer.h"
 #include "tools/gn/ninja_binary_target_writer.h"
 #include "tools/gn/ninja_bundle_data_target_writer.h"
@@ -294,7 +295,7 @@ std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
   out_ << "build ";
   path_output_.WriteFile(out_, input_stamp_file);
   out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
-       << Toolchain::ToolTypeToName(Toolchain::TYPE_STAMP);
+       << GeneralTool::kGeneralToolStamp;
   path_output_.WriteFiles(out_, outs);
 
   out_ << "\n";
@@ -317,7 +318,7 @@ void NinjaTargetWriter::WriteStampForTarget(
   path_output_.WriteFile(out_, stamp_file);
 
   out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
-       << Toolchain::ToolTypeToName(Toolchain::TYPE_STAMP);
+       << GeneralTool::kGeneralToolStamp;
   path_output_.WriteFiles(out_, files);
 
   if (!order_only_deps.empty()) {

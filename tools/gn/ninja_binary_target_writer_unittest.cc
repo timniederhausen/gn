@@ -738,26 +738,28 @@ TEST_F(NinjaBinaryTargetWriterTest, WinPrecompiledHeaders) {
   pch_settings.set_default_toolchain_label(setup.toolchain()->label());
 
   // Declare a C++ compiler that supports PCH.
-  std::unique_ptr<Tool> cxx_tool = std::make_unique<Tool>();
+  std::unique_ptr<Tool> cxx = Tool::CreateTool(CTool::kCToolCxx);
+  CTool* cxx_tool = cxx->AsC();
   TestWithScope::SetCommandForTool(
       "c++ {{source}} {{cflags}} {{cflags_cc}} {{defines}} {{include_dirs}} "
       "-o {{output}}",
-      cxx_tool.get());
+      cxx_tool);
   cxx_tool->set_outputs(SubstitutionList::MakeForTest(
       "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o"));
-  cxx_tool->set_precompiled_header_type(Tool::PCH_MSVC);
-  pch_toolchain.SetTool(Toolchain::TYPE_CXX, std::move(cxx_tool));
+  cxx_tool->set_precompiled_header_type(CTool::PCH_MSVC);
+  pch_toolchain.SetTool(std::move(cxx));
 
   // Add a C compiler as well.
-  std::unique_ptr<Tool> cc_tool = std::make_unique<Tool>();
+  std::unique_ptr<Tool> cc = Tool::CreateTool(CTool::kCToolCc);
+  CTool* cc_tool = cc->AsC();
   TestWithScope::SetCommandForTool(
       "cc {{source}} {{cflags}} {{cflags_c}} {{defines}} {{include_dirs}} "
       "-o {{output}}",
-      cc_tool.get());
+      cc_tool);
   cc_tool->set_outputs(SubstitutionList::MakeForTest(
       "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o"));
-  cc_tool->set_precompiled_header_type(Tool::PCH_MSVC);
-  pch_toolchain.SetTool(Toolchain::TYPE_CC, std::move(cc_tool));
+  cc_tool->set_precompiled_header_type(CTool::PCH_MSVC);
+  pch_toolchain.SetTool(std::move(cc));
   pch_toolchain.ToolchainSetupComplete();
 
   // This target doesn't specify precompiled headers.
@@ -847,7 +849,7 @@ TEST_F(NinjaBinaryTargetWriterTest, WinPrecompiledHeaders) {
         // The precompiled object files were added to the outputs.
         "withpch/obj/build/pch_target.precompile.c.o "
         "withpch/obj/build/pch_target.precompile.cc.o\n";
-    EXPECT_EQ(pch_win_expected, out.str());
+    EXPECT_EQ(pch_win_expected, out.str()) << pch_win_expected << "--BREAK--" << out.str();
   }
 }
 
@@ -865,27 +867,29 @@ TEST_F(NinjaBinaryTargetWriterTest, GCCPrecompiledHeaders) {
   pch_settings.set_default_toolchain_label(setup.toolchain()->label());
 
   // Declare a C++ compiler that supports PCH.
-  std::unique_ptr<Tool> cxx_tool = std::make_unique<Tool>();
+  std::unique_ptr<Tool> cxx = Tool::CreateTool(CTool::kCToolCxx);
+  CTool* cxx_tool = cxx->AsC();
   TestWithScope::SetCommandForTool(
       "c++ {{source}} {{cflags}} {{cflags_cc}} {{defines}} {{include_dirs}} "
       "-o {{output}}",
-      cxx_tool.get());
+      cxx_tool);
   cxx_tool->set_outputs(SubstitutionList::MakeForTest(
       "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o"));
-  cxx_tool->set_precompiled_header_type(Tool::PCH_GCC);
-  pch_toolchain.SetTool(Toolchain::TYPE_CXX, std::move(cxx_tool));
+  cxx_tool->set_precompiled_header_type(CTool::PCH_GCC);
+  pch_toolchain.SetTool(std::move(cxx));
   pch_toolchain.ToolchainSetupComplete();
 
   // Add a C compiler as well.
-  std::unique_ptr<Tool> cc_tool = std::make_unique<Tool>();
+  std::unique_ptr<Tool> cc = Tool::CreateTool(CTool::kCToolCc);
+  CTool* cc_tool = cc->AsC();
   TestWithScope::SetCommandForTool(
       "cc {{source}} {{cflags}} {{cflags_c}} {{defines}} {{include_dirs}} "
       "-o {{output}}",
-      cc_tool.get());
+      cc_tool);
   cc_tool->set_outputs(SubstitutionList::MakeForTest(
       "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o"));
-  cc_tool->set_precompiled_header_type(Tool::PCH_GCC);
-  pch_toolchain.SetTool(Toolchain::TYPE_CC, std::move(cc_tool));
+  cc_tool->set_precompiled_header_type(CTool::PCH_GCC);
+  pch_toolchain.SetTool(std::move(cc));
   pch_toolchain.ToolchainSetupComplete();
 
   // This target doesn't specify precompiled headers.

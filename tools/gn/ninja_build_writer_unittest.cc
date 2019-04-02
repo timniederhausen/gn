@@ -96,7 +96,7 @@ TEST_F(NinjaBuildWriterTest, TwoTargets) {
       Label(SourceDir("//other/"), "depth_pool", other_toolchain_label.dir(),
             other_toolchain_label.name()));
   other_regular_pool.set_depth(42);
-  other_toolchain.GetTool(Toolchain::TYPE_LINK)
+  other_toolchain.GetTool(CTool::kCToolLink)
       ->set_pool(LabelPtrPair<Pool>(&other_regular_pool));
 
   // Make another target that uses its own pool
@@ -122,7 +122,7 @@ TEST_F(NinjaBuildWriterTest, TwoTargets) {
                                             setup.toolchain()->label().dir(),
                                             setup.toolchain()->label().name()));
   console_pool.set_depth(1);
-  other_toolchain.GetTool(Toolchain::TYPE_STAMP)
+  other_toolchain.GetTool(GeneralTool::kGeneralToolStamp)
       ->set_pool(LabelPtrPair<Pool>(&console_pool));
 
   // Settings to go with the other toolchain.

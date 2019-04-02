@@ -611,8 +611,8 @@ bool VisualStudioWriter::WriteProjectFileContents(
 
     for (const SourceFile& file : target->sources()) {
       const char* compile_type;
-      Toolchain::ToolType tool_type = Toolchain::TYPE_NONE;
-      if (target->GetOutputFilesForSource(file, &tool_type, &tool_outputs)) {
+      const char* tool_name = Tool::kToolNone;
+      if (target->GetOutputFilesForSource(file, &tool_name, &tool_outputs)) {
         compile_type = "CustomBuild";
         std::unique_ptr<XmlElementWriter> build = group->SubElement(
             compile_type, "Include", SourceFileWriter(path_output, file));

@@ -10,6 +10,7 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/string_split.h"
 #include "tools/gn/builder.h"
+#include "tools/gn/c_tool.h"
 #include "tools/gn/config_values_extractors.h"
 #include "tools/gn/deps_iterator.h"
 #include "tools/gn/escape.h"
@@ -67,33 +68,33 @@ void SetupCompileFlags(const Target* target,
   base::EscapeJSONString(includes_out.str(), false, &flags.includes);
 
   std::ostringstream cflags_out;
-  WriteOneFlag(target, SUBSTITUTION_CFLAGS, false, Toolchain::TYPE_NONE,
+  WriteOneFlag(target, SUBSTITUTION_CFLAGS, false, Tool::kToolNone,
                &ConfigValues::cflags, opts, path_output, cflags_out,
                /*write_substitution=*/false);
   base::EscapeJSONString(cflags_out.str(), false, &flags.cflags);
 
   std::ostringstream cflags_c_out;
   WriteOneFlag(target, SUBSTITUTION_CFLAGS_C, has_precompiled_headers,
-               Toolchain::TYPE_CC, &ConfigValues::cflags_c, opts, path_output,
+               CTool::kCToolCc, &ConfigValues::cflags_c, opts, path_output,
                cflags_c_out, /*write_substitution=*/false);
   base::EscapeJSONString(cflags_c_out.str(), false, &flags.cflags_c);
 
   std::ostringstream cflags_cc_out;
   WriteOneFlag(target, SUBSTITUTION_CFLAGS_CC, has_precompiled_headers,
-               Toolchain::TYPE_CXX, &ConfigValues::cflags_cc, opts, path_output,
+               CTool::kCToolCxx, &ConfigValues::cflags_cc, opts, path_output,
                cflags_cc_out, /*write_substitution=*/false);
   base::EscapeJSONString(cflags_cc_out.str(), false, &flags.cflags_cc);
 
   std::ostringstream cflags_objc_out;
   WriteOneFlag(target, SUBSTITUTION_CFLAGS_OBJC, has_precompiled_headers,
-               Toolchain::TYPE_OBJC, &ConfigValues::cflags_objc, opts,
-               path_output, cflags_objc_out,
+               CTool::kCToolObjC, &ConfigValues::cflags_objc, opts, path_output,
+               cflags_objc_out,
                /*write_substitution=*/false);
   base::EscapeJSONString(cflags_objc_out.str(), false, &flags.cflags_objc);
 
   std::ostringstream cflags_objcc_out;
   WriteOneFlag(target, SUBSTITUTION_CFLAGS_OBJCC, has_precompiled_headers,
-               Toolchain::TYPE_OBJCXX, &ConfigValues::cflags_objcc, opts,
+               CTool::kCToolObjCxx, &ConfigValues::cflags_objcc, opts,
                path_output, cflags_objcc_out, /*write_substitution=*/false);
   base::EscapeJSONString(cflags_objcc_out.str(), false, &flags.cflags_objcc);
 }
@@ -121,12 +122,12 @@ void WriteCommand(const Target* target,
                   std::vector<OutputFile>& tool_outputs,
                   PathOutput& path_output,
                   SourceFileType source_type,
-                  Toolchain::ToolType tool_type,
+                  const char* tool_name,
                   EscapeOptions opts,
                   std::string* compile_commands) {
   EscapeOptions no_quoting(opts);
   no_quoting.inhibit_quoting = true;
-  const Tool* tool = target->toolchain()->GetTool(tool_type);
+  const Tool* tool = target->toolchain()->GetTool(tool_name);
   std::ostringstream command_out;
 
   for (const auto& range : tool->command().ranges()) {
@@ -237,8 +238,8 @@ void CompileCommandsWriter::RenderJSON(const BuildSettings* build_settings,
           source_type != SOURCE_M && source_type != SOURCE_MM)
         continue;
 
-      Toolchain::ToolType tool_type = Toolchain::TYPE_NONE;
-      if (!target->GetOutputFilesForSource(source, &tool_type, &tool_outputs))
+      const char* tool_name = Tool::kToolNone;
+      if (!target->GetOutputFilesForSource(source, &tool_name, &tool_outputs))
         continue;
 
       if (!first) {
@@ -253,7 +254,7 @@ void CompileCommandsWriter::RenderJSON(const BuildSettings* build_settings,
       WriteDirectory(base::StringPrintf("%" PRIsFP, build_dir.value().c_str()),
                      compile_commands);
       WriteCommand(target, source, flags, tool_outputs, path_output,
-                   source_type, tool_type, opts, compile_commands);
+                   source_type, tool_name, opts, compile_commands);
       compile_commands->append("\"");
       compile_commands->append(kPrettyPrintLineEnding);
       compile_commands->append("  }");

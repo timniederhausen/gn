@@ -63,7 +63,7 @@ struct IncludeWriter {
 void WriteOneFlag(const Target* target,
                   SubstitutionType subst_enum,
                   bool has_precompiled_headers,
-                  Toolchain::ToolType tool_type,
+                  const char* tool_name,
                   const std::vector<std::string>& (ConfigValues::*getter)()
                       const,
                   EscapeOptions flag_escape_options,
@@ -74,11 +74,11 @@ void WriteOneFlag(const Target* target,
 // Fills |outputs| with the object or gch file for the precompiled header of the
 // given type (flag type and tool type must match).
 void GetPCHOutputFiles(const Target* target,
-                       Toolchain::ToolType tool_type,
+                       const char* tool_name,
                        std::vector<OutputFile>* outputs);
 
-std::string GetGCCPCHOutputExtension(Toolchain::ToolType tool_type);
-std::string GetWindowsPCHObjectExtension(Toolchain::ToolType tool_type,
+std::string GetGCCPCHOutputExtension(const char* tool_name);
+std::string GetWindowsPCHObjectExtension(const char* tool_name,
                                          const std::string& obj_extension);
 
 #endif  // TOOLS_GN_NINJA_TARGET_COMMAND_WRITER_H_

@@ -34,7 +34,7 @@ TEST_F(FunctionToolchain, RuntimeOutputs) {
     ASSERT_TRUE(toolchain);
 
     // The toolchain should have a link tool with the two outputs.
-    const Tool* link = toolchain->GetTool(Toolchain::TYPE_LINK);
+    const Tool* link = toolchain->GetTool(CTool::kCToolLink);
     ASSERT_TRUE(link);
     ASSERT_EQ(1u, link->outputs().list().size());
     EXPECT_EQ("foo", link->outputs().list()[0].AsString());

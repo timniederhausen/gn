@@ -7,8 +7,10 @@
 #include <memory>
 #include <utility>
 
+#include "tools/gn/c_tool.h"
 #include "tools/gn/err.h"
 #include "tools/gn/functions.h"
+#include "tools/gn/general_tool.h"
 #include "tools/gn/label.h"
 #include "tools/gn/label_ptr.h"
 #include "tools/gn/parse_tree.h"
@@ -27,269 +29,6 @@ namespace {
 // This is just a unique value to take the address of to use as the key for
 // the toolchain property on a scope.
 const int kToolchainPropertyKey = 0;
-
-bool ReadBool(Scope* scope,
-              const char* var,
-              Tool* tool,
-              void (Tool::*set)(bool),
-              Err* err) {
-  const Value* v = scope->GetValue(var, true);
-  if (!v)
-    return true;  // Not present is fine.
-  if (!v->VerifyTypeIs(Value::BOOLEAN, err))
-    return false;
-
-  (tool->*set)(v->boolean_value());
-  return true;
-}
-
-// Reads the given string from the scope (if present) and puts the result into
-// dest. If the value is not a string, sets the error and returns false.
-bool ReadString(Scope* scope,
-                const char* var,
-                Tool* tool,
-                void (Tool::*set)(std::string),
-                Err* err) {
-  const Value* v = scope->GetValue(var, true);
-  if (!v)
-    return true;  // Not present is fine.
-  if (!v->VerifyTypeIs(Value::STRING, err))
-    return false;
-
-  (tool->*set)(v->string_value());
-  return true;
-}
-
-// Reads the given label from the scope (if present) and puts the result into
-// dest. If the value is not a label, sets the error and returns false.
-bool ReadLabel(Scope* scope,
-               const char* var,
-               Tool* tool,
-               const Label& current_toolchain,
-               void (Tool::*set)(LabelPtrPair<Pool>),
-               Err* err) {
-  const Value* v = scope->GetValue(var, true);
-  if (!v)
-    return true;  // Not present is fine.
-
-  Label label =
-      Label::Resolve(scope->GetSourceDir(), current_toolchain, *v, err);
-  if (err->has_error())
-    return false;
-
-  LabelPtrPair<Pool> pair(label);
-  pair.origin = tool->defined_from();
-
-  (tool->*set)(std::move(pair));
-  return true;
-}
-
-// Calls the given validate function on each type in the list. On failure,
-// sets the error, blame the value, and return false.
-bool ValidateSubstitutionList(const std::vector<SubstitutionType>& list,
-                              bool (*validate)(SubstitutionType),
-                              const Value* origin,
-                              Err* err) {
-  for (const auto& cur_type : list) {
-    if (!validate(cur_type)) {
-      *err = Err(*origin, "Pattern not valid here.",
-                 "You used the pattern " +
-                     std::string(kSubstitutionNames[cur_type]) +
-                     " which is not valid\nfor this variable.");
-      return false;
-    }
-  }
-  return true;
-}
-
-bool ReadPattern(Scope* scope,
-                 const char* name,
-                 bool (*validate)(SubstitutionType),
-                 Tool* tool,
-                 void (Tool::*set)(SubstitutionPattern),
-                 Err* err) {
-  const Value* value = scope->GetValue(name, true);
-  if (!value)
-    return true;  // Not present is fine.
-  if (!value->VerifyTypeIs(Value::STRING, err))
-    return false;
-
-  SubstitutionPattern pattern;
-  if (!pattern.Parse(*value, err))
-    return false;
-  if (!ValidateSubstitutionList(pattern.required_types(), validate, value, err))
-    return false;
-
-  (tool->*set)(std::move(pattern));
-  return true;
-}
-
-bool ReadPatternList(Scope* scope,
-                     const char* name,
-                     bool (*validate)(SubstitutionType),
-                     Tool* tool,
-                     void (Tool::*set)(SubstitutionList),
-                     Err* err) {
-  const Value* value = scope->GetValue(name, true);
-  if (!value)
-    return true;  // Not present is fine.
-  if (!value->VerifyTypeIs(Value::LIST, err))
-    return false;
-
-  SubstitutionList list;
-  if (!list.Parse(*value, err))
-    return false;
-
-  // Validate the right kinds of patterns are used.
-  if (!ValidateSubstitutionList(list.required_types(), validate, value, err))
-    return false;
-
-  (tool->*set)(std::move(list));
-  return true;
-}
-
-bool ReadOutputExtension(Scope* scope, Tool* tool, Err* err) {
-  const Value* value = scope->GetValue("default_output_extension", true);
-  if (!value)
-    return true;  // Not present is fine.
-  if (!value->VerifyTypeIs(Value::STRING, err))
-    return false;
-
-  if (value->string_value().empty())
-    return true;  // Accept empty string.
-
-  if (value->string_value()[0] != '.') {
-    *err = Err(*value, "default_output_extension must begin with a '.'");
-    return false;
-  }
-
-  tool->set_default_output_extension(value->string_value());
-  return true;
-}
-
-bool ReadPrecompiledHeaderType(Scope* scope, Tool* tool, Err* err) {
-  const Value* value = scope->GetValue("precompiled_header_type", true);
-  if (!value)
-    return true;  // Not present is fine.
-  if (!value->VerifyTypeIs(Value::STRING, err))
-    return false;
-
-  if (value->string_value().empty())
-    return true;  // Accept empty string, do nothing (default is "no PCH").
-
-  if (value->string_value() == "gcc") {
-    tool->set_precompiled_header_type(Tool::PCH_GCC);
-    return true;
-  } else if (value->string_value() == "msvc") {
-    tool->set_precompiled_header_type(Tool::PCH_MSVC);
-    return true;
-  }
-  *err = Err(*value, "Invalid precompiled_header_type",
-             "Must either be empty, \"gcc\", or \"msvc\".");
-  return false;
-}
-
-bool ReadDepsFormat(Scope* scope, Tool* tool, Err* err) {
-  const Value* value = scope->GetValue("depsformat", true);
-  if (!value)
-    return true;  // Not present is fine.
-  if (!value->VerifyTypeIs(Value::STRING, err))
-    return false;
-
-  if (value->string_value() == "gcc") {
-    tool->set_depsformat(Tool::DEPS_GCC);
-  } else if (value->string_value() == "msvc") {
-    tool->set_depsformat(Tool::DEPS_MSVC);
-  } else {
-    *err = Err(*value, "Deps format must be \"gcc\" or \"msvc\".");
-    return false;
-  }
-  return true;
-}
-
-bool IsCompilerTool(Toolchain::ToolType type) {
-  return type == Toolchain::TYPE_CC || type == Toolchain::TYPE_CXX ||
-         type == Toolchain::TYPE_OBJC || type == Toolchain::TYPE_OBJCXX ||
-         type == Toolchain::TYPE_RC || type == Toolchain::TYPE_ASM;
-}
-
-bool IsLinkerTool(Toolchain::ToolType type) {
-  // "alink" is not counted as in the generic "linker" tool list.
-  return type == Toolchain::TYPE_SOLINK ||
-         type == Toolchain::TYPE_SOLINK_MODULE || type == Toolchain::TYPE_LINK;
-}
-
-bool IsPatternInOutputList(const SubstitutionList& output_list,
-                           const SubstitutionPattern& pattern) {
-  for (const auto& cur : output_list.list()) {
-    if (pattern.ranges().size() == cur.ranges().size() &&
-        std::equal(pattern.ranges().begin(), pattern.ranges().end(),
-                   cur.ranges().begin()))
-      return true;
-  }
-  return false;
-}
-
-bool ValidateOutputs(const Tool* tool, Err* err) {
-  if (tool->outputs().list().empty()) {
-    *err = Err(tool->defined_from(),
-               "\"outputs\" must be specified for this tool.");
-    return false;
-  }
-  return true;
-}
-
-// Validates either link_output or depend_output. To generalize to either, pass
-// the associated pattern, and the variable name that should appear in error
-// messages.
-bool ValidateLinkAndDependOutput(const Tool* tool,
-                                 Toolchain::ToolType tool_type,
-                                 const SubstitutionPattern& pattern,
-                                 const char* variable_name,
-                                 Err* err) {
-  if (pattern.empty())
-    return true;  // Empty is always OK.
-
-  // It should only be specified for certain tool types.
-  if (tool_type != Toolchain::TYPE_SOLINK &&
-      tool_type != Toolchain::TYPE_SOLINK_MODULE) {
-    *err = Err(tool->defined_from(),
-               "This tool specifies a " + std::string(variable_name) + ".",
-               "This is only valid for solink and solink_module tools.");
-    return false;
-  }
-
-  if (!IsPatternInOutputList(tool->outputs(), pattern)) {
-    *err = Err(tool->defined_from(), "This tool's link_output is bad.",
-               "It must match one of the outputs.");
-    return false;
-  }
-
-  return true;
-}
-
-bool ValidateRuntimeOutputs(const Tool* tool,
-                            Toolchain::ToolType tool_type,
-                            Err* err) {
-  if (tool->runtime_outputs().list().empty())
-    return true;  // Empty is always OK.
-
-  if (!IsLinkerTool(tool_type)) {
-    *err = Err(tool->defined_from(), "This tool specifies runtime_outputs.",
-               "This is only valid for linker tools (alink doesn't count).");
-    return false;
-  }
-
-  for (const SubstitutionPattern& pattern : tool->runtime_outputs().list()) {
-    if (!IsPatternInOutputList(tool->outputs(), pattern)) {
-      *err = Err(tool->defined_from(), "This tool's runtime_outputs is bad.",
-                 "It must be a subset of the outputs. The bad one is:\n  " +
-                     pattern.AsString());
-      return false;
-    }
-  }
-  return true;
-}
 
 }  // namespace
 
@@ -1006,11 +745,6 @@ Value RunTool(Scope* scope,
   if (!EnsureSingleStringArg(function, args, err))
     return Value();
   const std::string& tool_name = args[0].string_value();
-  Toolchain::ToolType tool_type = Toolchain::ToolNameToType(tool_name);
-  if (tool_type == Toolchain::TYPE_NONE) {
-    *err = Err(args[0], "Unknown tool type");
-    return Value();
-  }
 
   // Run the tool block.
   Scope block_scope(scope);
@@ -1018,103 +752,21 @@ Value RunTool(Scope* scope,
   if (err->has_error())
     return Value();
 
-  // Figure out which validator to use for the substitution pattern for this
-  // tool type. There are different validators for the "outputs" than for the
-  // rest of the strings.
-  bool (*subst_validator)(SubstitutionType) = nullptr;
-  bool (*subst_output_validator)(SubstitutionType) = nullptr;
-  if (IsCompilerTool(tool_type)) {
-    subst_validator = &IsValidCompilerSubstitution;
-    subst_output_validator = &IsValidCompilerOutputsSubstitution;
-  } else if (IsLinkerTool(tool_type)) {
-    subst_validator = &IsValidLinkerSubstitution;
-    subst_output_validator = &IsValidLinkerOutputsSubstitution;
-  } else if (tool_type == Toolchain::TYPE_ALINK) {
-    subst_validator = &IsValidALinkSubstitution;
-    // ALink uses the standard output file patterns as other linker tools.
-    subst_output_validator = &IsValidLinkerOutputsSubstitution;
-  } else if (tool_type == Toolchain::TYPE_COPY ||
-             tool_type == Toolchain::TYPE_COPY_BUNDLE_DATA) {
-    subst_validator = &IsValidCopySubstitution;
-    subst_output_validator = &IsValidCopySubstitution;
-  } else if (tool_type == Toolchain::TYPE_COMPILE_XCASSETS) {
-    subst_validator = &IsValidCompileXCassetsSubstitution;
-    subst_output_validator = &IsValidCompileXCassetsSubstitution;
-  } else {
-    subst_validator = &IsValidToolSubstitution;
-    subst_output_validator = &IsValidToolSubstitution;
+  std::unique_ptr<Tool> tool =
+      Tool::CreateTool(tool_name, &block_scope, toolchain, err);
+
+  if (!tool) {
+    *err = Err(function, "Unknown tool type");
+    return Value();
   }
 
-  std::unique_ptr<Tool> tool = std::make_unique<Tool>();
   tool->set_defined_from(function);
-
-  if (!ReadPattern(&block_scope, "command", subst_validator, tool.get(),
-                   &Tool::set_command, err) ||
-      !ReadOutputExtension(&block_scope, tool.get(), err) ||
-      !ReadPattern(&block_scope, "depfile", subst_validator, tool.get(),
-                   &Tool::set_depfile, err) ||
-      !ReadDepsFormat(&block_scope, tool.get(), err) ||
-      !ReadPattern(&block_scope, "description", subst_validator, tool.get(),
-                   &Tool::set_description, err) ||
-      !ReadString(&block_scope, "lib_switch", tool.get(), &Tool::set_lib_switch,
-                  err) ||
-      !ReadString(&block_scope, "lib_dir_switch", tool.get(),
-                  &Tool::set_lib_dir_switch, err) ||
-      !ReadPattern(&block_scope, "link_output", subst_validator, tool.get(),
-                   &Tool::set_link_output, err) ||
-      !ReadPattern(&block_scope, "depend_output", subst_validator, tool.get(),
-                   &Tool::set_depend_output, err) ||
-      !ReadPatternList(&block_scope, "runtime_outputs", subst_validator,
-                       tool.get(), &Tool::set_runtime_outputs, err) ||
-      !ReadString(&block_scope, "output_prefix", tool.get(),
-                  &Tool::set_output_prefix, err) ||
-      !ReadPattern(&block_scope, "default_output_dir", subst_validator,
-                   tool.get(), &Tool::set_default_output_dir, err) ||
-      !ReadPrecompiledHeaderType(&block_scope, tool.get(), err) ||
-      !ReadBool(&block_scope, "restat", tool.get(), &Tool::set_restat, err) ||
-      !ReadPattern(&block_scope, "rspfile", subst_validator, tool.get(),
-                   &Tool::set_rspfile, err) ||
-      !ReadPattern(&block_scope, "rspfile_content", subst_validator, tool.get(),
-                   &Tool::set_rspfile_content, err) ||
-      !ReadLabel(&block_scope, "pool", tool.get(), toolchain->label(),
-                 &Tool::set_pool, err)) {
-    return Value();
-  }
-
-  if (tool_type != Toolchain::TYPE_COPY && tool_type != Toolchain::TYPE_STAMP &&
-      tool_type != Toolchain::TYPE_COPY_BUNDLE_DATA &&
-      tool_type != Toolchain::TYPE_COMPILE_XCASSETS &&
-      tool_type != Toolchain::TYPE_ACTION) {
-    // All tools should have outputs, except the copy, stamp, copy_bundle_data
-    // compile_xcassets and action tools that generate their outputs internally.
-    if (!ReadPatternList(&block_scope, "outputs", subst_output_validator,
-                         tool.get(), &Tool::set_outputs, err) ||
-        !ValidateOutputs(tool.get(), err))
-      return Value();
-  }
-  if (!ValidateRuntimeOutputs(tool.get(), tool_type, err))
-    return Value();
-
-  // Validate link_output and depend_output.
-  if (!ValidateLinkAndDependOutput(tool.get(), tool_type, tool->link_output(),
-                                   "link_output", err))
-    return Value();
-  if (!ValidateLinkAndDependOutput(tool.get(), tool_type, tool->depend_output(),
-                                   "depend_output", err))
-    return Value();
-  if ((!tool->link_output().empty() && tool->depend_output().empty()) ||
-      (tool->link_output().empty() && !tool->depend_output().empty())) {
-    *err = Err(function,
-               "Both link_output and depend_output should either "
-               "be specified or they should both be empty.");
-    return Value();
-  }
+  toolchain->SetTool(std::move(tool));
 
   // Make sure there weren't any vars set in this tool that were unused.
   if (!block_scope.CheckForUnusedVars(err))
     return Value();
 
-  toolchain->SetTool(tool_type, std::move(tool));
   return Value();
 }
 

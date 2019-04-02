@@ -276,14 +276,13 @@ bool Builder::ToolchainDefined(BuilderRecord* record, Err* err) {
   if (!AddDeps(record, toolchain->deps(), err))
     return false;
 
-  for (int i = Toolchain::TYPE_NONE + 1; i < Toolchain::TYPE_NUMTYPES; i++) {
-    Toolchain::ToolType tool_type = static_cast<Toolchain::ToolType>(i);
-    Tool* tool = toolchain->GetTool(tool_type);
-    if (!tool || tool->pool().label.is_null())
+  for (const auto& tool : toolchain->tools()) {
+    if (tool.second->pool().label.is_null())
       continue;
 
     BuilderRecord* dep_record = GetOrCreateRecordOfType(
-        tool->pool().label, tool->pool().origin, BuilderRecord::ITEM_POOL, err);
+        tool.second->pool().label, tool.second->pool().origin,
+        BuilderRecord::ITEM_POOL, err);
     if (!dep_record)
       return false;
     record->AddDep(dep_record);
@@ -565,23 +564,21 @@ bool Builder::ResolveActionValues(ActionValues* action_values, Err* err) {
 }
 
 bool Builder::ResolvePools(Toolchain* toolchain, Err* err) {
-  for (int i = Toolchain::TYPE_NONE + 1; i < Toolchain::TYPE_NUMTYPES; i++) {
-    Toolchain::ToolType tool_type = static_cast<Toolchain::ToolType>(i);
-    Tool* tool = toolchain->GetTool(tool_type);
-    if (!tool || tool->pool().label.is_null())
+  for (const auto& tool : toolchain->tools()) {
+    if (tool.second->pool().label.is_null())
       continue;
 
-    BuilderRecord* record =
-        GetResolvedRecordOfType(tool->pool().label, toolchain->defined_from(),
-                                BuilderRecord::ITEM_POOL, err);
+    BuilderRecord* record = GetResolvedRecordOfType(
+        tool.second->pool().label, toolchain->defined_from(),
+        BuilderRecord::ITEM_POOL, err);
     if (!record) {
-      *err = Err(tool->pool().origin, "Pool for tool not defined.",
+      *err = Err(tool.second->pool().origin, "Pool for tool not defined.",
                  "I was hoping to find a pool " +
-                     tool->pool().label.GetUserVisibleName(false));
+                     tool.second->pool().label.GetUserVisibleName(false));
       return false;
     }
 
-    tool->set_pool(LabelPtrPair<Pool>(record->item()->AsPool()));
+    tool.second->set_pool(LabelPtrPair<Pool>(record->item()->AsPool()));
   }
 
   return true;

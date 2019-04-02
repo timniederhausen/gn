@@ -9,7 +9,9 @@
 #include "base/files/file_util.h"
 #include "base/strings/stringize_macros.h"
 #include "tools/gn/build_settings.h"
+#include "tools/gn/c_tool.h"
 #include "tools/gn/filesystem_utils.h"
+#include "tools/gn/general_tool.h"
 #include "tools/gn/ninja_utils.h"
 #include "tools/gn/pool.h"
 #include "tools/gn/settings.h"
@@ -40,13 +42,10 @@ void NinjaToolchainWriter::Run(
     const std::vector<NinjaWriter::TargetRulePair>& rules) {
   std::string rule_prefix = GetNinjaRulePrefixForToolchain(settings_);
 
-  for (int i = Toolchain::TYPE_NONE + 1; i < Toolchain::TYPE_NUMTYPES; i++) {
-    Toolchain::ToolType tool_type = static_cast<Toolchain::ToolType>(i);
-    const Tool* tool = toolchain_->GetTool(tool_type);
-    if (tool_type == Toolchain::TYPE_ACTION)
+  for (const auto& tool : toolchain_->tools()) {
+    if (tool.second->name() == GeneralTool::kGeneralToolAction)
       continue;
-    if (tool)
-      WriteToolRule(tool_type, tool, rule_prefix);
+    WriteToolRule(tool.second.get(), rule_prefix);
   }
   out_ << std::endl;
 
@@ -76,11 +75,9 @@ bool NinjaToolchainWriter::RunAndWriteFile(
   return true;
 }
 
-void NinjaToolchainWriter::WriteToolRule(const Toolchain::ToolType type,
-                                         const Tool* tool,
+void NinjaToolchainWriter::WriteToolRule(Tool* tool,
                                          const std::string& rule_prefix) {
-  out_ << "rule " << rule_prefix << Toolchain::ToolTypeToName(type)
-       << std::endl;
+  out_ << "rule " << rule_prefix << tool->name() << std::endl;
 
   // Rules explicitly include shell commands, so don't try to escape.
   EscapeOptions options;
@@ -93,15 +90,17 @@ void NinjaToolchainWriter::WriteToolRule(const Toolchain::ToolType type,
   WriteRulePattern("rspfile", tool->rspfile(), options);
   WriteRulePattern("rspfile_content", tool->rspfile_content(), options);
 
-  if (tool->depsformat() == Tool::DEPS_GCC) {
-    // GCC-style deps require a depfile.
-    if (!tool->depfile().empty()) {
-      WriteRulePattern("depfile", tool->depfile(), options);
-      out_ << kIndent << "deps = gcc" << std::endl;
+  if (CTool* c_tool = tool->AsC()) {
+    if (c_tool->depsformat() == CTool::DEPS_GCC) {
+      // GCC-style deps require a depfile.
+      if (!tool->depfile().empty()) {
+        WriteRulePattern("depfile", tool->depfile(), options);
+        out_ << kIndent << "deps = gcc" << std::endl;
+      }
+    } else if (c_tool->depsformat() == CTool::DEPS_MSVC) {
+      // MSVC deps don't have a depfile.
+      out_ << kIndent << "deps = msvc" << std::endl;
     }
-  } else if (tool->depsformat() == Tool::DEPS_MSVC) {
-    // MSVC deps don't have a depfile.
-    out_ << kIndent << "deps = msvc" << std::endl;
   }
 
   // Use pool is specified.

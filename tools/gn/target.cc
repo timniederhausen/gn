@@ -10,6 +10,7 @@
 #include "base/stl_util.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
+#include "tools/gn/c_tool.h"
 #include "tools/gn/config_values_extractors.h"
 #include "tools/gn/deps_iterator.h"
 #include "tools/gn/filesystem_utils.h"
@@ -94,8 +95,8 @@ bool EnsureFileIsGeneratedByDependency(const Target* target,
   if (consider_object_files && target->IsBinary()) {
     std::vector<OutputFile> source_outputs;
     for (const SourceFile& source : target->sources()) {
-      Toolchain::ToolType tool_type;
-      if (!target->GetOutputFilesForSource(source, &tool_type, &source_outputs))
+      const char* tool_name;
+      if (!target->GetOutputFilesForSource(source, &tool_name, &source_outputs))
         continue;
       if (base::ContainsValue(source_outputs, file))
         return true;
@@ -464,29 +465,27 @@ bool Target::SetToolchain(const Toolchain* toolchain, Err* err) {
 
   // Tool not specified for this target type.
   if (err) {
-    *err =
-        Err(defined_from(), "This target uses an undefined tool.",
-            base::StringPrintf(
-                "The target %s\n"
-                "of type \"%s\"\n"
-                "uses toolchain %s\n"
-                "which doesn't have the tool \"%s\" defined.\n\n"
-                "Alas, I can not continue.",
-                label().GetUserVisibleName(false).c_str(),
-                GetStringForOutputType(output_type_),
-                label().GetToolchainLabel().GetUserVisibleName(false).c_str(),
-                Toolchain::ToolTypeToName(
-                    toolchain->GetToolTypeForTargetFinalOutput(this))
-                    .c_str()));
+    *err = Err(
+        defined_from(), "This target uses an undefined tool.",
+        base::StringPrintf(
+            "The target %s\n"
+            "of type \"%s\"\n"
+            "uses toolchain %s\n"
+            "which doesn't have the tool \"%s\" defined.\n\n"
+            "Alas, I can not continue.",
+            label().GetUserVisibleName(false).c_str(),
+            GetStringForOutputType(output_type_),
+            label().GetToolchainLabel().GetUserVisibleName(false).c_str(),
+            Tool::GetToolTypeForTargetFinalOutput(this)));
   }
   return false;
 }
 
 bool Target::GetOutputFilesForSource(const SourceFile& source,
-                                     Toolchain::ToolType* computed_tool_type,
+                                     const char** computed_tool_type,
                                      std::vector<OutputFile>* outputs) const {
   outputs->clear();
-  *computed_tool_type = Toolchain::TYPE_NONE;
+  *computed_tool_type = Tool::kToolNone;
 
   SourceFileType file_type = GetSourceFileType(source);
   if (file_type == SOURCE_UNKNOWN)
@@ -497,8 +496,8 @@ bool Target::GetOutputFilesForSource(const SourceFile& source,
     return true;
   }
 
-  *computed_tool_type = toolchain_->GetToolTypeForSourceType(file_type);
-  if (*computed_tool_type == Toolchain::TYPE_NONE)
+  *computed_tool_type = Tool::GetToolTypeForSourceType(file_type);
+  if (*computed_tool_type == Tool::kToolNone)
     return false;  // No tool for this file (it's a header file or something).
   const Tool* tool = toolchain_->GetTool(*computed_tool_type);
   if (!tool)
@@ -681,30 +680,32 @@ bool Target::FillOutputFiles(Err* err) {
     case SHARED_LIBRARY:
       CHECK(tool->outputs().list().size() >= 1);
       check_tool_outputs = true;
-      if (tool->link_output().empty() && tool->depend_output().empty()) {
-        // Default behavior, use the first output file for both.
-        link_output_file_ = dependency_output_file_ =
-            SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
-                this, tool, tool->outputs().list()[0]);
-      } else {
-        // Use the tool-specified ones.
-        if (!tool->link_output().empty()) {
-          link_output_file_ =
+      if (const CTool* ctool = tool->AsC()) {
+        if (ctool->link_output().empty() && ctool->depend_output().empty()) {
+          // Default behavior, use the first output file for both.
+          link_output_file_ = dependency_output_file_ =
               SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
-                  this, tool, tool->link_output());
+                  this, tool, tool->outputs().list()[0]);
+        } else {
+          // Use the tool-specified ones.
+          if (!ctool->link_output().empty()) {
+            link_output_file_ =
+                SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
+                    this, tool, ctool->link_output());
+          }
+          if (!ctool->depend_output().empty()) {
+            dependency_output_file_ =
+                SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
+                    this, tool, ctool->depend_output());
+          }
         }
-        if (!tool->depend_output().empty()) {
-          dependency_output_file_ =
-              SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
-                  this, tool, tool->depend_output());
+        if (tool->runtime_outputs().list().empty()) {
+          // Default to the link output for the runtime output.
+          runtime_outputs_.push_back(link_output_file_);
+        } else {
+          SubstitutionWriter::ApplyListToLinkerAsOutputFile(
+              this, tool, tool->runtime_outputs(), &runtime_outputs_);
         }
-      }
-      if (tool->runtime_outputs().list().empty()) {
-        // Default to the link output for the runtime output.
-        runtime_outputs_.push_back(link_output_file_);
-      } else {
-        SubstitutionWriter::ApplyListToLinkerAsOutputFile(
-            this, tool, tool->runtime_outputs(), &runtime_outputs_);
       }
       break;
     case UNKNOWN:

@@ -331,7 +331,7 @@ class Target : public Item {
   // are just passed to the output. The output will always be overwritten, not
   // appended to.
   bool GetOutputFilesForSource(const SourceFile& source,
-                               Toolchain::ToolType* computed_tool_type,
+                               const char** computed_tool_type,
                                std::vector<OutputFile>* outputs) const;
 
  private:

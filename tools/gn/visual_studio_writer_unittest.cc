@@ -175,12 +175,12 @@ TEST_F(VisualStudioWriterTest, NoDotSlash) {
           "base", path, MakeGuid(path, "project"), MakeTestPath("/foo"),
           "Win32"));
 
-  std::unique_ptr<Tool> tool = std::make_unique<Tool>();
+  std::unique_ptr<Tool> tool = Tool::CreateTool(CTool::kCToolAlink);
   tool->set_outputs(SubstitutionList::MakeForTest(
       "{{root_out_dir}}/{{target_output_name}}{{output_extension}}", ""));
 
   Toolchain toolchain(setup_.settings(), Label(SourceDir("//tc/"), "tc"));
-  toolchain.SetTool(Toolchain::TYPE_ALINK, std::move(tool));
+  toolchain.SetTool(std::move(tool));
 
   Target target(setup_.settings(), Label(SourceDir("//baz/"), "baz"));
   target.set_output_type(Target::STATIC_LIBRARY);
