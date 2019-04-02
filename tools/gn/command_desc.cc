@@ -291,7 +291,8 @@ std::map<std::string, DescHandlerFunc> GetHandlers() {
           {variables::kDataKeys, DefaultHandler},
           {variables::kRebase, DefaultHandler},
           {variables::kWalkKeys, DefaultHandler},
-          {variables::kWriteOutputConversion, DefaultHandler}};
+          {variables::kWriteOutputConversion, DefaultHandler},
+          {"runtime_deps", DefaultHandler}};
 }
 
 void HandleProperty(const std::string& what,
