@@ -685,6 +685,7 @@
       "vs2013" - Visual Studio 2013 project/solution files.
       "vs2015" - Visual Studio 2015 project/solution files.
       "vs2017" - Visual Studio 2017 project/solution files.
+      "vs2019" - Visual Studio 2019 project/solution files.
       "xcode" - Xcode workspace/solution files.
       "qtcreator" - QtCreator project files.
       "json" - JSON file containing target information
@@ -1385,8 +1386,9 @@
   are computed from all "bundle_data" target this one depends on transitively
   (the recursion stops at "create_bundle" targets).
 
-  The "bundle_*_dir" properties must be defined. They will be used for the
-  expansion of {{bundle_*_dir}} rules in "bundle_data" outputs.
+  The "bundle_*_dir" are be used for the expansion of {{bundle_*_dir}} rules in
+  "bundle_data" outputs. The properties are optional but must be defined if any
+  of the "bundle_data" target use them.
 
   This target can be used on all platforms though it is designed only to
   generate iOS or macOS bundle. In cross-platform projects, it is advised to put
@@ -1420,13 +1422,12 @@
 #### **Variables**
 
 ```
-  bundle_root_dir*, bundle_contents_dir*, bundle_resources_dir*,
-  bundle_executable_dir*, bundle_plugins_dir*, bundle_deps_filter, deps,
+  bundle_root_dir, bundle_contents_dir, bundle_resources_dir,
+  bundle_executable_dir, bundle_plugins_dir, bundle_deps_filter, deps,
   data_deps, public_deps, visibility, product_type, code_signing_args,
   code_signing_script, code_signing_sources, code_signing_outputs,
   xcode_extra_attributes, xcode_test_application_name, partial_info_plist,
   metadata
-  * = required
 ```
 
 #### **Example**
@@ -4287,9 +4288,12 @@
     ]
   }
 ```
-### <a name="var_bundle_executable_dir"></a>**bundle_executable_dir**: Expansion of {{bundle_executable_dir}} in create_bundle.
+### <a name="var_bundle_executable_dir"></a>**bundle_executable_dir**
 
 ```
+  bundle_executable_dir: Expansion of {{bundle_executable_dir}} in
+                         create_bundle.
+
   A string corresponding to a path in $root_build_dir.
 
   This string is used by the "create_bundle" target to expand the
@@ -4312,7 +4316,8 @@
 ### <a name="var_bundle_resources_dir"></a>**bundle_resources_dir**
 
 ```
-  bundle_resources_dir: Expansion of {{bundle_resources_dir}} in create_bundle.
+  bundle_resources_dir: Expansion of {{bundle_resources_dir}} in
+                        create_bundle.
 
   A string corresponding to a path in $root_build_dir.
 

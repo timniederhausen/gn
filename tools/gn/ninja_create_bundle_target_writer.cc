@@ -135,12 +135,18 @@ void NinjaCreateBundleTargetWriter::WriteCopyBundleFileRuleSteps(
   // steps as this is most likely implemented using hardlink in the common case.
   // See NinjaCopyTargetWriter::WriteCopyRules() for a detailed explanation.
   for (const SourceFile& source_file : file_rule.sources()) {
-    OutputFile output_file = file_rule.ApplyPatternToSourceAsOutputFile(
-        settings_, target_->bundle_data(), source_file);
-    output_files->push_back(output_file);
+    // There is no need to check for errors here as the substitution will have
+    // been performed when computing the list of output of the target during
+    // the Target::OnResolved phase earlier.
+    OutputFile expanded_output_file;
+    file_rule.ApplyPatternToSourceAsOutputFile(
+        settings_, target_, target_->bundle_data(), source_file,
+        &expanded_output_file,
+        /*err=*/nullptr);
+    output_files->push_back(expanded_output_file);
 
     out_ << "build ";
-    path_output_.WriteFile(out_, output_file);
+    path_output_.WriteFile(out_, expanded_output_file);
     out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
          << Toolchain::ToolTypeToName(Toolchain::TYPE_COPY_BUNDLE_DATA) << " ";
     path_output_.WriteFile(out_, source_file);

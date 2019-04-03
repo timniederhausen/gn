@@ -327,8 +327,9 @@ const char kCreateBundle_Help[] =
   are computed from all "bundle_data" target this one depends on transitively
   (the recursion stops at "create_bundle" targets).
 
-  The "bundle_*_dir" properties must be defined. They will be used for the
-  expansion of {{bundle_*_dir}} rules in "bundle_data" outputs.
+  The "bundle_*_dir" are be used for the expansion of {{bundle_*_dir}} rules in
+  "bundle_data" outputs. The properties are optional but must be defined if any
+  of the "bundle_data" target use them.
 
   This target can be used on all platforms though it is designed only to
   generate iOS or macOS bundle. In cross-platform projects, it is advised to put
@@ -358,13 +359,12 @@ Code signing
 
 Variables
 
-  bundle_root_dir*, bundle_contents_dir*, bundle_resources_dir*,
-  bundle_executable_dir*, bundle_plugins_dir*, bundle_deps_filter, deps,
+  bundle_root_dir, bundle_contents_dir, bundle_resources_dir,
+  bundle_executable_dir, bundle_plugins_dir, bundle_deps_filter, deps,
   data_deps, public_deps, visibility, product_type, code_signing_args,
   code_signing_script, code_signing_sources, code_signing_outputs,
   xcode_extra_attributes, xcode_test_application_name, partial_info_plist,
   metadata
-  * = required
 
 Example
 
