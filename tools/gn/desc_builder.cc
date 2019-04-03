@@ -662,8 +662,6 @@ class TargetDescBuilder : public BaseDescBuilder {
                                   RenderValue(bundle_data.resources_dir()));
     data->SetWithoutPathExpansion("executable_dir",
                                   RenderValue(bundle_data.executable_dir()));
-    data->SetWithoutPathExpansion("plugins_dir",
-                                  RenderValue(bundle_data.plugins_dir()));
     data->SetKey("product_type", base::Value(bundle_data.product_type()));
     data->SetWithoutPathExpansion(
         "partial_info_plist", RenderValue(bundle_data.partial_info_plist()));

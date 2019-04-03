@@ -1053,8 +1053,8 @@ TEST_F(TargetTest, PullRecursiveBundleData) {
       "{{bundle_resources_dir}}/{{source_file_part}}");
   ASSERT_TRUE(b.OnResolved(&err));
 
-  c.bundle_data().root_dir() = SourceDir("//out/foo_e.bundle");
-  c.bundle_data().resources_dir() = SourceDir("//out/foo_e.bundle/Resources");
+  c.bundle_data().root_dir() = SourceDir("//out/foo_c.bundle");
+  c.bundle_data().resources_dir() = SourceDir("//out/foo_c.bundle/Resources");
 
   d.sources().push_back(SourceFile("//foo/d.txt"));
   d.action_values().outputs() = SubstitutionList::MakeForTest(

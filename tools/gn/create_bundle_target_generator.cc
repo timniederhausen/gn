@@ -42,9 +42,6 @@ void CreateBundleTargetGenerator::DoRun() {
   if (!FillBundleDir(bundle_data.root_dir(), variables::kBundleExecutableDir,
                      &bundle_data.executable_dir()))
     return;
-  if (!FillBundleDir(bundle_data.root_dir(), variables::kBundlePlugInsDir,
-                     &bundle_data.plugins_dir()))
-    return;
 
   if (!FillXcodeExtraAttributes())
     return;

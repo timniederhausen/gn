@@ -86,7 +86,6 @@
     *   [bundle_contents_dir: Expansion of {{bundle_contents_dir}} in create_bundle.](#var_bundle_contents_dir)
     *   [bundle_deps_filter: [label list] A list of labels that are filtered out.](#var_bundle_deps_filter)
     *   [bundle_executable_dir: Expansion of {{bundle_executable_dir}} in create_bundle](#var_bundle_executable_dir)
-    *   [bundle_plugins_dir: Expansion of {{bundle_plugins_dir}} in create_bundle.](#var_bundle_plugins_dir)
     *   [bundle_resources_dir: Expansion of {{bundle_resources_dir}} in create_bundle.](#var_bundle_resources_dir)
     *   [bundle_root_dir: Expansion of {{bundle_root_dir}} in create_bundle.](#var_bundle_root_dir)
     *   [cflags: [string list] Flags passed to all C compiler variants.](#var_cflags)
@@ -1423,11 +1422,10 @@
 
 ```
   bundle_root_dir, bundle_contents_dir, bundle_resources_dir,
-  bundle_executable_dir, bundle_plugins_dir, bundle_deps_filter, deps,
-  data_deps, public_deps, visibility, product_type, code_signing_args,
-  code_signing_script, code_signing_sources, code_signing_outputs,
-  xcode_extra_attributes, xcode_test_application_name, partial_info_plist,
-  metadata
+  bundle_executable_dir, bundle_deps_filter, deps, data_deps, public_deps,
+  visibility, product_type, code_signing_args, code_signing_script,
+  code_signing_sources, code_signing_outputs, xcode_extra_attributes,
+  xcode_test_application_name, partial_info_plist, metadata
 ```
 
 #### **Example**
@@ -1454,7 +1452,7 @@
       }
 
       bundle_data("${app_name}_bundle_info_plist") {
-        deps = [ ":${app_name}_generate_info_plist" ]
+        public_deps = [ ":${app_name}_generate_info_plist" ]
         sources = [ "$gen_path/Info.plist" ]
         outputs = [ "{{bundle_contents_dir}}/Info.plist" ]
       }
@@ -1471,34 +1469,32 @@
       code_signing =
           defined(invoker.code_signing) && invoker.code_signing
 
-      if (is_ios && !code_signing) {
+      if (!is_ios || !code_signing) {
         bundle_data("${app_name}_bundle_executable") {
-          deps = [ ":${app_name}_generate_executable" ]
+          public_deps = [ ":${app_name}_generate_executable" ]
           sources = [ "$gen_path/$app_name" ]
           outputs = [ "{{bundle_executable_dir}}/$app_name" ]
         }
       }
 
-      create_bundle("${app_name}.app") {
+      create_bundle("$app_name.app") {
         product_type = "com.apple.product-type.application"
 
         if (is_ios) {
-          bundle_root_dir = "${root_build_dir}/$target_name"
+          bundle_root_dir = "$root_build_dir/$target_name"
           bundle_contents_dir = bundle_root_dir
           bundle_resources_dir = bundle_contents_dir
           bundle_executable_dir = bundle_contents_dir
-          bundle_plugins_dir = "${bundle_contents_dir}/Plugins"
 
           extra_attributes = {
             ONLY_ACTIVE_ARCH = "YES"
             DEBUG_INFORMATION_FORMAT = "dwarf"
           }
         } else {
-          bundle_root_dir = "${root_build_dir}/target_name"
-          bundle_contents_dir  = "${bundle_root_dir}/Contents"
-          bundle_resources_dir = "${bundle_contents_dir}/Resources"
-          bundle_executable_dir = "${bundle_contents_dir}/MacOS"
-          bundle_plugins_dir = "${bundle_contents_dir}/Plugins"
+          bundle_root_dir = "$root_build_dir/$target_name"
+          bundle_contents_dir  = "$bundle_root_dir/Contents"
+          bundle_resources_dir = "$bundle_contents_dir/Resources"
+          bundle_executable_dir = "$bundle_contents_dir/MacOS"
         }
         deps = [ ":${app_name}_bundle_info_plist" ]
         if (is_ios && code_signing) {
@@ -4302,17 +4298,6 @@
 
   See "gn help bundle_root_dir" for examples.
 ```
-### <a name="var_bundle_plugins_dir"></a>**bundle_plugins_dir**: Expansion of {{bundle_plugins_dir}} in create_bundle.
-
-```
-  A string corresponding to a path in $root_build_dir.
-
-  This string is used by the "create_bundle" target to expand the
-  {{bundle_plugins_dir}} of the "bundle_data" target it depends on. This must
-  correspond to a path under "bundle_root_dir".
-
-  See "gn help bundle_root_dir" for examples.
-```
 ### <a name="var_bundle_resources_dir"></a>**bundle_resources_dir**
 
 ```
@@ -4351,7 +4336,6 @@
     bundle_contents_dir = "${bundle_root_dir}/Contents"
     bundle_resources_dir = "${bundle_contents_dir}/Resources"
     bundle_executable_dir = "${bundle_contents_dir}/MacOS"
-    bundle_plugins_dir = "${bundle_contents_dir}/PlugIns"
   }
 ```
 ### <a name="var_cflags"></a>**cflags***: Flags passed to the C compiler.

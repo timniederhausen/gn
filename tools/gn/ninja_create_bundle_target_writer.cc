@@ -16,6 +16,11 @@
 
 namespace {
 
+bool TargetRequireAssetCatalogCompilation(const Target* target) {
+  return !target->bundle_data().assets_catalog_sources().empty() ||
+         !target->bundle_data().partial_info_plist().is_null();
+}
+
 void FailWithMissingToolError(Toolchain::ToolType tool, const Target* target) {
   const std::string& tool_name = Toolchain::ToolTypeToName(tool);
   g_scheduler->FailWithError(
@@ -33,13 +38,21 @@ void FailWithMissingToolError(Toolchain::ToolType tool, const Target* target) {
 bool EnsureAllToolsAvailable(const Target* target) {
   const Toolchain::ToolType kRequiredTools[] = {
       Toolchain::TYPE_COPY_BUNDLE_DATA,
-      Toolchain::TYPE_COMPILE_XCASSETS,
       Toolchain::TYPE_STAMP,
   };
 
   for (size_t i = 0; i < arraysize(kRequiredTools); ++i) {
     if (!target->toolchain()->GetTool(kRequiredTools[i])) {
       FailWithMissingToolError(kRequiredTools[i], target);
+      return false;
+    }
+  }
+
+  // The compile_xcassets tool is only required if the target has asset
+  // catalog resources to compile.
+  if (TargetRequireAssetCatalogCompilation(target)) {
+    if (!target->toolchain()->GetTool(Toolchain::TYPE_COMPILE_XCASSETS)) {
+      FailWithMissingToolError(Toolchain::TYPE_COMPILE_XCASSETS, target);
       return false;
     }
   }
@@ -163,8 +176,7 @@ void NinjaCreateBundleTargetWriter::WriteCopyBundleFileRuleSteps(
 void NinjaCreateBundleTargetWriter::WriteCompileAssetsCatalogStep(
     const std::vector<OutputFile>& order_only_deps,
     std::vector<OutputFile>* output_files) {
-  if (target_->bundle_data().assets_catalog_sources().empty() &&
-      target_->bundle_data().partial_info_plist().is_null())
+  if (!TargetRequireAssetCatalogCompilation(target_))
     return;
 
   OutputFile compiled_catalog;

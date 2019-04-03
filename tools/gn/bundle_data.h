@@ -100,9 +100,6 @@ class BundleData {
   SourceDir& executable_dir() { return executable_dir_; }
   const SourceDir& executable_dir() const { return executable_dir_; }
 
-  SourceDir& plugins_dir() { return plugins_dir_; }
-  const SourceDir& plugins_dir() const { return plugins_dir_; }
-
   std::map<std::string, std::string>& xcode_extra_attributes() {
     return xcode_extra_attributes_;
   }
@@ -170,7 +167,6 @@ class BundleData {
   SourceDir contents_dir_;
   SourceDir resources_dir_;
   SourceDir executable_dir_;
-  SourceDir plugins_dir_;
 
   // The specified attributes will append to the build settings of the generated
   // Xcode target.

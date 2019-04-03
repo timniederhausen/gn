@@ -87,14 +87,6 @@ bool BundleFileRule::ApplyPatternToSource(const Settings* settings,
         }
         output_path.append(bundle_data.executable_dir().value());
         break;
-      case SUBSTITUTION_BUNDLE_PLUGINS_DIR:
-        if (bundle_data.contents_dir().is_null()) {
-          *err = ErrMissingPropertyForExpansion(settings, target, this,
-                                                variables::kBundlePlugInsDir);
-          return false;
-        }
-        output_path.append(bundle_data.plugins_dir().value());
-        break;
       default:
         output_path.append(SubstitutionWriter::GetSourceSubstitution(
             target_, target_->settings(), source_file, subrange.type,
