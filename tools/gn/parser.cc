@@ -221,6 +221,12 @@ Scopes
   always unequal by definition.
 )*";
 
+// Precedence constants.
+//
+// Currently all operators are left-associative so this list is sequential. To
+// implement a right-assocative operators in a Pratt parser we would leave gaps
+// in between the constants, and right-associative operators get a precedence
+// of "<left-associated-precedence> - 1".
 enum Precedence {
   PRECEDENCE_ASSIGNMENT = 1,  // Lowest precedence.
   PRECEDENCE_OR = 2,
@@ -241,9 +247,8 @@ enum Precedence {
 // seen as either a prefix or infix operator, and if it's infix, what its
 // precedence is.
 //
-// Refs:
-// - http://javascript.crockford.com/tdop/tdop.html
-// -
+// References:
+// http://javascript.crockford.com/tdop/tdop.html
 // http://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/
 
 // Indexed by Token::Type.
