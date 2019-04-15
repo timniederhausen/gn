@@ -294,9 +294,11 @@ bool RunCompileCommandsWriter(const BuildSettings* build_settings,
   base::ElapsedTimer timer;
 
   std::string file_name = "compile_commands.json";
+  std::string target_filters =
+      command_line->GetSwitchValueASCII(kSwitchExportCompileCommands);
 
-  bool res = CompileCommandsWriter::RunAndWriteFiles(build_settings, builder,
-                                                     file_name, quiet, err);
+  bool res = CompileCommandsWriter::RunAndWriteFiles(
+      build_settings, builder, file_name, target_filters, quiet, err);
   if (res && !quiet) {
     OutputString("Generating compile_commands took " +
                  base::Int64ToString(timer.Elapsed().InMilliseconds()) +
@@ -420,12 +422,15 @@ Generic JSON Output
 
 Compilation Database
 
-  --export-compile-commands
+  --export-compile-commands[=<target_name1,target_name2...>]
       Produces a compile_commands.json file in the root of the build directory
       containing an array of “command objects”, where each command object
-      specifies one way a translation unit is compiled in the project. This is
-      used for various Clang-based tooling, allowing for the replay of individual
-      compilations independent of the build system.
+      specifies one way a translation unit is compiled in the project. If a list
+      of target_name is supplied, only targets that are reachable from the list
+      of target_name will be used for “command objects” generation, otherwise
+      all available targets will be used. This is used for various Clang-based
+      tooling, allowing for the replay of individual compilations independent
+      of the build system.
 )";
 
 int RunGen(const std::vector<std::string>& args) {

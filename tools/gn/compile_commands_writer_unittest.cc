@@ -588,3 +588,56 @@ TEST_F(CompileCommandsTest, EscapedFlags) {
 #endif
   EXPECT_EQ(expected, out);
 }
+
+TEST_F(CompileCommandsTest, CompDBFilter) {
+  Err err;
+
+  std::vector<const Target*> targets;
+  Target target1(settings(), Label(SourceDir("//foo/"), "bar1"));
+  target1.set_output_type(Target::SOURCE_SET);
+  target1.sources().push_back(SourceFile("//foo/input1.c"));
+  target1.config_values().cflags_c().push_back("-DCONFIG=\"/config\"");
+  target1.SetToolchain(toolchain());
+  ASSERT_TRUE(target1.OnResolved(&err));
+  targets.push_back(&target1);
+
+  Target target2(settings(), Label(SourceDir("//foo/"), "bar2"));
+  target2.set_output_type(Target::SOURCE_SET);
+  target2.sources().push_back(SourceFile("//foo/input2.c"));
+  target2.config_values().cflags_c().push_back("-DCONFIG=\"/config\"");
+  target2.SetToolchain(toolchain());
+  ASSERT_TRUE(target2.OnResolved(&err));
+  targets.push_back(&target2);
+
+  Target target3(settings(), Label(SourceDir("//foo/"), "bar3"));
+  target3.set_output_type(Target::SOURCE_SET);
+  target3.sources().push_back(SourceFile("//foo/input3.c"));
+  target3.config_values().cflags_c().push_back("-DCONFIG=\"/config\"");
+  target3.SetToolchain(toolchain());
+  ASSERT_TRUE(target3.OnResolved(&err));
+  targets.push_back(&target3);
+
+  target1.private_deps().push_back(LabelTargetPair(&target2));
+  target1.private_deps().push_back(LabelTargetPair(&target3));
+
+  CompileCommandsWriter writer;
+
+  std::set<std::string> filter1;
+  std::vector<const Target*> test_results1 =
+      writer.FilterTargets(targets, filter1);
+  ASSERT_TRUE(test_results1.empty());
+
+  std::set<std::string> filter2;
+  filter2.insert(target1.label().name());
+  std::vector<const Target*> test_results2 =
+      writer.FilterTargets(targets, filter2);
+  ASSERT_EQ(test_results2, targets);
+
+  std::set<std::string> filter3;
+  filter3.insert(target2.label().name());
+  std::vector<const Target*> test_result3 =
+      writer.FilterTargets(targets, filter3);
+  std::vector<const Target*> expected_results3;
+  expected_results3.push_back(&target2);
+  ASSERT_EQ(test_result3, expected_results3);
+}

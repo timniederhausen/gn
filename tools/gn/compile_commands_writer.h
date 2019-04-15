@@ -13,14 +13,29 @@ class BuildSettings;
 
 class CompileCommandsWriter {
  public:
+  // Write compile commands into a json file located by parameter file_name.
+  //
+  // Parameter target_filters should be in "target_name1,target_name2..."
+  // format. If it is not empty, only targets that are reachable from targets
+  // in target_filters are used to generate compile commands.
+  //
+  // Parameter quiet is not used.
   static bool RunAndWriteFiles(const BuildSettings* build_setting,
                                const Builder& builder,
                                const std::string& file_name,
+                               const std::string& target_filters,
                                bool quiet,
                                Err* err);
   static void RenderJSON(const BuildSettings* build_settings,
                          std::vector<const Target*>& all_targets,
                          std::string* compile_commands);
+  static std::vector<const Target*> FilterTargets(
+      const std::vector<const Target*>& all_targets,
+      const std::set<std::string>& target_filters_set);
+
+ private:
+  // This fuction visits the deps graph of a target in a DFS fashion.
+  static void VisitDeps(const Target* target, std::set<const Target*>* visited);
 };
 
 #endif  // TOOLS_GN_COMPILE_COMMANDS_WRITER_H_
