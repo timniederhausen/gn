@@ -63,6 +63,26 @@ class Metadata {
   Contents contents_;
   SourceDir source_dir_;
 
+  std::pair<Value, bool> RebaseValue(const BuildSettings* settings,
+                                     const SourceDir& rebase_dir,
+                                     const Value& value,
+                                     Err* err) const;
+
+  std::pair<Value, bool> RebaseStringValue(const BuildSettings* settings,
+                                           const SourceDir& rebase_dir,
+                                           const Value& value,
+                                           Err* err) const;
+
+  std::pair<Value, bool> RebaseListValue(const BuildSettings* settings,
+                                         const SourceDir& rebase_dir,
+                                         const Value& value,
+                                         Err* err) const;
+
+  std::pair<Value, bool> RebaseScopeValue(const BuildSettings* settings,
+                                          const SourceDir& rebase_dir,
+                                          const Value& value,
+                                          Err* err) const;
+
   DISALLOW_COPY_AND_ASSIGN(Metadata);
 };
 

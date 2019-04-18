@@ -99,29 +99,58 @@ TEST(MetadataTest, WalkWithRebase) {
   EXPECT_EQ(results, expected);
 }
 
-TEST(MetadataTest, WalkWithRebaseError) {
+TEST(MetadataTest, WalkWithRebaseNonString) {
   TestWithScope setup;
   Metadata metadata;
   metadata.set_source_dir(SourceDir("/usr/home/files/"));
 
-  Value a_expected(nullptr, Value::LIST);
-  a_expected.list_value().push_back(Value(nullptr, "foo.cpp"));
-  a_expected.list_value().push_back(Value(nullptr, true));
+  Value a(nullptr, Value::LIST);
+  Value inner_list(nullptr, Value::LIST);
+  Value inner_scope(nullptr, Value::SCOPE);
+  inner_list.list_value().push_back(Value(nullptr, "foo.cpp"));
+  inner_list.list_value().push_back(Value(nullptr, "foo/bar.h"));
+  a.list_value().push_back(inner_list);
 
-  metadata.contents().insert(
-      std::pair<base::StringPiece, Value>("a", a_expected));
+  std::unique_ptr<Scope> scope(new Scope(setup.settings()));
+  scope->SetValue("a1", Value(nullptr, "foo2.cpp"), nullptr);
+  scope->SetValue("a2", Value(nullptr, "foo/bar2.h"), nullptr);
+  inner_scope.SetScopeValue(std::move(scope));
+  a.list_value().push_back(inner_scope);
 
+  metadata.contents().insert(std::pair<base::StringPiece, Value>("a", a));
   std::vector<std::string> data_keys;
   data_keys.emplace_back("a");
   std::vector<std::string> walk_keys;
   std::vector<Value> next_walk_keys;
   std::vector<Value> results;
 
+  std::vector<Value> expected;
+  Value inner_list_expected(nullptr, Value::LIST);
+  Value inner_scope_expected(nullptr, Value::SCOPE);
+  inner_list_expected.list_value().push_back(
+      Value(nullptr, "../home/files/foo.cpp"));
+  inner_list_expected.list_value().push_back(
+      Value(nullptr, "../home/files/foo/bar.h"));
+  expected.push_back(inner_list_expected);
+
+  std::unique_ptr<Scope> scope_expected(new Scope(setup.settings()));
+  scope_expected->SetValue("a1", Value(nullptr, "../home/files/foo2.cpp"),
+                           nullptr);
+  scope_expected->SetValue("a2", Value(nullptr, "../home/files/foo/bar2.h"),
+                           nullptr);
+  inner_scope_expected.SetScopeValue(std::move(scope_expected));
+  expected.push_back(inner_scope_expected);
+
+  std::vector<Value> expected_walk_keys;
+  expected_walk_keys.emplace_back(nullptr, "");
+
   Err err;
-  EXPECT_FALSE(metadata.WalkStep(setup.settings()->build_settings(), data_keys,
-                                 walk_keys, SourceDir("/foo_dir/"),
-                                 &next_walk_keys, &results, &err));
-  EXPECT_TRUE(err.has_error());
+  EXPECT_TRUE(metadata.WalkStep(setup.settings()->build_settings(), data_keys,
+                                walk_keys, SourceDir("/usr/foo_dir/"),
+                                &next_walk_keys, &results, &err));
+  EXPECT_FALSE(err.has_error());
+  EXPECT_EQ(next_walk_keys, expected_walk_keys);
+  EXPECT_EQ(results, expected);
 }
 
 TEST(MetadataTest, WalkKeysToWalk) {
