@@ -203,8 +203,8 @@ TEST(MetadataWalkTest, CollectWithError) {
   EXPECT_TRUE(result.empty());
   EXPECT_TRUE(err.has_error());
   EXPECT_EQ(err.message(),
-            "I was expecting //foo:missing to be a dependency of "
-            "//foo:one(//toolchain:default). "
+            "I was expecting //foo:missing(//toolchain:default) to be a "
+            "dependency of //foo:one(//toolchain:default). "
             "Make sure it's included in the deps or data_deps, and that you've "
             "specified the appropriate toolchain.")
       << err.message();

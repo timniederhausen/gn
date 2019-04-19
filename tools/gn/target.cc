@@ -917,6 +917,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
   // Gather walk keys and find the appropriate target. Targets identified in
   // the walk key set must be deps or data_deps of the declaring target.
   const DepsIteratorRange& all_deps = GetDeps(Target::DEPS_ALL);
+  const SourceDir current_dir("//");
   for (const auto& next : next_walk_keys) {
     DCHECK(next.type() == Value::STRING);
 
@@ -941,10 +942,19 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
     }
 
     // Otherwise, look through the target's deps for the specified one.
+    // Canonicalize the label if possible.
+    Label next_label =
+        Label::Resolve(current_dir, settings()->toolchain_label(), next, err);
+    if (next_label.is_null()) {
+      *err = Err(next.origin(), std::string("Failed to canonicalize ") +
+                                    next.string_value() + std::string("."));
+    }
+    std::string canonicalize_next_label = next_label.GetUserVisibleName(true);
+
     bool found_next = false;
     for (const auto& dep : all_deps) {
       // Match against the label with the toolchain.
-      if (dep.label.GetUserVisibleName(true) == next.string_value()) {
+      if (dep.label.GetUserVisibleName(true) == canonicalize_next_label) {
         // If we haven't walked this dep yet, go down into it.
         auto pair = targets_walked->insert(dep.ptr);
         if (pair.second) {
@@ -961,7 +971,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
     // Propagate it back to the user.
     if (!found_next) {
       *err = Err(next.origin(),
-                 std::string("I was expecting ") + next.string_value() +
+                 std::string("I was expecting ") + canonicalize_next_label +
                      std::string(" to be a dependency of ") +
                      label().GetUserVisibleName(true) +
                      ". Make sure it's included in the deps or data_deps, and "
