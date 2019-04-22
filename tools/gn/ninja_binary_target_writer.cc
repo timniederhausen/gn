@@ -53,8 +53,6 @@ void NinjaBinaryTargetWriter::Run() {
   for (const auto& source : target_->sources())
     used_types.Set(GetSourceFileType(source));
 
-  if (used_types.CSourceUsed()) {
-    NinjaCBinaryTargetWriter writer(target_, out_);
-    writer.Run();
-  }
+  NinjaCBinaryTargetWriter writer(target_, out_);
+  writer.Run();
 }
