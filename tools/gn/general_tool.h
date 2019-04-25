@@ -35,7 +35,7 @@ class GeneralTool : public Tool {
   bool InitTool(Scope* block_scope, Toolchain* toolchain, Err* err);
   bool ValidateName(const char* name) const override;
   void SetComplete() override;
-  bool ValidateSubstitution(SubstitutionType sub_type) const override;
+  bool ValidateSubstitution(const Substitution* sub_type) const override;
 
   GeneralTool* AsGeneral() override;
   const GeneralTool* AsGeneral() const override;

@@ -53,7 +53,7 @@ class Tool {
   virtual void SetComplete() = 0;
 
   // Validate substitutions in this tool.
-  virtual bool ValidateSubstitution(SubstitutionType sub_type) const = 0;
+  virtual bool ValidateSubstitution(const Substitution* sub_type) const = 0;
 
   // Manual RTTI
   virtual CTool* AsC();
@@ -183,7 +183,7 @@ class Tool {
   // SetComplete().
   bool IsPatternInOutputList(const SubstitutionList& output_list,
                              const SubstitutionPattern& pattern) const;
-  bool ValidateSubstitutionList(const std::vector<SubstitutionType>& list,
+  bool ValidateSubstitutionList(const std::vector<const Substitution*>& list,
                                 const Value* origin,
                                 Err* err) const;
   bool ValidateOutputs(Err* err) const;

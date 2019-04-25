@@ -425,6 +425,7 @@ def WriteGNNinja(path, platform, host, options):
         'tools/gn/bundle_data_target_generator.cc',
         'tools/gn/bundle_file_rule.cc',
         'tools/gn/c_include_iterator.cc',
+        'tools/gn/c_substitution_type.cc',
         'tools/gn/c_tool.cc',
         'tools/gn/command_analyze.cc',
         'tools/gn/command_args.cc',

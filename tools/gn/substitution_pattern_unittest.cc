@@ -12,7 +12,7 @@ TEST(SubstitutionPattern, ParseLiteral) {
   EXPECT_TRUE(pattern.Parse("This is a literal", nullptr, &err));
   EXPECT_FALSE(err.has_error());
   ASSERT_EQ(1u, pattern.ranges().size());
-  EXPECT_EQ(SUBSTITUTION_LITERAL, pattern.ranges()[0].type);
+  EXPECT_EQ(&SubstitutionLiteral, pattern.ranges()[0].type);
   EXPECT_EQ("This is a literal", pattern.ranges()[0].literal);
 }
 
@@ -24,13 +24,13 @@ TEST(SubstitutionPattern, ParseComplex) {
   EXPECT_FALSE(err.has_error());
   ASSERT_EQ(5u, pattern.ranges().size());
 
-  EXPECT_EQ(SUBSTITUTION_LITERAL, pattern.ranges()[0].type);
+  EXPECT_EQ(&SubstitutionLiteral, pattern.ranges()[0].type);
   EXPECT_EQ("AA", pattern.ranges()[0].literal);
-  EXPECT_EQ(SUBSTITUTION_SOURCE, pattern.ranges()[1].type);
-  EXPECT_EQ(SUBSTITUTION_SOURCE_NAME_PART, pattern.ranges()[2].type);
-  EXPECT_EQ(SUBSTITUTION_LITERAL, pattern.ranges()[3].type);
+  EXPECT_EQ(&SubstitutionSource, pattern.ranges()[1].type);
+  EXPECT_EQ(&SubstitutionSourceNamePart, pattern.ranges()[2].type);
+  EXPECT_EQ(&SubstitutionLiteral, pattern.ranges()[3].type);
   EXPECT_EQ("BB", pattern.ranges()[3].literal);
-  EXPECT_EQ(SUBSTITUTION_SOURCE_FILE_PART, pattern.ranges()[4].type);
+  EXPECT_EQ(&SubstitutionSourceFilePart, pattern.ranges()[4].type);
 }
 
 TEST(SubstitutionPattern, ParseErrors) {

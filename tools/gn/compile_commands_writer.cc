@@ -7,9 +7,10 @@
 #include <sstream>
 
 #include "base/json/string_escape.h"
-#include "base/strings/stringprintf.h"
 #include "base/strings/string_split.h"
+#include "base/strings/stringprintf.h"
 #include "tools/gn/builder.h"
+#include "tools/gn/c_substitution_type.h"
 #include "tools/gn/c_tool.h"
 #include "tools/gn/config_values_extractors.h"
 #include "tools/gn/deps_iterator.h"
@@ -68,32 +69,32 @@ void SetupCompileFlags(const Target* target,
   base::EscapeJSONString(includes_out.str(), false, &flags.includes);
 
   std::ostringstream cflags_out;
-  WriteOneFlag(target, SUBSTITUTION_CFLAGS, false, Tool::kToolNone,
+  WriteOneFlag(target, &CSubstitutionCFlags, false, Tool::kToolNone,
                &ConfigValues::cflags, opts, path_output, cflags_out,
                /*write_substitution=*/false);
   base::EscapeJSONString(cflags_out.str(), false, &flags.cflags);
 
   std::ostringstream cflags_c_out;
-  WriteOneFlag(target, SUBSTITUTION_CFLAGS_C, has_precompiled_headers,
+  WriteOneFlag(target, &CSubstitutionCFlagsC, has_precompiled_headers,
                CTool::kCToolCc, &ConfigValues::cflags_c, opts, path_output,
                cflags_c_out, /*write_substitution=*/false);
   base::EscapeJSONString(cflags_c_out.str(), false, &flags.cflags_c);
 
   std::ostringstream cflags_cc_out;
-  WriteOneFlag(target, SUBSTITUTION_CFLAGS_CC, has_precompiled_headers,
+  WriteOneFlag(target, &CSubstitutionCFlagsCc, has_precompiled_headers,
                CTool::kCToolCxx, &ConfigValues::cflags_cc, opts, path_output,
                cflags_cc_out, /*write_substitution=*/false);
   base::EscapeJSONString(cflags_cc_out.str(), false, &flags.cflags_cc);
 
   std::ostringstream cflags_objc_out;
-  WriteOneFlag(target, SUBSTITUTION_CFLAGS_OBJC, has_precompiled_headers,
+  WriteOneFlag(target, &CSubstitutionCFlagsObjC, has_precompiled_headers,
                CTool::kCToolObjC, &ConfigValues::cflags_objc, opts, path_output,
                cflags_objc_out,
                /*write_substitution=*/false);
   base::EscapeJSONString(cflags_objc_out.str(), false, &flags.cflags_objc);
 
   std::ostringstream cflags_objcc_out;
-  WriteOneFlag(target, SUBSTITUTION_CFLAGS_OBJCC, has_precompiled_headers,
+  WriteOneFlag(target, &CSubstitutionCFlagsObjCc, has_precompiled_headers,
                CTool::kCToolObjCxx, &ConfigValues::cflags_objcc, opts,
                path_output, cflags_objcc_out, /*write_substitution=*/false);
   base::EscapeJSONString(cflags_objcc_out.str(), false, &flags.cflags_objcc);
@@ -132,65 +133,53 @@ void WriteCommand(const Target* target,
 
   for (const auto& range : tool->command().ranges()) {
     // TODO: this is emitting a bonus space prior to each substitution.
-    switch (range.type) {
-      case SUBSTITUTION_LITERAL:
-        EscapeStringToStream(command_out, range.literal, no_quoting);
-        break;
-      case SUBSTITUTION_OUTPUT:
-        path_output.WriteFiles(command_out, tool_outputs);
-        break;
-      case SUBSTITUTION_DEFINES:
-        command_out << flags.defines;
-        break;
-      case SUBSTITUTION_INCLUDE_DIRS:
-        command_out << flags.includes;
-        break;
-      case SUBSTITUTION_CFLAGS:
-        command_out << flags.cflags;
-        break;
-      case SUBSTITUTION_CFLAGS_C:
-        if (source_type == SOURCE_C)
-          command_out << flags.cflags_c;
-        break;
-      case SUBSTITUTION_CFLAGS_CC:
-        if (source_type == SOURCE_CPP)
-          command_out << flags.cflags_cc;
-        break;
-      case SUBSTITUTION_CFLAGS_OBJC:
-        if (source_type == SOURCE_M)
-          command_out << flags.cflags_objc;
-        break;
-      case SUBSTITUTION_CFLAGS_OBJCC:
-        if (source_type == SOURCE_MM)
-          command_out << flags.cflags_objcc;
-        break;
-      case SUBSTITUTION_LABEL:
-      case SUBSTITUTION_LABEL_NAME:
-      case SUBSTITUTION_ROOT_GEN_DIR:
-      case SUBSTITUTION_ROOT_OUT_DIR:
-      case SUBSTITUTION_TARGET_GEN_DIR:
-      case SUBSTITUTION_TARGET_OUT_DIR:
-      case SUBSTITUTION_TARGET_OUTPUT_NAME:
-      case SUBSTITUTION_SOURCE:
-      case SUBSTITUTION_SOURCE_NAME_PART:
-      case SUBSTITUTION_SOURCE_FILE_PART:
-      case SUBSTITUTION_SOURCE_DIR:
-      case SUBSTITUTION_SOURCE_ROOT_RELATIVE_DIR:
-      case SUBSTITUTION_SOURCE_GEN_DIR:
-      case SUBSTITUTION_SOURCE_OUT_DIR:
-      case SUBSTITUTION_SOURCE_TARGET_RELATIVE:
-        EscapeStringToStream(command_out,
-                             SubstitutionWriter::GetCompilerSubstitution(
-                                 target, source, range.type),
-                             opts);
-        break;
-
+    if (range.type == &SubstitutionLiteral) {
+      EscapeStringToStream(command_out, range.literal, no_quoting);
+    } else if (range.type == &SubstitutionOutput) {
+      path_output.WriteFiles(command_out, tool_outputs);
+    } else if (range.type == &CSubstitutionDefines) {
+      command_out << flags.defines;
+    } else if (range.type == &CSubstitutionIncludeDirs) {
+      command_out << flags.includes;
+    } else if (range.type == &CSubstitutionCFlags) {
+      command_out << flags.cflags;
+    } else if (range.type == &CSubstitutionCFlagsC) {
+      if (source_type == SOURCE_C)
+        command_out << flags.cflags_c;
+    } else if (range.type == &CSubstitutionCFlagsCc) {
+      if (source_type == SOURCE_CPP)
+        command_out << flags.cflags_cc;
+    } else if (range.type == &CSubstitutionCFlagsObjC) {
+      if (source_type == SOURCE_M)
+        command_out << flags.cflags_objc;
+    } else if (range.type == &CSubstitutionCFlagsObjCc) {
+      if (source_type == SOURCE_MM)
+        command_out << flags.cflags_objcc;
+    } else if (range.type == &SubstitutionLabel ||
+               range.type == &SubstitutionLabelName ||
+               range.type == &SubstitutionRootGenDir ||
+               range.type == &SubstitutionRootOutDir ||
+               range.type == &SubstitutionTargetGenDir ||
+               range.type == &SubstitutionTargetOutDir ||
+               range.type == &SubstitutionTargetOutputName ||
+               range.type == &SubstitutionSource ||
+               range.type == &SubstitutionSourceNamePart ||
+               range.type == &SubstitutionSourceFilePart ||
+               range.type == &SubstitutionSourceDir ||
+               range.type == &SubstitutionSourceRootRelativeDir ||
+               range.type == &SubstitutionSourceGenDir ||
+               range.type == &SubstitutionSourceOutDir ||
+               range.type == &SubstitutionSourceTargetRelative) {
+      EscapeStringToStream(command_out,
+                           SubstitutionWriter::GetCompilerSubstitution(
+                               target, source, range.type),
+                           opts);
+    } else {
       // Other flags shouldn't be relevant to compiling C/C++/ObjC/ObjC++
       // source files.
-      default:
-        NOTREACHED() << "Unsupported substitution for this type of target : "
-                     << kSubstitutionNames[range.type];
-        continue;
+      NOTREACHED() << "Unsupported substitution for this type of target : "
+                   << range.type->name;
+      continue;
     }
   }
   compile_commands->append(kPrettyPrintLineEnding);
@@ -300,7 +289,6 @@ bool CompileCommandsWriter::RunAndWriteFiles(
   if (!WriteFileIfChanged(output_path, json, err))
     return false;
   return true;
-
 }
 
 std::vector<const Target*> CompileCommandsWriter::FilterTargets(

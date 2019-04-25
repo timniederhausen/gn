@@ -51,47 +51,40 @@ bool BundleFileRule::ApplyPatternToSource(const Settings* settings,
                                           Err* err) const {
   std::string output_path;
   for (const auto& subrange : pattern_.ranges()) {
-    switch (subrange.type) {
-      case SUBSTITUTION_LITERAL:
-        output_path.append(subrange.literal);
-        break;
-      case SUBSTITUTION_BUNDLE_ROOT_DIR:
-        if (bundle_data.contents_dir().is_null()) {
-          *err = ErrMissingPropertyForExpansion(settings, target, this,
-                                                variables::kBundleRootDir);
-          return false;
-        }
-        output_path.append(bundle_data.root_dir().value());
-        break;
-      case SUBSTITUTION_BUNDLE_CONTENTS_DIR:
-        if (bundle_data.contents_dir().is_null()) {
-          *err = ErrMissingPropertyForExpansion(settings, target, this,
-                                                variables::kBundleContentsDir);
-          return false;
-        }
-        output_path.append(bundle_data.contents_dir().value());
-        break;
-      case SUBSTITUTION_BUNDLE_RESOURCES_DIR:
-        if (bundle_data.resources_dir().is_null()) {
-          *err = ErrMissingPropertyForExpansion(settings, target, this,
-                                                variables::kBundleResourcesDir);
-          return false;
-        }
-        output_path.append(bundle_data.resources_dir().value());
-        break;
-      case SUBSTITUTION_BUNDLE_EXECUTABLE_DIR:
-        if (bundle_data.executable_dir().is_null()) {
-          *err = ErrMissingPropertyForExpansion(
-              settings, target, this, variables::kBundleExecutableDir);
-          return false;
-        }
-        output_path.append(bundle_data.executable_dir().value());
-        break;
-      default:
-        output_path.append(SubstitutionWriter::GetSourceSubstitution(
-            target_, target_->settings(), source_file, subrange.type,
-            SubstitutionWriter::OUTPUT_ABSOLUTE, SourceDir()));
-        break;
+    if (subrange.type == &SubstitutionLiteral) {
+      output_path.append(subrange.literal);
+    } else if (subrange.type == &SubstitutionBundleRootDir) {
+      if (bundle_data.contents_dir().is_null()) {
+        *err = ErrMissingPropertyForExpansion(settings, target, this,
+                                              variables::kBundleRootDir);
+        return false;
+      }
+      output_path.append(bundle_data.root_dir().value());
+    } else if (subrange.type == &SubstitutionBundleContentsDir) {
+      if (bundle_data.contents_dir().is_null()) {
+        *err = ErrMissingPropertyForExpansion(settings, target, this,
+                                              variables::kBundleContentsDir);
+        return false;
+      }
+      output_path.append(bundle_data.contents_dir().value());
+    } else if (subrange.type == &SubstitutionBundleResourcesDir) {
+      if (bundle_data.resources_dir().is_null()) {
+        *err = ErrMissingPropertyForExpansion(settings, target, this,
+                                              variables::kBundleResourcesDir);
+        return false;
+      }
+      output_path.append(bundle_data.resources_dir().value());
+    } else if (subrange.type == &SubstitutionBundleExecutableDir) {
+      if (bundle_data.executable_dir().is_null()) {
+        *err = ErrMissingPropertyForExpansion(settings, target, this,
+                                              variables::kBundleExecutableDir);
+        return false;
+      }
+      output_path.append(bundle_data.executable_dir().value());
+    } else {
+      output_path.append(SubstitutionWriter::GetSourceSubstitution(
+          target_, target_->settings(), source_file, subrange.type,
+          SubstitutionWriter::OUTPUT_ABSOLUTE, SourceDir()));
     }
   }
   *expanded_source_file = SourceFile(SourceFile::SWAP_IN, &output_path);

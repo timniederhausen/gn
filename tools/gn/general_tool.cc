@@ -39,7 +39,7 @@ bool GeneralTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
   return Tool::InitTool(scope, toolchain, err);
 }
 
-bool GeneralTool::ValidateSubstitution(SubstitutionType sub_type) const {
+bool GeneralTool::ValidateSubstitution(const Substitution* sub_type) const {
   if (name_ == kGeneralToolStamp || name_ == kGeneralToolAction)
     return IsValidToolSubstitution(sub_type);
   else if (name_ == kGeneralToolCopy || name_ == kGeneralToolCopyBundleData)

@@ -42,7 +42,7 @@ OutputFile GetWindowsPCHFile(const Target* target, const char* tool_name) {
 }
 
 void WriteOneFlag(const Target* target,
-                  SubstitutionType subst_enum,
+                  const Substitution* subst_enum,
                   bool has_precompiled_headers,
                   const char* tool_name,
                   const std::vector<std::string>& (ConfigValues::*getter)()
@@ -51,11 +51,11 @@ void WriteOneFlag(const Target* target,
                   PathOutput& path_output,
                   std::ostream& out,
                   bool write_substitution) {
-  if (!target->toolchain()->substitution_bits().used[subst_enum])
+  if (!target->toolchain()->substitution_bits().used.count(subst_enum))
     return;
 
   if (write_substitution)
-    out << kSubstitutionNinjaNames[subst_enum] << " =";
+    out << subst_enum->ninja_name << " =";
 
   if (has_precompiled_headers) {
     const CTool* tool = target->toolchain()->GetToolAsC(tool_name);

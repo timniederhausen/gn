@@ -95,7 +95,7 @@ Value RunProcessFileTemplate(Scope* scope,
   }
 
   auto& types = subst.required_types();
-  if (base::ContainsValue(types, SUBSTITUTION_SOURCE_TARGET_RELATIVE)) {
+  if (base::ContainsValue(types, &SubstitutionSourceTargetRelative)) {
     *err = Err(template_arg, "Not a valid substitution type for the function.");
     return Value();
   }

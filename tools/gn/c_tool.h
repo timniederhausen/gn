@@ -46,7 +46,7 @@ class CTool : public Tool {
   bool InitTool(Scope* block_scope, Toolchain* toolchain, Err* err);
   bool ValidateName(const char* name) const override;
   void SetComplete() override;
-  bool ValidateSubstitution(SubstitutionType sub_type) const override;
+  bool ValidateSubstitution(const Substitution* sub_type) const override;
 
   CTool* AsC() override;
   const CTool* AsC() const override;
@@ -109,7 +109,7 @@ class CTool : public Tool {
   // Initialization methods used by InitTool(). If successful, will set the
   // field and return true, otherwise will return false. Must be called before
   // SetComplete().
-  bool ValidateOutputSubstitution(SubstitutionType sub_type) const;
+  bool ValidateOutputSubstitution(const Substitution* sub_type) const;
   bool ValidateRuntimeOutputs(Err* err);
   // Validates either link_output or depend_output. To generalize to either,
   // pass

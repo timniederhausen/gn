@@ -7,234 +7,178 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "tools/gn/c_substitution_type.h"
 #include "tools/gn/err.h"
 
-const char* kSubstitutionNames[SUBSTITUTION_NUM_TYPES] = {
-    "<<literal>>",  // SUBSTITUTION_LITERAL
+const std::vector<SubstitutionTypes*> AllSubstitutions = {&GeneralSubstitutions,
+                                                          &CSubstitutions};
 
-    "{{source}}",  // SUBSTITUTION_SOURCE
-    "{{output}}",  // SUBSTITUTION_OUTPUT
+const SubstitutionTypes GeneralSubstitutions = {
+    &SubstitutionLiteral,
 
-    "{{source_name_part}}",          // SUBSTITUTION_NAME_PART
-    "{{source_file_part}}",          // SUBSTITUTION_FILE_PART
-    "{{source_dir}}",                // SUBSTITUTION_SOURCE_DIR
-    "{{source_root_relative_dir}}",  // SUBSTITUTION_SOURCE_ROOT_RELATIVE_DIR
-    "{{source_gen_dir}}",            // SUBSTITUTION_SOURCE_GEN_DIR
-    "{{source_out_dir}}",            // SUBSTITUTION_SOURCE_OUT_DIR
-    "{{source_target_relative}}",    // SUBSTITUTION_SOURCE_TARGET_RELATIVE
+    &SubstitutionOutput,
+    &SubstitutionLabel,
+    &SubstitutionLabelName,
+    &SubstitutionRootGenDir,
+    &SubstitutionRootOutDir,
+    &SubstitutionTargetGenDir,
+    &SubstitutionTargetOutDir,
+    &SubstitutionTargetOutputName,
 
-    "{{label}}",               // SUBSTITUTION_LABEL
-    "{{label_name}}",          // SUBSTITUTION_LABEL_NAME
-    "{{root_gen_dir}}",        // SUBSTITUTION_ROOT_GEN_DIR
-    "{{root_out_dir}}",        // SUBSTITUTION_ROOT_OUT_DIR
-    "{{target_gen_dir}}",      // SUBSTITUTION_TARGET_GEN_DIR
-    "{{target_out_dir}}",      // SUBSTITUTION_TARGET_OUT_DIR
-    "{{target_output_name}}",  // SUBSTITUTION_TARGET_OUTPUT_NAME
+    &SubstitutionSource,
+    &SubstitutionSourceNamePart,
+    &SubstitutionSourceFilePart,
+    &SubstitutionSourceDir,
+    &SubstitutionSourceRootRelativeDir,
+    &SubstitutionSourceGenDir,
+    &SubstitutionSourceOutDir,
+    &SubstitutionSourceTargetRelative,
 
-    "{{asmflags}}",      // SUBSTITUTION_ASMFLAGS
-    "{{cflags}}",        // SUBSTITUTION_CFLAGS
-    "{{cflags_c}}",      // SUBSTITUTION_CFLAGS_C
-    "{{cflags_cc}}",     // SUBSTITUTION_CFLAGS_CC
-    "{{cflags_objc}}",   // SUBSTITUTION_CFLAGS_OBJC
-    "{{cflags_objcc}}",  // SUBSTITUTION_CFLAGS_OBJCC
-    "{{defines}}",       // SUBSTITUTION_DEFINES
-    "{{include_dirs}}",  // SUBSTITUTION_INCLUDE_DIRS
+    &SubstitutionBundleRootDir,
+    &SubstitutionBundleContentsDir,
+    &SubstitutionBundleResourcesDir,
+    &SubstitutionBundleExecutableDir,
 
-    "{{inputs}}",            // SUBSTITUTION_LINKER_INPUTS
-    "{{inputs_newline}}",    // SUBSTITUTION_LINKER_INPUTS_NEWLINE
-    "{{ldflags}}",           // SUBSTITUTION_LDFLAGS
-    "{{libs}}",              // SUBSTITUTION_LIBS
-    "{{output_dir}}",        // SUBSTITUTION_OUTPUT_DIR
-    "{{output_extension}}",  // SUBSTITUTION_OUTPUT_EXTENSION
-    "{{solibs}}",            // SUBSTITUTION_SOLIBS
+    &SubstitutionBundleProductType,
+    &SubstitutionBundlePartialInfoPlist,
 
-    "{{arflags}}",  // SUBSTITUTION_ARFLAGS
-
-    "{{bundle_root_dir}}",            // SUBSTITUTION_BUNDLE_ROOT_DIR
-    "{{bundle_contents_dir}}",        // SUBSTITUTION_BUNDLE_CONTENTS_DIR
-    "{{bundle_resources_dir}}",       // SUBSTITUTION_BUNDLE_RESOURCES_DIR
-    "{{bundle_executable_dir}}",      // SUBSTITUTION_BUNDLE_EXECUTABLE_DIR
-    "{{bundle_product_type}}",        // SUBSTITUTION_BUNDLE_PRODUCT_TYPE
-    "{{bundle_partial_info_plist}}",  // SUBSTITUTION_BUNDLE_PARTIAL_INFO_PLIST,
-
-    "{{response_file_name}}",  // SUBSTITUTION_RSP_FILE_NAME
+    &SubstitutionRspFileName,
 };
 
-const char* kSubstitutionNinjaNames[SUBSTITUTION_NUM_TYPES] = {
-    nullptr,  // SUBSTITUTION_LITERAL
+const Substitution SubstitutionLiteral = {"<<literal>>", nullptr};
 
-    "in",   // SUBSTITUTION_SOURCE
-    "out",  // SUBSTITUTION_OUTPUT
+const Substitution SubstitutionSource = {"{{source}}", "in"};
+const Substitution SubstitutionOutput = {"{{output}}", "out"};
 
-    "source_name_part",          // SUBSTITUTION_NAME_PART
-    "source_file_part",          // SUBSTITUTION_FILE_PART
-    "source_dir",                // SUBSTITUTION_SOURCE_DIR
-    "source_root_relative_dir",  // SUBSTITUTION_SOURCE_ROOT_RELATIVE_DIR
-    "source_gen_dir",            // SUBSTITUTION_SOURCE_GEN_DIR
-    "source_out_dir",            // SUBSTITUTION_SOURCE_OUT_DIR
-    "source_target_relative",    // SUBSTITUTION_SOURCE_TARGET_RELATIVE
+const Substitution SubstitutionSourceNamePart = {"{{source_name_part}}",
+                                                 "source_name_part"};
+const Substitution SubstitutionSourceFilePart = {"{{source_file_part}}",
+                                                 "source_file_part"};
+const Substitution SubstitutionSourceDir = {"{{source_dir}}", "source_dir"};
+const Substitution SubstitutionSourceRootRelativeDir = {
+    "{{source_root_relative_dir}}", "source_root_relative_dir"};
+const Substitution SubstitutionSourceGenDir = {"{{source_gen_dir}}",
+                                               "source_gen_dir"};
+const Substitution SubstitutionSourceOutDir = {"{{source_out_dir}}",
+                                               "source_out_dir"};
+const Substitution SubstitutionSourceTargetRelative = {
+    "{{source_target_relative}}", "source_target_relative"};
 
-    "label",               // SUBSTITUTION_LABEL
-    "label_name",          // SUBSTITUTION_LABEL_NAME
-    "root_gen_dir",        // SUBSTITUTION_ROOT_GEN_DIR
-    "root_out_dir",        // SUBSTITUTION_ROOT_OUT_DIR
-    "target_gen_dir",      // SUBSTITUTION_TARGET_GEN_DIR
-    "target_out_dir",      // SUBSTITUTION_TARGET_OUT_DIR
-    "target_output_name",  // SUBSTITUTION_TARGET_OUTPUT_NAME
+// Valid for all compiler and linker tools. These depend on the target and
+// do not vary on a per-file basis.
+const Substitution SubstitutionLabel = {"{{label}}", "label"};
+const Substitution SubstitutionLabelName = {"{{label_name}}", "label_name"};
+const Substitution SubstitutionRootGenDir = {"{{root_gen_dir}}",
+                                             "root_gen_dir"};
+const Substitution SubstitutionRootOutDir = {"{{root_out_dir}}",
+                                             "root_out_dir"};
+const Substitution SubstitutionTargetGenDir = {"{{target_gen_dir}}",
+                                               "target_gen_dir"};
+const Substitution SubstitutionTargetOutDir = {"{{target_out_dir}}",
+                                               "target_out_dir"};
+const Substitution SubstitutionTargetOutputName = {"{{target_output_name}}",
+                                                   "target_output_name"};
 
-    "asmflags",      // SUBSTITUTION_ASMFLAGS
-    "cflags",        // SUBSTITUTION_CFLAGS
-    "cflags_c",      // SUBSTITUTION_CFLAGS_C
-    "cflags_cc",     // SUBSTITUTION_CFLAGS_CC
-    "cflags_objc",   // SUBSTITUTION_CFLAGS_OBJC
-    "cflags_objcc",  // SUBSTITUTION_CFLAGS_OBJCC
-    "defines",       // SUBSTITUTION_DEFINES
-    "include_dirs",  // SUBSTITUTION_INCLUDE_DIRS
+// Valid for bundle_data targets.
+const Substitution SubstitutionBundleRootDir = {"{{bundle_root_dir}}",
+                                                "bundle_root_dir"};
+const Substitution SubstitutionBundleContentsDir = {"{{bundle_contents_dir}}",
+                                                    "bundle_contents_dir"};
+const Substitution SubstitutionBundleResourcesDir = {"{{bundle_resources_dir}}",
+                                                     "bundle_resources_dir"};
+const Substitution SubstitutionBundleExecutableDir = {
+    "{{bundle_executable_dir}}", "bundle_executable_dir"};
 
-    // LINKER_INPUTS expands to the same Ninja var as SUBSTITUTION_SOURCE. These
-    // are used in different contexts and are named differently to keep things
-    // clear, but they both expand to the "set of input files" for a build rule.
-    "in",                // SUBSTITUTION_LINKER_INPUTS
-    "in_newline",        // SUBSTITUTION_LINKER_INPUTS_NEWLINE
-    "ldflags",           // SUBSTITUTION_LDFLAGS
-    "libs",              // SUBSTITUTION_LIBS
-    "output_dir",        // SUBSTITUTION_OUTPUT_DIR
-    "output_extension",  // SUBSTITUTION_OUTPUT_EXTENSION
-    "solibs",            // SUBSTITUTION_SOLIBS
+// Valid for compile_xcassets tool.
+const Substitution SubstitutionBundleProductType = {"{{bundle_product_type}}",
+                                                    "product_type"};
+const Substitution SubstitutionBundlePartialInfoPlist = {
+    "{{bundle_partial_info_plist}}", "partial_info_plist"};
 
-    "arflags",  // SUBSTITUTION_ARFLAGS
+// Used only for the args of actions.
+const Substitution SubstitutionRspFileName = {"{{response_file_name}}",
+                                              "rspfile"};
 
-    "bundle_root_dir",        // SUBSTITUTION_BUNDLE_ROOT_DIR
-    "bundle_contents_dir",    // SUBSTITUTION_BUNDLE_CONTENTS_DIR
-    "bundle_resources_dir",   // SUBSTITUTION_BUNDLE_RESOURCES_DIR
-    "bundle_executable_dir",  // SUBSTITUTION_BUNDLE_EXECUTABLE_DIR
-    "product_type",           // SUBSTITUTION_BUNDLE_PRODUCT_TYPE
-    "partial_info_plist",     // SUBSTITUTION_BUNDLE_PARTIAL_INFO_PLIST
-
-    "rspfile",  // SUBSTITUTION_RSP_FILE_NAME
-};
-
-SubstitutionBits::SubstitutionBits() : used() {}
+SubstitutionBits::SubstitutionBits() = default;
 
 void SubstitutionBits::MergeFrom(const SubstitutionBits& other) {
-  for (size_t i = 0; i < SUBSTITUTION_NUM_TYPES; i++)
-    used[i] |= other.used[i];
+  for (const Substitution* s : other.used)
+    used.insert(s);
 }
 
-void SubstitutionBits::FillVector(std::vector<SubstitutionType>* vect) const {
-  for (size_t i = SUBSTITUTION_FIRST_PATTERN; i < SUBSTITUTION_NUM_TYPES; i++) {
-    if (used[i])
-      vect->push_back(static_cast<SubstitutionType>(i));
+void SubstitutionBits::FillVector(
+    std::vector<const Substitution*>* vect) const {
+  for (const Substitution* s : used) {
+    vect->push_back(s);
   }
 }
 
-bool SubstitutionIsInOutputDir(SubstitutionType type) {
-  return type == SUBSTITUTION_SOURCE_GEN_DIR ||
-         type == SUBSTITUTION_SOURCE_OUT_DIR ||
-         type == SUBSTITUTION_ROOT_GEN_DIR ||
-         type == SUBSTITUTION_ROOT_OUT_DIR ||
-         type == SUBSTITUTION_TARGET_GEN_DIR ||
-         type == SUBSTITUTION_TARGET_OUT_DIR;
+bool SubstitutionIsInOutputDir(const Substitution* type) {
+  return type == &SubstitutionSourceGenDir ||
+         type == &SubstitutionSourceOutDir || type == &SubstitutionRootGenDir ||
+         type == &SubstitutionRootOutDir || type == &SubstitutionTargetGenDir ||
+         type == &SubstitutionTargetOutDir;
 }
 
-bool SubstitutionIsInBundleDir(SubstitutionType type) {
-  return type == SUBSTITUTION_BUNDLE_ROOT_DIR ||
-         type == SUBSTITUTION_BUNDLE_CONTENTS_DIR ||
-         type == SUBSTITUTION_BUNDLE_RESOURCES_DIR ||
-         type == SUBSTITUTION_BUNDLE_EXECUTABLE_DIR;
+bool SubstitutionIsInBundleDir(const Substitution* type) {
+  return type == &SubstitutionBundleRootDir ||
+         type == &SubstitutionBundleContentsDir ||
+         type == &SubstitutionBundleResourcesDir ||
+         type == &SubstitutionBundleExecutableDir;
 }
 
-bool IsValidBundleDataSubstitution(SubstitutionType type) {
-  return type == SUBSTITUTION_LITERAL ||
-         type == SUBSTITUTION_SOURCE_NAME_PART ||
-         type == SUBSTITUTION_SOURCE_FILE_PART ||
-         type == SUBSTITUTION_SOURCE_ROOT_RELATIVE_DIR ||
-         type == SUBSTITUTION_BUNDLE_ROOT_DIR ||
-         type == SUBSTITUTION_BUNDLE_CONTENTS_DIR ||
-         type == SUBSTITUTION_BUNDLE_RESOURCES_DIR ||
-         type == SUBSTITUTION_BUNDLE_EXECUTABLE_DIR;
+bool IsValidBundleDataSubstitution(const Substitution* type) {
+  return type == &SubstitutionLiteral || type == &SubstitutionSourceNamePart ||
+         type == &SubstitutionSourceFilePart ||
+         type == &SubstitutionSourceRootRelativeDir ||
+         type == &SubstitutionBundleRootDir ||
+         type == &SubstitutionBundleContentsDir ||
+         type == &SubstitutionBundleResourcesDir ||
+         type == &SubstitutionBundleExecutableDir;
 }
 
-bool IsValidSourceSubstitution(SubstitutionType type) {
-  return type == SUBSTITUTION_LITERAL || type == SUBSTITUTION_SOURCE ||
-         type == SUBSTITUTION_SOURCE_NAME_PART ||
-         type == SUBSTITUTION_SOURCE_FILE_PART ||
-         type == SUBSTITUTION_SOURCE_DIR ||
-         type == SUBSTITUTION_SOURCE_ROOT_RELATIVE_DIR ||
-         type == SUBSTITUTION_SOURCE_GEN_DIR ||
-         type == SUBSTITUTION_SOURCE_OUT_DIR ||
-         type == SUBSTITUTION_SOURCE_TARGET_RELATIVE;
+bool IsValidSourceSubstitution(const Substitution* type) {
+  return type == &SubstitutionLiteral || type == &SubstitutionSource ||
+         type == &SubstitutionSourceNamePart ||
+         type == &SubstitutionSourceFilePart ||
+         type == &SubstitutionSourceDir ||
+         type == &SubstitutionSourceRootRelativeDir ||
+         type == &SubstitutionSourceGenDir ||
+         type == &SubstitutionSourceOutDir ||
+         type == &SubstitutionSourceTargetRelative;
 }
 
-bool IsValidScriptArgsSubstitution(SubstitutionType type) {
-  return IsValidSourceSubstitution(type) || type == SUBSTITUTION_RSP_FILE_NAME;
+bool IsValidScriptArgsSubstitution(const Substitution* type) {
+  return IsValidSourceSubstitution(type) || type == &SubstitutionRspFileName;
 }
 
-bool IsValidToolSubstitution(SubstitutionType type) {
-  return type == SUBSTITUTION_LITERAL || type == SUBSTITUTION_OUTPUT ||
-         type == SUBSTITUTION_LABEL || type == SUBSTITUTION_LABEL_NAME ||
-         type == SUBSTITUTION_ROOT_GEN_DIR ||
-         type == SUBSTITUTION_ROOT_OUT_DIR ||
-         type == SUBSTITUTION_TARGET_GEN_DIR ||
-         type == SUBSTITUTION_TARGET_OUT_DIR ||
-         type == SUBSTITUTION_TARGET_OUTPUT_NAME;
+bool IsValidToolSubstitution(const Substitution* type) {
+  return type == &SubstitutionLiteral || type == &SubstitutionOutput ||
+         type == &SubstitutionLabel || type == &SubstitutionLabelName ||
+         type == &SubstitutionRootGenDir || type == &SubstitutionRootOutDir ||
+         type == &SubstitutionTargetGenDir ||
+         type == &SubstitutionTargetOutDir ||
+         type == &SubstitutionTargetOutputName;
 }
 
-bool IsValidCompilerSubstitution(SubstitutionType type) {
-  return IsValidToolSubstitution(type) || IsValidSourceSubstitution(type) ||
-         type == SUBSTITUTION_SOURCE || type == SUBSTITUTION_ASMFLAGS ||
-         type == SUBSTITUTION_CFLAGS || type == SUBSTITUTION_CFLAGS_C ||
-         type == SUBSTITUTION_CFLAGS_CC || type == SUBSTITUTION_CFLAGS_OBJC ||
-         type == SUBSTITUTION_CFLAGS_OBJCC || type == SUBSTITUTION_DEFINES ||
-         type == SUBSTITUTION_INCLUDE_DIRS;
+bool IsValidCopySubstitution(const Substitution* type) {
+  return IsValidToolSubstitution(type) || type == &SubstitutionSource;
 }
 
-bool IsValidCompilerOutputsSubstitution(SubstitutionType type) {
-  // All tool types except "output" (which would be infinitely recursive).
-  return (IsValidToolSubstitution(type) && type != SUBSTITUTION_OUTPUT) ||
-         IsValidSourceSubstitution(type);
+bool IsValidCompileXCassetsSubstitution(const Substitution* type) {
+  return IsValidToolSubstitution(type) || type == &CSubstitutionLinkerInputs ||
+         type == &SubstitutionBundleProductType ||
+         type == &SubstitutionBundlePartialInfoPlist;
 }
 
-bool IsValidLinkerSubstitution(SubstitutionType type) {
-  return IsValidToolSubstitution(type) || type == SUBSTITUTION_LINKER_INPUTS ||
-         type == SUBSTITUTION_LINKER_INPUTS_NEWLINE ||
-         type == SUBSTITUTION_LDFLAGS || type == SUBSTITUTION_LIBS ||
-         type == SUBSTITUTION_OUTPUT_DIR ||
-         type == SUBSTITUTION_OUTPUT_EXTENSION || type == SUBSTITUTION_SOLIBS;
-}
-
-bool IsValidLinkerOutputsSubstitution(SubstitutionType type) {
-  // All valid compiler outputs plus the output extension.
-  return IsValidCompilerOutputsSubstitution(type) ||
-         type == SUBSTITUTION_OUTPUT_DIR ||
-         type == SUBSTITUTION_OUTPUT_EXTENSION;
-}
-
-bool IsValidALinkSubstitution(SubstitutionType type) {
-  return IsValidToolSubstitution(type) || type == SUBSTITUTION_LINKER_INPUTS ||
-         type == SUBSTITUTION_LINKER_INPUTS_NEWLINE ||
-         type == SUBSTITUTION_ARFLAGS || type == SUBSTITUTION_OUTPUT_DIR ||
-         type == SUBSTITUTION_OUTPUT_EXTENSION;
-}
-
-bool IsValidCopySubstitution(SubstitutionType type) {
-  return IsValidToolSubstitution(type) || type == SUBSTITUTION_SOURCE;
-}
-
-bool IsValidCompileXCassetsSubstitution(SubstitutionType type) {
-  return IsValidToolSubstitution(type) || type == SUBSTITUTION_LINKER_INPUTS ||
-         type == SUBSTITUTION_BUNDLE_PRODUCT_TYPE ||
-         type == SUBSTITUTION_BUNDLE_PARTIAL_INFO_PLIST;
-}
-
-bool EnsureValidSubstitutions(const std::vector<SubstitutionType>& types,
-                              bool (*is_valid_subst)(SubstitutionType),
+bool EnsureValidSubstitutions(const std::vector<const Substitution*>& types,
+                              bool (*is_valid_subst)(const Substitution*),
                               const ParseNode* origin,
                               Err* err) {
-  for (SubstitutionType type : types) {
+  for (const Substitution* type : types) {
     if (!is_valid_subst(type)) {
       *err = Err(origin, "Invalid substitution type.",
-                 "The substitution " + std::string(kSubstitutionNames[type]) +
+                 "The substitution " + std::string(type->name) +
                      " isn't valid for something\n"
                      "operating on a source file such as this.");
       return false;

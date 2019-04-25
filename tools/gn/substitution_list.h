@@ -31,7 +31,7 @@ class SubstitutionList {
 
   // Returns a list of all substitution types used by the patterns in this
   // list, with the exception of LITERAL.
-  const std::vector<SubstitutionType>& required_types() const {
+  const std::vector<const Substitution*>& required_types() const {
     return required_types_;
   }
 
@@ -40,7 +40,7 @@ class SubstitutionList {
  private:
   std::vector<SubstitutionPattern> list_;
 
-  std::vector<SubstitutionType> required_types_;
+  std::vector<const Substitution*> required_types_;
 };
 
 #endif  // TOOLS_GN_SUBSTITUTION_LIST_H_

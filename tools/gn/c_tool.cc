@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "tools/gn/c_tool.h"
+#include "tools/gn/c_substitution_type.h"
 #include "tools/gn/target.h"
 
 const char* CTool::kCToolCc = "cc";
@@ -155,8 +156,7 @@ bool CTool::ReadOutputsPatternList(Scope* scope,
   for (const auto& cur_type : list.required_types()) {
     if (!ValidateOutputSubstitution(cur_type)) {
       *err = Err(*value, "Pattern not valid here.",
-                 "You used the pattern " +
-                     std::string(kSubstitutionNames[cur_type]) +
+                 "You used the pattern " + std::string(cur_type->name) +
                      " which is not valid\nfor this variable.");
       return false;
     }
@@ -206,7 +206,7 @@ bool CTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
   return true;
 }
 
-bool CTool::ValidateSubstitution(SubstitutionType sub_type) const {
+bool CTool::ValidateSubstitution(const Substitution* sub_type) const {
   if (name_ == kCToolCc || name_ == kCToolCxx || name_ == kCToolObjC ||
       name_ == kCToolObjCxx || name_ == kCToolRc || name_ == kCToolAsm)
     return IsValidCompilerSubstitution(sub_type);
@@ -219,7 +219,7 @@ bool CTool::ValidateSubstitution(SubstitutionType sub_type) const {
   return false;
 }
 
-bool CTool::ValidateOutputSubstitution(SubstitutionType sub_type) const {
+bool CTool::ValidateOutputSubstitution(const Substitution* sub_type) const {
   if (name_ == kCToolCc || name_ == kCToolCxx || name_ == kCToolObjC ||
       name_ == kCToolObjCxx || name_ == kCToolRc || name_ == kCToolAsm)
     return IsValidCompilerOutputsSubstitution(sub_type);

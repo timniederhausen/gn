@@ -61,7 +61,7 @@ struct IncludeWriter {
 // tool-specific (e.g. "cflags_c"). For non-tool-specific flags (e.g.
 // "defines") tool_type should be TYPE_NONE.
 void WriteOneFlag(const Target* target,
-                  SubstitutionType subst_enum,
+                  const Substitution* subst_enum,
                   bool has_precompiled_headers,
                   const char* tool_name,
                   const std::vector<std::string>& (ConfigValues::*getter)()

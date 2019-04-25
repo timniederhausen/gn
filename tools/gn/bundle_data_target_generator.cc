@@ -55,10 +55,10 @@ bool BundleDataTargetGenerator::FillOutputs() {
     return false;
 
   // Check the substitutions used are valid for this purpose.
-  for (SubstitutionType type : outputs.required_types()) {
+  for (const Substitution* type : outputs.required_types()) {
     if (!IsValidBundleDataSubstitution(type)) {
       *err_ = Err(value->origin(), "Invalid substitution type.",
-                  "The substitution " + std::string(kSubstitutionNames[type]) +
+                  "The substitution " + std::string(type->name) +
                       " isn't valid for something\n"
                       "operating on a bundle_data file such as this.");
       return false;

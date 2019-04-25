@@ -20,14 +20,14 @@ class SubstitutionPattern {
  public:
   struct Subrange {
     Subrange();
-    explicit Subrange(SubstitutionType t, const std::string& l = std::string());
+    explicit Subrange(const Substitution* t, const std::string& l = std::string());
     ~Subrange();
 
     inline bool operator==(const Subrange& other) const {
       return type == other.type && literal == other.literal;
     }
 
-    SubstitutionType type;
+    const Substitution* type;
 
     // When type_ == LITERAL, this specifies the literal.
     std::string literal;
@@ -50,7 +50,7 @@ class SubstitutionPattern {
   std::string AsString() const;
 
   // Sets the bits in the given vector corresponding to the substitutions used
-  // by this pattern. SUBSTITUTION_LITERAL is ignored.
+  // by this pattern. SubstitutionLiteral is ignored.
   void FillRequiredTypes(SubstitutionBits* bits) const;
 
   // Checks whether this pattern resolves to something in the output directory
@@ -59,8 +59,8 @@ class SubstitutionPattern {
   bool IsInOutputDir(const BuildSettings* build_settings, Err* err) const;
 
   // Returns a vector listing the substitutions used by this pattern, not
-  // counting SUBSTITUTION_LITERAL.
-  const std::vector<SubstitutionType>& required_types() const {
+  // counting SubstitutionLiteral.
+  const std::vector<const Substitution*>& required_types() const {
     return required_types_;
   }
 
@@ -73,7 +73,7 @@ class SubstitutionPattern {
   std::vector<Subrange> ranges_;
   const ParseNode* origin_;
 
-  std::vector<SubstitutionType> required_types_;
+  std::vector<const Substitution*> required_types_;
 };
 
 #endif  // TOOLS_GN_SUBSTITUTION_PATTERN_H_

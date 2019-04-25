@@ -74,7 +74,7 @@ void ActionTargetGenerator::DoRun() {
   const auto& required_args_substitutions =
       target_->action_values().args().required_types();
   bool has_rsp_file_name = base::ContainsValue(required_args_substitutions,
-                                               SUBSTITUTION_RSP_FILE_NAME);
+                                               &SubstitutionRspFileName);
   if (target_->action_values().uses_rsp_file() && !has_rsp_file_name) {
     *err_ = Err(
         function_call_, "Missing {{response_file_name}} in args.",

@@ -368,7 +368,7 @@ bool TargetGenerator::EnsureSubstitutionIsInOutputDir(
     return false;
   }
 
-  if (pattern.ranges()[0].type == SUBSTITUTION_LITERAL) {
+  if (pattern.ranges()[0].type == &SubstitutionLiteral) {
     // If the first thing is a literal, it must start with the output dir.
     if (!EnsureStringIsInOutputDir(GetBuildSettings()->build_dir(),
                                    pattern.ranges()[0].literal,

@@ -53,14 +53,14 @@ bool Tool::IsPatternInOutputList(const SubstitutionList& output_list,
   return false;
 }
 
-bool Tool::ValidateSubstitutionList(const std::vector<SubstitutionType>& list,
+bool Tool::ValidateSubstitutionList(const std::vector<const Substitution*>& list,
                                     const Value* origin,
                                     Err* err) const {
   for (const auto& cur_type : list) {
     if (!ValidateSubstitution(cur_type)) {
       *err = Err(*origin, "Pattern not valid here.",
                  "You used the pattern " +
-                     std::string(kSubstitutionNames[cur_type]) +
+                     std::string(cur_type->name) +
                      " which is not valid\nfor this variable.");
       return false;
     }
