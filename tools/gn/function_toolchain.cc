@@ -753,10 +753,9 @@ Value RunTool(Scope* scope,
     return Value();
 
   std::unique_ptr<Tool> tool =
-      Tool::CreateTool(tool_name, &block_scope, toolchain, err);
+      Tool::CreateTool(function, tool_name, &block_scope, toolchain, err);
 
   if (!tool) {
-    *err = Err(function, "Unknown tool type");
     return Value();
   }
 

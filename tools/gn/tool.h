@@ -165,7 +165,8 @@ class Tool {
 
   // Create a tool based on given features.
   static std::unique_ptr<Tool> CreateTool(const std::string& name);
-  static std::unique_ptr<Tool> CreateTool(const std::string& name,
+  static std::unique_ptr<Tool> CreateTool(const ParseNode* function,
+                                          const std::string& name,
                                           Scope* scope,
                                           Toolchain* toolchain,
                                           Err* err);

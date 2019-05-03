@@ -53,14 +53,14 @@ bool Tool::IsPatternInOutputList(const SubstitutionList& output_list,
   return false;
 }
 
-bool Tool::ValidateSubstitutionList(const std::vector<const Substitution*>& list,
-                                    const Value* origin,
-                                    Err* err) const {
+bool Tool::ValidateSubstitutionList(
+    const std::vector<const Substitution*>& list,
+    const Value* origin,
+    Err* err) const {
   for (const auto& cur_type : list) {
     if (!ValidateSubstitution(cur_type)) {
       *err = Err(*origin, "Pattern not valid here.",
-                 "You used the pattern " +
-                     std::string(cur_type->name) +
+                 "You used the pattern " + std::string(cur_type->name) +
                      " which is not valid\nfor this variable.");
       return false;
     }
@@ -196,11 +196,16 @@ bool Tool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
   return true;
 }
 
-std::unique_ptr<Tool> Tool::CreateTool(const std::string& name,
+std::unique_ptr<Tool> Tool::CreateTool(const ParseNode* function,
+                                       const std::string& name,
                                        Scope* scope,
                                        Toolchain* toolchain,
                                        Err* err) {
   std::unique_ptr<Tool> tool = CreateTool(name);
+  if (!tool) {
+    *err = Err(function, "Unknown tool type.");
+    return nullptr;
+  }
   if (CTool* c_tool = tool->AsC()) {
     if (c_tool->InitTool(scope, toolchain, err))
       return tool;
@@ -212,6 +217,7 @@ std::unique_ptr<Tool> Tool::CreateTool(const std::string& name,
     return nullptr;
   }
   NOTREACHED();
+  *err = Err(function, "Unknown tool type.");
   return nullptr;
 }
 
