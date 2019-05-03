@@ -47,3 +47,60 @@ TEST_F(NinjaBinaryTargetWriterTest, CSources) {
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str);
 }
+
+TEST_F(NinjaBinaryTargetWriterTest, NoSourcesSourceSet) {
+  Err err;
+  TestWithScope setup;
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::SOURCE_SET);
+  target.visibility().SetPublic();
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream out;
+  NinjaBinaryTargetWriter writer(&target, out);
+  writer.Run();
+
+  const char expected[] =
+      "defines =\n"
+      "include_dirs =\n"
+      "root_out_dir = .\n"
+      "target_out_dir = obj/foo\n"
+      "target_output_name = bar\n"
+      "\n"
+      "\n"
+      "build obj/foo/bar.stamp: stamp\n";
+  std::string out_str = out.str();
+  EXPECT_EQ(expected, out_str);
+}
+
+TEST_F(NinjaBinaryTargetWriterTest, NoSourcesStaticLib) {
+  Err err;
+  TestWithScope setup;
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::STATIC_LIBRARY);
+  target.visibility().SetPublic();
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream out;
+  NinjaBinaryTargetWriter writer(&target, out);
+  writer.Run();
+
+  const char expected[] =
+      "defines =\n"
+      "include_dirs =\n"
+      "root_out_dir = .\n"
+      "target_out_dir = obj/foo\n"
+      "target_output_name = libbar\n"
+      "\n"
+      "\n"
+      "build obj/foo/libbar.a: alink\n"
+      "  arflags =\n"
+      "  output_extension = \n"
+      "  output_dir = \n";
+  std::string out_str = out.str();
+  EXPECT_EQ(expected, out_str);
+}
