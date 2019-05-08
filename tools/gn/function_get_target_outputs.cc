@@ -26,18 +26,18 @@ const char kGetTargetOutputs_Help[] =
   defined execution order, and it obviously can't reference targets that are
   defined after the function call).
 
-  Only copy and action targets are supported. The outputs from binary targets
-  will depend on the toolchain definition which won't necessarily have been
-  loaded by the time a given line of code has run, and source sets and groups
-  have no useful output file.
+  Only copy, generated_file, and action targets are supported. The outputs from
+  binary targets will depend on the toolchain definition which won't
+  necessarily have been loaded by the time a given line of code has run, and
+  source sets and groups have no useful output file.
 
 Return value
 
   The names in the resulting list will be absolute file paths (normally like
   "//out/Debug/bar.exe", depending on the build directory).
 
-  action targets: this will just return the files specified in the "outputs"
-  variable of the target.
+  action, copy, and generated_file targets: this will just return the files
+  specified in the "outputs" variable of the target.
 
   action_foreach targets: this will return the result of applying the output
   template to the sources (see "gn help source_expansion"). This will be the
@@ -121,12 +121,15 @@ Value RunGetTargetOutputs(Scope* scope,
   std::vector<SourceFile> files;
   if (target->output_type() == Target::ACTION ||
       target->output_type() == Target::COPY_FILES ||
-      target->output_type() == Target::ACTION_FOREACH) {
+      target->output_type() == Target::ACTION_FOREACH ||
+      target->output_type() == Target::GENERATED_FILE) {
     target->action_values().GetOutputsAsSourceFiles(target, &files);
   } else {
     // Other types of targets are not supported.
-    *err = Err(args[0], "Target is not an action, action_foreach, or copy.",
-               "Only these target types are supported by get_target_outputs.");
+    *err =
+        Err(args[0],
+            "Target is not an action, action_foreach, generated_file, or copy.",
+            "Only these target types are supported by get_target_outputs.");
     return Value();
   }
 
