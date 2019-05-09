@@ -73,6 +73,20 @@ const CTool* Toolchain::GetToolAsC(const char* name) const {
   return nullptr;
 }
 
+RustTool* Toolchain::GetToolAsRust(const char* name) {
+  if (Tool* tool = GetTool(name)) {
+    return tool->AsRust();
+  }
+  return nullptr;
+}
+
+const RustTool* Toolchain::GetToolAsRust(const char* name) const {
+  if (const Tool* tool = GetTool(name)) {
+    return tool->AsRust();
+  }
+  return nullptr;
+}
+
 void Toolchain::SetTool(std::unique_ptr<Tool> t) {
   DCHECK(t->name() != Tool::kToolNone);
   DCHECK(tools_.find(t->name()) == tools_.end());
@@ -101,6 +115,11 @@ const GeneralTool* Toolchain::GetToolForSourceTypeAsGeneral(
   return GetToolAsGeneral(Tool::GetToolTypeForSourceType(type));
 }
 
+const RustTool* Toolchain::GetToolForSourceTypeAsRust(
+    SourceFile::Type type) const {
+  return GetToolAsRust(Tool::GetToolTypeForSourceType(type));
+}
+
 const Tool* Toolchain::GetToolForTargetFinalOutput(const Target* target) const {
   return GetTool(Tool::GetToolTypeForTargetFinalOutput(target));
 }
@@ -113,4 +132,9 @@ const CTool* Toolchain::GetToolForTargetFinalOutputAsC(
 const GeneralTool* Toolchain::GetToolForTargetFinalOutputAsGeneral(
     const Target* target) const {
   return GetToolAsGeneral(Tool::GetToolTypeForTargetFinalOutput(target));
+}
+
+const RustTool* Toolchain::GetToolForTargetFinalOutputAsRust(
+    const Target* target) const {
+  return GetToolAsRust(Tool::GetToolTypeForTargetFinalOutput(target));
 }

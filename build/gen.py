@@ -516,6 +516,7 @@ def WriteGNNinja(path, platform, host, options):
         'tools/gn/qt_creator_writer.cc',
         'tools/gn/runtime_deps.cc',
         'tools/gn/rust_substitution_type.cc',
+        'tools/gn/rust_tool.cc',
         'tools/gn/rust_values.cc',
         'tools/gn/rust_variables.cc',
         'tools/gn/scheduler.cc',

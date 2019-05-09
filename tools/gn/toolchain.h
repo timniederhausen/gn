@@ -60,6 +60,8 @@ class Toolchain : public Item {
   const GeneralTool* GetToolAsGeneral(const char* name) const;
   CTool* GetToolAsC(const char* name);
   const CTool* GetToolAsC(const char* name) const;
+  RustTool* GetToolAsRust(const char* name);
+  const RustTool* GetToolAsRust(const char* name) const;
 
   // Set a tool. When all tools are configured, you should call
   // ToolchainSetupComplete().
@@ -90,6 +92,7 @@ class Toolchain : public Item {
   const Tool* GetToolForSourceType(SourceFile::Type type) const;
   const CTool* GetToolForSourceTypeAsC(SourceFile::Type type) const;
   const GeneralTool* GetToolForSourceTypeAsGeneral(SourceFile::Type type) const;
+  const RustTool* GetToolForSourceTypeAsRust(SourceFile::Type type) const;
 
   // Returns the tool that produces the final output for the given target type.
   // This isn't necessarily the tool you would expect. For copy target, this
@@ -99,6 +102,7 @@ class Toolchain : public Item {
   const CTool* GetToolForTargetFinalOutputAsC(const Target* target) const;
   const GeneralTool* GetToolForTargetFinalOutputAsGeneral(
       const Target* target) const;
+  const RustTool* GetToolForTargetFinalOutputAsRust(const Target* target) const;
 
   const SubstitutionBits& substitution_bits() const {
     DCHECK(setup_complete_);

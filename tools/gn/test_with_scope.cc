@@ -194,6 +194,24 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
   SetCommandForTool("touch {{output}}", compile_xcassets_tool.get());
   toolchain->SetTool(std::move(compile_xcassets_tool));
 
+  // RUST
+  std::unique_ptr<Tool> rustc_tool = Tool::CreateTool(RustTool::kRsToolRustc);
+  SetCommandForTool(
+      "{{rustenv}} rustc --edition=2018 --crate-name {{crate_name}} {{source}} "
+      "--crate-type {{crate_type}} {{rustflags}} -o "
+      "{{target_out_dir}}/"
+      "{{rustc_output_prefix}}{{crate_name}}{{rustc_output_extension}} "
+      "{{rustdeps}} {{externs}}",
+      rustc_tool.get());
+  rustc_tool->AsRust()->set_dylib_output_extension(".so");
+  rustc_tool->AsRust()->set_cdylib_output_extension(".so");
+  rustc_tool->AsRust()->set_staticlib_output_extension(".a");
+  rustc_tool->AsRust()->set_proc_macro_output_extension(".so");
+  rustc_tool->AsRust()->set_outputs(SubstitutionList::MakeForTest(
+      "{{target_out_dir}}/"
+      "{{rustc_output_prefix}}{{crate_name}}{{rustc_output_extension}}"));
+  toolchain->SetTool(std::move(rustc_tool));
+
   toolchain->ToolchainSetupComplete();
 }
 

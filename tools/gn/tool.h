@@ -23,6 +23,7 @@ class Toolchain;
 
 class CTool;
 class GeneralTool;
+class RustTool;
 
 // To add a new Tool category, create a subclass implementing SetComplete()
 // Add a new category to ToolCategories
@@ -60,6 +61,8 @@ class Tool {
   virtual const CTool* AsC() const;
   virtual GeneralTool* AsGeneral();
   virtual const GeneralTool* AsGeneral() const;
+  virtual RustTool* AsRust();
+  virtual const RustTool* AsRust() const;
 
   // Basic information ---------------------------------------------------------
 
