@@ -129,4 +129,30 @@ inline void swap(SourceFile& lhs, SourceFile& rhs) {
   lhs.swap(rhs);
 }
 
+// Represents a set of tool types.
+class SourceFileTypeSet {
+ public:
+  SourceFileTypeSet();
+
+  void Set(SourceFile::Type type) {
+    flags_[static_cast<int>(type)] = true;
+    empty_ = false;
+  }
+  bool Get(SourceFile::Type type) const {
+    return flags_[static_cast<int>(type)];
+  }
+
+  bool empty() const { return empty_; }
+
+  bool CSourceUsed() const;
+  bool RustSourceUsed() const;
+  bool GoSourceUsed() const;
+
+  bool MixedSourceUsed() const;
+
+ private:
+  bool empty_;
+  bool flags_[static_cast<int>(SourceFile::SOURCE_NUMTYPES)];
+};
+
 #endif  // TOOLS_GN_SOURCE_FILE_H_

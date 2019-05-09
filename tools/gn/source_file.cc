@@ -99,3 +99,30 @@ void SourceFile::SetValue(const std::string& value) {
   value_ = value;
   type_ = GetSourceFileType(value_);
 }
+
+SourceFileTypeSet::SourceFileTypeSet() : empty_(true) {
+  memset(flags_, 0,
+         sizeof(bool) * static_cast<int>(SourceFile::SOURCE_NUMTYPES));
+}
+
+bool SourceFileTypeSet::CSourceUsed() const {
+  return empty_ || Get(SourceFile::SOURCE_CPP) || Get(SourceFile::SOURCE_H) ||
+         Get(SourceFile::SOURCE_C) || Get(SourceFile::SOURCE_M) ||
+         Get(SourceFile::SOURCE_MM) || Get(SourceFile::SOURCE_RC) ||
+         Get(SourceFile::SOURCE_S) || Get(SourceFile::SOURCE_O) ||
+         Get(SourceFile::SOURCE_DEF);
+}
+
+bool SourceFileTypeSet::RustSourceUsed() const {
+  return Get(SourceFile::SOURCE_RS);
+}
+
+bool SourceFileTypeSet::GoSourceUsed() const {
+  return Get(SourceFile::SOURCE_GO);
+}
+
+bool SourceFileTypeSet::MixedSourceUsed() const {
+  return (1 << static_cast<int>(CSourceUsed())
+            << static_cast<int>(RustSourceUsed())
+            << static_cast<int>(GoSourceUsed())) > 2;
+}

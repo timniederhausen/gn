@@ -23,6 +23,8 @@ TEST_F(NinjaBinaryTargetWriterTest, CSources) {
   // dependents to link.
   target.sources().push_back(SourceFile("//foo/input3.o"));
   target.sources().push_back(SourceFile("//foo/input4.obj"));
+  target.source_types_used().Set(SourceFile::SOURCE_CPP);
+  target.source_types_used().Set(SourceFile::SOURCE_O);
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
 

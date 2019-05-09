@@ -26,7 +26,7 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
   typedef std::set<OutputFile> OutputFileSet;
 
   // Writes all flags for the compiler: includes, defines, cflags, etc.
-  void WriteCompilerVars(const SourceFileTypeSet& used_types);
+  void WriteCompilerVars();
 
   // Writes to the output stream a stamp rule for inputs, and
   // returns the file to be appended to source rules that encodes the
@@ -41,8 +41,7 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
   //
   // input_dep is the stamp file collecting the dependencies required before
   // compiling this target. It will be empty if there are no input deps.
-  void WritePCHCommands(const SourceFileTypeSet& used_types,
-                        const OutputFile& input_dep,
+  void WritePCHCommands(const OutputFile& input_dep,
                         const std::vector<OutputFile>& order_only_deps,
                         std::vector<OutputFile>* object_files,
                         std::vector<OutputFile>* other_files);

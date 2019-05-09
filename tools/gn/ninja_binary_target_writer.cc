@@ -27,21 +27,6 @@
 #include "tools/gn/substitution_writer.h"
 #include "tools/gn/target.h"
 
-bool NinjaBinaryTargetWriter::SourceFileTypeSet::CSourceUsed() {
-  return Get(SourceFile::SOURCE_CPP) || Get(SourceFile::SOURCE_H) ||
-         Get(SourceFile::SOURCE_C) || Get(SourceFile::SOURCE_M) ||
-         Get(SourceFile::SOURCE_MM) || Get(SourceFile::SOURCE_RC) ||
-         Get(SourceFile::SOURCE_S);
-}
-
-bool NinjaBinaryTargetWriter::SourceFileTypeSet::RustSourceUsed() {
-  return Get(SourceFile::SOURCE_RS);
-}
-
-bool NinjaBinaryTargetWriter::SourceFileTypeSet::GoSourceUsed() {
-  return Get(SourceFile::SOURCE_GO);
-}
-
 NinjaBinaryTargetWriter::NinjaBinaryTargetWriter(const Target* target,
                                                  std::ostream& out)
     : NinjaTargetWriter(target, out),

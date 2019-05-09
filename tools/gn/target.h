@@ -125,6 +125,11 @@ class Target : public Item {
   const FileList& sources() const { return sources_; }
   FileList& sources() { return sources_; }
 
+  const SourceFileTypeSet& source_types_used() const {
+    return source_types_used_;
+  }
+  SourceFileTypeSet& source_types_used() { return source_types_used_; }
+
   // Set to true when all sources are public. This is the default. In this case
   // the public headers list should be empty.
   bool all_headers_public() const { return all_headers_public_; }
@@ -367,6 +372,7 @@ class Target : public Item {
   bool output_extension_set_;
 
   FileList sources_;
+  SourceFileTypeSet source_types_used_;
   bool all_headers_public_;
   FileList public_headers_;
   bool check_includes_;

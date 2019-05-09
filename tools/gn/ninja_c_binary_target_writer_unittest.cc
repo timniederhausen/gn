@@ -32,6 +32,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, SourceSet) {
   // dependents to link.
   target.sources().push_back(SourceFile("//foo/input3.o"));
   target.sources().push_back(SourceFile("//foo/input4.obj"));
+  target.source_types_used().Set(SourceFile::SOURCE_CPP);
+  target.source_types_used().Set(SourceFile::SOURCE_O);
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
 
@@ -182,6 +184,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, StaticLibrary) {
 
   TestTarget target(setup, "//foo:bar", Target::STATIC_LIBRARY);
   target.sources().push_back(SourceFile("//foo/input1.cc"));
+  target.source_types_used().Set(SourceFile::SOURCE_CPP);
   target.config_values().arflags().push_back("--asdf");
   ASSERT_TRUE(target.OnResolved(&err));
 
@@ -214,11 +217,13 @@ TEST_F(NinjaCBinaryTargetWriterTest, CompleteStaticLibrary) {
 
   TestTarget target(setup, "//foo:bar", Target::STATIC_LIBRARY);
   target.sources().push_back(SourceFile("//foo/input1.cc"));
+  target.source_types_used().Set(SourceFile::SOURCE_CPP);
   target.config_values().arflags().push_back("--asdf");
   target.set_complete_static_lib(true);
 
   TestTarget baz(setup, "//foo:baz", Target::STATIC_LIBRARY);
   baz.sources().push_back(SourceFile("//foo/input2.cc"));
+  baz.source_types_used().Set(SourceFile::SOURCE_CPP);
 
   target.public_deps().push_back(LabelTargetPair(&baz));
 
@@ -303,6 +308,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, OutputExtensionAndInputDeps) {
   target.set_output_dir(SourceDir("//out/Debug/foo/"));
   target.sources().push_back(SourceFile("//foo/input1.cc"));
   target.sources().push_back(SourceFile("//foo/input2.cc"));
+  target.source_types_used().Set(SourceFile::SOURCE_CPP);
   target.public_deps().push_back(LabelTargetPair(&action));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -361,6 +367,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, NoHardDepsToNoPublicHeaderTarget) {
   gen_obj.set_output_type(Target::SOURCE_SET);
   gen_obj.set_output_dir(SourceDir("//out/Debug/foo/"));
   gen_obj.sources().push_back(generated_file);
+  gen_obj.source_types_used().Set(SourceFile::SOURCE_CPP);
   gen_obj.visibility().SetPublic();
   gen_obj.private_deps().push_back(LabelTargetPair(&action));
   gen_obj.set_all_headers_public(false);
@@ -397,6 +404,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, NoHardDepsToNoPublicHeaderTarget) {
   gen_lib.set_output_type(Target::SHARED_LIBRARY);
   gen_lib.set_output_dir(SourceDir("//out/Debug/foo/"));
   gen_lib.sources().push_back(SourceFile("//foor/generated.h"));
+  gen_lib.source_types_used().Set(SourceFile::SOURCE_H);
   gen_lib.visibility().SetPublic();
   gen_lib.private_deps().push_back(LabelTargetPair(&gen_obj));
   gen_lib.SetToolchain(setup.toolchain());
@@ -433,6 +441,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, NoHardDepsToNoPublicHeaderTarget) {
   executable.set_output_type(Target::EXECUTABLE);
   executable.set_output_dir(SourceDir("//out/Debug/foo/"));
   executable.sources().push_back(SourceFile("//foo/main.cc"));
+  executable.source_types_used().Set(SourceFile::SOURCE_CPP);
   executable.private_deps().push_back(LabelTargetPair(&gen_lib));
   executable.SetToolchain(setup.toolchain());
   ASSERT_TRUE(executable.OnResolved(&err)) << err.message();
@@ -513,6 +522,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, EmptyOutputExtension) {
   target.set_output_extension(std::string());
   target.sources().push_back(SourceFile("//foo/input1.cc"));
   target.sources().push_back(SourceFile("//foo/input2.cc"));
+  target.source_types_used().Set(SourceFile::SOURCE_CPP);
 
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -562,6 +572,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, SourceSetDataDeps) {
   inter.data_deps().push_back(LabelTargetPair(&data));
   inter.SetToolchain(setup.toolchain());
   inter.sources().push_back(SourceFile("//foo/inter.cc"));
+  inter.source_types_used().Set(SourceFile::SOURCE_CPP);
   ASSERT_TRUE(inter.OnResolved(&err)) << err.message();
 
   // Write out the intermediate target.
@@ -593,6 +604,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, SourceSetDataDeps) {
   exe.public_deps().push_back(LabelTargetPair(&inter));
   exe.SetToolchain(setup.toolchain());
   exe.sources().push_back(SourceFile("//foo/final.cc"));
+  exe.source_types_used().Set(SourceFile::SOURCE_CPP);
   ASSERT_TRUE(exe.OnResolved(&err));
 
   std::ostringstream final_out;
@@ -633,6 +645,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, SharedLibraryModuleDefinitionFile) {
   shared_lib.SetToolchain(setup.toolchain());
   shared_lib.sources().push_back(SourceFile("//foo/sources.cc"));
   shared_lib.sources().push_back(SourceFile("//foo/bar.def"));
+  shared_lib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  shared_lib.source_types_used().Set(SourceFile::SOURCE_DEF);
   ASSERT_TRUE(shared_lib.OnResolved(&err));
 
   std::ostringstream out;
@@ -667,6 +681,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, LoadableModule) {
   loadable_module.visibility().SetPublic();
   loadable_module.SetToolchain(setup.toolchain());
   loadable_module.sources().push_back(SourceFile("//foo/sources.cc"));
+  loadable_module.source_types_used().Set(SourceFile::SOURCE_CPP);
   ASSERT_TRUE(loadable_module.OnResolved(&err)) << err.message();
 
   std::ostringstream out;
@@ -697,6 +712,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, LoadableModule) {
   exe.public_deps().push_back(LabelTargetPair(&loadable_module));
   exe.SetToolchain(setup.toolchain());
   exe.sources().push_back(SourceFile("//foo/final.cc"));
+  exe.source_types_used().Set(SourceFile::SOURCE_CPP);
   ASSERT_TRUE(exe.OnResolved(&err)) << err.message();
 
   std::ostringstream final_out;
@@ -770,6 +786,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, WinPrecompiledHeaders) {
     no_pch_target.visibility().SetPublic();
     no_pch_target.sources().push_back(SourceFile("//foo/input1.cc"));
     no_pch_target.sources().push_back(SourceFile("//foo/input2.c"));
+    no_pch_target.source_types_used().Set(SourceFile::SOURCE_CPP);
+    no_pch_target.source_types_used().Set(SourceFile::SOURCE_C);
     no_pch_target.config_values().cflags_c().push_back("-std=c99");
     no_pch_target.SetToolchain(&pch_toolchain);
     ASSERT_TRUE(no_pch_target.OnResolved(&err));
@@ -807,6 +825,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, WinPrecompiledHeaders) {
     pch_target.visibility().SetPublic();
     pch_target.sources().push_back(SourceFile("//foo/input1.cc"));
     pch_target.sources().push_back(SourceFile("//foo/input2.c"));
+    pch_target.source_types_used().Set(SourceFile::SOURCE_CPP);
+    pch_target.source_types_used().Set(SourceFile::SOURCE_C);
     pch_target.SetToolchain(&pch_toolchain);
     ASSERT_TRUE(pch_target.OnResolved(&err));
 
@@ -900,6 +920,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, GCCPrecompiledHeaders) {
     no_pch_target.visibility().SetPublic();
     no_pch_target.sources().push_back(SourceFile("//foo/input1.cc"));
     no_pch_target.sources().push_back(SourceFile("//foo/input2.c"));
+    no_pch_target.source_types_used().Set(SourceFile::SOURCE_CPP);
+    no_pch_target.source_types_used().Set(SourceFile::SOURCE_C);
     no_pch_target.config_values().cflags_c().push_back("-std=c99");
     no_pch_target.SetToolchain(&pch_toolchain);
     ASSERT_TRUE(no_pch_target.OnResolved(&err));
@@ -937,6 +959,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, GCCPrecompiledHeaders) {
     pch_target.visibility().SetPublic();
     pch_target.sources().push_back(SourceFile("//foo/input1.cc"));
     pch_target.sources().push_back(SourceFile("//foo/input2.c"));
+    pch_target.source_types_used().Set(SourceFile::SOURCE_CPP);
+    pch_target.source_types_used().Set(SourceFile::SOURCE_C);
     pch_target.SetToolchain(&pch_toolchain);
     ASSERT_TRUE(pch_target.OnResolved(&err));
 
@@ -985,6 +1009,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, DupeObjFileError) {
   TestTarget target(setup, "//foo:bar", Target::EXECUTABLE);
   target.sources().push_back(SourceFile("//a.cc"));
   target.sources().push_back(SourceFile("//a.cc"));
+  target.source_types_used().Set(SourceFile::SOURCE_CPP);
 
   EXPECT_FALSE(scheduler().is_failed());
 
@@ -1013,6 +1038,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, InputFiles) {
     target.visibility().SetPublic();
     target.sources().push_back(SourceFile("//foo/input1.cc"));
     target.sources().push_back(SourceFile("//foo/input2.cc"));
+    target.source_types_used().Set(SourceFile::SOURCE_CPP);
     target.config_values().inputs().push_back(SourceFile("//foo/input.data"));
     target.SetToolchain(setup.toolchain());
     ASSERT_TRUE(target.OnResolved(&err));
@@ -1078,6 +1104,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, InputFiles) {
     target.visibility().SetPublic();
     target.sources().push_back(SourceFile("//foo/input1.cc"));
     target.sources().push_back(SourceFile("//foo/input2.cc"));
+    target.source_types_used().Set(SourceFile::SOURCE_CPP);
     target.config_values().inputs().push_back(SourceFile("//foo/input1.data"));
     target.config_values().inputs().push_back(SourceFile("//foo/input2.data"));
     target.SetToolchain(setup.toolchain());
@@ -1126,6 +1153,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, InputFiles) {
     target.visibility().SetPublic();
     target.sources().push_back(SourceFile("//foo/input1.cc"));
     target.sources().push_back(SourceFile("//foo/input2.cc"));
+    target.source_types_used().Set(SourceFile::SOURCE_CPP);
     target.config_values().inputs().push_back(SourceFile("//foo/input1.data"));
     target.configs().push_back(LabelConfigPair(&config));
     target.SetToolchain(setup.toolchain());

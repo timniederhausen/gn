@@ -174,3 +174,23 @@ TEST_F(FunctionsTarget, TemplateDefaults) {
   good_input.parsed()->Execute(setup.scope(), &err);
   ASSERT_FALSE(err.has_error()) << err.message();
 }
+
+// Checks that we find unused identifiers in targets.
+TEST_F(FunctionsTarget, MixedSourceError) {
+  TestWithScope setup;
+
+  // The target generator needs a place to put the targets or it will fail.
+  Scope::ItemVector item_collector;
+  setup.scope()->set_item_collector(&item_collector);
+
+  // Test a good one first.
+  TestParseInput good_input(
+      "source_set(\"foo\") {\n"
+      "  sources = [ \"cpp.cc\", \"rust.rs\" ]"
+      "}\n");
+  ASSERT_FALSE(good_input.has_error());
+  Err err;
+  good_input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_TRUE(err.has_error());
+  ASSERT_EQ(err.message(), "More than one language used in target sources.");
+}
