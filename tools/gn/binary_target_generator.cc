@@ -10,6 +10,8 @@
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/functions.h"
 #include "tools/gn/parse_tree.h"
+#include "tools/gn/rust_target_generator.h"
+#include "tools/gn/rust_variables.h"
 #include "tools/gn/scope.h"
 #include "tools/gn/settings.h"
 #include "tools/gn/value_extractors.h"
@@ -63,6 +65,13 @@ void BinaryTargetGenerator::DoRun() {
 
   if (!ValidateSources())
     return;
+
+  if (target_->source_types_used().RustSourceUsed()) {
+    RustTargetGenerator rustgen(target_, scope_, function_call_, err_);
+    rustgen.Run();
+    if (err_->has_error())
+      return;
+  }
 
   // Config values (compiler flags, etc.) set directly on this target.
   ConfigValuesGenerator gen(&target_->config_values(), scope_,
@@ -170,16 +179,6 @@ bool BinaryTargetGenerator::FillOutputDir() {
   return true;
 }
 
-bool BinaryTargetGenerator::FillOutputExtension() {
-  const Value* value = scope_->GetValue(variables::kOutputExtension, true);
-  if (!value)
-    return true;
-  if (!value->VerifyTypeIs(Value::STRING, err_))
-    return false;
-  target_->set_output_extension(value->string_value());
-  return true;
-}
-
 bool BinaryTargetGenerator::FillAllowCircularIncludesFrom() {
   const Value* value =
       scope_->GetValue(variables::kAllowCircularIncludesFrom, true);
@@ -219,6 +218,12 @@ bool BinaryTargetGenerator::FillAllowCircularIncludesFrom() {
 }
 
 bool BinaryTargetGenerator::ValidateSources() {
+  // For Rust targets, if the only source file is the root `sources` can be
+  // omitted/empty.
+  if (scope_->GetValue(variables::kRustCrateRoot, false)) {
+    target_->source_types_used().Set(SourceFile::SOURCE_RS);
+  }
+
   if (target_->source_types_used().MixedSourceUsed()) {
     *err_ =
         Err(function_call_, "More than one language used in target sources.",

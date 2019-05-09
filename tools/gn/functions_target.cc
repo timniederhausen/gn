@@ -20,6 +20,11 @@
   "  General: check_includes, configs, data, friend, inputs, metadata,\n"  \
   "           output_name, output_extension, public, sources, testonly,\n" \
   "           visibility\n"
+#define RUST_VARS \
+  "  Rust variables: aliased_deps, crate_root, crate_name, edition\n"
+#define RUST_SHARED_VARS                                                 \
+  "  Rust variables: aliased_deps, crate_root, crate_name, crate_type, " \
+  "edition\n"
 
 namespace functions {
 
@@ -86,6 +91,15 @@ Value ExecuteGenericTarget(const char* target_type,
   "  action is built, but may not have completed before all steps of the\n"   \
   "  action are started. This can give additional parallelism in the build\n" \
   "  for runtime-only dependencies.\n"
+
+// Common help paragraph on targets that can use different languages.
+#define LANGUAGE_HELP                                                     \
+  "\n"                                                                    \
+  "  The tools and commands used to create this target type will be\n"    \
+  "  determined by the source files in its sources. Targets containing\n" \
+  "  multiple compiler-incompatible languages are not allowed (e.g. a\n"  \
+  "  target containing both C and C++ sources is acceptable, but a\n"     \
+  "  target containing C and Rust sources is not).\n"
 
 const char kAction[] = "action";
 const char kAction_HelpShort[] =
@@ -532,9 +546,14 @@ const char kExecutable_HelpShort[] =
 const char kExecutable_Help[] =
     R"(executable: Declare an executable target.
 
+Language and compilation
+)" LANGUAGE_HELP
+    R"(
+
 Variables
 
-)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS;
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS
+        RUST_VARS;
 
 Value RunExecutable(Scope* scope,
                     const FunctionCallNode* function,
@@ -596,9 +615,14 @@ const char kLoadableModule_Help[] =
   to dynamically load the library at runtime), then you should use a
   "shared_library" target type instead.
 
+Language and compilation
+)" LANGUAGE_HELP
+    R"(
+
 Variables
 
-)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS;
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS
+        RUST_SHARED_VARS;
 
 Value RunLoadableModule(Scope* scope,
                         const FunctionCallNode* function,
@@ -606,6 +630,35 @@ Value RunLoadableModule(Scope* scope,
                         BlockNode* block,
                         Err* err) {
   return ExecuteGenericTarget(functions::kLoadableModule, scope, function, args,
+                              block, err);
+}
+
+// rust_library ----------------------------------------------------------------
+
+const char kRustLibrary[] = "rust_library";
+const char kRustLibrary_HelpShort[] =
+    "rust_library: Declare a Rust library target.";
+const char kRustLibrary_Help[] =
+    R"(rust_library: Declare a Rust library target.
+
+  A Rust library is an archive containing additional rust-c provided metadata.
+  These are the files produced by the rustc compiler with the `.rlib`
+  extension, and are the intermediate step for most Rust-based binaries.
+
+Language and compilation
+)" LANGUAGE_HELP
+    R"(
+
+Variables
+
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS
+        RUST_VARS;
+Value RunRustLibrary(Scope* scope,
+                     const FunctionCallNode* function,
+                     const std::vector<Value>& args,
+                     BlockNode* block,
+                     Err* err) {
+  return ExecuteGenericTarget(functions::kRustLibrary, scope, function, args,
                               block, err);
 }
 
@@ -623,9 +676,14 @@ const char kSharedLibrary_Help[] =
   via "data_deps" or, on Darwin platforms, use a "loadable_module" target type
   instead.
 
+Language and compilation
+)" LANGUAGE_HELP
+    R"(
+
 Variables
 
-)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS;
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS
+        RUST_SHARED_VARS;
 
 Value RunSharedLibrary(Scope* scope,
                        const FunctionCallNode* function,
@@ -642,6 +700,11 @@ const char kSourceSet[] = "source_set";
 const char kSourceSet_HelpShort[] = "source_set: Declare a source set target.";
 const char kSourceSet_Help[] =
     R"(source_set: Declare a source set target.
+
+  The language of a source_set target is determined by the extensions present
+  in its sources.
+
+C-language source_sets
 
   A source set is a collection of sources that get compiled, but are not linked
   to produce any kind of library. Instead, the resulting object files are
@@ -663,6 +726,13 @@ const char kSourceSet_Help[] =
   "exported symbol" notation indicate "export from the final shared library and
   not from the intermediate targets." There is no way to express this concept
   when linking multiple static libraries into a shared library.
+
+Rust-language source_sets
+
+  A Rust source set is a collection of sources that get passed along to the
+  final target that depends on it. No compilation is performed, and the source
+  files are simply added as dependencies on the eventual rustc invocation that
+  would produce a binary.
 
 Variables
 
@@ -694,7 +764,8 @@ const char kStaticLibrary_Help[] =
 Variables
 
   complete_static_lib
-)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS;
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS
+        RUST_VARS LANGUAGE_HELP;
 
 Value RunStaticLibrary(Scope* scope,
                        const FunctionCallNode* function,

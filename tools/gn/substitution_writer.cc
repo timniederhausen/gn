@@ -9,6 +9,8 @@
 #include "tools/gn/escape.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/output_file.h"
+#include "tools/gn/rust_substitution_type.h"
+#include "tools/gn/rust_tool.h"
 #include "tools/gn/settings.h"
 #include "tools/gn/source_file.h"
 #include "tools/gn/string_utils.h"
@@ -569,7 +571,26 @@ std::string SubstitutionWriter::GetLinkerSubstitution(
     if (target->output_extension().empty())
       return std::string();  // Explicitly set to no extension.
     return std::string(".") + target->output_extension();
-
+  } else if (type == &kRustSubstitutionCrateName) {
+    // Only include the toolchain for non-default toolchains.
+    return target->rust_values().crate_name();
+  } else if (type == &kRustSubstitutionOutputPrefix) {
+    // Rustc expects specific output prefixes, so make sure we provide it if
+    // necessary.
+    if (target->output_type() == Target::RUST_LIBRARY ||
+        target->output_type() == Target::SHARED_LIBRARY ||
+        target->output_type() == Target::LOADABLE_MODULE)
+      return "lib";
+    return "";
+  } else if (type == &kRustSubstitutionOutputExtension) {
+    if (!target->output_extension_set()) {
+      DCHECK(tool->AsRust());
+      return tool->AsRust()->rustc_output_extension(
+          target->output_type(), target->rust_values().crate_type());
+    }
+    if (target->output_extension().empty())
+      return std::string();  // Explicitly set to no extension.
+    return std::string(".") + target->output_extension();
   } else {
     NOTREACHED();
     return std::string();

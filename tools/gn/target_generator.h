@@ -52,6 +52,7 @@ class TargetGenerator {
   bool FillConfigs();
   bool FillOutputs(bool allow_substitutions);
   bool FillCheckIncludes();
+  bool FillOutputExtension();
 
   // Rrturns true if the given pattern will expand to a file in the output
   // directory. If not, returns false and sets the error, blaming the given

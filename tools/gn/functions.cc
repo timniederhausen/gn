@@ -1269,6 +1269,7 @@ struct FunctionInfoInitializer {
     INSERT_FUNCTION(StaticLibrary, true)
     INSERT_FUNCTION(Target, true)
     INSERT_FUNCTION(GeneratedFile, true)
+    INSERT_FUNCTION(RustLibrary, true)
 
     INSERT_FUNCTION(Assert, false)
     INSERT_FUNCTION(Config, false)

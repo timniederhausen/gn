@@ -278,6 +278,15 @@ Value RunRebasePath(Scope* scope,
                     const std::vector<Value>& args,
                     Err* err);
 
+extern const char kRustLibrary[];
+extern const char kRustLibrary_HelpShort[];
+extern const char kRustLibrary_Help[];
+Value RunRustLibrary(Scope* scope,
+                     const FunctionCallNode* function,
+                     const std::vector<Value>& args,
+                     BlockNode* block,
+                     Err* err);
+
 extern const char kSetDefaults[];
 extern const char kSetDefaults_HelpShort[];
 extern const char kSetDefaults_Help[];

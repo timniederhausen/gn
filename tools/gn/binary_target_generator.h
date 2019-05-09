@@ -30,7 +30,6 @@ class BinaryTargetGenerator : public TargetGenerator {
   bool FillOutputName();
   bool FillOutputPrefixOverride();
   bool FillOutputDir();
-  bool FillOutputExtension();
   bool FillAllowCircularIncludesFrom();
   bool ValidateSources();
 
