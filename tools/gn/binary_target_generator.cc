@@ -87,6 +87,7 @@ bool BinaryTargetGenerator::FillSources() {
       case SourceFile::SOURCE_O:
       case SourceFile::SOURCE_DEF:
       case SourceFile::SOURCE_GO:
+      case SourceFile::SOURCE_RS:
       case SourceFile::SOURCE_RC:
         // These are allowed.
         break;

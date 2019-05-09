@@ -4,6 +4,8 @@
 
 #include "tools/gn/variables.h"
 
+#include "tools/gn/rust_variables.h"
+
 namespace variables {
 
 // Built-in variables ----------------------------------------------------------
@@ -1917,6 +1919,10 @@ Sources for binary targets
   static library or source set will have no effect on the executable or shared
   library they're linked into).
 
+  For Rust targets that do not specify a crate_root, then the crate_root will
+  look for a lib.rs file (or main.rs for executable) or a single file in
+  sources, if sources contains only one file.
+
 Sources for non-binary targets
 
   action_foreach
@@ -2203,6 +2209,7 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(WriteValueContents)
     INSERT_VARIABLE(WriteRuntimeDeps)
     INSERT_VARIABLE(XcodeExtraAttributes)
+    InsertRustVariables(&info_map);
   }
   return info_map;
 }
