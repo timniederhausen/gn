@@ -22,17 +22,16 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
 
   void Run() override;
 
+ protected:
+  // Adds source_set files to the list of object files.
+  void AddSourceSetFiles(const Target* source_set,
+                         UniqueVector<OutputFile>* obj_files) const override;
+
  private:
   typedef std::set<OutputFile> OutputFileSet;
 
   // Writes all flags for the compiler: includes, defines, cflags, etc.
   void WriteCompilerVars();
-
-  // Writes to the output stream a stamp rule for inputs, and
-  // returns the file to be appended to source rules that encodes the
-  // implicit dependencies for the current target. The returned OutputFile
-  // will be empty if there are no inputs.
-  OutputFile WriteInputsStampAndGetDep() const;
 
   // Writes build lines required for precompiled headers. Any generated
   // object files will be appended to the |object_files|. Any generated
@@ -80,13 +79,6 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
                     std::vector<OutputFile>* object_files,
                     std::vector<SourceFile>* other_files);
 
-  // Writes a build line.
-  void WriteCompilerBuildLine(const SourceFile& source,
-                              const std::vector<OutputFile>& extra_deps,
-                              const std::vector<OutputFile>& order_only_deps,
-                              const char* tool_name,
-                              const std::vector<OutputFile>& outputs);
-
   void WriteLinkerStuff(const std::vector<OutputFile>& object_files,
                         const std::vector<SourceFile>& other_files,
                         const OutputFile& input_dep);
@@ -94,24 +86,6 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
   void WriteLibs();
   void WriteOutputSubstitutions();
   void WriteSolibs(const std::vector<OutputFile>& solibs);
-
-  // Writes the stamp line for a source set. These are not linked.
-  void WriteSourceSetStamp(const std::vector<OutputFile>& object_files);
-
-  // Gets all target dependencies and classifies them, as well as accumulates
-  // object files from source sets we need to link.
-  void GetDeps(UniqueVector<OutputFile>* extra_object_files,
-               UniqueVector<const Target*>* linkable_deps,
-               UniqueVector<const Target*>* non_linkable_deps) const;
-
-  // Classifies the dependency as linkable or nonlinkable with the current
-  // target, adding it to the appropriate vector. If the dependency is a source
-  // set we should link in, the source set's object files will be appended to
-  // |extra_object_files|.
-  void ClassifyDependency(const Target* dep,
-                          UniqueVector<OutputFile>* extra_object_files,
-                          UniqueVector<const Target*>* linkable_deps,
-                          UniqueVector<const Target*>* non_linkable_deps) const;
 
   // Writes the implicit dependencies for the link or stamp line. This is
   // the "||" and everything following it on the ninja line.

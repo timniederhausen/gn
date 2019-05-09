@@ -710,6 +710,11 @@ bool Target::FillOutputFiles(Err* err) {
           SubstitutionWriter::ApplyListToLinkerAsOutputFile(
               this, tool, tool->runtime_outputs(), &runtime_outputs_);
         }
+      } else if (const RustTool* rstool = tool->AsRust()) {
+        // Default behavior, use the first output file for both.
+        link_output_file_ = dependency_output_file_ =
+            SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
+                this, tool, tool->outputs().list()[0]);
       }
       break;
     case UNKNOWN:
