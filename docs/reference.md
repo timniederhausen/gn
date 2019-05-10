@@ -1271,7 +1271,7 @@
     script = "idl_processor.py"
     sources = [ "foo.idl", "bar.idl" ]
 
-    # Our script reads this file each time, so we need to list is as a
+    # Our script reads this file each time, so we need to list it as a
     # dependency so we can rebuild if it changes.
     inputs = [ "my_configuration.txt" ]
 
