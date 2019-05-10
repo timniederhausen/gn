@@ -50,7 +50,7 @@
       "-root",
       "[START_DIR]/cipd",
       "-ensure-file",
-      "infra/ninja/${platform} version:1.8.2\nfuchsia/clang/${platform} goma\n@Subdir sysroot\nfuchsia/sysroot/${platform} git_revision:a28dfa20af063e5ca00634024c85732e20220419",
+      "infra/ninja/${platform} version:1.8.2\nfuchsia/clang/${platform} git_revision:b920a7f65b13237dc4d5b2b836b29a954fff440a\n@Subdir sysroot\nfuchsia/sysroot/${platform} git_revision:a28dfa20af063e5ca00634024c85732e20220419",
       "-json-output",
       "/path/to/tmp/json"
     ],
@@ -61,7 +61,7 @@
       "@@@STEP_LOG_LINE@json.output@  \"result\": {@@@",
       "@@@STEP_LOG_LINE@json.output@    \"\": [@@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",
-      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-goma------------\", @@@",
+      "@@@STEP_LOG_LINE@json.output@        \"instance_id\": \"resolved-instance_id-of-git_revision:b92\", @@@",
       "@@@STEP_LOG_LINE@json.output@        \"package\": \"fuchsia/clang/resolved-platform\"@@@",
       "@@@STEP_LOG_LINE@json.output@      }, @@@",
       "@@@STEP_LOG_LINE@json.output@      {@@@",

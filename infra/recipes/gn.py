@@ -54,7 +54,8 @@ def RunSteps(api, repository):
     pkgs = api.cipd.EnsureFile()
     pkgs.add_package('infra/ninja/${platform}', 'version:1.8.2')
     if api.platform.is_linux or api.platform.is_mac:
-      pkgs.add_package('fuchsia/clang/${platform}', 'goma')
+      pkgs.add_package('fuchsia/clang/${platform}',
+                       'git_revision:b920a7f65b13237dc4d5b2b836b29a954fff440a')
     if api.platform.is_linux:
       pkgs.add_package('fuchsia/sysroot/${platform}',
                        'git_revision:a28dfa20af063e5ca00634024c85732e20220419',
