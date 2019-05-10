@@ -102,8 +102,9 @@ Placeholders
   {{source_target_relative}}
       The path to the source file relative to the target's directory. This will
       generally be used for replicating the source directory layout in the
-      output directory. This can only be used in actions and it is an error to
-      use in process_file_template where there is no "target".
+      output directory. This can only be used in actions and bundle_data
+      targets. It is an error to use in process_file_template where there is no
+      "target".
         "//foo/bar/baz.txt" => "baz.txt"
 
 (*) Note on directories

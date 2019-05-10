@@ -128,7 +128,9 @@ bool SubstitutionIsInBundleDir(const Substitution* type) {
 }
 
 bool IsValidBundleDataSubstitution(const Substitution* type) {
-  return type == &SubstitutionLiteral || type == &SubstitutionSourceNamePart ||
+  return type == &SubstitutionLiteral ||
+         type == &SubstitutionSourceTargetRelative ||
+         type == &SubstitutionSourceNamePart ||
          type == &SubstitutionSourceFilePart ||
          type == &SubstitutionSourceRootRelativeDir ||
          type == &SubstitutionBundleRootDir ||

@@ -778,12 +778,15 @@
 #### **Compilation Database**
 
 ```
-  --export-compile-commands
+  --export-compile-commands[=<target_name1,target_name2...>]
       Produces a compile_commands.json file in the root of the build directory
       containing an array of “command objects”, where each command object
-      specifies one way a translation unit is compiled in the project. This is
-      used for various Clang-based tooling, allowing for the replay of individual
-      compilations independent of the build system.
+      specifies one way a translation unit is compiled in the project. If a list
+      of target_name is supplied, only targets that are reachable from the list
+      of target_name will be used for “command objects” generation, otherwise
+      all available targets will be used. This is used for various Clang-based
+      tooling, allowing for the replay of individual compilations independent
+      of the build system.
 ```
 ### <a name="cmd_help"></a>**gn help &lt;anything&gt;**
 
@@ -6807,8 +6810,9 @@
   {{source_target_relative}}
       The path to the source file relative to the target's directory. This will
       generally be used for replicating the source directory layout in the
-      output directory. This can only be used in actions and it is an error to
-      use in process_file_template where there is no "target".
+      output directory. This can only be used in actions and bundle_data
+      targets. It is an error to use in process_file_template where there is no
+      "target".
         "//foo/bar/baz.txt" => "baz.txt"
 ```
 
