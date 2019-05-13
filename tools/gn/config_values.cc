@@ -34,6 +34,8 @@ void ConfigValues::AppendValues(const ConfigValues& append) {
   VectorAppend(&ldflags_, append.ldflags_);
   VectorAppend(&lib_dirs_, append.lib_dirs_);
   VectorAppend(&libs_, append.libs_);
+  VectorAppend(&rustflags_, append.rustflags_);
+  VectorAppend(&rustenv_, append.rustenv_);
 
   // Only append precompiled header if there isn't one. It might be nice to
   // throw an error if there are conflicting precompiled headers, but that

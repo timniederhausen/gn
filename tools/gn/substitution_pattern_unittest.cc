@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 #include "tools/gn/substitution_pattern.h"
+
 #include "tools/gn/err.h"
+#include "tools/gn/rust_substitution_type.h"
 #include "util/test/test.h"
 
 TEST(SubstitutionPattern, ParseLiteral) {
@@ -46,4 +48,26 @@ TEST(SubstitutionPattern, ParseErrors) {
   err = Err();
   EXPECT_FALSE(pattern.Parse("{{source{{source}}", nullptr, &err));
   EXPECT_TRUE(err.has_error());
+}
+
+TEST(SubstitutionPattern, ParseRust) {
+  SubstitutionPattern pattern;
+  Err err;
+  EXPECT_TRUE(pattern.Parse(
+      "AA{{rustflags}}{{rustenv}}BB{{crate_name}}{{rustdeps}}CC{{externs}}",
+      nullptr, &err));
+  EXPECT_FALSE(err.has_error());
+  ASSERT_EQ(8u, pattern.ranges().size());
+
+  EXPECT_EQ(&SubstitutionLiteral, pattern.ranges()[0].type);
+  EXPECT_EQ("AA", pattern.ranges()[0].literal);
+  EXPECT_EQ(&kRustSubstitutionRustFlags, pattern.ranges()[1].type);
+  EXPECT_EQ(&kRustSubstitutionRustEnv, pattern.ranges()[2].type);
+  EXPECT_EQ(&SubstitutionLiteral, pattern.ranges()[3].type);
+  EXPECT_EQ("BB", pattern.ranges()[3].literal);
+  EXPECT_EQ(&kRustSubstitutionCrateName, pattern.ranges()[4].type);
+  EXPECT_EQ(&kRustSubstitutionRustDeps, pattern.ranges()[5].type);
+  EXPECT_EQ(&SubstitutionLiteral, pattern.ranges()[6].type);
+  EXPECT_EQ("CC", pattern.ranges()[6].literal);
+  EXPECT_EQ(&kRustSubstitutionExterns, pattern.ranges()[7].type);
 }
