@@ -2065,7 +2065,7 @@ const char kWriteOutputConversion_Help[] =
     R"("output_conversion: Data format for generated_file targets.
 
   Controls how the "contents" of a generated_file target is formatted.
-  See "gn help output_conversion".
+  See "gn help io_conversion".
 )";
 
 const char kWriteRuntimeDeps[] = "write_runtime_deps";

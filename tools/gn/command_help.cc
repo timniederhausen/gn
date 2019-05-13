@@ -79,7 +79,7 @@ void PrintToplevelHelp() {
                  "grammar");
   PrintShortHelp(
       "input_conversion: Processing input from exec_script and read_file.",
-      "input_conversion");
+      "io_conversion");
   PrintShortHelp("label_pattern: Matching more than one label.",
                  "label_pattern");
   PrintShortHelp("labels: About labels.", "labels");
@@ -88,7 +88,7 @@ void PrintToplevelHelp() {
   PrintShortHelp("nogncheck: Annotating includes for checking.", "nogncheck");
   PrintShortHelp(
       "output_conversion: Specifies how to transform a value to output.",
-      "output_conversion");
+      "io_conversion");
   PrintShortHelp("runtime_deps: How runtime dependency computation works.",
                  "runtime_deps");
   PrintShortHelp("source_expansion: Map sources to outputs for scripts.",

@@ -47,7 +47,7 @@ Arguments
       The list or string to write.
 
   output_conversion
-    Controls how the output is written. See "gn help output_conversion".
+    Controls how the output is written. See "gn help io_conversion".
 )";
 
 Value RunWriteFile(Scope* scope,
