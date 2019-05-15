@@ -23,22 +23,23 @@
 #include "tools/gn/ninja_utils.h"
 #include "tools/gn/scheduler.h"
 #include "tools/gn/settings.h"
-#include "tools/gn/source_file_type.h"
 #include "tools/gn/string_utils.h"
 #include "tools/gn/substitution_writer.h"
 #include "tools/gn/target.h"
 
 bool NinjaBinaryTargetWriter::SourceFileTypeSet::CSourceUsed() {
-  return Get(SOURCE_CPP) || Get(SOURCE_H) || Get(SOURCE_C) || Get(SOURCE_M) ||
-         Get(SOURCE_MM) || Get(SOURCE_RC) || Get(SOURCE_S);
+  return Get(SourceFile::SOURCE_CPP) || Get(SourceFile::SOURCE_H) ||
+         Get(SourceFile::SOURCE_C) || Get(SourceFile::SOURCE_M) ||
+         Get(SourceFile::SOURCE_MM) || Get(SourceFile::SOURCE_RC) ||
+         Get(SourceFile::SOURCE_S);
 }
 
 bool NinjaBinaryTargetWriter::SourceFileTypeSet::RustSourceUsed() {
-  return Get(SOURCE_RS);
+  return Get(SourceFile::SOURCE_RS);
 }
 
 bool NinjaBinaryTargetWriter::SourceFileTypeSet::GoSourceUsed() {
-  return Get(SOURCE_GO);
+  return Get(SourceFile::SOURCE_GO);
 }
 
 NinjaBinaryTargetWriter::NinjaBinaryTargetWriter(const Target* target,
@@ -49,10 +50,6 @@ NinjaBinaryTargetWriter::NinjaBinaryTargetWriter(const Target* target,
 NinjaBinaryTargetWriter::~NinjaBinaryTargetWriter() = default;
 
 void NinjaBinaryTargetWriter::Run() {
-  SourceFileTypeSet used_types;
-  for (const auto& source : target_->sources())
-    used_types.Set(GetSourceFileType(source));
-
   NinjaCBinaryTargetWriter writer(target_, out_);
   writer.Run();
 }

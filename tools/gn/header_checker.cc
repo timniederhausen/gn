@@ -18,7 +18,6 @@
 #include "tools/gn/err.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/scheduler.h"
-#include "tools/gn/source_file_type.h"
 #include "tools/gn/target.h"
 #include "tools/gn/trace.h"
 #include "util/worker_pool.h"
@@ -152,9 +151,10 @@ void HeaderChecker::RunCheckOverFiles(const FileMap& files, bool force_check) {
 
   for (const auto& file : files) {
     // Only check C-like source files (RC files also have includes).
-    SourceFileType type = GetSourceFileType(file.first);
-    if (type != SOURCE_CPP && type != SOURCE_H && type != SOURCE_C &&
-        type != SOURCE_M && type != SOURCE_MM && type != SOURCE_RC)
+    SourceFile::Type type = file.first.type();
+    if (type != SourceFile::SOURCE_CPP && type != SourceFile::SOURCE_H &&
+        type != SourceFile::SOURCE_C && type != SourceFile::SOURCE_M &&
+        type != SourceFile::SOURCE_MM && type != SourceFile::SOURCE_RC)
       continue;
 
     if (!check_generated_) {

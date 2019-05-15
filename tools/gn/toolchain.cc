@@ -88,16 +88,16 @@ void Toolchain::ToolchainSetupComplete() {
   setup_complete_ = true;
 }
 
-const Tool* Toolchain::GetToolForSourceType(SourceFileType type) const {
+const Tool* Toolchain::GetToolForSourceType(SourceFile::Type type) const {
   return GetTool(Tool::GetToolTypeForSourceType(type));
 }
 
-const CTool* Toolchain::GetToolForSourceTypeAsC(SourceFileType type) const {
+const CTool* Toolchain::GetToolForSourceTypeAsC(SourceFile::Type type) const {
   return GetToolAsC(Tool::GetToolTypeForSourceType(type));
 }
 
 const GeneralTool* Toolchain::GetToolForSourceTypeAsGeneral(
-    SourceFileType type) const {
+    SourceFile::Type type) const {
   return GetToolAsGeneral(Tool::GetToolTypeForSourceType(type));
 }
 

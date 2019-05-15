@@ -12,7 +12,7 @@
 #include "tools/gn/label.h"
 #include "tools/gn/label_ptr.h"
 #include "tools/gn/scope.h"
-#include "tools/gn/source_file_type.h"
+#include "tools/gn/source_file.h"
 #include "tools/gn/substitution_list.h"
 #include "tools/gn/substitution_pattern.h"
 
@@ -171,7 +171,7 @@ class Tool {
                                           Toolchain* toolchain,
                                           Err* err);
 
-  static const char* GetToolTypeForSourceType(SourceFileType type);
+  static const char* GetToolTypeForSourceType(SourceFile::Type type);
   static const char* GetToolTypeForTargetFinalOutput(const Target* target);
 
  protected:

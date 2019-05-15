@@ -23,11 +23,12 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   class SourceFileTypeSet {
    public:
     SourceFileTypeSet() {
-      memset(flags_, 0, sizeof(bool) * static_cast<int>(SOURCE_NUMTYPES));
+      memset(flags_, 0,
+             sizeof(bool) * static_cast<int>(SourceFile::SOURCE_NUMTYPES));
     }
 
-    void Set(SourceFileType type) { flags_[static_cast<int>(type)] = true; }
-    bool Get(SourceFileType type) const {
+    void Set(SourceFile::Type type) { flags_[static_cast<int>(type)] = true; }
+    bool Get(SourceFile::Type type) const {
       return flags_[static_cast<int>(type)];
     }
 
@@ -36,7 +37,7 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
     bool GoSourceUsed();
 
    private:
-    bool flags_[static_cast<int>(SOURCE_NUMTYPES)];
+    bool flags_[static_cast<int>(SourceFile::SOURCE_NUMTYPES)];
   };
 
   NinjaBinaryTargetWriter(const Target* target, std::ostream& out);

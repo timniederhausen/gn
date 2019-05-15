@@ -11,7 +11,6 @@
 #include "base/macros.h"
 #include "tools/gn/label.h"
 #include "tools/gn/label_ptr.h"
-#include "tools/gn/source_file_type.h"
 #include "tools/gn/substitution_list.h"
 #include "tools/gn/substitution_pattern.h"
 #include "tools/gn/tool.h"

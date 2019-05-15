@@ -12,7 +12,6 @@
 #include "tools/gn/item.h"
 #include "tools/gn/label_ptr.h"
 #include "tools/gn/scope.h"
-#include "tools/gn/source_file_type.h"
 #include "tools/gn/substitution_type.h"
 #include "tools/gn/tool.h"
 #include "tools/gn/value.h"
@@ -88,9 +87,9 @@ class Toolchain : public Item {
   }
 
   // Returns the tool for compiling the given source file type.
-  const Tool* GetToolForSourceType(SourceFileType type) const;
-  const CTool* GetToolForSourceTypeAsC(SourceFileType type) const;
-  const GeneralTool* GetToolForSourceTypeAsGeneral(SourceFileType type) const;
+  const Tool* GetToolForSourceType(SourceFile::Type type) const;
+  const CTool* GetToolForSourceTypeAsC(SourceFile::Type type) const;
+  const GeneralTool* GetToolForSourceTypeAsGeneral(SourceFile::Type type) const;
 
   // Returns the tool that produces the final output for the given target type.
   // This isn't necessarily the tool you would expect. For copy target, this

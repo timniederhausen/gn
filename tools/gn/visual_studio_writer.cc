@@ -24,7 +24,6 @@
 #include "tools/gn/label_pattern.h"
 #include "tools/gn/parse_tree.h"
 #include "tools/gn/path_output.h"
-#include "tools/gn/source_file_type.h"
 #include "tools/gn/standard_out.h"
 #include "tools/gn/target.h"
 #include "tools/gn/variables.h"

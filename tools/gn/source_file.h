@@ -20,6 +20,28 @@ class SourceDir;
 // ends in one.
 class SourceFile {
  public:
+  // This should be sequential integers starting from 0 so they can be used as
+  // array indices.
+  enum Type {
+    SOURCE_UNKNOWN = 0,
+    SOURCE_ASM,
+    SOURCE_C,
+    SOURCE_CPP,
+    SOURCE_H,
+    SOURCE_M,
+    SOURCE_MM,
+    SOURCE_S,
+    SOURCE_RC,
+    SOURCE_O,  // Object files can be inputs, too. Also counts .obj.
+    SOURCE_DEF,
+
+    SOURCE_RS,
+    SOURCE_GO,
+
+    // Must be last.
+    SOURCE_NUMTYPES,
+  };
+
   enum SwapIn { SWAP_IN };
 
   SourceFile();
@@ -36,6 +58,7 @@ class SourceFile {
 
   bool is_null() const { return value_.empty(); }
   const std::string& value() const { return value_; }
+  Type type() const { return type_; }
 
   // Returns everything after the last slash.
   std::string GetName() const;
@@ -80,6 +103,7 @@ class SourceFile {
   friend class SourceDir;
 
   std::string value_;
+  Type type_;
 
   // Copy & assign supported.
 };

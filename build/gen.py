@@ -520,7 +520,6 @@ def WriteGNNinja(path, platform, host, options):
         'tools/gn/setup.cc',
         'tools/gn/source_dir.cc',
         'tools/gn/source_file.cc',
-        'tools/gn/source_file_type.cc',
         'tools/gn/standard_out.cc',
         'tools/gn/string_utils.cc',
         'tools/gn/substitution_list.cc',

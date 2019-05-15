@@ -122,7 +122,7 @@ void WriteCommand(const Target* target,
                   const CompileFlags& flags,
                   std::vector<OutputFile>& tool_outputs,
                   PathOutput& path_output,
-                  SourceFileType source_type,
+                  SourceFile::Type source_type,
                   const char* tool_name,
                   EscapeOptions opts,
                   std::string* compile_commands) {
@@ -144,16 +144,16 @@ void WriteCommand(const Target* target,
     } else if (range.type == &CSubstitutionCFlags) {
       command_out << flags.cflags;
     } else if (range.type == &CSubstitutionCFlagsC) {
-      if (source_type == SOURCE_C)
+      if (source_type == SourceFile::SOURCE_C)
         command_out << flags.cflags_c;
     } else if (range.type == &CSubstitutionCFlagsCc) {
-      if (source_type == SOURCE_CPP)
+      if (source_type == SourceFile::SOURCE_CPP)
         command_out << flags.cflags_cc;
     } else if (range.type == &CSubstitutionCFlagsObjC) {
-      if (source_type == SOURCE_M)
+      if (source_type == SourceFile::SOURCE_M)
         command_out << flags.cflags_objc;
     } else if (range.type == &CSubstitutionCFlagsObjCc) {
-      if (source_type == SOURCE_MM)
+      if (source_type == SourceFile::SOURCE_MM)
         command_out << flags.cflags_objcc;
     } else if (range.type == &SubstitutionLabel ||
                range.type == &SubstitutionLabelName ||
@@ -222,9 +222,11 @@ void CompileCommandsWriter::RenderJSON(const BuildSettings* build_settings,
     for (const auto& source : target->sources()) {
       // If this source is not a C/C++/ObjC/ObjC++ source (not header) file,
       // continue as it does not belong in the compilation database.
-      SourceFileType source_type = GetSourceFileType(source);
-      if (source_type != SOURCE_CPP && source_type != SOURCE_C &&
-          source_type != SOURCE_M && source_type != SOURCE_MM)
+      SourceFile::Type source_type = source.type();
+      if (source_type != SourceFile::SOURCE_CPP &&
+          source_type != SourceFile::SOURCE_C &&
+          source_type != SourceFile::SOURCE_M &&
+          source_type != SourceFile::SOURCE_MM)
         continue;
 
       const char* tool_name = Tool::kToolNone;

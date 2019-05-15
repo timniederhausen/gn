@@ -261,27 +261,27 @@ std::unique_ptr<Tool> Tool::CreateTool(const std::string& name) {
 }
 
 // static
-const char* Tool::GetToolTypeForSourceType(SourceFileType type) {
+const char* Tool::GetToolTypeForSourceType(SourceFile::Type type) {
   switch (type) {
-    case SOURCE_C:
+    case SourceFile::SOURCE_C:
       return CTool::kCToolCc;
-    case SOURCE_CPP:
+    case SourceFile::SOURCE_CPP:
       return CTool::kCToolCxx;
-    case SOURCE_M:
+    case SourceFile::SOURCE_M:
       return CTool::kCToolObjC;
-    case SOURCE_MM:
+    case SourceFile::SOURCE_MM:
       return CTool::kCToolObjCxx;
-    case SOURCE_ASM:
-    case SOURCE_S:
+    case SourceFile::SOURCE_ASM:
+    case SourceFile::SOURCE_S:
       return CTool::kCToolAsm;
-    case SOURCE_RC:
+    case SourceFile::SOURCE_RC:
       return CTool::kCToolRc;
-    case SOURCE_UNKNOWN:
-    case SOURCE_H:
-    case SOURCE_O:
-    case SOURCE_DEF:
-    case SOURCE_GO:
-    case SOURCE_RS:
+    case SourceFile::SOURCE_UNKNOWN:
+    case SourceFile::SOURCE_H:
+    case SourceFile::SOURCE_O:
+    case SourceFile::SOURCE_DEF:
+    case SourceFile::SOURCE_GO:
+    case SourceFile::SOURCE_RS:
       return kToolNone;
     default:
       NOTREACHED();
