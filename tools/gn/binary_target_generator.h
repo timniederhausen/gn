@@ -22,6 +22,7 @@ class BinaryTargetGenerator : public TargetGenerator {
 
  protected:
   void DoRun() override;
+  bool FillSources() override;
 
  private:
   bool FillCompleteStaticLib();

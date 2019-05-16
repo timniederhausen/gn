@@ -97,10 +97,15 @@ class SourceFile {
     return value_ < other.value_;
   }
 
-  void swap(SourceFile& other) { value_.swap(other.value_); }
+  void swap(SourceFile& other) {
+    value_.swap(other.value_);
+    std::swap(type_, other.type_);
+  }
 
  private:
   friend class SourceDir;
+
+  void SetValue(const std::string& value);
 
   std::string value_;
   Type type_;

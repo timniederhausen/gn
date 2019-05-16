@@ -98,10 +98,10 @@ SourceFile SourceDir::ResolveRelativeFile(
     return ret;
 
   const std::string& input_string = p.string_value();
-  if (!ValidateResolveInput<std::string>(true, p, input_string, err)) {
+  if (!ValidateResolveInput<std::string>(true, p, input_string, err))
     return ret;
-  }
-  ret.value_ = ResolveRelative(input_string, value_, true, source_root);
+
+  ret.SetValue(ResolveRelative(input_string, value_, true, source_root));
   return ret;
 }
 

@@ -68,6 +68,38 @@ void BinaryTargetGenerator::DoRun() {
     return;
 }
 
+bool BinaryTargetGenerator::FillSources() {
+  bool ret = TargetGenerator::FillSources();
+  for (std::size_t i = 0; i < target_->sources().size(); ++i) {
+    const auto& source = target_->sources()[i];
+    switch (source.type()) {
+      case SourceFile::SOURCE_CPP:
+      case SourceFile::SOURCE_H:
+      case SourceFile::SOURCE_C:
+      case SourceFile::SOURCE_M:
+      case SourceFile::SOURCE_MM:
+      case SourceFile::SOURCE_S:
+      case SourceFile::SOURCE_ASM:
+      case SourceFile::SOURCE_O:
+        // These are allowed.
+        break;
+      case SourceFile::SOURCE_RC:
+      case SourceFile::SOURCE_DEF:
+      case SourceFile::SOURCE_RS:
+      case SourceFile::SOURCE_GO:
+      case SourceFile::SOURCE_UNKNOWN:
+      case SourceFile::SOURCE_NUMTYPES:
+        *err_ =
+            Err(scope_->GetValue(variables::kSources, true)->list_value()[i],
+                std::string("Only source, header, and object files belong in "
+                            "the sources of a ") +
+                    Target::GetStringForOutputType(target_->output_type()) +
+                    ". " + source.value() + " is not one of the valid types.");
+    }
+  }
+  return ret;
+}
+
 bool BinaryTargetGenerator::FillCompleteStaticLib() {
   if (target_->output_type() == Target::STATIC_LIBRARY) {
     const Value* value = scope_->GetValue(variables::kCompleteStaticLib, true);
