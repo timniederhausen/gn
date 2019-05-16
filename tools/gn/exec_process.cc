@@ -22,7 +22,7 @@
 #else
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/signal.h>
+#include <signal.h>
 #include <sys/wait.h>
 #include <unistd.h>
 

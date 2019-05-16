@@ -314,6 +314,8 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
   os = "aix";
 #elif defined(OS_OPENBSD)
   os = "openbsd";
+#elif defined(OS_HAIKU)
+  os = "haiku";
 #else
 #error Unknown OS type.
 #endif
@@ -334,7 +336,7 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
   // Set the host CPU architecture based on the underlying OS, not
   // whatever the current bit-tedness of the GN binary is.
   std::string os_arch = OperatingSystemArchitecture();
-  if (os_arch == "x86")
+  if (os_arch == "x86" || os_arch == "BePC")
     arch = kX86;
   else if (os_arch == "x86_64")
     arch = kX64;

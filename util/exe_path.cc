@@ -19,6 +19,9 @@
 #include <limits.h>
 #include <sys/sysctl.h>
 #include <sys/types.h>
+#elif defined(OS_HAIKU)
+#include <OS.h>
+#include <image.h>
 #endif
 
 #if defined(OS_MACOSX)
@@ -62,6 +65,19 @@ base::FilePath GetExePath() {
     return base::FilePath();
   }
   return base::FilePath(buf);
+}
+
+#elif defined(OS_HAIKU)
+
+base::FilePath GetExePath() {
+  image_info i_info;
+  int32 image_cookie = 0;
+  while (get_next_image_info(B_CURRENT_TEAM, &image_cookie, &i_info) == B_OK) {
+    if (i_info.type == B_APP_IMAGE) {
+      break;
+    }
+  }
+  return base::FilePath(std::string(i_info.name));
 }
 
 #else

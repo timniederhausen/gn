@@ -51,7 +51,9 @@
 #elif defined(_AIX)
 #define OS_AIX 1
 #elif defined(__asmjs__)
-#define OS_ASMJS
+#define OS_ASMJS 1
+#elif defined(__HAIKU__)
+#define OS_HAIKU 1
 #else
 #error Please add support for your platform in build_config.h
 #endif
@@ -68,8 +70,8 @@
 // more specific macro.
 #if defined(OS_AIX) || defined(OS_ANDROID) || defined(OS_ASMJS) ||    \
     defined(OS_FREEBSD) || defined(OS_LINUX) || defined(OS_MACOSX) || \
-    defined(OS_NETBSD) || defined(OS_OPENBSD) || defined(OS_QNX) ||   \
-    defined(OS_SOLARIS)
+    defined(OS_NACL) || defined(OS_NETBSD) || defined(OS_OPENBSD) ||  \
+    defined(OS_QNX) || defined(OS_SOLARIS) || defined(OS_HAIKU)
 #define OS_POSIX 1
 #endif
 
