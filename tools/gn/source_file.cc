@@ -26,7 +26,8 @@ SourceFile::Type GetSourceFileType(const std::string& file) {
   if (extension == "cc" || extension == "cpp" || extension == "cxx")
     return SourceFile::SOURCE_CPP;
   if (extension == "h" || extension == "hpp" || extension == "hxx" ||
-      extension == "hh" || extension == "inc")
+      extension == "hh" || extension == "inc" || extension == "ipp" ||
+      extension == "inl")
     return SourceFile::SOURCE_H;
   if (extension == "c")
     return SourceFile::SOURCE_C;
