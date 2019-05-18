@@ -205,7 +205,9 @@ def WriteGenericNinja(path, static_libraries, executables,
         'build %s: %s %s' % (src_to_obj(src_file),
                              settings['tool'],
                              escape_path_ninja(
-                                 os.path.join(REPO_ROOT, src_file))),
+                                 os.path.relpath(
+                                     os.path.join(REPO_ROOT, src_file),
+                                     os.path.dirname(path)))),
         '  includes = %s' % ' '.join(
             ['-I' + escape_path_ninja(dirname) for dirname in
              include_dirs + settings.get('include_dirs', [])]),
@@ -274,7 +276,7 @@ def WriteGNNinja(path, platform, host, options):
   cflags_cc = os.environ.get('CXXFLAGS', '').split()
   ldflags = os.environ.get('LDFLAGS', '').split()
   libflags = os.environ.get('LIBFLAGS', '').split()
-  include_dirs = [REPO_ROOT, os.path.dirname(path)]
+  include_dirs = [os.path.relpath(REPO_ROOT, os.path.dirname(path)), '.']
   libs = []
 
   if not platform.is_msvc():
