@@ -4,6 +4,7 @@
 
 #include "tools/gn/args.h"
 
+#include "tools/gn/settings.h"
 #include "tools/gn/source_file.h"
 #include "tools/gn/string_utils.h"
 #include "tools/gn/variables.h"
@@ -267,9 +268,22 @@ Args::ValueWithOverrideMap Args::GetAllArguments() const {
 
   std::lock_guard<std::mutex> lock(lock_);
 
-  // Default values.
+  // Sort the keys from declared_arguments_per_toolchain_ so
+  // the return value will be deterministic.
+  std::vector<const Settings*> keys;
+  keys.reserve(declared_arguments_per_toolchain_.size());
   for (const auto& map_pair : declared_arguments_per_toolchain_) {
-    for (const auto& arg : map_pair.second)
+    keys.push_back(map_pair.first);
+  }
+  std::sort(keys.begin(), keys.end(),
+            [](const Settings* a, const Settings* b) -> bool {
+              return a->toolchain_label() < b->toolchain_label();
+            });
+
+  // Default values.
+  for (const auto& key : keys) {
+    const auto& value = declared_arguments_per_toolchain_[key];
+    for (const auto& arg : value)
       result.insert(std::make_pair(arg.first, ValueWithOverride(arg.second)));
   }
 
