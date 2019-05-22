@@ -38,6 +38,7 @@
 
 #if defined(OS_WIN)
 #include <windows.h>
+
 #include "base/win/scoped_process_information.h"
 #endif
 
@@ -197,8 +198,7 @@ std::wstring SysMultiByteToWide(base::StringPiece mb) {
 
   int mb_length = static_cast<int>(mb.length());
   // Compute the length of the buffer.
-  int charcount =
-      MultiByteToWideChar(CP_ACP, 0, mb.data(), mb_length, NULL, 0);
+  int charcount = MultiByteToWideChar(CP_ACP, 0, mb.data(), mb_length, NULL, 0);
   if (charcount == 0)
     return std::wstring();
 
@@ -297,12 +297,8 @@ Setup::Setup()
       loader_(new LoaderImpl(&build_settings_)),
       builder_(loader_.get()),
       root_build_file_("//BUILD.gn"),
-      check_public_headers_(false),
       dotfile_settings_(&build_settings_, std::string()),
-      dotfile_scope_(&dotfile_settings_),
-      default_args_(nullptr),
-      fill_arguments_(true),
-      gen_empty_args_(false) {
+      dotfile_scope_(&dotfile_settings_) {
   dotfile_settings_.set_toolchain_label(Label());
 
   build_settings_.set_item_defined_callback(
@@ -313,8 +309,6 @@ Setup::Setup()
   // we need to set it now.
   loader_->set_task_runner(scheduler_.task_runner());
 }
-
-Setup::~Setup() = default;
 
 bool Setup::DoSetup(const std::string& build_dir, bool force_create) {
   return DoSetup(build_dir, force_create,
@@ -446,7 +440,7 @@ bool Setup::FillArguments(const base::CommandLine& cmdline) {
   if (cmdline.HasSwitch(switches::kArgs) ||
       (gen_empty_args_ && !PathExists(build_arg_file))) {
     if (!FillArgsFromCommandLine(switch_value.empty() ? kDefaultArgsGn
-                                                    : switch_value)) {
+                                                      : switch_value)) {
       return false;
     }
     SaveArgsToFile();
@@ -538,7 +532,8 @@ bool Setup::SaveArgsToFile() {
   base::CreateDirectory(build_arg_file.DirName());
 
   std::string contents = args_input_file_->contents();
-  commands::FormatStringToString(contents, commands::TreeDumpMode::kInactive, &contents);
+  commands::FormatStringToString(contents, commands::TreeDumpMode::kInactive,
+                                 &contents);
 #if defined(OS_WIN)
   // Use Windows lineendings for this file since it will often open in
   // Notepad which can't handle Unix ones.

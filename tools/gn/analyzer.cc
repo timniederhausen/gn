@@ -142,11 +142,12 @@ Err JSONToInputs(const Label& default_toolchain,
   strings = GetStringVector(*dict, "files", &err);
   if (err.has_error())
     return err;
-  for (auto s : strings) {
-    if (!IsPathSourceAbsolute(s) && !IsPathAbsolute(s))
+  for (auto& s : strings) {
+    if (!IsPathSourceAbsolute(s) && !IsPathAbsolute(s)) {
       return Err(Location(),
                  "\"" + s + "\" is not a source-absolute or absolute path.");
-    inputs->source_vec.push_back(SourceFile(s));
+    }
+    inputs->source_vec.emplace_back(std::move(s));
   }
 
   strings = GetStringVector(*dict, "additional_compile_targets", &err);

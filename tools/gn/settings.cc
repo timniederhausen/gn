@@ -10,10 +10,7 @@
 
 Settings::Settings(const BuildSettings* build_settings,
                    const std::string& output_subdir_name)
-    : build_settings_(build_settings),
-      import_manager_(),
-      base_config_(this),
-      greedy_target_generation_(false) {
+    : build_settings_(build_settings), base_config_(this) {
   if (output_subdir_name.empty()) {
     toolchain_output_dir_ = build_settings->build_dir();
   } else {
@@ -30,5 +27,3 @@ Settings::Settings(const BuildSettings* build_settings,
   if (!toolchain_output_dir_.is_null())
     toolchain_gen_dir_ = SourceDir(toolchain_output_dir_.value() + "gen/");
 }
-
-Settings::~Settings() = default;

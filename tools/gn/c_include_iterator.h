@@ -43,13 +43,13 @@ class CIncludeIterator {
   base::StringPiece file_;
 
   // 0-based offset into the file.
-  size_t offset_;
+  size_t offset_ = 0;
 
-  int line_number_;  // One-based. Indicates the last line we read.
+  int line_number_ = 0;  // One-based. Indicates the last line we read.
 
   // Number of lines we've processed since seeing the last include (or the
   // beginning of the file) with some exceptions.
-  int lines_since_last_include_;
+  int lines_since_last_include_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(CIncludeIterator);
 };

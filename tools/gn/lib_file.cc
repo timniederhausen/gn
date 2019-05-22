@@ -6,18 +6,11 @@
 
 #include "base/logging.h"
 
-LibFile::LibFile() = default;
-
 LibFile::LibFile(const SourceFile& source_file) : source_file_(source_file) {}
 
 LibFile::LibFile(const base::StringPiece& lib_name)
     : name_(lib_name.data(), lib_name.size()) {
   DCHECK(!lib_name.empty());
-}
-
-void LibFile::Swap(LibFile* other) {
-  name_.swap(other->name_);
-  source_file_.swap(other->source_file_);
 }
 
 const std::string& LibFile::value() const {

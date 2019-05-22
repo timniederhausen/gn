@@ -4,6 +4,8 @@
 
 #include "tools/gn/source_dir.h"
 
+#include <string>
+
 #include "base/logging.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/source_file.h"
@@ -57,22 +59,17 @@ bool ValidateResolveInput(bool as_file,
 
 }  // namespace
 
-SourceDir::SourceDir() = default;
-
-SourceDir::SourceDir(const base::StringPiece& p) : value_(p.data(), p.size()) {
+SourceDir::SourceDir(const std::string& s) : value_(s) {
   if (!EndsWithSlash(value_))
     value_.push_back('/');
   AssertValueSourceDirString(value_);
 }
 
-SourceDir::SourceDir(SwapIn, std::string* s) {
-  value_.swap(*s);
+SourceDir::SourceDir(std::string&& s) : value_(std::move(s)) {
   if (!EndsWithSlash(value_))
     value_.push_back('/');
   AssertValueSourceDirString(value_);
 }
-
-SourceDir::~SourceDir() = default;
 
 template <typename StringType>
 std::string SourceDir::ResolveRelativeAs(
@@ -135,11 +132,6 @@ SourceDir SourceDir::ResolveRelativeDir(
 
 base::FilePath SourceDir::Resolve(const base::FilePath& source_root) const {
   return ResolvePath(value_, false, source_root);
-}
-
-void SourceDir::SwapValue(std::string* v) {
-  value_.swap(*v);
-  AssertValueSourceDirString(value_);
 }
 
 // Explicit template instantiation

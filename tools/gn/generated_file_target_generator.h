@@ -38,8 +38,8 @@ class GeneratedFileTargetGenerator : public TargetGenerator {
   bool IsMetadataCollectionTarget(const base::StringPiece& variable,
                                   const ParseNode* origin);
 
-  bool contents_defined_;
-  bool data_keys_defined_;
+  bool contents_defined_ = false;
+  bool data_keys_defined_ = false;
 
   Target::OutputType output_type_;
 

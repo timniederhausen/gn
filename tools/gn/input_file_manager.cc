@@ -298,7 +298,7 @@ bool InputFileManager::LoadFile(const LocationRange& origin,
     InputFileData* data = input_files_[name].get();
     data->loaded = true;
     if (success) {
-      data->tokens.swap(tokens);
+      data->tokens = std::move(tokens);
       data->parsed_root = std::move(root);
     } else {
       data->parse_error = *err;
@@ -318,7 +318,7 @@ bool InputFileManager::LoadFile(const LocationRange& origin,
     if (data->completion_event)
       data->completion_event->Signal();
 
-    callbacks.swap(data->scheduled_callbacks);
+    callbacks = std::move(data->scheduled_callbacks);
   }
 
   // Run pending invocations. Theoretically we could schedule each of these

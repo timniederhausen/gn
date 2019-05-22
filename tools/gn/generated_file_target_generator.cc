@@ -17,10 +17,7 @@ GeneratedFileTargetGenerator::GeneratedFileTargetGenerator(
     const FunctionCallNode* function_call,
     Target::OutputType type,
     Err* err)
-    : TargetGenerator(target, scope, function_call, err),
-      output_type_(type),
-      contents_defined_(false),
-      data_keys_defined_(false) {}
+    : TargetGenerator(target, scope, function_call, err), output_type_(type) {}
 
 GeneratedFileTargetGenerator::~GeneratedFileTargetGenerator() = default;
 

@@ -120,7 +120,8 @@ void LoaderImpl::Load(const SourceFile& file,
     std::unique_ptr<ToolchainRecord> new_record =
         std::make_unique<ToolchainRecord>(build_settings_, Label(), Label());
     ToolchainRecord* record = new_record.get();
-    toolchain_records_[Label()] = std::move(new_record);
+    Label empty_label;  // VS issues spurious warning using ...[Label()].
+    toolchain_records_[empty_label] = std::move(new_record);
 
     // The default build config is no dependent on the toolchain definition,
     // since we need to load the build config before we know what the default
@@ -383,7 +384,7 @@ void LoaderImpl::DidLoadBuildConfig(const Label& label) {
     for (const auto& load : old_loads) {
       if (load.toolchain_name.is_null()) {
         // Fix up toolchain label
-        invocations_.insert(LoadID(load.file, label));
+        invocations_.emplace(load.file, label);
       } else {
         // Can keep the old one.
         invocations_.insert(load);

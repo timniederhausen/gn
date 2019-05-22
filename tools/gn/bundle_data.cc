@@ -40,7 +40,7 @@ bool IsSourceFileFromAssetsCatalog(base::StringPiece source,
   }
   if (is_file_from_asset_catalog && asset_catalog) {
     std::string asset_catalog_path = dir.as_string();
-    *asset_catalog = SourceFile(SourceFile::SWAP_IN, &asset_catalog_path);
+    *asset_catalog = SourceFile(std::move(asset_catalog_path));
   }
   return is_file_from_asset_catalog;
 }
@@ -162,7 +162,7 @@ bool BundleData::GetOutputsAsSourceFiles(const Settings* settings,
 SourceFile BundleData::GetCompiledAssetCatalogPath() const {
   DCHECK(!assets_catalog_sources_.empty());
   std::string assets_car_path = resources_dir_.value() + "/Assets.car";
-  return SourceFile(SourceFile::SWAP_IN, &assets_car_path);
+  return SourceFile(std::move(assets_car_path));
 }
 
 SourceFile BundleData::GetBundleRootDirOutput(const Settings* settings) const {
@@ -171,7 +171,7 @@ SourceFile BundleData::GetBundleRootDirOutput(const Settings* settings) const {
   if (last_separator != std::string::npos)
     root_dir_value = root_dir_value.substr(0, last_separator);
 
-  return SourceFile(SourceFile::SWAP_IN, &root_dir_value);
+  return SourceFile(std::move(root_dir_value));
 }
 
 SourceDir BundleData::GetBundleRootDirOutputAsDir(

@@ -11,8 +11,7 @@
 
 const char* Tool::kToolNone = "";
 
-Tool::Tool(const char* n)
-    : defined_from_(nullptr), restat_(false), complete_(false), name_(n) {}
+Tool::Tool(const char* n) : name_(n) {}
 
 Tool::~Tool() = default;
 

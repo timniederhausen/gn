@@ -27,14 +27,10 @@ class Value;
 // Two slashes at the beginning indicate a path relative to the source root.
 class SourceDir {
  public:
-  enum SwapIn { SWAP_IN };
+  SourceDir() = default;
 
-  SourceDir();
-  explicit SourceDir(const base::StringPiece& p);
-  // Swaps the given string in without copies. The given string will be empty
-  // after this call.
-  SourceDir(SwapIn, std::string* s);
-  ~SourceDir();
+  SourceDir(const std::string& s);
+  explicit SourceDir(std::string&& s);
 
   // Resolves a file or dir name (based on as_file parameter) relative
   // to this source directory. Will return an empty string on error
@@ -137,13 +133,9 @@ class SourceDir {
   bool operator!=(const SourceDir& other) const { return !operator==(other); }
   bool operator<(const SourceDir& other) const { return value_ < other.value_; }
 
-  void swap(SourceDir& other) { value_.swap(other.value_); }
-
  private:
   friend class SourceFile;
   std::string value_;
-
-  // Copy & assign supported.
 };
 
 namespace std {
@@ -157,9 +149,5 @@ struct hash<SourceDir> {
 };
 
 }  // namespace std
-
-inline void swap(SourceDir& lhs, SourceDir& rhs) {
-  lhs.swap(rhs);
-}
 
 #endif  // TOOLS_GN_SOURCE_DIR_H_

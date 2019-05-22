@@ -120,11 +120,7 @@ bool HasNoCheckAnnotation(const base::StringPiece& line) {
 const int CIncludeIterator::kMaxNonIncludeLines = 10;
 
 CIncludeIterator::CIncludeIterator(const InputFile* input)
-    : input_file_(input),
-      file_(input->contents()),
-      offset_(0),
-      line_number_(0),
-      lines_since_last_include_(0) {}
+    : input_file_(input), file_(input->contents()) {}
 
 CIncludeIterator::~CIncludeIterator() = default;
 

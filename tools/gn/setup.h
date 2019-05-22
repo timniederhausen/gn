@@ -34,7 +34,6 @@ extern const char kDotfile_Help[];
 class Setup {
  public:
   Setup();
-  ~Setup();
 
   // Configures the build for the current command line. On success returns
   // true. On failure, prints the error and returns false.
@@ -148,7 +147,7 @@ class Setup {
 
   SourceFile root_build_file_;
 
-  bool check_public_headers_;
+  bool check_public_headers_ = false;
 
   // See getter for info.
   std::unique_ptr<std::vector<LabelPattern>> check_patterns_;
@@ -168,14 +167,14 @@ class Setup {
 
   // Default overrides, specified in the dotfile.
   // Owned by the Value (if it exists) in the dotfile_scope_.
-  const Scope* default_args_;
+  const Scope* default_args_ = nullptr;
 
   // Set to true when we should populate the build arguments from the command
   // line or build argument file. See setter above.
-  bool fill_arguments_;
+  bool fill_arguments_ = true;
 
   // Generate an empty args.gn file if it does not exists.
-  bool gen_empty_args_;
+  bool gen_empty_args_ = false;
 
   // State for invoking the command line args. We specifically want to keep
   // this around for the entire run so that Values can blame to the command

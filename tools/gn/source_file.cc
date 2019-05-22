@@ -53,25 +53,19 @@ SourceFile::Type GetSourceFileType(const std::string& file) {
 
 }  // namespace
 
-SourceFile::SourceFile() : type_(SOURCE_UNKNOWN) {}
-
-SourceFile::SourceFile(const base::StringPiece& p)
-    : value_(p.data(), p.size()) {
+SourceFile::SourceFile(const std::string& value) : value_(value) {
   DCHECK(!value_.empty());
   AssertValueSourceFileString(value_);
   NormalizePath(&value_);
   type_ = GetSourceFileType(value_);
 }
 
-SourceFile::SourceFile(SwapIn, std::string* value) {
-  value_.swap(*value);
+SourceFile::SourceFile(std::string&& value) : value_(std::move(value)) {
   DCHECK(!value_.empty());
   AssertValueSourceFileString(value_);
   NormalizePath(&value_);
   type_ = GetSourceFileType(value_);
 }
-
-SourceFile::~SourceFile() = default;
 
 std::string SourceFile::GetName() const {
   if (is_null())
@@ -88,7 +82,7 @@ SourceDir SourceFile::GetDir() const {
 
   DCHECK(value_.find('/') != std::string::npos);
   size_t last_slash = value_.rfind('/');
-  return SourceDir(base::StringPiece(&value_[0], last_slash + 1));
+  return SourceDir(value_.substr(0, last_slash + 1));
 }
 
 base::FilePath SourceFile::Resolve(const base::FilePath& source_root) const {

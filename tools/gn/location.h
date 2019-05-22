@@ -31,10 +31,10 @@ class Location {
   std::string Describe(bool include_column_number) const;
 
  private:
-  const InputFile* file_;  // Null when unset.
-  int line_number_;        // -1 when unset. 1-based.
-  int column_number_;      // -1 when unset. 1-based.
-  int byte_;               // Index into the buffer, 0-based.
+  const InputFile* file_ = nullptr;  // Null when unset.
+  int line_number_ = -1;             // -1 when unset. 1-based.
+  int column_number_ = -1;           // -1 when unset. 1-based.
+  int byte_ = 0;                     // Index into the buffer, 0-based.
 };
 
 // Represents a range in a source file. Used for error reporting.

@@ -238,7 +238,7 @@ bool ApplyTestonlyFilter(std::vector<const Target*>* targets) {
     return false;
   }
 
-  // Filter into a copy of the vector, then swap to output.
+  // Filter into a copy of the vector, then replace the output.
   std::vector<const Target*> result;
   result.reserve(targets->size());
 
@@ -247,7 +247,7 @@ bool ApplyTestonlyFilter(std::vector<const Target*>* targets) {
       result.push_back(target);
   }
 
-  targets->swap(result);
+  *targets = std::move(result);
   return true;
 }
 
@@ -260,7 +260,7 @@ bool ApplyTypeFilter(std::vector<const Target*>* targets) {
   if (targets->empty() || type == Target::UNKNOWN)
     return true;  // Nothing to filter out.
 
-  // Filter into a copy of the vector, then swap to output.
+  // Filter into a copy of the vector, then replace the output.
   std::vector<const Target*> result;
   result.reserve(targets->size());
 
@@ -272,7 +272,7 @@ bool ApplyTypeFilter(std::vector<const Target*>* targets) {
       result.push_back(target);
   }
 
-  targets->swap(result);
+  *targets = std::move(result);
   return true;
 }
 

@@ -16,14 +16,7 @@ Scheduler* g_scheduler = nullptr;
 
 Scheduler::Scheduler()
     : main_thread_run_loop_(MsgLoop::Current()),
-      input_file_manager_(new InputFileManager),
-      verbose_logging_(false),
-      pool_work_count_lock_(),
-      pool_work_count_cv_(),
-      worker_pool_(),
-      is_failed_(false),
-      suppress_output_for_testing_(false),
-      has_been_shutdown_(false) {
+      input_file_manager_(new InputFileManager) {
   g_scheduler = this;
 }
 

@@ -51,8 +51,10 @@ bool EnsureAllToolsAvailable(const Target* target) {
   // The compile_xcassets tool is only required if the target has asset
   // catalog resources to compile.
   if (TargetRequireAssetCatalogCompilation(target)) {
-    if (!target->toolchain()->GetTool(GeneralTool::kGeneralToolCompileXCAssets)) {
-      FailWithMissingToolError(GeneralTool::kGeneralToolCompileXCAssets, target);
+    if (!target->toolchain()->GetTool(
+            GeneralTool::kGeneralToolCompileXCAssets)) {
+      FailWithMissingToolError(GeneralTool::kGeneralToolCompileXCAssets,
+                               target);
       return false;
     }
   }
@@ -305,7 +307,7 @@ void NinjaCreateBundleTargetWriter::WriteCodeSigningStep(
   // Since the code signature step depends on all the files from the bundle,
   // the create_bundle stamp can just depends on the output of the signature
   // script (dependencies are transitive).
-  output_files->swap(code_signing_output_files);
+  *output_files = std::move(code_signing_output_files);
 
   out_ << ": " << code_signing_rule_name;
   out_ << " | ";

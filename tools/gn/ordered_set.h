@@ -14,9 +14,9 @@
 template <typename T>
 class OrderedSet {
  private:
-  typedef std::set<T> set_type;
-  typedef typename set_type::const_iterator set_iterator;
-  typedef std::vector<set_iterator> vector_type;
+  using set_type = std::set<T>;
+  using set_iterator = typename set_type::const_iterator;
+  using vector_type = std::vector<set_iterator>;
 
  public:
   static const size_t npos = static_cast<size_t>(-1);

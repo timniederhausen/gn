@@ -29,7 +29,6 @@ class Metadata {
  public:
   using Contents = Scope::KeyValueMap;
 
-  // Members must be set explicitly.
   Metadata() = default;
 
   const ParseNode* origin() const { return origin_; }
@@ -38,7 +37,7 @@ class Metadata {
   // The contents of this metadata varaiable.
   const Contents& contents() const { return contents_; }
   Contents& contents() { return contents_; }
-  void set_contents(Contents&& contents) { contents_.swap(contents); }
+  void set_contents(Contents&& contents) { contents_ = std::move(contents); }
 
   // The relative source directory to use when rebasing.
   const SourceDir& source_dir() const { return source_dir_; }
@@ -59,7 +58,7 @@ class Metadata {
                 Err* err) const;
 
  private:
-  const ParseNode* origin_;
+  const ParseNode* origin_ = nullptr;
   Contents contents_;
   SourceDir source_dir_;
 

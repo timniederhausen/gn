@@ -40,7 +40,6 @@ class BuilderRecord {
   };
 
   BuilderRecord(ItemType type, const Label& label);
-  ~BuilderRecord();
 
   ItemType type() const { return type_; }
   const Label& label() const { return label_; }
@@ -97,9 +96,9 @@ class BuilderRecord {
   ItemType type_;
   Label label_;
   std::unique_ptr<Item> item_;
-  const ParseNode* originally_referenced_from_;
-  bool should_generate_;
-  bool resolved_;
+  const ParseNode* originally_referenced_from_ = nullptr;
+  bool should_generate_ = false;
+  bool resolved_ = false;
 
   BuilderRecordSet all_deps_;
   BuilderRecordSet unresolved_deps_;

@@ -38,7 +38,7 @@ class InputFileManager : public base::RefCountedThreadSafe<InputFileManager> {
  public:
   // Callback issued when a file is laoded. On auccess, the parse node will
   // refer to the root block of the file. On failure, this will be NULL.
-  typedef base::Callback<void(const ParseNode*)> FileLoadCallback;
+  using FileLoadCallback = base::Callback<void(const ParseNode*)>;
 
   InputFileManager();
 
@@ -137,8 +137,8 @@ class InputFileManager : public base::RefCountedThreadSafe<InputFileManager> {
   mutable std::mutex lock_;
 
   // Maps repo-relative filenames to the corresponding owned pointer.
-  typedef std::unordered_map<SourceFile, std::unique_ptr<InputFileData>>
-      InputFileMap;
+  using InputFileMap =
+      std::unordered_map<SourceFile, std::unique_ptr<InputFileData>>;
   InputFileMap input_files_;
 
   // Tracks all dynamic inputs. The data are holders for memory management

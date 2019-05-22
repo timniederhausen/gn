@@ -56,7 +56,7 @@ class InputFile {
   base::FilePath physical_name_;
   std::string friendly_name_;
 
-  bool contents_loaded_;
+  bool contents_loaded_ = false;
   std::string contents_;
 
   DISALLOW_COPY_AND_ASSIGN(InputFile);

@@ -7,9 +7,7 @@
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/source_file.h"
 
-OutputFile::OutputFile() : value_() {}
-
-OutputFile::OutputFile(std::string&& v) : value_(v) {}
+OutputFile::OutputFile(std::string&& v) : value_(std::move(v)) {}
 
 OutputFile::OutputFile(const std::string& v) : value_(v) {}
 
@@ -19,16 +17,13 @@ OutputFile::OutputFile(const BuildSettings* build_settings,
                         build_settings->build_dir(),
                         build_settings->root_path_utf8())) {}
 
-OutputFile::~OutputFile() = default;
-
 SourceFile OutputFile::AsSourceFile(const BuildSettings* build_settings) const {
   DCHECK(!value_.empty());
   DCHECK(value_[value_.size() - 1] != '/');
 
   std::string path = build_settings->build_dir().value();
   path.append(value_);
-  NormalizePath(&path);
-  return SourceFile(path);
+  return SourceFile(std::move(path));
 }
 
 SourceDir OutputFile::AsSourceDir(const BuildSettings* build_settings) const {
@@ -40,5 +35,5 @@ SourceDir OutputFile::AsSourceDir(const BuildSettings* build_settings) const {
   std::string path = build_settings->build_dir().value();
   path.append(value_);
   NormalizePath(&path);
-  return SourceDir(path);
+  return SourceDir(std::move(path));
 }

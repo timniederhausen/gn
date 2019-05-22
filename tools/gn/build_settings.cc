@@ -22,8 +22,6 @@ BuildSettings::BuildSettings(const BuildSettings& other)
       build_dir_(other.build_dir_),
       build_args_(other.build_args_) {}
 
-BuildSettings::~BuildSettings() = default;
-
 void BuildSettings::SetRootTargetLabel(const Label& r) {
   root_target_label_ = r;
 }

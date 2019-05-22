@@ -30,8 +30,7 @@ struct EscapeOptions;
 //     DoSomething(iter.cur());
 class ConfigValuesIterator {
  public:
-  explicit ConfigValuesIterator(const Target* target)
-      : target_(target), cur_index_(-1) {}
+  explicit ConfigValuesIterator(const Target* target) : target_(target) {}
 
   bool done() const {
     return cur_index_ >= static_cast<int>(target_->configs().size());
@@ -66,7 +65,7 @@ class ConfigValuesIterator {
 
   // Represents an index into the target_'s configs() or, when -1, the config
   // values on the target itself.
-  int cur_index_;
+  int cur_index_ = -1;
 };
 
 template <typename T, class Writer>

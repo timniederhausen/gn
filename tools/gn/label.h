@@ -17,7 +17,7 @@ class Value;
 // part, so it starts with a slash, and has one colon.
 class Label {
  public:
-  Label();
+  Label() = default;
 
   // Makes a label given an already-separated out path and name.
   // See also Resolve().
@@ -28,8 +28,6 @@ class Label {
 
   // Makes a label with an empty toolchain.
   Label(const SourceDir& dir, const base::StringPiece& name);
-  Label(const Label& other);
-  ~Label();
 
   // Resolves a string from a build file that may be relative to the
   // current directory into a fully qualified label. On failure returns an
@@ -71,20 +69,9 @@ class Label {
   }
   bool operator!=(const Label& other) const { return !operator==(other); }
   bool operator<(const Label& other) const {
-    if (int c = dir_.value().compare(other.dir_.value()))
-      return c < 0;
-    if (int c = name_.compare(other.name_))
-      return c < 0;
-    if (int c = toolchain_dir_.value().compare(other.toolchain_dir_.value()))
-      return c < 0;
-    return toolchain_name_ < other.toolchain_name_;
-  }
-
-  void swap(Label& other) {
-    dir_.swap(other.dir_);
-    name_.swap(other.name_);
-    toolchain_dir_.swap(other.toolchain_dir_);
-    toolchain_name_.swap(other.toolchain_name_);
+    return std::tie(dir_, name_, toolchain_dir_, toolchain_name_) <
+           std::tie(other.dir_, other.name_, other.toolchain_dir_,
+                    other.toolchain_name_);
   }
 
   // Returns true if the toolchain dir/name of this object matches some
@@ -116,10 +103,6 @@ struct hash<Label> {
 };
 
 }  // namespace std
-
-inline void swap(Label& lhs, Label& rhs) {
-  lhs.swap(rhs);
-}
 
 extern const char kLabels_Help[];
 

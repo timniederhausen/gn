@@ -69,12 +69,7 @@ Token::Type GetSpecificOperatorType(base::StringPiece value) {
 }  // namespace
 
 Tokenizer::Tokenizer(const InputFile* input_file, Err* err)
-    : input_file_(input_file),
-      input_(input_file->contents()),
-      err_(err),
-      cur_(0),
-      line_number_(1),
-      column_number_(1) {}
+    : input_file_(input_file), input_(input_file->contents()), err_(err) {}
 
 Tokenizer::~Tokenizer() = default;
 

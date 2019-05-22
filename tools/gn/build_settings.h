@@ -30,7 +30,6 @@ class BuildSettings {
 
   BuildSettings();
   BuildSettings(const BuildSettings& other);
-  ~BuildSettings();
 
   // Root target label.
   const Label& root_target_label() const { return root_target_label_; }

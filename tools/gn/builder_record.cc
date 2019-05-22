@@ -7,13 +7,7 @@
 #include "tools/gn/item.h"
 
 BuilderRecord::BuilderRecord(ItemType type, const Label& label)
-    : type_(type),
-      label_(label),
-      originally_referenced_from_(nullptr),
-      should_generate_(false),
-      resolved_(false) {}
-
-BuilderRecord::~BuilderRecord() = default;
+    : type_(type), label_(label) {}
 
 // static
 const char* BuilderRecord::GetNameForType(ItemType type) {

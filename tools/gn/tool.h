@@ -217,8 +217,8 @@ class Tool {
                  Err* err);
   bool ReadOutputExtension(Scope* scope, Err* err);
 
-  const ParseNode* defined_from_;
-  const char* name_;
+  const ParseNode* defined_from_ = nullptr;
+  const char* name_ = nullptr;
 
   SubstitutionPattern command_;
   std::string command_launcher_;
@@ -229,12 +229,12 @@ class Tool {
   SubstitutionList outputs_;
   SubstitutionList runtime_outputs_;
   std::string output_prefix_;
-  bool restat_;
+  bool restat_ = false;
   SubstitutionPattern rspfile_;
   SubstitutionPattern rspfile_content_;
   LabelPtrPair<Pool> pool_;
 
-  bool complete_;
+  bool complete_ = false;
 
   SubstitutionBits substitution_bits_;
 

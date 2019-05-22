@@ -212,7 +212,7 @@ SourceFile SubstitutionWriter::ApplyPatternToSource(
   CHECK(!result_value.empty() && result_value[0] == '/')
       << "The result of the pattern \"" << pattern.AsString()
       << "\" was not a path beginning in \"/\" or \"//\".";
-  return SourceFile(SourceFile::SWAP_IN, &result_value);
+  return SourceFile(std::move(result_value));
 }
 
 // static

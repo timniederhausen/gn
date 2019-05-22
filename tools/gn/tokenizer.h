@@ -79,10 +79,10 @@ class Tokenizer {
   const InputFile* input_file_;
   const base::StringPiece input_;
   Err* err_;
-  size_t cur_;  // Byte offset into input buffer.
+  size_t cur_ = 0;  // Byte offset into input buffer.
 
-  int line_number_;
-  int column_number_;
+  int line_number_ = 1;
+  int column_number_ = 1;
 
   DISALLOW_COPY_AND_ASSIGN(Tokenizer);
 };

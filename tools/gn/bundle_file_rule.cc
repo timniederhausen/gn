@@ -87,7 +87,7 @@ bool BundleFileRule::ApplyPatternToSource(const Settings* settings,
           SubstitutionWriter::OUTPUT_ABSOLUTE, SourceDir()));
     }
   }
-  *expanded_source_file = SourceFile(SourceFile::SWAP_IN, &output_path);
+  *expanded_source_file = SourceFile(std::move(output_path));
   return true;
 }
 

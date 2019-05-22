@@ -98,7 +98,7 @@ bool CreateBundleTargetGenerator::FillBundleDir(
             str + "\".");
     return false;
   }
-  bundle_dir->SwapValue(&str);
+  *bundle_dir = SourceDir(std::move(str));
   return true;
 }
 
@@ -128,7 +128,8 @@ bool CreateBundleTargetGenerator::FillXcodeExtraAttributes() {
         std::make_pair(iter.first.as_string(), iter.second.string_value()));
   }
 
-  target_->bundle_data().xcode_extra_attributes().swap(xcode_extra_attributes);
+  target_->bundle_data().xcode_extra_attributes() =
+      std::move(xcode_extra_attributes);
   return true;
 }
 
@@ -217,7 +218,7 @@ bool CreateBundleTargetGenerator::FillCodeSigningSources() {
                                   err_))
     return false;
 
-  target_->bundle_data().code_signing_sources().swap(script_sources);
+  target_->bundle_data().code_signing_sources() = std::move(script_sources);
   return true;
 }
 

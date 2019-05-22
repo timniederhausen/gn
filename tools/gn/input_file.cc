@@ -7,7 +7,7 @@
 #include "base/files/file_util.h"
 
 InputFile::InputFile(const SourceFile& name)
-    : name_(name), dir_(name_.GetDir()), contents_loaded_(false) {}
+    : name_(name), dir_(name_.GetDir()) {}
 
 InputFile::~InputFile() = default;
 

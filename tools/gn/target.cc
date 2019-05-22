@@ -279,15 +279,7 @@ Dependencies
 Target::Target(const Settings* settings,
                const Label& label,
                const std::set<SourceFile>& build_dependency_files)
-    : Item(settings, label, build_dependency_files),
-      output_type_(UNKNOWN),
-      output_prefix_override_(false),
-      output_extension_set_(false),
-      all_headers_public_(true),
-      check_includes_(true),
-      complete_static_lib_(false),
-      testonly_(false),
-      toolchain_(nullptr) {}
+    : Item(settings, label, build_dependency_files) {}
 
 Target::~Target() = default;
 

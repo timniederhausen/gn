@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "tools/gn/source_file.h"
+
 #include "util/test/test.h"
 
 // The SourceFile object should normalize the input passed to the constructor.
@@ -13,7 +14,7 @@ TEST(SourceFile, Normalize) {
   EXPECT_EQ("//bar.cc", a.value());
 
   std::string b_str("//foo/././../bar.cc");
-  SourceFile b(SourceFile::SwapIn(), &b_str);
+  SourceFile b(std::move(b_str));
   EXPECT_TRUE(b_str.empty());  // Should have been swapped in.
   EXPECT_EQ("//bar.cc", b.value());
 }

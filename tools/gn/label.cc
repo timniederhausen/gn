@@ -250,8 +250,6 @@ Implicit names
     //tools/gn  ->  //tools/gn:gn
 )*";
 
-Label::Label() = default;
-
 Label::Label(const SourceDir& dir,
              const base::StringPiece& name,
              const SourceDir& toolchain_dir,
@@ -264,10 +262,6 @@ Label::Label(const SourceDir& dir,
 Label::Label(const SourceDir& dir, const base::StringPiece& name) : dir_(dir) {
   name_.assign(name.data(), name.size());
 }
-
-Label::Label(const Label& other) = default;
-
-Label::~Label() = default;
 
 // static
 Label Label::Resolve(const SourceDir& current_dir,

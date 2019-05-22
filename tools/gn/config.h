@@ -60,7 +60,7 @@ class Config : public Item {
   // Contains the own_values combined with sub-configs. Most configs don't have
   // sub-configs. So as an optimization, this is not populated if there are no
   // items in configs_. The resolved_values() getter handles this.
-  bool resolved_;
+  bool resolved_ = false;
   ConfigValues composite_values_;
 
   UniqueVector<LabelConfigPair> configs_;

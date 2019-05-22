@@ -869,7 +869,7 @@ SourceDir SourceDirForPath(const base::FilePath& source_root,
     result_str.append(FilePathToUTF8(path_comp[i]));
     result_str.push_back('/');
   }
-  return SourceDir(result_str);
+  return SourceDir(std::move(result_str));
 }
 
 SourceDir SourceDirForCurrentDirectory(const base::FilePath& source_root) {

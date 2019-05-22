@@ -35,7 +35,6 @@ class Settings {
   // Otherwise, it must end in a slash.
   Settings(const BuildSettings* build_settings,
            const std::string& output_subdir_name);
-  ~Settings();
 
   const BuildSettings* build_settings() const { return build_settings_; }
 
@@ -108,7 +107,7 @@ class Settings {
 
   Scope base_config_;
 
-  bool greedy_target_generation_;
+  bool greedy_target_generation_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(Settings);
 };

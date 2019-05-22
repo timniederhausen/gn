@@ -17,12 +17,13 @@ class SourceFile;
 // relative to the output directory.
 class OutputFile {
  public:
-  OutputFile();
+  OutputFile() = default;
+
   explicit OutputFile(std::string&& v);
   explicit OutputFile(const std::string& v);
+
   OutputFile(const BuildSettings* build_settings,
              const SourceFile& source_file);
-  ~OutputFile();
 
   std::string& value() { return value_; }
   const std::string& value() const { return value_; }
@@ -58,9 +59,5 @@ struct hash<OutputFile> {
 };
 
 }  // namespace std
-
-inline void swap(OutputFile& lhs, OutputFile& rhs) {
-  lhs.value().swap(rhs.value());
-}
 
 #endif  // TOOLS_GN_OUTPUT_FILE_H_

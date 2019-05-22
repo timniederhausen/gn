@@ -38,9 +38,9 @@ class Template;
 // variables. So you should use a non-const containing scope whenever possible.
 class Scope {
  public:
-  typedef std::map<base::StringPiece, Value> KeyValueMap;
+  using KeyValueMap = std::map<base::StringPiece, Value>;
   // Holds an owning list of Items.
-  typedef std::vector<std::unique_ptr<Item>> ItemVector;
+  using ItemVector = std::vector<std::unique_ptr<Item>>;
 
   // A flag to indicate whether a function should recurse into nested scopes,
   // or only operate on the current scope.

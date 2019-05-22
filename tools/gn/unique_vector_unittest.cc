@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "tools/gn/unique_vector.h"
+
 #include <stddef.h>
 
 #include <algorithm>
 
-#include "tools/gn/unique_vector.h"
 #include "util/test/test.h"
 
 TEST(UniqueVector, PushBack) {
@@ -30,14 +31,14 @@ TEST(UniqueVector, PushBack) {
   EXPECT_EQ(static_cast<size_t>(-1), foo.IndexOf(99));
 }
 
-TEST(UniqueVector, PushBackViaSwap) {
+TEST(UniqueVector, PushBackMove) {
   UniqueVector<std::string> vect;
   std::string a("a");
-  EXPECT_TRUE(vect.PushBackViaSwap(&a));
+  EXPECT_TRUE(vect.push_back(std::move(a)));
   EXPECT_EQ("", a);
 
   a = "a";
-  EXPECT_FALSE(vect.PushBackViaSwap(&a));
+  EXPECT_FALSE(vect.push_back(std::move(a)));
   EXPECT_EQ("a", a);
 
   EXPECT_EQ(0u, vect.IndexOf("a"));

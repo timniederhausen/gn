@@ -17,11 +17,11 @@
 // a library name (a string).
 class LibFile {
  public:
-  LibFile();
+  LibFile() = default;
+
   explicit LibFile(const base::StringPiece& lib_name);
   explicit LibFile(const SourceFile& source_file);
 
-  void Swap(LibFile* other);
   bool is_source_file() const { return name_.empty(); }
 
   // Returns name, or source_file().value() (whichever is set).
@@ -50,9 +50,5 @@ struct hash<LibFile> {
 };
 
 }  // namespace std
-
-inline void swap(LibFile& lhs, LibFile& rhs) {
-  lhs.Swap(&rhs);
-}
 
 #endif  // TOOLS_GN_LIB_FILE_H_

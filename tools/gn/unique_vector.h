@@ -27,28 +27,20 @@ namespace internal {
 template <typename T>
 class UniquifyRef {
  public:
-  UniquifyRef()
-      : value_(nullptr),
-        vect_(nullptr),
-        index_(static_cast<size_t>(-1)),
-        hash_val_(0) {}
+  UniquifyRef() = default;
 
   // Initialize with a pointer to a value.
-  explicit UniquifyRef(const T* v)
-      : value_(v), vect_(nullptr), index_(static_cast<size_t>(-1)) {
-    FillHashValue();
-  }
+  explicit UniquifyRef(const T* v) : value_(v) { FillHashValue(); }
 
   // Initialize with an array + index.
-  UniquifyRef(const std::vector<T>* v, size_t i)
-      : value_(nullptr), vect_(v), index_(i) {
+  UniquifyRef(const std::vector<T>* v, size_t i) : vect_(v), index_(i) {
     FillHashValue();
   }
 
   // Initialize with an array + index and a known hash value to prevent
   // re-hashing.
   UniquifyRef(const std::vector<T>* v, size_t i, size_t hash_value)
-      : value_(nullptr), vect_(v), index_(i), hash_val_(hash_value) {}
+      : vect_(v), index_(i), hash_val_(hash_value) {}
 
   const T& value() const { return value_ ? *value_ : (*vect_)[index_]; }
   size_t hash_val() const { return hash_val_; }
@@ -61,13 +53,13 @@ class UniquifyRef {
   }
 
   // When non-null, points to the object.
-  const T* value_;
+  const T* value_ = nullptr;
 
   // When value is null these are used.
-  const std::vector<T>* vect_;
-  size_t index_;
+  const std::vector<T>* vect_ = nullptr;
+  size_t index_ = static_cast<size_t>(-1);
 
-  size_t hash_val_;
+  size_t hash_val_ = 0;
 };
 
 template <typename T>
@@ -131,18 +123,15 @@ class UniqueVector {
     return true;
   }
 
-  // Like push_back but swaps in the type to avoid a copy.
-  bool PushBackViaSwap(T* t) {
-    using std::swap;
-
-    Ref ref(t);
+  bool push_back(T&& t) {
+    Ref ref(&t);
     if (set_.find(ref) != set_.end())
       return false;  // Already have this one.
 
-    size_t new_index = vector_.size();
-    vector_.resize(new_index + 1);
-    swap(vector_[new_index], *t);
-    set_.insert(Ref(&vector_, vector_.size() - 1, ref.hash_val()));
+    auto ref_hash_val = ref.hash_val();  // Save across moving t.
+
+    vector_.push_back(std::move(t));  // Invalidates |ref|.
+    set_.insert(Ref(&vector_, vector_.size() - 1, ref_hash_val));
     return true;
   }
 

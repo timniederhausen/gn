@@ -10,7 +10,7 @@
 #include "base/strings/string_number_conversions.h"
 #include "tools/gn/input_file.h"
 
-Location::Location() : file_(nullptr), line_number_(-1), column_number_(-1) {}
+Location::Location() = default;
 
 Location::Location(const InputFile* file,
                    int line_number,

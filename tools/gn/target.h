@@ -369,20 +369,20 @@ class Target : public Item {
   void CheckSourcesGenerated() const;
   void CheckSourceGenerated(const SourceFile& source) const;
 
-  OutputType output_type_;
+  OutputType output_type_ = UNKNOWN;
   std::string output_name_;
-  bool output_prefix_override_;
+  bool output_prefix_override_ = false;
   SourceDir output_dir_;
   std::string output_extension_;
-  bool output_extension_set_;
+  bool output_extension_set_ = false;
 
   FileList sources_;
   SourceFileTypeSet source_types_used_;
-  bool all_headers_public_;
+  bool all_headers_public_ = true;
   FileList public_headers_;
-  bool check_includes_;
-  bool complete_static_lib_;
-  bool testonly_;
+  bool check_includes_ = true;
+  bool complete_static_lib_ = false;
+  bool testonly_ = false;
   std::vector<std::string> data_;
   BundleData bundle_data_;
   OutputFile write_runtime_deps_output_;
@@ -426,7 +426,7 @@ class Target : public Item {
   RustValues rust_values_;
 
   // Toolchain used by this target. Null until target is resolved.
-  const Toolchain* toolchain_;
+  const Toolchain* toolchain_ = nullptr;
 
   // Output files. Empty until the target is resolved.
   std::vector<OutputFile> computed_outputs_;

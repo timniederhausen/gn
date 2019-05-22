@@ -41,16 +41,11 @@ enum EscapingPlatform {
 };
 
 struct EscapeOptions {
-  EscapeOptions()
-      : mode(ESCAPE_NONE),
-        platform(ESCAPE_PLATFORM_CURRENT),
-        inhibit_quoting(false) {}
-
-  EscapingMode mode;
+  EscapingMode mode = ESCAPE_NONE;
 
   // Controls how "fork" escaping is done. You will generally want to keep the
   // default "current" platform.
-  EscapingPlatform platform;
+  EscapingPlatform platform = ESCAPE_PLATFORM_CURRENT;
 
   // When the escaping mode is ESCAPE_SHELL, the escaper will normally put
   // quotes around things with spaces. If this value is set to true, we'll
@@ -60,7 +55,7 @@ struct EscapeOptions {
   // false. Note that Windows has strange behavior where the meaning of the
   // backslashes changes according to if it is followed by a quote. The
   // escaping rules assume that a double-quote will be appended to the result.
-  bool inhibit_quoting;
+  bool inhibit_quoting = false;
 };
 
 // Escapes the given input, returnining the result.
