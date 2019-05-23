@@ -81,48 +81,6 @@ bool FilterTargets(const BuildSettings* build_settings,
   return true;
 }
 
-std::string RenderJSON(const BuildSettings* build_settings,
-                       const Builder& builder,
-                       std::vector<const Target*>& all_targets) {
-  Label default_toolchain_label;
-
-  auto targets = std::make_unique<base::DictionaryValue>();
-  for (const auto* target : all_targets) {
-    if (default_toolchain_label.is_null())
-      default_toolchain_label = target->settings()->default_toolchain_label();
-    auto description =
-        DescBuilder::DescriptionForTarget(target, "", false, false, false);
-    // Outputs need to be asked for separately.
-    auto outputs = DescBuilder::DescriptionForTarget(target, "source_outputs",
-                                                     false, false, false);
-    base::DictionaryValue* outputs_value = nullptr;
-    if (outputs->GetDictionary("source_outputs", &outputs_value) &&
-        !outputs_value->empty()) {
-      description->MergeDictionary(outputs.get());
-    }
-    targets->SetWithoutPathExpansion(
-        target->label().GetUserVisibleName(default_toolchain_label),
-        std::move(description));
-  }
-
-  auto settings = std::make_unique<base::DictionaryValue>();
-  settings->SetKey("root_path", base::Value(build_settings->root_path_utf8()));
-  settings->SetKey("build_dir",
-                   base::Value(build_settings->build_dir().value()));
-  settings->SetKey(
-      "default_toolchain",
-      base::Value(default_toolchain_label.GetUserVisibleName(false)));
-
-  auto output = std::make_unique<base::DictionaryValue>();
-  output->SetWithoutPathExpansion("targets", std::move(targets));
-  output->SetWithoutPathExpansion("build_settings", std::move(settings));
-
-  std::string s;
-  base::JSONWriter::WriteWithOptions(
-      *output.get(), base::JSONWriter::OPTIONS_PRETTY_PRINT, &s);
-  return s;
-}
-
 bool InvokePython(const BuildSettings* build_settings,
                   const base::FilePath& python_script_path,
                   const std::string& python_script_extra_args,
@@ -192,7 +150,7 @@ bool JSONProjectWriter::RunAndWriteFiles(
     return false;
   }
 
-  std::string json = RenderJSON(build_settings, builder, targets);
+  std::string json = RenderJSON(build_settings, targets);
   if (!ContentsEqual(output_path, json)) {
     if (!WriteFileIfChanged(output_path, json, err)) {
       return false;
@@ -217,4 +175,46 @@ bool JSONProjectWriter::RunAndWriteFiles(
   }
 
   return true;
+}
+
+std::string JSONProjectWriter::RenderJSON(
+    const BuildSettings* build_settings,
+    std::vector<const Target*>& all_targets) {
+  Label default_toolchain_label;
+
+  auto targets = std::make_unique<base::DictionaryValue>();
+  for (const auto* target : all_targets) {
+    if (default_toolchain_label.is_null())
+      default_toolchain_label = target->settings()->default_toolchain_label();
+    auto description =
+        DescBuilder::DescriptionForTarget(target, "", false, false, false);
+    // Outputs need to be asked for separately.
+    auto outputs = DescBuilder::DescriptionForTarget(target, "source_outputs",
+                                                     false, false, false);
+    base::DictionaryValue* outputs_value = nullptr;
+    if (outputs->GetDictionary("source_outputs", &outputs_value) &&
+        !outputs_value->empty()) {
+      description->MergeDictionary(outputs.get());
+    }
+    targets->SetWithoutPathExpansion(
+        target->label().GetUserVisibleName(default_toolchain_label),
+        std::move(description));
+  }
+
+  auto settings = std::make_unique<base::DictionaryValue>();
+  settings->SetKey("root_path", base::Value(build_settings->root_path_utf8()));
+  settings->SetKey("build_dir",
+                   base::Value(build_settings->build_dir().value()));
+  settings->SetKey(
+      "default_toolchain",
+      base::Value(default_toolchain_label.GetUserVisibleName(false)));
+
+  auto output = std::make_unique<base::DictionaryValue>();
+  output->SetWithoutPathExpansion("targets", std::move(targets));
+  output->SetWithoutPathExpansion("build_settings", std::move(settings));
+
+  std::string s;
+  base::JSONWriter::WriteWithOptions(
+      *output.get(), base::JSONWriter::OPTIONS_PRETTY_PRINT, &s);
+  return s;
 }

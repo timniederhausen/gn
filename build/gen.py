@@ -587,6 +587,7 @@ def WriteGNNinja(path, platform, host, options):
         'tools/gn/header_checker_unittest.cc',
         'tools/gn/inherited_libraries_unittest.cc',
         'tools/gn/input_conversion_unittest.cc',
+        'tools/gn/json_project_writer_unittest.cc',
         'tools/gn/label_pattern_unittest.cc',
         'tools/gn/label_unittest.cc',
         'tools/gn/loader_unittest.cc',

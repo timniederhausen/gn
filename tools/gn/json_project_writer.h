@@ -21,6 +21,13 @@ class JSONProjectWriter {
                                const std::string& dir_filter_string,
                                bool quiet,
                                Err* err);
+
+ private:
+  FRIEND_TEST_ALL_PREFIXES(JSONProjectWriter, ActionWithResponseFile);
+  FRIEND_TEST_ALL_PREFIXES(JSONProjectWriter, ForEachWithResponseFile);
+
+  static std::string RenderJSON(const BuildSettings* build_settings,
+                                std::vector<const Target*>& all_targets);
 };
 
 #endif

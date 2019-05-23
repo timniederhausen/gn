@@ -55,6 +55,7 @@
 //   "walk_keys" : [ list of target walk keys ]
 //   "rebase" : true or false
 //   "output_conversion" : "string for output conversion"
+//   "response_file_contents": [ list of response file contents entries ]
 // }
 //
 // Optionally, if "what" is specified while generating description, two other
@@ -415,6 +416,16 @@ class TargetDescBuilder : public BaseDescBuilder {
           args->AppendString(elem.AsString());
 
         res->SetWithoutPathExpansion(variables::kArgs, std::move(args));
+      }
+      if (what(variables::kResponseFileContents) &&
+          !target_->action_values().rsp_file_contents().list().empty()) {
+        auto rsp_file_contents = std::make_unique<base::ListValue>();
+        for (const auto& elem :
+             target_->action_values().rsp_file_contents().list())
+          rsp_file_contents->AppendString(elem.AsString());
+
+        res->SetWithoutPathExpansion(variables::kResponseFileContents,
+                                     std::move(rsp_file_contents));
       }
       if (what(variables::kDepfile) &&
           !target_->action_values().depfile().empty()) {
