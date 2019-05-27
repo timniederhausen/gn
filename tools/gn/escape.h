@@ -23,8 +23,8 @@ enum EscapingMode {
 
   // For writing preformatted shell commands to Ninja files. This assumes the
   // output already has the proper quoting and may include special shell
-  // shell characters which we want to pass to the shell (like when writing
-  // tool commands). Only Ninja "$" are escaped.
+  // characters which we want to pass to the shell (like when writing tool
+  // commands). Only Ninja "$" are escaped.
   ESCAPE_NINJA_PREFORMATTED_COMMAND,
 };
 
