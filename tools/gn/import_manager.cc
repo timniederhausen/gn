@@ -21,6 +21,7 @@ std::unique_ptr<Scope> UncachedImport(const Settings* settings,
                                       const ParseNode* node_for_err,
                                       Err* err) {
   ScopedTrace load_trace(TraceItem::TRACE_IMPORT_LOAD, file.value());
+  load_trace.SetToolchain(settings->toolchain_label());
 
   const ParseNode* node = g_scheduler->input_file_manager()->SyncLoadFile(
       node_for_err->GetRange(), settings->build_settings(), file, err);
@@ -129,6 +130,8 @@ bool ImportManager::DoImport(const SourceFile& file,
                           std::this_thread::get_id());
         import_block_trace->set_begin(import_block_begin);
         import_block_trace->set_end(import_block_end);
+        import_block_trace->set_toolchain(
+            scope->settings()->toolchain_label().GetUserVisibleName(false));
         AddTrace(import_block_trace);
       }
     }

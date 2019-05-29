@@ -24,6 +24,8 @@
 
 namespace {
 
+constexpr uint64_t kNanosecondsToMicroseconds = 1'000;
+
 class TraceLog {
  public:
   TraceLog() { events_.reserve(16384); }
@@ -244,7 +246,7 @@ void SaveTraces(const base::FilePath& file_name) {
 
   // Write main thread metadata (assume this is being written on the main
   // thread).
-  out << "{\"pid\":0,\"tid\":" << std::this_thread::get_id();
+  out << "{\"pid\":0,\"tid\":\"" << std::this_thread::get_id() << "\"";
   out << ",\"ts\":0,\"ph\":\"M\",";
   out << "\"name\":\"thread_name\",\"args\":{\"name\":\"Main thread\"}},";
 
@@ -254,8 +256,8 @@ void SaveTraces(const base::FilePath& file_name) {
 
     if (i != 0)
       out << ",";
-    out << "{\"pid\":0,\"tid\":" << item.thread_id();
-    out << ",\"ts\":" << item.begin();
+    out << "{\"pid\":0,\"tid\":\"" << item.thread_id() << "\"";
+    out << ",\"ts\":" << item.begin() / kNanosecondsToMicroseconds;
     out << ",\"ph\":\"X\"";  // "X" = complete event with begin & duration.
     out << ",\"dur\":" << item.delta().InMicroseconds();
 
