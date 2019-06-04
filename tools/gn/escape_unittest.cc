@@ -12,6 +12,13 @@ TEST(Escape, Ninja) {
   EXPECT_EQ("asdf$:$ \"$$\\bar", result);
 }
 
+TEST(Escape, Depfile) {
+  EscapeOptions opts;
+  opts.mode = ESCAPE_DEPFILE;
+  std::string result = EscapeString("asdf:$ \\#*[|]bar", opts, nullptr);
+  EXPECT_EQ("asdf:$$\\ \\\\\\#\\*\\[\\|\\]bar", result);
+}
+
 TEST(Escape, WindowsCommand) {
   EscapeOptions opts;
   opts.mode = ESCAPE_NINJA_COMMAND;

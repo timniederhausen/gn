@@ -184,6 +184,33 @@ TEST_F(NinjaBuildWriterTest, TwoTargets) {
   EXPECT_EQ(std::string::npos, out_str.find("pool console"));
 }
 
+TEST_F(NinjaBuildWriterTest, SpaceInDepfile) {
+  TestWithScope setup;
+  Err err;
+
+  // Setup sets the default root dir to ".".
+  base::FilePath root(FILE_PATH_LITERAL("."));
+  base::FilePath root_realpath = base::MakeAbsoluteFilePath(root);
+  setup.build_settings()->SetRootPath(root_realpath);
+
+  // Cannot use MakeAbsoluteFilePath for non-existed paths
+  base::FilePath dependency =
+      root_realpath.Append(FILE_PATH_LITERAL("path with space/BUILD.gn"));
+  g_scheduler->AddGenDependency(dependency);
+
+  std::unordered_map<const Settings*, const Toolchain*> used_toolchains;
+  used_toolchains[setup.settings()] = setup.toolchain();
+  std::vector<const Target*> targets;
+  std::ostringstream ninja_out;
+  std::ostringstream depfile_out;
+  NinjaBuildWriter writer(setup.build_settings(), used_toolchains, targets,
+                          setup.toolchain(), targets, ninja_out, depfile_out);
+  ASSERT_TRUE(writer.Run(&err));
+
+  EXPECT_EQ(depfile_out.str(),
+            "build.ninja: ../../path\\ with\\ space/BUILD.gn");
+}
+
 TEST_F(NinjaBuildWriterTest, DuplicateOutputs) {
   TestWithScope setup;
   Err err;

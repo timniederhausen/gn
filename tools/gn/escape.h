@@ -16,6 +16,9 @@ enum EscapingMode {
   // Ninja string escaping.
   ESCAPE_NINJA,
 
+  // Ninja/makefile depfile string escaping.
+  ESCAPE_DEPFILE,
+
   // For writing commands to ninja files. This assumes the output is "one
   // thing" like a filename, so will escape or quote spaces as necessary for
   // both Ninja and the shell to keep that thing together.

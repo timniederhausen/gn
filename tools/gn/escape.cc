@@ -75,6 +75,24 @@ size_t EscapeStringToString_Ninja(const base::StringPiece& str,
   return i;
 }
 
+size_t EscapeStringToString_Depfile(const base::StringPiece& str,
+                                    const EscapeOptions& options,
+                                    char* dest,
+                                    bool* needed_quoting) {
+  size_t i = 0;
+  for (const auto& elem : str) {
+    // Escape all characters that ninja depfile parser can recognize as escaped,
+    // even if some of them can work without escaping.
+    if (elem == ' ' || elem == '\\' || elem == '#' || elem == '*' ||
+        elem == '[' || elem == '|' || elem == ']')
+      dest[i++] = '\\';
+    else if (elem == '$')  // Extra rule for $$
+      dest[i++] = '$';
+    dest[i++] = elem;
+  }
+  return i;
+}
+
 size_t EscapeStringToString_NinjaPreformatted(const base::StringPiece& str,
                                               char* dest) {
   // Only Ninja-escape $.
@@ -188,6 +206,8 @@ size_t EscapeStringToString(const base::StringPiece& str,
       return str.size();
     case ESCAPE_NINJA:
       return EscapeStringToString_Ninja(str, options, dest, needed_quoting);
+    case ESCAPE_DEPFILE:
+      return EscapeStringToString_Depfile(str, options, dest, needed_quoting);
     case ESCAPE_NINJA_COMMAND:
       switch (options.platform) {
         case ESCAPE_PLATFORM_CURRENT:

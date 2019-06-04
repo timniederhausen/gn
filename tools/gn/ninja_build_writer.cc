@@ -306,10 +306,16 @@ void NinjaBuildWriter::WriteNinjaRules() {
 
   const base::FilePath build_path =
       build_settings_->build_dir().Resolve(build_settings_->root_path());
+
+  EscapeOptions depfile_escape;
+  depfile_escape.mode = ESCAPE_DEPFILE;
   for (const auto& other_file : fileset) {
     const base::FilePath file =
         MakeAbsoluteFilePathRelativeIfPossible(build_path, other_file);
-    dep_out_ << " " << FilePathToUTF8(file.NormalizePathSeparatorsTo('/'));
+    dep_out_ << " ";
+    EscapeStringToStream(dep_out_,
+                         FilePathToUTF8(file.NormalizePathSeparatorsTo('/')),
+                         depfile_escape);
   }
 
   out_ << std::endl;

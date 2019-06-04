@@ -52,6 +52,8 @@ class Scheduler {
 
   // Declares that the given file was read and affected the build output.
   //
+  // Some consumers expect provided path to be absolute.kk
+  //
   // TODO(brettw) this is global rather than per-BuildSettings. If we
   // start using >1 build settings, then we probably want this to take a
   // BuildSettings object so we know the depdency on a per-build basis.
