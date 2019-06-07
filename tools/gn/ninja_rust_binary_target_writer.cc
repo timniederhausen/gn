@@ -127,12 +127,17 @@ void NinjaRustBinaryTargetWriter::Run() {
       order_only_deps.push_back(input_dep);
 
     std::vector<OutputFile> rustdeps;
+    std::vector<OutputFile> nonrustdeps;
     for (const auto* non_linkable_dep : non_linkable_deps) {
       order_only_deps.push_back(non_linkable_dep->dependency_output_file());
     }
 
     for (const auto* linkable_dep : linkable_deps) {
-      rustdeps.push_back(linkable_dep->dependency_output_file());
+      if (linkable_dep->source_types_used().RustSourceUsed()) {
+        rustdeps.push_back(linkable_dep->dependency_output_file());
+      } else {
+        nonrustdeps.push_back(linkable_dep->dependency_output_file());
+      }
       deps.push_back(linkable_dep->dependency_output_file());
     }
 
@@ -142,7 +147,7 @@ void NinjaRustBinaryTargetWriter::Run() {
     WriteCompilerBuildLine(target_->rust_values().crate_root(), deps.vector(),
                            order_only_deps, tool_->name(), tool_outputs);
     WriteExterns();
-    WriteRustdeps(rustdeps);
+    WriteRustdeps(rustdeps, nonrustdeps);
     WriteEdition();
   }
 }
@@ -191,12 +196,20 @@ void NinjaRustBinaryTargetWriter::WriteExterns() {
 }
 
 void NinjaRustBinaryTargetWriter::WriteRustdeps(
-    std::vector<OutputFile>& rustdeps) {
+    const std::vector<OutputFile>& rustdeps,
+    const std::vector<OutputFile>& nonrustdeps) {
   if (rustdeps.empty())
     return;
   out_ << "  rustdeps =";
   for (const auto& rustdep : rustdeps) {
     out_ << " -Ldependency=";
+    path_output_.WriteDir(
+        out_, rustdep.AsSourceFile(settings_->build_settings()).GetDir(),
+        PathOutput::DIR_NO_LAST_SLASH);
+  }
+
+  for (const auto& rustdep : nonrustdeps) {
+    out_ << " -Lnative=";
     path_output_.WriteDir(
         out_, rustdep.AsSourceFile(settings_->build_settings()).GetDir(),
         PathOutput::DIR_NO_LAST_SLASH);

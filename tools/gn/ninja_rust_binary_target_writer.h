@@ -25,7 +25,8 @@ class NinjaRustBinaryTargetWriter : public NinjaBinaryTargetWriter {
   void WriteSources(const OutputFile& input_dep,
                     const std::vector<OutputFile>& order_only_deps);
   void WriteExterns();
-  void WriteRustdeps(std::vector<OutputFile>& rustdeps);
+  void WriteRustdeps(const std::vector<OutputFile>& rustdeps,
+                     const std::vector<OutputFile>& nonrustdeps);
   void WriteEdition();
 
   const RustTool* tool_;
