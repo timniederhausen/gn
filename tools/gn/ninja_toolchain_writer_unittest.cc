@@ -22,3 +22,18 @@ TEST(NinjaToolchainWriter, WriteToolRule) {
       "-o ${out}\n",
       stream.str());
 }
+
+TEST(NinjaToolchainWriter, WriteToolRuleWithLauncher) {
+  TestWithScope setup;
+
+  std::ostringstream stream;
+  NinjaToolchainWriter writer(setup.settings(), setup.toolchain(), stream);
+  writer.WriteToolRule(setup.toolchain()->GetTool(CTool::kCToolCxx),
+                       std::string("prefix_"));
+
+  EXPECT_EQ(
+      "rule prefix_cxx\n"
+      "  command = launcher c++ ${in} ${cflags} ${cflags_cc} ${defines} ${include_dirs} "
+      "-o ${out}\n",
+      stream.str());
+}

@@ -190,6 +190,7 @@ bool Tool::ReadOutputExtension(Scope* scope, Err* err) {
 
 bool Tool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
   if (!ReadPattern(scope, "command", &command_, err) ||
+      !ReadString(scope, "command_launcher", &command_launcher_, err) ||
       !ReadOutputExtension(scope, err) ||
       !ReadPattern(scope, "depfile", &depfile_, err) ||
       !ReadPattern(scope, "description", &description_, err) ||

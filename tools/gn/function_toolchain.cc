@@ -309,6 +309,15 @@ Tool variables
 
         The command to run.
 
+    command_launcher  [string]
+        Valid for: all tools except "action" (optional)
+
+        The prefix with which to launch the command (e.g. the path to a Goma or
+        CCache compiler launcher).
+
+        Note that this prefix will not be included in the compilation database or
+        IDE files generated from the build.
+
     default_output_dir  [string with substitutions]
         Valid for: linker tools
 

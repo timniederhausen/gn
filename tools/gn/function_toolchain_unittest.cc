@@ -91,3 +91,29 @@ TEST_F(FunctionToolchain, Rust) {
     ASSERT_EQ(rust->description().AsString(), "RUST {{output}}");
   }
 }
+
+TEST_F(FunctionToolchain, CommandLauncher) {
+  TestWithScope setup;
+
+  TestParseInput input(
+      R"(toolchain("good") {
+        tool("cxx") {
+          command_launcher = "/usr/goma/gomacc"
+        }
+      })");
+  ASSERT_FALSE(input.has_error());
+
+  Err err;
+  input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message();
+
+  // It should have generated a toolchain.
+  ASSERT_EQ(1u, setup.items().size());
+  const Toolchain* toolchain = setup.items()[0]->AsToolchain();
+  ASSERT_TRUE(toolchain);
+
+  // The toolchain should have a link tool with the two outputs.
+  const Tool* link = toolchain->GetTool(CTool::kCToolCxx);
+  ASSERT_TRUE(link);
+  EXPECT_EQ("/usr/goma/gomacc", link->command_launcher());
+}

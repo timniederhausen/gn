@@ -83,6 +83,15 @@ class Tool {
     command_ = std::move(cmd);
   }
 
+  // Launcher for the command (e.g. goma)
+  const std::string& command_launcher() const {
+    return command_launcher_;
+  }
+  void set_command_launcher(std::string l) {
+    DCHECK(!complete_);
+    command_launcher_ = std::move(l);
+  }
+
   // Should include a leading "." if nonempty.
   const std::string& default_output_extension() const {
     return default_output_extension_;
@@ -212,6 +221,7 @@ class Tool {
   const char* name_;
 
   SubstitutionPattern command_;
+  std::string command_launcher_;
   std::string default_output_extension_;
   SubstitutionPattern default_output_dir_;
   SubstitutionPattern depfile_;

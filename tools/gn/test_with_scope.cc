@@ -91,6 +91,7 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
       cxx_tool.get());
   cxx_tool->set_outputs(SubstitutionList::MakeForTest(
       "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o"));
+  cxx_tool->set_command_launcher("launcher");
   toolchain->SetTool(std::move(cxx_tool));
 
   // OBJC

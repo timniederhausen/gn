@@ -83,8 +83,7 @@ void NinjaToolchainWriter::WriteToolRule(Tool* tool,
   EscapeOptions options;
   options.mode = ESCAPE_NINJA_PREFORMATTED_COMMAND;
 
-  CHECK(!tool->command().empty()) << "Command should not be empty";
-  WriteRulePattern("command", tool->command(), options);
+  WriteCommandRulePattern("command", tool->command_launcher(), tool->command(), options);
 
   WriteRulePattern("description", tool->description(), options);
   WriteRulePattern("rspfile", tool->rspfile(), options);
@@ -121,5 +120,20 @@ void NinjaToolchainWriter::WriteRulePattern(const char* name,
     return;
   out_ << kIndent << name << " = ";
   SubstitutionWriter::WriteWithNinjaVariables(pattern, options, out_);
+  out_ << std::endl;
+}
+
+void NinjaToolchainWriter::WriteCommandRulePattern(
+    const char* name,
+    const std::string& launcher,
+    const SubstitutionPattern& command,
+    const EscapeOptions& options) {
+  CHECK(!command.empty()) << "Command should not be empty";
+  if (command.empty())
+    return;
+  out_ << kIndent << name << " = " ;
+  if (!launcher.empty())
+    out_ << launcher << " ";
+  SubstitutionWriter::WriteWithNinjaVariables(command, options, out_);
   out_ << std::endl;
 }
