@@ -189,8 +189,8 @@ bool RustTargetGenerator::FillAliasedDeps() {
       return false;
 
     // Insert into the aliased_deps map.
-    target_->rust_values().aliased_deps().insert(std::pair<Label, std::string>(
-        std::move(dep_label), std::move(pair.first)));
+    target_->rust_values().aliased_deps().emplace(
+        std::move(dep_label), pair.first.as_string());
   }
 
   return true;
