@@ -186,6 +186,8 @@ TEST(NinjaCreateBundleTargetWriter, AssetCatalog) {
   bundle_data.sources().push_back(
       SourceFile("//foo/Foo.xcassets/Contents.json"));
   bundle_data.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/foo.colorset/Contents.json"));
+  bundle_data.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.imageset/Contents.json"));
   bundle_data.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.imageset/FooIcon-29.png"));
@@ -290,6 +292,8 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
   bundle_data2.sources().push_back(
       SourceFile("//foo/Foo.xcassets/Contents.json"));
   bundle_data2.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/foo.colorset/Contents.json"));
+  bundle_data2.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.imageset/Contents.json"));
   bundle_data2.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.imageset/FooIcon-29.png"));
@@ -321,6 +325,18 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
   bundle_data3.visibility().SetPublic();
   ASSERT_TRUE(bundle_data3.OnResolved(&err));
 
+  Target bundle_data4(setup.settings(), Label(SourceDir("//biz/"), "assets"));
+  bundle_data4.set_output_type(Target::BUNDLE_DATA);
+  bundle_data4.sources().push_back(
+      SourceFile("//biz/Biz.xcassets/Contents.json"));
+  bundle_data4.sources().push_back(
+      SourceFile("//biz/Biz.xcassets/biz.colorset/Contents.json"));
+  bundle_data4.action_values().outputs() = SubstitutionList::MakeForTest(
+      "{{bundle_resources_dir}}/{{source_file_part}}");
+  bundle_data4.SetToolchain(setup.toolchain());
+  bundle_data4.visibility().SetPublic();
+  ASSERT_TRUE(bundle_data4.OnResolved(&err));
+
   Target create_bundle(
       setup.settings(),
       Label(SourceDir("//baz/"), "bar", setup.toolchain()->label().dir(),
@@ -331,6 +347,7 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
   create_bundle.private_deps().push_back(LabelTargetPair(&bundle_data1));
   create_bundle.private_deps().push_back(LabelTargetPair(&bundle_data2));
   create_bundle.private_deps().push_back(LabelTargetPair(&bundle_data3));
+  create_bundle.private_deps().push_back(LabelTargetPair(&bundle_data4));
   create_bundle.private_deps().push_back(LabelTargetPair(action.get()));
   create_bundle.bundle_data().product_type().assign("com.apple.product-type");
   create_bundle.bundle_data().set_partial_info_plist(
@@ -343,9 +360,9 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
   writer.Run();
 
   const char expected[] =
-      "build obj/baz/bar.inputdeps.stamp: stamp obj/foo/assets.stamp "
-      "obj/foo/bar.stamp obj/foo/data.stamp obj/qux/info_plist.stamp "
-      "obj/quz/assets.stamp\n"
+      "build obj/baz/bar.inputdeps.stamp: stamp obj/biz/assets.stamp "
+      "obj/foo/assets.stamp obj/foo/bar.stamp obj/foo/data.stamp "
+      "obj/qux/info_plist.stamp obj/quz/assets.stamp\n"
       "build bar.bundle/Contents/Info.plist: copy_bundle_data "
       "../../qux/qux-Info.plist || obj/baz/bar.inputdeps.stamp\n"
       "build bar.bundle/Contents/Resources/input1.txt: copy_bundle_data "
@@ -354,11 +371,11 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
       "../../foo/input2.txt || obj/baz/bar.inputdeps.stamp\n"
       "build obj/baz/bar.xcassets.inputdeps.stamp: stamp "
       "obj/foo/assets.stamp "
-      "obj/quz/assets.stamp\n"
+      "obj/quz/assets.stamp obj/biz/assets.stamp\n"
       "build bar.bundle/Contents/Resources/Assets.car | "
       "baz/bar/bar_partial_info.plist: compile_xcassets "
-      "../../foo/Foo.xcassets "
-      "../../quz/Quz.xcassets | obj/baz/bar.xcassets.inputdeps.stamp || "
+      "../../foo/Foo.xcassets ../../quz/Quz.xcassets "
+      "../../biz/Biz.xcassets | obj/baz/bar.xcassets.inputdeps.stamp || "
       "obj/baz/bar.inputdeps.stamp\n"
       "  product_type = com.apple.product-type\n"
       "  partial_info_plist = baz/bar/bar_partial_info.plist\n"

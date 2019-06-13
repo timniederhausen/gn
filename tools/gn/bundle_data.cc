@@ -34,7 +34,7 @@ bool IsSourceFileFromAssetsCatalog(base::StringPiece source,
   if (source.ends_with("/Contents.json") && dir.ends_with(".xcassets")) {
     is_file_from_asset_catalog = true;
   } else if (dir.ends_with(".appiconset") || dir.ends_with(".imageset") ||
-             dir.ends_with(".launchimage")) {
+             dir.ends_with(".launchimage") || dir.ends_with(".colorset")) {
     dir = FindDirNoTrailingSeparator(dir);
     is_file_from_asset_catalog = dir.ends_with(".xcassets");
   }

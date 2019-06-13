@@ -22,6 +22,8 @@ TEST(NinjaBundleDataTargetWriter, Run) {
   bundle_data.sources().push_back(
       SourceFile("//foo/Foo.xcassets/Contents.json"));
   bundle_data.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/foo.colorset/Contents.json"));
+  bundle_data.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.imageset/Contents.json"));
   bundle_data.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.imageset/FooIcon-29.png"));
@@ -44,6 +46,7 @@ TEST(NinjaBundleDataTargetWriter, Run) {
       "../../foo/input1.txt "
       "../../foo/input2.txt "
       "../../foo/Foo.xcassets/Contents.json "
+      "../../foo/Foo.xcassets/foo.colorset/Contents.json "
       "../../foo/Foo.xcassets/foo.imageset/Contents.json "
       "../../foo/Foo.xcassets/foo.imageset/FooIcon-29.png "
       "../../foo/Foo.xcassets/foo.imageset/FooIcon-29@2x.png "
