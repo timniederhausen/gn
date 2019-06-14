@@ -100,6 +100,9 @@ void NinjaToolchainWriter::WriteToolRule(Tool* tool,
       // MSVC deps don't have a depfile.
       out_ << kIndent << "deps = msvc" << std::endl;
     }
+  } else if (!tool->depfile().empty()) {
+    WriteRulePattern("depfile", tool->depfile(), options);
+    out_ << kIndent << "deps = gcc" << std::endl;
   }
 
   // Use pool is specified.
