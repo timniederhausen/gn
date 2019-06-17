@@ -70,7 +70,7 @@ TEST(ExecProcessTest, TestLargeOutput) {
   std::string std_out, std_err;
   int exit_code;
 
-  ASSERT_TRUE(ExecPython("import sys; print 'o' * 1000000", &std_out, &std_err,
+  ASSERT_TRUE(ExecPython("import sys; print('o' * 1000000)", &std_out, &std_err,
                          &exit_code));
   EXPECT_EQ(0, exit_code);
   EXPECT_EQ(1000001u, std_out.size());
@@ -80,18 +80,20 @@ TEST(ExecProcessTest, TestStdoutAndStderrOutput) {
   std::string std_out, std_err;
   int exit_code;
 
-  ASSERT_TRUE(ExecPython(
-      "import sys; print 'o' * 10000; print >>sys.stderr, 'e' * 10000",
-      &std_out, &std_err, &exit_code));
+  ASSERT_TRUE(
+      ExecPython("from __future__ import print_function; import sys; print('o' "
+                 "* 10000); print('e' * 10000, file=sys.stderr)",
+                 &std_out, &std_err, &exit_code));
   EXPECT_EQ(0, exit_code);
   EXPECT_EQ(10001u, std_out.size());
   EXPECT_EQ(10001u, std_err.size());
 
   std_out.clear();
   std_err.clear();
-  ASSERT_TRUE(ExecPython(
-      "import sys; print >>sys.stderr, 'e' * 10000; print 'o' * 10000",
-      &std_out, &std_err, &exit_code));
+  ASSERT_TRUE(
+      ExecPython("from __future__ import print_function; import sys; print('e' "
+                 "* 10000, file=sys.stderr); print('o' * 10000)",
+                 &std_out, &std_err, &exit_code));
   EXPECT_EQ(0, exit_code);
   EXPECT_EQ(10001u, std_out.size());
   EXPECT_EQ(10001u, std_err.size());
@@ -101,7 +103,7 @@ TEST(ExecProcessTest, TestOneOutputClosed) {
   std::string std_out, std_err;
   int exit_code;
 
-  ASSERT_TRUE(ExecPython("import sys; sys.stderr.close(); print 'o' * 10000",
+  ASSERT_TRUE(ExecPython("import sys; sys.stderr.close(); print('o' * 10000)",
                          &std_out, &std_err, &exit_code));
   EXPECT_EQ(0, exit_code);
   EXPECT_EQ(10001u, std_out.size());
@@ -109,9 +111,10 @@ TEST(ExecProcessTest, TestOneOutputClosed) {
 
   std_out.clear();
   std_err.clear();
-  ASSERT_TRUE(ExecPython(
-      "import sys; sys.stdout.close(); print >>sys.stderr, 'e' * 10000",
-      &std_out, &std_err, &exit_code));
+  ASSERT_TRUE(
+      ExecPython("from __future__ import print_function; import sys; "
+                 "sys.stdout.close(); print('e' * 10000, file=sys.stderr)",
+                 &std_out, &std_err, &exit_code));
   EXPECT_EQ(0, exit_code);
   EXPECT_EQ(0u, std_out.size());
   EXPECT_EQ(10001u, std_err.size());
