@@ -412,8 +412,7 @@ bool Target::IsFinal() const {
          output_type_ == LOADABLE_MODULE || output_type_ == ACTION ||
          output_type_ == ACTION_FOREACH || output_type_ == COPY_FILES ||
          output_type_ == CREATE_BUNDLE ||
-         (output_type_ == STATIC_LIBRARY && complete_static_lib_) ||
-         output_type_ == RUST_LIBRARY;
+         (output_type_ == STATIC_LIBRARY && complete_static_lib_);
 }
 
 DepsIteratorRange Target::GetDeps(DepsIterationType type) const {
@@ -545,7 +544,7 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     // library.
     inherited_libraries_.AppendPublicSharedLibraries(dep->inherited_libraries(),
                                                      is_public);
-  } else if (!dep->IsFinal() || dep->output_type() == RUST_LIBRARY) {
+  } else if (!dep->IsFinal()) {
     // The current target isn't linked, so propogate linked deps and
     // libraries up the dependency tree.
     inherited_libraries_.AppendInherited(dep->inherited_libraries(), is_public);
@@ -566,8 +565,7 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
   }
 
   // Library settings are always inherited across static library boundaries.
-  if (!dep->IsFinal() || dep->output_type() == STATIC_LIBRARY ||
-      dep->output_type() == RUST_LIBRARY) {
+  if (!dep->IsFinal() || dep->output_type() == STATIC_LIBRARY) {
     all_lib_dirs_.append(dep->all_lib_dirs());
     all_libs_.append(dep->all_libs());
   }
