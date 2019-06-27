@@ -18,14 +18,18 @@ class RustValues {
   RustValues();
   ~RustValues();
 
-  // Shared library crate types are specified here, all other crate types are
-  // automatically deduced from the target type (e.g. executables use crate_type
-  // = "bin", static_libraries use crate_type = "staticlib").
+  // Library crate types are specified here. Shared library crate types must be
+  // specified, all other crate types can be automatically deduced from the
+  // target type (e.g. executables use crate_type = "bin", static_libraries use
+  // crate_type = "staticlib") unless explicitly set.
   enum CrateType {
     CRATE_AUTO = 0,
-    CRATE_DYLIB,
+    CRATE_BIN,
     CRATE_CDYLIB,
+    CRATE_DYLIB,
     CRATE_PROC_MACRO,
+    CRATE_RLIB,
+    CRATE_STATICLIB,
   };
 
   // Name of this crate.

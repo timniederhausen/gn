@@ -14,6 +14,10 @@
 #include "tools/gn/target.h"
 #include "tools/gn/value_extractors.h"
 
+static const char* kRustSupportedCrateTypesError =
+    "\"crate_type\" must be one of \"bin\", \"cdylib\", \"dylib\", or "
+    "\"proc-macro\", \"rlib\", \"staticlib\".";
+
 RustTargetGenerator::RustTargetGenerator(Target* target,
                                          Scope* scope,
                                          const FunctionCallNode* function_call,
@@ -77,48 +81,50 @@ bool RustTargetGenerator::FillCrateName() {
 bool RustTargetGenerator::FillCrateType() {
   const Value* value = scope_->GetValue(variables::kRustCrateType, true);
   if (!value) {
-    // Non-shared_library targets shouldn't set this, so that's okay.
-    if (target_->output_type() != Target::SHARED_LIBRARY &&
-        target_->output_type() != Target::LOADABLE_MODULE)
-      return true;
-    // But require shared_library and loadable_module targets to tell us what
+    // Require shared_library and loadable_module targets to tell us what
     // they want.
-    *err_ = Err(function_call_,
-                "Must set \"crate_type\" on a Rust \"shared_library\".",
-                "\"crate_type\" must be one of \"dylib\", \"cdylib\", or "
-                "\"proc-macro\".");
-    return false;
-  }
+    if (target_->output_type() == Target::SHARED_LIBRARY ||
+        target_->output_type() == Target::LOADABLE_MODULE) {
+      *err_ = Err(function_call_,
+                  "Must set \"crate_type\" on a Rust \"shared_library\".",
+                  kRustSupportedCrateTypesError);
+      return false;
+    }
 
-  if (target_->output_type() != Target::SHARED_LIBRARY &&
-      target_->output_type() != Target::LOADABLE_MODULE) {
-    *err_ = Err(
-        value->origin(),
-        "\"crate_type\" automatically inferred for non-shared Rust targets.",
-        "Setting it here has no effect.");
-    return false;
+    return true;
   }
 
   if (!value->VerifyTypeIs(Value::STRING, err_))
     return false;
 
-  if (value->string_value() == "dylib") {
-    target_->rust_values().set_crate_type(RustValues::CRATE_DYLIB);
+  if (value->string_value() == "bin") {
+    target_->rust_values().set_crate_type(RustValues::CRATE_BIN);
     return true;
   }
   if (value->string_value() == "cdylib") {
     target_->rust_values().set_crate_type(RustValues::CRATE_CDYLIB);
     return true;
   }
+  if (value->string_value() == "dylib") {
+    target_->rust_values().set_crate_type(RustValues::CRATE_DYLIB);
+    return true;
+  }
   if (value->string_value() == "proc-macro") {
     target_->rust_values().set_crate_type(RustValues::CRATE_PROC_MACRO);
+    return true;
+  }
+  if (value->string_value() == "rlib") {
+    target_->rust_values().set_crate_type(RustValues::CRATE_RLIB);
+    return true;
+  }
+  if (value->string_value() == "staticlib") {
+    target_->rust_values().set_crate_type(RustValues::CRATE_STATICLIB);
     return true;
   }
 
   *err_ = Err(value->origin(),
               "Inadmissible crate type \"" + value->string_value() + "\".",
-              "\"crate_type\" must be one of \"dylib\", \"cdylib\", or "
-              "\"proc-macro\" for a \"shared_library\".");
+              kRustSupportedCrateTypesError);
   return false;
 }
 
@@ -189,8 +195,8 @@ bool RustTargetGenerator::FillAliasedDeps() {
       return false;
 
     // Insert into the aliased_deps map.
-    target_->rust_values().aliased_deps().emplace(
-        std::move(dep_label), pair.first.as_string());
+    target_->rust_values().aliased_deps().emplace(std::move(dep_label),
+                                                  pair.first.as_string());
   }
 
   return true;

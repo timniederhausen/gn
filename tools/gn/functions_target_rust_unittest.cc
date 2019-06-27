@@ -172,20 +172,18 @@ TEST_F(RustFunctionsTarget, CrateTypeSelection) {
   ASSERT_EQ(item_collector.back()->AsTarget()->rust_values().crate_type(),
             RustValues::CRATE_DYLIB);
 
-  TestParseInput exe_error_input(
+  TestParseInput exe_non_default_input(
       "executable(\"foo\") {\n"
-      "  crate_type = \"bin\"\n"
+      "  crate_type = \"rlib\"\n"
       "  sources = [ \"main.rs\" ]\n"
       "  edition = \"2018\""
       "}\n");
-  ASSERT_FALSE(exe_error_input.has_error());
+  ASSERT_FALSE(exe_non_default_input.has_error());
   err = Err();
-  exe_error_input.parsed()->Execute(setup.scope(), &err);
-  ASSERT_TRUE(err.has_error());
-  EXPECT_EQ(
-      "\"crate_type\" automatically inferred for non-shared Rust targets.",
-      err.message())
-      << err.message();
+  exe_non_default_input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message();
+  ASSERT_EQ(item_collector.back()->AsTarget()->rust_values().crate_type(),
+            RustValues::CRATE_RLIB);
 
   TestParseInput lib_error_input(
       "shared_library(\"foo\") {\n"

@@ -40,30 +40,42 @@ void WriteCrateVars(const Target* target,
            target->rust_values().crate_name(), opts, out);
 
   std::string crate_type;
-  switch (target->output_type()) {
-    case Target::EXECUTABLE:
-      crate_type = "bin";
-      break;
-    case Target::STATIC_LIBRARY:
-      crate_type = "staticlib";
-      break;
-    case Target::RUST_LIBRARY:
-      crate_type = "rlib";
-      break;
-    case Target::SHARED_LIBRARY:
-      switch (target->rust_values().crate_type()) {
-        case RustValues::CRATE_DYLIB:
-          crate_type = "dylib";
+  switch (target->rust_values().crate_type()) {
+    // Auto-select the crate type for executables, static libraries, and rlibs.
+    case RustValues::CRATE_AUTO: {
+      switch (target->output_type()) {
+        case Target::EXECUTABLE:
+          crate_type = "bin";
           break;
-        case RustValues::CRATE_CDYLIB:
-          crate_type = "cdylib";
+        case Target::STATIC_LIBRARY:
+          crate_type = "staticlib";
           break;
-        case RustValues::CRATE_PROC_MACRO:
-          crate_type = "proc-macro";
+        case Target::RUST_LIBRARY:
+          crate_type = "rlib";
           break;
         default:
           NOTREACHED();
       }
+      break;
+    }
+    case RustValues::CRATE_BIN:
+      crate_type = "bin";
+      break;
+    case RustValues::CRATE_CDYLIB:
+      crate_type = "cdylib";
+      break;
+    case RustValues::CRATE_DYLIB:
+      crate_type = "dylib";
+      break;
+    case RustValues::CRATE_PROC_MACRO:
+      crate_type = "proc-macro";
+      break;
+    case RustValues::CRATE_RLIB:
+      crate_type = "rlib";
+      break;
+    case RustValues::CRATE_STATICLIB:
+      crate_type = "staticlib";
+      break;
     default:
       NOTREACHED();
   }
