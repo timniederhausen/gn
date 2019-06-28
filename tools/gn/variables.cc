@@ -1262,7 +1262,7 @@ const char kLdflags_Help[] =
 #define COMMON_LIB_INHERITANCE_HELP                                          \
   "\n"                                                                       \
   "  libs and lib_dirs work differently than other flags in two respects.\n" \
-  "  First, then are inherited across static library boundaries until a\n"   \
+  "  First, they are inherited across static library boundaries until a\n"   \
   "  shared library or executable target is reached. Second, they are\n"     \
   "  uniquified so each one is only passed once (the first instance of it\n" \
   "  will be the one used).\n"

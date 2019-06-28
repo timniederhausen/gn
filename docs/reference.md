@@ -3192,6 +3192,15 @@
 
         The command to run.
 
+    command_launcher  [string]
+        Valid for: all tools except "action" (optional)
+
+        The prefix with which to launch the command (e.g. the path to a Goma or
+        CCache compiler launcher).
+
+        Note that this prefix will not be included in the compilation database or
+        IDE files generated from the build.
+
     default_output_dir  [string with substitutions]
         Valid for: linker tools
 
@@ -5306,7 +5315,7 @@
   being relative to the current build file.
 
   libs and lib_dirs work differently than other flags in two respects.
-  First, then are inherited across static library boundaries until a
+  First, they are inherited across static library boundaries until a
   shared library or executable target is reached. Second, they are
   uniquified so each one is only passed once (the first instance of it
   will be the one used).
@@ -5348,7 +5357,7 @@
   library) containing the current target.
 
   libs and lib_dirs work differently than other flags in two respects.
-  First, then are inherited across static library boundaries until a
+  First, they are inherited across static library boundaries until a
   shared library or executable target is reached. Second, they are
   uniquified so each one is only passed once (the first instance of it
   will be the one used).
