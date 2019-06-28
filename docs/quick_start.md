@@ -352,7 +352,7 @@ See `gn help desc` for more.
 
 ### Performance
 
-You can see what took a long time by running it with the --time command
+You can see what took a long time by running it with the `--time` command
 line flag. This will output a summary of timings for various things.
 
 You can also make a trace of how the build files were executed:
