@@ -13,7 +13,7 @@ the platform that the build is run on, and the target is the platform
 where the code will actually run (This is different from
 [autotools](http://www.gnu.org/software/automake/manual/html_node/Cross_002dCompilation.html)'
 terminology, but uses the more common terminology for cross
-compiling**).**
+compiling).
 
 (Confusingly, GN also refers to each build artifact -- an executable,
 library, etc. -- as a target. On this page, we will use "target" only to
