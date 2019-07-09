@@ -2,24 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TOOLS_GN_RUST_TARGET_GENERATOR_H_
-#define TOOLS_GN_RUST_TARGET_GENERATOR_H_
+#ifndef TOOLS_GN_RUST_VALUES_GENERATOR_H_
+#define TOOLS_GN_RUST_VALUES_GENERATOR_H_
 
 #include "base/macros.h"
 #include "tools/gn/target.h"
-#include "tools/gn/target_generator.h"
+
+class FunctionCallNode;
 
 // Collects and writes specified data.
-class RustTargetGenerator : public TargetGenerator {
+class RustTargetGenerator {
  public:
   RustTargetGenerator(Target* target,
                       Scope* scope,
                       const FunctionCallNode* function_call,
                       Err* err);
-  ~RustTargetGenerator() override;
+  ~RustTargetGenerator();
 
- protected:
-  void DoRun() override;
+  void Run();
 
  private:
   bool FillCrateName();
@@ -28,7 +28,12 @@ class RustTargetGenerator : public TargetGenerator {
   bool FillEdition();
   bool FillAliasedDeps();
 
+  Target* target_;
+  Scope* scope_;
+  const FunctionCallNode* function_call_;
+  Err* err_;
+
   DISALLOW_COPY_AND_ASSIGN(RustTargetGenerator);
 };
 
-#endif  // TOOLS_GN_GENERATED_FILE_TARGET_GENERATOR_H_
+#endif  // TOOLS_GN_RUST_VALUES_GENERATOR_H_

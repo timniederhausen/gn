@@ -10,7 +10,7 @@
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/functions.h"
 #include "tools/gn/parse_tree.h"
-#include "tools/gn/rust_target_generator.h"
+#include "tools/gn/rust_values_generator.h"
 #include "tools/gn/rust_variables.h"
 #include "tools/gn/scope.h"
 #include "tools/gn/settings.h"

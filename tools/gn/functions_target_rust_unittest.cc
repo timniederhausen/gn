@@ -348,3 +348,26 @@ TEST_F(RustFunctionsTarget, AliasedDeps) {
       item_collector.back()->AsTarget()->rust_values().aliased_deps().size(),
       2U);
 }
+
+TEST_F(RustFunctionsTarget, PublicConfigs) {
+  TestWithScope setup;
+
+  Scope::ItemVector item_collector;
+  setup.scope()->set_item_collector(&item_collector);
+  setup.scope()->set_source_dir(SourceDir("/"));
+
+  TestParseInput exe_input(
+      "config(\"bar\") {\n"
+      "  defines = [ \"DOOM_MELON\" ]"
+      "}\n"
+      "executable(\"foo\") {\n"
+      "  crate_name = \"foo_crate\"\n"
+      "  sources = [ \"foo.rs\", \"lib.rs\", \"main.rs\" ]\n"
+      "  edition = \"2018\""
+      "  public_configs = [ \":bar\" ]"
+      "}\n");
+  ASSERT_FALSE(exe_input.has_error());
+  Err err;
+  exe_input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message();
+}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "tools/gn/rust_target_generator.h"
+#include "tools/gn/rust_values_generator.h"
 
 #include "tools/gn/config_values_generator.h"
 #include "tools/gn/err.h"
@@ -22,11 +22,14 @@ RustTargetGenerator::RustTargetGenerator(Target* target,
                                          Scope* scope,
                                          const FunctionCallNode* function_call,
                                          Err* err)
-    : TargetGenerator(target, scope, function_call, err) {}
+    : target_(target),
+      scope_(scope),
+      function_call_(function_call),
+      err_(err) {}
 
 RustTargetGenerator::~RustTargetGenerator() = default;
 
-void RustTargetGenerator::DoRun() {
+void RustTargetGenerator::Run() {
   // source_set targets don't need any special Rust handling.
   if (target_->output_type() == Target::SOURCE_SET)
     return;
