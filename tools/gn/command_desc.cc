@@ -229,20 +229,26 @@ void DepsHandler(const std::string& name,
 }
 
 // Outputs need special processing when output patterns are present.
-void ProcessOutputs(base::DictionaryValue* target) {
+void ProcessOutputs(base::DictionaryValue* target, bool files_only) {
   base::ListValue* patterns = nullptr;
   base::ListValue* outputs = nullptr;
   target->GetList("output_patterns", &patterns);
   target->GetList(variables::kOutputs, &outputs);
 
+  int indent = 0;
   if (outputs || patterns) {
-    OutputString("\noutputs\n");
-    int indent = 1;
+    if (!files_only) {
+      OutputString("\noutputs\n");
+      indent = 1;
+    }
     if (patterns) {
-      OutputString("  Output patterns\n");
-      indent = 2;
+      if (!files_only) {
+        OutputString("  Output patterns\n");
+        indent = 2;
+      }
       PrintValue(patterns, indent);
-      OutputString("\n  Resolved output file list\n");
+      if (!files_only)
+        OutputString("\n  Resolved output file list\n");
     }
     if (outputs)
       PrintValue(outputs, indent);
@@ -323,6 +329,10 @@ bool PrintTarget(const Target* target,
   }
   // Print single value
   if (!what.empty() && dict->size() == 1 && single_target) {
+    if (what == variables::kOutputs) {
+      ProcessOutputs(dict.get(), true);
+      return true;
+    }
     base::DictionaryValue::Iterator iter(*dict);
     auto pair = handler_map.find(what);
     if (pair != handler_map.end())
@@ -352,7 +362,7 @@ bool PrintTarget(const Target* target,
   HandleProperty(variables::kScript, handler_map, v, dict);
   HandleProperty(variables::kArgs, handler_map, v, dict);
   HandleProperty(variables::kDepfile, handler_map, v, dict);
-  ProcessOutputs(dict.get());
+  ProcessOutputs(dict.get(), false);
   HandleProperty("bundle_data", handler_map, v, dict);
   HandleProperty(variables::kArflags, handler_map, v, dict);
   HandleProperty(variables::kAsmflags, handler_map, v, dict);
