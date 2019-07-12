@@ -2042,13 +2042,13 @@ const char kWalkKeys_HelpShort[] =
 const char kWalkKeys_Help[] =
     R"(walk_keys: Key(s) for managing the metadata collection walk.
 
-  Defaults to [].
+  Defaults to [""].
 
   These keys are used to control the next step in a collection walk, acting as
   barriers. If a specified key is defined in a target's metadata, the walk will
   use the targets listed in that value to determine which targets are walked.
 
-  If no walk_keys are specified for a generated_file target (i.e. "[]"), the
+  If no walk_keys are specified for a generated_file target (i.e. "[""]"), the
   walk will touch all deps and data_deps of the specified target recursively.
 
   See "gn help generated_file".

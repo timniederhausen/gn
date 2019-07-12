@@ -11,6 +11,8 @@
 #include "tools/gn/scope.h"
 #include "tools/gn/source_dir.h"
 
+extern const char kMetadata_Help[];
+
 // Metadata about a particular target.
 //
 // Metadata is a collection of keys and values relating to a particular target.

@@ -13,6 +13,7 @@
 #include "tools/gn/input_conversion.h"
 #include "tools/gn/label.h"
 #include "tools/gn/label_pattern.h"
+#include "tools/gn/metadata.h"
 #include "tools/gn/ninja_build_writer.h"
 #include "tools/gn/output_conversion.h"
 #include "tools/gn/parser.h"
@@ -83,6 +84,8 @@ void PrintToplevelHelp() {
   PrintShortHelp("label_pattern: Matching more than one label.",
                  "label_pattern");
   PrintShortHelp("labels: About labels.", "labels");
+  PrintShortHelp("metadata_collection: About metadata and its collection.",
+                 "metadata_collection");
   PrintShortHelp("ninja_rules: How Ninja build rules are named.",
                  "ninja_rules");
   PrintShortHelp("nogncheck: Annotating includes for checking.", "nogncheck");
@@ -93,7 +96,8 @@ void PrintToplevelHelp() {
                  "runtime_deps");
   PrintShortHelp("source_expansion: Map sources to outputs for scripts.",
                  "source_expansion");
-  PrintShortHelp("switches: Show available command-line switches.", "switch_list");
+  PrintShortHelp("switches: Show available command-line switches.",
+                 "switch_list");
 }
 
 void PrintSwitchHelp() {
@@ -108,7 +112,8 @@ void PrintSwitchHelp() {
   Do "gn help --the_switch_you_want_help_on" for more. Individual commands may
   take command-specific switches not listed here. See the help on your specific
   command for more.
-)", "switch_list");
+)",
+                "switch_list");
 
   if (is_markdown)
     OutputString("```\n", DECORATION_NONE);
@@ -195,6 +200,7 @@ void PrintAllHelp() {
   PrintLongHelp(kInputOutputConversion_Help, "io_conversion");
   PrintLongHelp(kLabelPattern_Help, "label_pattern");
   PrintLongHelp(kLabels_Help, "labels");
+  PrintLongHelp(kMetadata_Help, "metadata_collection");
   PrintLongHelp(kNinjaRules_Help, "ninja_rules");
   PrintLongHelp(kNoGnCheck_Help, "nogncheck");
   PrintLongHelp(kRuntimeDeps_Help, "runtime_deps");
@@ -335,6 +341,9 @@ int RunHelp(const std::vector<std::string>& args) {
   };
   random_topics["label_pattern"] = []() { PrintLongHelp(kLabelPattern_Help); };
   random_topics["labels"] = []() { PrintLongHelp(kLabels_Help); };
+  random_topics["metadata_collection"] = []() {
+    PrintLongHelp(kMetadata_Help);
+  };
   random_topics["ninja_rules"] = []() { PrintLongHelp(kNinjaRules_Help); };
   random_topics["nogncheck"] = []() { PrintLongHelp(kNoGnCheck_Help); };
   random_topics["runtime_deps"] = []() { PrintLongHelp(kRuntimeDeps_Help); };
