@@ -400,7 +400,7 @@ bool Setup::RunPostMessageLoop(const base::CommandLine& cmdline) {
     OutputString(
         "\nThe build continued as if that argument was "
         "unspecified.\n\n");
-    return true;
+    // Nonfatal error.
   }
 
   if (check_public_headers_) {
