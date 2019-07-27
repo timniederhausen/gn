@@ -350,7 +350,7 @@ Value ExecuteEquals(Scope* exec_scope,
 
   // Optionally apply the assignment filter in-place.
   const PatternList* filter = dest->GetAssignmentFilter(exec_scope);
-  if (filter) {
+  if (filter && written_value->type() == Value::LIST) {
     std::vector<Value>& list_value = written_value->list_value();
     auto first_deleted = std::remove_if(
         list_value.begin(), list_value.end(),
