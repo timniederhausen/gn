@@ -547,7 +547,7 @@ std::string SubstitutionWriter::GetLinkerSubstitution(
     return result;
 
   // Fall-through to the linker-specific ones.
-  if (type == &CSubstitutionOutputDir) {
+  if (type == &SubstitutionOutputDir) {
     // Use the target's value if there is one (it will have no expansion
     // patterns since it can directly use GN variables to compute whatever
     // path it wants), or the tool's default (which will contain further

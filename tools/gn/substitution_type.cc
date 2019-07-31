@@ -22,6 +22,7 @@ const SubstitutionTypes GeneralSubstitutions = {
     &SubstitutionLabelName,
     &SubstitutionRootGenDir,
     &SubstitutionRootOutDir,
+    &SubstitutionOutputDir,
     &SubstitutionTargetGenDir,
     &SubstitutionTargetOutDir,
     &SubstitutionTargetOutputName,
@@ -73,6 +74,7 @@ const Substitution SubstitutionRootGenDir = {"{{root_gen_dir}}",
                                              "root_gen_dir"};
 const Substitution SubstitutionRootOutDir = {"{{root_out_dir}}",
                                              "root_out_dir"};
+const Substitution SubstitutionOutputDir = {"{{output_dir}}", "output_dir"};
 const Substitution SubstitutionTargetGenDir = {"{{target_gen_dir}}",
                                                "target_gen_dir"};
 const Substitution SubstitutionTargetOutDir = {"{{target_out_dir}}",

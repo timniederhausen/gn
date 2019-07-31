@@ -35,6 +35,7 @@ const Substitution kRustSubstitutionRustFlags = {"{{rustflags}}", "rustflags"};
 
 bool IsValidRustSubstitution(const Substitution* type) {
   return IsValidToolSubstitution(type) || IsValidSourceSubstitution(type) ||
+         type == &SubstitutionOutputDir ||
          type == &kRustSubstitutionCrateName ||
          type == &kRustSubstitutionCrateType ||
          type == &kRustSubstitutionEdition ||

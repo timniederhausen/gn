@@ -81,6 +81,10 @@ void WriteCrateVars(const Target* target,
   }
   WriteVar(kRustSubstitutionCrateType.ninja_name, crate_type, opts, out);
 
+  WriteVar(SubstitutionOutputDir.ninja_name,
+           SubstitutionWriter::GetLinkerSubstitution(target, tool,
+                                                     &SubstitutionOutputDir),
+           opts, out);
   if (!target->output_extension_set()) {
     DCHECK(tool->AsRust());
     WriteVar(kRustSubstitutionOutputExtension.ninja_name,
