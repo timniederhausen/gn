@@ -848,3 +848,21 @@ TEST(FilesystemUtils, GetDirForEmptyBuildDir) {
   EXPECT_EQ("obj/",
             GetBuildDirAsOutputFile(context, BuildDirType::OBJ).value());
 }
+
+TEST(FilesystemUtils, ResolveRelativeTest) {
+  std::string result;
+#ifndef OS_WIN
+  EXPECT_TRUE(
+      MakeAbsolutePathRelativeIfPossible("/some/dir", "/some/dir/a", &result));
+  EXPECT_EQ(result, "//a");
+
+  EXPECT_FALSE(MakeAbsolutePathRelativeIfPossible(
+      "/some/dir", "/some/dir-sufix/a", &result));
+#else
+  EXPECT_TRUE(MakeAbsolutePathRelativeIfPossible("C:/some/dir",
+                                                 "/C:/some/dir/a", &result));
+  EXPECT_EQ(result, "//a");
+  EXPECT_FALSE(MakeAbsolutePathRelativeIfPossible(
+      "C:/some/dir", "C:/some/dir-sufix/a", &result));
+#endif
+}
