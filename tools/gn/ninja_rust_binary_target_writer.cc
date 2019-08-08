@@ -188,7 +188,8 @@ void NinjaRustBinaryTargetWriter::WriteCompilerVars() {
 void NinjaRustBinaryTargetWriter::WriteExterns() {
   std::vector<const Target*> externs;
   for (const auto& pair : target_->GetDeps(Target::DEPS_LINKED)) {
-    if (pair.ptr->output_type() == Target::RUST_LIBRARY) {
+    if (pair.ptr->output_type() == Target::RUST_LIBRARY ||
+        pair.ptr->rust_values().crate_type() == RustValues::CRATE_PROC_MACRO) {
       externs.push_back(pair.ptr);
     }
   }

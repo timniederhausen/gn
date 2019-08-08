@@ -5,6 +5,7 @@
 #include "tools/gn/ninja_rust_binary_target_writer.h"
 
 #include "tools/gn/config.h"
+#include "tools/gn/rust_values.h"
 #include "tools/gn/scheduler.h"
 #include "tools/gn/target.h"
 #include "tools/gn/test_with_scheduler.h"
@@ -367,5 +368,85 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustOutputExtensionAndDir) {
         "  edition = 2018\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << out_str;
+  }
+}
+
+TEST_F(NinjaRustBinaryTargetWriterTest, ProcMacro) {
+  Err err;
+  TestWithScope setup;
+
+  Target procmacro(setup.settings(), Label(SourceDir("//bar/"), "mymacro"));
+  procmacro.set_output_type(Target::LOADABLE_MODULE);
+  procmacro.visibility().SetPublic();
+  SourceFile barlib("//bar/lib.rs");
+  procmacro.sources().push_back(SourceFile("//bar/mylib.rs"));
+  procmacro.sources().push_back(barlib);
+  procmacro.source_types_used().Set(SourceFile::SOURCE_RS);
+  procmacro.rust_values().set_crate_root(barlib);
+  procmacro.rust_values().crate_name() = "mymacro";
+  procmacro.rust_values().edition() = "2018";
+  procmacro.rust_values().set_crate_type(RustValues::CRATE_PROC_MACRO);
+  procmacro.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(procmacro.OnResolved(&err));
+
+  {
+    std::ostringstream out;
+    NinjaRustBinaryTargetWriter writer(&procmacro, out);
+    writer.Run();
+
+    const char expected[] =
+        "crate_name = mymacro\n"
+        "crate_type = proc-macro\n"
+        "output_dir = \n"
+        "rustc_output_extension = .so\n"
+        "rustflags =\n"
+        "rustenv =\n"
+        "root_out_dir = .\n"
+        "target_out_dir = obj/bar\n"
+        "target_output_name = mymacro\n"
+        "\n"
+        "build obj/bar/libmymacro.so: rustc ../../bar/lib.rs | "
+        "../../bar/mylib.rs ../../bar/lib.rs\n"
+        "  edition = 2018\n";
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << out_str;
+  }
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::EXECUTABLE);
+  target.visibility().SetPublic();
+  SourceFile main("//foo/main.rs");
+  target.sources().push_back(SourceFile("//foo/source.rs"));
+  target.sources().push_back(main);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(main);
+  target.rust_values().crate_name() = "foo_bar";
+  target.rust_values().edition() = "2018";
+  target.private_deps().push_back(LabelTargetPair(&procmacro));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  {
+    std::ostringstream out;
+    NinjaRustBinaryTargetWriter writer(&target, out);
+    writer.Run();
+
+    const char expected[] =
+        "crate_name = foo_bar\n"
+        "crate_type = bin\n"
+        "output_dir = \n"
+        "rustc_output_extension = \n"
+        "rustflags =\n"
+        "rustenv =\n"
+        "root_out_dir = .\n"
+        "target_out_dir = obj/foo\n"
+        "target_output_name = bar\n"
+        "\n"
+        "build obj/foo/foo_bar: rustc ../../foo/main.rs | ../../foo/source.rs "
+        "../../foo/main.rs || obj/bar/libmymacro.so\n"
+        "  externs = --extern mymacro=obj/bar/libmymacro.so\n"
+        "  edition = 2018\n";
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
 }
