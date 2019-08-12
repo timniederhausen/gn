@@ -21,6 +21,7 @@
 #include "tools/gn/scheduler.h"
 #include "tools/gn/setup.h"
 #include "tools/gn/source_file.h"
+#include "tools/gn/switches.h"
 #include "tools/gn/tokenizer.h"
 
 namespace commands {
@@ -1168,6 +1169,9 @@ int RunFormat(const std::vector<std::string>& args) {
     from_stdin = false;
   }
 
+  bool quiet =
+      base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kQuiet);
+
   if (from_stdin) {
     if (args.size() != 0) {
       Err(Location(), "Expecting no arguments when reading from stdin.\n")
@@ -1227,7 +1231,10 @@ int RunFormat(const std::vector<std::string>& args) {
                 .PrintToStdout();
             return 1;
           }
-          printf("Wrote formatted to '%s'.\n", FilePathToUTF8(to_write).c_str());
+          if (!quiet) {
+            printf("Wrote formatted to '%s'.\n",
+                   FilePathToUTF8(to_write).c_str());
+          }
         }
       }
     }
