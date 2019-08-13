@@ -221,8 +221,9 @@ void NinjaRustBinaryTargetWriter::WriteExterns(
 void NinjaRustBinaryTargetWriter::WriteRustdeps(
     const std::vector<OutputFile>& rustdeps,
     const std::vector<OutputFile>& nonrustdeps) {
-  if (rustdeps.empty())
+  if (rustdeps.empty() && nonrustdeps.empty())
     return;
+
   out_ << "  rustdeps =";
   for (const auto& rustdep : rustdeps) {
     out_ << " -Ldependency=";

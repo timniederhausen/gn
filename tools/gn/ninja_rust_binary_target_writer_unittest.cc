@@ -277,24 +277,24 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
   staticlib.SetToolchain(setup.toolchain());
   ASSERT_TRUE(staticlib.OnResolved(&err));
 
-  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
-  target.set_output_type(Target::EXECUTABLE);
-  target.visibility().SetPublic();
+  Target nonrust(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  nonrust.set_output_type(Target::EXECUTABLE);
+  nonrust.visibility().SetPublic();
   SourceFile main("//foo/main.rs");
-  target.sources().push_back(SourceFile("//foo/source.rs"));
-  target.sources().push_back(main);
-  target.source_types_used().Set(SourceFile::SOURCE_RS);
-  target.rust_values().set_crate_root(main);
-  target.rust_values().crate_name() = "foo_bar";
-  target.rust_values().edition() = "2018";
-  target.private_deps().push_back(LabelTargetPair(&rlib));
-  target.private_deps().push_back(LabelTargetPair(&staticlib));
-  target.SetToolchain(setup.toolchain());
-  ASSERT_TRUE(target.OnResolved(&err));
+  nonrust.sources().push_back(SourceFile("//foo/source.rs"));
+  nonrust.sources().push_back(main);
+  nonrust.source_types_used().Set(SourceFile::SOURCE_RS);
+  nonrust.rust_values().set_crate_root(main);
+  nonrust.rust_values().crate_name() = "foo_bar";
+  nonrust.rust_values().edition() = "2018";
+  nonrust.private_deps().push_back(LabelTargetPair(&rlib));
+  nonrust.private_deps().push_back(LabelTargetPair(&staticlib));
+  nonrust.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(nonrust.OnResolved(&err));
 
   {
     std::ostringstream out;
-    NinjaRustBinaryTargetWriter writer(&target, out);
+    NinjaRustBinaryTargetWriter writer(&nonrust, out);
     writer.Run();
 
     const char expected[] =
@@ -312,6 +312,43 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "../../foo/main.rs obj/bar/libmylib.rlib obj/foo/libstatic.a\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
         "  rustdeps = -Ldependency=obj/bar -Lnative=obj/foo\n"
+        "  edition = 2018\n";
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+  }
+
+  Target nonrust_only(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  nonrust_only.set_output_type(Target::EXECUTABLE);
+  nonrust_only.visibility().SetPublic();
+  nonrust_only.sources().push_back(SourceFile("//foo/source.rs"));
+  nonrust_only.sources().push_back(main);
+  nonrust_only.source_types_used().Set(SourceFile::SOURCE_RS);
+  nonrust_only.rust_values().set_crate_root(main);
+  nonrust_only.rust_values().crate_name() = "foo_bar";
+  nonrust_only.rust_values().edition() = "2018";
+  nonrust_only.private_deps().push_back(LabelTargetPair(&staticlib));
+  nonrust_only.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(nonrust_only.OnResolved(&err));
+
+  {
+    std::ostringstream out;
+    NinjaRustBinaryTargetWriter writer(&nonrust_only, out);
+    writer.Run();
+
+    const char expected[] =
+        "crate_name = foo_bar\n"
+        "crate_type = bin\n"
+        "output_dir = \n"
+        "rustc_output_extension = \n"
+        "rustflags =\n"
+        "rustenv =\n"
+        "root_out_dir = .\n"
+        "target_out_dir = obj/foo\n"
+        "target_output_name = bar\n"
+        "\n"
+        "build obj/foo/foo_bar: rustc ../../foo/main.rs | ../../foo/source.rs "
+        "../../foo/main.rs obj/foo/libstatic.a\n"
+        "  rustdeps = -Lnative=obj/foo\n"
         "  edition = 2018\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
