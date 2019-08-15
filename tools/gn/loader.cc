@@ -310,7 +310,10 @@ void LoaderImpl::BackgroundLoadBuildConfig(
   trace.SetToolchain(settings->toolchain_label());
 
   Err err;
-  root->Execute(base_config, &err);
+  Scope our_scope(base_config);
+  our_scope.set_source_dir(
+      settings->build_settings()->build_config_file().GetDir());
+  root->Execute(&our_scope, &err);
 
   // Clear all private variables left in the scope. We want the root build
   // config to be like a .gni file in that variables beginning with an
