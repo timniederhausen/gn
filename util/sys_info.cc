@@ -72,9 +72,7 @@ int NumberOfProcessors() {
 
   return static_cast<int>(res);
 #elif defined(OS_WIN)
-  SYSTEM_INFO system_info = {};
-  ::GetNativeSystemInfo(&system_info);
-  return system_info.dwNumberOfProcessors;
+  return ::GetActiveProcessorCount(ALL_PROCESSOR_GROUPS);
 #else
 #error
 #endif
