@@ -309,11 +309,18 @@ void LoaderImpl::BackgroundLoadBuildConfig(
                     settings->build_settings()->build_config_file().value());
   trace.SetToolchain(settings->toolchain_label());
 
-  Err err;
-  Scope our_scope(base_config);
-  our_scope.set_source_dir(
+  // Run the BUILDCONFIG with its directory as the current one. We want
+  // BUILDCONFIG to modify the base_config so can't make a copy or a nested one.
+  base_config->set_source_dir(
       settings->build_settings()->build_config_file().GetDir());
-  root->Execute(&our_scope, &err);
+
+  Err err;
+  root->Execute(base_config, &err);
+
+  // Put back the root as the default source dir. This probably isn't necessary
+  // as other scopes will set their directories to their own path, but it's a
+  // better default than the build config's directory.
+  base_config->set_source_dir(SourceDir("//"));
 
   // Clear all private variables left in the scope. We want the root build
   // config to be like a .gni file in that variables beginning with an
