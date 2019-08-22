@@ -95,6 +95,9 @@ def main(argv):
                     help='The path to generate the build files in.')
   parser.add_option('--no-strip', action='store_true',
                     help='Don\'t strip release build. Useful for profiling.')
+  parser.add_option('--no-static-libstdc++', action='store_true',
+                    default=False, dest='no_static_libstdcpp',
+                    help='Don\'t link libstdc++ statically')
   options, args = parser.parse_args(argv)
 
   if args:
@@ -324,10 +327,11 @@ def WriteGNNinja(path, platform, host, options):
     cflags_cc.extend(['-std=c++14', '-Wno-c++11-narrowing'])
 
     if platform.is_linux():
-      ldflags.extend([
-          '-static-libstdc++',
-          '-Wl,--as-needed',
-      ])
+      ldflags.append('-Wl,--as-needed')
+
+      if not options.no_static_libstdcpp:
+        ldflags.append('-static-libstdc++')
+
       # This is needed by libc++.
       libs.append('-ldl')
     elif platform.is_darwin():
