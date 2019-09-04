@@ -69,18 +69,6 @@ class CTool : public Tool {
     precompiled_header_type_ = pch_type;
   }
 
-  const std::string& lib_switch() const { return lib_switch_; }
-  void set_lib_switch(std::string s) {
-    DCHECK(!complete_);
-    lib_switch_ = std::move(s);
-  }
-
-  const std::string& lib_dir_switch() const { return lib_dir_switch_; }
-  void set_lib_dir_switch(std::string s) {
-    DCHECK(!complete_);
-    lib_dir_switch_ = std::move(s);
-  }
-
   // Should match files in the outputs() if nonempty.
   const SubstitutionPattern& link_output() const { return link_output_; }
   void set_link_output(SubstitutionPattern link_out) {
@@ -126,8 +114,6 @@ class CTool : public Tool {
 
   DepsFormat depsformat_;
   PrecompiledHeaderType precompiled_header_type_;
-  std::string lib_switch_;
-  std::string lib_dir_switch_;
   SubstitutionPattern link_output_;
   SubstitutionPattern depend_output_;
 

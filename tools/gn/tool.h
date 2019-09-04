@@ -123,6 +123,30 @@ class Tool {
     description_ = std::move(desc);
   }
 
+  const std::string& framework_switch() const { return framework_switch_; }
+  void set_framework_switch(std::string s) {
+    DCHECK(!complete_);
+    framework_switch_ = std::move(s);
+  }
+
+  const std::string& lib_switch() const { return lib_switch_; }
+  void set_lib_switch(std::string s) {
+    DCHECK(!complete_);
+    lib_switch_ = std::move(s);
+  }
+
+  const std::string& lib_dir_switch() const { return lib_dir_switch_; }
+  void set_lib_dir_switch(std::string s) {
+    DCHECK(!complete_);
+    lib_dir_switch_ = std::move(s);
+  }
+
+  const std::string& linker_arg() const { return linker_arg_; }
+  void set_linker_arg(std::string s) {
+    DCHECK(!complete_);
+    linker_arg_ = std::move(s);
+  }
+
   const SubstitutionList& outputs() const { return outputs_; }
   void set_outputs(SubstitutionList out) {
     DCHECK(!complete_);
@@ -226,6 +250,10 @@ class Tool {
   SubstitutionPattern default_output_dir_;
   SubstitutionPattern depfile_;
   SubstitutionPattern description_;
+  std::string framework_switch_;
+  std::string lib_switch_;
+  std::string lib_dir_switch_;
+  std::string linker_arg_;
   SubstitutionList outputs_;
   SubstitutionList runtime_outputs_;
   std::string output_prefix_;

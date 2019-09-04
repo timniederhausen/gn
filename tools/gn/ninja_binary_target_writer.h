@@ -57,6 +57,11 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
                               const char* tool_name,
                               const std::vector<OutputFile>& outputs);
 
+  void WriteLinkerFlags(std::ostream& out,
+                        const Tool* tool,
+                        const SourceFile* optional_def_file);
+  void WriteLibs(std::ostream& out, const Tool* tool);
+
   virtual void AddSourceSetFiles(const Target* source_set,
                                  UniqueVector<OutputFile>* obj_files) const;
 

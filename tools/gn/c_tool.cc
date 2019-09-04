@@ -20,6 +20,10 @@ const char* CTool::kCToolLink = "link";
 CTool::CTool(const char* n)
     : Tool(n), depsformat_(DEPS_GCC), precompiled_header_type_(PCH_NONE) {
   CHECK(ValidateName(n));
+  set_framework_switch("-framework ");
+  set_lib_dir_switch("-L");
+  set_lib_switch("-l");
+  set_linker_arg("");
 }
 
 CTool::~CTool() = default;

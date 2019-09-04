@@ -19,6 +19,17 @@
 #include "tools/gn/substitution_writer.h"
 #include "tools/gn/target.h"
 
+namespace {
+
+// Returns the proper escape options for writing compiler and linker flags.
+EscapeOptions GetFlagOptions() {
+  EscapeOptions opts;
+  opts.mode = ESCAPE_NINJA_COMMAND;
+  return opts;
+}
+
+}  // namespace
+
 NinjaBinaryTargetWriter::NinjaBinaryTargetWriter(const Target* target,
                                                  std::ostream& out)
     : NinjaTargetWriter(target, out),
@@ -205,4 +216,63 @@ void NinjaBinaryTargetWriter::WriteCompilerBuildLine(
     path_output_.WriteFiles(out_, order_only_deps);
   }
   out_ << std::endl;
+}
+
+void NinjaBinaryTargetWriter::WriteLinkerFlags(
+    std::ostream& out,
+    const Tool* tool,
+    const SourceFile* optional_def_file) {
+  if (tool->AsC()) {
+    // First the ldflags from the target and its config.
+    RecursiveTargetConfigStringsToStream(target_, &ConfigValues::ldflags,
+                                       GetFlagOptions(), out);
+  }
+
+  // Followed by library search paths that have been recursively pushed
+  // through the dependency tree.
+  const OrderedSet<SourceDir> all_lib_dirs = target_->all_lib_dirs();
+  if (!all_lib_dirs.empty()) {
+    // Since we're passing these on the command line to the linker and not
+    // to Ninja, we need to do shell escaping.
+    PathOutput lib_path_output(path_output_.current_dir(),
+                               settings_->build_settings()->root_path_utf8(),
+                               ESCAPE_NINJA_COMMAND);
+    for (size_t i = 0; i < all_lib_dirs.size(); i++) {
+      out << " " << tool->lib_dir_switch();
+      lib_path_output.WriteDir(out, all_lib_dirs[i],
+                               PathOutput::DIR_NO_LAST_SLASH);
+    }
+  }
+
+  if (optional_def_file) {
+    out_ << " /DEF:";
+    path_output_.WriteFile(out, *optional_def_file);
+  }
+}
+
+void NinjaBinaryTargetWriter::WriteLibs(std::ostream& out, const Tool* tool) {
+  // Libraries that have been recursively pushed through the dependency tree.
+  EscapeOptions lib_escape_opts;
+  lib_escape_opts.mode = ESCAPE_NINJA_COMMAND;
+  const OrderedSet<LibFile> all_libs = target_->all_libs();
+  const std::string framework_ending(".framework");
+  for (size_t i = 0; i < all_libs.size(); i++) {
+    const LibFile& lib_file = all_libs[i];
+    const std::string& lib_value = lib_file.value();
+    if (lib_file.is_source_file()) {
+      out << " " << tool->linker_arg();
+      path_output_.WriteFile(out, lib_file.source_file());
+    } else if (base::EndsWith(lib_value, framework_ending,
+                              base::CompareCase::INSENSITIVE_ASCII)) {
+      // Special-case libraries ending in ".framework" to support Mac: Add the
+      // -framework switch and don't add the extension to the output.
+      out << " " << tool->framework_switch();
+      EscapeStringToStream(
+          out, lib_value.substr(0, lib_value.size() - framework_ending.size()),
+          lib_escape_opts);
+    } else {
+      out << " " << tool->lib_switch();
+      EscapeStringToStream(out, lib_value, lib_escape_opts);
+    }
+  }
 }

@@ -6,7 +6,9 @@
 
 #include <sstream>
 
+#include "base/strings/string_util.h"
 #include "tools/gn/deps_iterator.h"
+#include "tools/gn/filesystem_utils.h"
 #include "tools/gn/general_tool.h"
 #include "tools/gn/ninja_target_command_util.h"
 #include "tools/gn/ninja_utils.h"
@@ -145,9 +147,12 @@ void NinjaRustBinaryTargetWriter::Run() {
     std::vector<OutputFile> rustdeps;
     std::vector<OutputFile> nonrustdeps;
     for (const auto* non_linkable_dep : non_linkable_deps) {
+      if (non_linkable_dep->source_types_used().RustSourceUsed() &&
+          non_linkable_dep->output_type() != Target::SOURCE_SET) {
+        rustdeps.push_back(non_linkable_dep->dependency_output_file());
+      }
       order_only_deps.push_back(non_linkable_dep->dependency_output_file());
     }
-
     for (const auto* linkable_dep : linkable_deps) {
       if (linkable_dep->source_types_used().RustSourceUsed()) {
         rustdeps.push_back(linkable_dep->dependency_output_file());
@@ -167,7 +172,6 @@ void NinjaRustBinaryTargetWriter::Run() {
     std::copy(non_linkable_deps.begin(), non_linkable_deps.end(),
               std::back_inserter(extern_deps));
     WriteExterns(extern_deps);
-
     WriteRustdeps(rustdeps, nonrustdeps);
   }
 }
@@ -220,10 +224,9 @@ void NinjaRustBinaryTargetWriter::WriteExterns(
 void NinjaRustBinaryTargetWriter::WriteRustdeps(
     const std::vector<OutputFile>& rustdeps,
     const std::vector<OutputFile>& nonrustdeps) {
-  if (rustdeps.empty() && nonrustdeps.empty())
-    return;
-
   out_ << "  rustdeps =";
+
+  // Rust dependencies.
   for (const auto& rustdep : rustdeps) {
     out_ << " -Ldependency=";
     path_output_.WriteDir(
@@ -231,11 +234,27 @@ void NinjaRustBinaryTargetWriter::WriteRustdeps(
         PathOutput::DIR_NO_LAST_SLASH);
   }
 
+  EscapeOptions lib_escape_opts;
+  lib_escape_opts.mode = ESCAPE_NINJA_COMMAND;
+  const std::string_view lib_prefix("lib");
+
+  // Non-Rust native dependencies.
   for (const auto& rustdep : nonrustdeps) {
     out_ << " -Lnative=";
     path_output_.WriteDir(
         out_, rustdep.AsSourceFile(settings_->build_settings()).GetDir(),
         PathOutput::DIR_NO_LAST_SLASH);
+    std::string_view file = FindFilenameNoExtension(&rustdep.value());
+    if (!file.compare(0, lib_prefix.size(), lib_prefix)) {
+      out_ << " -l";
+      EscapeStringToStream(out_, file.substr(lib_prefix.size()), lib_escape_opts);
+    } else {
+      out_ << " -Clink-arg=";
+      path_output_.WriteFile(out_, rustdep);
+    }
   }
+
+  WriteLinkerFlags(out_, tool_, nullptr);
+  WriteLibs(out_, tool_);
   out_ << std::endl;
 }

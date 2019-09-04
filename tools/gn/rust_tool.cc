@@ -11,6 +11,11 @@ const char* RustTool::kRsToolRustc = "rustc";
 
 RustTool::RustTool(const char* n) : Tool(n), rlib_output_extension_(".rlib") {
   CHECK(ValidateName(n));
+  // TODO: should these be settable in toolchain definition?
+  set_framework_switch("-lframework=");
+  set_lib_dir_switch("-Lnative=");
+  set_lib_switch("-l");
+  set_linker_arg("-Clink-arg=");
 }
 
 RustTool::~RustTool() = default;
@@ -115,7 +120,6 @@ bool RustTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
   if (!ReadOutputsPatternList(scope, "outputs", &outputs_, err)) {
     return false;
   }
-
   return true;
 }
 
