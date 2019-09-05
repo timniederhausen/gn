@@ -45,12 +45,6 @@ Return value
   process_file_template will return for those inputs (see "gn help
   process_file_template").
 
-  binary targets (executables, libraries): this will return a list of the
-  resulting binary file(s). The "main output" (the actual binary or library)
-  will always be the 0th element in the result. Depending on the platform and
-  output type, there may be other output files as well (like import libraries)
-  which will follow.
-
   source sets and groups: this will return a list containing the path of the
   "stamp" file that Ninja will produce once all outputs are generated. This
   probably isn't very useful.
