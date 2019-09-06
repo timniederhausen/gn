@@ -324,7 +324,7 @@ def WriteGNNinja(path, platform, host, options):
         '-fno-rtti',
         '-fdiagnostics-color',
     ])
-    cflags_cc.extend(['-std=c++14', '-Wno-c++11-narrowing'])
+    cflags_cc.extend(['-std=c++17'])
 
     if platform.is_linux():
       ldflags.append('-Wl,--as-needed')
@@ -378,6 +378,7 @@ def WriteGNNinja(path, platform, host, options):
         '/wd4996',
     ])
     cflags_cc.extend([
+        '/std:c++17',
         '/GR-',
         '/D_HAS_EXCEPTIONS=0',
     ])
