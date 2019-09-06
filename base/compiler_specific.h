@@ -159,7 +159,7 @@
 #endif
 
 // MemorySanitizer annotations.
-#if defined(MEMORY_SANITIZER) && !defined(OS_NACL)
+#if defined(MEMORY_SANITIZER)
 #include <sanitizer/msan_interface.h>
 
 // Mark a memory region fully initialized.

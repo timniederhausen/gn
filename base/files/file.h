@@ -22,7 +22,7 @@
 
 namespace base {
 
-#if defined(OS_BSD) || defined(OS_MACOSX) || defined(OS_NACL) || \
+#if defined(OS_BSD) || defined(OS_MACOSX) || \
     defined(OS_ANDROID) && __ANDROID_API__ < 21
 typedef struct stat stat_wrapper_t;
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)

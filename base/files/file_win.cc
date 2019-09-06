@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "base/logging.h"
+#include "base/win/win_util.h"
 
 #include <windows.h>
 
@@ -348,8 +349,8 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
   if (flags & FLAG_SEQUENTIAL_SCAN)
     create_flags |= FILE_FLAG_SEQUENTIAL_SCAN;
 
-  file_.Set(CreateFile(path.value().c_str(), access, sharing, NULL, disposition,
-                       create_flags, NULL));
+  file_.Set(CreateFile(ToWCharT(&path.value()), access, sharing, NULL,
+                       disposition, create_flags, NULL));
 
   if (file_.IsValid()) {
     error_details_ = FILE_OK;

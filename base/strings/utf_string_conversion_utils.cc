@@ -53,19 +53,6 @@ bool ReadUnicodeCharacter(const char16* src,
   return IsValidCodepoint(*code_point);
 }
 
-#if defined(WCHAR_T_IS_UTF32)
-bool ReadUnicodeCharacter(const wchar_t* src,
-                          int32_t src_len,
-                          int32_t* char_index,
-                          uint32_t* code_point) {
-  // Conversion is easy since the source is 32-bit.
-  *code_point = src[*char_index];
-
-  // Validate the value.
-  return IsValidCodepoint(*code_point);
-}
-#endif  // defined(WCHAR_T_IS_UTF32)
-
 // WriteUnicodeCharacter -------------------------------------------------------
 
 size_t WriteUnicodeCharacter(uint32_t code_point, std::string* output) {
@@ -120,10 +107,6 @@ void PrepareForUTF8Output(const CHAR* src,
 }
 
 // Instantiate versions we know callers will need.
-#if !defined(OS_WIN)
-// wchar_t and char16 are the same thing on Windows.
-template void PrepareForUTF8Output(const wchar_t*, size_t, std::string*);
-#endif
 template void PrepareForUTF8Output(const char16*, size_t, std::string*);
 
 template <typename STRING>
@@ -144,10 +127,6 @@ void PrepareForUTF16Or32Output(const char* src,
 }
 
 // Instantiate versions we know callers will need.
-#if !defined(OS_WIN)
-// std::wstring and string16 are the same thing on Windows.
-template void PrepareForUTF16Or32Output(const char*, size_t, std::wstring*);
-#endif
 template void PrepareForUTF16Or32Output(const char*, size_t, string16*);
 
 }  // namespace base

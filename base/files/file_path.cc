@@ -199,10 +199,6 @@ bool FilePath::operator!=(const FilePath& that) const {
 #endif  // defined(FILE_PATH_USES_DRIVE_LETTERS)
 }
 
-std::ostream& operator<<(std::ostream& out, const FilePath& file_path) {
-  return out << file_path.value();
-}
-
 // static
 bool FilePath::IsSeparator(CharType character) {
   for (size_t i = 0; i < kSeparatorsLength - 1; ++i) {
@@ -578,22 +574,8 @@ std::string FilePath::MaybeAsASCII() const {
   return std::string();
 }
 
-std::string FilePath::AsUTF8Unsafe() const {
-  return WideToUTF8(value());
-}
-
-string16 FilePath::AsUTF16Unsafe() const {
-  return value();
-}
-
-// static
-FilePath FilePath::FromUTF8Unsafe(StringPiece utf8) {
-  return FilePath(UTF8ToWide(utf8));
-}
-
-// static
-FilePath FilePath::FromUTF16Unsafe(StringPiece16 utf16) {
-  return FilePath(utf16);
+std::string FilePath::As8Bit() const {
+  return UTF16ToUTF8(value());
 }
 
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
@@ -607,22 +589,8 @@ std::string FilePath::MaybeAsASCII() const {
   return std::string();
 }
 
-std::string FilePath::AsUTF8Unsafe() const {
+std::string FilePath::As8Bit() const {
   return value();
-}
-
-string16 FilePath::AsUTF16Unsafe() const {
-  return UTF8ToUTF16(value());
-}
-
-// static
-FilePath FilePath::FromUTF8Unsafe(StringPiece utf8) {
-  return FilePath(utf8);
-}
-
-// static
-FilePath FilePath::FromUTF16Unsafe(StringPiece16 utf16) {
-  return FilePath(UTF16ToUTF8(utf16));
 }
 
 #endif  // defined(OS_WIN)

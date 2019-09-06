@@ -5,7 +5,6 @@
 // This file adds defines about the platform we're currently building on.
 //  Operating System:
 //    OS_WIN / OS_MACOSX / OS_LINUX / OS_POSIX (MACOSX or LINUX) /
-//    OS_NACL (NACL_SFI or NACL_NONSFI) / OS_NACL_SFI / OS_NACL_NONSFI
 //    OS_CHROMEOS is set by the build system
 //  Compiler:
 //    COMPILER_MSVC / COMPILER_GCC
@@ -16,19 +15,7 @@
 #ifndef BUILD_BUILD_CONFIG_H_
 #define BUILD_BUILD_CONFIG_H_
 
-// A set of macros to use for platform detection.
-#if defined(__native_client__)
-// __native_client__ must be first, so that other OS_ defines are not set.
-#define OS_NACL 1
-// OS_NACL comes in two sandboxing technology flavors, SFI or Non-SFI.
-// PNaCl toolchain defines __native_client_nonsfi__ macro in Non-SFI build
-// mode, while it does not in SFI build mode.
-#if defined(__native_client_nonsfi__)
-#define OS_NACL_NONSFI
-#else
-#define OS_NACL_SFI
-#endif
-#elif defined(ANDROID)
+#if defined(ANDROID)
 #define OS_ANDROID 1
 #elif defined(__APPLE__)
 // only include TargetConditions after testing ANDROID as some android builds
@@ -81,8 +68,8 @@
 // more specific macro.
 #if defined(OS_AIX) || defined(OS_ANDROID) || defined(OS_ASMJS) ||    \
     defined(OS_FREEBSD) || defined(OS_LINUX) || defined(OS_MACOSX) || \
-    defined(OS_NACL) || defined(OS_NETBSD) || defined(OS_OPENBSD) ||  \
-    defined(OS_QNX) || defined(OS_SOLARIS)
+    defined(OS_NETBSD) || defined(OS_OPENBSD) || defined(OS_QNX) ||   \
+    defined(OS_SOLARIS)
 #define OS_POSIX 1
 #endif
 
@@ -174,23 +161,6 @@
 #endif
 #else
 #error Please add support for your architecture in build_config.h
-#endif
-
-// Type detection for wchar_t.
-#if defined(OS_WIN)
-#define WCHAR_T_IS_UTF16
-#elif defined(OS_POSIX) && defined(COMPILER_GCC) && defined(__WCHAR_MAX__) && \
-    (__WCHAR_MAX__ == 0x7fffffff || __WCHAR_MAX__ == 0xffffffff)
-#define WCHAR_T_IS_UTF32
-#elif defined(OS_POSIX) && defined(COMPILER_GCC) && defined(__WCHAR_MAX__) && \
-    (__WCHAR_MAX__ == 0x7fff || __WCHAR_MAX__ == 0xffff)
-// On Posix, we'll detect short wchar_t, but projects aren't guaranteed to
-// compile in this mode (in particular, Chrome doesn't). This is intended for
-// other projects using base who manage their own dependencies and make sure
-// short wchar works for them.
-#define WCHAR_T_IS_UTF16
-#else
-#error Please add support for your compiler in build_config.h
 #endif
 
 #endif  // BUILD_BUILD_CONFIG_H_

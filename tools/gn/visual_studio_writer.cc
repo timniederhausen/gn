@@ -99,8 +99,8 @@ std::string GetWindowsKitsIncludeDirs(const std::string& win_kit) {
 
 #if defined(OS_WIN)
   const base::char16* const subkeys[] = {
-      L"SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots",
-      L"SOFTWARE\\Wow6432Node\\Microsoft\\Windows Kits\\Installed Roots"};
+      u"SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots",
+      u"SOFTWARE\\Wow6432Node\\Microsoft\\Windows Kits\\Installed Roots"};
 
   base::string16 value_name =
       base::ASCIIToUTF16("KitsRoot") + base::ASCIIToUTF16(kWindowsKitsVersion);

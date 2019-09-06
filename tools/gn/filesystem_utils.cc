@@ -159,8 +159,10 @@ bool FilesystemStringsEqual(const base::FilePath::StringType& a,
   // Note: The documentation for CompareString says it runs fastest on
   // null-terminated strings with -1 passed for the length, so we do that here.
   // There should not be embedded nulls in filesystem strings.
-  return ::CompareString(LOCALE_USER_DEFAULT, LINGUISTIC_IGNORECASE, a.c_str(),
-                         -1, b.c_str(), -1) == CSTR_EQUAL;
+  return ::CompareString(LOCALE_USER_DEFAULT, LINGUISTIC_IGNORECASE,
+                         reinterpret_cast<LPCWSTR>(a.c_str()), -1,
+                         reinterpret_cast<LPCWSTR>(b.c_str()),
+                         -1) == CSTR_EQUAL;
 #else
   // Assume case-sensitive filesystems on non-Windows.
   return a == b;
@@ -214,7 +216,7 @@ size_t AbsPathLenWithNoTrailingSlash(const base::StringPiece& path) {
 
 std::string FilePathToUTF8(const base::FilePath::StringType& str) {
 #if defined(OS_WIN)
-  return base::WideToUTF8(str);
+  return base::UTF16ToUTF8(str);
 #else
   return str;
 #endif
@@ -222,7 +224,7 @@ std::string FilePathToUTF8(const base::FilePath::StringType& str) {
 
 base::FilePath UTF8ToFilePath(const base::StringPiece& sp) {
 #if defined(OS_WIN)
-  return base::FilePath(base::UTF8ToWide(sp));
+  return base::FilePath(base::UTF8ToUTF16(sp));
 #else
   return base::FilePath(sp.as_string());
 #endif
@@ -977,9 +979,9 @@ bool WriteFile(const base::FilePath& file_path,
   // version opens with FILE_SHARE_READ (normally not what you want when
   // replacing the entire contents of the file) which lets us continue even if
   // another program has the file open for reading. See http://crbug.com/468437
-  base::win::ScopedHandle file(::CreateFile(file_path.value().c_str(),
-                                            GENERIC_WRITE, FILE_SHARE_READ,
-                                            NULL, CREATE_ALWAYS, 0, NULL));
+  base::win::ScopedHandle file(::CreateFile(
+      reinterpret_cast<LPCWSTR>(file_path.value().c_str()), GENERIC_WRITE,
+      FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL));
   if (file.IsValid()) {
     DWORD written;
     BOOL result = ::WriteFile(file.Get(), data.c_str(), size, &written, NULL);

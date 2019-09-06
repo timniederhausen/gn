@@ -9,7 +9,7 @@
 //
 //                   POSIX            Windows
 //                   ---------------  ----------------------------------
-// Fundamental type  char[]           wchar_t[]
+// Fundamental type  char[]           char16_t[]
 // Encoding          unspecified*     UTF-16
 // Separator         /                \, tolerant of /
 // Drive letters     no               case-insensitive A-Z followed by :
@@ -50,7 +50,7 @@
 //
 // To aid in initialization of FilePath objects from string literals, a
 // FILE_PATH_LITERAL macro is provided, which accounts for the difference
-// between char[]-based pathnames on POSIX systems and wchar_t[]-based
+// between char[]-based pathnames on POSIX systems and char16_t[]-based
 // pathnames on Windows.
 //
 // As a precaution against premature truncation, paths can't contain NULs.
@@ -142,9 +142,9 @@ class PickleIterator;
 class FilePath {
  public:
 #if defined(OS_WIN)
-  // On Windows, for Unicode-aware applications, native pathnames are wchar_t
+  // On Windows, for Unicode-aware applications, native pathnames are char16_t
   // arrays encoded in UTF-16.
-  typedef std::wstring StringType;
+  typedef std::u16string StringType;
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
   // On most platforms, native pathnames are char arrays, and the encoding
   // may or may not be specified.  On Mac OS X, native pathnames are encoded
@@ -306,10 +306,10 @@ class FilePath {
   FilePath Append(StringPieceType component) const WARN_UNUSED_RESULT;
   FilePath Append(const FilePath& component) const WARN_UNUSED_RESULT;
 
-  // Although Windows StringType is std::wstring, since the encoding it uses for
-  // paths is well defined, it can handle ASCII path components as well.
-  // Mac uses UTF8, and since ASCII is a subset of that, it works there as well.
-  // On Linux, although it can use any 8-bit encoding for paths, we assume that
+  // Although Windows StringType is std::u16string, since the encoding it uses
+  // for paths is well defined, it can handle ASCII path components as well. Mac
+  // uses UTF8, and since ASCII is a subset of that, it works there as well. On
+  // Linux, although it can use any 8-bit encoding for paths, we assume that
   // ASCII is a valid subset, regardless of the encoding, since many operating
   // system paths will always be ASCII.
   FilePath AppendASCII(StringPiece component) const WARN_UNUSED_RESULT;
@@ -346,36 +346,8 @@ class FilePath {
   // known-ASCII filename.
   std::string MaybeAsASCII() const;
 
-  // Return the path as UTF-8.
-  //
-  // This function is *unsafe* as there is no way to tell what encoding is
-  // used in file names on POSIX systems other than Mac and Chrome OS,
-  // although UTF-8 is practically used everywhere these days. To mitigate
-  // the encoding issue, this function internally calls
-  // SysNativeMBToWide() on POSIX systems other than Mac and Chrome OS,
-  // per assumption that the current locale's encoding is used in file
-  // names, but this isn't a perfect solution.
-  //
-  // Once it becomes safe to to stop caring about non-UTF-8 file names,
-  // the SysNativeMBToWide() hack will be removed from the code, along
-  // with "Unsafe" in the function name.
-  std::string AsUTF8Unsafe() const;
-
-  // Similar to AsUTF8Unsafe, but returns UTF-16 instead.
-  string16 AsUTF16Unsafe() const;
-
-  // Returns a FilePath object from a path name in UTF-8. This function
-  // should only be used for cases where you are sure that the input
-  // string is UTF-8.
-  //
-  // Like AsUTF8Unsafe(), this function is unsafe. This function
-  // internally calls SysWideToNativeMB() on POSIX systems other than Mac
-  // and Chrome OS, to mitigate the encoding issue. See the comment at
-  // AsUTF8Unsafe() for details.
-  static FilePath FromUTF8Unsafe(StringPiece utf8);
-
-  // Similar to FromUTF8Unsafe, but accepts UTF-16 instead.
-  static FilePath FromUTF16Unsafe(StringPiece16 utf16);
+  // Return the path as 8-bit. On Linux this isn't guaranteed to be UTF-8.
+  std::string As8Bit() const;
 
   // Normalize all path separators to backslash on Windows
   // (if FILE_PATH_USES_WIN_SEPARATORS is true), or do nothing on POSIX systems.
@@ -396,18 +368,13 @@ class FilePath {
   StringType path_;
 };
 
-std::ostream& operator<<(std::ostream& out, const FilePath& file_path);
-
 }  // namespace base
 
-// Macros for string literal initialization of FilePath::CharType[], and for
-// using a FilePath::CharType[] in a printf-style format string.
+// Macros for string literal initialization of FilePath::CharType[].
 #if defined(OS_WIN)
-#define FILE_PATH_LITERAL(x) L##x
-#define PRFilePath "ls"
+#define FILE_PATH_LITERAL(x) u##x
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
 #define FILE_PATH_LITERAL(x) x
-#define PRFilePath "s"
 #endif  // OS_WIN
 
 namespace std {

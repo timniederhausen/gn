@@ -40,6 +40,7 @@
 #include <windows.h>
 
 #include "base/win/scoped_process_information.h"
+#include "base/win/win_util.h"
 #endif
 
 const char kDotfile_Help[] =
@@ -192,19 +193,20 @@ void DecrementWorkCount() {
 
 #if defined(OS_WIN)
 
-std::wstring SysMultiByteToWide(base::StringPiece mb) {
+std::u16string SysMultiByteTo16(base::StringPiece mb) {
   if (mb.empty())
-    return std::wstring();
+    return std::u16string();
 
   int mb_length = static_cast<int>(mb.length());
   // Compute the length of the buffer.
   int charcount = MultiByteToWideChar(CP_ACP, 0, mb.data(), mb_length, NULL, 0);
   if (charcount == 0)
-    return std::wstring();
+    return std::u16string();
 
-  std::wstring wide;
+  std::u16string wide;
   wide.resize(charcount);
-  MultiByteToWideChar(CP_ACP, 0, mb.data(), mb_length, &wide[0], charcount);
+  MultiByteToWideChar(CP_ACP, 0, mb.data(), mb_length, base::ToWCharT(&wide[0]),
+                      charcount);
 
   return wide;
 }
@@ -220,9 +222,9 @@ base::FilePath PythonBatToExe(const base::FilePath& bat_path) {
   // quote the first argument in addition (to allow for spaces in the Python
   // path, you need *another* set of quotes around that, likewise, we need
   // two quotes at the end.
-  base::string16 command = L"cmd.exe /c \"\"";
+  base::string16 command = u"cmd.exe /c \"\"";
   command.append(bat_path.value());
-  command.append(L"\" -c \"import sys; print sys.executable\"\"");
+  command.append(u"\" -c \"import sys; print sys.executable\"\"");
 
   std::string python_path;
   std::string std_err;
@@ -234,7 +236,7 @@ base::FilePath PythonBatToExe(const base::FilePath& bat_path) {
     base::TrimWhitespaceASCII(python_path, base::TRIM_ALL, &python_path);
 
     // Python uses the system multibyte code page for sys.executable.
-    base::FilePath exe_path(SysMultiByteToWide(python_path));
+    base::FilePath exe_path(SysMultiByteTo16(python_path));
 
     // Check for reasonable output, cmd may have output an error message.
     if (base::PathExists(exe_path))
@@ -243,12 +245,12 @@ base::FilePath PythonBatToExe(const base::FilePath& bat_path) {
   return base::FilePath();
 }
 
-const base::char16 kPythonExeName[] = L"python.exe";
-const base::char16 kPythonBatName[] = L"python.bat";
+const base::char16 kPythonExeName[] = u"python.exe";
+const base::char16 kPythonBatName[] = u"python.bat";
 
 base::FilePath FindWindowsPython() {
   base::char16 current_directory[MAX_PATH];
-  ::GetCurrentDirectory(MAX_PATH, current_directory);
+  ::GetCurrentDirectory(MAX_PATH, reinterpret_cast<LPWSTR>(current_directory));
 
   // First search for python.exe in the current directory.
   base::FilePath cur_dir_candidate_exe =
@@ -257,18 +259,20 @@ base::FilePath FindWindowsPython() {
     return cur_dir_candidate_exe;
 
   // Get the path.
-  const base::char16 kPathEnvVarName[] = L"Path";
-  DWORD path_length = ::GetEnvironmentVariable(kPathEnvVarName, nullptr, 0);
+  const base::char16 kPathEnvVarName[] = u"Path";
+  DWORD path_length = ::GetEnvironmentVariable(
+      reinterpret_cast<LPCWSTR>(kPathEnvVarName), nullptr, 0);
   if (path_length == 0)
     return base::FilePath();
   std::unique_ptr<base::char16[]> full_path(new base::char16[path_length]);
-  DWORD actual_path_length =
-      ::GetEnvironmentVariable(kPathEnvVarName, full_path.get(), path_length);
+  DWORD actual_path_length = ::GetEnvironmentVariable(
+      reinterpret_cast<LPCWSTR>(kPathEnvVarName),
+      reinterpret_cast<LPWSTR>(full_path.get()), path_length);
   CHECK_EQ(path_length, actual_path_length + 1);
 
   // Search for python.exe in the path.
   for (const auto& component : base::SplitStringPiece(
-           base::StringPiece16(full_path.get(), path_length), L";",
+           base::StringPiece16(full_path.get(), path_length), u";",
            base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY)) {
     base::FilePath candidate_exe =
         base::FilePath(component).Append(kPythonExeName);

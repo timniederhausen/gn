@@ -37,20 +37,6 @@ struct SizeCoefficient<char16, char> {
   static constexpr int value = 3;
 };
 
-#if defined(WCHAR_T_IS_UTF32)
-template <>
-struct SizeCoefficient<wchar_t, char> {
-  // UTF-8 uses at most 4 codeunits per character.
-  static constexpr int value = 4;
-};
-
-template <>
-struct SizeCoefficient<wchar_t, char16> {
-  // UTF-16 uses at most 2 codeunits per character.
-  static constexpr int value = 2;
-};
-#endif  // defined(WCHAR_T_IS_UTF32)
-
 template <typename SrcChar, typename DestChar>
 constexpr int size_coefficient_v =
     SizeCoefficient<std::decay_t<SrcChar>, std::decay_t<DestChar>>::value;
@@ -66,14 +52,6 @@ void UnicodeAppendUnsafe(char* out, int32_t* size, uint32_t code_point) {
 void UnicodeAppendUnsafe(char16* out, int32_t* size, uint32_t code_point) {
   CBU16_APPEND_UNSAFE(out, *size, code_point);
 }
-
-#if defined(WCHAR_T_IS_UTF32)
-
-void UnicodeAppendUnsafe(wchar_t* out, int32_t* size, uint32_t code_point) {
-  out[(*size)++] = code_point;
-}
-
-#endif  // defined(WCHAR_T_IS_UTF32)
 
 // DoUTFConversion ------------------------------------------------------------
 // Main driver of UTFConversion specialized for different Src encodings.
@@ -144,31 +122,6 @@ bool DoUTFConversion(const char16* src,
   return success;
 }
 
-#if defined(WCHAR_T_IS_UTF32)
-
-template <typename DestChar>
-bool DoUTFConversion(const wchar_t* src,
-                     int32_t src_len,
-                     DestChar* dest,
-                     int32_t* dest_len) {
-  bool success = true;
-
-  for (int32_t i = 0; i < src_len; ++i) {
-    int32_t code_point = src[i];
-
-    if (!IsValidCodepoint(code_point)) {
-      success = false;
-      code_point = kErrorCodePoint;
-    }
-
-    UnicodeAppendUnsafe(dest, dest_len, code_point);
-  }
-
-  return success;
-}
-
-#endif  // defined(WCHAR_T_IS_UTF32)
-
 // UTFConversion --------------------------------------------------------------
 // Function template for generating all UTF conversions.
 
@@ -226,99 +179,7 @@ std::string UTF16ToUTF8(StringPiece16 utf16) {
   return ret;
 }
 
-// UTF-16 <-> Wide -------------------------------------------------------------
-
-#if defined(WCHAR_T_IS_UTF16)
-// When wide == UTF-16 the conversions are a NOP.
-
-bool WideToUTF16(const wchar_t* src, size_t src_len, string16* output) {
-  output->assign(src, src_len);
-  return true;
-}
-
-string16 WideToUTF16(WStringPiece wide) {
-  return wide.as_string();
-}
-
-bool UTF16ToWide(const char16* src, size_t src_len, std::wstring* output) {
-  output->assign(src, src_len);
-  return true;
-}
-
-std::wstring UTF16ToWide(StringPiece16 utf16) {
-  return utf16.as_string();
-}
-
-#elif defined(WCHAR_T_IS_UTF32)
-
-bool WideToUTF16(const wchar_t* src, size_t src_len, string16* output) {
-  return UTFConversion(base::WStringPiece(src, src_len), output);
-}
-
-string16 WideToUTF16(WStringPiece wide) {
-  string16 ret;
-  // Ignore the success flag of this call, it will do the best it can for
-  // invalid input, which is what we want here.
-  WideToUTF16(wide.data(), wide.length(), &ret);
-  return ret;
-}
-
-bool UTF16ToWide(const char16* src, size_t src_len, std::wstring* output) {
-  return UTFConversion(StringPiece16(src, src_len), output);
-}
-
-std::wstring UTF16ToWide(StringPiece16 utf16) {
-  std::wstring ret;
-  // Ignore the success flag of this call, it will do the best it can for
-  // invalid input, which is what we want here.
-  UTF16ToWide(utf16.data(), utf16.length(), &ret);
-  return ret;
-}
-
-#endif  // defined(WCHAR_T_IS_UTF32)
-
-// UTF-8 <-> Wide --------------------------------------------------------------
-
-// UTF8ToWide is the same code, regardless of whether wide is 16 or 32 bits
-
-bool UTF8ToWide(const char* src, size_t src_len, std::wstring* output) {
-  return UTFConversion(StringPiece(src, src_len), output);
-}
-
-std::wstring UTF8ToWide(StringPiece utf8) {
-  std::wstring ret;
-  // Ignore the success flag of this call, it will do the best it can for
-  // invalid input, which is what we want here.
-  UTF8ToWide(utf8.data(), utf8.length(), &ret);
-  return ret;
-}
-
-#if defined(WCHAR_T_IS_UTF16)
-// Easy case since we can use the "utf" versions we already wrote above.
-
-bool WideToUTF8(const wchar_t* src, size_t src_len, std::string* output) {
-  return UTF16ToUTF8(src, src_len, output);
-}
-
-std::string WideToUTF8(WStringPiece wide) {
-  return UTF16ToUTF8(wide);
-}
-
-#elif defined(WCHAR_T_IS_UTF32)
-
-bool WideToUTF8(const wchar_t* src, size_t src_len, std::string* output) {
-  return UTFConversion(WStringPiece(src, src_len), output);
-}
-
-std::string WideToUTF8(WStringPiece wide) {
-  std::string ret;
-  // Ignore the success flag of this call, it will do the best it can for
-  // invalid input, which is what we want here.
-  WideToUTF8(wide.data(), wide.length(), &ret);
-  return ret;
-}
-
-#endif  // defined(WCHAR_T_IS_UTF32)
+// ASCII <-> UTF-16 -----------------------------------------------------------
 
 string16 ASCIIToUTF16(StringPiece ascii) {
   DCHECK(IsStringASCII(ascii)) << ascii;

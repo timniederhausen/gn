@@ -15,26 +15,6 @@
 #include "base/strings/string_piece.h"
 #include "util/build_config.h"
 
-// ----------------------------------------------------------------------------
-// IMPORTANT MESSAGE FROM YOUR SPONSOR
-//
-// This file contains no "wstring" variants. New code should use string16. If
-// you need to make old code work, use the UTF8 version and convert. Please do
-// not add wstring variants.
-//
-// Please do not add "convenience" functions for converting strings to integers
-// that return the value and ignore success/failure. That encourages people to
-// write code that doesn't properly handle the error conditions.
-//
-// DO NOT use these functions in any UI unless it's NOT localized on purpose.
-// Instead, use base::MessageFormatter for a complex message with numbers
-// (integer, float) embedded or base::Format{Number,Percent} to
-// just format a single number/percent. Note that some languages use native
-// digits instead of ASCII digits while others use a group separator or decimal
-// point different from ',' and '.'. Using these functions in the UI would lead
-// numbers to be formatted in a non-native way.
-// ----------------------------------------------------------------------------
-
 namespace base {
 
 // Number -> string conversions ------------------------------------------------

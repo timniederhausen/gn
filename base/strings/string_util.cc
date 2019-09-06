@@ -97,53 +97,8 @@ template <>
 struct NonASCIIMask<8, char> {
   static inline uint64_t value() { return 0x8080808080808080ULL; }
 };
-#if defined(WCHAR_T_IS_UTF32)
-template <>
-struct NonASCIIMask<4, wchar_t> {
-  static inline uint32_t value() { return 0xFFFFFF80U; }
-};
-template <>
-struct NonASCIIMask<8, wchar_t> {
-  static inline uint64_t value() { return 0xFFFFFF80FFFFFF80ULL; }
-};
-#endif  // WCHAR_T_IS_UTF32
 
 }  // namespace
-
-bool IsWprintfFormatPortable(const wchar_t* format) {
-  for (const wchar_t* position = format; *position != '\0'; ++position) {
-    if (*position == '%') {
-      bool in_specification = true;
-      bool modifier_l = false;
-      while (in_specification) {
-        // Eat up characters until reaching a known specifier.
-        if (*++position == '\0') {
-          // The format string ended in the middle of a specification.  Call
-          // it portable because no unportable specifications were found.  The
-          // string is equally broken on all platforms.
-          return true;
-        }
-
-        if (*position == 'l') {
-          // 'l' is the only thing that can save the 's' and 'c' specifiers.
-          modifier_l = true;
-        } else if (((*position == 's' || *position == 'c') && !modifier_l) ||
-                   *position == 'S' || *position == 'C' || *position == 'F' ||
-                   *position == 'D' || *position == 'O' || *position == 'U') {
-          // Not portable.
-          return false;
-        }
-
-        if (wcschr(L"diouxXeEfgGaAcspn%", *position)) {
-          // Portable, keep scanning the rest of the format string.
-          in_specification = false;
-        }
-      }
-    }
-  }
-
-  return true;
-}
 
 namespace {
 
@@ -489,12 +444,6 @@ bool IsStringASCII(StringPiece16 str) {
   return DoIsStringASCII(str.data(), str.length());
 }
 
-#if defined(WCHAR_T_IS_UTF32)
-bool IsStringASCII(WStringPiece str) {
-  return DoIsStringASCII(str.data(), str.length());
-}
-#endif
-
 bool IsStringUTF8(StringPiece str) {
   const char* src = str.data();
   int32_t src_len = static_cast<int32_t>(str.length());
@@ -623,7 +572,7 @@ bool EndsWith(StringPiece16 str,
   return EndsWithT<string16>(str, search_for, case_sensitivity);
 }
 
-char HexDigitToInt(wchar_t c) {
+char HexDigitToInt(char16_t c) {
   DCHECK(IsHexDigit(c));
   if (c >= '0' && c <= '9')
     return static_cast<char>(c - '0');
@@ -634,9 +583,9 @@ char HexDigitToInt(wchar_t c) {
   return 0;
 }
 
-bool IsUnicodeWhitespace(wchar_t c) {
+bool IsUnicodeWhitespace(char16_t c) {
   // kWhitespaceWide is a NULL-terminated string
-  for (const wchar_t* cur = kWhitespaceWide; *cur; ++cur) {
+  for (const char16_t* cur = kWhitespaceUTF16; *cur; ++cur) {
     if (*cur == c)
       return true;
   }
@@ -1090,12 +1039,5 @@ size_t lcpyT(CHAR* dst, const CHAR* src, size_t dst_size) {
 }
 
 }  // namespace
-
-size_t strlcpy(char* dst, const char* src, size_t dst_size) {
-  return lcpyT<char>(dst, src, dst_size);
-}
-size_t wcslcpy(wchar_t* dst, const wchar_t* src, size_t dst_size) {
-  return lcpyT<wchar_t>(dst, src, dst_size);
-}
 
 }  // namespace base

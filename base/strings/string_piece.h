@@ -428,11 +428,6 @@ struct StringPiece16Hash {
     HASH_STRING_PIECE(StringPiece16, sp16);
   }
 };
-struct WStringPieceHash {
-  std::size_t operator()(const WStringPiece& wsp) const {
-    HASH_STRING_PIECE(WStringPiece, wsp);
-  }
-};
 
 }  // namespace base
 

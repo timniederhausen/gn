@@ -304,13 +304,13 @@ class CheckOpResult {
 // - Don't cause too much binary bloat.
 #if defined(COMPILER_GCC)
 
-#if defined(ARCH_CPU_X86_FAMILY) && !defined(OS_NACL)
+#if defined(ARCH_CPU_X86_FAMILY)
 // int 3 will generate a SIGTRAP.
 #define TRAP_SEQUENCE() \
   asm volatile(         \
       "int3; ud2; push %0;" ::"i"(static_cast<unsigned char>(__COUNTER__)))
 
-#elif defined(ARCH_CPU_ARMEL) && !defined(OS_NACL)
+#elif defined(ARCH_CPU_ARMEL)
 // bkpt will generate a SIGBUS when running on armv7 and a SIGTRAP when running
 // as a 32 bit userspace app on arm64. There doesn't seem to be any way to
 // cause a SIGTRAP from userspace without using a syscall (which would be a
@@ -318,7 +318,7 @@ class CheckOpResult {
 #define TRAP_SEQUENCE() \
   asm volatile("bkpt #0; udf %0;" ::"i"(__COUNTER__ % 256))
 
-#elif defined(ARCH_CPU_ARM64) && !defined(OS_NACL)
+#elif defined(ARCH_CPU_ARM64)
 // This will always generate a SIGTRAP on arm64.
 #define TRAP_SEQUENCE() \
   asm volatile("brk #0; hlt %0;" ::"i"(__COUNTER__ % 65536))
@@ -901,31 +901,10 @@ void RawLog(int level, const char* message);
 bool IsLoggingToFileEnabled();
 
 // Returns the default log file path.
-std::wstring GetLogFileFullPath();
+std::u16string GetLogFileFullPath();
 #endif
 
 }  // namespace logging
-
-// Note that "The behavior of a C++ program is undefined if it adds declarations
-// or definitions to namespace std or to a namespace within namespace std unless
-// otherwise specified." --C++11[namespace.std]
-//
-// We've checked that this particular definition has the intended behavior on
-// our implementations, but it's prone to breaking in the future, and please
-// don't imitate this in your own definitions without checking with some
-// standard library experts.
-namespace std {
-// These functions are provided as a convenience for logging, which is where we
-// use streams (it is against Google style to use streams in other places). It
-// is designed to allow you to emit non-ASCII Unicode strings to the log file,
-// which is normally ASCII. It is relatively slow, so try not to use it for
-// common cases. Non-ASCII characters will be converted to UTF-8 by these
-// operators.
-std::ostream& operator<<(std::ostream& out, const wchar_t* wstr);
-inline std::ostream& operator<<(std::ostream& out, const std::wstring& wstr) {
-  return out << wstr.c_str();
-}
-}  // namespace std
 
 // The NOTIMPLEMENTED() macro annotates codepaths which have not been
 // implemented yet. If output spam is a serious concern,

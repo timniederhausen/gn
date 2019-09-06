@@ -288,7 +288,7 @@ bool RunEditor(const base::FilePath& file_to_edit) {
   memset(&info, 0, sizeof(info));
   info.cbSize = sizeof(info);
   info.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_CLASSNAME;
-  info.lpFile = file_to_edit.value().c_str();
+  info.lpFile = reinterpret_cast<LPCWSTR>(file_to_edit.value().c_str());
   info.nShow = SW_SHOW;
   info.lpClass = L".txt";
   if (!::ShellExecuteEx(&info)) {

@@ -24,7 +24,7 @@ static_assert(File::FROM_BEGIN == SEEK_SET && File::FROM_CURRENT == SEEK_CUR &&
 
 namespace {
 
-#if defined(OS_BSD) || defined(OS_MACOSX) || defined(OS_NACL) || \
+#if defined(OS_BSD) || defined(OS_MACOSX) || \
     defined(OS_ANDROID) && __ANDROID_API__ < 21
 int CallFstat(int fd, stat_wrapper_t* sb) {
   return fstat(fd, sb);
@@ -35,9 +35,9 @@ int CallFstat(int fd, stat_wrapper_t* sb) {
 }
 #endif
 
-// NaCl doesn't provide the following system calls, so either simulate them or
-// wrap them in order to minimize the number of #ifdef's in this file.
-#if !defined(OS_NACL) && !defined(OS_AIX)
+// Some systems don't provide the following system calls, so either simulate
+// them or wrap them in order to minimize the number of #ifdef's in this file.
+#if !defined(OS_AIX)
 bool IsOpenAppend(PlatformFile file) {
   return (fcntl(file, F_GETFL) & O_APPEND) != 0;
 }
@@ -59,7 +59,7 @@ File::Error CallFcntlFlock(PlatformFile file, bool do_lock) {
 }
 #endif
 
-#else   // defined(OS_NACL) && !defined(OS_AIX)
+#else   // !defined(OS_AIX)
 
 bool IsOpenAppend(PlatformFile file) {
   // NaCl doesn't implement fcntl. Since NaCl's write conforms to the POSIX
@@ -77,7 +77,7 @@ File::Error CallFcntlFlock(PlatformFile file, bool do_lock) {
   NOTIMPLEMENTED();  // NaCl doesn't implement flock struct.
   return File::FILE_ERROR_INVALID_OPERATION;
 }
-#endif  // defined(OS_NACL)
+#endif  // defined(OS_AIX)
 
 }  // namespace
 
@@ -303,9 +303,7 @@ File::Error File::OSErrorToFileError(int saved_errno) {
     case EPERM:
       return FILE_ERROR_ACCESS_DENIED;
     case EBUSY:
-#if !defined(OS_NACL)  // ETXTBSY not defined by NaCl.
     case ETXTBSY:
-#endif
       return FILE_ERROR_IN_USE;
     case EEXIST:
       return FILE_ERROR_EXISTS;
@@ -329,8 +327,6 @@ File::Error File::OSErrorToFileError(int saved_errno) {
   }
 }
 
-// NaCl doesn't implement system calls to open files directly.
-#if !defined(OS_NACL)
 // TODO(erikkay): does it make sense to support FLAG_EXCLUSIVE_* here?
 void File::DoInitialize(const FilePath& path, uint32_t flags) {
   DCHECK(!IsValid());
@@ -409,7 +405,6 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
   error_details_ = FILE_OK;
   file_.reset(descriptor);
 }
-#endif  // !defined(OS_NACL)
 
 bool File::Flush() {
   DCHECK(IsValid());

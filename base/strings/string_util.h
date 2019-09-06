@@ -53,38 +53,6 @@ inline int snprintf(char* buffer,
   return result;
 }
 
-// BSD-style safe and consistent string copy functions.
-// Copies |src| to |dst|, where |dst_size| is the total allocated size of |dst|.
-// Copies at most |dst_size|-1 characters, and always NULL terminates |dst|, as
-// long as |dst_size| is not 0.  Returns the length of |src| in characters.
-// If the return value is >= dst_size, then the output was truncated.
-// NOTE: All sizes are in number of characters, NOT in bytes.
-size_t strlcpy(char* dst, const char* src, size_t dst_size);
-size_t wcslcpy(wchar_t* dst, const wchar_t* src, size_t dst_size);
-
-// Scan a wprintf format string to determine whether it's portable across a
-// variety of systems.  This function only checks that the conversion
-// specifiers used by the format string are supported and have the same meaning
-// on a variety of systems.  It doesn't check for other errors that might occur
-// within a format string.
-//
-// Nonportable conversion specifiers for wprintf are:
-//  - 's' and 'c' without an 'l' length modifier.  %s and %c operate on char
-//     data on all systems except Windows, which treat them as wchar_t data.
-//     Use %ls and %lc for wchar_t data instead.
-//  - 'S' and 'C', which operate on wchar_t data on all systems except Windows,
-//     which treat them as char data.  Use %ls and %lc for wchar_t data
-//     instead.
-//  - 'F', which is not identified by Windows wprintf documentation.
-//  - 'D', 'O', and 'U', which are deprecated and not available on all systems.
-//     Use %ld, %lo, and %lu instead.
-//
-// Note that there is no portable conversion specifier for char data when
-// working with wprintf.
-//
-// This function is intended to be called from base::vswprintf.
-bool IsWprintfFormatPortable(const wchar_t* format);
-
 // ASCII-specific tolower.  The standard library's tolower is locale sensitive,
 // so we don't want to use it here.
 inline char ToLowerASCII(char c) {
@@ -146,7 +114,6 @@ bool EqualsCaseInsensitiveASCII(StringPiece16 a, StringPiece16 b);
 // Contains the set of characters representing whitespace in the corresponding
 // encoding. Null-terminated. The ASCII versions are the whitespaces as defined
 // by HTML5, and don't include control characters.
-extern const wchar_t kWhitespaceWide[];  // Includes Unicode.
 extern const char16 kWhitespaceUTF16[];  // Includes Unicode.
 extern const char kWhitespaceASCII[];
 extern const char16 kWhitespaceASCIIAs16[];  // No unicode.
@@ -264,9 +231,6 @@ bool ContainsOnlyChars(StringPiece16 input, StringPiece16 characters);
 bool IsStringUTF8(StringPiece str);
 bool IsStringASCII(StringPiece str);
 bool IsStringASCII(StringPiece16 str);
-#if defined(WCHAR_T_IS_UTF32)
-bool IsStringASCII(WStringPiece str);
-#endif
 
 // Compare the lower-case form of the given string against the given
 // previously-lower-cased ASCII string (typically a constant).
@@ -338,10 +302,10 @@ inline bool IsHexDigit(Char c) {
 //    'a' -> 10
 //    'B' -> 11
 // Assumes the input is a valid hex character. DCHECKs in debug builds if not.
-char HexDigitToInt(wchar_t c);
+char HexDigitToInt(char16_t c);
 
 // Returns true if it's a Unicode whitespace character.
-bool IsUnicodeWhitespace(wchar_t c);
+bool IsUnicodeWhitespace(char16_t c);
 
 // Return a byte string in human-readable format with a unit suffix. Not
 // appropriate for use in any UI; use of FormatBytes and friends in ui/base is

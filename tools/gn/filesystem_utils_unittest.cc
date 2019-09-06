@@ -177,31 +177,31 @@ TEST(FilesystemUtils, MakeAbsolutePathRelativeIfPossible) {
 TEST(FilesystemUtils, MakeAbsoluteFilePathRelativeIfPossible) {
 #if defined(OS_WIN)
   EXPECT_EQ(
-      base::FilePath(L"out\\Debug"),
+      base::FilePath(u"out\\Debug"),
       MakeAbsoluteFilePathRelativeIfPossible(
-          base::FilePath(L"C:\\src"), base::FilePath(L"C:\\src\\out\\Debug")));
-  EXPECT_EQ(base::FilePath(L".\\gn"),
+          base::FilePath(u"C:\\src"), base::FilePath(u"C:\\src\\out\\Debug")));
+  EXPECT_EQ(base::FilePath(u".\\gn"),
             MakeAbsoluteFilePathRelativeIfPossible(
-                base::FilePath(L"C:\\src\\out\\Debug"),
-                base::FilePath(L"C:\\src\\out\\Debug\\gn")));
+                base::FilePath(u"C:\\src\\out\\Debug"),
+                base::FilePath(u"C:\\src\\out\\Debug\\gn")));
   EXPECT_EQ(
-      base::FilePath(L"..\\.."),
+      base::FilePath(u"..\\.."),
       MakeAbsoluteFilePathRelativeIfPossible(
-          base::FilePath(L"C:\\src\\out\\Debug"), base::FilePath(L"C:\\src")));
+          base::FilePath(u"C:\\src\\out\\Debug"), base::FilePath(u"C:\\src")));
   EXPECT_EQ(
-      base::FilePath(L"..\\.."),
+      base::FilePath(u"..\\.."),
       MakeAbsoluteFilePathRelativeIfPossible(
-          base::FilePath(L"C:\\src\\out\\Debug"), base::FilePath(L"C:/src")));
-  EXPECT_EQ(base::FilePath(L"."),
-            MakeAbsoluteFilePathRelativeIfPossible(base::FilePath(L"C:\\src"),
-                                                   base::FilePath(L"C:\\src")));
-  EXPECT_EQ(base::FilePath(L"..\\..\\..\\u\\v\\w"),
+          base::FilePath(u"C:\\src\\out\\Debug"), base::FilePath(u"C:/src")));
+  EXPECT_EQ(base::FilePath(u"."),
+            MakeAbsoluteFilePathRelativeIfPossible(base::FilePath(u"C:\\src"),
+                                                   base::FilePath(u"C:\\src")));
+  EXPECT_EQ(base::FilePath(u"..\\..\\..\\u\\v\\w"),
             MakeAbsoluteFilePathRelativeIfPossible(
-                base::FilePath(L"C:\\a\\b\\c\\x\\y\\z"),
-                base::FilePath(L"C:\\a\\b\\c\\u\\v\\w")));
-  EXPECT_EQ(base::FilePath(L"D:\\bar"),
-            MakeAbsoluteFilePathRelativeIfPossible(base::FilePath(L"C:\\foo"),
-                                                   base::FilePath(L"D:\\bar")));
+                base::FilePath(u"C:\\a\\b\\c\\x\\y\\z"),
+                base::FilePath(u"C:\\a\\b\\c\\u\\v\\w")));
+  EXPECT_EQ(base::FilePath(u"D:\\bar"),
+            MakeAbsoluteFilePathRelativeIfPossible(base::FilePath(u"C:\\foo"),
+                                                   base::FilePath(u"D:\\bar")));
 #else
   EXPECT_EQ(base::FilePath("out/Debug"),
             MakeAbsoluteFilePathRelativeIfPossible(
@@ -559,42 +559,42 @@ TEST(FilesystemUtils, DirectoryWithNoLastSlash) {
 
 TEST(FilesystemUtils, SourceDirForPath) {
 #if defined(OS_WIN)
-  base::FilePath root(L"C:\\source\\foo\\");
+  base::FilePath root(u"C:\\source\\foo\\");
   EXPECT_EQ("/C:/foo/bar/",
-            SourceDirForPath(root, base::FilePath(L"C:\\foo\\bar")).value());
-  EXPECT_EQ("/", SourceDirForPath(root, base::FilePath(L"/")).value());
+            SourceDirForPath(root, base::FilePath(u"C:\\foo\\bar")).value());
+  EXPECT_EQ("/", SourceDirForPath(root, base::FilePath(u"/")).value());
   EXPECT_EQ("//",
-            SourceDirForPath(root, base::FilePath(L"C:\\source\\foo")).value());
+            SourceDirForPath(root, base::FilePath(u"C:\\source\\foo")).value());
   EXPECT_EQ("//bar/",
-            SourceDirForPath(root, base::FilePath(L"C:\\source\\foo\\bar\\"))
+            SourceDirForPath(root, base::FilePath(u"C:\\source\\foo\\bar\\"))
                 .value());
   EXPECT_EQ("//bar/baz/",
-            SourceDirForPath(root, base::FilePath(L"C:\\source\\foo\\bar\\baz"))
+            SourceDirForPath(root, base::FilePath(u"C:\\source\\foo\\bar\\baz"))
                 .value());
 
   // Should be case-and-slash-insensitive.
   EXPECT_EQ(
       "//baR/",
-      SourceDirForPath(root, base::FilePath(L"c:/SOURCE\\Foo/baR/")).value());
+      SourceDirForPath(root, base::FilePath(u"c:/SOURCE\\Foo/baR/")).value());
 
   // Some "weird" Windows paths.
   EXPECT_EQ("/foo/bar/",
-            SourceDirForPath(root, base::FilePath(L"/foo/bar/")).value());
+            SourceDirForPath(root, base::FilePath(u"/foo/bar/")).value());
   EXPECT_EQ("/C:/foo/bar/",
-            SourceDirForPath(root, base::FilePath(L"C:foo/bar/")).value());
+            SourceDirForPath(root, base::FilePath(u"C:foo/bar/")).value());
 
   // Also allow absolute GN-style Windows paths.
   EXPECT_EQ("/C:/foo/bar/",
-            SourceDirForPath(root, base::FilePath(L"/C:/foo/bar")).value());
+            SourceDirForPath(root, base::FilePath(u"/C:/foo/bar")).value());
   EXPECT_EQ(
       "//bar/",
-      SourceDirForPath(root, base::FilePath(L"/C:/source/foo/bar")).value());
+      SourceDirForPath(root, base::FilePath(u"/C:/source/foo/bar")).value());
 
   // Empty source dir.
   base::FilePath empty;
   EXPECT_EQ(
       "/C:/source/foo/",
-      SourceDirForPath(empty, base::FilePath(L"C:\\source\\foo")).value());
+      SourceDirForPath(empty, base::FilePath(u"C:\\source\\foo")).value());
 #else
   base::FilePath root("/source/foo/");
   EXPECT_EQ("/foo/bar/",

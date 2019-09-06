@@ -59,7 +59,7 @@ TEST(RebasePath, Strings) {
 
 // Test system path output.
 #if defined(OS_WIN)
-  setup.build_settings()->SetRootPath(base::FilePath(L"C:/path/to/src"));
+  setup.build_settings()->SetRootPath(base::FilePath(u"C:/path/to/src"));
   EXPECT_EQ("C:/path/to/src", RebaseOne(scope, ".", "", "//"));
   EXPECT_EQ("C:/path/to/src/", RebaseOne(scope, "//", "", "//"));
   EXPECT_EQ("C:/path/to/src/foo", RebaseOne(scope, "foo", "", "//"));
@@ -98,7 +98,7 @@ TEST(RebasePath, StringsSystemPaths) {
 
 #if defined(OS_WIN)
   setup.build_settings()->SetBuildDir(SourceDir("C:/ssd/out/Debug"));
-  setup.build_settings()->SetRootPath(base::FilePath(L"C:/hdd/src"));
+  setup.build_settings()->SetRootPath(base::FilePath(u"C:/hdd/src"));
 
   // Test system absolute to-dir.
   EXPECT_EQ("../../ssd/out/Debug",

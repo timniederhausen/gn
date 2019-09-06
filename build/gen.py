@@ -655,7 +655,6 @@ def WriteGNNinja(path, platform, host, options):
         'base/files/file_util_posix.cc',
         'base/posix/file_descriptor_shuffle.cc',
         'base/posix/safe_strerror.cc',
-        'base/strings/string16.cc',
     ])
 
   if platform.is_windows():

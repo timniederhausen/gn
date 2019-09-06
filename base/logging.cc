@@ -324,7 +324,3 @@ void LogErrorNotReached(const char* file, int line) {
 }
 
 }  // namespace logging
-
-std::ostream& std::operator<<(std::ostream& out, const wchar_t* wstr) {
-  return out << (wstr ? base::WideToUTF8(wstr) : std::string());
-}

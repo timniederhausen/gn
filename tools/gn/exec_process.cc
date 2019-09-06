@@ -18,6 +18,7 @@
 
 #include "base/win/scoped_handle.h"
 #include "base/win/scoped_process_information.h"
+#include "base/win/win_util.h"
 #else
 #include <errno.h>
 #include <fcntl.h>
@@ -97,11 +98,11 @@ bool ExecProcess(const base::string16& cmdline_str,
 
   // Create the child process.
   PROCESS_INFORMATION temp_process_info = {};
-  if (!CreateProcess(nullptr, &cmdline_writable[0], nullptr, nullptr,
-                     TRUE,  // Handles are inherited.
-                     NORMAL_PRIORITY_CLASS, nullptr,
-                     startup_dir.value().c_str(), &start_info,
-                     &temp_process_info)) {
+  if (!CreateProcess(
+          nullptr, base::ToWCharT(&cmdline_writable[0]), nullptr, nullptr,
+          TRUE,  // Handles are inherited.
+          NORMAL_PRIORITY_CLASS, nullptr, base::ToWCharT(&startup_dir.value()),
+          &start_info, &temp_process_info)) {
     return false;
   }
   base::win::ScopedProcessInformation proc_info(temp_process_info);

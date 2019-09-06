@@ -242,7 +242,7 @@ class StringTokenizerT {
 
 typedef StringTokenizerT<std::string, std::string::const_iterator>
     StringTokenizer;
-typedef StringTokenizerT<std::wstring, std::wstring::const_iterator>
+typedef StringTokenizerT<std::u16string, std::u16string::const_iterator>
     WStringTokenizer;
 typedef StringTokenizerT<std::string, const char*> CStringTokenizer;
 

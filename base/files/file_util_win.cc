@@ -29,6 +29,7 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/win/scoped_handle.h"
+#include "base/win/win_util.h"
 
 // #define needed to link in RtlGenRandom(), a.k.a. SystemFunction036.  See the
 // "Community Additions" comment on MSDN here:
@@ -61,7 +62,7 @@ DWORD DeleteFileRecursive(const FilePath& path,
     if ((info.find_data().dwFileAttributes & FILE_ATTRIBUTE_READONLY) &&
         (recursive || !info.IsDirectory())) {
       ::SetFileAttributes(
-          current.value().c_str(),
+          ToWCharT(&current.value()),
           info.find_data().dwFileAttributes & ~FILE_ATTRIBUTE_READONLY);
     }
 
@@ -70,11 +71,11 @@ DWORD DeleteFileRecursive(const FilePath& path,
       if (recursive) {
         this_result = DeleteFileRecursive(current, pattern, true);
         if (this_result == ERROR_SUCCESS &&
-            !::RemoveDirectory(current.value().c_str())) {
+            !::RemoveDirectory(ToWCharT(&current.value()))) {
           this_result = ::GetLastError();
         }
       }
-    } else if (!::DeleteFile(current.value().c_str())) {
+    } else if (!::DeleteFile(ToWCharT(&current.value()))) {
       this_result = ::GetLastError();
     }
     if (result == ERROR_SUCCESS)
@@ -100,14 +101,14 @@ DWORD DoDeleteFile(const FilePath& path, bool recursive) {
     return ERROR_BAD_PATHNAME;
 
   // Handle any path with wildcards.
-  if (path.BaseName().value().find_first_of(L"*?") !=
+  if (path.BaseName().value().find_first_of(u"*?") !=
       FilePath::StringType::npos) {
     return DeleteFileRecursive(path.DirName(), path.BaseName().value(),
                                recursive);
   }
 
   // Report success if the file or path does not exist.
-  const DWORD attr = ::GetFileAttributes(path.value().c_str());
+  const DWORD attr = ::GetFileAttributes(ToWCharT(&path.value()));
   if (attr == INVALID_FILE_ATTRIBUTES) {
     const DWORD error_code = ::GetLastError();
     return (error_code == ERROR_FILE_NOT_FOUND ||
@@ -118,24 +119,24 @@ DWORD DoDeleteFile(const FilePath& path, bool recursive) {
 
   // Clear the read-only bit if it is set.
   if ((attr & FILE_ATTRIBUTE_READONLY) &&
-      !::SetFileAttributes(path.value().c_str(),
+      !::SetFileAttributes(ToWCharT(&path.value()),
                            attr & ~FILE_ATTRIBUTE_READONLY)) {
     return ::GetLastError();
   }
 
   // Perform a simple delete on anything that isn't a directory.
   if (!(attr & FILE_ATTRIBUTE_DIRECTORY)) {
-    return ::DeleteFile(path.value().c_str()) ? ERROR_SUCCESS
-                                              : ::GetLastError();
+    return ::DeleteFile(ToWCharT(&path.value())) ? ERROR_SUCCESS
+                                                 : ::GetLastError();
   }
 
   if (recursive) {
-    const DWORD error_code = DeleteFileRecursive(path, L"*", true);
+    const DWORD error_code = DeleteFileRecursive(path, u"*", true);
     if (error_code != ERROR_SUCCESS)
       return error_code;
   }
-  return ::RemoveDirectory(path.value().c_str()) ? ERROR_SUCCESS
-                                                 : ::GetLastError();
+  return ::RemoveDirectory(ToWCharT(&path.value())) ? ERROR_SUCCESS
+                                                    : ::GetLastError();
 }
 
 std::string RandomDataToGUIDString(const uint64_t bytes[2]) {
@@ -185,8 +186,8 @@ std::string GenerateGUID() {
 }  // namespace
 
 FilePath MakeAbsoluteFilePath(const FilePath& input) {
-  wchar_t file_path[MAX_PATH];
-  if (!_wfullpath(file_path, input.value().c_str(), MAX_PATH))
+  char16_t file_path[MAX_PATH];
+  if (!_wfullpath(ToWCharT(file_path), ToWCharT(&input.value()), MAX_PATH))
     return FilePath();
   return FilePath(file_path);
 }
@@ -208,7 +209,7 @@ bool DeleteFileAfterReboot(const FilePath& path) {
   if (path.value().length() >= MAX_PATH)
     return false;
 
-  return MoveFileEx(path.value().c_str(), NULL,
+  return MoveFileEx(ToWCharT(&path.value()), NULL,
                     MOVEFILE_DELAY_UNTIL_REBOOT | MOVEFILE_REPLACE_EXISTING) !=
          FALSE;
 }
@@ -218,7 +219,7 @@ bool ReplaceFile(const FilePath& from_path,
                  File::Error* error) {
   // Try a simple move first.  It will only succeed when |to_path| doesn't
   // already exist.
-  if (::MoveFile(from_path.value().c_str(), to_path.value().c_str()))
+  if (::MoveFile(ToWCharT(&from_path.value()), ToWCharT(&to_path.value())))
     return true;
   File::Error move_error = File::OSErrorToFileError(GetLastError());
 
@@ -226,8 +227,8 @@ bool ReplaceFile(const FilePath& from_path,
   // succeed when |to_path| does exist. When writing to a network share, we may
   // not be able to change the ACLs. Ignore ACL errors then
   // (REPLACEFILE_IGNORE_MERGE_ERRORS).
-  if (::ReplaceFile(to_path.value().c_str(), from_path.value().c_str(), NULL,
-                    REPLACEFILE_IGNORE_MERGE_ERRORS, NULL, NULL)) {
+  if (::ReplaceFile(ToWCharT(&to_path.value()), ToWCharT(&from_path.value()),
+                    NULL, REPLACEFILE_IGNORE_MERGE_ERRORS, NULL, NULL)) {
     return true;
   }
   // In the case of FILE_ERROR_NOT_FOUND from ReplaceFile, it is likely that
@@ -242,12 +243,13 @@ bool ReplaceFile(const FilePath& from_path,
 }
 
 bool PathExists(const FilePath& path) {
-  return (GetFileAttributes(path.value().c_str()) != INVALID_FILE_ATTRIBUTES);
+  return (GetFileAttributes(ToWCharT(&path.value())) !=
+          INVALID_FILE_ATTRIBUTES);
 }
 
 bool PathIsWritable(const FilePath& path) {
   HANDLE dir =
-      CreateFile(path.value().c_str(), FILE_ADD_FILE, kFileShareAll, NULL,
+      CreateFile(ToWCharT(&path.value()), FILE_ADD_FILE, kFileShareAll, NULL,
                  OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 
   if (dir == INVALID_HANDLE_VALUE)
@@ -258,15 +260,15 @@ bool PathIsWritable(const FilePath& path) {
 }
 
 bool DirectoryExists(const FilePath& path) {
-  DWORD fileattr = GetFileAttributes(path.value().c_str());
+  DWORD fileattr = GetFileAttributes(ToWCharT(&path.value()));
   if (fileattr != INVALID_FILE_ATTRIBUTES)
     return (fileattr & FILE_ATTRIBUTE_DIRECTORY) != 0;
   return false;
 }
 
 bool GetTempDir(FilePath* path) {
-  wchar_t temp_path[MAX_PATH + 1];
-  DWORD path_len = ::GetTempPath(MAX_PATH, temp_path);
+  char16_t temp_path[MAX_PATH + 1];
+  DWORD path_len = ::GetTempPath(MAX_PATH, ToWCharT(temp_path));
   if (path_len >= MAX_PATH || path_len <= 0)
     return false;
   // TODO(evanm): the old behavior of this function was to always strip the
@@ -318,7 +320,7 @@ bool CreateTemporaryFileInDir(const FilePath& dir, FilePath* temp_file) {
   // Although it is nearly impossible to get a duplicate name with GUID, we
   // still use a loop here in case it happens.
   for (int i = 0; i < 100; ++i) {
-    temp_name = dir.Append(ASCIIToUTF16(base::GenerateGUID()) + L".tmp");
+    temp_name = dir.Append(ASCIIToUTF16(base::GenerateGUID()) + u".tmp");
     File file(temp_name,
               File::FLAG_CREATE | File::FLAG_READ | File::FLAG_WRITE);
     if (file.IsValid()) {
@@ -334,9 +336,9 @@ bool CreateTemporaryFileInDir(const FilePath& dir, FilePath* temp_file) {
     return false;
   }
 
-  wchar_t long_temp_name[MAX_PATH + 1];
-  DWORD long_name_len =
-      GetLongPathName(temp_name.value().c_str(), long_temp_name, MAX_PATH);
+  char16_t long_temp_name[MAX_PATH + 1];
+  DWORD long_name_len = GetLongPathName(ToWCharT(&temp_name.value()),
+                                        ToWCharT(long_temp_name), MAX_PATH);
   if (long_name_len > MAX_PATH || long_name_len == 0) {
     // GetLongPathName() failed, but we still have a temporary file.
     *temp_file = std::move(temp_name);
@@ -364,7 +366,7 @@ bool CreateTemporaryDirInDir(const FilePath& base_dir,
     new_dir_name.append(UTF8ToUTF16(GenerateGUID()));
 
     path_to_create = base_dir.Append(new_dir_name);
-    if (::CreateDirectory(path_to_create.value().c_str(), NULL)) {
+    if (::CreateDirectory(ToWCharT(&path_to_create.value()), NULL)) {
       *new_dir = path_to_create;
       return true;
     }
@@ -384,13 +386,13 @@ bool CreateNewTempDirectory(const FilePath::StringType& prefix,
 
 bool CreateDirectoryAndGetError(const FilePath& full_path, File::Error* error) {
   // If the path exists, we've succeeded if it's a directory, failed otherwise.
-  const wchar_t* full_path_str = full_path.value().c_str();
-  DWORD fileattr = ::GetFileAttributes(full_path_str);
+  DWORD fileattr = ::GetFileAttributes(ToWCharT(&full_path.value()));
   if (fileattr != INVALID_FILE_ATTRIBUTES) {
     if ((fileattr & FILE_ATTRIBUTE_DIRECTORY) != 0) {
       return true;
     }
-    DLOG(WARNING) << "CreateDirectory(" << full_path_str << "), "
+    DLOG(WARNING) << "CreateDirectory(" << UTF16ToUTF8(full_path.value())
+                  << "), "
                   << "conflicts with existing file.";
     if (error) {
       *error = File::FILE_ERROR_NOT_A_DIRECTORY;
@@ -418,7 +420,7 @@ bool CreateDirectoryAndGetError(const FilePath& full_path, File::Error* error) {
     return false;
   }
 
-  if (!::CreateDirectory(full_path_str, NULL)) {
+  if (!::CreateDirectory(ToWCharT(&full_path.value()), NULL)) {
     DWORD error_code = ::GetLastError();
     if (error_code == ERROR_ALREADY_EXISTS && DirectoryExists(full_path)) {
       // This error code ERROR_ALREADY_EXISTS doesn't indicate whether we
@@ -429,8 +431,9 @@ bool CreateDirectoryAndGetError(const FilePath& full_path, File::Error* error) {
     } else {
       if (error)
         *error = File::OSErrorToFileError(error_code);
-      DLOG(WARNING) << "Failed to create directory " << full_path_str
-                    << ", last error is " << error_code << ".";
+      DLOG(WARNING) << "Failed to create directory "
+                    << UTF16ToUTF8(full_path.value()) << ", last error is "
+                    << error_code << ".";
       return false;
     }
   } else {
@@ -453,17 +456,18 @@ bool DevicePathToDriveLetterPath(const FilePath& nt_device_path,
                                  FilePath* out_drive_letter_path) {
   // Get the mapping of drive letters to device paths.
   const int kDriveMappingSize = 1024;
-  wchar_t drive_mapping[kDriveMappingSize] = {'\0'};
-  if (!::GetLogicalDriveStrings(kDriveMappingSize - 1, drive_mapping)) {
+  char16_t drive_mapping[kDriveMappingSize] = {'\0'};
+  if (!::GetLogicalDriveStrings(kDriveMappingSize - 1,
+                                ToWCharT(drive_mapping))) {
     DLOG(ERROR) << "Failed to get drive mapping.";
     return false;
   }
 
   // The drive mapping is a sequence of null terminated strings.
   // The last string is empty.
-  wchar_t* drive_map_ptr = drive_mapping;
-  wchar_t device_path_as_string[MAX_PATH];
-  wchar_t drive[] = L" :";
+  char16_t* drive_map_ptr = drive_mapping;
+  char16_t device_path_as_string[MAX_PATH];
+  char16_t drive[] = u" :";
 
   // For each string in the drive mapping, get the junction that links
   // to it.  If that junction is a prefix of |device_path|, then we
@@ -471,13 +475,14 @@ bool DevicePathToDriveLetterPath(const FilePath& nt_device_path,
   while (*drive_map_ptr) {
     drive[0] = drive_map_ptr[0];  // Copy the drive letter.
 
-    if (QueryDosDevice(drive, device_path_as_string, MAX_PATH)) {
+    if (QueryDosDevice(ToWCharT(drive), ToWCharT(device_path_as_string),
+                       MAX_PATH)) {
       FilePath device_path(device_path_as_string);
       if (device_path == nt_device_path ||
           device_path.IsParent(nt_device_path)) {
         *out_drive_letter_path =
             FilePath(drive + nt_device_path.value().substr(
-                                 wcslen(device_path_as_string)));
+                                 wcslen(ToWCharT(device_path_as_string))));
         return true;
       }
     }
@@ -499,9 +504,9 @@ bool NormalizeToNativeFilePath(const FilePath& path, FilePath* nt_path) {
   // code below to a call to GetFinalPathNameByHandle().  The method this
   // function uses is explained in the following msdn article:
   // http://msdn.microsoft.com/en-us/library/aa366789(VS.85).aspx
-  win::ScopedHandle file_handle(::CreateFile(path.value().c_str(), GENERIC_READ,
-                                             kFileShareAll, NULL, OPEN_EXISTING,
-                                             FILE_ATTRIBUTE_NORMAL, NULL));
+  win::ScopedHandle file_handle(
+      ::CreateFile(ToWCharT(&path.value()), GENERIC_READ, kFileShareAll, NULL,
+                   OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
   if (!file_handle.IsValid())
     return false;
 
@@ -528,10 +533,11 @@ bool NormalizeToNativeFilePath(const FilePath& path, FilePath* nt_path) {
   // not return kMaxPathLength.  This would mean that only part of the
   // path fit in |mapped_file_path|.
   const int kMaxPathLength = MAX_PATH + 10;
-  wchar_t mapped_file_path[kMaxPathLength];
+  char16_t mapped_file_path[kMaxPathLength];
   bool success = false;
   HANDLE cp = GetCurrentProcess();
-  if (::GetMappedFileNameW(cp, file_view, mapped_file_path, kMaxPathLength)) {
+  if (::GetMappedFileNameW(cp, file_view, ToWCharT(mapped_file_path),
+                           kMaxPathLength)) {
     *nt_path = FilePath(mapped_file_path);
     success = true;
   }
@@ -547,7 +553,7 @@ bool IsLink(const FilePath& file_path) {
 
 bool GetFileInfo(const FilePath& file_path, File::Info* results) {
   WIN32_FILE_ATTRIBUTE_DATA attr;
-  if (!GetFileAttributesEx(file_path.value().c_str(), GetFileExInfoStandard,
+  if (!GetFileAttributesEx(ToWCharT(&file_path.value()), GetFileExInfoStandard,
                            &attr)) {
     return false;
   }
@@ -574,7 +580,7 @@ FILE* OpenFile(const FilePath& filename, const char* mode) {
       (strchr(mode, ',') != nullptr && strchr(mode, 'N') > strchr(mode, ',')));
   string16 w_mode = ASCIIToUTF16(mode);
   AppendModeCharacter(L'N', &w_mode);
-  return _wfsopen(filename.value().c_str(), w_mode.c_str(), _SH_DENYNO);
+  return _wfsopen(ToWCharT(&filename.value()), ToWCharT(&w_mode), _SH_DENYNO);
 }
 
 FILE* FileToFILE(File file, const char* mode) {
@@ -592,7 +598,7 @@ FILE* FileToFILE(File file, const char* mode) {
 }
 
 int ReadFile(const FilePath& filename, char* data, int max_size) {
-  win::ScopedHandle file(CreateFile(filename.value().c_str(), GENERIC_READ,
+  win::ScopedHandle file(CreateFile(ToWCharT(&filename.value()), GENERIC_READ,
                                     FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
                                     OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN,
                                     NULL));
@@ -607,9 +613,9 @@ int ReadFile(const FilePath& filename, char* data, int max_size) {
 }
 
 int WriteFile(const FilePath& filename, const char* data, int size) {
-  win::ScopedHandle file(CreateFile(filename.value().c_str(), GENERIC_WRITE, 0,
-                                    NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
-                                    NULL));
+  win::ScopedHandle file(CreateFile(ToWCharT(&filename.value()), GENERIC_WRITE,
+                                    0, NULL, CREATE_ALWAYS,
+                                    FILE_ATTRIBUTE_NORMAL, NULL));
   if (!file.IsValid()) {
     DPLOG(WARNING) << "CreateFile failed for path "
                    << UTF16ToUTF8(filename.value());
@@ -634,8 +640,9 @@ int WriteFile(const FilePath& filename, const char* data, int size) {
 }
 
 bool AppendToFile(const FilePath& filename, const char* data, int size) {
-  win::ScopedHandle file(CreateFile(filename.value().c_str(), FILE_APPEND_DATA,
-                                    0, NULL, OPEN_EXISTING, 0, NULL));
+  win::ScopedHandle file(CreateFile(ToWCharT(&filename.value()),
+                                    FILE_APPEND_DATA, 0, NULL, OPEN_EXISTING, 0,
+                                    NULL));
   if (!file.IsValid()) {
     return false;
   }
@@ -649,33 +656,33 @@ bool AppendToFile(const FilePath& filename, const char* data, int size) {
 }
 
 bool GetCurrentDirectory(FilePath* dir) {
-  wchar_t system_buffer[MAX_PATH];
+  char16_t system_buffer[MAX_PATH];
   system_buffer[0] = 0;
-  DWORD len = ::GetCurrentDirectory(MAX_PATH, system_buffer);
+  DWORD len = ::GetCurrentDirectory(MAX_PATH, ToWCharT(system_buffer));
   if (len == 0 || len > MAX_PATH)
     return false;
   // TODO(evanm): the old behavior of this function was to always strip the
   // trailing slash.  We duplicate this here, but it shouldn't be necessary
   // when everyone is using the appropriate FilePath APIs.
-  std::wstring dir_str(system_buffer);
+  std::u16string dir_str(system_buffer);
   *dir = FilePath(dir_str).StripTrailingSeparators();
   return true;
 }
 
 bool SetCurrentDirectory(const FilePath& directory) {
-  return ::SetCurrentDirectory(directory.value().c_str()) != 0;
+  return ::SetCurrentDirectory(ToWCharT(&directory.value())) != 0;
 }
 
 int GetMaximumPathComponentLength(const FilePath& path) {
-  wchar_t volume_path[MAX_PATH];
-  if (!GetVolumePathNameW(path.NormalizePathSeparators().value().c_str(),
-                          volume_path, arraysize(volume_path))) {
+  char16_t volume_path[MAX_PATH];
+  if (!GetVolumePathNameW(ToWCharT(&path.NormalizePathSeparators().value()),
+                          ToWCharT(volume_path), arraysize(volume_path))) {
     return -1;
   }
 
   DWORD max_length = 0;
-  if (!GetVolumeInformationW(volume_path, NULL, 0, NULL, &max_length, NULL,
-                             NULL, 0)) {
+  if (!GetVolumeInformationW(ToWCharT(volume_path), NULL, 0, NULL, &max_length,
+                             NULL, NULL, 0)) {
     return -1;
   }
 

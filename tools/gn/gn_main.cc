@@ -25,7 +25,7 @@ std::vector<std::string> GetArgs(const base::CommandLine& cmdline) {
 #if defined(OS_WIN)
   std::vector<std::string> out_args;
   for (const auto& arg : in_args)
-    out_args.push_back(base::WideToUTF8(arg));
+    out_args.push_back(base::UTF16ToUTF8(arg));
   return out_args;
 #else
   return in_args;

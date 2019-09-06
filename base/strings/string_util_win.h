@@ -9,17 +9,10 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <wchar.h>
 
 #include "base/logging.h"
 
 namespace base {
-
-// Chromium code style is to not use malloc'd strings; this is only for use
-// for interaction with APIs that require it.
-inline char* strdup(const char* str) {
-  return _strdup(str);
-}
 
 inline int vsnprintf(char* buffer,
                      size_t size,
@@ -28,18 +21,6 @@ inline int vsnprintf(char* buffer,
   int length = vsnprintf_s(buffer, size, size - 1, format, arguments);
   if (length < 0)
     return _vscprintf(format, arguments);
-  return length;
-}
-
-inline int vswprintf(wchar_t* buffer,
-                     size_t size,
-                     const wchar_t* format,
-                     va_list arguments) {
-  DCHECK(IsWprintfFormatPortable(format));
-
-  int length = _vsnwprintf_s(buffer, size, size - 1, format, arguments);
-  if (length < 0)
-    return _vscwprintf(format, arguments);
   return length;
 }
 

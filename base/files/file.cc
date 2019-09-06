@@ -19,12 +19,10 @@ File::Info::~Info() = default;
 File::File()
     : error_details_(FILE_ERROR_FAILED), created_(false), async_(false) {}
 
-#if !defined(OS_NACL)
 File::File(const FilePath& path, uint32_t flags)
     : error_details_(FILE_OK), created_(false), async_(false) {
   Initialize(path, flags);
 }
-#endif
 
 File::File(PlatformFile platform_file)
     : file_(platform_file),
@@ -68,7 +66,6 @@ File& File::operator=(File&& other) {
   return *this;
 }
 
-#if !defined(OS_NACL)
 void File::Initialize(const FilePath& path, uint32_t flags) {
   if (path.ReferencesParent()) {
 #if defined(OS_WIN)
@@ -83,7 +80,6 @@ void File::Initialize(const FilePath& path, uint32_t flags) {
   }
   DoInitialize(path, flags);
 }
-#endif
 
 std::string File::ErrorToString(Error error) {
   switch (error) {

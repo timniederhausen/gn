@@ -18,8 +18,7 @@
 #include "base/numerics/safe_conversions.h"
 
 // Where available use builtin math overflow support on Clang and GCC.
-#if !defined(__native_client__) &&                         \
-    ((defined(__clang__) &&                                \
+#if ((defined(__clang__) &&                                \
       ((__clang_major__ > 3) ||                            \
        (__clang_major__ == 3 && __clang_minor__ >= 4))) || \
      (defined(__GNUC__) && __GNUC__ >= 5))

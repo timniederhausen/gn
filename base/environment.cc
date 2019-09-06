@@ -57,15 +57,17 @@ class EnvironmentImpl : public Environment {
  private:
   bool GetVarImpl(StringPiece variable_name, std::string* result) {
 #if defined(OS_WIN)
-    DWORD value_length =
-        ::GetEnvironmentVariable(UTF8ToWide(variable_name).c_str(), nullptr, 0);
+    DWORD value_length = ::GetEnvironmentVariable(
+        reinterpret_cast<LPCWSTR>(UTF8ToUTF16(variable_name).c_str()), nullptr,
+        0);
     if (value_length == 0)
       return false;
     if (result) {
-      std::unique_ptr<wchar_t[]> value(new wchar_t[value_length]);
-      ::GetEnvironmentVariable(UTF8ToWide(variable_name).c_str(), value.get(),
-                               value_length);
-      *result = WideToUTF8(value.get());
+      std::unique_ptr<char16_t[]> value(new char16_t[value_length]);
+      ::GetEnvironmentVariable(
+          reinterpret_cast<LPCWSTR>(UTF8ToUTF16(variable_name).c_str()),
+          reinterpret_cast<LPWSTR>(value.get()), value_length);
+      *result = UTF16ToUTF8(value.get());
     }
     return true;
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
@@ -82,8 +84,9 @@ class EnvironmentImpl : public Environment {
   bool SetVarImpl(StringPiece variable_name, const std::string& new_value) {
 #if defined(OS_WIN)
     // On success, a nonzero value is returned.
-    return !!SetEnvironmentVariable(UTF8ToWide(variable_name).c_str(),
-                                    UTF8ToWide(new_value).c_str());
+    return !!SetEnvironmentVariable(
+        reinterpret_cast<LPCWSTR>(UTF8ToUTF16(variable_name).c_str()),
+        reinterpret_cast<LPCWSTR>(UTF8ToUTF16(new_value).c_str()));
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
     // On success, zero is returned.
     return !setenv(variable_name.data(), new_value.c_str(), 1);
@@ -93,7 +96,8 @@ class EnvironmentImpl : public Environment {
   bool UnSetVarImpl(StringPiece variable_name) {
 #if defined(OS_WIN)
     // On success, a nonzero value is returned.
-    return !!SetEnvironmentVariable(UTF8ToWide(variable_name).c_str(), nullptr);
+    return !!SetEnvironmentVariable(
+        reinterpret_cast<LPCWSTR>(UTF8ToUTF16(variable_name).c_str()), nullptr);
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
     // On success, zero is returned.
     return !unsetenv(variable_name.data());
@@ -143,14 +147,14 @@ bool Environment::HasVar(StringPiece variable_name) {
 
 #if defined(OS_WIN)
 
-string16 AlterEnvironment(const wchar_t* env, const EnvironmentMap& changes) {
+string16 AlterEnvironment(const char16_t* env, const EnvironmentMap& changes) {
   string16 result;
 
   // First copy all unmodified values to the output.
   size_t cur_env = 0;
   string16 key;
   while (env[cur_env]) {
-    const wchar_t* line = &env[cur_env];
+    const char16_t* line = &env[cur_env];
     size_t line_length = ParseEnvLine(line, &key);
 
     // Keep only values not specified in the change vector.

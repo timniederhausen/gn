@@ -47,7 +47,7 @@ struct Counts {
   const Target* last_seen;
 };
 
-} // namespace
+}  // namespace
 
 base::CommandLine GetSelfInvocationCommandLine(
     const BuildSettings* build_settings) {
@@ -119,10 +119,9 @@ base::CommandLine GetSelfInvocationCommandLine(
 namespace {
 
 std::string GetSelfInvocationCommand(const BuildSettings* build_settings) {
-  base::CommandLine cmdline = GetSelfInvocationCommandLine(
-      build_settings);
+  base::CommandLine cmdline = GetSelfInvocationCommandLine(build_settings);
 #if defined(OS_WIN)
-  return base::WideToUTF8(cmdline.GetCommandLineString());
+  return base::UTF16ToUTF8(cmdline.GetCommandLineString());
 #else
   return cmdline.GetCommandLineString();
 #endif
@@ -247,8 +246,8 @@ bool NinjaBuildWriter::RunAndWriteFile(const BuildSettings* build_settings,
   std::stringstream file;
   std::stringstream depfile;
   NinjaBuildWriter gen(build_settings, used_toolchains, all_targets,
-                       default_toolchain, default_toolchain_targets,
-                       file, depfile);
+                       default_toolchain, default_toolchain_targets, file,
+                       depfile);
   if (!gen.Run(err))
     return false;
 

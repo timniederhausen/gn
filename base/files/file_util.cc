@@ -23,7 +23,6 @@
 
 namespace base {
 
-#if !defined(OS_NACL_NONSFI)
 namespace {
 
 // The maximum number of 'uniquified' files we will try to create.
@@ -47,9 +46,9 @@ bool ContentsEqual(const FilePath& filename1, const FilePath& filename2) {
   // We open the file in binary format even if they are text files because
   // we are just comparing that bytes are exactly same in both files and not
   // doing anything smart with text formatting.
-  std::ifstream file1(filename1.value().c_str(),
+  std::ifstream file1(filename1.As8Bit().c_str(),
                       std::ios::in | std::ios::binary);
-  std::ifstream file2(filename2.value().c_str(),
+  std::ifstream file2(filename2.As8Bit().c_str(),
                       std::ios::in | std::ios::binary);
 
   // Even if both files aren't openable (and thus, in some sense, "equal"),
@@ -77,8 +76,8 @@ bool ContentsEqual(const FilePath& filename1, const FilePath& filename2) {
 }
 
 bool TextContentsEqual(const FilePath& filename1, const FilePath& filename2) {
-  std::ifstream file1(filename1.value().c_str(), std::ios::in);
-  std::ifstream file2(filename2.value().c_str(), std::ios::in);
+  std::ifstream file1(filename1.As8Bit().c_str(), std::ios::in);
+  std::ifstream file2(filename2.As8Bit().c_str(), std::ios::in);
 
   // Even if both files aren't openable (and thus, in some sense, "equal"),
   // any unusable file yields a result of "false".
@@ -114,7 +113,6 @@ bool TextContentsEqual(const FilePath& filename1, const FilePath& filename2) {
 
   return true;
 }
-#endif  // !defined(OS_NACL_NONSFI)
 
 bool ReadFileToStringWithMaxSize(const FilePath& path,
                                  std::string* contents,
@@ -133,15 +131,11 @@ bool ReadFileToStringWithMaxSize(const FilePath& path,
   // file size as a hint for chunk size if available.
   constexpr int64_t kDefaultChunkSize = 1 << 16;
   int64_t chunk_size;
-#if !defined(OS_NACL_NONSFI)
   if (!GetFileSize(path, &chunk_size) || chunk_size <= 0)
     chunk_size = kDefaultChunkSize - 1;
   // We need to attempt to read at EOF for feof flag to be set so here we
   // use |chunk_size| + 1.
   chunk_size = std::min<uint64_t>(chunk_size, max_size) + 1;
-#else
-  chunk_size = kDefaultChunkSize;
-#endif  // !defined(OS_NACL_NONSFI)
   size_t bytes_read_this_pass;
   size_t bytes_read_so_far = 0;
   bool read_status = true;
@@ -183,7 +177,6 @@ bool ReadFileToString(const FilePath& path, std::string* contents) {
                                      std::numeric_limits<size_t>::max());
 }
 
-#if !defined(OS_NACL_NONSFI)
 bool IsDirectoryEmpty(const FilePath& dir_path) {
   FileEnumerator files(dir_path, false,
                        FileEnumerator::FILES | FileEnumerator::DIRECTORIES);
@@ -212,15 +205,12 @@ bool GetFileSize(const FilePath& file_path, int64_t* file_size) {
   return true;
 }
 
-#endif  // !defined(OS_NACL_NONSFI)
-
 bool CloseFile(FILE* file) {
   if (file == nullptr)
     return true;
   return fclose(file) == 0;
 }
 
-#if !defined(OS_NACL_NONSFI)
 bool TruncateFile(FILE* file) {
   if (file == nullptr)
     return false;
@@ -258,6 +248,5 @@ int GetUniquePathNumber(const FilePath& path,
 
   return -1;
 }
-#endif  // !defined(OS_NACL_NONSFI)
 
 }  // namespace base
