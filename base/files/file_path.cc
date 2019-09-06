@@ -171,7 +171,7 @@ FilePath::FilePath(const FilePath& that) = default;
 FilePath::FilePath(FilePath&& that) noexcept = default;
 
 FilePath::FilePath(StringPieceType path) {
-  path.CopyToString(&path_);
+  path_.assign(path);
   StringType::size_type nul_pos = path_.find(kStringTerminator);
   if (nul_pos != StringType::npos)
     path_.erase(nul_pos, StringType::npos);
@@ -401,7 +401,7 @@ FilePath FilePath::InsertBeforeExtension(StringPieceType suffix) const {
 
   StringType ext = Extension();
   StringType ret = RemoveExtension().value();
-  suffix.AppendToString(&ret);
+  ret.append(suffix);
   ret.append(ext);
   return FilePath(ret);
 }
@@ -429,7 +429,7 @@ FilePath FilePath::AddExtension(StringPieceType extension) const {
       *(str.end() - 1) != kExtensionSeparator) {
     str.append(1, kExtensionSeparator);
   }
-  extension.AppendToString(&str);
+  str.append(extension);
   return FilePath(str);
 }
 
@@ -446,7 +446,7 @@ FilePath FilePath::ReplaceExtension(StringPieceType extension) const {
   StringType str = no_ext.value();
   if (extension[0] != kExtensionSeparator)
     str.append(1, kExtensionSeparator);
-  extension.AppendToString(&str);
+  str.append(extension);
   return FilePath(str);
 }
 
@@ -456,7 +456,7 @@ FilePath FilePath::Append(StringPieceType component) const {
 
   StringType::size_type nul_pos = component.find(kStringTerminator);
   if (nul_pos != StringPieceType::npos) {
-    component.substr(0, nul_pos).CopyToString(&without_nuls);
+    without_nuls.assign(component.substr(0, nul_pos));
     appended = StringPieceType(without_nuls);
   }
 
@@ -490,7 +490,7 @@ FilePath FilePath::Append(StringPieceType component) const {
     }
   }
 
-  appended.AppendToString(&new_path.path_);
+  new_path.path_.append(appended);
   return new_path;
 }
 

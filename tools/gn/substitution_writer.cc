@@ -354,7 +354,7 @@ std::string SubstitutionWriter::GetSourceSubstitution(
       return source.value();
     to_rebase = source.value();
   } else if (type == &SubstitutionSourceNamePart) {
-    return FindFilenameNoExtension(&source.value()).as_string();
+    return std::string(FindFilenameNoExtension(&source.value()));
   } else if (type == &SubstitutionSourceFilePart) {
     return source.GetName();
   } else if (type == &SubstitutionSourceDir) {

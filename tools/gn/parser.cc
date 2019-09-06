@@ -435,8 +435,7 @@ std::unique_ptr<ParseNode> Parser::ParseExpression(int precedence) {
   PrefixFunc prefix = expressions_[token.type()].prefix;
 
   if (prefix == nullptr) {
-    *err_ = Err(token, std::string("Unexpected token '") +
-                           token.value().as_string() + std::string("'"));
+    *err_ = Err(token, "Unexpected token '" + std::string(token.value()) + "'");
     return std::unique_ptr<ParseNode>();
   }
 
@@ -449,9 +448,8 @@ std::unique_ptr<ParseNode> Parser::ParseExpression(int precedence) {
     const Token& next_token = Consume();
     InfixFunc infix = expressions_[next_token.type()].infix;
     if (infix == nullptr) {
-      *err_ = Err(next_token, std::string("Unexpected token '") +
-                                  next_token.value().as_string() +
-                                  std::string("'"));
+      *err_ = Err(next_token,
+                  "Unexpected token '" + std::string(next_token.value()) + "'");
       return std::unique_ptr<ParseNode>();
     }
     left = (this->*infix)(std::move(left), next_token);
@@ -521,7 +519,7 @@ std::unique_ptr<ParseNode> Parser::BinaryOperator(
   if (!right) {
     if (!has_error()) {
       *err_ = Err(token, "Expected right-hand side for '" +
-                             token.value().as_string() + "'");
+                             std::string(token.value()) + "'");
     }
     return std::unique_ptr<ParseNode>();
   }
@@ -899,8 +897,9 @@ std::string IndentFor(int value) {
   return std::string(value, ' ');
 }
 
-void RenderToText(const base::Value& node, int indent_level,
-    std::ostringstream& os) {
+void RenderToText(const base::Value& node,
+                  int indent_level,
+                  std::ostringstream& os) {
   const base::Value* child = node.FindKey(std::string("child"));
   std::string node_type(node.FindKey("type")->GetString());
   if (node_type == "ACCESSOR") {
@@ -908,7 +907,7 @@ void RenderToText(const base::Value& node, int indent_level,
     // for the base.
     os << IndentFor(indent_level) << node_type << std::endl;
     os << IndentFor(indent_level + 1) << node.FindKey("value")->GetString()
-        << std::endl;
+       << std::endl;
   } else {
     os << IndentFor(indent_level) << node_type;
     if (node.FindKey("value")) {
@@ -918,20 +917,20 @@ void RenderToText(const base::Value& node, int indent_level,
   }
   if (node.FindKey(kJsonBeforeComment)) {
     for (auto& v : node.FindKey(kJsonBeforeComment)->GetList()) {
-      os << IndentFor(indent_level + 1) <<
-          "+BEFORE_COMMENT(\"" << v.GetString() << "\")\n";
+      os << IndentFor(indent_level + 1) << "+BEFORE_COMMENT(\"" << v.GetString()
+         << "\")\n";
     }
   }
   if (node.FindKey(kJsonSuffixComment)) {
     for (auto& v : node.FindKey(kJsonSuffixComment)->GetList()) {
-      os << IndentFor(indent_level + 1) <<
-          "+SUFFIX_COMMENT(\"" << v.GetString() << "\")\n";
+      os << IndentFor(indent_level + 1) << "+SUFFIX_COMMENT(\"" << v.GetString()
+         << "\")\n";
     }
   }
   if (node.FindKey(kJsonAfterComment)) {
     for (auto& v : node.FindKey(kJsonAfterComment)->GetList()) {
-      os << IndentFor(indent_level + 1) <<
-          "+AFTER_COMMENT(\"" << v.GetString() << "\")\n";
+      os << IndentFor(indent_level + 1) << "+AFTER_COMMENT(\"" << v.GetString()
+         << "\")\n";
     }
   }
   if (child) {

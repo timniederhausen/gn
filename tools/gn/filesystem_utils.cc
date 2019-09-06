@@ -226,7 +226,7 @@ base::FilePath UTF8ToFilePath(const base::StringPiece& sp) {
 #if defined(OS_WIN)
   return base::FilePath(base::UTF8ToUTF16(sp));
 #else
-  return base::FilePath(sp.as_string());
+  return base::FilePath(sp);
 #endif
 }
 
@@ -572,7 +572,7 @@ void NormalizePath(std::string* path, const base::StringPiece& source_root) {
                 // On Windows, if the source_root does not start with a slash,
                 // append one here for consistency.
                 if (!IsSlash(source_root[0])) {
-                  path->insert(0, "/" + source_root.as_string());
+                  path->insert(0, "/" + std::string(source_root));
                   source_root_len++;
                 } else {
                   path->insert(0, source_root.data(), source_root_len);
@@ -704,7 +704,8 @@ std::string RebasePath(const std::string& input,
                        const SourceDir& dest_dir,
                        const base::StringPiece& source_root) {
   std::string ret;
-  DCHECK(source_root.empty() || !source_root.ends_with("/"));
+  DCHECK(source_root.empty() ||
+         !base::EndsWith(source_root, "/", base::CompareCase::SENSITIVE));
 
   bool input_is_source_path =
       (input.size() >= 2 && input[0] == '/' && input[1] == '/');
@@ -714,14 +715,14 @@ std::string RebasePath(const std::string& input,
     std::string input_full;
     std::string dest_full;
     if (input_is_source_path) {
-      source_root.AppendToString(&input_full);
+      input_full.append(source_root);
       input_full.push_back('/');
       input_full.append(input, 2, std::string::npos);
     } else {
       input_full.append(input);
     }
     if (dest_dir.is_source_absolute()) {
-      source_root.AppendToString(&dest_full);
+      dest_full.append(source_root);
       dest_full.push_back('/');
       dest_full.append(dest_dir.value(), 2, std::string::npos);
     } else {

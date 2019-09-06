@@ -125,7 +125,7 @@ bool CreateBundleTargetGenerator::FillXcodeExtraAttributes() {
       return false;
 
     xcode_extra_attributes.insert(
-        std::make_pair(iter.first.as_string(), iter.second.string_value()));
+        std::make_pair(std::string(iter.first), iter.second.string_value()));
   }
 
   target_->bundle_data().xcode_extra_attributes() =

@@ -33,7 +33,7 @@ std::string ExtractGNBuildCommands(const base::FilePath& build_ninja_file) {
   std::string result;
   int num_blank_lines = 0;
   for (const auto& line : lines) {
-    line.AppendToString(&result);
+    result.append(line);
     result.push_back('\n');
     if (line.empty())
       ++num_blank_lines;

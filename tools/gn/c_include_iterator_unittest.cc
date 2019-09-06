@@ -132,7 +132,7 @@ TEST(CIncludeIterator, TolerateNonIncludes) {
   CIncludeIterator iter(&file);
   for (size_t group = 0; group < kGroupCount; group++) {
     EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
-    EXPECT_EQ(include, contents.as_string());
+    EXPECT_EQ(include, std::string(contents));
   }
   EXPECT_FALSE(iter.GetNextIncludeString(&contents, &range));
 }

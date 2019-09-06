@@ -152,8 +152,8 @@ class FilePath {
   typedef std::string StringType;
 #endif  // OS_WIN
 
-  typedef BasicStringPiece<StringType> StringPieceType;
-  typedef StringType::value_type CharType;
+  using CharType = StringType::value_type;
+  using StringPieceType = std::basic_string_view<CharType>;
 
   // Null-terminated array of separators used to separate components in
   // hierarchical paths.  Each character in this array is a valid separator,

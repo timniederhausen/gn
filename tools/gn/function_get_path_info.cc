@@ -63,10 +63,10 @@ std::string GetOnePathInfo(const Settings* settings,
 
   switch (what) {
     case WHAT_FILE: {
-      return FindFilename(&input_string).as_string();
+      return std::string(FindFilename(&input_string));
     }
     case WHAT_NAME: {
-      std::string file = FindFilename(&input_string).as_string();
+      std::string file(FindFilename(&input_string));
       size_t extension_offset = FindExtensionOffset(file);
       if (extension_offset == std::string::npos)
         return file;
@@ -74,7 +74,7 @@ std::string GetOnePathInfo(const Settings* settings,
       return file.substr(0, extension_offset - 1);
     }
     case WHAT_EXTENSION: {
-      return FindExtension(&input_string).as_string();
+      return std::string(FindExtension(&input_string));
     }
     case WHAT_DIR: {
       base::StringPiece dir_incl_slash = FindDir(&input_string);
@@ -87,7 +87,7 @@ std::string GetOnePathInfo(const Settings* settings,
         return std::string("/.");
       if (dir_incl_slash == "//")
         return std::string("//.");
-      return dir_incl_slash.substr(0, dir_incl_slash.size() - 1).as_string();
+      return std::string(dir_incl_slash.substr(0, dir_incl_slash.size() - 1));
     }
     case WHAT_GEN_DIR: {
       return DirectoryWithNoLastSlash(GetSubBuildDirAsSourceDir(

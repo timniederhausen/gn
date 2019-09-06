@@ -8,6 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <string>
+
 #include "base/strings/string_piece.h"
 
 namespace base {

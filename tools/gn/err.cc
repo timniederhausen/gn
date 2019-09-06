@@ -22,7 +22,7 @@ std::string GetNthLine(const base::StringPiece& data, int n) {
   size_t end = line_off + 1;
   while (end < data.size() && !Tokenizer::IsNewline(data, end))
     end++;
-  return data.substr(line_off, end - line_off).as_string();
+  return std::string(data.substr(line_off, end - line_off));
 }
 
 void FillRangeOnLine(const LocationRange& range,

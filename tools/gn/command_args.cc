@@ -72,7 +72,7 @@ std::string StripHashFromLine(const base::StringPiece& line, bool pad) {
   // normal comment that has a space after the # will be indented 4 spaces
   // (which makes our formatting come out nicely). If the comment is indented
   // from there, we want to preserve that indenting.
-  std::string line_stripped = line.substr(line.find('#') + 1).as_string();
+  std::string line_stripped(line.substr(line.find('#') + 1));
   if (pad)
     return "   " + line_stripped;
 
@@ -131,7 +131,7 @@ void PrintDefaultValueInfo(base::StringPiece name, const Value& value) {
     if (!comment.empty())
       OutputString("\n" + comment);
   } else {
-    OutputString("      (Internally set; try `gn help " + name.as_string() +
+    OutputString("      (Internally set; try `gn help " + std::string(name) +
                  "`.)\n");
   }
 }
@@ -139,7 +139,7 @@ void PrintDefaultValueInfo(base::StringPiece name, const Value& value) {
 // Override value is null if there is no override.
 void PrintArgHelp(const base::StringPiece& name,
                   const Args::ValueWithOverride& val) {
-  OutputString(name.as_string(), DECORATION_YELLOW);
+  OutputString(std::string(name), DECORATION_YELLOW);
   OutputString("\n");
 
   if (val.has_override) {
@@ -259,7 +259,7 @@ int ListArgs(const std::string& build_dir) {
     for (const auto& arg : args) {
       if (overrides_only && !arg.second.has_override)
         continue;
-      OutputString(arg.first.as_string());
+      OutputString(std::string(arg.first));
       OutputString(" = ");
       if (arg.second.has_override)
         OutputString(arg.second.override_value.ToString(true));

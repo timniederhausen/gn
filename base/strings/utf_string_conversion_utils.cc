@@ -30,7 +30,7 @@ bool ReadUnicodeCharacter(const char* src,
   return IsValidCodepoint(code_point);
 }
 
-bool ReadUnicodeCharacter(const char16* src,
+bool ReadUnicodeCharacter(const char16_t* src,
                           int32_t src_len,
                           int32_t* char_index,
                           uint32_t* code_point) {
@@ -107,7 +107,7 @@ void PrepareForUTF8Output(const CHAR* src,
 }
 
 // Instantiate versions we know callers will need.
-template void PrepareForUTF8Output(const char16*, size_t, std::string*);
+template void PrepareForUTF8Output(const char16_t*, size_t, std::string*);
 
 template <typename STRING>
 void PrepareForUTF16Or32Output(const char* src,

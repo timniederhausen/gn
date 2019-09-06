@@ -700,7 +700,7 @@ void VisualStudioWriter::WriteFiltersFileContents(
       base::StringPiece filter_path = FindParentDir(&target_relative_path);
 
       if (!filter_path.empty()) {
-        std::string filter_path_str = filter_path.as_string();
+        std::string filter_path_str(filter_path);
         while (processed_filters.find(filter_path_str) ==
                processed_filters.end()) {
           auto it = processed_filters.insert(filter_path_str).first;
@@ -708,7 +708,7 @@ void VisualStudioWriter::WriteFiltersFileContents(
               ->SubElement("Filter", XmlAttributes("Include", filter_path_str))
               ->SubElement("UniqueIdentifier")
               ->Text(MakeGuid(filter_path_str, kGuidSeedFilter));
-          filter_path_str = FindParentDir(&(*it)).as_string();
+          filter_path_str = std::string(FindParentDir(&(*it)));
           if (filter_path_str.empty())
             break;
         }
@@ -815,9 +815,10 @@ void VisualStudioWriter::ResolveSolutionFolders() {
     if (it != processed_paths.end()) {
       project->parent_folder = it->second;
     } else {
-      std::string folder_path_str = folder_path.as_string();
+      std::string folder_path_str(folder_path);
       std::unique_ptr<SolutionEntry> folder = std::make_unique<SolutionEntry>(
-          FindLastDirComponent(SourceDir(std::string(folder_path))).as_string(),
+          std::string(
+              FindLastDirComponent(SourceDir(std::string(folder_path)))),
           folder_path_str, MakeGuid(folder_path_str, kGuidSeedFolder));
       project->parent_folder = folder.get();
       processed_paths[folder_path] = folder.get();
@@ -863,10 +864,10 @@ void VisualStudioWriter::ResolveSolutionFolders() {
       } else {
         std::unique_ptr<SolutionEntry> new_folder =
             std::make_unique<SolutionEntry>(
-                FindLastDirComponent(SourceDir(std::string(parent_path)))
-                    .as_string(),
-                parent_path.as_string(),
-                MakeGuid(parent_path.as_string(), kGuidSeedFolder));
+                std::string(
+                    FindLastDirComponent(SourceDir(std::string(parent_path)))),
+                std::string(parent_path),
+                MakeGuid(std::string(parent_path), kGuidSeedFolder));
         processed_paths[parent_path] = new_folder.get();
         folder = new_folder.get();
         additional_folders.push_back(std::move(new_folder));

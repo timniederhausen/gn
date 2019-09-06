@@ -56,7 +56,7 @@ void RenderScopeToJSON(const Value& output, std::ostream& out, int indent) {
     if (!first)
       out << ",\n";
     Indent(indent, out);
-    out << "\"" << pair.first.as_string() << "\": ";
+    out << "\"" << pair.first << "\": ";
     if (pair.second.type() == Value::SCOPE)
       RenderScopeToJSON(pair.second, out, indent + 1);
     else if (pair.second.type() == Value::LIST)
@@ -103,8 +103,7 @@ void OutputScope(const Value& output, std::ostream& out) {
   Scope::KeyValueMap scope_values;
   output.scope_value()->GetCurrentScopeValues(&scope_values);
   for (const auto& pair : scope_values) {
-    out << "  " << pair.first.as_string() << " = " << pair.second.ToString(true)
-        << "\n";
+    out << "  " << pair.first << " = " << pair.second.ToString(true) << "\n";
   }
 }
 

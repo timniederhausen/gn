@@ -5,6 +5,7 @@
 #ifndef TOOLS_GN_STRING_UTILS_H_
 #define TOOLS_GN_STRING_UTILS_H_
 
+#include <string>
 #include <vector>
 
 #include "base/strings/string_piece.h"

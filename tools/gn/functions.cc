@@ -1175,7 +1175,7 @@ Value RunStringReplace(Scope* scope,
   int64_t n = 0;
   std::string val(str);
   size_t start_pos = 0;
-  while((start_pos = val.find(old, start_pos)) != std::string::npos) {
+  while ((start_pos = val.find(old, start_pos)) != std::string::npos) {
     val.replace(start_pos, old.length(), new_);
     start_pos += new_.length();
     if (++n >= max)
@@ -1315,7 +1315,7 @@ Value RunFunction(Scope* scope,
                   Err* err) {
   const Token& name = function->function();
 
-  std::string template_name = function->function().value().as_string();
+  std::string template_name(function->function().value());
   const Template* templ = scope->GetTemplate(template_name);
   if (templ) {
     Value args = args_list->Execute(scope, err);

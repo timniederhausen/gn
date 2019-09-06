@@ -47,7 +47,7 @@ bool ReadUnicodeCharacter(const char* src,
                           uint32_t* code_point_out);
 
 // Reads a UTF-16 character. The usage is the same as the 8-bit version above.
-bool ReadUnicodeCharacter(const char16* src,
+bool ReadUnicodeCharacter(const char16_t* src,
                           int32_t src_len,
                           int32_t* char_index,
                           uint32_t* code_point);

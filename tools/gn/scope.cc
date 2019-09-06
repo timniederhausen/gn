@@ -220,7 +220,7 @@ void Scope::MarkAllUsed() {
 void Scope::MarkAllUsed(const std::set<std::string>& excluded_values) {
   for (auto& cur : values_) {
     if (!excluded_values.empty() &&
-        excluded_values.find(cur.first.as_string()) != excluded_values.end()) {
+        excluded_values.find(std::string(cur.first)) != excluded_values.end()) {
       continue;  // Skip this excluded value.
     }
     cur.second.used = true;
@@ -250,7 +250,7 @@ bool Scope::CheckForUnusedVars(Err* err) const {
   for (const auto& pair : values_) {
     if (!pair.second.used) {
       std::string help =
-          "You set the variable \"" + pair.first.as_string() +
+          "You set the variable \"" + std::string(pair.first) +
           "\" here and it was unused before it went\nout of scope.";
 
       const BinaryOpNode* binary = pair.second.value.origin()->AsBinaryOp();
@@ -302,7 +302,7 @@ bool Scope::NonRecursiveMergeTo(Scope* dest,
     if (options.skip_private_vars && IsPrivateVar(current_name))
       continue;  // Skip this private var.
     if (!options.excluded_values.empty() &&
-        options.excluded_values.find(current_name.as_string()) !=
+        options.excluded_values.find(std::string(current_name)) !=
             options.excluded_values.end()) {
       continue;  // Skip this excluded value.
     }
@@ -315,7 +315,7 @@ bool Scope::NonRecursiveMergeTo(Scope* dest,
         std::string desc_string(desc_for_err);
         *err = Err(node_for_err, "Value collision.",
                    "This " + desc_string + " contains \"" +
-                       current_name.as_string() + "\"");
+                       std::string(current_name) + "\"");
         err->AppendSubErr(
             Err(pair.second.value, "defined here.",
                 "Which would clobber the one in your current scope"));

@@ -49,21 +49,6 @@ static bool CompareParameter(const ReplacementOffset& elem1,
   return elem1.parameter < elem2.parameter;
 }
 
-// Overloaded function to append one string onto the end of another. Having a
-// separate overload for |source| as both string and StringPiece allows for more
-// efficient usage from functions templated to work with either type (avoiding a
-// redundant call to the BasicStringPiece constructor in both cases).
-template <typename string_type>
-inline void AppendToString(string_type* target, const string_type& source) {
-  target->append(source);
-}
-
-template <typename string_type>
-inline void AppendToString(string_type* target,
-                           const BasicStringPiece<string_type>& source) {
-  source.AppendToString(target);
-}
-
 // Assuming that a pointer is the size of a "machine word", then
 // uintptr_t is an integer type that is also a machine word.
 typedef uintptr_t MachineWord;
@@ -103,7 +88,8 @@ struct NonASCIIMask<8, char> {
 namespace {
 
 template <typename StringType>
-StringType ToLowerASCIIImpl(BasicStringPiece<StringType> str) {
+StringType ToLowerASCIIImpl(
+    std::basic_string_view<typename StringType::value_type> str) {
   StringType ret;
   ret.reserve(str.size());
   for (size_t i = 0; i < str.size(); i++)
@@ -112,7 +98,8 @@ StringType ToLowerASCIIImpl(BasicStringPiece<StringType> str) {
 }
 
 template <typename StringType>
-StringType ToUpperASCIIImpl(BasicStringPiece<StringType> str) {
+StringType ToUpperASCIIImpl(
+    std::basic_string_view<typename StringType::value_type> str) {
   StringType ret;
   ret.reserve(str.size());
   for (size_t i = 0; i < str.size(); i++)
@@ -139,8 +126,9 @@ string16 ToUpperASCII(StringPiece16 str) {
 }
 
 template <class StringType>
-int CompareCaseInsensitiveASCIIT(BasicStringPiece<StringType> a,
-                                 BasicStringPiece<StringType> b) {
+int CompareCaseInsensitiveASCIIT(
+    std::basic_string_view<typename StringType::value_type> a,
+    std::basic_string_view<typename StringType::value_type> b) {
   // Find the first characters that aren't equal and compare them.  If the end
   // of one of the strings is found before a nonequal character, the lengths
   // of the strings are compared.
@@ -186,10 +174,11 @@ bool EqualsCaseInsensitiveASCII(StringPiece16 a, StringPiece16 b) {
 }
 
 template <class StringType>
-bool ReplaceCharsT(const StringType& input,
-                   BasicStringPiece<StringType> find_any_of_these,
-                   BasicStringPiece<StringType> replace_with,
-                   StringType* output);
+bool ReplaceCharsT(
+    const StringType& input,
+    std::basic_string_view<typename StringType::value_type> find_any_of_these,
+    std::basic_string_view<typename StringType::value_type> replace_with,
+    StringType* output);
 
 bool ReplaceChars(const string16& input,
                   StringPiece16 replace_chars,
@@ -219,15 +208,16 @@ bool RemoveChars(const std::string& input,
 }
 
 template <typename Str>
-TrimPositions TrimStringT(const Str& input,
-                          BasicStringPiece<Str> trim_chars,
-                          TrimPositions positions,
-                          Str* output) {
+TrimPositions TrimStringT(
+    const Str& input,
+    std::basic_string_view<typename Str::value_type> trim_chars,
+    TrimPositions positions,
+    Str* output) {
   // Find the edges of leading/trailing whitespace as desired. Need to use
   // a StringPiece version of input to be able to call find* on it with the
   // StringPiece version of trim_chars (normally the trim_chars will be a
   // constant so avoid making a copy).
-  BasicStringPiece<Str> input_piece(input);
+  std::basic_string_view<typename Str::value_type> input_piece(input);
   const size_t last_char = input.length() - 1;
   const size_t first_good_char = (positions & TRIM_LEADING)
                                      ? input_piece.find_first_not_of(trim_chars)
@@ -267,12 +257,16 @@ bool TrimString(const std::string& input,
   return TrimStringT(input, trim_chars, TRIM_ALL, output) != TRIM_NONE;
 }
 
-template <typename Str>
-BasicStringPiece<Str> TrimStringPieceT(BasicStringPiece<Str> input,
-                                       BasicStringPiece<Str> trim_chars,
-                                       TrimPositions positions) {
+template <typename char_type>
+std::basic_string_view<char_type> TrimStringPieceT(
+    std::basic_string_view<char_type> input,
+    std::basic_string_view<char_type> trim_chars,
+    TrimPositions positions) {
   size_t begin =
       (positions & TRIM_LEADING) ? input.find_first_not_of(trim_chars) : 0;
+  if (begin == std::basic_string_view<char_type>::npos)
+    return std::basic_string_view<char_type>();  // All trimmed.
+
   size_t end = (positions & TRIM_TRAILING)
                    ? input.find_last_not_of(trim_chars) + 1
                    : input.size();
@@ -474,8 +468,9 @@ bool IsStringUTF8(StringPiece str) {
 // string piece gives additional flexibility for the caller (doesn't have to be
 // null terminated) so we choose the StringPiece route.
 template <typename Str>
-static inline bool DoLowerCaseEqualsASCII(BasicStringPiece<Str> str,
-                                          StringPiece lowercase_ascii) {
+static inline bool DoLowerCaseEqualsASCII(
+    std::basic_string_view<typename Str::value_type> str,
+    StringPiece lowercase_ascii) {
   if (str.size() != lowercase_ascii.size())
     return false;
   for (size_t i = 0; i < str.size(); i++) {
@@ -499,23 +494,22 @@ bool EqualsASCII(StringPiece16 str, StringPiece ascii) {
   return std::equal(ascii.begin(), ascii.end(), str.begin());
 }
 
-template <typename Str>
-bool StartsWithT(BasicStringPiece<Str> str,
-                 BasicStringPiece<Str> search_for,
+template <typename char_type>
+bool StartsWithT(std::basic_string_view<char_type> str,
+                 std::basic_string_view<char_type> search_for,
                  CompareCase case_sensitivity) {
   if (search_for.size() > str.size())
     return false;
 
-  BasicStringPiece<Str> source = str.substr(0, search_for.size());
+  std::basic_string_view<char_type> source = str.substr(0, search_for.size());
 
   switch (case_sensitivity) {
     case CompareCase::SENSITIVE:
       return source == search_for;
 
     case CompareCase::INSENSITIVE_ASCII:
-      return std::equal(
-          search_for.begin(), search_for.end(), source.begin(),
-          CaseInsensitiveCompareASCII<typename Str::value_type>());
+      return std::equal(search_for.begin(), search_for.end(), source.begin(),
+                        CaseInsensitiveCompareASCII<char_type>());
 
     default:
       NOTREACHED();
@@ -526,23 +520,23 @@ bool StartsWithT(BasicStringPiece<Str> str,
 bool StartsWith(StringPiece str,
                 StringPiece search_for,
                 CompareCase case_sensitivity) {
-  return StartsWithT<std::string>(str, search_for, case_sensitivity);
+  return StartsWithT(str, search_for, case_sensitivity);
 }
 
 bool StartsWith(StringPiece16 str,
                 StringPiece16 search_for,
                 CompareCase case_sensitivity) {
-  return StartsWithT<string16>(str, search_for, case_sensitivity);
+  return StartsWithT(str, search_for, case_sensitivity);
 }
 
 template <typename Str>
-bool EndsWithT(BasicStringPiece<Str> str,
-               BasicStringPiece<Str> search_for,
+bool EndsWithT(std::basic_string_view<typename Str::value_type> str,
+               std::basic_string_view<typename Str::value_type> search_for,
                CompareCase case_sensitivity) {
   if (search_for.size() > str.size())
     return false;
 
-  BasicStringPiece<Str> source =
+  std::basic_string_view<typename Str::value_type> source =
       str.substr(str.size() - search_for.size(), search_for.size());
 
   switch (case_sensitivity) {
@@ -620,7 +614,7 @@ string16 FormatBytesUnlocalized(int64_t bytes) {
 // A Matcher for DoReplaceMatchesAfterOffset() that matches substrings.
 template <class StringType>
 struct SubstringMatcher {
-  BasicStringPiece<StringType> find_this;
+  std::basic_string_view<typename StringType::value_type> find_this;
 
   size_t Find(const StringType& input, size_t pos) {
     return input.find(find_this.data(), pos, find_this.length());
@@ -631,7 +625,7 @@ struct SubstringMatcher {
 // A Matcher for DoReplaceMatchesAfterOffset() that matches single characters.
 template <class StringType>
 struct CharacterMatcher {
-  BasicStringPiece<StringType> find_any_of_these;
+  std::basic_string_view<typename StringType::value_type> find_any_of_these;
 
   size_t Find(const StringType& input, size_t pos) {
     return input.find_first_of(find_any_of_these.data(), pos,
@@ -648,11 +642,12 @@ enum class ReplaceType { REPLACE_ALL, REPLACE_FIRST };
 // This is parameterized on a |Matcher| traits type, so that it can be the
 // implementation for both ReplaceChars() and ReplaceSubstringsAfterOffset().
 template <class StringType, class Matcher>
-bool DoReplaceMatchesAfterOffset(StringType* str,
-                                 size_t initial_offset,
-                                 Matcher matcher,
-                                 BasicStringPiece<StringType> replace_with,
-                                 ReplaceType replace_type) {
+bool DoReplaceMatchesAfterOffset(
+    StringType* str,
+    size_t initial_offset,
+    Matcher matcher,
+    std::basic_string_view<typename StringType::value_type> replace_with,
+    ReplaceType replace_type) {
   using CharTraits = typename StringType::traits_type;
 
   const size_t find_length = matcher.MatchSize();
@@ -791,10 +786,11 @@ bool DoReplaceMatchesAfterOffset(StringType* str,
 }
 
 template <class StringType>
-bool ReplaceCharsT(const StringType& input,
-                   BasicStringPiece<StringType> find_any_of_these,
-                   BasicStringPiece<StringType> replace_with,
-                   StringType* output) {
+bool ReplaceCharsT(
+    const StringType& input,
+    std::basic_string_view<typename StringType::value_type> find_any_of_these,
+    std::basic_string_view<typename StringType::value_type> replace_with,
+    StringType* output) {
   // Commonly, this is called with output and input being the same string; in
   // that case, this assignment is inexpensive.
   *output = input;
@@ -863,34 +859,30 @@ char16* WriteInto(string16* str, size_t length_with_null) {
 #endif
 
 // Generic version for all JoinString overloads. |list_type| must be a sequence
-// (std::vector or std::initializer_list) of strings/StringPieces (std::string,
-// string16, StringPiece or StringPiece16). |string_type| is either std::string
-// or string16.
-template <typename list_type, typename string_type>
-static string_type JoinStringT(const list_type& parts,
-                               BasicStringPiece<string_type> sep) {
+// (std::vector or std::initializer_list) of strings/string_views of any type.
+template <typename char_type, typename list_type>
+static std::basic_string<char_type> JoinStringT(
+    const list_type& parts,
+    std::basic_string_view<char_type> sep) {
   if (parts.size() == 0)
-    return string_type();
+    return std::basic_string<char_type>();
 
   // Pre-allocate the eventual size of the string. Start with the size of all of
   // the separators (note that this *assumes* parts.size() > 0).
   size_t total_size = (parts.size() - 1) * sep.size();
   for (const auto& part : parts)
     total_size += part.size();
-  string_type result;
+  std::basic_string<char_type> result;
   result.reserve(total_size);
 
   auto iter = parts.begin();
   DCHECK(iter != parts.end());
-  AppendToString(&result, *iter);
+  result.append(*iter);
   ++iter;
 
   for (; iter != parts.end(); ++iter) {
-    sep.AppendToString(&result);
-    // Using the overloaded AppendToString allows this template function to work
-    // on both strings and StringPieces without creating an intermediate
-    // StringPiece object.
-    AppendToString(&result, *iter);
+    result.append(sep);
+    result.append(*iter);
   }
 
   // Sanity-check that we pre-allocated correctly.

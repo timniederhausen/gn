@@ -5,8 +5,8 @@
 #ifndef TOOLS_GN_XML_ELEMENT_WRITER_H_
 #define TOOLS_GN_XML_ELEMENT_WRITER_H_
 
-#include <iosfwd>
 #include <memory>
+#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>

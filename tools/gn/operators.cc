@@ -118,7 +118,7 @@ bool ValueDestination::Init(Scope* exec_scope,
           "\n"
           "If you really wanted to do this, do:\n"
           "  " +
-              base_str.as_string() + " = " + base_str.as_string() +
+              std::string(base_str) + " = " + std::string(base_str) +
               "\n"
               "to copy it into the current scope before doing this operation.");
     } else {
@@ -246,7 +246,7 @@ Err MakeIncompatibleTypeError(const BinaryOpNode* op_node,
                               const Value& right) {
   std::string msg = std::string("You can't do <") +
                     Value::DescribeType(left.type()) + "> " +
-                    op_node->op().value().as_string() + " <" +
+                    std::string(op_node->op().value()) + " <" +
                     Value::DescribeType(right.type()) + ">.";
   if (left.type() == Value::LIST) {
     // Append extra hint for list stuff.

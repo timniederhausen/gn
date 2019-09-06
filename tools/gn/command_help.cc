@@ -366,7 +366,7 @@ int RunHelp(const std::vector<std::string>& args) {
     OutputString("Run `gn help` for a list of available topics.\n",
                  DECORATION_NONE);
   } else {
-    OutputString("Did you mean `gn help " + suggestion.as_string() + "`?\n",
+    OutputString("Did you mean `gn help " + std::string(suggestion) + "`?\n",
                  DECORATION_NONE);
   }
   return 1;

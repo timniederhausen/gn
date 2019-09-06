@@ -13,6 +13,7 @@
 #include "base/json/string_escape.h"
 #include "base/stl_util.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/strings/string_util.h"
 #include "tools/gn/functions.h"
 #include "tools/gn/operators.h"
 #include "tools/gn/scope.h"
@@ -51,7 +52,8 @@ DepsCategory GetDepsCategory(base::StringPiece deps) {
 std::tuple<base::StringPiece, base::StringPiece> SplitAtFirst(
     base::StringPiece str,
     char c) {
-  if (!str.starts_with("\"") || !str.ends_with("\""))
+  if (!base::StartsWith(str, "\"", base::CompareCase::SENSITIVE) ||
+      !base::EndsWith(str, "\"", base::CompareCase::SENSITIVE))
     return std::make_tuple(str, base::StringPiece());
 
   str = str.substr(1, str.length() - 2);
@@ -146,7 +148,7 @@ base::Value ParseNode::CreateJSONNode(const char* type) const {
 }
 
 base::Value ParseNode::CreateJSONNode(const char* type,
-    const base::StringPiece& value) const {
+                                      const base::StringPiece& value) const {
   base::Value dict(base::Value::Type::DICTIONARY);
   dict.SetKey(kJsonNodeType, base::Value(type));
   dict.SetKey(kJsonNodeValue, base::Value(value));
@@ -305,7 +307,7 @@ bool AccessorNode::ComputeAndValidateListIndex(Scope* scope,
   if (max_len == 0) {
     *err = Err(index_->GetRange(), "Array subscript out of range.",
                "You gave me " + base::Int64ToString(index_int) + " but the " +
-               "array has no elements.");
+                   "array has no elements.");
     return false;
   }
   size_t index_sizet = static_cast<size_t>(index_int);
@@ -806,7 +808,9 @@ Value LiteralNode::Execute(Scope* scope, Err* err) const {
       return Value(this, false);
     case Token::INTEGER: {
       base::StringPiece s = value_.value();
-      if ((s.starts_with("0") && s.size() > 1) || s.starts_with("-0")) {
+      if ((base::StartsWith(s, "0", base::CompareCase::SENSITIVE) &&
+           s.size() > 1) ||
+          base::StartsWith(s, "-0", base::CompareCase::SENSITIVE)) {
         if (s == "-0")
           *err = MakeErrorDescribing("Negative zero doesn't make sense");
         else
@@ -909,7 +913,7 @@ Err BlockCommentNode::MakeErrorDescribing(const std::string& msg,
 
 base::Value BlockCommentNode::GetJSONNode() const {
   std::string escaped;
-  base::EscapeJSONString(comment_.value().as_string(), false, &escaped);
+  base::EscapeJSONString(std::string(comment_.value()), false, &escaped);
   return CreateJSONNode("BLOCK_COMMENT", escaped);
 }
 

@@ -14,34 +14,15 @@ namespace base {
 
 namespace {
 
-// PieceToOutputType converts a StringPiece as needed to a given output type,
-// which is either the same type of StringPiece (a NOP) or the corresponding
-// non-piece string type.
-//
-// The default converter is a NOP, it works when the OutputType is the
-// correct StringPiece.
-template <typename Str, typename OutputType>
-OutputType PieceToOutputType(BasicStringPiece<Str> piece) {
-  return piece;
-}
-template <>  // Convert StringPiece to std::string
-std::string PieceToOutputType<std::string, std::string>(StringPiece piece) {
-  return piece.as_string();
-}
-template <>  // Convert StringPiece16 to string16.
-string16 PieceToOutputType<string16, string16>(StringPiece16 piece) {
-  return piece.as_string();
-}
-
 // Returns either the ASCII or UTF-16 whitespace.
-template <typename Str>
-BasicStringPiece<Str> WhitespaceForType();
+template <typename char_type>
+std::basic_string_view<char_type> WhitespaceForType();
 template <>
-StringPiece16 WhitespaceForType<string16>() {
+StringPiece16 WhitespaceForType<char16_t>() {
   return kWhitespaceUTF16;
 }
 template <>
-StringPiece WhitespaceForType<std::string>() {
+StringPiece WhitespaceForType<char>() {
   return kWhitespaceASCII;
 }
 
@@ -69,36 +50,39 @@ size_t FindFirstOf(StringPiece16 piece, StringPiece16 one_of, size_t pos) {
 // multiple-character delimiters.
 //
 // DelimiterType is either a character (Str::value_type) or a string piece of
-// multiple characters (BasicStringPiece<Str>). StringPiece has a version of
-// find for both of these cases, and the single-character version is the most
+// multiple characters (std::basic_string_view<char>). StringPiece has a version
+// of find for both of these cases, and the single-character version is the most
 // common and can be implemented faster, which is why this is a template.
-template <typename Str, typename OutputStringType, typename DelimiterType>
-static std::vector<OutputStringType> SplitStringT(BasicStringPiece<Str> str,
-                                                  DelimiterType delimiter,
-                                                  WhitespaceHandling whitespace,
-                                                  SplitResult result_type) {
+template <typename char_type, typename OutputStringType, typename DelimiterType>
+static std::vector<OutputStringType> SplitStringT(
+    std::basic_string_view<char_type> str,
+    DelimiterType delimiter,
+    WhitespaceHandling whitespace,
+    SplitResult result_type) {
   std::vector<OutputStringType> result;
   if (str.empty())
     return result;
 
+  using ViewType = std::basic_string_view<char_type>;
+
   size_t start = 0;
-  while (start != Str::npos) {
+  while (start != ViewType::npos) {
     size_t end = FindFirstOf(str, delimiter, start);
 
-    BasicStringPiece<Str> piece;
-    if (end == Str::npos) {
+    ViewType piece;
+    if (end == ViewType::npos) {
       piece = str.substr(start);
-      start = Str::npos;
+      start = ViewType::npos;
     } else {
       piece = str.substr(start, end - start);
       start = end + 1;
     }
 
     if (whitespace == TRIM_WHITESPACE)
-      piece = TrimString(piece, WhitespaceForType<Str>(), TRIM_ALL);
+      piece = TrimString(piece, WhitespaceForType<char_type>(), TRIM_ALL);
 
     if (result_type == SPLIT_WANT_ALL || !piece.empty())
-      result.push_back(PieceToOutputType<Str, OutputStringType>(piece));
+      result.emplace_back(piece);
   }
   return result;
 }
@@ -116,7 +100,7 @@ bool AppendStringKeyValue(StringPiece input,
   if (end_key_pos == std::string::npos) {
     return false;  // No delimiter.
   }
-  input.substr(0, end_key_pos).CopyToString(&result_pair.first);
+  result_pair.first.assign(input.substr(0, end_key_pos));
 
   // Find the value string.
   StringPiece remains = input.substr(end_key_pos, input.size() - end_key_pos);
@@ -124,19 +108,19 @@ bool AppendStringKeyValue(StringPiece input,
   if (begin_value_pos == StringPiece::npos) {
     return false;  // No value.
   }
-  remains.substr(begin_value_pos, remains.size() - begin_value_pos)
-      .CopyToString(&result_pair.second);
+  result_pair.second.assign(
+      remains.substr(begin_value_pos, remains.size() - begin_value_pos));
 
   return true;
 }
 
-template <typename Str, typename OutputStringType>
-void SplitStringUsingSubstrT(BasicStringPiece<Str> input,
-                             BasicStringPiece<Str> delimiter,
+template <typename char_type, typename OutputStringType>
+void SplitStringUsingSubstrT(std::basic_string_view<char_type> input,
+                             std::basic_string_view<char_type> delimiter,
                              WhitespaceHandling whitespace,
                              SplitResult result_type,
                              std::vector<OutputStringType>* result) {
-  using Piece = BasicStringPiece<Str>;
+  using Piece = std::basic_string_view<char_type>;
   using size_type = typename Piece::size_type;
 
   result->clear();
@@ -148,10 +132,10 @@ void SplitStringUsingSubstrT(BasicStringPiece<Str> input,
                      : input.substr(begin_index, end_index - begin_index);
 
     if (whitespace == TRIM_WHITESPACE)
-      term = TrimString(term, WhitespaceForType<Str>(), TRIM_ALL);
+      term = TrimString(term, WhitespaceForType<char_type>(), TRIM_ALL);
 
     if (result_type == SPLIT_WANT_ALL || !term.empty())
-      result->push_back(PieceToOutputType<Str, OutputStringType>(term));
+      result->emplace_back(term);
   }
 }
 
@@ -162,11 +146,11 @@ std::vector<std::string> SplitString(StringPiece input,
                                      WhitespaceHandling whitespace,
                                      SplitResult result_type) {
   if (separators.size() == 1) {
-    return SplitStringT<std::string, std::string, char>(
-        input, separators[0], whitespace, result_type);
+    return SplitStringT<char, std::string, char>(input, separators[0],
+                                                 whitespace, result_type);
   }
-  return SplitStringT<std::string, std::string, StringPiece>(
-      input, separators, whitespace, result_type);
+  return SplitStringT<char, std::string, StringPiece>(input, separators,
+                                                      whitespace, result_type);
 }
 
 std::vector<string16> SplitString(StringPiece16 input,
@@ -174,10 +158,10 @@ std::vector<string16> SplitString(StringPiece16 input,
                                   WhitespaceHandling whitespace,
                                   SplitResult result_type) {
   if (separators.size() == 1) {
-    return SplitStringT<string16, string16, char16>(input, separators[0],
+    return SplitStringT<char16_t, string16, char16>(input, separators[0],
                                                     whitespace, result_type);
   }
-  return SplitStringT<string16, string16, StringPiece16>(
+  return SplitStringT<char16_t, string16, StringPiece16>(
       input, separators, whitespace, result_type);
 }
 
@@ -186,11 +170,11 @@ std::vector<StringPiece> SplitStringPiece(StringPiece input,
                                           WhitespaceHandling whitespace,
                                           SplitResult result_type) {
   if (separators.size() == 1) {
-    return SplitStringT<std::string, StringPiece, char>(
-        input, separators[0], whitespace, result_type);
+    return SplitStringT<char, StringPiece, char>(input, separators[0],
+                                                 whitespace, result_type);
   }
-  return SplitStringT<std::string, StringPiece, StringPiece>(
-      input, separators, whitespace, result_type);
+  return SplitStringT<char, StringPiece, StringPiece>(input, separators,
+                                                      whitespace, result_type);
 }
 
 std::vector<StringPiece16> SplitStringPiece(StringPiece16 input,
@@ -198,10 +182,10 @@ std::vector<StringPiece16> SplitStringPiece(StringPiece16 input,
                                             WhitespaceHandling whitespace,
                                             SplitResult result_type) {
   if (separators.size() == 1) {
-    return SplitStringT<string16, StringPiece16, char16>(
+    return SplitStringT<char16_t, StringPiece16, char16>(
         input, separators[0], whitespace, result_type);
   }
-  return SplitStringT<string16, StringPiece16, StringPiece16>(
+  return SplitStringT<char16_t, StringPiece16, StringPiece16>(
       input, separators, whitespace, result_type);
 }
 

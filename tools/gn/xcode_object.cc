@@ -560,8 +560,8 @@ PBXFileReference* PBXGroup::AddSourceFile(const std::string& navigator_path,
   }
 
   if (!group) {
-    children_.push_back(std::make_unique<PBXGroup>(component.as_string(),
-                                                   component.as_string()));
+    children_.push_back(std::make_unique<PBXGroup>(std::string(component),
+                                                   std::string(component)));
     group = static_cast<PBXGroup*>(children_.back().get());
   }
 

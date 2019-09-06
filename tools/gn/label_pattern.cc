@@ -55,9 +55,7 @@ LabelPattern::LabelPattern(Type type,
                            const SourceDir& dir,
                            const base::StringPiece& name,
                            const Label& toolchain_label)
-    : toolchain_(toolchain_label), type_(type), dir_(dir) {
-  name.CopyToString(&name_);
-}
+    : toolchain_(toolchain_label), type_(type), dir_(dir), name_(name) {}
 
 LabelPattern::LabelPattern(const LabelPattern& other) = default;
 
@@ -103,8 +101,8 @@ LabelPattern LabelPattern::GetPattern(const SourceDir& current_dir,
       return LabelPattern();
     }
 
-    std::string toolchain_string =
-        str.substr(open_paren + 1, close_paren - open_paren - 1).as_string();
+    std::string toolchain_string(
+        str.substr(open_paren + 1, close_paren - open_paren - 1));
     if (toolchain_string.find('*') != std::string::npos) {
       *err = Err(value, "Can't have a wildcard in the toolchain.");
       return LabelPattern();

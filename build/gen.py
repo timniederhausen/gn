@@ -407,7 +407,6 @@ def WriteGNNinja(path, platform, host, options):
         'base/memory/weak_ptr.cc',
         'base/sha1.cc',
         'base/strings/string_number_conversions.cc',
-        'base/strings/string_piece.cc',
         'base/strings/string_split.cc',
         'base/strings/string_util.cc',
         'base/strings/string_util_constants.cc',

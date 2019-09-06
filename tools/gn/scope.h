@@ -338,8 +338,7 @@ class Scope {
     Value value;
   };
 
-  typedef std::unordered_map<base::StringPiece, Record, base::StringPieceHash>
-      RecordMap;
+  using RecordMap = std::unordered_map<base::StringPiece, Record>;
 
   void AddProvider(ProgrammaticProvider* p);
   void RemoveProvider(ProgrammaticProvider* p);

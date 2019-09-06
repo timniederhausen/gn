@@ -26,17 +26,17 @@ TEST(FilesystemUtils, FileExtensionOffset) {
 
 TEST(FilesystemUtils, FindExtension) {
   std::string input;
-  EXPECT_EQ("", FindExtension(&input).as_string());
+  EXPECT_EQ("", FindExtension(&input));
   input = "foo/bar/baz";
-  EXPECT_EQ("", FindExtension(&input).as_string());
+  EXPECT_EQ("", FindExtension(&input));
   input = "foo.";
-  EXPECT_EQ("", FindExtension(&input).as_string());
+  EXPECT_EQ("", FindExtension(&input));
   input = "f.o.bar";
-  EXPECT_EQ("bar", FindExtension(&input).as_string());
+  EXPECT_EQ("bar", FindExtension(&input));
   input = "foo.bar/";
-  EXPECT_EQ("", FindExtension(&input).as_string());
+  EXPECT_EQ("", FindExtension(&input));
   input = "foo.bar/baz";
-  EXPECT_EQ("", FindExtension(&input).as_string());
+  EXPECT_EQ("", FindExtension(&input));
 }
 
 TEST(FilesystemUtils, FindFilenameOffset) {

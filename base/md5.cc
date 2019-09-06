@@ -24,6 +24,7 @@
 #include "base/md5.h"
 
 #include <stddef.h>
+#include <string.h>
 
 namespace {
 
