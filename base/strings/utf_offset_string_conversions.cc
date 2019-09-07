@@ -8,9 +8,9 @@
 
 #include <algorithm>
 #include <memory>
+#include <string_view>
 
 #include "base/logging.h"
-#include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversion_utils.h"
 
 namespace base {
@@ -37,7 +37,7 @@ void OffsetAdjuster::AdjustOffset(const Adjustments& adjustments,
                                   size_t* offset,
                                   size_t limit) {
   DCHECK(offset);
-  if (*offset == string16::npos)
+  if (*offset == std::u16string::npos)
     return;
   int adjustment = 0;
   for (Adjustments::const_iterator i = adjustments.begin();
@@ -45,7 +45,7 @@ void OffsetAdjuster::AdjustOffset(const Adjustments& adjustments,
     if (*offset <= i->original_offset)
       break;
     if (*offset < (i->original_offset + i->original_length)) {
-      *offset = string16::npos;
+      *offset = std::u16string::npos;
       return;
     }
     adjustment += static_cast<int>(i->original_length - i->output_length);
@@ -53,7 +53,7 @@ void OffsetAdjuster::AdjustOffset(const Adjustments& adjustments,
   *offset -= adjustment;
 
   if (*offset > limit)
-    *offset = string16::npos;
+    *offset = std::u16string::npos;
 }
 
 // static
@@ -70,7 +70,7 @@ void OffsetAdjuster::UnadjustOffsets(
 // static
 void OffsetAdjuster::UnadjustOffset(const Adjustments& adjustments,
                                     size_t* offset) {
-  if (*offset == string16::npos)
+  if (*offset == std::u16string::npos)
     return;
   int adjustment = 0;
   for (Adjustments::const_iterator i = adjustments.begin();
@@ -79,7 +79,7 @@ void OffsetAdjuster::UnadjustOffset(const Adjustments& adjustments,
       break;
     adjustment += static_cast<int>(i->original_length - i->output_length);
     if ((*offset + adjustment) < (i->original_offset + i->original_length)) {
-      *offset = string16::npos;
+      *offset = std::u16string::npos;
       return;
     }
   }
@@ -221,39 +221,39 @@ bool ConvertUnicode(const SrcChar* src,
 bool UTF8ToUTF16WithAdjustments(
     const char* src,
     size_t src_len,
-    string16* output,
+    std::u16string* output,
     base::OffsetAdjuster::Adjustments* adjustments) {
   PrepareForUTF16Or32Output(src, src_len, output);
   return ConvertUnicode(src, src_len, output, adjustments);
 }
 
-string16 UTF8ToUTF16WithAdjustments(
-    const base::StringPiece& utf8,
+std::u16string UTF8ToUTF16WithAdjustments(
+    const std::string_view& utf8,
     base::OffsetAdjuster::Adjustments* adjustments) {
-  string16 result;
+  std::u16string result;
   UTF8ToUTF16WithAdjustments(utf8.data(), utf8.length(), &result, adjustments);
   return result;
 }
 
-string16 UTF8ToUTF16AndAdjustOffsets(
-    const base::StringPiece& utf8,
+std::u16string UTF8ToUTF16AndAdjustOffsets(
+    const std::string_view& utf8,
     std::vector<size_t>* offsets_for_adjustment) {
   for (size_t& offset : *offsets_for_adjustment) {
     if (offset > utf8.length())
-      offset = string16::npos;
+      offset = std::u16string::npos;
   }
   OffsetAdjuster::Adjustments adjustments;
-  string16 result = UTF8ToUTF16WithAdjustments(utf8, &adjustments);
+  std::u16string result = UTF8ToUTF16WithAdjustments(utf8, &adjustments);
   OffsetAdjuster::AdjustOffsets(adjustments, offsets_for_adjustment);
   return result;
 }
 
 std::string UTF16ToUTF8AndAdjustOffsets(
-    const base::StringPiece16& utf16,
+    const std::u16string_view& utf16,
     std::vector<size_t>* offsets_for_adjustment) {
   for (size_t& offset : *offsets_for_adjustment) {
     if (offset > utf16.length())
-      offset = string16::npos;
+      offset = std::u16string::npos;
   }
   std::string result;
   PrepareForUTF8Output(utf16.data(), utf16.length(), &result);

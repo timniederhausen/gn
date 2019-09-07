@@ -169,7 +169,7 @@ void MD5Init(MD5Context* context) {
  * Update context to reflect the concatenation of another buffer full
  * of bytes.
  */
-void MD5Update(MD5Context* context, const StringPiece& data) {
+void MD5Update(MD5Context* context, const std::string_view& data) {
   struct Context* ctx = reinterpret_cast<struct Context*>(context);
   const uint8_t* buf = reinterpret_cast<const uint8_t*>(data.data());
   size_t len = data.size();
@@ -287,11 +287,12 @@ std::string MD5DigestToBase16(const MD5Digest& digest) {
 void MD5Sum(const void* data, size_t length, MD5Digest* digest) {
   MD5Context ctx;
   MD5Init(&ctx);
-  MD5Update(&ctx, StringPiece(reinterpret_cast<const char*>(data), length));
+  MD5Update(&ctx,
+            std::string_view(reinterpret_cast<const char*>(data), length));
   MD5Final(digest, &ctx);
 }
 
-std::string MD5String(const StringPiece& str) {
+std::string MD5String(const std::string_view& str) {
   MD5Digest digest;
   MD5Sum(str.data(), str.length(), &digest);
   return MD5DigestToBase16(digest);

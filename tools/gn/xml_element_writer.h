@@ -8,22 +8,22 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
 #include "base/macros.h"
-#include "base/strings/string_piece.h"
 
 // Vector of XML attribute key-value pairs.
 class XmlAttributes
-    : public std::vector<std::pair<base::StringPiece, base::StringPiece>> {
+    : public std::vector<std::pair<std::string_view, std::string_view>> {
  public:
   XmlAttributes();
-  XmlAttributes(const base::StringPiece& attr_key,
-                const base::StringPiece& attr_value);
+  XmlAttributes(const std::string_view& attr_key,
+                const std::string_view& attr_value);
 
-  XmlAttributes& add(const base::StringPiece& attr_key,
-                     const base::StringPiece& attr_value);
+  XmlAttributes& add(const std::string_view& attr_key,
+                     const std::string_view& attr_value);
 };
 
 // Helper class for writing XML elements. New XML element is started in
@@ -54,7 +54,7 @@ class XmlElementWriter {
   ~XmlElementWriter();
 
   // Writes arbitrary XML element text.
-  void Text(const base::StringPiece& content);
+  void Text(const std::string_view& content);
 
   // Starts new XML sub-element. Caller must ensure that parent element outlives
   // its children.

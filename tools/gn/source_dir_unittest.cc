@@ -13,9 +13,9 @@ TEST(SourceDir, ResolveRelativeFile) {
   Err err;
   SourceDir base("//base/");
 #if defined(OS_WIN)
-  base::StringPiece source_root("C:/source/root");
+  std::string_view source_root("C:/source/root");
 #else
-  base::StringPiece source_root("/source/root");
+  std::string_view source_root("/source/root");
 #endif
 
   // Empty input is an error.
@@ -116,9 +116,9 @@ TEST(SourceDir, ResolveRelativeDir) {
   Err err;
   SourceDir base("//base/");
 #if defined(OS_WIN)
-  base::StringPiece source_root("C:/source/root");
+  std::string_view source_root("C:/source/root");
 #else
-  base::StringPiece source_root("/source/root");
+  std::string_view source_root("/source/root");
 #endif
 
   // Empty input is an error.

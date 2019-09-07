@@ -112,8 +112,8 @@ class ParseNode {
   // Helper functions for GetJSONNode. Creates and fills a Value object with
   // given type (and value).
   base::Value CreateJSONNode(const char* type) const;
-  base::Value CreateJSONNode(const char* type, const base::StringPiece& value)
-      const;
+  base::Value CreateJSONNode(const char* type,
+                             const std::string_view& value) const;
 
  private:
   // Helper function for CreateJSONNode.

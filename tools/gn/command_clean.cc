@@ -27,7 +27,7 @@ std::string ExtractGNBuildCommands(const base::FilePath& build_ninja_file) {
   if (!base::ReadFileToString(build_ninja_file, &file_contents))
     return std::string();
 
-  std::vector<base::StringPiece> lines = base::SplitStringPiece(
+  std::vector<std::string_view> lines = base::SplitStringPiece(
       file_contents, "\n", base::KEEP_WHITESPACE, base::SPLIT_WANT_ALL);
 
   std::string result;

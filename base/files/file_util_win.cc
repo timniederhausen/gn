@@ -18,13 +18,13 @@
 #include <algorithm>
 #include <limits>
 #include <string>
+#include <string_view>
 
 #include "base/files/file_enumerator.h"
 #include "base/files/file_path.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/strings/string_number_conversions.h"
-#include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
@@ -86,9 +86,9 @@ DWORD DeleteFileRecursive(const FilePath& path,
 
 // Appends |mode_char| to |mode| before the optional character set encoding; see
 // https://msdn.microsoft.com/library/yeby3zcb.aspx for details.
-void AppendModeCharacter(base::char16 mode_char, base::string16* mode) {
+void AppendModeCharacter(char16_t mode_char, std::u16string* mode) {
   size_t comma_pos = mode->find(L',');
-  mode->insert(comma_pos == base::string16::npos ? mode->length() : comma_pos,
+  mode->insert(comma_pos == std::u16string::npos ? mode->length() : comma_pos,
                1, mode_char);
 }
 
@@ -195,7 +195,7 @@ FilePath MakeAbsoluteFilePath(const FilePath& input) {
 bool DeleteFile(const FilePath& path, bool recursive) {
   static constexpr char kRecursive[] = "DeleteFile.Recursive";
   static constexpr char kNonRecursive[] = "DeleteFile.NonRecursive";
-  const StringPiece operation(recursive ? kRecursive : kNonRecursive);
+  const std::string_view operation(recursive ? kRecursive : kNonRecursive);
 
   // Metrics for delete failures tracked in https://crbug.com/599084. Delete may
   // fail for a number of reasons. Log some metrics relating to failures in the
@@ -359,7 +359,7 @@ bool CreateTemporaryDirInDir(const FilePath& base_dir,
   for (int count = 0; count < 50; ++count) {
     // Try create a new temporary directory with random generated name. If
     // the one exists, keep trying another path name until we reach some limit.
-    string16 new_dir_name;
+    std::u16string new_dir_name;
     new_dir_name.assign(prefix);
     new_dir_name.append(IntToString16(::GetCurrentProcessId()));
     new_dir_name.push_back('_');
@@ -578,7 +578,7 @@ FILE* OpenFile(const FilePath& filename, const char* mode) {
   DCHECK(
       strchr(mode, 'N') == nullptr ||
       (strchr(mode, ',') != nullptr && strchr(mode, 'N') > strchr(mode, ',')));
-  string16 w_mode = ASCIIToUTF16(mode);
+  std::u16string w_mode = ASCIIToUTF16(mode);
   AppendModeCharacter(L'N', &w_mode);
   return _wfsopen(ToWCharT(&filename.value()), ToWCharT(&w_mode), _SH_DENYNO);
 }

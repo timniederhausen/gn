@@ -5,11 +5,12 @@
 #include "base/files/file_path.h"
 
 #include <string.h>
+
 #include <algorithm>
+#include <string_view>
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "util/build_config.h"
@@ -28,7 +29,7 @@
 namespace base {
 
 using StringType = FilePath::StringType;
-using StringPieceType = FilePath::StringPieceType;
+using StringViewType = FilePath::StringViewType;
 
 namespace {
 
@@ -42,7 +43,7 @@ const FilePath::CharType kStringTerminator = FILE_PATH_LITERAL('\0');
 // otherwise returns npos.  This can only be true on Windows, when a pathname
 // begins with a letter followed by a colon.  On other platforms, this always
 // returns npos.
-StringPieceType::size_type FindDriveLetter(StringPieceType path) {
+StringViewType::size_type FindDriveLetter(StringViewType path) {
 #if defined(FILE_PATH_USES_DRIVE_LETTERS)
   // This is dependent on an ASCII-based character set, but that's a
   // reasonable assumption.  iswalpha can be too inclusive here.
@@ -56,25 +57,25 @@ StringPieceType::size_type FindDriveLetter(StringPieceType path) {
 }
 
 #if defined(FILE_PATH_USES_DRIVE_LETTERS)
-bool EqualDriveLetterCaseInsensitive(StringPieceType a, StringPieceType b) {
+bool EqualDriveLetterCaseInsensitive(StringViewType a, StringViewType b) {
   size_t a_letter_pos = FindDriveLetter(a);
   size_t b_letter_pos = FindDriveLetter(b);
 
   if (a_letter_pos == StringType::npos || b_letter_pos == StringType::npos)
     return a == b;
 
-  StringPieceType a_letter(a.substr(0, a_letter_pos + 1));
-  StringPieceType b_letter(b.substr(0, b_letter_pos + 1));
+  StringViewType a_letter(a.substr(0, a_letter_pos + 1));
+  StringViewType b_letter(b.substr(0, b_letter_pos + 1));
   if (!StartsWith(a_letter, b_letter, CompareCase::INSENSITIVE_ASCII))
     return false;
 
-  StringPieceType a_rest(a.substr(a_letter_pos + 1));
-  StringPieceType b_rest(b.substr(b_letter_pos + 1));
+  StringViewType a_rest(a.substr(a_letter_pos + 1));
+  StringViewType b_rest(b.substr(b_letter_pos + 1));
   return a_rest == b_rest;
 }
 #endif  // defined(FILE_PATH_USES_DRIVE_LETTERS)
 
-bool IsPathAbsolute(StringPieceType path) {
+bool IsPathAbsolute(StringViewType path) {
 #if defined(FILE_PATH_USES_DRIVE_LETTERS)
   StringType::size_type letter = FindDriveLetter(path);
   if (letter != StringType::npos) {
@@ -170,7 +171,7 @@ FilePath::FilePath() = default;
 FilePath::FilePath(const FilePath& that) = default;
 FilePath::FilePath(FilePath&& that) noexcept = default;
 
-FilePath::FilePath(StringPieceType path) {
+FilePath::FilePath(StringViewType path) {
   path_.assign(path);
   StringType::size_type nul_pos = path_.find(kStringTerminator);
   if (nul_pos != StringType::npos)
@@ -392,7 +393,7 @@ FilePath FilePath::RemoveFinalExtension() const {
   return FilePath(path_.substr(0, dot));
 }
 
-FilePath FilePath::InsertBeforeExtension(StringPieceType suffix) const {
+FilePath FilePath::InsertBeforeExtension(StringViewType suffix) const {
   if (suffix.empty())
     return FilePath(path_);
 
@@ -406,7 +407,7 @@ FilePath FilePath::InsertBeforeExtension(StringPieceType suffix) const {
   return FilePath(ret);
 }
 
-FilePath FilePath::InsertBeforeExtensionASCII(StringPiece suffix) const {
+FilePath FilePath::InsertBeforeExtensionASCII(std::string_view suffix) const {
   DCHECK(IsStringASCII(suffix));
 #if defined(OS_WIN)
   return InsertBeforeExtension(ASCIIToUTF16(suffix));
@@ -415,7 +416,7 @@ FilePath FilePath::InsertBeforeExtensionASCII(StringPiece suffix) const {
 #endif
 }
 
-FilePath FilePath::AddExtension(StringPieceType extension) const {
+FilePath FilePath::AddExtension(StringViewType extension) const {
   if (IsEmptyOrSpecialCase(BaseName().value()))
     return FilePath();
 
@@ -433,7 +434,7 @@ FilePath FilePath::AddExtension(StringPieceType extension) const {
   return FilePath(str);
 }
 
-FilePath FilePath::ReplaceExtension(StringPieceType extension) const {
+FilePath FilePath::ReplaceExtension(StringViewType extension) const {
   if (IsEmptyOrSpecialCase(BaseName().value()))
     return FilePath();
 
@@ -450,14 +451,14 @@ FilePath FilePath::ReplaceExtension(StringPieceType extension) const {
   return FilePath(str);
 }
 
-FilePath FilePath::Append(StringPieceType component) const {
-  StringPieceType appended = component;
+FilePath FilePath::Append(StringViewType component) const {
+  StringViewType appended = component;
   StringType without_nuls;
 
   StringType::size_type nul_pos = component.find(kStringTerminator);
-  if (nul_pos != StringPieceType::npos) {
+  if (nul_pos != StringViewType::npos) {
     without_nuls.assign(component.substr(0, nul_pos));
-    appended = StringPieceType(without_nuls);
+    appended = StringViewType(without_nuls);
   }
 
   DCHECK(!IsPathAbsolute(appended));
@@ -498,7 +499,7 @@ FilePath FilePath::Append(const FilePath& component) const {
   return Append(component.value());
 }
 
-FilePath FilePath::AppendASCII(StringPiece component) const {
+FilePath FilePath::AppendASCII(std::string_view component) const {
   DCHECK(base::IsStringASCII(component));
 #if defined(OS_WIN)
   return Append(ASCIIToUTF16(component));
@@ -564,7 +565,7 @@ bool FilePath::ReferencesParent() const {
 
 #if defined(OS_WIN)
 
-string16 FilePath::LossyDisplayName() const {
+std::u16string FilePath::LossyDisplayName() const {
   return path_;
 }
 

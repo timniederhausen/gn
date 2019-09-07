@@ -62,7 +62,7 @@ inline bool ShouldEscapeCharForNinja(char ch) {
   return ch == '$' || ch == ' ' || ch == ':';
 }
 
-size_t EscapeStringToString_Ninja(const base::StringPiece& str,
+size_t EscapeStringToString_Ninja(const std::string_view& str,
                                   const EscapeOptions& options,
                                   char* dest,
                                   bool* needed_quoting) {
@@ -75,7 +75,7 @@ size_t EscapeStringToString_Ninja(const base::StringPiece& str,
   return i;
 }
 
-size_t EscapeStringToString_Depfile(const base::StringPiece& str,
+size_t EscapeStringToString_Depfile(const std::string_view& str,
                                     const EscapeOptions& options,
                                     char* dest,
                                     bool* needed_quoting) {
@@ -93,7 +93,7 @@ size_t EscapeStringToString_Depfile(const base::StringPiece& str,
   return i;
 }
 
-size_t EscapeStringToString_NinjaPreformatted(const base::StringPiece& str,
+size_t EscapeStringToString_NinjaPreformatted(const std::string_view& str,
                                               char* dest) {
   // Only Ninja-escape $.
   size_t i = 0;
@@ -113,7 +113,7 @@ size_t EscapeStringToString_NinjaPreformatted(const base::StringPiece& str,
 // See:
 //   http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
 //   http://blogs.msdn.com/b/oldnewthing/archive/2010/09/17/10063629.aspx
-size_t EscapeStringToString_WindowsNinjaFork(const base::StringPiece& str,
+size_t EscapeStringToString_WindowsNinjaFork(const std::string_view& str,
                                              const EscapeOptions& options,
                                              char* dest,
                                              bool* needed_quoting) {
@@ -165,7 +165,7 @@ size_t EscapeStringToString_WindowsNinjaFork(const base::StringPiece& str,
   return i;
 }
 
-size_t EscapeStringToString_PosixNinjaFork(const base::StringPiece& str,
+size_t EscapeStringToString_PosixNinjaFork(const std::string_view& str,
                                            const EscapeOptions& options,
                                            char* dest,
                                            bool* needed_quoting) {
@@ -196,7 +196,7 @@ size_t EscapeStringToString_PosixNinjaFork(const base::StringPiece& str,
 }
 
 // Escapes |str| into |dest| and returns the number of characters written.
-size_t EscapeStringToString(const base::StringPiece& str,
+size_t EscapeStringToString(const std::string_view& str,
                             const EscapeOptions& options,
                             char* dest,
                             bool* needed_quoting) {
@@ -237,7 +237,7 @@ size_t EscapeStringToString(const base::StringPiece& str,
 
 }  // namespace
 
-std::string EscapeString(const base::StringPiece& str,
+std::string EscapeString(const std::string_view& str,
                          const EscapeOptions& options,
                          bool* needed_quoting) {
   StackOrHeapBuffer dest(str.size() * kMaxEscapedCharsPerChar);
@@ -246,7 +246,7 @@ std::string EscapeString(const base::StringPiece& str,
 }
 
 void EscapeStringToStream(std::ostream& out,
-                          const base::StringPiece& str,
+                          const std::string_view& str,
                           const EscapeOptions& options) {
   StackOrHeapBuffer dest(str.size() * kMaxEscapedCharsPerChar);
   out.write(dest, EscapeStringToString(str, options, dest, nullptr));

@@ -107,7 +107,7 @@ Value ParseList(const std::string& input, const ParseNode* origin, Err* err) {
   return ret;
 }
 
-bool IsIdentifier(const base::StringPiece& buffer) {
+bool IsIdentifier(const std::string_view& buffer) {
   DCHECK(buffer.size() > 0);
   if (!Tokenizer::IsIdentifierFirstChar(buffer[0]))
     return false;
@@ -146,14 +146,13 @@ Value ParseJSONValue(const Settings* settings,
         }
         // Search for the key in the input file. We know it's present because
         // it was parsed by the JSON reader, but we need its location to
-        // construct a StringPiece that can be used as key in the Scope.
+        // construct a std::string_view that can be used as key in the Scope.
         size_t off = input_file->contents().find("\"" + it.first + "\"");
         if (off == std::string::npos) {
           *err = Err(origin, "Invalid encoding \"" + it.first + "\".");
           return Value();
         }
-        base::StringPiece key(&input_file->contents()[off + 1],
-                              it.first.size());
+        std::string_view key(&input_file->contents()[off + 1], it.first.size());
         scope->SetValue(key, std::move(parsed_value), origin);
       }
       return Value(origin, std::move(scope));

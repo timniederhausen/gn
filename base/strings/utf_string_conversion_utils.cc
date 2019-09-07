@@ -75,10 +75,10 @@ size_t WriteUnicodeCharacter(uint32_t code_point, std::string* output) {
   return char_offset - original_char_offset;
 }
 
-size_t WriteUnicodeCharacter(uint32_t code_point, string16* output) {
+size_t WriteUnicodeCharacter(uint32_t code_point, std::u16string* output) {
   if (CBU16_LENGTH(code_point) == 1) {
     // Thie code point is in the Basic Multilingual Plane (BMP).
-    output->push_back(static_cast<char16>(code_point));
+    output->push_back(static_cast<char16_t>(code_point));
     return 1;
   }
   // Non-BMP characters use a double-character encoding.
@@ -127,6 +127,6 @@ void PrepareForUTF16Or32Output(const char* src,
 }
 
 // Instantiate versions we know callers will need.
-template void PrepareForUTF16Or32Output(const char*, size_t, string16*);
+template void PrepareForUTF16Or32Output(const char*, size_t, std::u16string*);
 
 }  // namespace base

@@ -14,7 +14,7 @@
 
 TEST(PathOutput, Basic) {
   SourceDir build_dir("//out/Debug/");
-  base::StringPiece source_root("/source/root");
+  std::string_view source_root("/source/root");
   PathOutput writer(build_dir, source_root, ESCAPE_NONE);
   {
     // Normal source-root path.
@@ -56,7 +56,7 @@ TEST(PathOutput, Basic) {
 // Same as basic but the output dir is the root.
 TEST(PathOutput, BasicInRoot) {
   SourceDir build_dir("//");
-  base::StringPiece source_root("/source/root");
+  std::string_view source_root("/source/root");
   PathOutput writer(build_dir, source_root, ESCAPE_NONE);
   {
     // Normal source-root path.
@@ -74,7 +74,7 @@ TEST(PathOutput, BasicInRoot) {
 
 TEST(PathOutput, NinjaEscaping) {
   SourceDir build_dir("//out/Debug/");
-  base::StringPiece source_root("/source/root");
+  std::string_view source_root("/source/root");
   PathOutput writer(build_dir, source_root, ESCAPE_NINJA);
   {
     // Spaces and $ in filenames.
@@ -92,7 +92,7 @@ TEST(PathOutput, NinjaEscaping) {
 
 TEST(PathOutput, NinjaForkEscaping) {
   SourceDir build_dir("//out/Debug/");
-  base::StringPiece source_root("/source/root");
+  std::string_view source_root("/source/root");
   PathOutput writer(build_dir, source_root, ESCAPE_NINJA_COMMAND);
 
   // Spaces in filenames should get quoted on Windows.
@@ -145,7 +145,7 @@ TEST(PathOutput, NinjaForkEscaping) {
 
 TEST(PathOutput, InhibitQuoting) {
   SourceDir build_dir("//out/Debug/");
-  base::StringPiece source_root("/source/root");
+  std::string_view source_root("/source/root");
   PathOutput writer(build_dir, source_root, ESCAPE_NINJA_COMMAND);
   writer.set_inhibit_quoting(true);
 
@@ -169,7 +169,7 @@ TEST(PathOutput, InhibitQuoting) {
 TEST(PathOutput, WriteDir) {
   {
     SourceDir build_dir("//out/Debug/");
-    base::StringPiece source_root("/source/root");
+    std::string_view source_root("/source/root");
     PathOutput writer(build_dir, source_root, ESCAPE_NINJA);
     {
       std::ostringstream out;
@@ -259,7 +259,7 @@ TEST(PathOutput, WriteDir) {
   }
   {
     // Empty build dir writer.
-    base::StringPiece source_root("/source/root");
+    std::string_view source_root("/source/root");
     PathOutput root_writer(SourceDir("//"), source_root, ESCAPE_NINJA);
     {
       std::ostringstream out;

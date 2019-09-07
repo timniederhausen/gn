@@ -144,7 +144,7 @@ TEST(StringUtils, EditDistance) {
 }
 
 TEST(StringUtils, SpellcheckString) {
-  std::vector<base::StringPiece> words;
+  std::vector<std::string_view> words;
   words.push_back("your");
   words.push_back("bravado");
   words.push_back("won\'t");

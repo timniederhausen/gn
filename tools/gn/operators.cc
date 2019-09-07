@@ -101,7 +101,7 @@ bool ValueDestination::Init(Scope* exec_scope,
   }
 
   // Known to be an accessor.
-  base::StringPiece base_str = dest_accessor->base().value();
+  std::string_view base_str = dest_accessor->base().value();
   Value* base =
       exec_scope->GetMutableValue(base_str, Scope::SEARCH_CURRENT, false);
   if (!base) {

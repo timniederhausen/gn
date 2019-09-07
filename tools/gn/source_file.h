@@ -9,10 +9,10 @@
 
 #include <algorithm>
 #include <string>
+#include <string_view>
 
 #include "base/files/file_path.h"
 #include "base/logging.h"
-#include "base/strings/string_piece.h"
 
 class SourceDir;
 
@@ -78,9 +78,9 @@ class SourceFile {
   //
   // This function asserts that the file is actually source-absolute. The
   // return value points into our buffer.
-  base::StringPiece SourceAbsoluteWithOneSlash() const {
+  std::string_view SourceAbsoluteWithOneSlash() const {
     CHECK(is_source_absolute());
-    return base::StringPiece(&value_[1], value_.size() - 1);
+    return std::string_view(&value_[1], value_.size() - 1);
   }
 
   bool operator==(const SourceFile& other) const {

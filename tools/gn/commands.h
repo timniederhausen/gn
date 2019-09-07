@@ -8,9 +8,9 @@
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
-#include "base/strings/string_piece.h"
 #include "base/values.h"
 #include "tools/gn/target.h"
 #include "tools/gn/unique_vector.h"
@@ -102,7 +102,7 @@ struct CommandInfo {
   CommandRunner runner;
 };
 
-typedef std::map<base::StringPiece, CommandInfo> CommandInfoMap;
+typedef std::map<std::string_view, CommandInfo> CommandInfoMap;
 
 const CommandInfoMap& GetCommands();
 
@@ -145,7 +145,8 @@ bool ResolveFromCommandLineInput(
 bool CheckPublicHeaders(const BuildSettings* build_settings,
                         const std::vector<const Target*>& all_targets,
                         const std::vector<const Target*>& to_check,
-                        bool force_check, bool check_generated);
+                        bool force_check,
+                        bool check_generated);
 
 // Filters the given list of targets by the given pattern list.
 void FilterTargetsByPatterns(const std::vector<const Target*>& input,

@@ -270,38 +270,38 @@ template <typename ITERATOR>
 class BaseHexIteratorRangeToUInt64Traits
     : public BaseIteratorRangeToNumberTraits<ITERATOR, uint64_t, 16> {};
 
-typedef BaseHexIteratorRangeToIntTraits<StringPiece::const_iterator>
+typedef BaseHexIteratorRangeToIntTraits<std::string_view::const_iterator>
     HexIteratorRangeToIntTraits;
 
-typedef BaseHexIteratorRangeToUIntTraits<StringPiece::const_iterator>
+typedef BaseHexIteratorRangeToUIntTraits<std::string_view::const_iterator>
     HexIteratorRangeToUIntTraits;
 
-typedef BaseHexIteratorRangeToInt64Traits<StringPiece::const_iterator>
+typedef BaseHexIteratorRangeToInt64Traits<std::string_view::const_iterator>
     HexIteratorRangeToInt64Traits;
 
-typedef BaseHexIteratorRangeToUInt64Traits<StringPiece::const_iterator>
+typedef BaseHexIteratorRangeToUInt64Traits<std::string_view::const_iterator>
     HexIteratorRangeToUInt64Traits;
 
 template <typename VALUE, int BASE>
 class StringPieceToNumberTraits
-    : public BaseIteratorRangeToNumberTraits<StringPiece::const_iterator,
+    : public BaseIteratorRangeToNumberTraits<std::string_view::const_iterator,
                                              VALUE,
                                              BASE> {};
 
 template <typename VALUE>
-bool StringToIntImpl(StringPiece input, VALUE* output) {
+bool StringToIntImpl(std::string_view input, VALUE* output) {
   return IteratorRangeToNumber<StringPieceToNumberTraits<VALUE, 10>>::Invoke(
       input.begin(), input.end(), output);
 }
 
 template <typename VALUE, int BASE>
-class StringPiece16ToNumberTraits
-    : public BaseIteratorRangeToNumberTraits<StringPiece16::const_iterator,
-                                             VALUE,
-                                             BASE> {};
+class StringPiece16ToNumberTraits : public BaseIteratorRangeToNumberTraits<
+                                        std::u16string_view::const_iterator,
+                                        VALUE,
+                                        BASE> {};
 
 template <typename VALUE>
-bool String16ToIntImpl(StringPiece16 input, VALUE* output) {
+bool String16ToIntImpl(std::u16string_view input, VALUE* output) {
   return IteratorRangeToNumber<StringPiece16ToNumberTraits<VALUE, 10>>::Invoke(
       input.begin(), input.end(), output);
 }
@@ -312,87 +312,87 @@ std::string NumberToString(int value) {
   return IntToStringT<std::string, int>::IntToString(value);
 }
 
-string16 NumberToString16(int value) {
-  return IntToStringT<string16, int>::IntToString(value);
+std::u16string NumberToString16(int value) {
+  return IntToStringT<std::u16string, int>::IntToString(value);
 }
 
 std::string NumberToString(unsigned value) {
   return IntToStringT<std::string, unsigned>::IntToString(value);
 }
 
-string16 NumberToString16(unsigned value) {
-  return IntToStringT<string16, unsigned>::IntToString(value);
+std::u16string NumberToString16(unsigned value) {
+  return IntToStringT<std::u16string, unsigned>::IntToString(value);
 }
 
 std::string NumberToString(long value) {
   return IntToStringT<std::string, long>::IntToString(value);
 }
 
-string16 NumberToString16(long value) {
-  return IntToStringT<string16, long>::IntToString(value);
+std::u16string NumberToString16(long value) {
+  return IntToStringT<std::u16string, long>::IntToString(value);
 }
 
 std::string NumberToString(unsigned long value) {
   return IntToStringT<std::string, unsigned long>::IntToString(value);
 }
 
-string16 NumberToString16(unsigned long value) {
-  return IntToStringT<string16, unsigned long>::IntToString(value);
+std::u16string NumberToString16(unsigned long value) {
+  return IntToStringT<std::u16string, unsigned long>::IntToString(value);
 }
 
 std::string NumberToString(long long value) {
   return IntToStringT<std::string, long long>::IntToString(value);
 }
 
-string16 NumberToString16(long long value) {
-  return IntToStringT<string16, long long>::IntToString(value);
+std::u16string NumberToString16(long long value) {
+  return IntToStringT<std::u16string, long long>::IntToString(value);
 }
 
 std::string NumberToString(unsigned long long value) {
   return IntToStringT<std::string, unsigned long long>::IntToString(value);
 }
 
-string16 NumberToString16(unsigned long long value) {
-  return IntToStringT<string16, unsigned long long>::IntToString(value);
+std::u16string NumberToString16(unsigned long long value) {
+  return IntToStringT<std::u16string, unsigned long long>::IntToString(value);
 }
 
-bool StringToInt(StringPiece input, int* output) {
+bool StringToInt(std::string_view input, int* output) {
   return StringToIntImpl(input, output);
 }
 
-bool StringToInt(StringPiece16 input, int* output) {
+bool StringToInt(std::u16string_view input, int* output) {
   return String16ToIntImpl(input, output);
 }
 
-bool StringToUint(StringPiece input, unsigned* output) {
+bool StringToUint(std::string_view input, unsigned* output) {
   return StringToIntImpl(input, output);
 }
 
-bool StringToUint(StringPiece16 input, unsigned* output) {
+bool StringToUint(std::u16string_view input, unsigned* output) {
   return String16ToIntImpl(input, output);
 }
 
-bool StringToInt64(StringPiece input, int64_t* output) {
+bool StringToInt64(std::string_view input, int64_t* output) {
   return StringToIntImpl(input, output);
 }
 
-bool StringToInt64(StringPiece16 input, int64_t* output) {
+bool StringToInt64(std::u16string_view input, int64_t* output) {
   return String16ToIntImpl(input, output);
 }
 
-bool StringToUint64(StringPiece input, uint64_t* output) {
+bool StringToUint64(std::string_view input, uint64_t* output) {
   return StringToIntImpl(input, output);
 }
 
-bool StringToUint64(StringPiece16 input, uint64_t* output) {
+bool StringToUint64(std::u16string_view input, uint64_t* output) {
   return String16ToIntImpl(input, output);
 }
 
-bool StringToSizeT(StringPiece input, size_t* output) {
+bool StringToSizeT(std::string_view input, size_t* output) {
   return StringToIntImpl(input, output);
 }
 
-bool StringToSizeT(StringPiece16 input, size_t* output) {
+bool StringToSizeT(std::u16string_view input, size_t* output) {
   return String16ToIntImpl(input, output);
 }
 
@@ -418,27 +418,27 @@ std::string HexEncode(const void* bytes, size_t size) {
   return ret;
 }
 
-bool HexStringToInt(StringPiece input, int* output) {
+bool HexStringToInt(std::string_view input, int* output) {
   return IteratorRangeToNumber<HexIteratorRangeToIntTraits>::Invoke(
       input.begin(), input.end(), output);
 }
 
-bool HexStringToUInt(StringPiece input, uint32_t* output) {
+bool HexStringToUInt(std::string_view input, uint32_t* output) {
   return IteratorRangeToNumber<HexIteratorRangeToUIntTraits>::Invoke(
       input.begin(), input.end(), output);
 }
 
-bool HexStringToInt64(StringPiece input, int64_t* output) {
+bool HexStringToInt64(std::string_view input, int64_t* output) {
   return IteratorRangeToNumber<HexIteratorRangeToInt64Traits>::Invoke(
       input.begin(), input.end(), output);
 }
 
-bool HexStringToUInt64(StringPiece input, uint64_t* output) {
+bool HexStringToUInt64(std::string_view input, uint64_t* output) {
   return IteratorRangeToNumber<HexIteratorRangeToUInt64Traits>::Invoke(
       input.begin(), input.end(), output);
 }
 
-bool HexStringToBytes(StringPiece input, std::vector<uint8_t>* output) {
+bool HexStringToBytes(std::string_view input, std::vector<uint8_t>* output) {
   DCHECK_EQ(output->size(), 0u);
   size_t count = input.size();
   if (count == 0 || (count % 2) != 0)

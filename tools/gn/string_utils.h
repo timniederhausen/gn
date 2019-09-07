@@ -6,16 +6,15 @@
 #define TOOLS_GN_STRING_UTILS_H_
 
 #include <string>
+#include <string_view>
 #include <vector>
-
-#include "base/strings/string_piece.h"
 
 class Err;
 class Scope;
 class Token;
 class Value;
 
-inline std::string operator+(const std::string& a, const base::StringPiece& b) {
+inline std::string operator+(const std::string& a, const std::string_view& b) {
   std::string ret;
   ret.reserve(a.size() + b.size());
   ret.assign(a);
@@ -23,7 +22,7 @@ inline std::string operator+(const std::string& a, const base::StringPiece& b) {
   return ret;
 }
 
-inline std::string operator+(const base::StringPiece& a, const std::string& b) {
+inline std::string operator+(const std::string_view& a, const std::string& b) {
   std::string ret;
   ret.reserve(a.size() + b.size());
   ret.assign(a.data(), a.size());
@@ -41,14 +40,14 @@ bool ExpandStringLiteral(Scope* scope,
 // Returns the minimum number of inserts, deleted, and replacements of
 // characters needed to transform s1 to s2, or max_edit_distance + 1 if
 // transforming s1 into s2 isn't possible in at most max_edit_distance steps.
-size_t EditDistance(const base::StringPiece& s1,
-                    const base::StringPiece& s2,
+size_t EditDistance(const std::string_view& s1,
+                    const std::string_view& s2,
                     size_t max_edit_distance);
 
 // Given a string |text| and a vector of correctly-spelled strings |words|,
 // returns the first string in |words| closest to |text|, or an empty
-// StringPiece if none of the strings in |words| is close.
-base::StringPiece SpellcheckString(const base::StringPiece& text,
-                                   const std::vector<base::StringPiece>& words);
+// std::string_view if none of the strings in |words| is close.
+std::string_view SpellcheckString(const std::string_view& text,
+                                  const std::vector<std::string_view>& words);
 
 #endif  // TOOLS_GN_STRING_UTILS_H_

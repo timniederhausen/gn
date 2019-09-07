@@ -193,7 +193,7 @@ void DecrementWorkCount() {
 
 #if defined(OS_WIN)
 
-std::u16string SysMultiByteTo16(base::StringPiece mb) {
+std::u16string SysMultiByteTo16(std::string_view mb) {
   if (mb.empty())
     return std::u16string();
 
@@ -222,7 +222,7 @@ base::FilePath PythonBatToExe(const base::FilePath& bat_path) {
   // quote the first argument in addition (to allow for spaces in the Python
   // path, you need *another* set of quotes around that, likewise, we need
   // two quotes at the end.
-  base::string16 command = u"cmd.exe /c \"\"";
+  std::u16string command = u"cmd.exe /c \"\"";
   command.append(bat_path.value());
   command.append(u"\" -c \"import sys; print sys.executable\"\"");
 
@@ -245,11 +245,11 @@ base::FilePath PythonBatToExe(const base::FilePath& bat_path) {
   return base::FilePath();
 }
 
-const base::char16 kPythonExeName[] = u"python.exe";
-const base::char16 kPythonBatName[] = u"python.bat";
+const char16_t kPythonExeName[] = u"python.exe";
+const char16_t kPythonBatName[] = u"python.bat";
 
 base::FilePath FindWindowsPython() {
-  base::char16 current_directory[MAX_PATH];
+  char16_t current_directory[MAX_PATH];
   ::GetCurrentDirectory(MAX_PATH, reinterpret_cast<LPWSTR>(current_directory));
 
   // First search for python.exe in the current directory.
@@ -259,12 +259,12 @@ base::FilePath FindWindowsPython() {
     return cur_dir_candidate_exe;
 
   // Get the path.
-  const base::char16 kPathEnvVarName[] = u"Path";
+  const char16_t kPathEnvVarName[] = u"Path";
   DWORD path_length = ::GetEnvironmentVariable(
       reinterpret_cast<LPCWSTR>(kPathEnvVarName), nullptr, 0);
   if (path_length == 0)
     return base::FilePath();
-  std::unique_ptr<base::char16[]> full_path(new base::char16[path_length]);
+  std::unique_ptr<char16_t[]> full_path(new char16_t[path_length]);
   DWORD actual_path_length = ::GetEnvironmentVariable(
       reinterpret_cast<LPCWSTR>(kPathEnvVarName),
       reinterpret_cast<LPWSTR>(full_path.get()), path_length);
@@ -272,7 +272,7 @@ base::FilePath FindWindowsPython() {
 
   // Search for python.exe in the path.
   for (const auto& component : base::SplitStringPiece(
-           base::StringPiece16(full_path.get(), path_length), u";",
+           std::u16string_view(full_path.get(), path_length), u";",
            base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY)) {
     base::FilePath candidate_exe =
         base::FilePath(component).Append(kPythonExeName);

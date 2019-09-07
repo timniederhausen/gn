@@ -57,7 +57,7 @@ TEST(Scope, NonRecursiveMergeTo) {
   // Add some values to the scope.
   Value old_value(&assignment, "hello");
   setup.scope()->SetValue("v", old_value, &assignment);
-  base::StringPiece private_var_name("_private");
+  std::string_view private_var_name("_private");
   setup.scope()->SetValue(private_var_name, old_value, &assignment);
 
   // Add some templates to the scope.

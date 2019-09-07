@@ -42,7 +42,7 @@ bool ExecProcess(const base::CommandLine& cmdline,
                      std_err, exit_code);
 }
 
-bool ExecProcess(const base::string16& cmdline_str,
+bool ExecProcess(const std::u16string& cmdline_str,
                  const base::FilePath& startup_dir,
                  std::string* std_out,
                  std::string* std_err,
@@ -94,7 +94,7 @@ bool ExecProcess(const base::string16& cmdline_str,
   start_info.hStdError = GetStdHandle(STD_ERROR_HANDLE);
   start_info.dwFlags |= STARTF_USESTDHANDLES;
 
-  base::string16 cmdline_writable = cmdline_str;
+  std::u16string cmdline_writable = cmdline_str;
 
   // Create the child process.
   PROCESS_INFORMATION temp_process_info = {};

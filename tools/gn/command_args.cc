@@ -40,7 +40,7 @@ const char kSwitchShort[] = "short";
 const char kSwitchOverridesOnly[] = "overrides-only";
 const char kSwitchJson[] = "json";
 
-bool DoesLineBeginWithComment(const base::StringPiece& line) {
+bool DoesLineBeginWithComment(const std::string_view& line) {
   // Skip whitespace.
   size_t i = 0;
   while (i < line.size() && base::IsAsciiWhitespace(line[i]))
@@ -67,7 +67,7 @@ size_t BackUpToLineBegin(const std::string& data, size_t offset) {
 
 // Assumes DoesLineBeginWithComment(), this strips the # character from the
 // beginning and normalizes preceding whitespace.
-std::string StripHashFromLine(const base::StringPiece& line, bool pad) {
+std::string StripHashFromLine(const std::string_view& line, bool pad) {
   // Replace the # sign and everything before it with 3 spaces, so that a
   // normal comment that has a space after the # will be indented 4 spaces
   // (which makes our formatting come out nicely). If the comment is indented
@@ -104,8 +104,8 @@ void GetContextForValue(const Value& value,
     line_off -= 2;  // Back up to end of previous line.
     size_t previous_line_offset = BackUpToLineBegin(data, line_off);
 
-    base::StringPiece line(&data[previous_line_offset],
-                           line_off - previous_line_offset + 1);
+    std::string_view line(&data[previous_line_offset],
+                          line_off - previous_line_offset + 1);
     if (!DoesLineBeginWithComment(line))
       break;
 
@@ -120,7 +120,7 @@ void GetContextForValue(const Value& value,
 // is a bit different.
 //
 // The default value also contains the docstring.
-void PrintDefaultValueInfo(base::StringPiece name, const Value& value) {
+void PrintDefaultValueInfo(std::string_view name, const Value& value) {
   OutputString(value.ToString(true) + "\n");
   if (value.origin()) {
     int line_no;
@@ -137,7 +137,7 @@ void PrintDefaultValueInfo(base::StringPiece name, const Value& value) {
 }
 
 // Override value is null if there is no override.
-void PrintArgHelp(const base::StringPiece& name,
+void PrintArgHelp(const std::string_view& name,
                   const Args::ValueWithOverride& val) {
   OutputString(std::string(name), DECORATION_YELLOW);
   OutputString("\n");
@@ -163,7 +163,7 @@ void PrintArgHelp(const base::StringPiece& name,
 }
 
 void BuildArgJson(base::Value& dict,
-                  const base::StringPiece& name,
+                  const std::string_view& name,
                   const Args::ValueWithOverride& arg,
                   bool short_only) {
   assert(dict.is_dict());

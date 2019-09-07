@@ -35,7 +35,7 @@ class GeneratedFileTargetGenerator : public TargetGenerator {
   // it is okay to set metadata collection variables on this target.
   //
   // Should be called before FillContents().
-  bool IsMetadataCollectionTarget(const base::StringPiece& variable,
+  bool IsMetadataCollectionTarget(const std::string_view& variable,
                                   const ParseNode* origin);
 
   bool contents_defined_ = false;

@@ -6,9 +6,9 @@
 #define TOOLS_GN_TOOLCHAIN_H_
 
 #include <memory>
+#include <string_view>
 
 #include "base/logging.h"
-#include "base/strings/string_piece.h"
 #include "tools/gn/item.h"
 #include "tools/gn/label_ptr.h"
 #include "tools/gn/scope.h"

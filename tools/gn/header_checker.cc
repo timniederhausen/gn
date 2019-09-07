@@ -244,7 +244,7 @@ bool HeaderChecker::IsFileInOuputDir(const SourceFile& file) const {
 }
 
 SourceFile HeaderChecker::SourceFileForInclude(
-    const base::StringPiece& relative_file_path,
+    const std::string_view& relative_file_path,
     const std::vector<SourceDir>& include_dirs,
     const InputFile& source_file,
     const LocationRange& range,
@@ -308,7 +308,7 @@ bool HeaderChecker::CheckFile(const Target* from_target,
 
   size_t error_count_before = errors->size();
   CIncludeIterator iter(&input_file);
-  base::StringPiece current_include;
+  std::string_view current_include;
   LocationRange range;
 
   std::set<std::pair<const Target*, const Target*>> no_dependency_cache;

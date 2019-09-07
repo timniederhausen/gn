@@ -108,8 +108,8 @@ Args::~Args() = default;
 void Args::AddArgOverride(const char* name, const Value& value) {
   std::lock_guard<std::mutex> lock(lock_);
 
-  overrides_[base::StringPiece(name)] = value;
-  all_overrides_[base::StringPiece(name)] = value;
+  overrides_[std::string_view(name)] = value;
+  all_overrides_[std::string_view(name)] = value;
 }
 
 void Args::AddArgOverrides(const Scope::KeyValueMap& overrides) {
@@ -131,7 +131,7 @@ const Value* Args::GetArgOverride(const char* name) const {
   std::lock_guard<std::mutex> lock(lock_);
 
   Scope::KeyValueMap::const_iterator found =
-      all_overrides_.find(base::StringPiece(name));
+      all_overrides_.find(std::string_view(name));
   if (found == all_overrides_.end())
     return nullptr;
   return &found->second;
@@ -240,7 +240,7 @@ bool Args::VerifyAllOverridesUsed(Err* err) const {
 
   // Some assignments in args.gn had no effect.  Show an error for the first
   // unused assignment.
-  base::StringPiece name = unused_overrides.begin()->first;
+  std::string_view name = unused_overrides.begin()->first;
   const Value& value = unused_overrides.begin()->second;
 
   std::string err_help(
@@ -250,12 +250,12 @@ bool Args::VerifyAllOverridesUsed(Err* err) const {
       "To view all possible args, run \"gn args --list <out_dir>\"");
 
   // Use all declare_args for a spelling suggestion.
-  std::vector<base::StringPiece> candidates;
+  std::vector<std::string_view> candidates;
   for (const auto& map_pair : declared_arguments_per_toolchain_) {
     for (const auto& declared_arg : map_pair.second)
       candidates.push_back(declared_arg.first);
   }
-  base::StringPiece suggestion = SpellcheckString(name, candidates);
+  std::string_view suggestion = SpellcheckString(name, candidates);
   if (!suggestion.empty())
     err_help = "Did you mean \"" + suggestion + "\"?\n\n" + err_help;
 

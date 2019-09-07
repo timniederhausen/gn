@@ -116,38 +116,41 @@ bool EscapeJSONStringImpl(const S& str, bool put_in_quotes, std::string* dest) {
 
 }  // namespace
 
-bool EscapeJSONString(StringPiece str, bool put_in_quotes, std::string* dest) {
-  return EscapeJSONStringImpl(str, put_in_quotes, dest);
-}
-
-bool EscapeJSONString(StringPiece16 str,
+bool EscapeJSONString(std::string_view str,
                       bool put_in_quotes,
                       std::string* dest) {
   return EscapeJSONStringImpl(str, put_in_quotes, dest);
 }
 
-std::string GetQuotedJSONString(StringPiece str) {
+bool EscapeJSONString(std::u16string_view str,
+                      bool put_in_quotes,
+                      std::string* dest) {
+  return EscapeJSONStringImpl(str, put_in_quotes, dest);
+}
+
+std::string GetQuotedJSONString(std::string_view str) {
   std::string dest;
   bool ok = EscapeJSONStringImpl(str, true, &dest);
   DCHECK(ok);
   return dest;
 }
 
-std::string GetQuotedJSONString(StringPiece16 str) {
+std::string GetQuotedJSONString(std::u16string_view str) {
   std::string dest;
   bool ok = EscapeJSONStringImpl(str, true, &dest);
   DCHECK(ok);
   return dest;
 }
 
-std::string EscapeBytesAsInvalidJSONString(StringPiece str,
+std::string EscapeBytesAsInvalidJSONString(std::string_view str,
                                            bool put_in_quotes) {
   std::string dest;
 
   if (put_in_quotes)
     dest.push_back('"');
 
-  for (StringPiece::const_iterator it = str.begin(); it != str.end(); ++it) {
+  for (std::string_view::const_iterator it = str.begin(); it != str.end();
+       ++it) {
     unsigned char c = *it;
     if (EscapeSpecialCodePoint(c, &dest))
       continue;

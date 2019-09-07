@@ -8,7 +8,7 @@
 
 Token::Token() : type_(INVALID), value_() {}
 
-Token::Token(const Location& location, Type t, const base::StringPiece& v)
+Token::Token(const Location& location, Type t, const std::string_view& v)
     : type_(t), value_(v), location_(location) {}
 
 Token::Token(const Token& other) = default;

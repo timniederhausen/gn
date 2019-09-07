@@ -6,7 +6,8 @@
 
 #include <stdint.h>
 
-#include "base/strings/string_piece.h"
+#include <string_view>
+
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversion_utils.h"
 #include "base/third_party/icu/icu_utf.h"
@@ -32,7 +33,7 @@ struct SizeCoefficient {
 };
 
 template <>
-struct SizeCoefficient<char16, char> {
+struct SizeCoefficient<char16_t, char> {
   // One UTF-16 codeunit corresponds to at most 3 codeunits in UTF-8.
   static constexpr int value = 3;
 };
@@ -49,7 +50,7 @@ void UnicodeAppendUnsafe(char* out, int32_t* size, uint32_t code_point) {
   CBU8_APPEND_UNSAFE(out, *size, code_point);
 }
 
-void UnicodeAppendUnsafe(char16* out, int32_t* size, uint32_t code_point) {
+void UnicodeAppendUnsafe(char16_t* out, int32_t* size, uint32_t code_point) {
   CBU16_APPEND_UNSAFE(out, *size, code_point);
 }
 
@@ -80,13 +81,13 @@ bool DoUTFConversion(const char* src,
 }
 
 template <typename DestChar>
-bool DoUTFConversion(const char16* src,
+bool DoUTFConversion(const char16_t* src,
                      int32_t src_len,
                      DestChar* dest,
                      int32_t* dest_len) {
   bool success = true;
 
-  auto ConvertSingleChar = [&success](char16 in) -> int32_t {
+  auto ConvertSingleChar = [&success](char16_t in) -> int32_t {
     if (!CBU16_IS_SINGLE(in) || !IsValidCodepoint(in)) {
       success = false;
       return kErrorCodePoint;
@@ -155,23 +156,23 @@ bool UTFConversion(const InputString& src_str, DestString* dest_str) {
 
 // UTF16 <-> UTF8 --------------------------------------------------------------
 
-bool UTF8ToUTF16(const char* src, size_t src_len, string16* output) {
-  return UTFConversion(StringPiece(src, src_len), output);
+bool UTF8ToUTF16(const char* src, size_t src_len, std::u16string* output) {
+  return UTFConversion(std::string_view(src, src_len), output);
 }
 
-string16 UTF8ToUTF16(StringPiece utf8) {
-  string16 ret;
+std::u16string UTF8ToUTF16(std::string_view utf8) {
+  std::u16string ret;
   // Ignore the success flag of this call, it will do the best it can for
   // invalid input, which is what we want here.
   UTF8ToUTF16(utf8.data(), utf8.size(), &ret);
   return ret;
 }
 
-bool UTF16ToUTF8(const char16* src, size_t src_len, std::string* output) {
-  return UTFConversion(StringPiece16(src, src_len), output);
+bool UTF16ToUTF8(const char16_t* src, size_t src_len, std::string* output) {
+  return UTFConversion(std::u16string_view(src, src_len), output);
 }
 
-std::string UTF16ToUTF8(StringPiece16 utf16) {
+std::string UTF16ToUTF8(std::u16string_view utf16) {
   std::string ret;
   // Ignore the success flag of this call, it will do the best it can for
   // invalid input, which is what we want here.
@@ -181,12 +182,12 @@ std::string UTF16ToUTF8(StringPiece16 utf16) {
 
 // ASCII <-> UTF-16 -----------------------------------------------------------
 
-string16 ASCIIToUTF16(StringPiece ascii) {
+std::u16string ASCIIToUTF16(std::string_view ascii) {
   DCHECK(IsStringASCII(ascii)) << ascii;
-  return string16(ascii.begin(), ascii.end());
+  return std::u16string(ascii.begin(), ascii.end());
 }
 
-std::string UTF16ToASCII(StringPiece16 utf16) {
+std::string UTF16ToASCII(std::u16string_view utf16) {
   DCHECK(IsStringASCII(utf16)) << UTF16ToUTF8(utf16);
   return std::string(utf16.begin(), utf16.end());
 }

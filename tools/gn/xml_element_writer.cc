@@ -8,13 +8,13 @@
 
 XmlAttributes::XmlAttributes() = default;
 
-XmlAttributes::XmlAttributes(const base::StringPiece& attr_key,
-                             const base::StringPiece& attr_value) {
+XmlAttributes::XmlAttributes(const std::string_view& attr_key,
+                             const std::string_view& attr_value) {
   add(attr_key, attr_value);
 }
 
-XmlAttributes& XmlAttributes::add(const base::StringPiece& attr_key,
-                                  const base::StringPiece& attr_value) {
+XmlAttributes& XmlAttributes::add(const std::string_view& attr_key,
+                                  const std::string_view& attr_value) {
   push_back(std::make_pair(attr_key, attr_value));
   return *this;
 }
@@ -50,7 +50,7 @@ XmlElementWriter::~XmlElementWriter() {
   }
 }
 
-void XmlElementWriter::Text(const base::StringPiece& content) {
+void XmlElementWriter::Text(const std::string_view& content) {
   StartContent(false);
   out_ << content;
 }

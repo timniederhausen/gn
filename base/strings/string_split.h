@@ -6,11 +6,9 @@
 #define BASE_STRINGS_STRING_SPLIT_H_
 
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
-
-#include "base/strings/string16.h"
-#include "base/strings/string_piece.h"
 
 namespace base {
 
@@ -42,14 +40,14 @@ enum SplitResult {
 //
 //   std::vector<std::string> tokens = base::SplitString(
 //       input, ",;", base::KEEP_WHITESPACE, base::SPLIT_WANT_ALL);
-std::vector<std::string> SplitString(StringPiece input,
-                                     StringPiece separators,
+std::vector<std::string> SplitString(std::string_view input,
+                                     std::string_view separators,
                                      WhitespaceHandling whitespace,
                                      SplitResult result_type);
-std::vector<string16> SplitString(StringPiece16 input,
-                                  StringPiece16 separators,
-                                  WhitespaceHandling whitespace,
-                                  SplitResult result_type);
+std::vector<std::u16string> SplitString(std::u16string_view input,
+                                        std::u16string_view separators,
+                                        WhitespaceHandling whitespace,
+                                        SplitResult result_type);
 
 // Like SplitString above except it returns a vector of StringPieces which
 // reference the original buffer without copying. Although you have to be
@@ -63,14 +61,15 @@ std::vector<string16> SplitString(StringPiece16 input,
 //                               base::KEEP_WHITESPACE,
 //                               base::SPLIT_WANT_NONEMPTY)) {
 //     ...
-std::vector<StringPiece> SplitStringPiece(StringPiece input,
-                                          StringPiece separators,
-                                          WhitespaceHandling whitespace,
-                                          SplitResult result_type);
-std::vector<StringPiece16> SplitStringPiece(StringPiece16 input,
-                                            StringPiece16 separators,
-                                            WhitespaceHandling whitespace,
-                                            SplitResult result_type);
+std::vector<std::string_view> SplitStringPiece(std::string_view input,
+                                               std::string_view separators,
+                                               WhitespaceHandling whitespace,
+                                               SplitResult result_type);
+std::vector<std::u16string_view> SplitStringPiece(
+    std::u16string_view input,
+    std::u16string_view separators,
+    WhitespaceHandling whitespace,
+    SplitResult result_type);
 
 using StringPairs = std::vector<std::pair<std::string, std::string>>;
 
@@ -78,19 +77,20 @@ using StringPairs = std::vector<std::pair<std::string, std::string>>;
 // removes whitespace leading each key and trailing each value. Returns true
 // only if each pair has a non-empty key and value. |key_value_pairs| will
 // include ("","") pairs for entries without |key_value_delimiter|.
-bool SplitStringIntoKeyValuePairs(StringPiece input,
+bool SplitStringIntoKeyValuePairs(std::string_view input,
                                   char key_value_delimiter,
                                   char key_value_pair_delimiter,
                                   StringPairs* key_value_pairs);
 
 // Similar to SplitString, but use a substring delimiter instead of a list of
 // characters that are all possible delimiters.
-std::vector<string16> SplitStringUsingSubstr(StringPiece16 input,
-                                             StringPiece16 delimiter,
-                                             WhitespaceHandling whitespace,
-                                             SplitResult result_type);
-std::vector<std::string> SplitStringUsingSubstr(StringPiece input,
-                                                StringPiece delimiter,
+std::vector<std::u16string> SplitStringUsingSubstr(
+    std::u16string_view input,
+    std::u16string_view delimiter,
+    WhitespaceHandling whitespace,
+    SplitResult result_type);
+std::vector<std::string> SplitStringUsingSubstr(std::string_view input,
+                                                std::string_view delimiter,
                                                 WhitespaceHandling whitespace,
                                                 SplitResult result_type);
 
@@ -106,14 +106,14 @@ std::vector<std::string> SplitStringUsingSubstr(StringPiece input,
 //                                     base::KEEP_WHITESPACE,
 //                                     base::SPLIT_WANT_NONEMPTY)) {
 //     ...
-std::vector<StringPiece16> SplitStringPieceUsingSubstr(
-    StringPiece16 input,
-    StringPiece16 delimiter,
+std::vector<std::u16string_view> SplitStringPieceUsingSubstr(
+    std::u16string_view input,
+    std::u16string_view delimiter,
     WhitespaceHandling whitespace,
     SplitResult result_type);
-std::vector<StringPiece> SplitStringPieceUsingSubstr(
-    StringPiece input,
-    StringPiece delimiter,
+std::vector<std::string_view> SplitStringPieceUsingSubstr(
+    std::string_view input,
+    std::string_view delimiter,
     WhitespaceHandling whitespace,
     SplitResult result_type);
 

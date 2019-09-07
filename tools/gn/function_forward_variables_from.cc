@@ -43,9 +43,10 @@ void ForwardValuesFromList(Scope* source,
     if (value) {
       // Use the storage key for the original value rather than the string in
       // "cur" because "cur" is a temporary that will be deleted, and Scopes
-      // expect a persistent StringPiece (it won't copy). Not doing this will
-      // lead the scope's key to point to invalid memory after this returns.
-      base::StringPiece storage_key = source->GetStorageKey(cur.string_value());
+      // expect a persistent std::string_view (it won't copy). Not doing this
+      // will lead the scope's key to point to invalid memory after this
+      // returns.
+      std::string_view storage_key = source->GetStorageKey(cur.string_value());
       if (storage_key.empty()) {
         // Programmatic value, don't allow copying.
         *err =

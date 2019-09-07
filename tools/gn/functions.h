@@ -7,9 +7,8 @@
 
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
-
-#include "base/strings/string_piece.h"
 
 class Err;
 class BlockNode;
@@ -433,7 +432,7 @@ struct FunctionInfo {
   bool is_target;
 };
 
-typedef std::map<base::StringPiece, FunctionInfo> FunctionInfoMap;
+typedef std::map<std::string_view, FunctionInfo> FunctionInfoMap;
 
 // Returns the mapping of all built-in functions.
 const FunctionInfoMap& GetFunctions();

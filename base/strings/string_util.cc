@@ -67,7 +67,7 @@ inline T* AlignToMachineWord(T* pointer) {
 template <size_t size, typename CharacterType>
 struct NonASCIIMask;
 template <>
-struct NonASCIIMask<4, char16> {
+struct NonASCIIMask<4, char16_t> {
   static inline uint32_t value() { return 0xFF80FF80U; }
 };
 template <>
@@ -75,7 +75,7 @@ struct NonASCIIMask<4, char> {
   static inline uint32_t value() { return 0x80808080U; }
 };
 template <>
-struct NonASCIIMask<8, char16> {
+struct NonASCIIMask<8, char16_t> {
   static inline uint64_t value() { return 0xFF80FF80FF80FF80ULL; }
 };
 template <>
@@ -109,20 +109,20 @@ StringType ToUpperASCIIImpl(
 
 }  // namespace
 
-std::string ToLowerASCII(StringPiece str) {
+std::string ToLowerASCII(std::string_view str) {
   return ToLowerASCIIImpl<std::string>(str);
 }
 
-string16 ToLowerASCII(StringPiece16 str) {
-  return ToLowerASCIIImpl<string16>(str);
+std::u16string ToLowerASCII(std::u16string_view str) {
+  return ToLowerASCIIImpl<std::u16string>(str);
 }
 
-std::string ToUpperASCII(StringPiece str) {
+std::string ToUpperASCII(std::string_view str) {
   return ToUpperASCIIImpl<std::string>(str);
 }
 
-string16 ToUpperASCII(StringPiece16 str) {
-  return ToUpperASCIIImpl<string16>(str);
+std::u16string ToUpperASCII(std::u16string_view str) {
+  return ToUpperASCIIImpl<std::u16string>(str);
 }
 
 template <class StringType>
@@ -153,24 +153,24 @@ int CompareCaseInsensitiveASCIIT(
   return 1;
 }
 
-int CompareCaseInsensitiveASCII(StringPiece a, StringPiece b) {
+int CompareCaseInsensitiveASCII(std::string_view a, std::string_view b) {
   return CompareCaseInsensitiveASCIIT<std::string>(a, b);
 }
 
-int CompareCaseInsensitiveASCII(StringPiece16 a, StringPiece16 b) {
-  return CompareCaseInsensitiveASCIIT<string16>(a, b);
+int CompareCaseInsensitiveASCII(std::u16string_view a, std::u16string_view b) {
+  return CompareCaseInsensitiveASCIIT<std::u16string>(a, b);
 }
 
-bool EqualsCaseInsensitiveASCII(StringPiece a, StringPiece b) {
+bool EqualsCaseInsensitiveASCII(std::string_view a, std::string_view b) {
   if (a.length() != b.length())
     return false;
   return CompareCaseInsensitiveASCIIT<std::string>(a, b) == 0;
 }
 
-bool EqualsCaseInsensitiveASCII(StringPiece16 a, StringPiece16 b) {
+bool EqualsCaseInsensitiveASCII(std::u16string_view a, std::u16string_view b) {
   if (a.length() != b.length())
     return false;
-  return CompareCaseInsensitiveASCIIT<string16>(a, b) == 0;
+  return CompareCaseInsensitiveASCIIT<std::u16string>(a, b) == 0;
 }
 
 template <class StringType>
@@ -180,31 +180,32 @@ bool ReplaceCharsT(
     std::basic_string_view<typename StringType::value_type> replace_with,
     StringType* output);
 
-bool ReplaceChars(const string16& input,
-                  StringPiece16 replace_chars,
-                  const string16& replace_with,
-                  string16* output) {
-  return ReplaceCharsT(input, replace_chars, StringPiece16(replace_with),
+bool ReplaceChars(const std::u16string& input,
+                  std::u16string_view replace_chars,
+                  const std::u16string& replace_with,
+                  std::u16string* output) {
+  return ReplaceCharsT(input, replace_chars, std::u16string_view(replace_with),
                        output);
 }
 
 bool ReplaceChars(const std::string& input,
-                  StringPiece replace_chars,
+                  std::string_view replace_chars,
                   const std::string& replace_with,
                   std::string* output) {
-  return ReplaceCharsT(input, replace_chars, StringPiece(replace_with), output);
+  return ReplaceCharsT(input, replace_chars, std::string_view(replace_with),
+                       output);
 }
 
-bool RemoveChars(const string16& input,
-                 StringPiece16 remove_chars,
-                 string16* output) {
-  return ReplaceCharsT(input, remove_chars, StringPiece16(), output);
+bool RemoveChars(const std::u16string& input,
+                 std::u16string_view remove_chars,
+                 std::u16string* output) {
+  return ReplaceCharsT(input, remove_chars, std::u16string_view(), output);
 }
 
 bool RemoveChars(const std::string& input,
-                 StringPiece remove_chars,
+                 std::string_view remove_chars,
                  std::string* output) {
-  return ReplaceCharsT(input, remove_chars, StringPiece(), output);
+  return ReplaceCharsT(input, remove_chars, std::string_view(), output);
 }
 
 template <typename Str>
@@ -214,8 +215,8 @@ TrimPositions TrimStringT(
     TrimPositions positions,
     Str* output) {
   // Find the edges of leading/trailing whitespace as desired. Need to use
-  // a StringPiece version of input to be able to call find* on it with the
-  // StringPiece version of trim_chars (normally the trim_chars will be a
+  // a std::string_view version of input to be able to call find* on it with the
+  // std::string_view version of trim_chars (normally the trim_chars will be a
   // constant so avoid making a copy).
   std::basic_string_view<typename Str::value_type> input_piece(input);
   const size_t last_char = input.length() - 1;
@@ -245,14 +246,14 @@ TrimPositions TrimStringT(
       ((last_good_char == last_char) ? TRIM_NONE : TRIM_TRAILING));
 }
 
-bool TrimString(const string16& input,
-                StringPiece16 trim_chars,
-                string16* output) {
+bool TrimString(const std::u16string& input,
+                std::u16string_view trim_chars,
+                std::u16string* output) {
   return TrimStringT(input, trim_chars, TRIM_ALL, output) != TRIM_NONE;
 }
 
 bool TrimString(const std::string& input,
-                StringPiece trim_chars,
+                std::string_view trim_chars,
                 std::string* output) {
   return TrimStringT(input, trim_chars, TRIM_ALL, output) != TRIM_NONE;
 }
@@ -273,15 +274,15 @@ std::basic_string_view<char_type> TrimStringPieceT(
   return input.substr(begin, end - begin);
 }
 
-StringPiece16 TrimString(StringPiece16 input,
-                         StringPiece16 trim_chars,
-                         TrimPositions positions) {
+std::u16string_view TrimString(std::u16string_view input,
+                               std::u16string_view trim_chars,
+                               TrimPositions positions) {
   return TrimStringPieceT(input, trim_chars, positions);
 }
 
-StringPiece TrimString(StringPiece input,
-                       StringPiece trim_chars,
-                       TrimPositions positions) {
+std::string_view TrimString(std::string_view input,
+                            std::string_view trim_chars,
+                            TrimPositions positions) {
   return TrimStringPieceT(input, trim_chars, positions);
 }
 
@@ -321,24 +322,29 @@ void TruncateUTF8ToByteSize(const std::string& input,
     output->clear();
 }
 
-TrimPositions TrimWhitespace(const string16& input,
+TrimPositions TrimWhitespace(const std::u16string& input,
                              TrimPositions positions,
-                             string16* output) {
-  return TrimStringT(input, StringPiece16(kWhitespaceUTF16), positions, output);
+                             std::u16string* output) {
+  return TrimStringT(input, std::u16string_view(kWhitespaceUTF16), positions,
+                     output);
 }
 
-StringPiece16 TrimWhitespace(StringPiece16 input, TrimPositions positions) {
-  return TrimStringPieceT(input, StringPiece16(kWhitespaceUTF16), positions);
+std::u16string_view TrimWhitespace(std::u16string_view input,
+                                   TrimPositions positions) {
+  return TrimStringPieceT(input, std::u16string_view(kWhitespaceUTF16),
+                          positions);
 }
 
 TrimPositions TrimWhitespaceASCII(const std::string& input,
                                   TrimPositions positions,
                                   std::string* output) {
-  return TrimStringT(input, StringPiece(kWhitespaceASCII), positions, output);
+  return TrimStringT(input, std::string_view(kWhitespaceASCII), positions,
+                     output);
 }
 
-StringPiece TrimWhitespaceASCII(StringPiece input, TrimPositions positions) {
-  return TrimStringPieceT(input, StringPiece(kWhitespaceASCII), positions);
+std::string_view TrimWhitespaceASCII(std::string_view input,
+                                     TrimPositions positions) {
+  return TrimStringPieceT(input, std::string_view(kWhitespaceASCII), positions);
 }
 
 template <typename STR>
@@ -382,8 +388,8 @@ STR CollapseWhitespaceT(const STR& text, bool trim_sequences_with_line_breaks) {
   return result;
 }
 
-string16 CollapseWhitespace(const string16& text,
-                            bool trim_sequences_with_line_breaks) {
+std::u16string CollapseWhitespace(const std::u16string& text,
+                                  bool trim_sequences_with_line_breaks) {
   return CollapseWhitespaceT(text, trim_sequences_with_line_breaks);
 }
 
@@ -392,12 +398,13 @@ std::string CollapseWhitespaceASCII(const std::string& text,
   return CollapseWhitespaceT(text, trim_sequences_with_line_breaks);
 }
 
-bool ContainsOnlyChars(StringPiece input, StringPiece characters) {
-  return input.find_first_not_of(characters) == StringPiece::npos;
+bool ContainsOnlyChars(std::string_view input, std::string_view characters) {
+  return input.find_first_not_of(characters) == std::string_view::npos;
 }
 
-bool ContainsOnlyChars(StringPiece16 input, StringPiece16 characters) {
-  return input.find_first_not_of(characters) == StringPiece16::npos;
+bool ContainsOnlyChars(std::u16string_view input,
+                       std::u16string_view characters) {
+  return input.find_first_not_of(characters) == std::u16string_view::npos;
 }
 
 template <class Char>
@@ -430,15 +437,15 @@ inline bool DoIsStringASCII(const Char* characters, size_t length) {
   return !(all_char_bits & non_ascii_bit_mask);
 }
 
-bool IsStringASCII(StringPiece str) {
+bool IsStringASCII(std::string_view str) {
   return DoIsStringASCII(str.data(), str.length());
 }
 
-bool IsStringASCII(StringPiece16 str) {
+bool IsStringASCII(std::u16string_view str) {
   return DoIsStringASCII(str.data(), str.length());
 }
 
-bool IsStringUTF8(StringPiece str) {
+bool IsStringUTF8(std::string_view str) {
   const char* src = str.data();
   int32_t src_len = static_cast<int32_t>(str.length());
   int32_t char_index = 0;
@@ -453,8 +460,8 @@ bool IsStringUTF8(StringPiece str) {
 }
 
 // Implementation note: Normally this function will be called with a hardcoded
-// constant for the lowercase_ascii parameter. Constructing a StringPiece from
-// a C constant requires running strlen, so the result will be two passes
+// constant for the lowercase_ascii parameter. Constructing a std::string_view
+// from a C constant requires running strlen, so the result will be two passes
 // through the buffers, one to file the length of lowercase_ascii, and one to
 // compare each letter.
 //
@@ -466,11 +473,11 @@ bool IsStringUTF8(StringPiece str) {
 //
 // The hardcoded strings are typically very short so it doesn't matter, and the
 // string piece gives additional flexibility for the caller (doesn't have to be
-// null terminated) so we choose the StringPiece route.
+// null terminated) so we choose the std::string_view route.
 template <typename Str>
 static inline bool DoLowerCaseEqualsASCII(
     std::basic_string_view<typename Str::value_type> str,
-    StringPiece lowercase_ascii) {
+    std::string_view lowercase_ascii) {
   if (str.size() != lowercase_ascii.size())
     return false;
   for (size_t i = 0; i < str.size(); i++) {
@@ -480,15 +487,17 @@ static inline bool DoLowerCaseEqualsASCII(
   return true;
 }
 
-bool LowerCaseEqualsASCII(StringPiece str, StringPiece lowercase_ascii) {
+bool LowerCaseEqualsASCII(std::string_view str,
+                          std::string_view lowercase_ascii) {
   return DoLowerCaseEqualsASCII<std::string>(str, lowercase_ascii);
 }
 
-bool LowerCaseEqualsASCII(StringPiece16 str, StringPiece lowercase_ascii) {
-  return DoLowerCaseEqualsASCII<string16>(str, lowercase_ascii);
+bool LowerCaseEqualsASCII(std::u16string_view str,
+                          std::string_view lowercase_ascii) {
+  return DoLowerCaseEqualsASCII<std::u16string>(str, lowercase_ascii);
 }
 
-bool EqualsASCII(StringPiece16 str, StringPiece ascii) {
+bool EqualsASCII(std::u16string_view str, std::string_view ascii) {
   if (str.length() != ascii.length())
     return false;
   return std::equal(ascii.begin(), ascii.end(), str.begin());
@@ -517,14 +526,14 @@ bool StartsWithT(std::basic_string_view<char_type> str,
   }
 }
 
-bool StartsWith(StringPiece str,
-                StringPiece search_for,
+bool StartsWith(std::string_view str,
+                std::string_view search_for,
                 CompareCase case_sensitivity) {
   return StartsWithT(str, search_for, case_sensitivity);
 }
 
-bool StartsWith(StringPiece16 str,
-                StringPiece16 search_for,
+bool StartsWith(std::u16string_view str,
+                std::u16string_view search_for,
                 CompareCase case_sensitivity) {
   return StartsWithT(str, search_for, case_sensitivity);
 }
@@ -554,16 +563,16 @@ bool EndsWithT(std::basic_string_view<typename Str::value_type> str,
   }
 }
 
-bool EndsWith(StringPiece str,
-              StringPiece search_for,
+bool EndsWith(std::string_view str,
+              std::string_view search_for,
               CompareCase case_sensitivity) {
   return EndsWithT<std::string>(str, search_for, case_sensitivity);
 }
 
-bool EndsWith(StringPiece16 str,
-              StringPiece16 search_for,
+bool EndsWith(std::u16string_view str,
+              std::u16string_view search_for,
               CompareCase case_sensitivity) {
-  return EndsWithT<string16>(str, search_for, case_sensitivity);
+  return EndsWithT<std::u16string>(str, search_for, case_sensitivity);
 }
 
 char HexDigitToInt(char16_t c) {
@@ -589,7 +598,7 @@ bool IsUnicodeWhitespace(char16_t c) {
 static const char* const kByteStringsUnlocalized[] = {" B",  " kB", " MB",
                                                       " GB", " TB", " PB"};
 
-string16 FormatBytesUnlocalized(int64_t bytes) {
+std::u16string FormatBytesUnlocalized(int64_t bytes) {
   double unit_amount = static_cast<double>(bytes);
   size_t dimension = 0;
   const int kKilo = 1024;
@@ -800,37 +809,37 @@ bool ReplaceCharsT(
       ReplaceType::REPLACE_ALL);
 }
 
-void ReplaceFirstSubstringAfterOffset(string16* str,
+void ReplaceFirstSubstringAfterOffset(std::u16string* str,
                                       size_t start_offset,
-                                      StringPiece16 find_this,
-                                      StringPiece16 replace_with) {
+                                      std::u16string_view find_this,
+                                      std::u16string_view replace_with) {
   DoReplaceMatchesAfterOffset(str, start_offset,
-                              SubstringMatcher<string16>{find_this},
+                              SubstringMatcher<std::u16string>{find_this},
                               replace_with, ReplaceType::REPLACE_FIRST);
 }
 
 void ReplaceFirstSubstringAfterOffset(std::string* str,
                                       size_t start_offset,
-                                      StringPiece find_this,
-                                      StringPiece replace_with) {
+                                      std::string_view find_this,
+                                      std::string_view replace_with) {
   DoReplaceMatchesAfterOffset(str, start_offset,
                               SubstringMatcher<std::string>{find_this},
                               replace_with, ReplaceType::REPLACE_FIRST);
 }
 
-void ReplaceSubstringsAfterOffset(string16* str,
+void ReplaceSubstringsAfterOffset(std::u16string* str,
                                   size_t start_offset,
-                                  StringPiece16 find_this,
-                                  StringPiece16 replace_with) {
+                                  std::u16string_view find_this,
+                                  std::u16string_view replace_with) {
   DoReplaceMatchesAfterOffset(str, start_offset,
-                              SubstringMatcher<string16>{find_this},
+                              SubstringMatcher<std::u16string>{find_this},
                               replace_with, ReplaceType::REPLACE_ALL);
 }
 
 void ReplaceSubstringsAfterOffset(std::string* str,
                                   size_t start_offset,
-                                  StringPiece find_this,
-                                  StringPiece replace_with) {
+                                  std::string_view find_this,
+                                  std::string_view replace_with) {
   DoReplaceMatchesAfterOffset(str, start_offset,
                               SubstringMatcher<std::string>{find_this},
                               replace_with, ReplaceType::REPLACE_ALL);
@@ -849,7 +858,7 @@ char* WriteInto(std::string* str, size_t length_with_null) {
   return WriteIntoT(str, length_with_null);
 }
 
-char16* WriteInto(string16* str, size_t length_with_null) {
+char16_t* WriteInto(std::u16string* str, size_t length_with_null) {
   return WriteIntoT(str, length_with_null);
 }
 
@@ -892,12 +901,12 @@ static std::basic_string<char_type> JoinStringT(
 }
 
 std::string JoinString(const std::vector<std::string>& parts,
-                       StringPiece separator) {
+                       std::string_view separator) {
   return JoinStringT(parts, separator);
 }
 
-string16 JoinString(const std::vector<string16>& parts,
-                    StringPiece16 separator) {
+std::u16string JoinString(const std::vector<std::u16string>& parts,
+                          std::u16string_view separator) {
   return JoinStringT(parts, separator);
 }
 
@@ -906,23 +915,23 @@ string16 JoinString(const std::vector<string16>& parts,
 #pragma optimize("", on)
 #endif
 
-std::string JoinString(const std::vector<StringPiece>& parts,
-                       StringPiece separator) {
+std::string JoinString(const std::vector<std::string_view>& parts,
+                       std::string_view separator) {
   return JoinStringT(parts, separator);
 }
 
-string16 JoinString(const std::vector<StringPiece16>& parts,
-                    StringPiece16 separator) {
+std::u16string JoinString(const std::vector<std::u16string_view>& parts,
+                          std::u16string_view separator) {
   return JoinStringT(parts, separator);
 }
 
-std::string JoinString(std::initializer_list<StringPiece> parts,
-                       StringPiece separator) {
+std::string JoinString(std::initializer_list<std::string_view> parts,
+                       std::string_view separator) {
   return JoinStringT(parts, separator);
 }
 
-string16 JoinString(std::initializer_list<StringPiece16> parts,
-                    StringPiece16 separator) {
+std::u16string JoinString(std::initializer_list<std::u16string_view> parts,
+                          std::u16string_view separator) {
   return JoinStringT(parts, separator);
 }
 
@@ -981,25 +990,27 @@ OutStringType DoReplaceStringPlaceholders(
   return formatted;
 }
 
-string16 ReplaceStringPlaceholders(const string16& format_string,
-                                   const std::vector<string16>& subst,
-                                   std::vector<size_t>* offsets) {
+std::u16string ReplaceStringPlaceholders(
+    const std::u16string& format_string,
+    const std::vector<std::u16string>& subst,
+    std::vector<size_t>* offsets) {
   return DoReplaceStringPlaceholders(format_string, subst, offsets);
 }
 
-std::string ReplaceStringPlaceholders(StringPiece format_string,
+std::string ReplaceStringPlaceholders(std::string_view format_string,
                                       const std::vector<std::string>& subst,
                                       std::vector<size_t>* offsets) {
   return DoReplaceStringPlaceholders(format_string, subst, offsets);
 }
 
-string16 ReplaceStringPlaceholders(const string16& format_string,
-                                   const string16& a,
-                                   size_t* offset) {
+std::u16string ReplaceStringPlaceholders(const std::u16string& format_string,
+                                         const std::u16string& a,
+                                         size_t* offset) {
   std::vector<size_t> offsets;
-  std::vector<string16> subst;
+  std::vector<std::u16string> subst;
   subst.push_back(a);
-  string16 result = ReplaceStringPlaceholders(format_string, subst, &offsets);
+  std::u16string result =
+      ReplaceStringPlaceholders(format_string, subst, &offsets);
 
   DCHECK_EQ(1U, offsets.size());
   if (offset)

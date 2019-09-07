@@ -73,7 +73,7 @@ void CreateBundleTargetGenerator::DoRun() {
 
 bool CreateBundleTargetGenerator::FillBundleDir(
     const SourceDir& bundle_root_dir,
-    const base::StringPiece& name,
+    const std::string_view& name,
     SourceDir* bundle_dir) {
   // All bundle_foo_dir properties are optional. They are only required if they
   // are used in an expansion. The check is performed there.

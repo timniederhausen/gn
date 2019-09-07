@@ -37,7 +37,7 @@ class Args {
     bool has_override;     // True indicates override_value is valid.
     Value override_value;  // From .gn or the current build's "gn args".
   };
-  using ValueWithOverrideMap = std::map<base::StringPiece, ValueWithOverride>;
+  using ValueWithOverrideMap = std::map<std::string_view, ValueWithOverride>;
 
   Args();
   Args(const Args& other);

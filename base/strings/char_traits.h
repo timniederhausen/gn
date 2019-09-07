@@ -13,7 +13,7 @@ namespace base {
 
 // constexpr version of http://en.cppreference.com/w/cpp/string/char_traits.
 // This currently just implements the bits needed to support a (mostly)
-// constexpr StringPiece.
+// constexpr std::string_view.
 //
 // TODO(dcheng): Once we switch to C++17, most methods will become constexpr and
 // we can switch over to using the one in the standard library.

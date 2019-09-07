@@ -117,7 +117,7 @@ bool AppendInterpolatedIdentifier(Scope* scope,
                                   size_t end_offset,
                                   std::string* output,
                                   Err* err) {
-  base::StringPiece identifier(&input[begin_offset], end_offset - begin_offset);
+  std::string_view identifier(&input[begin_offset], end_offset - begin_offset);
   const Value* value = scope->GetValue(identifier, true);
   if (!value) {
     // We assume the input points inside the token.
@@ -225,7 +225,7 @@ bool AppendHexByte(Scope* scope,
     return false;
   }
   int value = 0;
-  if (!base::HexStringToInt(base::StringPiece(&input[*i + 2], 2), &value)) {
+  if (!base::HexStringToInt(std::string_view(&input[*i + 2], 2), &value)) {
     *err = ErrInsideStringToken(token, dollars_index, *i - dollars_index + 1,
                                 "Could not convert hex value.");
     return false;
@@ -287,8 +287,8 @@ bool ExpandStringLiteral(Scope* scope,
   return true;
 }
 
-size_t EditDistance(const base::StringPiece& s1,
-                    const base::StringPiece& s2,
+size_t EditDistance(const std::string_view& s1,
+                    const std::string_view& s2,
                     size_t max_edit_distance) {
   // The algorithm implemented below is the "classic"
   // dynamic-programming algorithm for computing the Levenshtein
@@ -329,14 +329,13 @@ size_t EditDistance(const base::StringPiece& s1,
   return row[n];
 }
 
-base::StringPiece SpellcheckString(
-    const base::StringPiece& text,
-    const std::vector<base::StringPiece>& words) {
+std::string_view SpellcheckString(const std::string_view& text,
+                                  const std::vector<std::string_view>& words) {
   const size_t kMaxValidEditDistance = 3u;
 
   size_t min_distance = kMaxValidEditDistance + 1u;
-  base::StringPiece result;
-  for (base::StringPiece word : words) {
+  std::string_view result;
+  for (std::string_view word : words) {
     size_t distance = EditDistance(word, text, kMaxValidEditDistance);
     if (distance < min_distance) {
       min_distance = distance;

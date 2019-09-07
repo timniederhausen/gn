@@ -8,8 +8,7 @@
 #define BASE_JSON_STRING_ESCAPE_H_
 
 #include <string>
-
-#include "base/strings/string_piece.h"
+#include <string_view>
 
 namespace base {
 
@@ -25,17 +24,21 @@ namespace base {
 //
 // If |put_in_quotes| is true, then a leading and trailing double-quote mark
 // will be appended to |dest| as well.
-bool EscapeJSONString(StringPiece str, bool put_in_quotes, std::string* dest);
+bool EscapeJSONString(std::string_view str,
+                      bool put_in_quotes,
+                      std::string* dest);
 
-// Performs a similar function to the UTF-8 StringPiece version above,
+// Performs a similar function to the UTF-8 std::string_view version above,
 // converting UTF-16 code units to UTF-8 code units and escaping non-printing
 // control characters. On return, |dest| will contain a valid UTF-8 JSON string.
-bool EscapeJSONString(StringPiece16 str, bool put_in_quotes, std::string* dest);
+bool EscapeJSONString(std::u16string_view str,
+                      bool put_in_quotes,
+                      std::string* dest);
 
 // Helper functions that wrap the above two functions but return the value
 // instead of appending. |put_in_quotes| is always true.
-std::string GetQuotedJSONString(StringPiece str);
-std::string GetQuotedJSONString(StringPiece16 str);
+std::string GetQuotedJSONString(std::string_view str);
+std::string GetQuotedJSONString(std::u16string_view str);
 
 // Given an arbitrary byte string |str|, this will escape all non-ASCII bytes
 // as \uXXXX escape sequences. This function is *NOT* meant to be used with
@@ -48,7 +51,8 @@ std::string GetQuotedJSONString(StringPiece16 str);
 //
 // The output of this function takes the *appearance* of JSON but is not in
 // fact valid according to RFC 4627.
-std::string EscapeBytesAsInvalidJSONString(StringPiece str, bool put_in_quotes);
+std::string EscapeBytesAsInvalidJSONString(std::string_view str,
+                                           bool put_in_quotes);
 
 }  // namespace base
 

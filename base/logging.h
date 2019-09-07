@@ -11,13 +11,13 @@
 #include <cstring>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
 #include "base/callback_forward.h"
 #include "base/compiler_specific.h"
 #include "base/macros.h"
-#include "base/strings/string_piece.h"
 #include "base/template_util.h"
 #include "util/build_config.h"
 

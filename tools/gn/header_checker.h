@@ -9,13 +9,13 @@
 #include <map>
 #include <mutex>
 #include <set>
+#include <string_view>
 #include <vector>
 
 #include "base/atomic_ref_count.h"
 #include "base/gtest_prod_util.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
-#include "base/strings/string_piece.h"
 #include "tools/gn/err.h"
 #include "tools/gn/source_dir.h"
 
@@ -112,7 +112,7 @@ class HeaderChecker : public base::RefCountedThreadSafe<HeaderChecker> {
   bool IsFileInOuputDir(const SourceFile& file) const;
 
   // Resolves the contents of an include to a SourceFile.
-  SourceFile SourceFileForInclude(const base::StringPiece& relative_file_path,
+  SourceFile SourceFileForInclude(const std::string_view& relative_file_path,
                                   const std::vector<SourceDir>& include_dirs,
                                   const InputFile& source_file,
                                   const LocationRange& range,

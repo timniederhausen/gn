@@ -24,12 +24,12 @@ class Label {
   // Makes a label given an already-separated out path and name.
   // See also Resolve().
   Label(const SourceDir& dir,
-        const base::StringPiece& name,
+        const std::string_view& name,
         const SourceDir& toolchain_dir,
-        const base::StringPiece& toolchain_name);
+        const std::string_view& toolchain_name);
 
   // Makes a label with an empty toolchain.
-  Label(const SourceDir& dir, const base::StringPiece& name);
+  Label(const SourceDir& dir, const std::string_view& name);
 
   // Resolves a string from a build file that may be relative to the
   // current directory into a fully qualified label. On failure returns an

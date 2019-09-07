@@ -32,7 +32,7 @@ bool IsScoperChar(char c) {
   return c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}';
 }
 
-Token::Type GetSpecificOperatorType(base::StringPiece value) {
+Token::Type GetSpecificOperatorType(std::string_view value) {
   if (value == "=")
     return Token::EQUAL;
   if (value == "+")
@@ -98,8 +98,8 @@ std::vector<Token> Tokenizer::Run() {
       break;
     size_t token_end = cur_;
 
-    base::StringPiece token_value(&input_.data()[token_begin],
-                                  token_end - token_begin);
+    std::string_view token_value(&input_.data()[token_begin],
+                                 token_end - token_begin);
 
     if (type == Token::UNCLASSIFIED_OPERATOR) {
       type = GetSpecificOperatorType(token_value);
@@ -148,7 +148,7 @@ std::vector<Token> Tokenizer::Run() {
 }
 
 // static
-size_t Tokenizer::ByteOffsetOfNthLine(const base::StringPiece& buf, int n) {
+size_t Tokenizer::ByteOffsetOfNthLine(const std::string_view& buf, int n) {
   DCHECK_GT(n, 0);
 
   if (n == 1)
@@ -168,7 +168,7 @@ size_t Tokenizer::ByteOffsetOfNthLine(const base::StringPiece& buf, int n) {
 }
 
 // static
-bool Tokenizer::IsNewline(const base::StringPiece& buffer, size_t offset) {
+bool Tokenizer::IsNewline(const std::string_view& buffer, size_t offset) {
   DCHECK(offset < buffer.size());
   // We may need more logic here to handle different line ending styles.
   return buffer[offset] == '\n';

@@ -100,7 +100,7 @@ TEST_F(OutputConversionTest, StringScope) {
   // Add some values to the scope.
   Value value(nullptr, "hello");
   new_scope->SetValue("v", value, nullptr);
-  base::StringPiece private_var_name("_private");
+  std::string_view private_var_name("_private");
   new_scope->SetValue(private_var_name, value, nullptr);
 
   std::ostringstream result;
@@ -164,7 +164,7 @@ TEST_F(OutputConversionTest, ValueScope) {
   // Add some values to the scope.
   Value value(nullptr, "hello");
   new_scope->SetValue("v", value, nullptr);
-  base::StringPiece private_var_name("_private");
+  std::string_view private_var_name("_private");
   new_scope->SetValue(private_var_name, value, nullptr);
 
   std::ostringstream result;

@@ -17,8 +17,8 @@ bool BasicValueConverter<std::string>::Convert(const base::Value& value,
   return value.GetAsString(field);
 }
 
-bool BasicValueConverter<string16>::Convert(const base::Value& value,
-                                            string16* field) const {
+bool BasicValueConverter<std::u16string>::Convert(const base::Value& value,
+                                                  std::u16string* field) const {
   return value.GetAsString(field);
 }
 

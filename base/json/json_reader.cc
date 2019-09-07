@@ -41,7 +41,7 @@ JSONReader::JSONReader(int options, int max_depth)
 JSONReader::~JSONReader() = default;
 
 // static
-std::unique_ptr<Value> JSONReader::Read(StringPiece json,
+std::unique_ptr<Value> JSONReader::Read(std::string_view json,
                                         int options,
                                         int max_depth) {
   internal::JSONParser parser(options, max_depth);
@@ -51,7 +51,7 @@ std::unique_ptr<Value> JSONReader::Read(StringPiece json,
 
 // static
 std::unique_ptr<Value> JSONReader::ReadAndReturnError(
-    StringPiece json,
+    std::string_view json,
     int options,
     int* error_code_out,
     std::string* error_msg_out,
@@ -103,7 +103,7 @@ std::string JSONReader::ErrorCodeToString(JsonParseError error_code) {
   return std::string();
 }
 
-std::unique_ptr<Value> JSONReader::ReadToValue(StringPiece json) {
+std::unique_ptr<Value> JSONReader::ReadToValue(std::string_view json) {
   Optional<Value> value = parser_->Parse(json);
   return value ? std::make_unique<Value>(std::move(*value)) : nullptr;
 }

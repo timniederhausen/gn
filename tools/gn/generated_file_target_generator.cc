@@ -68,7 +68,7 @@ bool GeneratedFileTargetGenerator::FillContents() {
 }
 
 bool GeneratedFileTargetGenerator::IsMetadataCollectionTarget(
-    const base::StringPiece& variable,
+    const std::string_view& variable,
     const ParseNode* origin) {
   if (contents_defined_) {
     *err_ =

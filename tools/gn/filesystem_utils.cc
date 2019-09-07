@@ -81,8 +81,8 @@ inline char NormalizeWindowsPathChar(char c) {
 
 // Attempts to do a case and slash-insensitive comparison of two 8-bit Windows
 // paths.
-bool AreAbsoluteWindowsPathsEqual(const base::StringPiece& a,
-                                  const base::StringPiece& b) {
+bool AreAbsoluteWindowsPathsEqual(const std::string_view& a,
+                                  const std::string_view& b) {
   if (a.size() != b.size())
     return false;
 
@@ -95,7 +95,7 @@ bool AreAbsoluteWindowsPathsEqual(const base::StringPiece& a,
   return true;
 }
 
-bool DoesBeginWindowsDriveLetter(const base::StringPiece& path) {
+bool DoesBeginWindowsDriveLetter(const std::string_view& path) {
   if (path.size() < 3)
     return false;
 
@@ -200,7 +200,7 @@ void AppendFixedAbsolutePathSuffix(const BuildSettings* build_settings,
   }
 }
 
-size_t AbsPathLenWithNoTrailingSlash(const base::StringPiece& path) {
+size_t AbsPathLenWithNoTrailingSlash(const std::string_view& path) {
   size_t len = path.size();
 #if defined(OS_WIN)
   size_t min_len = 3;
@@ -222,7 +222,7 @@ std::string FilePathToUTF8(const base::FilePath::StringType& str) {
 #endif
 }
 
-base::FilePath UTF8ToFilePath(const base::StringPiece& sp) {
+base::FilePath UTF8ToFilePath(const std::string_view& sp) {
 #if defined(OS_WIN)
   return base::FilePath(base::UTF8ToUTF16(sp));
 #else
@@ -240,12 +240,12 @@ size_t FindExtensionOffset(const std::string& path) {
   return std::string::npos;
 }
 
-base::StringPiece FindExtension(const std::string* path) {
+std::string_view FindExtension(const std::string* path) {
   size_t extension_offset = FindExtensionOffset(*path);
   if (extension_offset == std::string::npos)
-    return base::StringPiece();
-  return base::StringPiece(&path->data()[extension_offset],
-                           path->size() - extension_offset);
+    return std::string_view();
+  return std::string_view(&path->data()[extension_offset],
+                          path->size() - extension_offset);
 }
 
 size_t FindFilenameOffset(const std::string& path) {
@@ -256,17 +256,17 @@ size_t FindFilenameOffset(const std::string& path) {
   return 0;  // No filename found means everything was the filename.
 }
 
-base::StringPiece FindFilename(const std::string* path) {
+std::string_view FindFilename(const std::string* path) {
   size_t filename_offset = FindFilenameOffset(*path);
   if (filename_offset == 0)
-    return base::StringPiece(*path);  // Everything is the file name.
-  return base::StringPiece(&(*path).data()[filename_offset],
-                           path->size() - filename_offset);
+    return std::string_view(*path);  // Everything is the file name.
+  return std::string_view(&(*path).data()[filename_offset],
+                          path->size() - filename_offset);
 }
 
-base::StringPiece FindFilenameNoExtension(const std::string* path) {
+std::string_view FindFilenameNoExtension(const std::string* path) {
   if (path->empty())
-    return base::StringPiece();
+    return std::string_view();
   size_t filename_offset = FindFilenameOffset(*path);
   size_t extension_offset = FindExtensionOffset(*path);
 
@@ -276,7 +276,7 @@ base::StringPiece FindFilenameNoExtension(const std::string* path) {
   else
     name_len = extension_offset - filename_offset - 1;
 
-  return base::StringPiece(&(*path).data()[filename_offset], name_len);
+  return std::string_view(&(*path).data()[filename_offset], name_len);
 }
 
 void RemoveFilename(std::string* path) {
@@ -287,18 +287,18 @@ bool EndsWithSlash(const std::string& s) {
   return !s.empty() && IsSlash(s[s.size() - 1]);
 }
 
-base::StringPiece FindDir(const std::string* path) {
+std::string_view FindDir(const std::string* path) {
   size_t filename_offset = FindFilenameOffset(*path);
   if (filename_offset == 0u)
-    return base::StringPiece();
-  return base::StringPiece(path->data(), filename_offset);
+    return std::string_view();
+  return std::string_view(path->data(), filename_offset);
 }
 
-base::StringPiece FindLastDirComponent(const SourceDir& dir) {
+std::string_view FindLastDirComponent(const SourceDir& dir) {
   const std::string& dir_string = dir.value();
 
   if (dir_string.empty())
-    return base::StringPiece();
+    return std::string_view();
   int cur = static_cast<int>(dir_string.size()) - 1;
   DCHECK(dir_string[cur] == '/');
   int end = cur;
@@ -306,9 +306,9 @@ base::StringPiece FindLastDirComponent(const SourceDir& dir) {
 
   for (; cur >= 0; cur--) {
     if (dir_string[cur] == '/')
-      return base::StringPiece(&dir_string[cur + 1], end - cur - 1);
+      return std::string_view(&dir_string[cur + 1], end - cur - 1);
   }
-  return base::StringPiece(&dir_string[0], end);
+  return std::string_view(&dir_string[0], end);
 }
 
 bool IsStringInOutputDir(const SourceDir& output_dir, const std::string& str) {
@@ -334,7 +334,7 @@ bool EnsureStringIsInOutputDir(const SourceDir& output_dir,
   return false;
 }
 
-bool IsPathAbsolute(const base::StringPiece& path) {
+bool IsPathAbsolute(const std::string_view& path) {
   if (path.empty())
     return false;
 
@@ -355,12 +355,12 @@ bool IsPathAbsolute(const base::StringPiece& path) {
   return true;
 }
 
-bool IsPathSourceAbsolute(const base::StringPiece& path) {
+bool IsPathSourceAbsolute(const std::string_view& path) {
   return (path.size() >= 2 && path[0] == '/' && path[1] == '/');
 }
 
-bool MakeAbsolutePathRelativeIfPossible(const base::StringPiece& source_root,
-                                        const base::StringPiece& path,
+bool MakeAbsolutePathRelativeIfPossible(const std::string_view& source_root,
+                                        const std::string_view& path,
                                         std::string* dest) {
   DCHECK(IsPathAbsolute(source_root));
   DCHECK(IsPathAbsolute(path));
@@ -504,7 +504,7 @@ base::FilePath MakeAbsoluteFilePathRelativeIfPossible(
   return base::FilePath(base::JoinString(relative_components, separator));
 }
 
-void NormalizePath(std::string* path, const base::StringPiece& source_root) {
+void NormalizePath(std::string* path, const std::string_view& source_root) {
   char* pathbuf = path->empty() ? nullptr : &(*path)[0];
 
   // top_index is the first character we can modify in the path. Anything
@@ -702,7 +702,7 @@ std::string MakeRelativePath(const std::string& input,
 
 std::string RebasePath(const std::string& input,
                        const SourceDir& dest_dir,
-                       const base::StringPiece& source_root) {
+                       const std::string_view& source_root) {
   std::string ret;
   DCHECK(source_root.empty() ||
          !base::EndsWith(source_root, "/", base::CompareCase::SENSITIVE));
@@ -784,7 +784,7 @@ template <typename StringType>
 std::string ResolveRelative(const StringType& input,
                             const std::string& value,
                             bool as_file,
-                            const base::StringPiece& source_root) {
+                            const std::string_view& source_root) {
   std::string result;
 
   if (input.size() >= 2 && input[0] == '/' && input[1] == '/') {
@@ -846,15 +846,15 @@ std::string ResolveRelative(const StringType& input,
 }
 
 // Explicit template instantiation
-template std::string ResolveRelative(const base::StringPiece& input,
+template std::string ResolveRelative(const std::string_view& input,
                                      const std::string& value,
                                      bool as_file,
-                                     const base::StringPiece& source_root);
+                                     const std::string_view& source_root);
 
 template std::string ResolveRelative(const std::string& input,
                                      const std::string& value,
                                      bool as_file,
-                                     const base::StringPiece& source_root);
+                                     const std::string_view& source_root);
 
 std::string DirectoryWithNoLastSlash(const SourceDir& dir) {
   std::string ret;

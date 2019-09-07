@@ -5,8 +5,8 @@
 #include "tools/gn/visibility.h"
 
 #include <memory>
+#include <string_view>
 
-#include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
 #include "base/values.h"
 #include "tools/gn/err.h"

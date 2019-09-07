@@ -77,7 +77,7 @@ std::string SourceDir::ResolveRelativeAs(
     const Value& blame_input_value,
     const StringType& input_value,
     Err* err,
-    const base::StringPiece& source_root) const {
+    const std::string_view& source_root) const {
   if (!ValidateResolveInput<StringType>(as_file, blame_input_value, input_value,
                                         err)) {
     return std::string();
@@ -88,7 +88,7 @@ std::string SourceDir::ResolveRelativeAs(
 SourceFile SourceDir::ResolveRelativeFile(
     const Value& p,
     Err* err,
-    const base::StringPiece& source_root) const {
+    const std::string_view& source_root) const {
   SourceFile ret;
 
   if (!p.VerifyTypeIs(Value::STRING, err))
@@ -105,7 +105,7 @@ SourceFile SourceDir::ResolveRelativeFile(
 std::string SourceDir::ResolveRelativeAs(bool as_file,
                                          const Value& v,
                                          Err* err,
-                                         const base::StringPiece& source_root,
+                                         const std::string_view& source_root,
                                          const std::string* v_value) const {
   if (!v.VerifyTypeIs(Value::STRING, err))
     return std::string();
@@ -123,7 +123,7 @@ std::string SourceDir::ResolveRelativeAs(bool as_file,
 SourceDir SourceDir::ResolveRelativeDir(
     const Value& v,
     Err* err,
-    const base::StringPiece& source_root) const {
+    const std::string_view& source_root) const {
   if (!v.VerifyTypeIs(Value::STRING, err))
     return SourceDir();
 
@@ -140,11 +140,11 @@ template std::string SourceDir::ResolveRelativeAs(
     const Value& blame_input_value,
     const std::string& input_value,
     Err* err,
-    const base::StringPiece& source_root) const;
+    const std::string_view& source_root) const;
 
 template std::string SourceDir::ResolveRelativeAs(
     bool as_file,
     const Value& blame_input_value,
-    const base::StringPiece& input_value,
+    const std::string_view& input_value,
     Err* err,
-    const base::StringPiece& source_root) const;
+    const std::string_view& source_root) const;

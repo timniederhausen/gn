@@ -23,7 +23,6 @@
 
 #include "base/files/file.h"
 #include "base/files/file_path.h"
-#include "base/strings/string16.h"
 #include "util/build_config.h"
 
 #if defined(OS_WIN)

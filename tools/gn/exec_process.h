@@ -7,7 +7,6 @@
 
 #include <string>
 
-#include "base/strings/string16.h"
 #include "util/build_config.h"
 
 namespace base {
@@ -24,7 +23,7 @@ bool ExecProcess(const base::CommandLine& cmdline,
                  int* exit_code);
 
 #if defined(OS_WIN)
-bool ExecProcess(const base::string16& cmdline_str,
+bool ExecProcess(const std::u16string& cmdline_str,
                  const base::FilePath& startup_dir,
                  std::string* std_out,
                  std::string* std_err,

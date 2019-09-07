@@ -27,14 +27,13 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
 #include "base/containers/flat_map.h"
 #include "base/containers/span.h"
 #include "base/macros.h"
-#include "base/strings/string16.h"
-#include "base/strings/string_piece.h"
 #include "base/value_iterators.h"
 
 namespace base {
@@ -116,15 +115,15 @@ class Value {
   explicit Value(bool in_bool);
   explicit Value(int in_int);
 
-  // Value(const char*) and Value(const char16*) are required despite
-  // Value(StringPiece) and Value(StringPiece16) because otherwise the
-  // compiler will choose the Value(bool) constructor for these arguments.
+  // Value(const char*) and Value(const char16_t*) are required despite
+  // Value(std::string_view) and Value(std::u16string_view) because otherwise
+  // the compiler will choose the Value(bool) constructor for these arguments.
   // Value(std::string&&) allow for efficient move construction.
   explicit Value(const char* in_string);
-  explicit Value(StringPiece in_string);
+  explicit Value(std::string_view in_string);
   explicit Value(std::string&& in_string) noexcept;
-  explicit Value(const char16* in_string16);
-  explicit Value(StringPiece16 in_string16);
+  explicit Value(const char16_t* in_string16);
+  explicit Value(std::u16string_view in_string16);
 
   explicit Value(const BlobStorage& in_blob);
   explicit Value(BlobStorage&& in_blob) noexcept;
@@ -171,8 +170,8 @@ class Value {
   //
   // Example:
   //   auto* found = FindKey("foo");
-  Value* FindKey(StringPiece key);
-  const Value* FindKey(StringPiece key) const;
+  Value* FindKey(std::string_view key);
+  const Value* FindKey(std::string_view key) const;
 
   // |FindKeyOfType| is similar to |FindKey|, but it also requires the found
   // value to have type |type|. If no type is found, or the found value is of a
@@ -183,8 +182,8 @@ class Value {
   //
   // Example:
   //   auto* found = FindKey("foo", Type::INTEGER);
-  Value* FindKeyOfType(StringPiece key, Type type);
-  const Value* FindKeyOfType(StringPiece key, Type type) const;
+  Value* FindKeyOfType(std::string_view key, Type type);
+  const Value* FindKeyOfType(std::string_view key, Type type) const;
 
   // |SetKey| looks up |key| in the underlying dictionary and sets the mapped
   // value to |value|. If |key| could not be found, a new element is inserted.
@@ -193,7 +192,7 @@ class Value {
   //
   // Example:
   //   SetKey("foo", std::move(myvalue));
-  Value* SetKey(StringPiece key, Value value);
+  Value* SetKey(std::string_view key, Value value);
   // This overload results in a performance improvement for std::string&&.
   Value* SetKey(std::string&& key, Value value);
   // This overload is necessary to avoid ambiguity for const char* arguments.
@@ -207,7 +206,7 @@ class Value {
   //
   // Example:
   //   bool success = RemoveKey("foo");
-  bool RemoveKey(StringPiece key);
+  bool RemoveKey(std::string_view key);
 
   // Searches a hierarchy of dictionary values for a given value. If a path
   // of dictionaries exist, returns the item at that path. If any of the path
@@ -223,25 +222,27 @@ class Value {
   // Example:
   //   auto* found = FindPath({"foo", "bar"});
   //
-  //   std::vector<StringPiece> components = ...
+  //   std::vector<std::string_view> components = ...
   //   auto* found = FindPath(components);
   //
   // Note: If there is only one component in the path, use FindKey() instead.
-  Value* FindPath(std::initializer_list<StringPiece> path);
-  Value* FindPath(span<const StringPiece> path);
-  const Value* FindPath(std::initializer_list<StringPiece> path) const;
-  const Value* FindPath(span<const StringPiece> path) const;
+  Value* FindPath(std::initializer_list<std::string_view> path);
+  Value* FindPath(span<const std::string_view> path);
+  const Value* FindPath(std::initializer_list<std::string_view> path) const;
+  const Value* FindPath(span<const std::string_view> path) const;
 
   // Like FindPath() but will only return the value if the leaf Value type
   // matches the given type. Will return nullptr otherwise.
   //
   // Note: If there is only one component in the path, use FindKeyOfType()
   // instead.
-  Value* FindPathOfType(std::initializer_list<StringPiece> path, Type type);
-  Value* FindPathOfType(span<const StringPiece> path, Type type);
-  const Value* FindPathOfType(std::initializer_list<StringPiece> path,
+  Value* FindPathOfType(std::initializer_list<std::string_view> path,
+                        Type type);
+  Value* FindPathOfType(span<const std::string_view> path, Type type);
+  const Value* FindPathOfType(std::initializer_list<std::string_view> path,
                               Type type) const;
-  const Value* FindPathOfType(span<const StringPiece> path, Type type) const;
+  const Value* FindPathOfType(span<const std::string_view> path,
+                              Type type) const;
 
   // Sets the given path, expanding and creating dictionary keys as necessary.
   //
@@ -255,12 +256,12 @@ class Value {
   // Example:
   //   value.SetPath({"foo", "bar"}, std::move(myvalue));
   //
-  //   std::vector<StringPiece> components = ...
+  //   std::vector<std::string_view> components = ...
   //   value.SetPath(components, std::move(myvalue));
   //
   // Note: If there is only one component in the path, use SetKey() instead.
-  Value* SetPath(std::initializer_list<StringPiece> path, Value value);
-  Value* SetPath(span<const StringPiece> path, Value value);
+  Value* SetPath(std::initializer_list<std::string_view> path, Value value);
+  Value* SetPath(span<const std::string_view> path, Value value);
 
   // Tries to remove a Value at the given path.
   //
@@ -272,12 +273,12 @@ class Value {
   // Example:
   //   bool success = value.RemovePath({"foo", "bar"});
   //
-  //   std::vector<StringPiece> components = ...
+  //   std::vector<std::string_view> components = ...
   //   bool success = value.RemovePath(components);
   //
   // Note: If there is only one component in the path, use RemoveKey() instead.
-  bool RemovePath(std::initializer_list<StringPiece> path);
-  bool RemovePath(span<const StringPiece> path);
+  bool RemovePath(std::initializer_list<std::string_view> path);
+  bool RemovePath(span<const std::string_view> path);
 
   using dict_iterator_proxy = detail::dict_iterator_proxy;
   using const_dict_iterator_proxy = detail::const_dict_iterator_proxy;
@@ -305,9 +306,9 @@ class Value {
   bool GetAsInteger(int* out_value) const;
   // DEPRECATED, use GetString() instead.
   bool GetAsString(std::string* out_value) const;
-  bool GetAsString(string16* out_value) const;
+  bool GetAsString(std::u16string* out_value) const;
   bool GetAsString(const Value** out_value) const;
-  bool GetAsString(StringPiece* out_value) const;
+  bool GetAsString(std::string_view* out_value) const;
   // ListValue::From is the equivalent for std::unique_ptr conversions.
   // DEPRECATED, use GetList() instead.
   bool GetAsList(ListValue** out_value);
@@ -384,7 +385,7 @@ class DictionaryValue : public Value {
 
   // Returns true if the current dictionary has a value for the given key.
   // DEPRECATED, use Value::FindKey(key) instead.
-  bool HasKey(StringPiece key) const;
+  bool HasKey(std::string_view key) const;
 
   // Returns the number of Values in this dictionary.
   size_t size() const { return dict_.size(); }
@@ -404,28 +405,29 @@ class DictionaryValue : public Value {
   // to the path in that location. |in_value| must be non-null.
   // Returns a pointer to the inserted value.
   // DEPRECATED, use Value::SetPath(path, value) instead.
-  Value* Set(StringPiece path, std::unique_ptr<Value> in_value);
+  Value* Set(std::string_view path, std::unique_ptr<Value> in_value);
 
   // Convenience forms of Set().  These methods will replace any existing
   // value at that path, even if it has a different type.
   // DEPRECATED, use Value::SetPath(path, Value(bool)) instead.
-  Value* SetBoolean(StringPiece path, bool in_value);
+  Value* SetBoolean(std::string_view path, bool in_value);
   // DEPRECATED, use Value::SetPath(path, Value(int)) instead.
-  Value* SetInteger(StringPiece path, int in_value);
-  // DEPRECATED, use Value::SetPath(path, Value(StringPiece)) instead.
-  Value* SetString(StringPiece path, StringPiece in_value);
+  Value* SetInteger(std::string_view path, int in_value);
+  // DEPRECATED, use Value::SetPath(path, Value(std::string_view)) instead.
+  Value* SetString(std::string_view path, std::string_view in_value);
   // DEPRECATED, use Value::SetPath(path, Value(const string& 16)) instead.
-  Value* SetString(StringPiece path, const string16& in_value);
+  Value* SetString(std::string_view path, const std::u16string& in_value);
   // DEPRECATED, use Value::SetPath(path, Value(Type::DICTIONARY)) instead.
-  DictionaryValue* SetDictionary(StringPiece path,
+  DictionaryValue* SetDictionary(std::string_view path,
                                  std::unique_ptr<DictionaryValue> in_value);
   // DEPRECATED, use Value::SetPath(path, Value(Type::LIST)) instead.
-  ListValue* SetList(StringPiece path, std::unique_ptr<ListValue> in_value);
+  ListValue* SetList(std::string_view path,
+                     std::unique_ptr<ListValue> in_value);
 
   // Like Set(), but without special treatment of '.'.  This allows e.g. URLs to
   // be used as paths.
   // DEPRECATED, use Value::SetKey(key, value) instead.
-  Value* SetWithoutPathExpansion(StringPiece key,
+  Value* SetWithoutPathExpansion(std::string_view key,
                                  std::unique_ptr<Value> in_value);
 
   // Gets the Value associated with the given path starting from this object.
@@ -437,65 +439,69 @@ class DictionaryValue : public Value {
   // Note that the dictionary always owns the value that's returned.
   // |out_value| is optional and will only be set if non-NULL.
   // DEPRECATED, use Value::FindPath(path) instead.
-  bool Get(StringPiece path, const Value** out_value) const;
+  bool Get(std::string_view path, const Value** out_value) const;
   // DEPRECATED, use Value::FindPath(path) instead.
-  bool Get(StringPiece path, Value** out_value);
+  bool Get(std::string_view path, Value** out_value);
 
   // These are convenience forms of Get().  The value will be retrieved
   // and the return value will be true if the path is valid and the value at
   // the end of the path can be returned in the form specified.
   // |out_value| is optional and will only be set if non-NULL.
   // DEPRECATED, use Value::FindPath(path) and Value::GetBool() instead.
-  bool GetBoolean(StringPiece path, bool* out_value) const;
+  bool GetBoolean(std::string_view path, bool* out_value) const;
   // DEPRECATED, use Value::FindPath(path) and Value::GetInt() instead.
-  bool GetInteger(StringPiece path, int* out_value) const;
+  bool GetInteger(std::string_view path, int* out_value) const;
   // DEPRECATED, use Value::FindPath(path) and Value::GetString() instead.
-  bool GetString(StringPiece path, std::string* out_value) const;
+  bool GetString(std::string_view path, std::string* out_value) const;
   // DEPRECATED, use Value::FindPath(path) and Value::GetString() instead.
-  bool GetString(StringPiece path, string16* out_value) const;
+  bool GetString(std::string_view path, std::u16string* out_value) const;
   // DEPRECATED, use Value::FindPath(path) and Value::GetString() instead.
-  bool GetStringASCII(StringPiece path, std::string* out_value) const;
+  bool GetStringASCII(std::string_view path, std::string* out_value) const;
   // DEPRECATED, use Value::FindPath(path) and Value::GetBlob() instead.
-  bool GetBinary(StringPiece path, const Value** out_value) const;
+  bool GetBinary(std::string_view path, const Value** out_value) const;
   // DEPRECATED, use Value::FindPath(path) and Value::GetBlob() instead.
-  bool GetBinary(StringPiece path, Value** out_value);
+  bool GetBinary(std::string_view path, Value** out_value);
   // DEPRECATED, use Value::FindPath(path) and Value's Dictionary API instead.
-  bool GetDictionary(StringPiece path, const DictionaryValue** out_value) const;
+  bool GetDictionary(std::string_view path,
+                     const DictionaryValue** out_value) const;
   // DEPRECATED, use Value::FindPath(path) and Value's Dictionary API instead.
-  bool GetDictionary(StringPiece path, DictionaryValue** out_value);
+  bool GetDictionary(std::string_view path, DictionaryValue** out_value);
   // DEPRECATED, use Value::FindPath(path) and Value::GetList() instead.
-  bool GetList(StringPiece path, const ListValue** out_value) const;
+  bool GetList(std::string_view path, const ListValue** out_value) const;
   // DEPRECATED, use Value::FindPath(path) and Value::GetList() instead.
-  bool GetList(StringPiece path, ListValue** out_value);
+  bool GetList(std::string_view path, ListValue** out_value);
 
   // Like Get(), but without special treatment of '.'.  This allows e.g. URLs to
   // be used as paths.
   // DEPRECATED, use Value::FindKey(key) instead.
-  bool GetWithoutPathExpansion(StringPiece key, const Value** out_value) const;
+  bool GetWithoutPathExpansion(std::string_view key,
+                               const Value** out_value) const;
   // DEPRECATED, use Value::FindKey(key) instead.
-  bool GetWithoutPathExpansion(StringPiece key, Value** out_value);
+  bool GetWithoutPathExpansion(std::string_view key, Value** out_value);
   // DEPRECATED, use Value::FindKey(key) and Value::GetBool() instead.
-  bool GetBooleanWithoutPathExpansion(StringPiece key, bool* out_value) const;
+  bool GetBooleanWithoutPathExpansion(std::string_view key,
+                                      bool* out_value) const;
   // DEPRECATED, use Value::FindKey(key) and Value::GetInt() instead.
-  bool GetIntegerWithoutPathExpansion(StringPiece key, int* out_value) const;
+  bool GetIntegerWithoutPathExpansion(std::string_view key,
+                                      int* out_value) const;
   // DEPRECATED, use Value::FindKey(key) and Value::GetString() instead.
-  bool GetStringWithoutPathExpansion(StringPiece key,
+  bool GetStringWithoutPathExpansion(std::string_view key,
                                      std::string* out_value) const;
   // DEPRECATED, use Value::FindKey(key) and Value::GetString() instead.
-  bool GetStringWithoutPathExpansion(StringPiece key,
-                                     string16* out_value) const;
+  bool GetStringWithoutPathExpansion(std::string_view key,
+                                     std::u16string* out_value) const;
   // DEPRECATED, use Value::FindKey(key) and Value's Dictionary API instead.
   bool GetDictionaryWithoutPathExpansion(
-      StringPiece key,
+      std::string_view key,
       const DictionaryValue** out_value) const;
   // DEPRECATED, use Value::FindKey(key) and Value's Dictionary API instead.
-  bool GetDictionaryWithoutPathExpansion(StringPiece key,
+  bool GetDictionaryWithoutPathExpansion(std::string_view key,
                                          DictionaryValue** out_value);
   // DEPRECATED, use Value::FindKey(key) and Value::GetList() instead.
-  bool GetListWithoutPathExpansion(StringPiece key,
+  bool GetListWithoutPathExpansion(std::string_view key,
                                    const ListValue** out_value) const;
   // DEPRECATED, use Value::FindKey(key) and Value::GetList() instead.
-  bool GetListWithoutPathExpansion(StringPiece key, ListValue** out_value);
+  bool GetListWithoutPathExpansion(std::string_view key, ListValue** out_value);
 
   // Removes the Value with the specified path from this dictionary (or one
   // of its child dictionaries, if the path is more than just a local key).
@@ -504,18 +510,18 @@ class DictionaryValue : public Value {
   // This method returns true if |path| is a valid path; otherwise it will
   // return false and the DictionaryValue object will be unchanged.
   // DEPRECATED, use Value::RemovePath(path) instead.
-  bool Remove(StringPiece path, std::unique_ptr<Value>* out_value);
+  bool Remove(std::string_view path, std::unique_ptr<Value>* out_value);
 
   // Like Remove(), but without special treatment of '.'.  This allows e.g. URLs
   // to be used as paths.
   // DEPRECATED, use Value::RemoveKey(key) instead.
-  bool RemoveWithoutPathExpansion(StringPiece key,
+  bool RemoveWithoutPathExpansion(std::string_view key,
                                   std::unique_ptr<Value>* out_value);
 
   // Removes a path, clearing out all dictionaries on |path| that remain empty
   // after removing the value at |path|.
   // DEPRECATED, use Value::RemovePath(path) instead.
-  bool RemovePath(StringPiece path, std::unique_ptr<Value>* out_value);
+  bool RemovePath(std::string_view path, std::unique_ptr<Value>* out_value);
 
   using Value::RemovePath;  // DictionaryValue::RemovePath shadows otherwise.
 
@@ -625,7 +631,7 @@ class ListValue : public Value {
   bool GetInteger(size_t index, int* out_value) const;
   // DEPRECATED, use GetList()::operator[]::GetString() instead.
   bool GetString(size_t index, std::string* out_value) const;
-  bool GetString(size_t index, string16* out_value) const;
+  bool GetString(size_t index, std::u16string* out_value) const;
 
   bool GetDictionary(size_t index, const DictionaryValue** out_value) const;
   bool GetDictionary(size_t index, DictionaryValue** out_value);
@@ -664,11 +670,11 @@ class ListValue : public Value {
   // DEPRECATED, use GetList()::emplace_back() instead.
   void AppendBoolean(bool in_value);
   void AppendInteger(int in_value);
-  void AppendString(StringPiece in_value);
-  void AppendString(const string16& in_value);
+  void AppendString(std::string_view in_value);
+  void AppendString(const std::u16string& in_value);
   // DEPRECATED, use GetList()::emplace_back() in a loop instead.
   void AppendStrings(const std::vector<std::string>& in_values);
-  void AppendStrings(const std::vector<string16>& in_values);
+  void AppendStrings(const std::vector<std::u16string>& in_values);
 
   // Appends a Value if it's not already present. Returns true if successful,
   // or false if the value was already

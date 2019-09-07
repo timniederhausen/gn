@@ -140,7 +140,7 @@ const SourceTypeForExt kSourceTypeForExt[] = {
     {"y", "sourcecode.yacc"},
 };
 
-const char* GetSourceType(const base::StringPiece& ext) {
+const char* GetSourceType(const std::string_view& ext) {
   for (size_t i = 0; i < arraysize(kSourceTypeForExt); ++i) {
     if (kSourceTypeForExt[i].ext == ext)
       return kSourceTypeForExt[i].source_type;
@@ -149,11 +149,11 @@ const char* GetSourceType(const base::StringPiece& ext) {
   return "text";
 }
 
-bool HasExplicitFileType(const base::StringPiece& ext) {
+bool HasExplicitFileType(const std::string_view& ext) {
   return ext == "dart";
 }
 
-bool IsSourceFileForIndexing(const base::StringPiece& ext) {
+bool IsSourceFileForIndexing(const std::string_view& ext) {
   return ext == "c" || ext == "cc" || ext == "cpp" || ext == "cxx" ||
          ext == "m" || ext == "mm";
 }
@@ -467,7 +467,7 @@ void PBXFileReference::Print(std::ostream& out, unsigned indent) const {
     PrintProperty(out, rules, "explicitFileType", type_);
     PrintProperty(out, rules, "includeInIndex", 0u);
   } else {
-    base::StringPiece ext = FindExtension(&name_);
+    std::string_view ext = FindExtension(&name_);
     if (HasExplicitFileType(ext))
       PrintProperty(out, rules, "explicitFileType", GetSourceType(ext));
     else
@@ -547,7 +547,7 @@ PBXFileReference* PBXGroup::AddSourceFile(const std::string& navigator_path,
   }
 
   PBXGroup* group = nullptr;
-  base::StringPiece component(navigator_path.data(), sep);
+  std::string_view component(navigator_path.data(), sep);
   for (const auto& child : children_) {
     if (child->Class() != PBXGroupClass)
       continue;
@@ -692,7 +692,7 @@ void PBXProject::AddSourceFile(const std::string& navigator_path,
                                PBXNativeTarget* target) {
   PBXFileReference* file_reference =
       sources_->AddSourceFile(navigator_path, source_path);
-  base::StringPiece ext = FindExtension(&source_path);
+  std::string_view ext = FindExtension(&source_path);
   if (!IsSourceFileForIndexing(ext))
     return;
 
@@ -736,7 +736,7 @@ PBXNativeTarget* PBXProject::AddNativeTarget(
     const std::string& output_type,
     const std::string& shell_script,
     const PBXAttributes& extra_attributes) {
-  base::StringPiece ext = FindExtension(&output_name);
+  std::string_view ext = FindExtension(&output_name);
   PBXFileReference* product = static_cast<PBXFileReference*>(
       products_->AddChild(std::make_unique<PBXFileReference>(
           std::string(), output_name,

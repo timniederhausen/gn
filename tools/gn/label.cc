@@ -29,7 +29,7 @@ std::string DirWithNoTrailingSlash(const SourceDir& dir) {
 // used. The value is used only for generating error messages.
 bool ComputeBuildLocationFromDep(const Value& input_value,
                                  const SourceDir& current_dir,
-                                 const base::StringPiece& input,
+                                 const std::string_view& input,
                                  SourceDir* result,
                                  Err* err) {
   // No rule, use the current location.
@@ -48,7 +48,7 @@ bool ComputeBuildLocationFromDep(const Value& input_value,
 // error messages.
 bool ComputeTargetNameFromDep(const Value& input_value,
                               const SourceDir& computed_location,
-                              const base::StringPiece& input,
+                              const std::string_view& input,
                               std::string* result,
                               Err* err) {
   if (!input.empty()) {
@@ -88,13 +88,14 @@ bool ComputeTargetNameFromDep(const Value& input_value,
 bool Resolve(const SourceDir& current_dir,
              const Label& current_toolchain,
              const Value& original_value,
-             const base::StringPiece& input,
+             const std::string_view& input,
              SourceDir* out_dir,
              std::string* out_name,
              SourceDir* out_toolchain_dir,
              std::string* out_toolchain_name,
              Err* err) {
-  // To workaround the problem that StringPiece operator[] doesn't return a ref.
+  // To workaround the problem that std::string_view operator[] doesn't return a
+  // ref.
   const char* input_str = input.data();
   size_t offset = 0;
 #if defined(OS_WIN)
@@ -110,19 +111,19 @@ bool Resolve(const SourceDir& current_dir,
   }
 #endif
   size_t path_separator = input.find_first_of(":(", offset);
-  base::StringPiece location_piece;
-  base::StringPiece name_piece;
-  base::StringPiece toolchain_piece;
+  std::string_view location_piece;
+  std::string_view name_piece;
+  std::string_view toolchain_piece;
   if (path_separator == std::string::npos) {
     location_piece = input;
     // Leave name & toolchain piece null.
   } else {
-    location_piece = base::StringPiece(&input_str[0], path_separator);
+    location_piece = std::string_view(&input_str[0], path_separator);
 
     size_t toolchain_separator = input.find('(', path_separator);
     if (toolchain_separator == std::string::npos) {
-      name_piece = base::StringPiece(&input_str[path_separator + 1],
-                                     input.size() - path_separator - 1);
+      name_piece = std::string_view(&input_str[path_separator + 1],
+                                    input.size() - path_separator - 1);
       // Leave location piece null.
     } else if (!out_toolchain_dir) {
       // Toolchain specified but not allows in this context.
@@ -135,9 +136,8 @@ bool Resolve(const SourceDir& current_dir,
       // Name piece is everything between the two separators. Note that the
       // separators may be the same (e.g. "//foo(bar)" which means empty name.
       if (toolchain_separator > path_separator) {
-        name_piece =
-            base::StringPiece(&input_str[path_separator + 1],
-                              toolchain_separator - path_separator - 1);
+        name_piece = std::string_view(&input_str[path_separator + 1],
+                                      toolchain_separator - path_separator - 1);
       }
 
       // Toolchain name should end in a ) and this should be the end of the
@@ -151,8 +151,8 @@ bool Resolve(const SourceDir& current_dir,
 
       // Subtract off the two parens to just get the toolchain name.
       toolchain_piece =
-          base::StringPiece(&input_str[toolchain_separator + 1],
-                            input.size() - toolchain_separator - 2);
+          std::string_view(&input_str[toolchain_separator + 1],
+                           input.size() - toolchain_separator - 2);
     }
   }
 
@@ -251,15 +251,15 @@ Implicit names
 )*";
 
 Label::Label(const SourceDir& dir,
-             const base::StringPiece& name,
+             const std::string_view& name,
              const SourceDir& toolchain_dir,
-             const base::StringPiece& toolchain_name)
+             const std::string_view& toolchain_name)
     : dir_(dir), toolchain_dir_(toolchain_dir) {
   name_.assign(name.data(), name.size());
   toolchain_name_.assign(toolchain_name.data(), toolchain_name.size());
 }
 
-Label::Label(const SourceDir& dir, const base::StringPiece& name) : dir_(dir) {
+Label::Label(const SourceDir& dir, const std::string_view& name) : dir_(dir) {
   name_.assign(name.data(), name.size());
 }
 

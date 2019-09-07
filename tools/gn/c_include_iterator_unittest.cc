@@ -44,7 +44,7 @@ TEST(CIncludeIterator, Basic) {
 
   CIncludeIterator iter(&file);
 
-  base::StringPiece contents;
+  std::string_view contents;
   LocationRange range;
   EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
   EXPECT_EQ("foo/bar.h", contents);
@@ -77,7 +77,7 @@ TEST(CIncludeIterator, GiveUp) {
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  base::StringPiece contents;
+  std::string_view contents;
   LocationRange range;
 
   CIncludeIterator iter(&file);
@@ -99,7 +99,7 @@ TEST(CIncludeIterator, DontGiveUp) {
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  base::StringPiece contents;
+  std::string_view contents;
   LocationRange range;
 
   CIncludeIterator iter(&file);
@@ -126,7 +126,7 @@ TEST(CIncludeIterator, TolerateNonIncludes) {
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  base::StringPiece contents;
+  std::string_view contents;
   LocationRange range;
 
   CIncludeIterator iter(&file);
@@ -152,7 +152,7 @@ TEST(CIncludeIterator, CStyleComments) {
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  base::StringPiece contents;
+  std::string_view contents;
   LocationRange range;
 
   CIncludeIterator iter(&file);
@@ -167,7 +167,7 @@ TEST(CIncludeIterator, SpacesAfterHash) {
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  base::StringPiece contents;
+  std::string_view contents;
   LocationRange range;
 
   CIncludeIterator iter(&file);

@@ -42,12 +42,12 @@
 #include <iomanip>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "base/callback.h"
 #include "base/containers/stack.h"
 #include "base/posix/eintr_wrapper.h"
-#include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
@@ -188,9 +188,9 @@ LogMessage::~LogMessage() {
 
 // writes the common header info to the stream
 void LogMessage::Init(const char* file, int line) {
-  base::StringPiece filename(file);
+  std::string_view filename(file);
   size_t last_slash_pos = filename.find_last_of("\\/");
-  if (last_slash_pos != base::StringPiece::npos)
+  if (last_slash_pos != std::string_view::npos)
     filename.remove_prefix(last_slash_pos + 1);
 
   // TODO(darin): It might be nice if the columns were fixed width.

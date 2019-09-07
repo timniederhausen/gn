@@ -106,12 +106,11 @@
 
 #include <iosfwd>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "base/compiler_specific.h"
 #include "base/macros.h"
-#include "base/strings/string16.h"
-#include "base/strings/string_piece.h"
 #include "util/build_config.h"
 
 // Windows-style drive letter support and pathname separator characters can be
@@ -153,7 +152,7 @@ class FilePath {
 #endif  // OS_WIN
 
   using CharType = StringType::value_type;
-  using StringPieceType = std::basic_string_view<CharType>;
+  using StringViewType = std::basic_string_view<CharType>;
 
   // Null-terminated array of separators used to separate components in
   // hierarchical paths.  Each character in this array is a valid separator,
@@ -175,7 +174,7 @@ class FilePath {
 
   FilePath();
   FilePath(const FilePath& that);
-  explicit FilePath(StringPieceType path);
+  explicit FilePath(StringViewType path);
   ~FilePath();
   FilePath& operator=(const FilePath& that);
 
@@ -282,20 +281,20 @@ class FilePath {
   // path == "jojo.jpg"         suffix == " (1)", returns "jojo (1).jpg"
   // path == "C:\pics\jojo"     suffix == " (1)", returns "C:\pics\jojo (1)"
   // path == "C:\pics.old\jojo" suffix == " (1)", returns "C:\pics.old\jojo (1)"
-  FilePath InsertBeforeExtension(StringPieceType suffix) const
+  FilePath InsertBeforeExtension(StringViewType suffix) const
       WARN_UNUSED_RESULT;
-  FilePath InsertBeforeExtensionASCII(StringPiece suffix) const
+  FilePath InsertBeforeExtensionASCII(std::string_view suffix) const
       WARN_UNUSED_RESULT;
 
   // Adds |extension| to |file_name|. Returns the current FilePath if
   // |extension| is empty. Returns "" if BaseName() == "." or "..".
-  FilePath AddExtension(StringPieceType extension) const WARN_UNUSED_RESULT;
+  FilePath AddExtension(StringViewType extension) const WARN_UNUSED_RESULT;
 
   // Replaces the extension of |file_name| with |extension|.  If |file_name|
   // does not have an extension, then |extension| is added.  If |extension| is
   // empty, then the extension is removed from |file_name|.
   // Returns "" if BaseName() == "." or "..".
-  FilePath ReplaceExtension(StringPieceType extension) const WARN_UNUSED_RESULT;
+  FilePath ReplaceExtension(StringViewType extension) const WARN_UNUSED_RESULT;
 
   // Returns a FilePath by appending a separator and the supplied path
   // component to this object's path.  Append takes care to avoid adding
@@ -303,7 +302,7 @@ class FilePath {
   // If this object's path is kCurrentDirectory, a new FilePath corresponding
   // only to |component| is returned.  |component| must be a relative path;
   // it is an error to pass an absolute path.
-  FilePath Append(StringPieceType component) const WARN_UNUSED_RESULT;
+  FilePath Append(StringViewType component) const WARN_UNUSED_RESULT;
   FilePath Append(const FilePath& component) const WARN_UNUSED_RESULT;
 
   // Although Windows StringType is std::u16string, since the encoding it uses
@@ -312,7 +311,7 @@ class FilePath {
   // Linux, although it can use any 8-bit encoding for paths, we assume that
   // ASCII is a valid subset, regardless of the encoding, since many operating
   // system paths will always be ASCII.
-  FilePath AppendASCII(StringPiece component) const WARN_UNUSED_RESULT;
+  FilePath AppendASCII(std::string_view component) const WARN_UNUSED_RESULT;
 
   // Returns true if this FilePath contains an absolute path.  On Windows, an
   // absolute path begins with either a drive letter specification followed by
@@ -338,8 +337,8 @@ class FilePath {
   // Return a Unicode human-readable version of this path.
   // Warning: you can *not*, in general, go from a display name back to a real
   // path.  Only use this when displaying paths to users, not just when you
-  // want to stuff a string16 into some other API.
-  string16 LossyDisplayName() const;
+  // want to stuff a std::u16string into some other API.
+  std::u16string LossyDisplayName() const;
 
   // Return the path as ASCII, or the empty string if the path is not ASCII.
   // This should only be used for cases where the FilePath is representing a

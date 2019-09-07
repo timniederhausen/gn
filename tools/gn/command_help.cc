@@ -215,7 +215,7 @@ void PrintAllHelp() {
 bool PrintHelpOnSwitch(const std::string& what) {
   const switches::SwitchInfoMap& all = switches::GetSwitches();
   switches::SwitchInfoMap::const_iterator found =
-      all.find(base::StringPiece(what));
+      all.find(std::string_view(what));
   if (found == all.end())
     return false;
   PrintLongHelp(found->second.long_help);
@@ -280,7 +280,7 @@ int RunHelp(const std::vector<std::string>& args) {
     what = args[0];
   }
 
-  std::vector<base::StringPiece> all_help_topics;
+  std::vector<std::string_view> all_help_topics;
 
   // Special-case ambiguous topics.
   if (what == "args") {
@@ -361,7 +361,7 @@ int RunHelp(const std::vector<std::string>& args) {
 
   // No help on this.
   Err(Location(), "No help on \"" + what + "\".").PrintToStdout();
-  base::StringPiece suggestion = SpellcheckString(what, all_help_topics);
+  std::string_view suggestion = SpellcheckString(what, all_help_topics);
   if (suggestion.empty()) {
     OutputString("Run `gn help` for a list of available topics.\n",
                  DECORATION_NONE);

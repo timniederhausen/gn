@@ -424,7 +424,7 @@ TEST(FilesystemUtils, NormalizePath) {
 }
 
 TEST(FilesystemUtils, RebasePath) {
-  base::StringPiece source_root("/source/root");
+  std::string_view source_root("/source/root");
 
   // Degenerate case.
   EXPECT_EQ(".", RebasePath("//", SourceDir("//"), source_root));
@@ -468,84 +468,84 @@ TEST(FilesystemUtils, RebasePath) {
 
   // Check when only |input| is system-absolute
   EXPECT_EQ("foo", RebasePath("/source/root/foo", SourceDir("//"),
-                              base::StringPiece("/source/root")));
+                              std::string_view("/source/root")));
   EXPECT_EQ("foo/", RebasePath("/source/root/foo/", SourceDir("//"),
-                               base::StringPiece("/source/root")));
+                               std::string_view("/source/root")));
   EXPECT_EQ("../../builddir/Out/Debug",
             RebasePath("/builddir/Out/Debug", SourceDir("//"),
-                       base::StringPiece("/source/root")));
+                       std::string_view("/source/root")));
   EXPECT_EQ("../../../builddir/Out/Debug",
             RebasePath("/builddir/Out/Debug", SourceDir("//"),
-                       base::StringPiece("/source/root/foo")));
+                       std::string_view("/source/root/foo")));
   EXPECT_EQ("../../../builddir/Out/Debug/",
             RebasePath("/builddir/Out/Debug/", SourceDir("//"),
-                       base::StringPiece("/source/root/foo")));
+                       std::string_view("/source/root/foo")));
   EXPECT_EQ("../../path/to/foo", RebasePath("/path/to/foo", SourceDir("//"),
-                                            base::StringPiece("/source/root")));
+                                            std::string_view("/source/root")));
   EXPECT_EQ("../../../path/to/foo",
             RebasePath("/path/to/foo", SourceDir("//a"),
-                       base::StringPiece("/source/root")));
+                       std::string_view("/source/root")));
   EXPECT_EQ("../../../../path/to/foo",
             RebasePath("/path/to/foo", SourceDir("//a/b"),
-                       base::StringPiece("/source/root")));
+                       std::string_view("/source/root")));
 
   // Check when only |dest_dir| is system-absolute.
   EXPECT_EQ(".", RebasePath("//", SourceDir("/source/root"),
-                            base::StringPiece("/source/root")));
+                            std::string_view("/source/root")));
   EXPECT_EQ("foo", RebasePath("//foo", SourceDir("/source/root"),
-                              base::StringPiece("/source/root")));
+                              std::string_view("/source/root")));
   EXPECT_EQ("../foo", RebasePath("//foo", SourceDir("/source/root/bar"),
-                                 base::StringPiece("/source/root")));
+                                 std::string_view("/source/root")));
   EXPECT_EQ("../../../source/root/foo",
             RebasePath("//foo", SourceDir("/other/source/root"),
-                       base::StringPiece("/source/root")));
+                       std::string_view("/source/root")));
   EXPECT_EQ("../../../../source/root/foo",
             RebasePath("//foo", SourceDir("/other/source/root/bar"),
-                       base::StringPiece("/source/root")));
+                       std::string_view("/source/root")));
 
   // Check when |input| and |dest_dir| are both system-absolute. Also,
   // in this case |source_root| is never used so set it to a dummy
   // value.
   EXPECT_EQ("foo", RebasePath("/source/root/foo", SourceDir("/source/root"),
-                              base::StringPiece("/x/y/z")));
+                              std::string_view("/x/y/z")));
   EXPECT_EQ("foo/", RebasePath("/source/root/foo/", SourceDir("/source/root"),
-                               base::StringPiece("/x/y/z")));
+                               std::string_view("/x/y/z")));
   EXPECT_EQ("../../builddir/Out/Debug",
             RebasePath("/builddir/Out/Debug", SourceDir("/source/root"),
-                       base::StringPiece("/x/y/z")));
+                       std::string_view("/x/y/z")));
   EXPECT_EQ("../../../builddir/Out/Debug",
             RebasePath("/builddir/Out/Debug", SourceDir("/source/root/foo"),
-                       base::StringPiece("/source/root/foo")));
+                       std::string_view("/source/root/foo")));
   EXPECT_EQ("../../../builddir/Out/Debug/",
             RebasePath("/builddir/Out/Debug/", SourceDir("/source/root/foo"),
-                       base::StringPiece("/source/root/foo")));
+                       std::string_view("/source/root/foo")));
   EXPECT_EQ("../../path/to/foo",
             RebasePath("/path/to/foo", SourceDir("/source/root"),
-                       base::StringPiece("/x/y/z")));
+                       std::string_view("/x/y/z")));
   EXPECT_EQ("../../../path/to/foo",
             RebasePath("/path/to/foo", SourceDir("/source/root/a"),
-                       base::StringPiece("/x/y/z")));
+                       std::string_view("/x/y/z")));
   EXPECT_EQ("../../../../path/to/foo",
             RebasePath("/path/to/foo", SourceDir("/source/root/a/b"),
-                       base::StringPiece("/x/y/z")));
+                       std::string_view("/x/y/z")));
 
 #if defined(OS_WIN)
   // Test corrections while rebasing Windows-style absolute paths.
   EXPECT_EQ("../../../../path/to/foo",
             RebasePath("C:/path/to/foo", SourceDir("//a/b"),
-                       base::StringPiece("/C:/source/root")));
+                       std::string_view("/C:/source/root")));
   EXPECT_EQ("../../../../path/to/foo",
             RebasePath("/C:/path/to/foo", SourceDir("//a/b"),
-                       base::StringPiece("C:/source/root")));
+                       std::string_view("C:/source/root")));
   EXPECT_EQ("../../../../path/to/foo",
             RebasePath("/C:/path/to/foo", SourceDir("//a/b"),
-                       base::StringPiece("/c:/source/root")));
+                       std::string_view("/c:/source/root")));
   EXPECT_EQ("../../../../path/to/foo",
             RebasePath("/c:/path/to/foo", SourceDir("//a/b"),
-                       base::StringPiece("c:/source/root")));
+                       std::string_view("c:/source/root")));
   EXPECT_EQ("../../../../path/to/foo",
             RebasePath("/c:/path/to/foo", SourceDir("//a/b"),
-                       base::StringPiece("C:/source/root")));
+                       std::string_view("C:/source/root")));
 #endif
 }
 

@@ -183,7 +183,7 @@ bool CopyFileContents(File* infile, File* outfile) {
 // Appends |mode_char| to |mode| before the optional character set encoding; see
 // https://www.gnu.org/software/libc/manual/html_node/Opening-Streams.html for
 // details.
-std::string AppendModeCharacter(StringPiece mode, char mode_char) {
+std::string AppendModeCharacter(std::string_view mode, char mode_char) {
   std::string result(mode);
   size_t comma_pos = result.find(',');
   result.insert(comma_pos == std::string::npos ? result.length() : comma_pos, 1,
@@ -394,7 +394,7 @@ bool ExecutableExistsInPath(Environment* env,
     return false;
   }
 
-  for (const StringPiece& cur_path :
+  for (const std::string_view& cur_path :
        SplitStringPiece(path, ":", KEEP_WHITESPACE, SPLIT_WANT_NONEMPTY)) {
     FilePath file(cur_path);
     int permissions;

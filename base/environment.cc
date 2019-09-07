@@ -6,10 +6,10 @@
 
 #include <stddef.h>
 
+#include <string_view>
 #include <vector>
 
 #include "base/memory/ptr_util.h"
-#include "base/strings/string_piece.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "util/build_config.h"
@@ -26,7 +26,7 @@ namespace {
 
 class EnvironmentImpl : public Environment {
  public:
-  bool GetVar(StringPiece variable_name, std::string* result) override {
+  bool GetVar(std::string_view variable_name, std::string* result) override {
     if (GetVarImpl(variable_name, result))
       return true;
 
@@ -45,17 +45,17 @@ class EnvironmentImpl : public Environment {
     return GetVarImpl(alternate_case_var, result);
   }
 
-  bool SetVar(StringPiece variable_name,
+  bool SetVar(std::string_view variable_name,
               const std::string& new_value) override {
     return SetVarImpl(variable_name, new_value);
   }
 
-  bool UnSetVar(StringPiece variable_name) override {
+  bool UnSetVar(std::string_view variable_name) override {
     return UnSetVarImpl(variable_name);
   }
 
  private:
-  bool GetVarImpl(StringPiece variable_name, std::string* result) {
+  bool GetVarImpl(std::string_view variable_name, std::string* result) {
 #if defined(OS_WIN)
     DWORD value_length = ::GetEnvironmentVariable(
         reinterpret_cast<LPCWSTR>(UTF8ToUTF16(variable_name).c_str()), nullptr,
@@ -81,7 +81,8 @@ class EnvironmentImpl : public Environment {
 #endif
   }
 
-  bool SetVarImpl(StringPiece variable_name, const std::string& new_value) {
+  bool SetVarImpl(std::string_view variable_name,
+                  const std::string& new_value) {
 #if defined(OS_WIN)
     // On success, a nonzero value is returned.
     return !!SetEnvironmentVariable(
@@ -93,7 +94,7 @@ class EnvironmentImpl : public Environment {
 #endif
   }
 
-  bool UnSetVarImpl(StringPiece variable_name) {
+  bool UnSetVarImpl(std::string_view variable_name) {
 #if defined(OS_WIN)
     // On success, a nonzero value is returned.
     return !!SetEnvironmentVariable(
@@ -141,18 +142,19 @@ std::unique_ptr<Environment> Environment::Create() {
   return std::make_unique<EnvironmentImpl>();
 }
 
-bool Environment::HasVar(StringPiece variable_name) {
+bool Environment::HasVar(std::string_view variable_name) {
   return GetVar(variable_name, nullptr);
 }
 
 #if defined(OS_WIN)
 
-string16 AlterEnvironment(const char16_t* env, const EnvironmentMap& changes) {
-  string16 result;
+std::u16string AlterEnvironment(const char16_t* env,
+                                const EnvironmentMap& changes) {
+  std::u16string result;
 
   // First copy all unmodified values to the output.
   size_t cur_env = 0;
-  string16 key;
+  std::u16string key;
   while (env[cur_env]) {
     const char16_t* line = &env[cur_env];
     size_t line_length = ParseEnvLine(line, &key);

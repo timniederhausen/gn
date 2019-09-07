@@ -34,7 +34,7 @@ namespace base {
       0x3000, /* IDEOGRAPHIC SPACE */         \
       0
 
-const char16 kWhitespaceUTF16[] = {WHITESPACE_UNICODE};
+const char16_t kWhitespaceUTF16[] = {WHITESPACE_UNICODE};
 
 const char kWhitespaceASCII[] = {0x09,  // CHARACTER TABULATION
                                  0x0A,  // LINE FEED (LF)
@@ -44,13 +44,13 @@ const char kWhitespaceASCII[] = {0x09,  // CHARACTER TABULATION
                                  0x20,  // SPACE
                                  0};
 
-const char16 kWhitespaceASCIIAs16[] = {0x09,  // CHARACTER TABULATION
-                                       0x0A,  // LINE FEED (LF)
-                                       0x0B,  // LINE TABULATION
-                                       0x0C,  // FORM FEED (FF)
-                                       0x0D,  // CARRIAGE RETURN (CR)
-                                       0x20,  // SPACE
-                                       0};
+const char16_t kWhitespaceASCIIAs16[] = {0x09,  // CHARACTER TABULATION
+                                         0x0A,  // LINE FEED (LF)
+                                         0x0B,  // LINE TABULATION
+                                         0x0C,  // FORM FEED (FF)
+                                         0x0D,  // CARRIAGE RETURN (CR)
+                                         0x20,  // SPACE
+                                         0};
 
 const char kUtf8ByteOrderMark[] = "\xEF\xBB\xBF";
 

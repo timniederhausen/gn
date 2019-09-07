@@ -22,7 +22,7 @@ void AssertValueSourceFileString(const std::string& s) {
 }
 
 SourceFile::Type GetSourceFileType(const std::string& file) {
-  base::StringPiece extension = FindExtension(&file);
+  std::string_view extension = FindExtension(&file);
   if (extension == "cc" || extension == "cpp" || extension == "cxx")
     return SourceFile::SOURCE_CPP;
   if (extension == "h" || extension == "hpp" || extension == "hxx" ||

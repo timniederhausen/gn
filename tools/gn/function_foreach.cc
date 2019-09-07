@@ -62,7 +62,7 @@ Value RunForEach(Scope* scope,
         Err(args_vector[0].get(), "Expected an identifier for the loop var.");
     return Value();
   }
-  base::StringPiece loop_var(identifier->value().value());
+  std::string_view loop_var(identifier->value().value());
 
   // Extract the list to iterate over. Always copy in case the code changes
   // the list variable inside the loop.

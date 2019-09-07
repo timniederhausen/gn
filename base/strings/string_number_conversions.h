@@ -9,10 +9,9 @@
 #include <stdint.h>
 
 #include <string>
+#include <string_view>
 #include <vector>
 
-#include "base/strings/string16.h"
-#include "base/strings/string_piece.h"
 #include "util/build_config.h"
 
 namespace base {
@@ -21,17 +20,17 @@ namespace base {
 
 // Ignores locale! see warning above.
 std::string NumberToString(int value);
-string16 NumberToString16(int value);
+std::u16string NumberToString16(int value);
 std::string NumberToString(unsigned int value);
-string16 NumberToString16(unsigned int value);
+std::u16string NumberToString16(unsigned int value);
 std::string NumberToString(long value);
-string16 NumberToString16(long value);
+std::u16string NumberToString16(long value);
 std::string NumberToString(unsigned long value);
-string16 NumberToString16(unsigned long value);
+std::u16string NumberToString16(unsigned long value);
 std::string NumberToString(long long value);
-string16 NumberToString16(long long value);
+std::u16string NumberToString16(long long value);
 std::string NumberToString(unsigned long long value);
-string16 NumberToString16(unsigned long long value);
+std::u16string NumberToString16(unsigned long long value);
 
 // Type-specific naming for backwards compatibility.
 //
@@ -40,19 +39,19 @@ string16 NumberToString16(unsigned long long value);
 inline std::string IntToString(int value) {
   return NumberToString(value);
 }
-inline string16 IntToString16(int value) {
+inline std::u16string IntToString16(int value) {
   return NumberToString16(value);
 }
 inline std::string UintToString(unsigned value) {
   return NumberToString(value);
 }
-inline string16 UintToString16(unsigned value) {
+inline std::u16string UintToString16(unsigned value) {
   return NumberToString16(value);
 }
 inline std::string Int64ToString(int64_t value) {
   return NumberToString(value);
 }
-inline string16 Int64ToString16(int64_t value) {
+inline std::u16string Int64ToString16(int64_t value) {
   return NumberToString16(value);
 }
 
@@ -74,20 +73,20 @@ inline string16 Int64ToString16(int64_t value) {
 //  - Empty string.  |*output| will be set to 0.
 // WARNING: Will write to |output| even when returning false.
 //          Read the comments above carefully.
-bool StringToInt(StringPiece input, int* output);
-bool StringToInt(StringPiece16 input, int* output);
+bool StringToInt(std::string_view input, int* output);
+bool StringToInt(std::u16string_view input, int* output);
 
-bool StringToUint(StringPiece input, unsigned* output);
-bool StringToUint(StringPiece16 input, unsigned* output);
+bool StringToUint(std::string_view input, unsigned* output);
+bool StringToUint(std::u16string_view input, unsigned* output);
 
-bool StringToInt64(StringPiece input, int64_t* output);
-bool StringToInt64(StringPiece16 input, int64_t* output);
+bool StringToInt64(std::string_view input, int64_t* output);
+bool StringToInt64(std::u16string_view input, int64_t* output);
 
-bool StringToUint64(StringPiece input, uint64_t* output);
-bool StringToUint64(StringPiece16 input, uint64_t* output);
+bool StringToUint64(std::string_view input, uint64_t* output);
+bool StringToUint64(std::u16string_view input, uint64_t* output);
 
-bool StringToSizeT(StringPiece input, size_t* output);
-bool StringToSizeT(StringPiece16 input, size_t* output);
+bool StringToSizeT(std::string_view input, size_t* output);
+bool StringToSizeT(std::u16string_view input, size_t* output);
 
 // Hex encoding ----------------------------------------------------------------
 
@@ -102,30 +101,30 @@ std::string HexEncode(const void* bytes, size_t size);
 // Best effort conversion, see StringToInt above for restrictions.
 // Will only successful parse hex values that will fit into |output|, i.e.
 // -0x80000000 < |input| < 0x7FFFFFFF.
-bool HexStringToInt(StringPiece input, int* output);
+bool HexStringToInt(std::string_view input, int* output);
 
 // Best effort conversion, see StringToInt above for restrictions.
 // Will only successful parse hex values that will fit into |output|, i.e.
 // 0x00000000 < |input| < 0xFFFFFFFF.
 // The string is not required to start with 0x.
-bool HexStringToUInt(StringPiece input, uint32_t* output);
+bool HexStringToUInt(std::string_view input, uint32_t* output);
 
 // Best effort conversion, see StringToInt above for restrictions.
 // Will only successful parse hex values that will fit into |output|, i.e.
 // -0x8000000000000000 < |input| < 0x7FFFFFFFFFFFFFFF.
-bool HexStringToInt64(StringPiece input, int64_t* output);
+bool HexStringToInt64(std::string_view input, int64_t* output);
 
 // Best effort conversion, see StringToInt above for restrictions.
 // Will only successful parse hex values that will fit into |output|, i.e.
 // 0x0000000000000000 < |input| < 0xFFFFFFFFFFFFFFFF.
 // The string is not required to start with 0x.
-bool HexStringToUInt64(StringPiece input, uint64_t* output);
+bool HexStringToUInt64(std::string_view input, uint64_t* output);
 
 // Similar to the previous functions, except that output is a vector of bytes.
 // |*output| will contain as many bytes as were successfully parsed prior to the
 // error.  There is no overflow, but input.size() must be evenly divisible by 2.
 // Leading 0x or +/- are not allowed.
-bool HexStringToBytes(StringPiece input, std::vector<uint8_t>* output);
+bool HexStringToBytes(std::string_view input, std::vector<uint8_t>* output);
 
 }  // namespace base
 

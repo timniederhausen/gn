@@ -6,8 +6,7 @@
 #define TOOLS_GN_ESCAPE_H_
 
 #include <iosfwd>
-
-#include "base/strings/string_piece.h"
+#include <string_view>
 
 enum EscapingMode {
   // No escaping.
@@ -64,14 +63,14 @@ struct EscapeOptions {
 // (if inhibit_quoting was set) quoted will be written to it. This value should
 // be initialized to false by the caller and will be written to only if it's
 // true (the common use-case is for chaining calls).
-std::string EscapeString(const base::StringPiece& str,
+std::string EscapeString(const std::string_view& str,
                          const EscapeOptions& options,
                          bool* needed_quoting);
 
 // Same as EscapeString but writes the results to the given stream, saving a
 // copy.
 void EscapeStringToStream(std::ostream& out,
-                          const base::StringPiece& str,
+                          const std::string_view& str,
                           const EscapeOptions& options);
 
 #endif  // TOOLS_GN_ESCAPE_H_

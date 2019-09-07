@@ -9,13 +9,12 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/ptr_util.h"
-#include "base/strings/string16.h"
-#include "base/strings/string_piece.h"
 #include "base/values.h"
 
 // JSONValueConverter converts a JSON value into a C++ struct in a
@@ -70,8 +69,8 @@
 //
 // Sometimes JSON format uses string representations for other types such
 // like enum, timestamp, or URL.  You can use RegisterCustomField method
-// and specify a function to convert a StringPiece to your type.
-//   bool ConvertFunc(StringPiece s, YourEnum* result) {
+// and specify a function to convert a std::string_view to your type.
+//   bool ConvertFunc(std::string_view s, YourEnum* result) {
 //     // do something and return true if succeed...
 //   }
 //   struct Message {
@@ -158,11 +157,12 @@ class BasicValueConverter<std::string> : public ValueConverter<std::string> {
 };
 
 template <>
-class BasicValueConverter<string16> : public ValueConverter<string16> {
+class BasicValueConverter<std::u16string>
+    : public ValueConverter<std::u16string> {
  public:
   BasicValueConverter() = default;
 
-  bool Convert(const base::Value& value, string16* field) const override;
+  bool Convert(const base::Value& value, std::u16string* field) const override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BasicValueConverter);
@@ -211,7 +211,7 @@ class ValueFieldConverter : public ValueConverter<FieldType> {
 template <typename FieldType>
 class CustomFieldConverter : public ValueConverter<FieldType> {
  public:
-  typedef bool (*ConvertFunc)(StringPiece value, FieldType* field);
+  typedef bool (*ConvertFunc)(std::string_view value, FieldType* field);
 
   explicit CustomFieldConverter(ConvertFunc convert_func)
       : convert_func_(convert_func) {}
@@ -367,10 +367,11 @@ class JSONValueConverter {
   }
 
   void RegisterStringField(const std::string& field_name,
-                           string16 StructType::*field) {
+                           std::u16string StructType::*field) {
     fields_.push_back(
-        std::make_unique<internal::FieldConverter<StructType, string16>>(
-            field_name, field, new internal::BasicValueConverter<string16>));
+        std::make_unique<internal::FieldConverter<StructType, std::u16string>>(
+            field_name, field,
+            new internal::BasicValueConverter<std::u16string>));
   }
 
   void RegisterBoolField(const std::string& field_name,
@@ -398,7 +399,7 @@ class JSONValueConverter {
   template <typename FieldType>
   void RegisterCustomField(const std::string& field_name,
                            FieldType StructType::*field,
-                           bool (*convert_func)(StringPiece, FieldType*)) {
+                           bool (*convert_func)(std::string_view, FieldType*)) {
     fields_.push_back(
         std::make_unique<internal::FieldConverter<StructType, FieldType>>(
             field_name, field,
@@ -436,10 +437,12 @@ class JSONValueConverter {
 
   void RegisterRepeatedString(
       const std::string& field_name,
-      std::vector<std::unique_ptr<string16>> StructType::*field) {
-    fields_.push_back(std::make_unique<internal::FieldConverter<
-                          StructType, std::vector<std::unique_ptr<string16>>>>(
-        field_name, field, new internal::RepeatedValueConverter<string16>));
+      std::vector<std::unique_ptr<std::u16string>> StructType::*field) {
+    fields_.push_back(
+        std::make_unique<internal::FieldConverter<
+            StructType, std::vector<std::unique_ptr<std::u16string>>>>(
+            field_name, field,
+            new internal::RepeatedValueConverter<std::u16string>));
   }
 
   void RegisterRepeatedDouble(

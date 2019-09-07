@@ -17,8 +17,8 @@ TEST(MetadataTest, SetContents) {
   b_expected.list_value().push_back(Value(nullptr, true));
 
   Metadata::Contents contents;
-  contents.insert(std::pair<base::StringPiece, Value>("a", a_expected));
-  contents.insert(std::pair<base::StringPiece, Value>("b", b_expected));
+  contents.insert(std::pair<std::string_view, Value>("a", a_expected));
+  contents.insert(std::pair<std::string_view, Value>("b", b_expected));
 
   metadata.set_contents(std::move(contents));
 
@@ -41,7 +41,7 @@ TEST(MetadataTest, Walk) {
   a_expected.list_value().push_back(Value(nullptr, "bar.h"));
 
   metadata.contents().insert(
-      std::pair<base::StringPiece, Value>("a", a_expected));
+      std::pair<std::string_view, Value>("a", a_expected));
 
   std::vector<std::string> data_keys;
   data_keys.emplace_back("a");
@@ -75,7 +75,7 @@ TEST(MetadataTest, WalkWithRebase) {
   a_expected.list_value().push_back(Value(nullptr, "foo/bar.h"));
 
   metadata.contents().insert(
-      std::pair<base::StringPiece, Value>("a", a_expected));
+      std::pair<std::string_view, Value>("a", a_expected));
 
   std::vector<std::string> data_keys;
   data_keys.emplace_back("a");
@@ -117,7 +117,7 @@ TEST(MetadataTest, WalkWithRebaseNonString) {
   inner_scope.SetScopeValue(std::move(scope));
   a.list_value().push_back(inner_scope);
 
-  metadata.contents().insert(std::pair<base::StringPiece, Value>("a", a));
+  metadata.contents().insert(std::pair<std::string_view, Value>("a", a));
   std::vector<std::string> data_keys;
   data_keys.emplace_back("a");
   std::vector<std::string> walk_keys;
@@ -162,7 +162,7 @@ TEST(MetadataTest, WalkKeysToWalk) {
   a_expected.list_value().push_back(Value(nullptr, "//target"));
 
   metadata.contents().insert(
-      std::pair<base::StringPiece, Value>("a", a_expected));
+      std::pair<std::string_view, Value>("a", a_expected));
 
   std::vector<std::string> data_keys;
   std::vector<std::string> walk_keys;
@@ -213,7 +213,7 @@ TEST(MetadataTest, WalkNoKeysWithContents) {
   a_expected.list_value().push_back(Value(nullptr, "//target"));
 
   metadata.contents().insert(
-      std::pair<base::StringPiece, Value>("a", a_expected));
+      std::pair<std::string_view, Value>("a", a_expected));
 
   std::vector<std::string> data_keys;
   std::vector<std::string> walk_keys;

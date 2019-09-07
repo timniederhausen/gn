@@ -77,7 +77,7 @@ std::string GetOnePathInfo(const Settings* settings,
       return std::string(FindExtension(&input_string));
     }
     case WHAT_DIR: {
-      base::StringPiece dir_incl_slash = FindDir(&input_string);
+      std::string_view dir_incl_slash = FindDir(&input_string);
       if (dir_incl_slash.empty())
         return std::string(".");
       // Trim slash since this function doesn't return trailing slashes. The

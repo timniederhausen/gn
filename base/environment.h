@@ -8,9 +8,8 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 
-#include "base/strings/string16.h"
-#include "base/strings/string_piece.h"
 #include "util/build_config.h"
 
 namespace base {
@@ -32,22 +31,22 @@ class Environment {
 
   // Gets an environment variable's value and stores it in |result|.
   // Returns false if the key is unset.
-  virtual bool GetVar(StringPiece variable_name, std::string* result) = 0;
+  virtual bool GetVar(std::string_view variable_name, std::string* result) = 0;
 
   // Syntactic sugar for GetVar(variable_name, nullptr);
-  virtual bool HasVar(StringPiece variable_name);
+  virtual bool HasVar(std::string_view variable_name);
 
   // Returns true on success, otherwise returns false.
-  virtual bool SetVar(StringPiece variable_name,
+  virtual bool SetVar(std::string_view variable_name,
                       const std::string& new_value) = 0;
 
   // Returns true on success, otherwise returns false.
-  virtual bool UnSetVar(StringPiece variable_name) = 0;
+  virtual bool UnSetVar(std::string_view variable_name) = 0;
 };
 
 #if defined(OS_WIN)
 
-typedef string16 NativeEnvironmentString;
+typedef std::u16string NativeEnvironmentString;
 typedef std::map<NativeEnvironmentString, NativeEnvironmentString>
     EnvironmentMap;
 
@@ -61,7 +60,8 @@ typedef std::map<NativeEnvironmentString, NativeEnvironmentString>
 // which is a concatenated list of null-terminated 16-bit strings. The end is
 // marked by a double-null terminator. The size of the returned string will
 // include the terminators.
-string16 AlterEnvironment(const char16_t* env, const EnvironmentMap& changes);
+std::u16string AlterEnvironment(const char16_t* env,
+                                const EnvironmentMap& changes);
 
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
 

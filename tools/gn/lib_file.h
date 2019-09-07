@@ -9,8 +9,8 @@
 
 #include <algorithm>
 #include <string>
+#include <string_view>
 
-#include "base/strings/string_piece.h"
 #include "tools/gn/source_file.h"
 
 // Represents an entry in "libs" list. Can be either a path (a SourceFile) or
@@ -19,7 +19,7 @@ class LibFile {
  public:
   LibFile() = default;
 
-  explicit LibFile(const base::StringPiece& lib_name);
+  explicit LibFile(const std::string_view& lib_name);
   explicit LibFile(const SourceFile& source_file);
 
   bool is_source_file() const { return name_.empty(); }

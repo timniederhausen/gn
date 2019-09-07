@@ -6,8 +6,7 @@
 #define TOOLS_GN_VARIABLES_H_
 
 #include <map>
-
-#include "base/strings/string_piece.h"
+#include <string_view>
 
 namespace variables {
 
@@ -337,7 +336,7 @@ struct VariableInfo {
   const char* help;
 };
 
-typedef std::map<base::StringPiece, VariableInfo> VariableInfoMap;
+typedef std::map<std::string_view, VariableInfo> VariableInfoMap;
 
 // Returns the built-in readonly variables.
 // Note: this is used only for help so this getter is not threadsafe.

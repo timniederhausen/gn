@@ -9,10 +9,10 @@
 
 #include <algorithm>
 #include <string>
+#include <string_view>
 
 #include "base/files/file_path.h"
 #include "base/logging.h"
-#include "base/strings/string_piece.h"
 
 class Err;
 class SourceFile;
@@ -47,7 +47,7 @@ class SourceDir {
       bool as_file,
       const Value& v,
       Err* err,
-      const base::StringPiece& source_root = base::StringPiece(),
+      const std::string_view& source_root = std::string_view(),
       const std::string* v_value = nullptr) const;
 
   // Like ResolveRelativeAs above, but allows to produce result
@@ -58,13 +58,13 @@ class SourceDir {
       const Value& blame_input_value,
       const StringType& input_value,
       Err* err,
-      const base::StringPiece& source_root = base::StringPiece()) const;
+      const std::string_view& source_root = std::string_view()) const;
 
   // Wrapper for ResolveRelativeAs.
   SourceFile ResolveRelativeFile(
       const Value& p,
       Err* err,
-      const base::StringPiece& source_root = base::StringPiece()) const;
+      const std::string_view& source_root = std::string_view()) const;
 
   // Wrapper for ResolveRelativeAs.
   template <typename StringType>
@@ -72,7 +72,7 @@ class SourceDir {
       const Value& blame_input_value,
       const StringType& input_value,
       Err* err,
-      const base::StringPiece& source_root = base::StringPiece()) const {
+      const std::string_view& source_root = std::string_view()) const {
     SourceDir ret;
     ret.value_ = ResolveRelativeAs<StringType>(false, blame_input_value,
                                                input_value, err, source_root);
@@ -84,7 +84,7 @@ class SourceDir {
   SourceDir ResolveRelativeDir(
       const Value& v,
       Err* err,
-      const base::StringPiece& source_root = base::StringPiece()) const;
+      const std::string_view& source_root = std::string_view()) const;
 
   // Resolves this source file relative to some given source root. Returns
   // an empty file path on error.
@@ -110,19 +110,19 @@ class SourceDir {
   //
   // This function asserts that the directory is actually source-absolute. The
   // return value points into our buffer.
-  base::StringPiece SourceAbsoluteWithOneSlash() const {
+  std::string_view SourceAbsoluteWithOneSlash() const {
     CHECK(is_source_absolute());
-    return base::StringPiece(&value_[1], value_.size() - 1);
+    return std::string_view(&value_[1], value_.size() - 1);
   }
 
   // Returns a path that does not end with a slash.
   //
   // This function simply returns the reference to the value if the path is a
   // root, e.g. "/" or "//".
-  base::StringPiece SourceWithNoTrailingSlash() const {
+  std::string_view SourceWithNoTrailingSlash() const {
     if (value_.size() > 2)
-      return base::StringPiece(&value_[0], value_.size() - 1);
-    return base::StringPiece(value_);
+      return std::string_view(&value_[0], value_.size() - 1);
+    return std::string_view(value_);
   }
 
   void SwapValue(std::string* v);

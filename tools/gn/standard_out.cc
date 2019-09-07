@@ -6,11 +6,11 @@
 
 #include <stddef.h>
 
+#include <string_view>
 #include <vector>
 
 #include "base/command_line.h"
 #include "base/logging.h"
-#include "base/strings/string_piece.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "tools/gn/switches.h"
@@ -78,8 +78,8 @@ void WriteToStdOut(const std::string& output) {
 #endif  // !defined(OS_WIN)
 
 void OutputMarkdownDec(TextDecoration dec) {
-// The markdown rendering turns "dim" text to italics and any
-// other colored text to bold.
+  // The markdown rendering turns "dim" text to italics and any
+  // other colored text to bold.
 
 #if defined(OS_WIN)
   DWORD written = 0;

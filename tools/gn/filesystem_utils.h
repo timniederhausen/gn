@@ -8,9 +8,9 @@
 #include <stddef.h>
 
 #include <string>
+#include <string_view>
 
 #include "base/files/file_path.h"
-#include "base/strings/string_piece.h"
 #include "tools/gn/settings.h"
 #include "tools/gn/target.h"
 
@@ -20,7 +20,7 @@ std::string FilePathToUTF8(const base::FilePath::StringType& str);
 inline std::string FilePathToUTF8(const base::FilePath& path) {
   return FilePathToUTF8(path.value());
 }
-base::FilePath UTF8ToFilePath(const base::StringPiece& sp);
+base::FilePath UTF8ToFilePath(const std::string_view& sp);
 
 // Extensions -----------------------------------------------------------------
 
@@ -31,7 +31,7 @@ size_t FindExtensionOffset(const std::string& path);
 
 // Returns a string piece pointing into the input string identifying the
 // extension. Note that the input pointer must outlive the output.
-base::StringPiece FindExtension(const std::string* path);
+std::string_view FindExtension(const std::string* path);
 
 // Filename parts -------------------------------------------------------------
 
@@ -43,10 +43,10 @@ size_t FindFilenameOffset(const std::string& path);
 // Returns a string piece pointing into the input string identifying the
 // file name (following the last slash, including the extension). Note that the
 // input pointer must outlive the output.
-base::StringPiece FindFilename(const std::string* path);
+std::string_view FindFilename(const std::string* path);
 
 // Like FindFilename but does not include the extension.
-base::StringPiece FindFilenameNoExtension(const std::string* path);
+std::string_view FindFilenameNoExtension(const std::string* path);
 
 // Removes everything after the last slash. The last slash, if any, will be
 // preserved.
@@ -67,11 +67,11 @@ bool EndsWithSlash(const std::string& s);
 // Returns a string piece pointing into the input string identifying the
 // directory name of the given path, including the last slash. Note that the
 // input pointer must outlive the output.
-base::StringPiece FindDir(const std::string* path);
+std::string_view FindDir(const std::string* path);
 
 // Returns the substring identifying the last component of the dir, or the
 // empty substring if none. For example "//foo/bar/" -> "bar".
-base::StringPiece FindLastDirComponent(const SourceDir& dir);
+std::string_view FindLastDirComponent(const SourceDir& dir);
 
 // Returns true if the given string is in the given output dir. This is pretty
 // stupid and doesn't handle "." and "..", etc., it is designed for a sanity
@@ -96,12 +96,12 @@ bool EnsureStringIsInOutputDir(const SourceDir& output_dir,
 // Returns true if the input string is absolute. Double-slashes at the
 // beginning are treated as source-relative paths. On Windows, this handles
 // paths of both the native format: "C:/foo" and ours "/C:/foo"
-bool IsPathAbsolute(const base::StringPiece& path);
+bool IsPathAbsolute(const std::string_view& path);
 
 // Returns true if the input string is source-absolute. Source-absolute
 // paths begin with two forward slashes and resolve as if they are
 // relative to the source root.
-bool IsPathSourceAbsolute(const base::StringPiece& path);
+bool IsPathSourceAbsolute(const std::string_view& path);
 
 // Given an absolute path, checks to see if is it is inside the source root.
 // If it is, fills a source-absolute path into the given output and returns
@@ -112,8 +112,8 @@ bool IsPathSourceAbsolute(const base::StringPiece& path);
 // ("/C:/"). The source root can end with a slash or not.
 //
 // Note that this does not attempt to normalize slashes in the output.
-bool MakeAbsolutePathRelativeIfPossible(const base::StringPiece& source_root,
-                                        const base::StringPiece& path,
+bool MakeAbsolutePathRelativeIfPossible(const std::string_view& source_root,
+                                        const std::string_view& path,
                                         std::string* dest);
 
 // Given two absolute paths |base| and |target|, returns a relative path to
@@ -134,7 +134,7 @@ base::FilePath MakeAbsoluteFilePathRelativeIfPossible(
 // a leading slash. Otherwise, |path| will retain its relativity. |source_root|
 // must not end with a slash.
 void NormalizePath(std::string* path,
-                   const base::StringPiece& source_root = base::StringPiece());
+                   const std::string_view& source_root = std::string_view());
 
 // Converts slashes to backslashes for Windows. Keeps the string unchanged
 // for other systems.
@@ -150,7 +150,7 @@ void ConvertPathToSystem(std::string* path);
 std::string RebasePath(
     const std::string& input,
     const SourceDir& dest_dir,
-    const base::StringPiece& source_root = base::StringPiece());
+    const std::string_view& source_root = std::string_view());
 
 // Resolves a file or dir name (parameter input) relative to
 // value directory. Will return an empty SourceDir/File on error
@@ -169,7 +169,7 @@ template <typename StringType>
 std::string ResolveRelative(const StringType& input,
                             const std::string& value,
                             bool as_file,
-                            const base::StringPiece& source_root);
+                            const std::string_view& source_root);
 
 // Resolves source file or directory relative to some given source root. Returns
 // an empty file path on error.
