@@ -5,6 +5,7 @@
 #include "tools/gn/xcode_writer.h"
 
 #include <iomanip>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -135,7 +136,7 @@ bool IsXCUITestModuleTarget(const Target* target) {
 
 bool IsXCTestFile(const SourceFile& file) {
   std::string file_name = file.GetName();
-  for (size_t i = 0; i < arraysize(kXCTestFileSuffixes); ++i) {
+  for (size_t i = 0; i < std::size(kXCTestFileSuffixes); ++i) {
     if (base::EndsWith(file_name, kXCTestFileSuffixes[i],
                        base::CompareCase::SENSITIVE)) {
       return true;

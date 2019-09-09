@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <stdint.h>
 
+#include <iterator>
 #include <thread>
 
 #include "base/macros.h"
@@ -61,7 +62,7 @@ namespace logging {
 namespace {
 
 const char* const log_severity_names[] = {"INFO", "WARNING", "ERROR", "FATAL"};
-static_assert(LOG_NUM_SEVERITIES == arraysize(log_severity_names),
+static_assert(LOG_NUM_SEVERITIES == std::size(log_severity_names),
               "Incorrect number of log_severity_names");
 
 const char* log_severity_name(int severity) {
@@ -250,7 +251,7 @@ std::string SystemErrorCodeToString(SystemErrorCode error_code) {
   char msgbuf[kErrorMessageBufferSize];
   DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
   DWORD len = FormatMessageA(flags, nullptr, error_code, 0, msgbuf,
-                             arraysize(msgbuf), nullptr);
+                             std::size(msgbuf), nullptr);
   if (len) {
     // Messages returned by system end with line breaks.
     return base::CollapseWhitespaceASCII(msgbuf, true) +

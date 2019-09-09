@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <stddef.h>
 
+#include <iterator>
 #include <vector>
 
 #include "base/macros.h"
@@ -49,17 +50,17 @@ static void StringAppendVT(StringType* dst,
 #if !defined(OS_WIN)
   ScopedClearErrno clear_errno;
 #endif
-  int result = vsnprintfT(stack_buf, arraysize(stack_buf), format, ap_copy);
+  int result = vsnprintfT(stack_buf, std::size(stack_buf), format, ap_copy);
   va_end(ap_copy);
 
-  if (result >= 0 && result < static_cast<int>(arraysize(stack_buf))) {
+  if (result >= 0 && result < static_cast<int>(std::size(stack_buf))) {
     // It fit.
     dst->append(stack_buf, result);
     return;
   }
 
   // Repeatedly increase buffer size until it fits.
-  int mem_length = arraysize(stack_buf);
+  int mem_length = std::size(stack_buf);
   while (true) {
     if (result < 0) {
 #if defined(OS_WIN)

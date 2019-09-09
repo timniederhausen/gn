@@ -62,7 +62,7 @@ Iterator LastUnique(Iterator first, Iterator last, BinaryPredicate compare) {
 template <typename T, typename = void>
 struct IsTransparentCompare : std::false_type {};
 template <typename T>
-struct IsTransparentCompare<T, void_t<typename T::is_transparent>>
+struct IsTransparentCompare<T, std::void_t<typename T::is_transparent>>
     : std::true_type {};
 
 // Implementation -------------------------------------------------------------

@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include <algorithm>
+#include <iterator>
 #include <string_view>
 
 #include "base/logging.h"
@@ -134,14 +135,14 @@ StringType::size_type ExtensionSeparatorPosition(const StringType& path) {
     return last_dot;
   }
 
-  for (size_t i = 0; i < arraysize(kCommonDoubleExtensions); ++i) {
+  for (size_t i = 0; i < std::size(kCommonDoubleExtensions); ++i) {
     StringType extension(path, penultimate_dot + 1);
     if (LowerCaseEqualsASCII(extension, kCommonDoubleExtensions[i]))
       return penultimate_dot;
   }
 
   StringType extension(path, last_dot + 1);
-  for (size_t i = 0; i < arraysize(kCommonDoubleExtensionSuffixes); ++i) {
+  for (size_t i = 0; i < std::size(kCommonDoubleExtensionSuffixes); ++i) {
     if (LowerCaseEqualsASCII(extension, kCommonDoubleExtensionSuffixes[i])) {
       if ((last_dot - penultimate_dot) <= 5U &&
           (last_dot - penultimate_dot) > 1U) {

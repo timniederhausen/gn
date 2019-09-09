@@ -17,6 +17,7 @@
 #include <wctype.h>
 
 #include <algorithm>
+#include <iterator>
 #include <limits>
 #include <vector>
 
@@ -603,17 +604,17 @@ std::u16string FormatBytesUnlocalized(int64_t bytes) {
   size_t dimension = 0;
   const int kKilo = 1024;
   while (unit_amount >= kKilo &&
-         dimension < arraysize(kByteStringsUnlocalized) - 1) {
+         dimension < std::size(kByteStringsUnlocalized) - 1) {
     unit_amount /= kKilo;
     dimension++;
   }
 
   char buf[64];
   if (bytes != 0 && dimension > 0 && unit_amount < 100) {
-    base::snprintf(buf, arraysize(buf), "%.1lf%s", unit_amount,
+    base::snprintf(buf, std::size(buf), "%.1lf%s", unit_amount,
                    kByteStringsUnlocalized[dimension]);
   } else {
-    base::snprintf(buf, arraysize(buf), "%.0lf%s", unit_amount,
+    base::snprintf(buf, std::size(buf), "%.0lf%s", unit_amount,
                    kByteStringsUnlocalized[dimension]);
   }
 

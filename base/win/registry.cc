@@ -6,7 +6,9 @@
 
 #include <shlwapi.h>
 #include <stddef.h>
+
 #include <algorithm>
+#include <iterator>
 
 #include "base/logging.h"
 #include "base/macros.h"
@@ -181,7 +183,7 @@ DWORD RegKey::GetValueCount() const {
 
 LONG RegKey::GetValueNameAt(int index, std::u16string* name) const {
   char16_t buf[256];
-  DWORD bufsize = arraysize(buf);
+  DWORD bufsize = std::size(buf);
   LONG r = ::RegEnumValue(key_, index, ToWCharT(buf), &bufsize, NULL, NULL,
                           NULL, NULL);
   if (r == ERROR_SUCCESS)
@@ -581,7 +583,7 @@ void RegistryKeyIterator::operator++() {
 
 bool RegistryKeyIterator::Read() {
   if (Valid()) {
-    DWORD ncount = arraysize(name_);
+    DWORD ncount = std::size(name_);
     FILETIME written;
     LONG r = ::RegEnumKeyEx(key_, index_, ToWCharT(name_), &ncount, NULL, NULL,
                             NULL, &written);

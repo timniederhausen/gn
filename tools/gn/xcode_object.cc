@@ -5,6 +5,7 @@
 #include "tools/gn/xcode_object.h"
 
 #include <iomanip>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <utility>
@@ -141,7 +142,7 @@ const SourceTypeForExt kSourceTypeForExt[] = {
 };
 
 const char* GetSourceType(const std::string_view& ext) {
-  for (size_t i = 0; i < arraysize(kSourceTypeForExt); ++i) {
+  for (size_t i = 0; i < std::size(kSourceTypeForExt); ++i) {
     if (kSourceTypeForExt[i].ext == ext)
       return kSourceTypeForExt[i].source_type;
   }

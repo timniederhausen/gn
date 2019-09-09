@@ -5,6 +5,7 @@
 #include "base/command_line.h"
 
 #include <algorithm>
+#include <iterator>
 #include <ostream>
 #include <string_view>
 
@@ -44,7 +45,7 @@ const CommandLine::CharType* const kSwitchPrefixes[] = {u"--", u"-", u"/"};
 // Unixes don't use slash as a switch.
 const CommandLine::CharType* const kSwitchPrefixes[] = {"--", "-"};
 #endif
-size_t switch_prefix_count = arraysize(kSwitchPrefixes);
+size_t switch_prefix_count = std::size(kSwitchPrefixes);
 
 size_t GetSwitchPrefixLength(const CommandLine::StringType& string) {
   for (size_t i = 0; i < switch_prefix_count; ++i) {
@@ -186,9 +187,9 @@ CommandLine::~CommandLine() = default;
 // static
 void CommandLine::set_slash_is_not_a_switch() {
   // The last switch prefix should be slash, so adjust the size to skip it.
-  DCHECK(std::u16string_view(kSwitchPrefixes[arraysize(kSwitchPrefixes) - 1]) ==
+  DCHECK(std::u16string_view(kSwitchPrefixes[std::size(kSwitchPrefixes) - 1]) ==
          std::u16string_view(u"/"));
-  switch_prefix_count = arraysize(kSwitchPrefixes) - 1;
+  switch_prefix_count = std::size(kSwitchPrefixes) - 1;
 }
 
 // static

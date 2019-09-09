@@ -52,12 +52,12 @@ using IsLegalDataConversion = std::is_convertible<From (*)[], To (*)[]>;
 
 template <typename Container, typename T>
 using ContainerHasConvertibleData = IsLegalDataConversion<
-    std::remove_pointer_t<decltype(base::data(std::declval<Container>()))>,
+    std::remove_pointer_t<decltype(std::data(std::declval<Container>()))>,
     T>;
 
 template <typename Container>
 using ContainerHasIntegralSize =
-    std::is_integral<decltype(base::size(std::declval<Container>()))>;
+    std::is_integral<decltype(std::size(std::declval<Container>()))>;
 
 template <typename From, size_t FromExtent, typename To, size_t ToExtent>
 using EnableIfLegalSpanConversion =
@@ -200,14 +200,14 @@ class span {
   template <
       size_t N,
       typename = internal::EnableIfSpanCompatibleArray<T (&)[N], N, T, Extent>>
-  constexpr span(T (&array)[N]) noexcept : span(base::data(array), N) {}
+  constexpr span(T (&array)[N]) noexcept : span(std::data(array), N) {}
 
   template <
       size_t N,
       typename = internal::
           EnableIfSpanCompatibleArray<std::array<value_type, N>&, N, T, Extent>>
   constexpr span(std::array<value_type, N>& array) noexcept
-      : span(base::data(array), N) {}
+      : span(std::data(array), N) {}
 
   template <size_t N,
             typename = internal::EnableIfSpanCompatibleArray<
@@ -216,20 +216,20 @@ class span {
                 T,
                 Extent>>
   constexpr span(const std::array<value_type, N>& array) noexcept
-      : span(base::data(array), N) {}
+      : span(std::data(array), N) {}
 
-  // Conversion from a container that has compatible base::data() and integral
-  // base::size().
+  // Conversion from a container that has compatible std::data() and integral
+  // std::size().
   template <typename Container,
             typename = internal::EnableIfSpanCompatibleContainer<Container&, T>>
   constexpr span(Container& container) noexcept
-      : span(base::data(container), base::size(container)) {}
+      : span(std::data(container), std::size(container)) {}
 
   template <
       typename Container,
       typename = internal::EnableIfSpanCompatibleContainer<const Container&, T>>
   span(const Container& container) noexcept
-      : span(base::data(container), base::size(container)) {}
+      : span(std::data(container), std::size(container)) {}
 
   constexpr span(const span& other) noexcept = default;
 

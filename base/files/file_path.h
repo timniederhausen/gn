@@ -160,7 +160,7 @@ class FilePath {
   // when composing pathnames.
   static const CharType kSeparators[];
 
-  // arraysize(kSeparators).
+  // std::size(kSeparators).
   static const size_t kSeparatorsLength;
 
   // A special path component meaning "this directory."

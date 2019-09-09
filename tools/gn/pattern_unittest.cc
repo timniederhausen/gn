@@ -4,6 +4,8 @@
 
 #include <stddef.h>
 
+#include <iterator>
+
 #include "base/macros.h"
 #include "tools/gn/pattern.h"
 #include "util/test/test.h"
@@ -54,7 +56,7 @@ TEST(Pattern, Matches) {
       {"*\\bfoo\\b*", "foob", false},
       {"*\\bfoo\\b*", "lala/foo/bar/baz", true},
   };
-  for (size_t i = 0; i < arraysize(pattern_cases); i++) {
+  for (size_t i = 0; i < std::size(pattern_cases); i++) {
     const Case& c = pattern_cases[i];
     Pattern pattern(c.pattern);
     bool result = pattern.MatchesString(c.candidate);

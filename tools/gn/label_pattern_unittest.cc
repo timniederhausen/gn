@@ -4,6 +4,8 @@
 
 #include <stddef.h>
 
+#include <iterator>
+
 #include "base/macros.h"
 #include "tools/gn/err.h"
 #include "tools/gn/label_pattern.h"
@@ -70,7 +72,7 @@ TEST(LabelPattern, PatternParse) {
 #endif
   };
 
-  for (size_t i = 0; i < arraysize(cases); i++) {
+  for (size_t i = 0; i < std::size(cases); i++) {
     const PatternCase& cur = cases[i];
     Err err;
     LabelPattern result =

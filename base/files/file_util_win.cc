@@ -16,6 +16,7 @@
 #include <winsock2.h>
 
 #include <algorithm>
+#include <iterator>
 #include <limits>
 #include <string>
 #include <string_view>
@@ -676,7 +677,7 @@ bool SetCurrentDirectory(const FilePath& directory) {
 int GetMaximumPathComponentLength(const FilePath& path) {
   char16_t volume_path[MAX_PATH];
   if (!GetVolumePathNameW(ToWCharT(&path.NormalizePathSeparators().value()),
-                          ToWCharT(volume_path), arraysize(volume_path))) {
+                          ToWCharT(volume_path), std::size(volume_path))) {
     return -1;
   }
 

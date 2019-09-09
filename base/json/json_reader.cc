@@ -9,7 +9,6 @@
 
 #include "base/json/json_parser.h"
 #include "base/logging.h"
-#include "base/optional.h"
 #include "base/values.h"
 
 namespace base {
@@ -45,7 +44,7 @@ std::unique_ptr<Value> JSONReader::Read(std::string_view json,
                                         int options,
                                         int max_depth) {
   internal::JSONParser parser(options, max_depth);
-  Optional<Value> root = parser.Parse(json);
+  std::optional<Value> root = parser.Parse(json);
   return root ? std::make_unique<Value>(std::move(*root)) : nullptr;
 }
 
@@ -58,7 +57,7 @@ std::unique_ptr<Value> JSONReader::ReadAndReturnError(
     int* error_line_out,
     int* error_column_out) {
   internal::JSONParser parser(options);
-  Optional<Value> root = parser.Parse(json);
+  std::optional<Value> root = parser.Parse(json);
   if (!root) {
     if (error_code_out)
       *error_code_out = parser.error_code();
@@ -104,7 +103,7 @@ std::string JSONReader::ErrorCodeToString(JsonParseError error_code) {
 }
 
 std::unique_ptr<Value> JSONReader::ReadToValue(std::string_view json) {
-  Optional<Value> value = parser_->Parse(json);
+  std::optional<Value> value = parser_->Parse(json);
   return value ? std::make_unique<Value>(std::move(*value)) : nullptr;
 }
 

@@ -4,6 +4,7 @@
 
 #include "tools/gn/input_conversion.h"
 
+#include <iterator>
 #include <memory>
 #include <utility>
 
@@ -218,7 +219,7 @@ Value DoConvertInputToValue(const Settings* settings,
     // Remove "trim" prefix from the input conversion and re-run.
     return DoConvertInputToValue(
         settings, trimmed, origin, original_input_conversion,
-        input_conversion.substr(arraysize(kTrimPrefix) - 1), err);
+        input_conversion.substr(std::size(kTrimPrefix) - 1), err);
   }
 
   if (input_conversion == "value")

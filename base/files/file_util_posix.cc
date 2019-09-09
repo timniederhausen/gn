@@ -21,6 +21,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <iterator>
+
 #include "base/command_line.h"
 #include "base/containers/stack.h"
 #include "base/environment.h"
@@ -344,7 +346,7 @@ bool ReadSymbolicLink(const FilePath& symlink_path, FilePath* target_path) {
   DCHECK(!symlink_path.empty());
   DCHECK(target_path);
   char buf[PATH_MAX];
-  ssize_t count = ::readlink(symlink_path.value().c_str(), buf, arraysize(buf));
+  ssize_t count = ::readlink(symlink_path.value().c_str(), buf, std::size(buf));
 
   if (count <= 0) {
     target_path->clear();
@@ -714,7 +716,7 @@ bool VerifyPathControlledByAdmin(const FilePath& path) {
   const char* const kAdminGroupNames[] = {"admin", "wheel"};
 
   std::set<gid_t> allowed_group_ids;
-  for (int i = 0, ie = arraysize(kAdminGroupNames); i < ie; ++i) {
+  for (int i = 0, ie = std::size(kAdminGroupNames); i < ie; ++i) {
     struct group* group_record = getgrnam(kAdminGroupNames[i]);
     if (!group_record) {
       DPLOG(ERROR) << "Could not get the group ID of group \""

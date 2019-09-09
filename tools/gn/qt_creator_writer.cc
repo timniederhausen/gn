@@ -4,6 +4,7 @@
 
 #include "tools/gn/qt_creator_writer.h"
 
+#include <optional>
 #include <set>
 #include <sstream>
 #include <string>
@@ -11,7 +12,6 @@
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/optional.h"
 
 #include "tools/gn/builder.h"
 #include "tools/gn/config_values_extractors.h"
@@ -133,12 +133,12 @@ enum class CxxVersion {
 std::string ToMacro(CVersion version) {
   const std::string s = "__STDC_VERSION__";
 
-  switch(version) {
+  switch (version) {
     case CVersion::C99:
       return s + " 199901L";
     case CVersion::C11:
       return s + " 201112L";
-    }
+  }
 
   return std::string();
 }
@@ -146,7 +146,7 @@ std::string ToMacro(CVersion version) {
 std::string ToMacro(CxxVersion version) {
   const std::string name = "__cplusplus";
 
-  switch(version) {
+  switch (version) {
     case CxxVersion::CXX98:
     case CxxVersion::CXX03:
       return name + " 199711L";
@@ -156,29 +156,27 @@ std::string ToMacro(CxxVersion version) {
       return name + " 201402L";
     case CxxVersion::CXX17:
       return name + " 201703L";
-    }
+  }
 
   return std::string();
 }
 
 const std::map<std::string, CVersion> kFlagToCVersion{
-  {"-std=gnu99" , CVersion::C99},
-  {"-std=c99"   , CVersion::C99},
-  {"-std=gnu11" , CVersion::C11},
-  {"-std=c11"   , CVersion::C11}
-};
+    {"-std=gnu99", CVersion::C99},
+    {"-std=c99", CVersion::C99},
+    {"-std=gnu11", CVersion::C11},
+    {"-std=c11", CVersion::C11}};
 
 const std::map<std::string, CxxVersion> kFlagToCxxVersion{
-  {"-std=gnu++11", CxxVersion::CXX11}, {"-std=c++11", CxxVersion::CXX11},
-  {"-std=gnu++98", CxxVersion::CXX98}, {"-std=c++98", CxxVersion::CXX98},
-  {"-std=gnu++03", CxxVersion::CXX03}, {"-std=c++03", CxxVersion::CXX03},
-  {"-std=gnu++14", CxxVersion::CXX14}, {"-std=c++14", CxxVersion::CXX14},
-  {"-std=c++1y"  , CxxVersion::CXX14},
-  {"-std=gnu++17", CxxVersion::CXX17}, {"-std=c++17", CxxVersion::CXX17},
-  {"-std=c++1z"  , CxxVersion::CXX17},
+    {"-std=gnu++11", CxxVersion::CXX11}, {"-std=c++11", CxxVersion::CXX11},
+    {"-std=gnu++98", CxxVersion::CXX98}, {"-std=c++98", CxxVersion::CXX98},
+    {"-std=gnu++03", CxxVersion::CXX03}, {"-std=c++03", CxxVersion::CXX03},
+    {"-std=gnu++14", CxxVersion::CXX14}, {"-std=c++14", CxxVersion::CXX14},
+    {"-std=c++1y", CxxVersion::CXX14},   {"-std=gnu++17", CxxVersion::CXX17},
+    {"-std=c++17", CxxVersion::CXX17},   {"-std=c++1z", CxxVersion::CXX17},
 };
 
-template<typename Enum>
+template <typename Enum>
 struct CompVersion {
   bool operator()(Enum a, Enum b) {
     return static_cast<int>(a) < static_cast<int>(b);
@@ -186,22 +184,18 @@ struct CompVersion {
 };
 
 struct CompilerOptions {
-  base::Optional<CVersion> c_version_;
-  base::Optional<CxxVersion> cxx_version_;
+  std::optional<CVersion> c_version_;
+  std::optional<CxxVersion> cxx_version_;
 
-  void SetCVersion(CVersion ver) {
-    SetVersionImpl(c_version_, ver);
-  }
+  void SetCVersion(CVersion ver) { SetVersionImpl(c_version_, ver); }
 
-  void SetCxxVersion(CxxVersion ver) {
-    SetVersionImpl(cxx_version_, ver);
-  }
+  void SetCxxVersion(CxxVersion ver) { SetVersionImpl(cxx_version_, ver); }
 
-private:
-  template<typename Version>
-  void SetVersionImpl(base::Optional<Version> &cur_ver, Version ver) {
+ private:
+  template <typename Version>
+  void SetVersionImpl(std::optional<Version>& cur_ver, Version ver) {
     if (cur_ver)
-      cur_ver = std::max(*cur_ver, ver, CompVersion<Version> {});
+      cur_ver = std::max(*cur_ver, ver, CompVersion<Version>{});
     else
       cur_ver = ver;
   }
@@ -223,7 +217,7 @@ void ParseCompilerOptions(const std::vector<std::string>& cflags,
     ParseCompilerOption(flag, options);
 }
 
-} // QtCreatorWriterUtils
+}  // namespace QtCreatorWriterUtils
 
 void QtCreatorWriter::HandleTarget(const Target* target) {
   using namespace QtCreatorWriterUtils;
@@ -250,7 +244,7 @@ void QtCreatorWriter::HandleTarget(const Target* target) {
           FilePathToUTF8(build_settings_->GetFullPath(include_dir)));
     }
 
-    static constexpr const char *define_str = "#define ";
+    static constexpr const char* define_str = "#define ";
     for (std::string define : it.cur().defines()) {
       size_t equal_pos = define.find('=');
       if (equal_pos != std::string::npos)
@@ -264,7 +258,7 @@ void QtCreatorWriter::HandleTarget(const Target* target) {
     ParseCompilerOptions(it.cur().cflags_c(), &options);
     ParseCompilerOptions(it.cur().cflags_cc(), &options);
 
-    auto add_define_version = [this] (auto &ver) {
+    auto add_define_version = [this](auto& ver) {
       if (ver)
         defines_.insert(define_str + ToMacro(*ver));
     };

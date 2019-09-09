@@ -4,6 +4,8 @@
 
 #include <stddef.h>
 
+#include <iterator>
+
 #include "base/macros.h"
 #include "tools/gn/err.h"
 #include "tools/gn/label.h"
@@ -73,7 +75,7 @@ TEST(Label, Resolve) {
 
   Label default_toolchain(SourceDir("//t/"), "d");
 
-  for (size_t i = 0; i < arraysize(cases); i++) {
+  for (size_t i = 0; i < std::size(cases); i++) {
     const ParseDepStringCase& cur = cases[i];
 
     std::string location, name;

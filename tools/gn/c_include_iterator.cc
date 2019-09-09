@@ -4,6 +4,8 @@
 
 #include "tools/gn/c_include_iterator.h"
 
+#include <iterator>
+
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/strings/string_util.h"
@@ -63,9 +65,9 @@ IncludeType ExtractInclude(const std::string_view& line,
                            std::string_view* path,
                            int* begin_char) {
   static const char kInclude[] = "include";
-  static const size_t kIncludeLen = arraysize(kInclude) - 1;  // No null.
+  static const size_t kIncludeLen = std::size(kInclude) - 1;  // No null.
   static const char kImport[] = "import";
-  static const size_t kImportLen = arraysize(kImport) - 1;  // No null.
+  static const size_t kImportLen = std::size(kImport) - 1;  // No null.
 
   std::string_view trimmed = TrimLeadingWhitespace(line);
   if (trimmed.empty())

@@ -4,6 +4,8 @@
 
 #include "tools/gn/ninja_create_bundle_target_writer.h"
 
+#include <iterator>
+
 #include "base/macros.h"
 #include "base/strings/string_util.h"
 #include "tools/gn/filesystem_utils.h"
@@ -41,7 +43,7 @@ bool EnsureAllToolsAvailable(const Target* target) {
       GeneralTool::kGeneralToolStamp,
   };
 
-  for (size_t i = 0; i < arraysize(kRequiredTools); ++i) {
+  for (size_t i = 0; i < std::size(kRequiredTools); ++i) {
     if (!target->toolchain()->GetTool(kRequiredTools[i])) {
       FailWithMissingToolError(kRequiredTools[i], target);
       return false;
