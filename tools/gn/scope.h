@@ -366,7 +366,7 @@ class Scope {
 
   // Note that this can't use string pieces since the names are constructed from
   // Values which might be deallocated before this goes out of scope.
-  typedef std::unordered_map<std::string, std::unique_ptr<Scope>> NamedScopeMap;
+  using NamedScopeMap = std::unordered_map<std::string, std::unique_ptr<Scope>>;
   NamedScopeMap target_defaults_;
 
   // Null indicates not set and that we should fallback to the containing
@@ -374,16 +374,16 @@ class Scope {
   std::unique_ptr<PatternList> sources_assignment_filter_;
 
   // Owning pointers, must be deleted.
-  typedef std::map<std::string, scoped_refptr<const Template>> TemplateMap;
+  using TemplateMap = std::map<std::string, scoped_refptr<const Template>>;
   TemplateMap templates_;
 
   ItemVector* item_collector_;
 
   // Opaque pointers. See SetProperty() above.
-  typedef std::map<const void*, void*> PropertyMap;
+  using PropertyMap = std::map<const void*, void*>;
   PropertyMap properties_;
 
-  typedef std::set<ProgrammaticProvider*> ProviderSet;
+  using ProviderSet = std::set<ProgrammaticProvider*>;
   ProviderSet programmatic_providers_;
 
   SourceDir source_dir_;

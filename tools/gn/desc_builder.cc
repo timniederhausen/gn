@@ -106,7 +106,7 @@ void RecursiveCollectChildDeps(const Target* target,
 // Common functionality for target and config description builder
 class BaseDescBuilder {
  public:
-  typedef std::unique_ptr<base::Value> ValuePtr;
+  using ValuePtr = std::unique_ptr<base::Value>;
 
   BaseDescBuilder(const std::set<std::string>& what,
                   bool all,

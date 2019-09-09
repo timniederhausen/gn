@@ -22,7 +22,7 @@ class Target;
 // location of the thing that added this dependency.
 template <typename T>
 struct LabelPtrPair {
-  typedef T DestType;
+  using DestType = T;
 
   LabelPtrPair() = default;
 
@@ -43,11 +43,11 @@ struct LabelPtrPair {
   const ParseNode* origin = nullptr;
 };
 
-typedef LabelPtrPair<Config> LabelConfigPair;
-typedef LabelPtrPair<Target> LabelTargetPair;
+using LabelConfigPair = LabelPtrPair<Config>;
+using LabelTargetPair = LabelPtrPair<Target>;
 
-typedef std::vector<LabelConfigPair> LabelConfigVector;
-typedef std::vector<LabelTargetPair> LabelTargetVector;
+using LabelConfigVector = std::vector<LabelConfigPair>;
+using LabelTargetVector = std::vector<LabelTargetPair>;
 
 // Default comparison operators -----------------------------------------------
 //

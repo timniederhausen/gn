@@ -28,7 +28,7 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
                          UniqueVector<OutputFile>* obj_files) const override;
 
  private:
-  typedef std::set<OutputFile> OutputFileSet;
+  using OutputFileSet = std::set<OutputFile>;
 
   // Writes all flags for the compiler: includes, defines, cflags, etc.
   void WriteCompilerVars();

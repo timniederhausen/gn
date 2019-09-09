@@ -27,7 +27,7 @@ class Toolchain;
 
 namespace commands {
 
-typedef int (*CommandRunner)(const std::vector<std::string>&);
+using CommandRunner = int (*)(const std::vector<std::string>&);
 
 extern const char kAnalyze[];
 extern const char kAnalyze_HelpShort[];
@@ -102,7 +102,7 @@ struct CommandInfo {
   CommandRunner runner;
 };
 
-typedef std::map<std::string_view, CommandInfo> CommandInfoMap;
+using CommandInfoMap = std::map<std::string_view, CommandInfo>;
 
 const CommandInfoMap& GetCommands();
 

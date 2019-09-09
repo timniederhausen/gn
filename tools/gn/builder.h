@@ -24,7 +24,7 @@ class ParseNode;
 // the main thread only. See also BuilderRecord.
 class Builder {
  public:
-  typedef base::Callback<void(const BuilderRecord*)> ResolvedGeneratedCallback;
+  using ResolvedGeneratedCallback = base::Callback<void(const BuilderRecord*)>;
 
   explicit Builder(Loader* loader);
   ~Builder();

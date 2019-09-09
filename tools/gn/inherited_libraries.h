@@ -62,7 +62,7 @@ class InheritedLibraries {
     bool is_public;
   };
 
-  typedef std::map<const Target*, Node> LibraryMap;
+  using LibraryMap = std::map<const Target*, Node>;
   LibraryMap map_;
 
   DISALLOW_COPY_AND_ASSIGN(InheritedLibraries);

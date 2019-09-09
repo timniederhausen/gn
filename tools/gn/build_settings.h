@@ -25,8 +25,8 @@ class Item;
 // may be multiple Settings objects that refer to this, one for each toolchain.
 class BuildSettings {
  public:
-  typedef base::Callback<void(std::unique_ptr<Item>)> ItemDefinedCallback;
-  typedef base::Callback<void(const std::string&)> PrintCallback;
+  using ItemDefinedCallback = base::Callback<void(std::unique_ptr<Item>)>;
+  using PrintCallback = base::Callback<void(const std::string&)>;
 
   BuildSettings();
   BuildSettings(const BuildSettings& other);

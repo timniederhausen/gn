@@ -52,7 +52,7 @@ std::vector<const Item*> MockBuilder::GetAllItems() const {
 
 class MockInputFileManager {
  public:
-  typedef base::Callback<void(const ParseNode*)> Callback;
+  using Callback = base::Callback<void(const ParseNode*)>;
 
   MockInputFileManager() = default;
 
@@ -84,7 +84,7 @@ class MockInputFileManager {
     return true;
   }
 
-  typedef std::map<SourceFile, std::unique_ptr<CannedResult>> CannedResponseMap;
+  using CannedResponseMap = std::map<SourceFile, std::unique_ptr<CannedResult>>;
   CannedResponseMap canned_responses_;
 
   std::vector<std::pair<SourceFile, Callback>> pending_;

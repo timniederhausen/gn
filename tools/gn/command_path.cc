@@ -41,7 +41,7 @@ struct Options {
   bool with_data;
 };
 
-typedef std::list<PathVector> WorkQueue;
+using WorkQueue = std::list<PathVector>;
 
 struct Stats {
   Stats() : public_paths(0), other_paths(0) {}

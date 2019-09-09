@@ -18,7 +18,7 @@ struct SwitchInfo {
   const char* long_help;
 };
 
-typedef std::map<std::string_view, SwitchInfo> SwitchInfoMap;
+using SwitchInfoMap = std::map<std::string_view, SwitchInfo>;
 
 // Returns the mapping of all global switches.
 const SwitchInfoMap& GetSwitches();

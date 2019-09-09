@@ -46,7 +46,7 @@ class HeaderChecker : public base::RefCountedThreadSafe<HeaderChecker> {
       return target == other.target && is_public == other.is_public;
     }
   };
-  typedef std::vector<ChainLink> Chain;
+  using Chain = std::vector<ChainLink>;
 
   // check_generated, if true, will also check generated
   // files. Something that can only be done after running a build that
@@ -94,10 +94,10 @@ class HeaderChecker : public base::RefCountedThreadSafe<HeaderChecker> {
     bool is_generated;
   };
 
-  typedef std::vector<TargetInfo> TargetVector;
-  typedef std::map<SourceFile, TargetVector> FileMap;
-  typedef base::RepeatingCallback<bool(const base::FilePath& path)>
-      PathExistsCallback;
+  using TargetVector = std::vector<TargetInfo>;
+  using FileMap = std::map<SourceFile, TargetVector>;
+  using PathExistsCallback =
+      base::RepeatingCallback<bool(const base::FilePath& path)>;
 
   // Backend for Run() that takes the list of files to check. The errors_ list
   // will be populate on failure.

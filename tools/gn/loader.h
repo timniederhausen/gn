@@ -71,12 +71,12 @@ class Loader : public base::RefCountedThreadSafe<Loader> {
 class LoaderImpl : public Loader {
  public:
   // Callback to emulate InputFileManager::AsyncLoadFile.
-  typedef base::Callback<bool(const LocationRange&,
-                              const BuildSettings*,
-                              const SourceFile&,
-                              const base::Callback<void(const ParseNode*)>&,
-                              Err*)>
-      AsyncLoadFileCallback;
+  using AsyncLoadFileCallback =
+      base::Callback<bool(const LocationRange&,
+                          const BuildSettings*,
+                          const SourceFile&,
+                          const base::Callback<void(const ParseNode*)>&,
+                          Err*)>;
 
   explicit LoaderImpl(const BuildSettings* build_settings);
 
@@ -164,14 +164,14 @@ class LoaderImpl : public Loader {
   // mocking purposes.
   AsyncLoadFileCallback async_load_file_;
 
-  typedef std::set<LoadID> LoadIDSet;
+  using LoadIDSet = std::set<LoadID>;
   LoadIDSet invocations_;
 
   const BuildSettings* build_settings_;
   Label default_toolchain_label_;
 
   // Records for the build config file loads.
-  typedef std::map<Label, std::unique_ptr<ToolchainRecord>> ToolchainRecordMap;
+  using ToolchainRecordMap = std::map<Label, std::unique_ptr<ToolchainRecord>>;
   ToolchainRecordMap toolchain_records_;
 };
 

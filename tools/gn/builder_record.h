@@ -29,7 +29,7 @@ class ParseNode;
 // the current build (should_generate is false).
 class BuilderRecord {
  public:
-  typedef std::set<BuilderRecord*> BuilderRecordSet;
+  using BuilderRecordSet = std::set<BuilderRecord*>;
 
   enum ItemType {
     ITEM_UNKNOWN,

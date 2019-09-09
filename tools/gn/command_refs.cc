@@ -26,11 +26,11 @@ namespace commands {
 
 namespace {
 
-typedef std::set<const Target*> TargetSet;
-typedef std::vector<const Target*> TargetVector;
+using TargetSet = std::set<const Target*>;
+using TargetVector = std::vector<const Target*>;
 
 // Maps targets to the list of targets that depend on them.
-typedef std::multimap<const Target*, const Target*> DepMap;
+using DepMap = std::multimap<const Target*, const Target*>;
 
 // Populates the reverse dependency map for the targets in the Setup.
 void FillDepMap(Setup* setup, DepMap* dep_map) {

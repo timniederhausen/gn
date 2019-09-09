@@ -56,8 +56,8 @@ class Target : public Item {
     DEPS_LINKED,  // Iterates through all non-data dependencies.
   };
 
-  typedef std::vector<SourceFile> FileList;
-  typedef std::vector<std::string> StringVector;
+  using FileList = std::vector<SourceFile>;
+  using StringVector = std::vector<std::string>;
 
   // We track the set of build files that may affect this target, please refer
   // to Scope for how this is determined.

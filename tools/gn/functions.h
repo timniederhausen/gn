@@ -26,31 +26,31 @@ namespace functions {
 // This type of function invocation has no block and evaluates its arguments
 // itself rather than taking a pre-executed list. This allows us to implement
 // certain built-in functions.
-typedef Value (*SelfEvaluatingArgsFunction)(Scope* scope,
-                                            const FunctionCallNode* function,
-                                            const ListNode* args_list,
-                                            Err* err);
+using SelfEvaluatingArgsFunction = Value (*)(Scope* scope,
+                                             const FunctionCallNode* function,
+                                             const ListNode* args_list,
+                                             Err* err);
 
 // This type of function invocation takes a block node that it will execute.
-typedef Value (*GenericBlockFunction)(Scope* scope,
-                                      const FunctionCallNode* function,
-                                      const std::vector<Value>& args,
-                                      BlockNode* block,
-                                      Err* err);
+using GenericBlockFunction = Value (*)(Scope* scope,
+                                       const FunctionCallNode* function,
+                                       const std::vector<Value>& args,
+                                       BlockNode* block,
+                                       Err* err);
 
 // This type of function takes a block, but does not need to control execution
 // of it. The dispatch function will pre-execute the block and pass the
 // resulting block_scope to the function.
-typedef Value (*ExecutedBlockFunction)(const FunctionCallNode* function,
-                                       const std::vector<Value>& args,
-                                       Scope* block_scope,
-                                       Err* err);
+using ExecutedBlockFunction = Value (*)(const FunctionCallNode* function,
+                                        const std::vector<Value>& args,
+                                        Scope* block_scope,
+                                        Err* err);
 
 // This type of function does not take a block. It just has arguments.
-typedef Value (*NoBlockFunction)(Scope* scope,
-                                 const FunctionCallNode* function,
-                                 const std::vector<Value>& args,
-                                 Err* err);
+using NoBlockFunction = Value (*)(Scope* scope,
+                                  const FunctionCallNode* function,
+                                  const std::vector<Value>& args,
+                                  Err* err);
 
 extern const char kAction[];
 extern const char kAction_HelpShort[];
@@ -432,7 +432,7 @@ struct FunctionInfo {
   bool is_target;
 };
 
-typedef std::map<std::string_view, FunctionInfo> FunctionInfoMap;
+using FunctionInfoMap = std::map<std::string_view, FunctionInfo>;
 
 // Returns the mapping of all built-in functions.
 const FunctionInfoMap& GetFunctions();

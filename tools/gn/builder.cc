@@ -20,7 +20,7 @@
 
 namespace {
 
-typedef BuilderRecord::BuilderRecordSet BuilderRecordSet;
+using BuilderRecordSet = BuilderRecord::BuilderRecordSet;
 
 // Recursively looks in the tree for a given node, returning true if it
 // was found in the dependecy graph. This is used to see if a given node

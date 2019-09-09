@@ -23,7 +23,7 @@
 
 namespace {
 
-typedef std::set<const Config*> ConfigSet;
+using ConfigSet = std::set<const Config*>;
 
 // Merges the public configs from the given target to the given config list.
 void MergePublicConfigsFrom(const Target* from_target,

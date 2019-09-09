@@ -91,9 +91,9 @@ struct hash<internal::UniquifyRef<T>> {
 template <typename T>
 class UniqueVector {
  public:
-  typedef std::vector<T> Vector;
-  typedef typename Vector::iterator iterator;
-  typedef typename Vector::const_iterator const_iterator;
+  using Vector = std::vector<T>;
+  using iterator = typename Vector::iterator;
+  using const_iterator = typename Vector::const_iterator;
 
   const Vector& vector() const { return vector_; }
   size_t size() const { return vector_.size(); }
@@ -153,8 +153,8 @@ class UniqueVector {
   }
 
  private:
-  typedef internal::UniquifyRef<T> Ref;
-  typedef std::unordered_set<Ref> HashSet;
+  using Ref = internal::UniquifyRef<T>;
+  using HashSet = std::unordered_set<Ref>;
 
   HashSet set_;
   Vector vector_;

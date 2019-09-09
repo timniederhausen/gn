@@ -43,7 +43,7 @@ class ImportManager {
   std::mutex imports_lock_;
 
   // Owning pointers to the scopes.
-  typedef std::map<SourceFile, std::unique_ptr<ImportInfo>> ImportMap;
+  using ImportMap = std::map<SourceFile, std::unique_ptr<ImportInfo>>;
   ImportMap imports_;
 
   std::unordered_set<std::string> imports_in_progress_;

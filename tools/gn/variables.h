@@ -336,7 +336,7 @@ struct VariableInfo {
   const char* help;
 };
 
-typedef std::map<std::string_view, VariableInfo> VariableInfoMap;
+using VariableInfoMap = std::map<std::string_view, VariableInfo>;
 
 // Returns the built-in readonly variables.
 // Note: this is used only for help so this getter is not threadsafe.
