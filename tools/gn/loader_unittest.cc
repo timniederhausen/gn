@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <utility>
 #include <vector>
 
-#include "base/bind.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/err.h"
 #include "tools/gn/loader.h"
@@ -52,7 +52,7 @@ std::vector<const Item*> MockBuilder::GetAllItems() const {
 
 class MockInputFileManager {
  public:
-  using Callback = base::Callback<void(const ParseNode*)>;
+  using Callback = std::function<void(const ParseNode*)>;
 
   MockInputFileManager() = default;
 
@@ -91,8 +91,11 @@ class MockInputFileManager {
 };
 
 LoaderImpl::AsyncLoadFileCallback MockInputFileManager::GetCallback() {
-  return base::Bind(&MockInputFileManager::AsyncLoadFile,
-                    base::Unretained(this));
+  return
+      [this](const LocationRange& origin, const BuildSettings* build_settings,
+             const SourceFile& file_name, const Callback& callback, Err* err) {
+        return AsyncLoadFile(origin, build_settings, file_name, callback, err);
+      };
 }
 
 // Sets a given response for a given source file.
@@ -131,9 +134,9 @@ void MockInputFileManager::IssueAllPending() {
   for (const auto& cur : pending_) {
     CannedResponseMap::const_iterator found = canned_responses_.find(cur.first);
     if (found == canned_responses_.end())
-      cur.second.Run(&block);
+      cur.second(&block);
     else
-      cur.second.Run(found->second->root.get());
+      cur.second(found->second->root.get());
   }
   pending_.clear();
 }
@@ -217,8 +220,10 @@ TEST_F(LoaderTest, BuildDependencyFilesAreCollected) {
   SourceFile build_config("//build/config/BUILDCONFIG.gn");
   SourceFile root_build("//BUILD.gn");
   build_settings_.set_build_config_file(build_config);
-  build_settings_.set_item_defined_callback(base::Bind(
-      &MockBuilder::OnItemDefined, base::Unretained(&mock_builder_)));
+  build_settings_.set_item_defined_callback(
+      [builder = &mock_builder_](std::unique_ptr<Item> item) {
+        builder->OnItemDefined(std::move(item));
+      });
 
   scoped_refptr<LoaderImpl> loader(new LoaderImpl(&build_settings_));
   mock_ifm_.AddCannedResponse(build_config,

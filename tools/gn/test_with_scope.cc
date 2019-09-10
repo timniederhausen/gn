@@ -7,7 +7,6 @@
 #include <memory>
 #include <utility>
 
-#include "base/bind.h"
 #include "tools/gn/parser.h"
 #include "tools/gn/tokenizer.h"
 
@@ -28,7 +27,7 @@ TestWithScope::TestWithScope()
       scope_(&settings_),
       scope_progammatic_provider_(&scope_, true) {
   build_settings_.set_print_callback(
-      base::Bind(&TestWithScope::AppendPrintOutput, base::Unretained(this)));
+      [this](const std::string& str) { AppendPrintOutput(str); });
 
   settings_.set_toolchain_label(toolchain_.label());
   settings_.set_default_toolchain_label(toolchain_.label());

@@ -4,7 +4,6 @@
 
 #include <mutex>
 
-#include "base/bind.h"
 #include "base/command_line.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/stringprintf.h"
@@ -78,7 +77,7 @@ void ItemResolvedAndGeneratedCallback(TargetWriteInfo* write_info,
   const Target* target = item->AsTarget();
   if (target) {
     g_scheduler->ScheduleWork(
-        base::Bind(&BackgroundDoWrite, write_info, target));
+        [write_info, target]() { BackgroundDoWrite(write_info, target); });
   }
 }
 
@@ -461,7 +460,9 @@ int RunGen(const std::vector<std::string>& args) {
   // Cause the load to also generate the ninja files for each target.
   TargetWriteInfo write_info;
   setup->builder().set_resolved_and_generated_callback(
-      base::Bind(&ItemResolvedAndGeneratedCallback, &write_info));
+      [&write_info](const BuilderRecord* record) {
+        ItemResolvedAndGeneratedCallback(&write_info, record);
+      });
 
   // Do the actual load. This will also write out the target ninja files.
   if (!setup->Run())

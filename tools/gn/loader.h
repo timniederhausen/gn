@@ -5,11 +5,11 @@
 #ifndef TOOLS_GN_LOADER_H_
 #define TOOLS_GN_LOADER_H_
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>
 
-#include "base/callback.h"
 #include "base/memory/ref_counted.h"
 #include "tools/gn/label.h"
 #include "tools/gn/scope.h"
@@ -72,11 +72,11 @@ class LoaderImpl : public Loader {
  public:
   // Callback to emulate InputFileManager::AsyncLoadFile.
   using AsyncLoadFileCallback =
-      base::Callback<bool(const LocationRange&,
-                          const BuildSettings*,
-                          const SourceFile&,
-                          const base::Callback<void(const ParseNode*)>&,
-                          Err*)>;
+      std::function<bool(const LocationRange&,
+                         const BuildSettings*,
+                         const SourceFile&,
+                         std::function<void(const ParseNode*)>,
+                         Err*)>;
 
   explicit LoaderImpl(const BuildSettings* build_settings);
 
@@ -96,13 +96,13 @@ class LoaderImpl : public Loader {
   // The complete callback is called whenever there are no more pending loads.
   // Called on the main thread only. This may be called more than once if the
   // queue is drained, but then more stuff gets added.
-  void set_complete_callback(const base::Closure& cb) {
-    complete_callback_ = cb;
+  void set_complete_callback(std::function<void()> cb) {
+    complete_callback_ = std::move(cb);
   }
 
   // This callback is used when the loader finds it wants to load a file.
-  void set_async_load_file(const AsyncLoadFileCallback& cb) {
-    async_load_file_ = cb;
+  void set_async_load_file(AsyncLoadFileCallback cb) {
+    async_load_file_ = std::move(cb);
   }
 
   const Label& default_toolchain_label() const {
@@ -152,13 +152,13 @@ class LoaderImpl : public Loader {
   bool AsyncLoadFile(const LocationRange& origin,
                      const BuildSettings* build_settings,
                      const SourceFile& file_name,
-                     const base::Callback<void(const ParseNode*)>& callback,
+                     std::function<void(const ParseNode*)> callback,
                      Err* err);
 
   MsgLoop* task_runner_;
 
   int pending_loads_;
-  base::Closure complete_callback_;
+  std::function<void()> complete_callback_;
 
   // When non-null, use this callback instead of the InputFileManager for
   // mocking purposes.

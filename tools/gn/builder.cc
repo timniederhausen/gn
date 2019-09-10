@@ -438,8 +438,8 @@ void Builder::RecursiveSetShouldGenerate(BuilderRecord* record, bool force) {
     record->set_should_generate(true);
 
     // This may have caused the item to go into "resolved and generated" state.
-    if (record->resolved() && !resolved_and_generated_callback_.is_null())
-      resolved_and_generated_callback_.Run(record);
+    if (record->resolved() && resolved_and_generated_callback_)
+      resolved_and_generated_callback_(record);
   } else if (!force) {
     return;  // Already set and we're not required to iterate dependencies.
   }
@@ -487,8 +487,8 @@ bool Builder::ResolveItem(BuilderRecord* record, Err* err) {
 
   if (!record->item()->OnResolved(err))
     return false;
-  if (record->should_generate() && !resolved_and_generated_callback_.is_null())
-    resolved_and_generated_callback_.Run(record);
+  if (record->should_generate() && resolved_and_generated_callback_)
+    resolved_and_generated_callback_(record);
 
   // Recursively update everybody waiting on this item to be resolved.
   for (BuilderRecord* waiting : record->waiting_on_resolution()) {

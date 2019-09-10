@@ -11,7 +11,6 @@
 #include <sstream>
 #include <utility>
 
-#include "base/bind.h"
 #include "base/command_line.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
@@ -178,13 +177,15 @@ void ItemDefinedCallback(MsgLoop* task_runner,
   // this call completing on the main thread, the 'Complete' function will
   // be signaled and we'll stop running with an incomplete build.
   g_scheduler->IncrementWorkCount();
-  task_runner->PostTask(base::BindOnce(
-      [](Builder* builder_call_on_main_thread_only,
-         std::unique_ptr<Item> item) {
-        builder_call_on_main_thread_only->ItemDefined(std::move(item));
+
+  // Work around issue binding a unique_ptr with std::function by moving into a
+  // shared_ptr.
+  auto item_shared = std::make_shared<std::unique_ptr<Item>>(std::move(item));
+  task_runner->PostTask(
+      [builder_call_on_main_thread_only, item_shared]() mutable {
+        builder_call_on_main_thread_only->ItemDefined(std::move(*item_shared));
         g_scheduler->DecrementWorkCount();
-      },
-      builder_call_on_main_thread_only, base::Passed(&item)));
+      });
 }
 
 void DecrementWorkCount() {
@@ -306,9 +307,12 @@ Setup::Setup()
   dotfile_settings_.set_toolchain_label(Label());
 
   build_settings_.set_item_defined_callback(
-      base::Bind(&ItemDefinedCallback, scheduler_.task_runner(), &builder_));
+      [task_runner = scheduler_.task_runner(),
+       builder = &builder_](std::unique_ptr<Item> item) {
+        ItemDefinedCallback(task_runner, builder, std::move(item));
+      });
 
-  loader_->set_complete_callback(base::Bind(&DecrementWorkCount));
+  loader_->set_complete_callback(&DecrementWorkCount);
   // The scheduler's task runner wasn't created when the Loader was created, so
   // we need to set it now.
   loader_->set_task_runner(scheduler_.task_runner());

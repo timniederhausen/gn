@@ -7,7 +7,6 @@
 #include <memory>
 #include <utility>
 
-#include "base/bind.h"
 #include "base/stl_util.h"
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/parser.h"
@@ -31,7 +30,7 @@ struct ScopedUnlock {
 
 void InvokeFileLoadCallback(const InputFileManager::FileLoadCallback& cb,
                             const ParseNode* node) {
-  cb.Run(node);
+  cb(node);
 }
 
 bool DoLoadFile(const LocationRange& origin,
@@ -111,7 +110,7 @@ bool InputFileManager::AsyncLoadFile(const LocationRange& origin,
   // Try not to schedule callbacks while holding the lock. All cases that don't
   // want to schedule should return early. Otherwise, this will be scheduled
   // after we leave the lock.
-  Task schedule_this;
+  std::function<void()> schedule_this;
   {
     std::lock_guard<std::mutex> lock(lock_);
 
@@ -121,9 +120,10 @@ bool InputFileManager::AsyncLoadFile(const LocationRange& origin,
       std::unique_ptr<InputFileData> data =
           std::make_unique<InputFileData>(file_name);
       data->scheduled_callbacks.push_back(callback);
-      schedule_this =
-          base::BindOnce(&InputFileManager::BackgroundLoadFile, this, origin,
-                         build_settings, file_name, &data->file);
+      schedule_this = [this, origin, build_settings, file_name,
+                       file = &data->file]() {
+        BackgroundLoadFile(origin, build_settings, file_name, file);
+      };
       input_files_[file_name] = std::move(data);
 
     } else {
@@ -146,8 +146,9 @@ bool InputFileManager::AsyncLoadFile(const LocationRange& origin,
 
       if (data->loaded) {
         // Can just directly issue the callback on the background thread.
-        schedule_this = base::BindOnce(&InvokeFileLoadCallback, callback,
-                                       data->parsed_root.get());
+        schedule_this = [callback, root = data->parsed_root.get()]() {
+          InvokeFileLoadCallback(callback, root);
+        };
       } else {
         // Load is pending on this file, schedule the invoke.
         data->scheduled_callbacks.push_back(callback);
@@ -326,7 +327,7 @@ bool InputFileManager::LoadFile(const LocationRange& origin,
   // item in the list, so that's extra overhead and complexity for no gain.
   if (success) {
     for (const auto& cb : callbacks)
-      cb.Run(unowned_root);
+      cb(unowned_root);
   }
   return success;
 }

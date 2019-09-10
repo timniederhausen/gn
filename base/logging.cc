@@ -46,8 +46,6 @@
 #include <string_view>
 #include <utility>
 
-#include "base/callback.h"
-#include "base/containers/stack.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"

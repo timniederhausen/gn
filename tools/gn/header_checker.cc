@@ -6,7 +6,6 @@
 
 #include <algorithm>
 
-#include "base/bind.h"
 #include "base/containers/queue.h"
 #include "base/files/file_util.h"
 #include "base/strings/string_util.h"
@@ -173,8 +172,9 @@ void HeaderChecker::RunCheckOverFiles(const FileMap& files, bool force_check) {
     for (const auto& vect_i : file.second) {
       if (vect_i.target->check_includes()) {
         task_count_.Increment();
-        pool.PostTask(base::BindOnce(&HeaderChecker::DoWork, this,
-                                     vect_i.target, file.first));
+        pool.PostTask([this, target = vect_i.target, file = file.first]() {
+          DoWork(target, file);
+        });
       }
     }
   }

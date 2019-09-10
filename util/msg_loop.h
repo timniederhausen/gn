@@ -6,9 +6,9 @@
 #define UTIL_RUN_LOOP_H_
 
 #include "base/macros.h"
-#include "util/task.h"
 
 #include <condition_variable>
+#include <functional>
 #include <mutex>
 #include <queue>
 
@@ -26,7 +26,7 @@ class MsgLoop {
 
   // Posts a work item to this queue. All items will be run on the thread from
   // which Run() was called. Can be called from any thread.
-  void PostTask(Task task);
+  void PostTask(std::function<void()> task);
 
   // Run()s until the queue is empty. Should only be used (carefully) in tests.
   void RunUntilIdleForTesting();
@@ -37,7 +37,7 @@ class MsgLoop {
 
  private:
   std::mutex queue_mutex_;
-  std::queue<Task> task_queue_;
+  std::queue<std::function<void()>> task_queue_;
   std::condition_variable notifier_;
   bool should_quit_ = false;
 

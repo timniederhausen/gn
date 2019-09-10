@@ -6,7 +6,6 @@
 
 #include <memory>
 
-#include "base/bind.h"
 #include "tools/gn/build_settings.h"
 #include "tools/gn/err.h"
 #include "tools/gn/filesystem_utils.h"
@@ -208,10 +207,12 @@ void LoaderImpl::ScheduleLoadFile(const Settings* settings,
                                   const SourceFile& file) {
   Err err;
   pending_loads_++;
-  if (!AsyncLoadFile(origin, settings->build_settings(), file,
-                     base::Bind(&LoaderImpl::BackgroundLoadFile, this, settings,
-                                file, origin),
-                     &err)) {
+  if (!AsyncLoadFile(
+          origin, settings->build_settings(), file,
+          [this, settings, file, origin](const ParseNode* parse_node) {
+            BackgroundLoadFile(settings, file, origin, parse_node);
+          },
+          &err)) {
     g_scheduler->FailWithError(err);
     DecrementPendingLoads();
   }
@@ -222,11 +223,13 @@ void LoaderImpl::ScheduleLoadBuildConfig(
     const Scope::KeyValueMap& toolchain_overrides) {
   Err err;
   pending_loads_++;
-  if (!AsyncLoadFile(LocationRange(), settings->build_settings(),
-                     settings->build_settings()->build_config_file(),
-                     base::Bind(&LoaderImpl::BackgroundLoadBuildConfig, this,
-                                settings, toolchain_overrides),
-                     &err)) {
+  if (!AsyncLoadFile(
+          LocationRange(), settings->build_settings(),
+          settings->build_settings()->build_config_file(),
+          [this, settings, toolchain_overrides](const ParseNode* root) {
+            BackgroundLoadBuildConfig(settings, toolchain_overrides, root);
+          },
+          &err)) {
     g_scheduler->FailWithError(err);
     DecrementPendingLoads();
   }
@@ -237,8 +240,7 @@ void LoaderImpl::BackgroundLoadFile(const Settings* settings,
                                     const LocationRange& origin,
                                     const ParseNode* root) {
   if (!root) {
-    task_runner_->PostTask(
-        base::BindOnce(&LoaderImpl::DecrementPendingLoads, this));
+    task_runner_->PostTask([this]() { DecrementPendingLoads(); });
     return;
   }
 
@@ -277,7 +279,7 @@ void LoaderImpl::BackgroundLoadFile(const Settings* settings,
 
   trace.Done();
 
-  task_runner_->PostTask(base::BindOnce(&LoaderImpl::DidLoadFile, this));
+  task_runner_->PostTask([this]() { DidLoadFile(); });
 }
 
 void LoaderImpl::BackgroundLoadBuildConfig(
@@ -285,8 +287,7 @@ void LoaderImpl::BackgroundLoadBuildConfig(
     const Scope::KeyValueMap& toolchain_overrides,
     const ParseNode* root) {
   if (!root) {
-    task_runner_->PostTask(
-        base::BindOnce(&LoaderImpl::DecrementPendingLoads, this));
+    task_runner_->PostTask([this]() { DecrementPendingLoads(); });
     return;
   }
 
@@ -348,8 +349,10 @@ void LoaderImpl::BackgroundLoadBuildConfig(
     }
   }
 
-  task_runner_->PostTask(base::BindOnce(&LoaderImpl::DidLoadBuildConfig, this,
-                                        settings->toolchain_label()));
+  task_runner_->PostTask(
+      [this, toolchain_label = settings->toolchain_label()]() {
+        DidLoadBuildConfig(toolchain_label);
+      });
 }
 
 void LoaderImpl::DidLoadFile() {
@@ -419,19 +422,19 @@ void LoaderImpl::DidLoadBuildConfig(const Label& label) {
 void LoaderImpl::DecrementPendingLoads() {
   DCHECK_GT(pending_loads_, 0);
   pending_loads_--;
-  if (pending_loads_ == 0 && !complete_callback_.is_null())
-    complete_callback_.Run();
+  if (pending_loads_ == 0 && complete_callback_)
+    complete_callback_();
 }
 
-bool LoaderImpl::AsyncLoadFile(
-    const LocationRange& origin,
-    const BuildSettings* build_settings,
-    const SourceFile& file_name,
-    const base::Callback<void(const ParseNode*)>& callback,
-    Err* err) {
-  if (async_load_file_.is_null()) {
-    return g_scheduler->input_file_manager()->AsyncLoadFile(
-        origin, build_settings, file_name, callback, err);
+bool LoaderImpl::AsyncLoadFile(const LocationRange& origin,
+                               const BuildSettings* build_settings,
+                               const SourceFile& file_name,
+                               std::function<void(const ParseNode*)> callback,
+                               Err* err) {
+  if (async_load_file_) {
+    return async_load_file_(origin, build_settings, file_name,
+                            std::move(callback), err);
   }
-  return async_load_file_.Run(origin, build_settings, file_name, callback, err);
+  return g_scheduler->input_file_manager()->AsyncLoadFile(
+      origin, build_settings, file_name, std::move(callback), err);
 }

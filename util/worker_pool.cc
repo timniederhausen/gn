@@ -117,7 +117,7 @@ WorkerPool::~WorkerPool() {
   }
 }
 
-void WorkerPool::PostTask(Task work) {
+void WorkerPool::PostTask(std::function<void()> work) {
   {
     std::unique_lock<std::mutex> queue_lock(queue_mutex_);
     CHECK(!should_stop_processing_);
@@ -129,7 +129,7 @@ void WorkerPool::PostTask(Task work) {
 
 void WorkerPool::Worker() {
   for (;;) {
-    Task task;
+    std::function<void()> task;
 
     {
       std::unique_lock<std::mutex> queue_lock(queue_mutex_);
@@ -145,6 +145,6 @@ void WorkerPool::Worker() {
       task_queue_.pop();
     }
 
-    std::move(task).Run();
+    task();
   }
 }

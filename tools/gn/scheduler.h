@@ -6,6 +6,7 @@
 #define TOOLS_GN_SCHEDULER_H_
 
 #include <condition_variable>
+#include <functional>
 #include <map>
 #include <mutex>
 
@@ -17,7 +18,6 @@
 #include "tools/gn/source_file.h"
 #include "tools/gn/token.h"
 #include "util/msg_loop.h"
-#include "util/task.h"
 #include "util/worker_pool.h"
 
 class Target;
@@ -46,7 +46,7 @@ class Scheduler {
   void Log(const std::string& verb, const std::string& msg);
   void FailWithError(const Err& err);
 
-  void ScheduleWork(Task work);
+  void ScheduleWork(std::function<void()> work);
 
   void Shutdown();
 

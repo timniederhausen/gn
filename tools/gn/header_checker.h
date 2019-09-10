@@ -6,6 +6,7 @@
 #define TOOLS_GN_HEADER_CHECKER_H_
 
 #include <condition_variable>
+#include <functional>
 #include <map>
 #include <mutex>
 #include <set>
@@ -96,8 +97,7 @@ class HeaderChecker : public base::RefCountedThreadSafe<HeaderChecker> {
 
   using TargetVector = std::vector<TargetInfo>;
   using FileMap = std::map<SourceFile, TargetVector>;
-  using PathExistsCallback =
-      base::RepeatingCallback<bool(const base::FilePath& path)>;
+  using PathExistsCallback = std::function<bool(const base::FilePath& path)>;
 
   // Backend for Run() that takes the list of files to check. The errors_ list
   // will be populate on failure.

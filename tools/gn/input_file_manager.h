@@ -5,13 +5,13 @@
 #ifndef TOOLS_GN_INPUT_FILE_MANAGER_H_
 #define TOOLS_GN_INPUT_FILE_MANAGER_H_
 
+#include <functional>
 #include <mutex>
 #include <set>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include "base/callback.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
@@ -38,7 +38,7 @@ class InputFileManager : public base::RefCountedThreadSafe<InputFileManager> {
  public:
   // Callback issued when a file is laoded. On auccess, the parse node will
   // refer to the root block of the file. On failure, this will be NULL.
-  using FileLoadCallback = base::Callback<void(const ParseNode*)>;
+  using FileLoadCallback = std::function<void(const ParseNode*)>;
 
   InputFileManager();
 

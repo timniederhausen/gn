@@ -70,6 +70,6 @@ base::FilePath BuildSettings::GetFullPathSecondary(const std::string& path,
 
 void BuildSettings::ItemDefined(std::unique_ptr<Item> item) const {
   DCHECK(item);
-  if (!item_defined_callback_.is_null())
-    item_defined_callback_.Run(std::move(item));
+  if (item_defined_callback_)
+    item_defined_callback_(std::move(item));
 }

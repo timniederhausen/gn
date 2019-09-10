@@ -1022,11 +1022,12 @@ Value RunPrint(Scope* scope,
 
   const BuildSettings::PrintCallback& cb =
       scope->settings()->build_settings()->print_callback();
-  if (cb.is_null()) {
+  if (cb) {
+    cb(output);
+  } else {
     printf("%s", output.c_str());
     fflush(stdout);
-  } else
-    cb.Run(output);
+  }
 
   return Value();
 }

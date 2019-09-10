@@ -5,7 +5,6 @@
 #include <ostream>
 #include <vector>
 
-#include "base/bind.h"
 #include "tools/gn/config.h"
 #include "tools/gn/header_checker.h"
 #include "tools/gn/scheduler.h"

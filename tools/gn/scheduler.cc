@@ -6,7 +6,6 @@
 
 #include <algorithm>
 
-#include "base/bind.h"
 #include "tools/gn/standard_out.h"
 #include "tools/gn/target.h"
 
@@ -40,8 +39,7 @@ bool Scheduler::Run() {
 }
 
 void Scheduler::Log(const std::string& verb, const std::string& msg) {
-  task_runner()->PostTask(base::BindOnce(&Scheduler::LogOnMainThread,
-                                         base::Unretained(this), verb, msg));
+  task_runner()->PostTask([this, verb, msg]() { LogOnMainThread(verb, msg); });
 }
 
 void Scheduler::FailWithError(const Err& err) {
@@ -54,23 +52,20 @@ void Scheduler::FailWithError(const Err& err) {
     is_failed_ = true;
   }
 
-  task_runner()->PostTask(base::BindOnce(&Scheduler::FailWithErrorOnMainThread,
-                                         base::Unretained(this), err));
+  task_runner()->PostTask([this, err]() { FailWithErrorOnMainThread(err); });
 }
 
-void Scheduler::ScheduleWork(Task work) {
+void Scheduler::ScheduleWork(std::function<void()> work) {
   IncrementWorkCount();
   pool_work_count_.Increment();
-  worker_pool_.PostTask(base::BindOnce(
-      [](Scheduler* self, Task work) {
-        std::move(work).Run();
-        self->DecrementWorkCount();
-        if (!self->pool_work_count_.Decrement()) {
-          std::unique_lock<std::mutex> auto_lock(self->pool_work_count_lock_);
-          self->pool_work_count_cv_.notify_one();
-        }
-      },
-      this, std::move(work)));
+  worker_pool_.PostTask([this, work = std::move(work)]() {
+    work();
+    DecrementWorkCount();
+    if (!pool_work_count_.Decrement()) {
+      std::unique_lock<std::mutex> auto_lock(pool_work_count_lock_);
+      pool_work_count_cv_.notify_one();
+    }
+  });
 }
 
 void Scheduler::AddGenDependency(const base::FilePath& file) {
@@ -154,8 +149,7 @@ void Scheduler::IncrementWorkCount() {
 
 void Scheduler::DecrementWorkCount() {
   if (!work_count_.Decrement()) {
-    task_runner()->PostTask(
-        base::BindOnce(&Scheduler::OnComplete, base::Unretained(this)));
+    task_runner()->PostTask([this]() { OnComplete(); });
   }
 }
 

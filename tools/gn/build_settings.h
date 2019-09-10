@@ -5,12 +5,12 @@
 #ifndef TOOLS_GN_BUILD_SETTINGS_H_
 #define TOOLS_GN_BUILD_SETTINGS_H_
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>
 #include <utility>
 
-#include "base/callback.h"
 #include "base/files/file_path.h"
 #include "base/macros.h"
 #include "tools/gn/args.h"
@@ -25,8 +25,8 @@ class Item;
 // may be multiple Settings objects that refer to this, one for each toolchain.
 class BuildSettings {
  public:
-  using ItemDefinedCallback = base::Callback<void(std::unique_ptr<Item>)>;
-  using PrintCallback = base::Callback<void(const std::string&)>;
+  using ItemDefinedCallback = std::function<void(std::unique_ptr<Item>)>;
+  using PrintCallback = std::function<void(const std::string&)>;
 
   BuildSettings();
   BuildSettings(const BuildSettings& other);

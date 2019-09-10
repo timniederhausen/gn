@@ -5,10 +5,10 @@
 #ifndef TOOLS_GN_BUILDER_H_
 #define TOOLS_GN_BUILDER_H_
 
+#include <functional>
 #include <map>
 #include <memory>
 
-#include "base/callback.h"
 #include "base/macros.h"
 #include "tools/gn/builder_record.h"
 #include "tools/gn/label.h"
@@ -24,7 +24,7 @@ class ParseNode;
 // the main thread only. See also BuilderRecord.
 class Builder {
  public:
-  using ResolvedGeneratedCallback = base::Callback<void(const BuilderRecord*)>;
+  using ResolvedGeneratedCallback = std::function<void(const BuilderRecord*)>;
 
   explicit Builder(Loader* loader);
   ~Builder();

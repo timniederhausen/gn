@@ -387,7 +387,6 @@ def WriteGNNinja(path, platform, host, options):
 
   static_libraries = {
       'base': {'sources': [
-        'base/callback_internal.cc',
         'base/command_line.cc',
         'base/environment.cc',
         'base/files/file.cc',
