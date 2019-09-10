@@ -21,6 +21,8 @@ import vim
 
 # Change this to the full path if gn is not on the path.
 binary = 'gn'
+if vim.eval('exists("g:gn_path")') == "1":
+  binary = vim.eval('g:gn_path')
 
 def main():
   # Get the current text.
