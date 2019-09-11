@@ -60,9 +60,6 @@ void RustTargetGenerator::Run() {
   if (!FillCrateRoot())
     return;
 
-  if (!FillEdition())
-    return;
-
   if (!FillAliasedDeps())
     return;
 }
@@ -162,20 +159,6 @@ bool RustTargetGenerator::FillCrateRoot() {
     return false;
 
   target_->rust_values().set_crate_root(dest);
-  return true;
-}
-
-bool RustTargetGenerator::FillEdition() {
-  const Value* value = scope_->GetValue(variables::kRustEdition, true);
-  if (!value) {
-    *err_ = Err(function_call_, "Missing \"edition\" in Rust target.");
-    return false;
-  }
-
-  if (!value->VerifyTypeIs(Value::STRING, err_))
-    return false;
-
-  target_->rust_values().edition() = std::move(value->string_value());
   return true;
 }
 

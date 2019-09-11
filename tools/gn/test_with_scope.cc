@@ -197,7 +197,7 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
   // RUST
   std::unique_ptr<Tool> rustc_tool = Tool::CreateTool(RustTool::kRsToolRustc);
   SetCommandForTool(
-      "{{rustenv}} rustc --edition=2018 --crate-name {{crate_name}} {{source}} "
+      "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
       "--crate-type {{crate_type}} {{rustflags}} -o "
       "{{target_out_dir}}/"
       "{{rustc_output_prefix}}{{crate_name}}{{rustc_output_extension}} "

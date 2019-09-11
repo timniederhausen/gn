@@ -68,7 +68,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustExecutable) {
   target.source_types_used().Set(SourceFile::SOURCE_RS);
   target.rust_values().set_crate_root(main);
   target.rust_values().crate_name() = "foo_bar";
-  target.rust_values().edition() = "2018";
   target.private_deps().push_back(LabelTargetPair(&source_set));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -91,8 +90,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustExecutable) {
         "\n"
         "build obj/foo/foo_bar: rustc ../../foo/main.rs | ../../foo/input3.rs "
         "../../foo/main.rs ../../foo/input1.rs ../../foo/input2.rs || "
-        "obj/foo/sources.stamp\n"
-        "  edition = 2018\n";
+        "obj/foo/sources.stamp\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << out_str;
   }
@@ -111,7 +109,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDeps) {
   rlib.source_types_used().Set(SourceFile::SOURCE_RS);
   rlib.rust_values().set_crate_root(barlib);
   rlib.rust_values().crate_name() = "mylib";
-  rlib.rust_values().edition() = "2018";
   rlib.SetToolchain(setup.toolchain());
   ASSERT_TRUE(rlib.OnResolved(&err));
 
@@ -133,8 +130,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDeps) {
         "target_output_name = mylib\n"
         "\n"
         "build obj/bar/libmylib.rlib: rustc ../../bar/lib.rs | "
-        "../../bar/mylib.rs ../../bar/lib.rs\n"
-        "  edition = 2018\n";
+        "../../bar/mylib.rs ../../bar/lib.rs\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << out_str;
   }
@@ -148,7 +144,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDeps) {
   another_rlib.source_types_used().Set(SourceFile::SOURCE_RS);
   another_rlib.rust_values().set_crate_root(lib);
   another_rlib.rust_values().crate_name() = "direct";
-  another_rlib.rust_values().edition() = "2018";
   another_rlib.SetToolchain(setup.toolchain());
   another_rlib.public_deps().push_back(LabelTargetPair(&rlib));
   ASSERT_TRUE(another_rlib.OnResolved(&err));
@@ -162,7 +157,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDeps) {
   target.source_types_used().Set(SourceFile::SOURCE_RS);
   target.rust_values().set_crate_root(main);
   target.rust_values().crate_name() = "foo_bar";
-  target.rust_values().edition() = "2018";
   target.private_deps().push_back(LabelTargetPair(&another_rlib));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -187,8 +181,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDeps) {
         "../../foo/main.rs obj/foo/libdirect.rlib obj/bar/libmylib.rlib\n"
         "  externs = --extern direct=obj/foo/libdirect.rlib --extern "
         "mylib=obj/bar/libmylib.rlib\n"
-        "  rustdeps = -Ldependency=obj/foo -Ldependency=obj/bar\n"
-        "  edition = 2018\n";
+        "  rustdeps = -Ldependency=obj/foo -Ldependency=obj/bar\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
@@ -207,7 +200,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RenamedDeps) {
   another_rlib.source_types_used().Set(SourceFile::SOURCE_RS);
   another_rlib.rust_values().set_crate_root(lib);
   another_rlib.rust_values().crate_name() = "direct";
-  another_rlib.rust_values().edition() = "2018";
   another_rlib.SetToolchain(setup.toolchain());
   ASSERT_TRUE(another_rlib.OnResolved(&err));
 
@@ -221,7 +213,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RenamedDeps) {
   target.rust_values().set_crate_root(main);
   target.rust_values().crate_name() = "foo_bar";
   target.rust_values().aliased_deps()[another_rlib.label()] = "direct_renamed";
-  target.rust_values().edition() = "2018";
   target.private_deps().push_back(LabelTargetPair(&another_rlib));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -245,8 +236,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RenamedDeps) {
         "build obj/foo/foo_bar: rustc ../../foo/main.rs | ../../foo/source.rs "
         "../../foo/main.rs obj/foo/libdirect.rlib\n"
         "  externs = --extern direct_renamed=obj/foo/libdirect.rlib\n"
-        "  rustdeps = -Ldependency=obj/foo\n"
-        "  edition = 2018\n";
+        "  rustdeps = -Ldependency=obj/foo\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
@@ -265,7 +255,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
   rlib.source_types_used().Set(SourceFile::SOURCE_RS);
   rlib.rust_values().set_crate_root(barlib);
   rlib.rust_values().crate_name() = "mylib";
-  rlib.rust_values().edition() = "2018";
   rlib.SetToolchain(setup.toolchain());
   ASSERT_TRUE(rlib.OnResolved(&err));
 
@@ -286,7 +275,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
   nonrust.source_types_used().Set(SourceFile::SOURCE_RS);
   nonrust.rust_values().set_crate_root(main);
   nonrust.rust_values().crate_name() = "foo_bar";
-  nonrust.rust_values().edition() = "2018";
   nonrust.private_deps().push_back(LabelTargetPair(&rlib));
   nonrust.private_deps().push_back(LabelTargetPair(&staticlib));
   nonrust.SetToolchain(setup.toolchain());
@@ -311,8 +299,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "build obj/foo/foo_bar: rustc ../../foo/main.rs | ../../foo/source.rs "
         "../../foo/main.rs obj/bar/libmylib.rlib obj/foo/libstatic.a\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
-        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/foo\n"
-        "  edition = 2018\n";
+        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/foo\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
@@ -325,7 +312,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
   nonrust_only.source_types_used().Set(SourceFile::SOURCE_RS);
   nonrust_only.rust_values().set_crate_root(main);
   nonrust_only.rust_values().crate_name() = "foo_bar";
-  nonrust_only.rust_values().edition() = "2018";
   nonrust_only.private_deps().push_back(LabelTargetPair(&staticlib));
   nonrust_only.SetToolchain(setup.toolchain());
   ASSERT_TRUE(nonrust_only.OnResolved(&err));
@@ -348,8 +334,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "\n"
         "build obj/foo/foo_bar: rustc ../../foo/main.rs | ../../foo/source.rs "
         "../../foo/main.rs obj/foo/libstatic.a\n"
-        "  rustdeps = -Lnative=obj/foo\n"
-        "  edition = 2018\n";
+        "  rustdeps = -Lnative=obj/foo\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
@@ -379,7 +364,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustOutputExtensionAndDir) {
   target.set_output_dir(SourceDir("//out/Debug/foo/"));
   target.rust_values().set_crate_root(main);
   target.rust_values().crate_name() = "foo_bar";
-  target.rust_values().edition() = "2018";
   target.private_deps().push_back(LabelTargetPair(&source_set));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -402,8 +386,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustOutputExtensionAndDir) {
         "\n"
         "build obj/foo/foo_bar.exe: rustc ../../foo/main.rs | ../../foo/input3.rs "
         "../../foo/main.rs ../../foo/input1.rs ../../foo/input2.rs || "
-        "obj/foo/sources.stamp\n"
-        "  edition = 2018\n";
+        "obj/foo/sources.stamp\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << out_str;
   }
@@ -422,7 +405,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, ProcMacro) {
   procmacro.source_types_used().Set(SourceFile::SOURCE_RS);
   procmacro.rust_values().set_crate_root(barlib);
   procmacro.rust_values().crate_name() = "mymacro";
-  procmacro.rust_values().edition() = "2018";
   procmacro.rust_values().set_crate_type(RustValues::CRATE_PROC_MACRO);
   procmacro.SetToolchain(setup.toolchain());
   ASSERT_TRUE(procmacro.OnResolved(&err));
@@ -444,8 +426,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, ProcMacro) {
         "target_output_name = mymacro\n"
         "\n"
         "build obj/bar/libmymacro.so: rustc ../../bar/lib.rs | "
-        "../../bar/mylib.rs ../../bar/lib.rs\n"
-        "  edition = 2018\n";
+        "../../bar/mylib.rs ../../bar/lib.rs\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << out_str;
   }
@@ -459,7 +440,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, ProcMacro) {
   target.source_types_used().Set(SourceFile::SOURCE_RS);
   target.rust_values().set_crate_root(main);
   target.rust_values().crate_name() = "foo_bar";
-  target.rust_values().edition() = "2018";
   target.private_deps().push_back(LabelTargetPair(&procmacro));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -482,8 +462,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, ProcMacro) {
         "\n"
         "build obj/foo/foo_bar: rustc ../../foo/main.rs | ../../foo/source.rs "
         "../../foo/main.rs || obj/bar/libmymacro.so\n"
-        "  externs = --extern mymacro=obj/bar/libmymacro.so\n"
-        "  edition = 2018\n";
+        "  externs = --extern mymacro=obj/bar/libmymacro.so\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
@@ -502,7 +481,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, GroupDeps) {
   rlib.source_types_used().Set(SourceFile::SOURCE_RS);
   rlib.rust_values().set_crate_root(barlib);
   rlib.rust_values().crate_name() = "mylib";
-  rlib.rust_values().edition() = "2018";
   rlib.SetToolchain(setup.toolchain());
   ASSERT_TRUE(rlib.OnResolved(&err));
 
@@ -524,8 +502,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, GroupDeps) {
         "target_output_name = mylib\n"
         "\n"
         "build obj/bar/libmylib.rlib: rustc ../../bar/lib.rs | "
-        "../../bar/mylib.rs ../../bar/lib.rs\n"
-        "  edition = 2018\n";
+        "../../bar/mylib.rs ../../bar/lib.rs\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << out_str;
   }
@@ -546,7 +523,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, GroupDeps) {
   target.source_types_used().Set(SourceFile::SOURCE_RS);
   target.rust_values().set_crate_root(main);
   target.rust_values().crate_name() = "foo_bar";
-  target.rust_values().edition() = "2018";
   target.private_deps().push_back(LabelTargetPair(&group));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -570,8 +546,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, GroupDeps) {
         "build obj/foo/foo_bar: rustc ../../foo/main.rs | ../../foo/source.rs "
         "../../foo/main.rs obj/bar/libmylib.rlib || obj/baz/group.stamp\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
-        "  rustdeps = -Ldependency=obj/bar\n"
-        "  edition = 2018\n";
+        "  rustdeps = -Ldependency=obj/bar\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }

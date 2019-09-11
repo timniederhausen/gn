@@ -5,7 +5,6 @@ executable("hello_world") {
   deps = [
     "//hello_world/foo/src:foo",
   ]
-  edition = "2018"
   aliased_deps = {
     baz = "//hello_world/foo/src:foo"
   }

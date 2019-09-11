@@ -169,7 +169,6 @@ void NinjaRustBinaryTargetWriter::Run() {
     WriteExterns(extern_deps);
 
     WriteRustdeps(rustdeps, nonrustdeps);
-    WriteEdition();
   }
 }
 
@@ -239,9 +238,4 @@ void NinjaRustBinaryTargetWriter::WriteRustdeps(
         PathOutput::DIR_NO_LAST_SLASH);
   }
   out_ << std::endl;
-}
-
-void NinjaRustBinaryTargetWriter::WriteEdition() {
-  DCHECK(!target_->rust_values().edition().empty());
-  out_ << "  edition = " << target_->rust_values().edition() << std::endl;
 }

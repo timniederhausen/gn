@@ -95,20 +95,6 @@ const char kRustCrateRoot_Help[] =
   only one file.
 )";
 
-const char kRustEdition[] = "edition";
-const char kRustEdition_HelpShort[] =
-    "edition: [string] The rustc edition to use in compiliation.";
-const char kRustEdition_Help[] =
-    R"(edition: [string] The rustc edition to use in compiliation.
-
-  Valid for `rust_library` targets and `executable`, `static_library`,
-  `shared_library`, and `source_set` targets that contain Rust sources.
-
-  This indicates the compiler edition to use in compilition. Should be a value
-  like "2015" or "2018", indiicating the appropriate value to pass to the
-  `--edition=<>` flag in rustc.
-)";
-
 void InsertRustVariables(VariableInfoMap* info_map) {
   info_map->insert(std::make_pair(
       kRustAliasedDeps,
@@ -122,8 +108,6 @@ void InsertRustVariables(VariableInfoMap* info_map) {
   info_map->insert(std::make_pair(
       kRustCrateRoot,
       VariableInfo(kRustCrateRoot_HelpShort, kRustCrateRoot_Help)));
-  info_map->insert(std::make_pair(
-      kRustEdition, VariableInfo(kRustEdition_HelpShort, kRustEdition_Help)));
 }
 
 }  // namespace variables

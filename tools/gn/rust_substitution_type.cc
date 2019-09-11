@@ -12,10 +12,9 @@
 
 const SubstitutionTypes RustSubstitutions = {
     &kRustSubstitutionCrateName,       &kRustSubstitutionCrateType,
-    &kRustSubstitutionEdition,         &kRustSubstitutionExterns,
     &kRustSubstitutionOutputExtension, &kRustSubstitutionOutputPrefix,
     &kRustSubstitutionRustDeps,        &kRustSubstitutionRustFlags,
-    &kRustSubstitutionRustEnv,
+    &kRustSubstitutionRustEnv,         &kRustSubstitutionExterns,
 };
 
 // Valid for Rust tools.
@@ -23,7 +22,6 @@ const Substitution kRustSubstitutionCrateName = {"{{crate_name}}",
                                                  "crate_name"};
 const Substitution kRustSubstitutionCrateType = {"{{crate_type}}",
                                                  "crate_type"};
-const Substitution kRustSubstitutionEdition = {"{{edition}}", "edition"};
 const Substitution kRustSubstitutionExterns = {"{{externs}}", "externs"};
 const Substitution kRustSubstitutionOutputExtension = {
     "{{rustc_output_extension}}", "rustc_output_extension"};
@@ -38,7 +36,6 @@ bool IsValidRustSubstitution(const Substitution* type) {
          type == &SubstitutionOutputDir ||
          type == &kRustSubstitutionCrateName ||
          type == &kRustSubstitutionCrateType ||
-         type == &kRustSubstitutionEdition ||
          type == &kRustSubstitutionExterns ||
          type == &kRustSubstitutionOutputExtension ||
          type == &kRustSubstitutionOutputPrefix ||

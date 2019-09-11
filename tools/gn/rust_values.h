@@ -45,9 +45,6 @@ class RustValues {
   const CrateType crate_type() const { return crate_type_; }
   void set_crate_type(CrateType s) { crate_type_ = s; }
 
-  std::string& edition() { return edition_; }
-  const std::string& edition() const { return edition_; }
-
   // Any renamed dependencies for the `extern` flags.
   const std::map<Label, std::string>& aliased_deps() const {
     return aliased_deps_;
@@ -58,7 +55,6 @@ class RustValues {
   std::string crate_name_;
   SourceFile crate_root_;
   CrateType crate_type_ = CRATE_AUTO;
-  std::string edition_;
   std::map<Label, std::string> aliased_deps_;
 
   DISALLOW_COPY_AND_ASSIGN(RustValues);

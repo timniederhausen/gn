@@ -24,7 +24,6 @@ TEST_F(RustFunctionsTarget, CrateName) {
       "executable(\"foo\") {\n"
       "  crate_name = \"foo_crate\"\n"
       "  sources = [ \"foo.rs\", \"lib.rs\", \"main.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(exe_input.has_error());
   Err err;
@@ -36,7 +35,6 @@ TEST_F(RustFunctionsTarget, CrateName) {
   TestParseInput lib_input(
       "executable(\"foo\") {\n"
       "  sources = [ \"lib.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(lib_input.has_error());
   err = Err();
@@ -60,7 +58,6 @@ TEST_F(RustFunctionsTarget, CrateRootFind) {
       "executable(\"foo\") {\n"
       "  crate_root = \"foo.rs\""
       "  sources = [ \"main.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(normal_input.has_error());
   Err err;
@@ -75,7 +72,6 @@ TEST_F(RustFunctionsTarget, CrateRootFind) {
       "  crate_root = \"foo.rs\""
       "  crate_type = \"dylib\"\n"
       "  sources = [ \"main.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(normal_shlib_input.has_error());
   err = Err();
@@ -88,7 +84,6 @@ TEST_F(RustFunctionsTarget, CrateRootFind) {
   TestParseInput exe_input(
       "executable(\"foo\") {\n"
       "  sources = [ \"foo.rs\", \"lib.rs\", \"main.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(exe_input.has_error());
   err = Err();
@@ -101,7 +96,6 @@ TEST_F(RustFunctionsTarget, CrateRootFind) {
   TestParseInput lib_input(
       "rust_library(\"libfoo\") {\n"
       "  sources = [ \"foo.rs\", \"lib.rs\", \"main.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(lib_input.has_error());
   err = Err();
@@ -114,7 +108,6 @@ TEST_F(RustFunctionsTarget, CrateRootFind) {
   TestParseInput singlesource_input(
       "executable(\"bar\") {\n"
       "  sources = [ \"bar.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(singlesource_input.has_error());
   err = Err();
@@ -127,7 +120,6 @@ TEST_F(RustFunctionsTarget, CrateRootFind) {
   TestParseInput error_input(
       "rust_library(\"foo\") {\n"
       "  sources = [ \"foo.rs\", \"main.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(error_input.has_error());
   err = Err();
@@ -139,7 +131,6 @@ TEST_F(RustFunctionsTarget, CrateRootFind) {
   TestParseInput nosources_input(
       "executable(\"bar\") {\n"
       "  crate_root = \"bar.rs\"\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(nosources_input.has_error());
   err = Err();
@@ -163,7 +154,6 @@ TEST_F(RustFunctionsTarget, CrateTypeSelection) {
       "shared_library(\"libfoo\") {\n"
       "  crate_type = \"dylib\"\n"
       "  sources = [ \"lib.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(lib_input.has_error());
   Err err;
@@ -176,7 +166,6 @@ TEST_F(RustFunctionsTarget, CrateTypeSelection) {
       "executable(\"foo\") {\n"
       "  crate_type = \"rlib\"\n"
       "  sources = [ \"main.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(exe_non_default_input.has_error());
   err = Err();
@@ -189,7 +178,6 @@ TEST_F(RustFunctionsTarget, CrateTypeSelection) {
       "shared_library(\"foo\") {\n"
       "  crate_type = \"bad\"\n"
       "  sources = [ \"lib.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(lib_error_input.has_error());
   err = Err();
@@ -200,7 +188,6 @@ TEST_F(RustFunctionsTarget, CrateTypeSelection) {
   TestParseInput lib_missing_error_input(
       "shared_library(\"foo\") {\n"
       "  sources = [ \"lib.rs\" ]\n"
-      "  edition = \"2018\""
       "}\n");
   ASSERT_FALSE(lib_missing_error_input.has_error());
   err = Err();
@@ -286,40 +273,6 @@ TEST_F(RustFunctionsTarget, SetDefaults) {
             ":foo");
 }
 
-// Checks that the dition gets propagated correctly.
-TEST_F(RustFunctionsTarget, Edition) {
-  TestWithScope setup;
-
-  // The target generator needs a place to put the targets or it will fail.
-  Scope::ItemVector item_collector;
-  setup.scope()->set_item_collector(&item_collector);
-  setup.scope()->set_source_dir(SourceDir("/"));
-
-  TestParseInput lib_input(
-      "shared_library(\"libfoo\") {\n"
-      "  crate_type = \"dylib\"\n"
-      "  sources = [ \"lib.rs\" ]\n"
-      "  edition = \"2018\""
-      "}\n");
-  ASSERT_FALSE(lib_input.has_error());
-  Err err;
-  lib_input.parsed()->Execute(setup.scope(), &err);
-  ASSERT_FALSE(err.has_error()) << err.message();
-  ASSERT_EQ(item_collector.back()->AsTarget()->rust_values().edition(), "2018");
-
-  TestParseInput error_input(
-      "shared_library(\"foo\") {\n"
-      "  crate_type = \"dylib\"\n"
-      "  sources = [ \"lib.rs\" ]\n"
-      "}\n");
-  ASSERT_FALSE(error_input.has_error());
-  err = Err();
-  error_input.parsed()->Execute(setup.scope(), &err);
-  ASSERT_TRUE(err.has_error());
-  EXPECT_EQ("Missing \"edition\" in Rust target.", err.message())
-      << err.message();
-}
-
 // Checks aliased_deps parsing.
 TEST_F(RustFunctionsTarget, AliasedDeps) {
   TestWithScope setup;
@@ -333,7 +286,6 @@ TEST_F(RustFunctionsTarget, AliasedDeps) {
       "executable(\"foo\") {\n"
       "  sources = [ \"main.rs\" ]\n"
       "  deps = [ \"//bar\", \"//baz\" ]\n"
-      "  edition = \"2018\""
       "  aliased_deps = {\n"
       "    bar_renamed = \"//bar\"\n"
       "    baz_renamed = \"//baz:baz\"\n"
@@ -363,7 +315,6 @@ TEST_F(RustFunctionsTarget, PublicConfigs) {
       "executable(\"foo\") {\n"
       "  crate_name = \"foo_crate\"\n"
       "  sources = [ \"foo.rs\", \"lib.rs\", \"main.rs\" ]\n"
-      "  edition = \"2018\""
       "  public_configs = [ \":bar\" ]"
       "}\n");
   ASSERT_FALSE(exe_input.has_error());

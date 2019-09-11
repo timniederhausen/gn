@@ -112,7 +112,6 @@
     *   [defines: [string list] C preprocessor defines.](#var_defines)
     *   [depfile: [string] File name for input dependencies for actions.](#var_depfile)
     *   [deps: [label list] Private linked dependencies.](#var_deps)
-    *   [edition: [string] The rustc edition to use in compiliation.](#var_edition)
     *   [friend: [label pattern list] Allow targets to include private headers.](#var_friend)
     *   [include_dirs: [directory list] Additional include directories.](#var_include_dirs)
     *   [inputs: [file list] Additional compile-time dependencies.](#var_inputs)
@@ -1561,7 +1560,7 @@
   General: check_includes, configs, data, friend, inputs, metadata,
            output_name, output_extension, public, sources, testonly,
            visibility
-  Rust variables: aliased_deps, crate_root, crate_name, edition
+  Rust variables: aliased_deps, crate_root, crate_name
 ```
 ### <a name="func_generated_file"></a>**generated_file**: Declare a generated_file target.
 
@@ -1755,7 +1754,7 @@
   General: check_includes, configs, data, friend, inputs, metadata,
            output_name, output_extension, public, sources, testonly,
            visibility
-  Rust variables: aliased_deps, crate_root, crate_name, crate_type, edition
+  Rust variables: aliased_deps, crate_root, crate_name, crate_type
 ```
 ### <a name="func_rust_library"></a>**rust_library**: Declare a Rust library target.
 
@@ -1787,7 +1786,7 @@
   General: check_includes, configs, data, friend, inputs, metadata,
            output_name, output_extension, public, sources, testonly,
            visibility
-  Rust variables: aliased_deps, crate_root, crate_name, edition
+  Rust variables: aliased_deps, crate_root, crate_name
 ```
 ### <a name="func_shared_library"></a>**shared_library**: Declare a shared library target.
 
@@ -1821,7 +1820,7 @@
   General: check_includes, configs, data, friend, inputs, metadata,
            output_name, output_extension, public, sources, testonly,
            visibility
-  Rust variables: aliased_deps, crate_root, crate_name, crate_type, edition
+  Rust variables: aliased_deps, crate_root, crate_name, crate_type
 ```
 ### <a name="func_source_set"></a>**source_set**: Declare a source set target.
 
@@ -1900,7 +1899,7 @@
   General: check_includes, configs, data, friend, inputs, metadata,
            output_name, output_extension, public, sources, testonly,
            visibility
-  Rust variables: aliased_deps, crate_root, crate_name, edition
+  Rust variables: aliased_deps, crate_root, crate_name
 
   The tools and commands used to create this target type will be
   determined by the source files in its sources. Targets containing
@@ -2471,12 +2470,6 @@
   process_file_template will return for those inputs (see "gn help
   process_file_template").
 
-  binary targets (executables, libraries): this will return a list of the
-  resulting binary file(s). The "main output" (the actual binary or library)
-  will always be the 0th element in the result. Depending on the platform and
-  output type, there may be other output files as well (like import libraries)
-  which will follow.
-
   source sets and groups: this will return a list containing the path of the
   "stamp" file that Ninja will produce once all outputs are generated. This
   probably isn't very useful.
@@ -2612,7 +2605,7 @@
   toolchain("toolchain") {
     tool("link") {
       command = "..."
-      pool = ":link_pool($default_toolchain)")
+      pool = ":link_pool($default_toolchain)"
     }
   }
 ```
@@ -5100,16 +5093,6 @@
   "gn help runtime_deps".
 
   See also "public_deps".
-```
-### <a name="var_edition"></a>**edition**: [string] The rustc edition to use in compiliation.
-
-```
-  Valid for `rust_library` targets and `executable`, `static_library`,
-  `shared_library`, and `source_set` targets that contain Rust sources.
-
-  This indicates the compiler edition to use in compilition. Should be a value
-  like "2015" or "2018", indiicating the appropriate value to pass to the
-  `--edition=<>` flag in rustc.
 ```
 ### <a name="var_friend"></a>**friend**: Allow targets to include private headers.
 

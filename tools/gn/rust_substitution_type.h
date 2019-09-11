@@ -16,7 +16,6 @@ extern const SubstitutionTypes RustSubstitutions;
 // Valid for Rust tools.
 extern const Substitution kRustSubstitutionCrateName;
 extern const Substitution kRustSubstitutionCrateType;
-extern const Substitution kRustSubstitutionEdition;
 extern const Substitution kRustSubstitutionExterns;
 extern const Substitution kRustSubstitutionOutputExtension;
 extern const Substitution kRustSubstitutionOutputPrefix;

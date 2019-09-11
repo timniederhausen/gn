@@ -21,10 +21,9 @@
   "           output_name, output_extension, public, sources, testonly,\n" \
   "           visibility\n"
 #define RUST_VARS \
-  "  Rust variables: aliased_deps, crate_root, crate_name, edition\n"
+  "  Rust variables: aliased_deps, crate_root, crate_name\n"
 #define RUST_SHARED_VARS                                                 \
-  "  Rust variables: aliased_deps, crate_root, crate_name, crate_type, " \
-  "edition\n"
+  "  Rust variables: aliased_deps, crate_root, crate_name, crate_type\n"
 
 namespace functions {
 
