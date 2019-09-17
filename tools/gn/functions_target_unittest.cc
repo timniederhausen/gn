@@ -66,6 +66,16 @@ TEST_F(FunctionsTarget, CheckNotNeeded) {
   scoped_input.parsed()->Execute(setup.scope(), &err);
   ASSERT_FALSE(err.has_error()) << err.message();
 
+  TestParseInput nonexistent_arg_input(
+      "source_set(\"foo\") {\n"
+      "  a = {x = 1}\n"
+      "  not_needed(a, [ \"x\", \"y\" ])\n"
+      "}\n");
+  ASSERT_FALSE(nonexistent_arg_input.has_error());
+  err = Err();
+  nonexistent_arg_input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message();
+
   TestParseInput exclusion_input(
       "source_set(\"foo\") {\n"
       "  x = 1\n"

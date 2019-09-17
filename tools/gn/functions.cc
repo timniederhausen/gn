@@ -778,10 +778,10 @@ Value RunNotNeeded(Scope* scope,
     for (const Value& cur : value->list_value()) {
       if (!cur.VerifyTypeIs(Value::STRING, err))
         return Value();
-      if (!source->GetValue(cur.string_value(), true)) {
-        *err = Err(cur, "Undefined identifier");
-        return Value();
-      }
+      // We don't need the return value, we invoke scope::GetValue only to mark
+      // the value as used. Note that we cannot use Scope::MarkUsed because we
+      // want to also search in the parent scope.
+      (void) source->GetValue(cur.string_value(), true);
     }
     return Value();
   }
