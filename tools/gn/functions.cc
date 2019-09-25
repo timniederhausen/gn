@@ -410,8 +410,9 @@ const char kDeclareArgs_Help[] =
       the current scope is not (since the overrides haven't been applied yet).
 
    2. At the end of executing the block, any variables set within that scope
-      are saved globally as build arguments, with their current values being
-      saved as the "default value" for that argument.
+      are saved, with the values specified in the block used as the "default value"
+      for that argument. Once saved, these variables are available for override
+      via args.gn.
 
    3. User-defined overrides are applied. Anything set in "gn args" now
       overrides any default values. The resulting set of variables is promoted
