@@ -99,8 +99,7 @@ What gets checked
     - Includes with a "nogncheck" annotation are skipped (see
       "gn help nogncheck").
 
-    - Only includes using "quotes" are checked. <brackets> are assumed to be
-      system includes.
+    - Includes using both "quotes" and <brackets> are checked.
 
     - Include paths are assumed to be relative to any of the "include_dirs" for
       the target (including the implicit current dir).
@@ -224,9 +223,12 @@ int RunCheck(const std::vector<std::string>& args) {
   const base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
   bool force = cmdline->HasSwitch("force");
   bool check_generated = cmdline->HasSwitch("check-generated");
+  bool check_system = setup->check_system_includes() ||
+                      cmdline->HasSwitch("check-system");
 
   if (!CheckPublicHeaders(&setup->build_settings(), all_targets,
-                          targets_to_check, force, check_generated))
+                          targets_to_check, force, check_generated,
+                          check_system))
     return 1;
 
   if (!base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kQuiet)) {
@@ -246,11 +248,12 @@ int RunCheck(const std::vector<std::string>& args) {
 bool CheckPublicHeaders(const BuildSettings* build_settings,
                         const std::vector<const Target*>& all_targets,
                         const std::vector<const Target*>& to_check,
-                        bool force_check, bool check_generated) {
+                        bool force_check, bool check_generated,
+                        bool check_system) {
   ScopedTrace trace(TraceItem::TRACE_CHECK_HEADERS, "Check headers");
 
   scoped_refptr<HeaderChecker> header_checker(
-      new HeaderChecker(build_settings, all_targets, check_generated));
+      new HeaderChecker(build_settings, all_targets, check_generated, check_system));
 
   std::vector<Err> header_errors;
   header_checker->Run(to_check, force_check, &header_errors);

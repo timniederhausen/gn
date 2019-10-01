@@ -83,6 +83,12 @@ class Setup {
   // headers to be checked. Defaults to false.
   void set_check_public_headers(bool s) { check_public_headers_ = s; }
 
+  // After a successful run, setting this will additionally cause system style
+  // includes to be checked. Defaults to false.
+  void set_check_system_includes(bool s) { check_system_includes_ = s; }
+
+  bool check_system_includes() const { return check_system_includes_; }
+
   // Before DoSetup, setting this will generate an empty args.gn if
   // it does not exist and set up correct dependencies for it.
   void set_gen_empty_args(bool ge) { gen_empty_args_ = ge; }
@@ -148,6 +154,7 @@ class Setup {
   SourceFile root_build_file_;
 
   bool check_public_headers_ = false;
+  bool check_system_includes_ = false;
 
   // See getter for info.
   std::unique_ptr<std::vector<LabelPattern>> check_patterns_;

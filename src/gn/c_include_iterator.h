@@ -10,14 +10,17 @@
 #include <string_view>
 
 #include "base/macros.h"
+#include "gn/location.h"
 
 class InputFile;
-class LocationRange;
+
+struct IncludeStringWithLocation {
+  std::string_view contents;
+  LocationRange location;
+  bool system_style_include = false;
+};
 
 // Iterates through #includes in C source and header files.
-//
-// This only returns includes we want to check, which is user includes with
-// double-quotes: #include "..."
 class CIncludeIterator {
  public:
   // The InputFile pointed to must outlive this class.
@@ -27,7 +30,7 @@ class CIncludeIterator {
   // Fills in the string with the contents of the next include, and the
   // location with where it came from, and returns true, or returns false if
   // there are no more includes.
-  bool GetNextIncludeString(std::string_view* out, LocationRange* location);
+  bool GetNextIncludeString(IncludeStringWithLocation* include);
 
   // Maximum numbef of non-includes we'll tolerate before giving up. This does
   // not count comments or preprocessor.

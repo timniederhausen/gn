@@ -126,8 +126,8 @@ CIncludeIterator::CIncludeIterator(const InputFile* input)
 
 CIncludeIterator::~CIncludeIterator() = default;
 
-bool CIncludeIterator::GetNextIncludeString(std::string_view* out,
-                                            LocationRange* location) {
+bool CIncludeIterator::GetNextIncludeString(
+    IncludeStringWithLocation* include) {
   std::string_view line;
   int cur_line_number = 0;
   while (lines_since_last_include_ <= kMaxNonIncludeLines &&
@@ -135,15 +135,17 @@ bool CIncludeIterator::GetNextIncludeString(std::string_view* out,
     std::string_view include_contents;
     int begin_char;
     IncludeType type = ExtractInclude(line, &include_contents, &begin_char);
-    if (type == INCLUDE_USER && !HasNoCheckAnnotation(line)) {
-      // Only count user includes for now.
-      *out = include_contents;
-      *location = LocationRange(
+    if (HasNoCheckAnnotation(line))
+      continue;
+    if (type != INCLUDE_NONE) {
+      include->contents = include_contents;
+      include->location = LocationRange(
           Location(input_file_, cur_line_number, begin_char,
                    -1 /* TODO(scottmg): Is this important? */),
           Location(input_file_, cur_line_number,
                    begin_char + static_cast<int>(include_contents.size()),
                    -1 /* TODO(scottmg): Is this important? */));
+      include->system_style_include = (type == INCLUDE_SYSTEM);
 
       lines_since_last_include_ = 0;
       return true;

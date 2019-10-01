@@ -77,6 +77,14 @@ Variables
       The format of this list is identical to that of "visibility" so see "gn
       help visibility" for examples.
 
+  check_system_includes [optional]
+      Boolean to control whether system style includes are checked by default
+      when running "gn check" or "gn gen --check".  System style includes are
+      includes that use angle brackets <> instead of double quotes "". If this
+      setting is omitted or set to false, these includes will be ignored by
+      default. They can be checked explicitly by running
+      "gn check --check-system" or "gn gen --check=system"
+
   exec_script_whitelist [optional]
       A list of .gn/.gni files (not labels) that have permission to call the
       exec_script function. If this list is defined, calls to exec_script will
@@ -422,7 +430,7 @@ bool Setup::RunPostMessageLoop(const base::CommandLine& cmdline) {
     }
 
     if (!commands::CheckPublicHeaders(&build_settings_, all_targets, to_check,
-                                      false, false)) {
+                                      false, false, check_system_includes_)) {
       return false;
     }
   }
@@ -817,6 +825,17 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline) {
       return false;
     }
   }
+
+  const Value* check_system_includes_value =
+      dotfile_scope_.GetValue("check_system_includes", true);
+  if (check_system_includes_value) {
+    if (!check_system_includes_value->VerifyTypeIs(Value::BOOLEAN, &err)) {
+      err.PrintToStdout();
+      return false;
+    }
+    check_system_includes_ = check_system_includes_value->boolean_value();
+  }
+
 
   // Fill exec_script_whitelist.
   const Value* exec_script_whitelist_value =

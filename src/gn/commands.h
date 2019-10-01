@@ -146,7 +146,8 @@ bool CheckPublicHeaders(const BuildSettings* build_settings,
                         const std::vector<const Target*>& all_targets,
                         const std::vector<const Target*>& to_check,
                         bool force_check,
-                        bool check_generated);
+                        bool check_generated,
+                        bool check_system);
 
 // Filters the given list of targets by the given pattern list.
 void FilterTargetsByPatterns(const std::vector<const Target*>& input,

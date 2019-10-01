@@ -54,6 +54,13 @@ class HeaderCheckerTest : public TestWithScheduler {
   }
 
  protected:
+  scoped_refptr<HeaderChecker> CreateChecker() {
+    bool check_generated = false;
+    bool check_system = true;
+    return base::MakeRefCounted<HeaderChecker>(
+        setup_.build_settings(), targets_, check_generated, check_system);
+  }
+
   TestWithScope setup_;
 
   // Some headers that are automatically set up with a public dependency chain.
@@ -73,8 +80,7 @@ void PrintTo(const SourceFile& source_file, ::std::ostream* os) {
 }
 
 TEST_F(HeaderCheckerTest, IsDependencyOf) {
-  scoped_refptr<HeaderChecker> checker(
-      new HeaderChecker(setup_.build_settings(), targets_));
+  auto checker = CreateChecker();
 
   // Add a target P ("private") that privately depends on C, and hook up the
   // chain so that A -> P -> C. A will depend on C via two different paths.
@@ -189,8 +195,7 @@ TEST_F(HeaderCheckerTest, CheckInclude) {
   otc.sources().push_back(otc_header);
   EXPECT_TRUE(otc.OnResolved(&err));
 
-  scoped_refptr<HeaderChecker> checker(
-      new HeaderChecker(setup_.build_settings(), targets_));
+  auto checker = CreateChecker();
 
   std::set<std::pair<const Target*, const Target*>> no_dependency_cache;
   // A file in target A can't include a header from D because A has no
@@ -254,8 +259,7 @@ TEST_F(HeaderCheckerTest, PublicFirst) {
   // marked as not permitted.
   bool is_permitted = false;
   HeaderChecker::Chain chain;
-  scoped_refptr<HeaderChecker> checker(
-      new HeaderChecker(setup_.build_settings(), targets_));
+  auto checker = CreateChecker();
   EXPECT_TRUE(checker->IsDependencyOf(&d_, &a_, &chain, &is_permitted));
 
   EXPECT_FALSE(is_permitted);
@@ -267,7 +271,7 @@ TEST_F(HeaderCheckerTest, PublicFirst) {
   // Hook up D to the existing public A -> B -> C chain to make a long one, and
   // search for D again.
   c_.public_deps().push_back(LabelTargetPair(&d_));
-  checker = new HeaderChecker(setup_.build_settings(), targets_);
+  checker = CreateChecker();
   chain.clear();
   EXPECT_TRUE(checker->IsDependencyOf(&d_, &a_, &chain, &is_permitted));
 
@@ -290,8 +294,7 @@ TEST_F(HeaderCheckerTest, CheckIncludeAllowCircular) {
   SourceFile a_public("//a_public.h");
   a_.sources().push_back(a_public);
 
-  scoped_refptr<HeaderChecker> checker(
-      new HeaderChecker(setup_.build_settings(), targets_));
+  auto checker = CreateChecker();
 
   // A depends on B. So B normally can't include headers from A.
   std::vector<Err> errors;
@@ -317,27 +320,56 @@ TEST_F(HeaderCheckerTest, SourceFileForInclude) {
       SourceDir("/c/custom_include/"), SourceDir("//"), SourceDir("//subdir")};
   a_.sources().push_back(SourceFile("//lib/header1.h"));
   b_.sources().push_back(SourceFile("/c/custom_include/header2.h"));
+  d_.sources().push_back(SourceFile("/d/subdir/header3.h"));
 
-  InputFile dummy_input_file(SourceFile("//some_file.cc"));
+  InputFile dummy_input_file(SourceFile("/d/subdir/some_file.cc"));
   dummy_input_file.SetContents(std::string());
-  LocationRange dummy_range;
 
-  scoped_refptr<HeaderChecker> checker(
-      new HeaderChecker(setup_.build_settings(), targets_));
+  auto checker = CreateChecker();
   {
     Err err;
+    IncludeStringWithLocation include;
+    include.contents = "lib/header1.h";
     SourceFile source_file = checker->SourceFileForInclude(
-        "lib/header1.h", kIncludeDirs, dummy_input_file, dummy_range, &err);
+        include, kIncludeDirs, dummy_input_file, &err);
     EXPECT_FALSE(err.has_error());
     EXPECT_EQ(SourceFile("//lib/header1.h"), source_file);
   }
 
   {
     Err err;
+    IncludeStringWithLocation include;
+    include.contents = "header2.h";
     SourceFile source_file = checker->SourceFileForInclude(
-        "header2.h", kIncludeDirs, dummy_input_file, dummy_range, &err);
+        include, kIncludeDirs, dummy_input_file, &err);
     EXPECT_FALSE(err.has_error());
     EXPECT_EQ(SourceFile("/c/custom_include/header2.h"), source_file);
+  }
+
+  // A non system style include should find a header file in the same directory
+  // as the source file, regardless of include dirs.
+  {
+    Err err;
+    IncludeStringWithLocation include;
+    include.contents = "header3.h";
+    include.system_style_include = false;
+    SourceFile source_file = checker->SourceFileForInclude(
+        include, kIncludeDirs, dummy_input_file, &err);
+    EXPECT_FALSE(err.has_error());
+    EXPECT_EQ(SourceFile("/d/subdir/header3.h"), source_file);
+  }
+
+  // A system style include should *not* find a header file in the same
+  // directory as the source file if that directory is not in the include dirs.
+  {
+    Err err;
+    IncludeStringWithLocation include;
+    include.contents = "header3.h";
+    include.system_style_include = true;
+    SourceFile source_file = checker->SourceFileForInclude(
+        include, kIncludeDirs, dummy_input_file, &err);
+    EXPECT_TRUE(source_file.is_null());
+    EXPECT_FALSE(err.has_error());
   }
 }
 
@@ -345,22 +377,16 @@ TEST_F(HeaderCheckerTest, SourceFileForInclude_FileNotFound) {
   using base::FilePath;
   const char kFileContents[] = "Some dummy contents";
   const std::vector<SourceDir> kIncludeDirs = {SourceDir("//")};
-  scoped_refptr<HeaderChecker> checker(
-      new HeaderChecker(setup_.build_settings(), targets_));
+  auto checker = CreateChecker();
 
   Err err;
   InputFile input_file(SourceFile("//input.cc"));
   input_file.SetContents(std::string(kFileContents));
-  const int kLineNumber = 10;
-  const int kColumnNumber = 16;
-  const int kLength = 8;
-  const int kByteNumber = 100;
-  LocationRange range(
-      Location(&input_file, kLineNumber, kColumnNumber, kByteNumber),
-      Location(&input_file, kLineNumber, kColumnNumber + kLength, kByteNumber));
 
-  SourceFile source_file = checker->SourceFileForInclude(
-      "header.h", kIncludeDirs, input_file, range, &err);
+  IncludeStringWithLocation include;
+  include.contents = "header.h";
+  SourceFile source_file =
+      checker->SourceFileForInclude(include, kIncludeDirs, input_file, &err);
   EXPECT_TRUE(source_file.is_null());
   EXPECT_FALSE(err.has_error());
 }
@@ -383,8 +409,7 @@ TEST_F(HeaderCheckerTest, Friend) {
   ASSERT_FALSE(err.has_error());
 
   // Must be after setting everything up for it to find the files.
-  scoped_refptr<HeaderChecker> checker(
-      new HeaderChecker(setup_.build_settings(), targets_));
+  auto checker = CreateChecker();
 
   // B should not be allowed to include C's private header.
   std::vector<Err> errors;

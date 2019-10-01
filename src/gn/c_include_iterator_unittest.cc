@@ -44,27 +44,35 @@ TEST(CIncludeIterator, Basic) {
 
   CIncludeIterator iter(&file);
 
-  std::string_view contents;
-  LocationRange range;
-  EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
-  EXPECT_EQ("foo/bar.h", contents);
-  EXPECT_TRUE(RangeIs(range, 3, 11, 20)) << range.begin().Describe(true);
+  IncludeStringWithLocation include;
+  EXPECT_TRUE(iter.GetNextIncludeString(&include));
+  EXPECT_EQ("foo/bar.h", include.contents);
+  EXPECT_TRUE(RangeIs(include.location, 3, 11, 20)) << include.location.begin().Describe(true);
+  EXPECT_FALSE(include.system_style_include);
 
-  EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
-  EXPECT_EQ("foo/baz.h", contents);
-  EXPECT_TRUE(RangeIs(range, 7, 12, 21)) << range.begin().Describe(true);
+  EXPECT_TRUE(iter.GetNextIncludeString(&include));
+  EXPECT_EQ("stdio.h", include.contents);
+  EXPECT_TRUE(RangeIs(include.location, 5, 11, 18)) << include.location.begin().Describe(true);
+  EXPECT_TRUE(include.system_style_include);
 
-  EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
-  EXPECT_EQ("la/deda.h", contents);
-  EXPECT_TRUE(RangeIs(range, 8, 11, 20)) << range.begin().Describe(true);
+  EXPECT_TRUE(iter.GetNextIncludeString(&include));
+  EXPECT_EQ("foo/baz.h", include.contents);
+  EXPECT_TRUE(RangeIs(include.location, 7, 12, 21)) << include.location.begin().Describe(true);
+  EXPECT_FALSE(include.system_style_include);
+
+  EXPECT_TRUE(iter.GetNextIncludeString(&include));
+  EXPECT_EQ("la/deda.h", include.contents);
+  EXPECT_TRUE(RangeIs(include.location, 8, 11, 20)) << include.location.begin().Describe(true);
+  EXPECT_FALSE(include.system_style_include);
 
   // The line annotated with "nogncheck" should be skipped.
 
-  EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
-  EXPECT_EQ("weird_mac_import.h", contents);
-  EXPECT_TRUE(RangeIs(range, 10, 10, 28)) << range.begin().Describe(true);
+  EXPECT_TRUE(iter.GetNextIncludeString(&include));
+  EXPECT_EQ("weird_mac_import.h", include.contents);
+  EXPECT_TRUE(RangeIs(include.location, 10, 10, 28)) << include.location.begin().Describe(true);
+  EXPECT_FALSE(include.system_style_include);
 
-  EXPECT_FALSE(iter.GetNextIncludeString(&contents, &range));
+  EXPECT_FALSE(iter.GetNextIncludeString(&include));
 }
 
 // Tests that we don't search for includes indefinitely.
@@ -77,12 +85,11 @@ TEST(CIncludeIterator, GiveUp) {
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  std::string_view contents;
-  LocationRange range;
+  IncludeStringWithLocation include;
 
   CIncludeIterator iter(&file);
-  EXPECT_FALSE(iter.GetNextIncludeString(&contents, &range));
-  EXPECT_TRUE(contents.empty());
+  EXPECT_FALSE(iter.GetNextIncludeString(&include));
+  EXPECT_TRUE(include.contents.empty());
 }
 
 // Don't count blank lines, comments, and preprocessor when giving up.
@@ -99,12 +106,11 @@ TEST(CIncludeIterator, DontGiveUp) {
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  std::string_view contents;
-  LocationRange range;
+  IncludeStringWithLocation include;
 
   CIncludeIterator iter(&file);
-  EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
-  EXPECT_EQ("foo/bar.h", contents);
+  EXPECT_TRUE(iter.GetNextIncludeString(&include));
+  EXPECT_EQ("foo/bar.h", include.contents);
 }
 
 // Tests that we'll tolerate some small numbers of non-includes interspersed
@@ -113,28 +119,27 @@ TEST(CIncludeIterator, TolerateNonIncludes) {
   const size_t kSkip = CIncludeIterator::kMaxNonIncludeLines - 2;
   const size_t kGroupCount = 100;
 
-  std::string include("foo/bar.h");
+  std::string include_str("foo/bar.h");
 
   // Allow a series of includes with blanks in between.
   std::string buffer;
   for (size_t group = 0; group < kGroupCount; group++) {
     for (size_t i = 0; i < kSkip; i++)
       buffer.append("foo\n");
-    buffer.append("#include \"" + include + "\"\n");
+    buffer.append("#include \"" + include_str + "\"\n");
   }
 
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  std::string_view contents;
-  LocationRange range;
+  IncludeStringWithLocation include;
 
   CIncludeIterator iter(&file);
   for (size_t group = 0; group < kGroupCount; group++) {
-    EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
-    EXPECT_EQ(include, std::string(contents));
+    EXPECT_TRUE(iter.GetNextIncludeString(&include));
+    EXPECT_EQ(include_str, std::string(include.contents));
   }
-  EXPECT_FALSE(iter.GetNextIncludeString(&contents, &range));
+  EXPECT_FALSE(iter.GetNextIncludeString(&include));
 }
 
 // Tests that comments of the form
@@ -152,12 +157,11 @@ TEST(CIncludeIterator, CStyleComments) {
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  std::string_view contents;
-  LocationRange range;
+  IncludeStringWithLocation include;
 
   CIncludeIterator iter(&file);
-  EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
-  EXPECT_EQ("foo/bar.h", contents);
+  EXPECT_TRUE(iter.GetNextIncludeString(&include));
+  EXPECT_EQ("foo/bar.h", include.contents);
 }
 
 // Tests that spaces between the hash and directive are ignored.
@@ -167,12 +171,11 @@ TEST(CIncludeIterator, SpacesAfterHash) {
   InputFile file(SourceFile("//foo.cc"));
   file.SetContents(buffer);
 
-  std::string_view contents;
-  LocationRange range;
+  IncludeStringWithLocation include;
 
   CIncludeIterator iter(&file);
-  EXPECT_TRUE(iter.GetNextIncludeString(&contents, &range));
-  EXPECT_EQ("foo/bar.h", contents);
+  EXPECT_TRUE(iter.GetNextIncludeString(&include));
+  EXPECT_EQ("foo/bar.h", include.contents);
 
-  EXPECT_FALSE(iter.GetNextIncludeString(&contents, &range));
+  EXPECT_FALSE(iter.GetNextIncludeString(&include));
 }
