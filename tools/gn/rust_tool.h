@@ -21,7 +21,12 @@
 class RustTool : public Tool {
  public:
   // Rust tools
-  static const char* kRsToolRustc;
+  static const char* kRsToolBin;
+  static const char* kRsToolCDylib;
+  static const char* kRsToolDylib;
+  static const char* kRsToolMacro;
+  static const char* kRsToolRlib;
+  static const char* kRsToolStaticlib;
 
   explicit RustTool(const char* n);
   ~RustTool();
@@ -36,61 +41,12 @@ class RustTool : public Tool {
   RustTool* AsRust() override;
   const RustTool* AsRust() const override;
 
-  void set_exe_output_extension(std::string ext) {
-    DCHECK(!complete_);
-    DCHECK(ext.empty() || ext[0] == '.');
-    exe_output_extension_ = std::move(ext);
-  }
-
-  void set_rlib_output_extension(std::string ext) {
-    DCHECK(!complete_);
-    DCHECK(ext.empty() || ext[0] == '.');
-    rlib_output_extension_ = std::move(ext);
-  }
-
-  void set_dylib_output_extension(std::string ext) {
-    DCHECK(!complete_);
-    DCHECK(ext.empty() || ext[0] == '.');
-    dylib_output_extension_ = std::move(ext);
-  }
-
-  void set_cdylib_output_extension(std::string ext) {
-    DCHECK(!complete_);
-    DCHECK(ext.empty() || ext[0] == '.');
-    cdylib_output_extension_ = std::move(ext);
-  }
-
-  void set_staticlib_output_extension(std::string ext) {
-    DCHECK(!complete_);
-    DCHECK(ext.empty() || ext[0] == '.');
-    staticlib_output_extension_ = std::move(ext);
-  }
-
-  void set_proc_macro_output_extension(std::string ext) {
-    DCHECK(!complete_);
-    DCHECK(ext.empty() || ext[0] == '.');
-    proc_macro_output_extension_ = std::move(ext);
-  }
-
-  // Will include a leading "." if nonempty.
-  const std::string& rustc_output_extension(
-      Target::OutputType type,
-      const RustValues::CrateType crate_type) const;
-
  private:
   bool SetOutputExtension(const Value* value, std::string* var, Err* err);
-  bool ReadOutputExtensions(Scope* scope, Err* err);
   bool ReadOutputsPatternList(Scope* scope,
                               const char* var,
                               SubstitutionList* field,
                               Err* err);
-
-  std::string exe_output_extension_;
-  std::string rlib_output_extension_;
-  std::string dylib_output_extension_;
-  std::string cdylib_output_extension_;
-  std::string staticlib_output_extension_;
-  std::string proc_macro_output_extension_;
 
   DISALLOW_COPY_AND_ASSIGN(RustTool);
 };

@@ -253,7 +253,7 @@ TEST(SubstitutionWriter, LinkerSubstitutions) {
   // The compiler substitution is just target + OUTPUT_EXTENSION combined. So
   // test one target one plus the output extension.
   EXPECT_EQ(".so", SubstitutionWriter::GetLinkerSubstitution(
-                       &target, tool, &CSubstitutionOutputExtension));
+                       &target, tool, &SubstitutionOutputExtension));
   EXPECT_EQ("gen/foo/bar", SubstitutionWriter::GetLinkerSubstitution(
                                &target, tool, &SubstitutionTargetGenDir));
 
@@ -270,10 +270,10 @@ TEST(SubstitutionWriter, LinkerSubstitutions) {
   // Output extensions can be overridden.
   target.set_output_extension("extension");
   EXPECT_EQ(".extension", SubstitutionWriter::GetLinkerSubstitution(
-                              &target, tool, &CSubstitutionOutputExtension));
+                              &target, tool, &SubstitutionOutputExtension));
   target.set_output_extension("");
   EXPECT_EQ("", SubstitutionWriter::GetLinkerSubstitution(
-                    &target, tool, &CSubstitutionOutputExtension));
+                    &target, tool, &SubstitutionOutputExtension));
 
   // Output directory is tested in a separate test below.
 }

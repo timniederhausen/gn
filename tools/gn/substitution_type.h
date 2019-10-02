@@ -40,6 +40,7 @@ extern const Substitution SubstitutionLabelName;
 extern const Substitution SubstitutionRootGenDir;
 extern const Substitution SubstitutionRootOutDir;
 extern const Substitution SubstitutionOutputDir;
+extern const Substitution SubstitutionOutputExtension;
 extern const Substitution SubstitutionTargetGenDir;
 extern const Substitution SubstitutionTargetOutDir;
 extern const Substitution SubstitutionTargetOutputName;

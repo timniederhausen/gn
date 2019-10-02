@@ -311,6 +311,8 @@ const char* Target::GetStringForOutputType(OutputType type) {
       return functions::kCreateBundle;
     case GENERATED_FILE:
       return functions::kGeneratedFile;
+    case RUST_LIBRARY:
+      return functions::kRustLibrary;
     default:
       return "";
   }

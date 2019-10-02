@@ -28,7 +28,6 @@ extern const Substitution CSubstitutionLinkerInputs;
 extern const Substitution CSubstitutionLinkerInputsNewline;
 extern const Substitution CSubstitutionLdFlags;
 extern const Substitution CSubstitutionLibs;
-extern const Substitution CSubstitutionOutputExtension;
 extern const Substitution CSubstitutionSoLibs;
 
 // Valid for alink only.

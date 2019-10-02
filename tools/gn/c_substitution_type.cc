@@ -17,7 +17,6 @@ const SubstitutionTypes CSubstitutions = {
 
     &CSubstitutionLinkerInputs, &CSubstitutionLinkerInputsNewline,
     &CSubstitutionLdFlags,      &CSubstitutionLibs,
-    &CSubstitutionOutputExtension,
     &CSubstitutionSoLibs,
 
     &CSubstitutionArFlags,
@@ -41,8 +40,6 @@ const Substitution CSubstitutionLinkerInputsNewline = {"{{inputs_newline}}",
                                                       "in_newline"};
 const Substitution CSubstitutionLdFlags = {"{{ldflags}}", "ldflags"};
 const Substitution CSubstitutionLibs = {"{{libs}}", "libs"};
-const Substitution CSubstitutionOutputExtension = {"{{output_extension}}",
-                                                  "output_extension"};
 const Substitution CSubstitutionSoLibs = {"{{solibs}}", "solibs"};
 
 // Valid for alink only.
@@ -64,22 +61,27 @@ bool IsValidCompilerOutputsSubstitution(const Substitution* type) {
 }
 
 bool IsValidLinkerSubstitution(const Substitution* type) {
-  return IsValidToolSubstitution(type) || type == &SubstitutionOutputDir ||
+  return IsValidToolSubstitution(type) ||
+         type == &SubstitutionOutputDir ||
+         type == &SubstitutionOutputExtension ||
          type == &CSubstitutionLinkerInputs ||
          type == &CSubstitutionLinkerInputsNewline ||
-         type == &CSubstitutionLdFlags || type == &CSubstitutionLibs ||
-         type == &CSubstitutionOutputExtension || type == &CSubstitutionSoLibs;
+         type == &CSubstitutionLdFlags ||
+         type == &CSubstitutionLibs ||
+         type == &CSubstitutionSoLibs;
 }
 
 bool IsValidLinkerOutputsSubstitution(const Substitution* type) {
   // All valid compiler outputs plus the output extension.
   return IsValidCompilerOutputsSubstitution(type) ||
-         type == &SubstitutionOutputDir || type == &CSubstitutionOutputExtension;
+         type == &SubstitutionOutputDir || type == &SubstitutionOutputExtension;
 }
 
 bool IsValidALinkSubstitution(const Substitution* type) {
-  return IsValidToolSubstitution(type) || type == &SubstitutionOutputDir ||
+  return IsValidToolSubstitution(type) ||
+         type == &SubstitutionOutputDir ||
+         type == &SubstitutionOutputExtension ||
          type == &CSubstitutionLinkerInputs ||
          type == &CSubstitutionLinkerInputsNewline ||
-         type == &CSubstitutionArFlags || type == &CSubstitutionOutputExtension;
+         type == &CSubstitutionArFlags;
 }

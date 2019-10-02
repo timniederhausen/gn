@@ -12,7 +12,6 @@
 
 const SubstitutionTypes RustSubstitutions = {
     &kRustSubstitutionCrateName,       &kRustSubstitutionCrateType,
-    &kRustSubstitutionOutputExtension, &kRustSubstitutionOutputPrefix,
     &kRustSubstitutionRustDeps,        &kRustSubstitutionRustFlags,
     &kRustSubstitutionRustEnv,         &kRustSubstitutionExterns,
 };
@@ -23,10 +22,6 @@ const Substitution kRustSubstitutionCrateName = {"{{crate_name}}",
 const Substitution kRustSubstitutionCrateType = {"{{crate_type}}",
                                                  "crate_type"};
 const Substitution kRustSubstitutionExterns = {"{{externs}}", "externs"};
-const Substitution kRustSubstitutionOutputExtension = {
-    "{{rustc_output_extension}}", "rustc_output_extension"};
-const Substitution kRustSubstitutionOutputPrefix = {"{{rustc_output_prefix}}",
-                                                    "rustc_output_prefix"};
 const Substitution kRustSubstitutionRustDeps = {"{{rustdeps}}", "rustdeps"};
 const Substitution kRustSubstitutionRustEnv = {"{{rustenv}}", "rustenv"};
 const Substitution kRustSubstitutionRustFlags = {"{{rustflags}}", "rustflags"};
@@ -34,11 +29,10 @@ const Substitution kRustSubstitutionRustFlags = {"{{rustflags}}", "rustflags"};
 bool IsValidRustSubstitution(const Substitution* type) {
   return IsValidToolSubstitution(type) || IsValidSourceSubstitution(type) ||
          type == &SubstitutionOutputDir ||
+         type == &SubstitutionOutputExtension ||
          type == &kRustSubstitutionCrateName ||
          type == &kRustSubstitutionCrateType ||
          type == &kRustSubstitutionExterns ||
-         type == &kRustSubstitutionOutputExtension ||
-         type == &kRustSubstitutionOutputPrefix ||
          type == &kRustSubstitutionRustDeps ||
          type == &kRustSubstitutionRustEnv ||
          type == &kRustSubstitutionRustFlags;

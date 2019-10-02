@@ -67,7 +67,7 @@ TEST_F(FunctionToolchain, Rust) {
   {
     TestParseInput input(
         R"(toolchain("rust") {
-          tool("rustc") {
+          tool("rust_bin") {
             command = "{{rustenv}} rustc --crate-name {{crate_name}} --crate-type bin {{rustflags}} -o {{output}} {{externs}} {{source}}"
             description = "RUST {{output}}"
           }
@@ -83,7 +83,7 @@ TEST_F(FunctionToolchain, Rust) {
     const Toolchain* toolchain = setup.items()[0]->AsToolchain();
     ASSERT_TRUE(toolchain);
 
-    const Tool* rust = toolchain->GetTool(RustTool::kRsToolRustc);
+    const Tool* rust = toolchain->GetTool(RustTool::kRsToolBin);
     ASSERT_TRUE(rust);
     ASSERT_EQ(rust->command().AsString(),
               "{{rustenv}} rustc --crate-name {{crate_name}} --crate-type bin "

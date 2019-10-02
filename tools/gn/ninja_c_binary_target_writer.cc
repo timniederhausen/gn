@@ -548,7 +548,7 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
 void NinjaCBinaryTargetWriter::WriteOutputSubstitutions() {
   out_ << "  output_extension = "
        << SubstitutionWriter::GetLinkerSubstitution(
-              target_, tool_, &CSubstitutionOutputExtension);
+              target_, tool_, &SubstitutionOutputExtension);
   out_ << std::endl;
   out_ << "  output_dir = "
        << SubstitutionWriter::GetLinkerSubstitution(target_, tool_,

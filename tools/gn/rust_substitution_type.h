@@ -17,8 +17,6 @@ extern const SubstitutionTypes RustSubstitutions;
 extern const Substitution kRustSubstitutionCrateName;
 extern const Substitution kRustSubstitutionCrateType;
 extern const Substitution kRustSubstitutionExterns;
-extern const Substitution kRustSubstitutionOutputExtension;
-extern const Substitution kRustSubstitutionOutputPrefix;
 extern const Substitution kRustSubstitutionRustDeps;
 extern const Substitution kRustSubstitutionRustEnv;
 extern const Substitution kRustSubstitutionRustFlags;

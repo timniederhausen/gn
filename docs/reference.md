@@ -2041,8 +2041,9 @@
       the current scope is not (since the overrides haven't been applied yet).
 
    2. At the end of executing the block, any variables set within that scope
-      are saved globally as build arguments, with their current values being
-      saved as the "default value" for that argument.
+      are saved, with the values specified in the block used as the "default value"
+      for that argument. Once saved, these variables are available for override
+      via args.gn.
 
    3. User-defined overrides are applied. Anything set in "gn args" now
       overrides any default values. The resulting set of variables is promoted
@@ -3175,7 +3176,12 @@
       "compile_xcassets": [iOS, macOS] Tool to compile asset catalogs.
 
     Rust tools:
-      "rustc": Rust compiler and linker
+      "rust_bin": Tool for compiling Rust binaries
+      "rust_cdylib": Tool for compiling C-compatible dynamic libraries.
+      "rust_dylib": Tool for compiling Rust dynamic libraries.
+      "rust_macro": Tool for compiling Rust procedural macros.
+      "rust_rlib": Tool for compiling Rust libraries.
+      "rust_staticlib": Tool for compiling Rust static libraries.
 ```
 
 #### **Tool variables**
@@ -3591,13 +3597,6 @@
     {{externs}}
         Expands to the list of --extern flags needed to include addition Rust
         libraries in this target. Includes any specified renamed dependencies.
-
-    {{rustc_output_extension}}
-        Expands to the output extension for this target's crate type.
-
-    {{rustc_output_prefix}}
-        Expands to the prefix for shared and static libraries. This should
-        generally be "lib". Empty for executable targets.
 
     {{rustdeps}}
         Expands to the list of -Ldependency=<path> strings needed to compile

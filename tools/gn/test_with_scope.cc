@@ -195,22 +195,80 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
   toolchain->SetTool(std::move(compile_xcassets_tool));
 
   // RUST
-  std::unique_ptr<Tool> rustc_tool = Tool::CreateTool(RustTool::kRsToolRustc);
+  std::unique_ptr<Tool> rustc_tool = Tool::CreateTool(RustTool::kRsToolBin);
   SetCommandForTool(
       "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
-      "--crate-type {{crate_type}} {{rustflags}} -o "
-      "{{target_out_dir}}/"
-      "{{rustc_output_prefix}}{{crate_name}}{{rustc_output_extension}} "
+      "--crate-type {{crate_type}} {{rustflags}} -o {{output}} "
       "{{rustdeps}} {{externs}}",
       rustc_tool.get());
-  rustc_tool->AsRust()->set_dylib_output_extension(".so");
-  rustc_tool->AsRust()->set_cdylib_output_extension(".so");
-  rustc_tool->AsRust()->set_staticlib_output_extension(".a");
-  rustc_tool->AsRust()->set_proc_macro_output_extension(".so");
-  rustc_tool->AsRust()->set_outputs(SubstitutionList::MakeForTest(
-      "{{target_out_dir}}/"
-      "{{rustc_output_prefix}}{{crate_name}}{{rustc_output_extension}}"));
+  rustc_tool->set_outputs(SubstitutionList::MakeForTest(
+      "{{root_out_dir}}/{{crate_name}}{{output_extension}}"));
   toolchain->SetTool(std::move(rustc_tool));
+
+  // CDYLIB
+  std::unique_ptr<Tool> cdylib_tool = Tool::CreateTool(RustTool::kRsToolCDylib);
+  SetCommandForTool(
+      "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
+      "--crate-type {{crate_type}} {{rustflags}} -o {{output}} "
+      "{{rustdeps}} {{externs}}",
+      cdylib_tool.get());
+  cdylib_tool->set_output_prefix("lib");
+  cdylib_tool->set_default_output_extension(".so");
+  cdylib_tool->set_outputs(SubstitutionList::MakeForTest(
+      "{{root_output_dir}}/{{target_output_name}}{{output_extension}}"));
+  toolchain->SetTool(std::move(cdylib_tool));
+
+  // DYLIB
+  std::unique_ptr<Tool> dylib_tool = Tool::CreateTool(RustTool::kRsToolDylib);
+  SetCommandForTool(
+      "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
+      "--crate-type {{crate_type}} {{rustflags}} -o {{output}} "
+      "{{rustdeps}} {{externs}}",
+      dylib_tool.get());
+  dylib_tool->set_output_prefix("lib");
+  dylib_tool->set_default_output_extension(".so");
+  dylib_tool->set_outputs(SubstitutionList::MakeForTest(
+      "{{root_output_dir}}/{{target_output_name}}{{output_extension}}"));
+  toolchain->SetTool(std::move(dylib_tool));
+
+  // PROC_MACRO
+  std::unique_ptr<Tool> proc_macro_tool = Tool::CreateTool(RustTool::kRsToolMacro);
+  SetCommandForTool(
+      "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
+      "--crate-type {{crate_type}} {{rustflags}} -o {{output}} "
+      "{{rustdeps}} {{externs}}",
+      proc_macro_tool.get());
+  proc_macro_tool->set_output_prefix("lib");
+  proc_macro_tool->set_default_output_extension(".so");
+  proc_macro_tool->set_outputs(SubstitutionList::MakeForTest(
+      "{{target_out_dir}}/{{target_output_name}}{{output_extension}}"));
+  toolchain->SetTool(std::move(proc_macro_tool));
+
+  // RLIB
+  std::unique_ptr<Tool> rlib_tool = Tool::CreateTool(RustTool::kRsToolRlib);
+  SetCommandForTool(
+      "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
+      "--crate-type {{crate_type}} {{rustflags}} -o {{output}} "
+      "{{rustdeps}} {{externs}}",
+      rlib_tool.get());
+  rlib_tool->set_output_prefix("lib");
+  rlib_tool->set_default_output_extension(".rlib");
+  rlib_tool->set_outputs(SubstitutionList::MakeForTest(
+      "{{target_out_dir}}/{{target_output_name}}{{output_extension}}"));
+  toolchain->SetTool(std::move(rlib_tool));
+
+  // STATICLIB
+  std::unique_ptr<Tool> staticlib_tool = Tool::CreateTool(RustTool::kRsToolStaticlib);
+  SetCommandForTool(
+      "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
+      "--crate-type {{crate_type}} {{rustflags}} -o {{output}} "
+      "{{rustdeps}} {{externs}}",
+      staticlib_tool.get());
+  staticlib_tool->set_output_prefix("lib");
+  staticlib_tool->set_default_output_extension(".a");
+  staticlib_tool->set_outputs(SubstitutionList::MakeForTest(
+      "{{target_out_dir}}/{{target_output_name}}{{output_extension}}"));
+  toolchain->SetTool(std::move(staticlib_tool));
 
   toolchain->ToolchainSetupComplete();
 }
