@@ -12,28 +12,20 @@
 #if defined(OS_MACOSX)
 
 Semaphore::Semaphore(int count) {
-  kern_return_t result = semaphore_create(mach_task_self(), &native_handle_,
-                                          SYNC_POLICY_FIFO, count);
-  DCHECK_EQ(KERN_SUCCESS, result);
+  native_handle_ = dispatch_semaphore_create(count);
+  DCHECK(native_handle_);
 }
 
 Semaphore::~Semaphore() {
-  kern_return_t result = semaphore_destroy(mach_task_self(), native_handle_);
-  DCHECK_EQ(KERN_SUCCESS, result);
+  dispatch_release(native_handle_);
 }
 
 void Semaphore::Signal() {
-  kern_return_t result = semaphore_signal(native_handle_);
-  DCHECK_EQ(KERN_SUCCESS, result);
+  dispatch_semaphore_signal(native_handle_);
 }
 
 void Semaphore::Wait() {
-  while (true) {
-    kern_return_t result = semaphore_wait(native_handle_);
-    if (result == KERN_SUCCESS)
-      return;  // Semaphore was signalled.
-    DCHECK_EQ(KERN_ABORTED, result);
-  }
+  dispatch_semaphore_wait(native_handle_, DISPATCH_TIME_FOREVER);
 }
 
 #elif defined(OS_POSIX)

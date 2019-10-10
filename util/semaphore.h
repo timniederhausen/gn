@@ -14,7 +14,7 @@
 #if defined(OS_WIN)
 #include <windows.h>
 #elif defined(OS_MACOSX)
-#include <mach/mach.h>
+#include <dispatch/dispatch.h>
 #elif defined(OS_POSIX)
 #include <semaphore.h>
 #else
@@ -34,11 +34,11 @@ class Semaphore {
   void Wait();
 
 #if defined(OS_MACOSX)
-  typedef semaphore_t NativeHandle;
+  using NativeHandle = dispatch_semaphore_t;
 #elif defined(OS_POSIX)
-  typedef sem_t NativeHandle;
+  using NativeHandle = sem_t;
 #elif defined(OS_WIN)
-  typedef HANDLE NativeHandle;
+  using NativeHandle = HANDLE;
 #endif
 
   NativeHandle& native_handle() { return native_handle_; }
