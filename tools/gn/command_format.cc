@@ -21,6 +21,7 @@
 #include "tools/gn/scheduler.h"
 #include "tools/gn/setup.h"
 #include "tools/gn/source_file.h"
+#include "tools/gn/string_utils.h"
 #include "tools/gn/switches.h"
 #include "tools/gn/tokenizer.h"
 
@@ -1079,23 +1080,6 @@ void DoFormat(const ParseNode* root,
   Printer pr;
   pr.Block(root);
   *output = pr.String();
-}
-
-std::string ReadStdin() {
-  static const int kBufferSize = 256;
-  char buffer[kBufferSize];
-  std::string result;
-  while (true) {
-    char* input = nullptr;
-    input = fgets(buffer, kBufferSize, stdin);
-    if (input == nullptr && feof(stdin))
-      return result;
-    int length = static_cast<int>(strlen(buffer));
-    if (length == 0)
-      return result;
-    else
-      result += std::string(buffer, length);
-  }
 }
 
 }  // namespace

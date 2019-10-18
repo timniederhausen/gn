@@ -14,6 +14,8 @@
 #include "tools/gn/filesystem_utils.h"
 #include "tools/gn/location.h"
 #include "tools/gn/setup.h"
+#include "tools/gn/standard_out.h"
+#include "tools/gn/string_utils.h"
 
 namespace commands {
 
@@ -50,6 +52,8 @@ const char kAnalyze_Help[] =
      This filtering behavior is also known as "pruning" the list of compile
      targets.
 
+  If input_path is -, input is read from stdin.
+
   output_path is a path indicating where the results of the command are to be
   written. The results will be a file containing a JSON object with one or more
   of following fields:
@@ -83,6 +87,8 @@ const char kAnalyze_Help[] =
      a string describing the error. This includes cases where the input file is
      not in the right format, or contains invalid targets.
 
+  If output_path is -, output is written to stdout.
+
   The command returns 1 if it is unable to read the input file or write the
   output file, or if there is something wrong with the build such that gen
   would also fail, and 0 otherwise. In particular, it returns 0 even if the
@@ -100,10 +106,14 @@ int RunAnalyze(const std::vector<std::string>& args) {
   }
 
   std::string input;
-  bool ret = base::ReadFileToString(UTF8ToFilePath(args[1]), &input);
-  if (!ret) {
-    Err(Location(), "Input file " + args[1] + " not found.").PrintToStdout();
-    return 1;
+  if (args[1] == "-") {
+    input = ReadStdin();
+  } else {
+    bool ret = base::ReadFileToString(UTF8ToFilePath(args[1]), &input);
+    if (!ret) {
+      Err(Location(), "Input file " + args[1] + " not found.").PrintToStdout();
+      return 1;
+    }
   }
 
   // Deliberately leaked to avoid expensive process teardown.
@@ -122,10 +132,14 @@ int RunAnalyze(const std::vector<std::string>& args) {
     return 1;
   }
 
-  WriteFile(UTF8ToFilePath(args[2]), output, &err);
-  if (err.has_error()) {
-    err.PrintToStdout();
-    return 1;
+  if (args[2] == "-") {
+    OutputString(output + "\n");
+  } else {
+    WriteFile(UTF8ToFilePath(args[2]), output, &err);
+    if (err.has_error()) {
+      err.PrintToStdout();
+      return 1;
+    }
   }
 
   return 0;

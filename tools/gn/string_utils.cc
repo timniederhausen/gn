@@ -344,3 +344,20 @@ std::string_view SpellcheckString(const std::string_view& text,
   }
   return result;
 }
+
+std::string ReadStdin() {
+  static const int kBufferSize = 256;
+  char buffer[kBufferSize];
+  std::string result;
+  while (true) {
+    char* input = nullptr;
+    input = fgets(buffer, kBufferSize, stdin);
+    if (input == nullptr && feof(stdin))
+      return result;
+    int length = static_cast<int>(strlen(buffer));
+    if (length == 0)
+      return result;
+    else
+      result += std::string(buffer, length);
+  }
+}

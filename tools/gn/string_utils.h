@@ -50,4 +50,7 @@ size_t EditDistance(const std::string_view& s1,
 std::string_view SpellcheckString(const std::string_view& text,
                                   const std::vector<std::string_view>& words);
 
+// Reads stdin until end-of-data and returns what it read.
+std::string ReadStdin();
+
 #endif  // TOOLS_GN_STRING_UTILS_H_
