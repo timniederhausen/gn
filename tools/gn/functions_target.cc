@@ -848,7 +848,7 @@ const char kGeneratedFile_Help[] =
   Writes data value(s) to disk on resolution. This target type mirrors some
   functionality of the write_file() function, but also provides the ability to
   collect metadata from its dependencies on resolution rather than writing out
-  parse time.
+  at parse time.
 
   The `outputs` variable is required to be a list with a single element,
   specifying the intended location of the output file.
@@ -875,8 +875,8 @@ Example (metadata collection)
         doom_melon = [ "enable" ]
         my_files = [ "foo.cpp" ]
 
-        // Note: this is functionally equivalent to not defining `my_barrier`
-        // at all in this target's metadata.
+        # Note: this is functionally equivalent to not defining `my_barrier`
+        # at all in this target's metadata.
         my_barrier = [ "" ]
       }
 
