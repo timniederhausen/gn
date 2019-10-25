@@ -231,43 +231,55 @@ Value RunAssert(Scope* scope,
                 const FunctionCallNode* function,
                 const std::vector<Value>& args,
                 Err* err) {
+  // Check usage: Assert takes 1 or 2 arguments.
   if (args.size() != 1 && args.size() != 2) {
     *err = Err(function->function(), "Wrong number of arguments.",
-               "assert() takes one or two argument, "
-               "were you expecting somethig else?");
-  } else if (args[0].type() != Value::BOOLEAN) {
-    *err = Err(function->function(), "Assertion value not a bool.");
-  } else if (!args[0].boolean_value()) {
-    if (args.size() == 2) {
-      // Optional string message.
-      if (args[1].type() != Value::STRING) {
-        *err = Err(function->function(), "Assertion failed.",
-                   "<<<ERROR MESSAGE IS NOT A STRING>>>");
-      } else {
-        *err = Err(function->function(), "Assertion failed.",
-                   args[1].string_value());
-      }
-    } else {
-      *err = Err(function->function(), "Assertion failed.");
-    }
+               "assert() takes one or two arguments, "
+               "were you expecting something else?");
+    return Value();
+  }
 
-    if (args[0].origin()) {
-      // If you do "assert(foo)" we'd ideally like to show you where foo was
-      // set, and in this case the origin of the args will tell us that.
-      // However, if you do "assert(foo && bar)" the source of the value will
-      // be the assert like, which isn't so helpful.
-      //
-      // So we try to see if the args are from the same line or not. This will
-      // break if you do "assert(\nfoo && bar)" and we may show the second line
-      // as the source, oh well. The way around this is to check to see if the
-      // origin node is inside our function call block.
-      Location origin_location = args[0].origin()->GetRange().begin();
-      if (origin_location.file() != function->function().location().file() ||
-          origin_location.line_number() !=
-              function->function().location().line_number()) {
-        err->AppendSubErr(
-            Err(args[0].origin()->GetRange(), "", "This is where it was set."));
-      }
+  // Check usage: The first argument must be a boolean.
+  if (args[0].type() != Value::BOOLEAN) {
+    *err = Err(function->function(), "Assertion value not a bool.");
+    return Value();
+  }
+  bool assertion_passed = args[0].boolean_value();
+
+  // Check usage: The second argument, if present, must be a string.
+  if (args.size() == 2 && args[1].type() != Value::STRING) {
+    *err = Err(function->function(), "Assertion message is not a string.");
+    return Value();
+  }
+
+  // Assertion passed: there is nothing to do, so return an empty value.
+  if (assertion_passed) {
+    return Value();
+  }
+
+  // Assertion failed; try to make a useful message and report it.
+  if (args.size() == 2) {
+    *err = Err(function->function(), "Assertion failed.",
+               args[1].string_value());
+  } else {
+    *err = Err(function->function(), "Assertion failed.");
+  }
+  if (args[0].origin()) {
+    // If you do "assert(foo)" we'd ideally like to show you where foo was
+    // set, and in this case the origin of the args will tell us that.
+    // However, if you do "assert(foo && bar)" the source of the value will
+    // be the assert like, which isn't so helpful.
+    //
+    // So we try to see if the args are from the same line or not. This will
+    // break if you do "assert(\nfoo && bar)" and we may show the second line
+    // as the source, oh well. The way around this is to check to see if the
+    // origin node is inside our function call block.
+    Location origin_location = args[0].origin()->GetRange().begin();
+    if (origin_location.file() != function->function().location().file() ||
+        origin_location.line_number() !=
+            function->function().location().line_number()) {
+      err->AppendSubErr(
+          Err(args[0].origin()->GetRange(), "", "This is where it was set."));
     }
   }
   return Value();
