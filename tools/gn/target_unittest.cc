@@ -1189,11 +1189,11 @@ TEST(TargetTest, CollectMetadataWithBarrier) {
 
   Value walk_expected(nullptr, Value::LIST);
   walk_expected.list_value().push_back(
-      Value(nullptr, "//foo:two(//toolchain:default)"));
+      Value(nullptr, "two"));
   one.metadata().contents().insert(
       std::pair<std::string_view, Value>("walk", walk_expected));
 
-  TestTarget two(setup, "//foo:two", Target::SOURCE_SET);
+  TestTarget two(setup, "//foo/two:two", Target::SOURCE_SET);
   Value a_2_expected(nullptr, Value::LIST);
   a_2_expected.list_value().push_back(Value(nullptr, "bar"));
   two.metadata().contents().insert(
@@ -1205,7 +1205,7 @@ TEST(TargetTest, CollectMetadataWithBarrier) {
   three.metadata().contents().insert(
       std::pair<std::string_view, Value>("a", a_3_expected));
 
-  one.public_deps().push_back(LabelTargetPair(&two));
+  one.private_deps().push_back(LabelTargetPair(&two));
   one.public_deps().push_back(LabelTargetPair(&three));
 
   std::vector<std::string> data_keys;

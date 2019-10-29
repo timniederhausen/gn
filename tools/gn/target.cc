@@ -918,7 +918,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
   // Gather walk keys and find the appropriate target. Targets identified in
   // the walk key set must be deps or data_deps of the declaring target.
   const DepsIteratorRange& all_deps = GetDeps(Target::DEPS_ALL);
-  const SourceDir current_dir("//");
+  const SourceDir& current_dir = label().dir();
   for (const auto& next : next_walk_keys) {
     DCHECK(next.type() == Value::STRING);
 
