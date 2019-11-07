@@ -335,6 +335,9 @@ def WriteGNNinja(path, platform, host, options):
         '-fno-exceptions',
         '-fno-rtti',
         '-fdiagnostics-color',
+        '-Wall',
+        '-Wextra',
+        '-Wno-unused-parameter',
     ])
     cflags_cc.extend(['-std=c++17'])
 

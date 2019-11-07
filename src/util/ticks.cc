@@ -33,7 +33,9 @@ uint64_t g_start;
 #error Port.
 #endif
 
+#if !defined(OS_MACOSX)
 constexpr uint64_t kNano = 1'000'000'000;
+#endif
 
 void Init() {
   DCHECK(!g_initialized);
