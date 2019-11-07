@@ -9,13 +9,9 @@ rule cxx
   deps = msvc
 
 rule alink_thin
-  command = ninja -t msvc -- $ar /nologo /ignore:4221 /OUT:$out @$out.rsp
+  command = ninja -t msvc -- $ar /nologo /ignore:4221 $libflags /OUT:$out $in
   description = LIB $out
-  rspfile = $out.rsp
-  rspfile_content = $in_newline $libflags
 
 rule link
-  command = ninja -t msvc -- $ld /nologo /OUT:$out /PDB:$out.pdb @$out.rsp
+  command = ninja -t msvc -- $ld /nologo $ldflags /OUT:$out /PDB:$out.pdb $in $solibs $libs
   description = LINK $out
-  rspfile = $out.rsp
-  rspfile_content = $in_newline $libs $solibs $ldflags
