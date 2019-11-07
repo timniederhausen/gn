@@ -17,24 +17,28 @@ using FormatTest = TestWithScheduler;
 #define FORMAT_TEST(n)                                                      \
   TEST_F(FormatTest, n) {                                                   \
     ::Setup setup;                                                          \
+    std::string input;                                                      \
     std::string out;                                                        \
     std::string expected;                                                   \
     base::FilePath src_dir =                                                \
         GetExePath().DirName().Append(FILE_PATH_LITERAL(".."));             \
     base::SetCurrentDirectory(src_dir);                                     \
-    EXPECT_TRUE(commands::FormatFileToString(                               \
-        &setup, SourceFile("//src/gn/format_test_data/" #n ".gn"),          \
-        commands::TreeDumpMode::kInactive, &out));                          \
+    ASSERT_TRUE(base::ReadFileToString(                                     \
+        base::FilePath(FILE_PATH_LITERAL("src/gn/format_test_data/")        \
+                           FILE_PATH_LITERAL(#n) FILE_PATH_LITERAL(".gn")), \
+        &input));                                                           \
     ASSERT_TRUE(base::ReadFileToString(                                     \
         base::FilePath(FILE_PATH_LITERAL("src/gn/format_test_data/")        \
                            FILE_PATH_LITERAL(#n)                            \
                                FILE_PATH_LITERAL(".golden")),               \
         &expected));                                                        \
+    EXPECT_TRUE(commands::FormatStringToString(                             \
+        input, commands::TreeDumpMode::kInactive, &out));                   \
     EXPECT_EQ(expected, out);                                               \
     /* Make sure formatting the output doesn't cause further changes. */    \
     std::string out_again;                                                  \
-    EXPECT_TRUE(commands::FormatStringToString(out,                         \
-        commands::TreeDumpMode::kInactive, &out_again));                    \
+    EXPECT_TRUE(commands::FormatStringToString(                             \
+        out, commands::TreeDumpMode::kInactive, &out_again));               \
     ASSERT_EQ(out, out_again);                                              \
   }
 
@@ -116,3 +120,4 @@ FORMAT_TEST(072)
 FORMAT_TEST(073)
 FORMAT_TEST(074)
 FORMAT_TEST(075)
+FORMAT_TEST(076)

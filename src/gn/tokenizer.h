@@ -16,9 +16,22 @@
 
 class InputFile;
 
+// Tab (0x09), vertical tab (0x0B), and formfeed (0x0C) are illegal in GN files.
+// Almost always these are errors. However, in the case of running the formatter
+// it's nice to convert these to spaces when encountered so that the input can
+// still be parsed and rewritten correctly by the formatter.
+enum class WhitespaceTransform {
+  kMaintainOriginalInput,
+  kInvalidToSpace,
+};
+
 class Tokenizer {
  public:
-  static std::vector<Token> Tokenize(const InputFile* input_file, Err* err);
+  static std::vector<Token> Tokenize(
+      const InputFile* input_file,
+      Err* err,
+      WhitespaceTransform whitespace_transform =
+          WhitespaceTransform::kMaintainOriginalInput);
 
   // Counts lines in the given buffer (the first line is "1") and returns
   // the byte offset of the beginning of that line, or (size_t)-1 if there
@@ -39,7 +52,9 @@ class Tokenizer {
 
  private:
   // InputFile must outlive the tokenizer and all generated tokens.
-  Tokenizer(const InputFile* input_file, Err* err);
+  Tokenizer(const InputFile* input_file,
+            Err* err,
+            WhitespaceTransform whitespace_transform);
   ~Tokenizer();
 
   std::vector<Token> Run();
@@ -79,6 +94,7 @@ class Tokenizer {
   const InputFile* input_file_;
   const std::string_view input_;
   Err* err_;
+  WhitespaceTransform whitespace_transform_;
   size_t cur_ = 0;  // Byte offset into input buffer.
 
   int line_number_ = 1;

@@ -203,3 +203,35 @@ TEST(Tokenizer, CommentsContinued) {
       "}",
       fn2));
 }
+
+TEST(Tokenizer, WhitespaceTransformMaintain) {
+  InputFile input(SourceFile("/test"));
+  input.SetContents("a\t2\v\"st\tuff\"\f{");
+
+  Err err;
+  std::vector<Token> results = Tokenizer::Tokenize(
+      &input, &err, WhitespaceTransform::kMaintainOriginalInput);
+  EXPECT_TRUE(err.has_error());
+  EXPECT_EQ(err.location().column_number(), 2);
+}
+
+TEST(Tokenizer, WhitespaceTransformToSpace) {
+  InputFile input(SourceFile("/test"));
+  input.SetContents("a\t2\v\"st\tuff\"\f{");
+
+  Err err;
+  std::vector<Token> results =
+      Tokenizer::Tokenize(&input, &err, WhitespaceTransform::kInvalidToSpace);
+  EXPECT_FALSE(err.has_error());
+  ASSERT_EQ(results.size(), 4u);
+  EXPECT_EQ(results[0].type(), Token::IDENTIFIER);
+  EXPECT_EQ(results[0].value(), "a");
+  EXPECT_EQ(results[1].type(), Token::INTEGER);
+  EXPECT_EQ(results[1].value(), "2");
+  EXPECT_EQ(results[2].type(), Token::STRING);
+  EXPECT_EQ(results[2].value(),
+            "\"st\tuff\"");  // Note, embedded \t not transformed.
+  EXPECT_EQ(results[3].type(), Token::LEFT_BRACE);
+  EXPECT_EQ(results[3].value(), "{");
+}
+

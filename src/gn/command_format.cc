@@ -1084,22 +1084,6 @@ void DoFormat(const ParseNode* root,
 
 }  // namespace
 
-bool FormatFileToString(Setup* setup,
-                        const SourceFile& file,
-                        TreeDumpMode dump_tree,
-                        std::string* output) {
-  Err err;
-  const ParseNode* parse_node =
-      setup->scheduler().input_file_manager()->SyncLoadFile(
-          LocationRange(), &setup->build_settings(), file, &err);
-  if (err.has_error()) {
-    err.PrintToStdout();
-    return false;
-  }
-  DoFormat(parse_node, dump_tree, output);
-  return true;
-}
-
 bool FormatStringToString(const std::string& input,
                           TreeDumpMode dump_tree,
                           std::string* output) {
@@ -1108,7 +1092,8 @@ bool FormatStringToString(const std::string& input,
   file.SetContents(input);
   Err err;
   // Tokenize.
-  std::vector<Token> tokens = Tokenizer::Tokenize(&file, &err);
+  std::vector<Token> tokens =
+      Tokenizer::Tokenize(&file, &err, WhitespaceTransform::kInvalidToSpace);
   if (err.has_error()) {
     err.PrintToStdout();
     return false;
@@ -1192,34 +1177,35 @@ int RunFormat(const std::vector<std::string>& args) {
       return 1;
     }
 
+    base::FilePath to_format = setup.build_settings().GetFullPath(file);
+    std::string original_contents;
+    if (!base::ReadFileToString(to_format, &original_contents)) {
+      Err(Location(),
+          std::string("Couldn't read \"") + FilePathToUTF8(to_format))
+          .PrintToStdout();
+      return 1;
+    }
+
     std::string output_string;
-    if (FormatFileToString(&setup, file, dump_tree, &output_string)) {
-      if (dump_tree == TreeDumpMode::kInactive) {
-        // Update the file in-place.
-        base::FilePath to_write = setup.build_settings().GetFullPath(file);
-        std::string original_contents;
-        if (!base::ReadFileToString(to_write, &original_contents)) {
-          Err(Location(), std::string("Couldn't read \"") +
-                              FilePathToUTF8(to_write) +
-                              std::string("\" for comparison."))
+    if (!FormatStringToString(original_contents, dump_tree, &output_string)) {
+      return 1;
+    }
+    if (dump_tree == TreeDumpMode::kInactive) {
+      // Update the file in-place.
+      if (dry_run)
+        return original_contents == output_string ? 0 : 2;
+      if (original_contents != output_string) {
+        if (base::WriteFile(to_format, output_string.data(),
+                            static_cast<int>(output_string.size())) == -1) {
+          Err(Location(),
+              std::string("Failed to write formatted output back to \"") +
+                  FilePathToUTF8(to_format) + std::string("\"."))
               .PrintToStdout();
           return 1;
         }
-        if (dry_run)
-          return original_contents == output_string ? 0 : 2;
-        if (original_contents != output_string) {
-          if (base::WriteFile(to_write, output_string.data(),
-                              static_cast<int>(output_string.size())) == -1) {
-            Err(Location(),
-                std::string("Failed to write formatted output back to \"") +
-                    FilePathToUTF8(to_write) + std::string("\"."))
-                .PrintToStdout();
-            return 1;
-          }
-          if (!quiet) {
-            printf("Wrote formatted to '%s'.\n",
-                   FilePathToUTF8(to_write).c_str());
-          }
+        if (!quiet) {
+          printf("Wrote formatted to '%s'.\n",
+                 FilePathToUTF8(to_format).c_str());
         }
       }
     }

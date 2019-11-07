@@ -68,14 +68,22 @@ Token::Type GetSpecificOperatorType(std::string_view value) {
 
 }  // namespace
 
-Tokenizer::Tokenizer(const InputFile* input_file, Err* err)
-    : input_file_(input_file), input_(input_file->contents()), err_(err) {}
+Tokenizer::Tokenizer(const InputFile* input_file,
+                     Err* err,
+                     WhitespaceTransform whitespace_transform)
+    : input_file_(input_file),
+      input_(input_file->contents()),
+      err_(err),
+      whitespace_transform_(whitespace_transform) {}
 
 Tokenizer::~Tokenizer() = default;
 
 // static
-std::vector<Token> Tokenizer::Tokenize(const InputFile* input_file, Err* err) {
-  Tokenizer t(input_file, err);
+std::vector<Token> Tokenizer::Tokenize(
+    const InputFile* input_file,
+    Err* err,
+    WhitespaceTransform whitespace_transform) {
+  Tokenizer t(input_file, err, whitespace_transform);
   return t.Run();
 }
 
@@ -339,7 +347,9 @@ bool Tokenizer::IsCurrentWhitespace() const {
   DCHECK(!at_end());
   char c = input_[cur_];
   // Note that tab (0x09), vertical tab (0x0B), and formfeed (0x0C) are illegal.
-  return c == 0x0A || c == 0x0D || c == 0x20;
+  return c == 0x0A || c == 0x0D || c == 0x20 ||
+         (whitespace_transform_ == WhitespaceTransform::kInvalidToSpace &&
+          (c == 0x09 || c == 0x0B || c == 0x0C));
 }
 
 bool Tokenizer::IsCurrentStringTerminator(char quote_char) const {
