@@ -323,6 +323,10 @@ def WriteGNNinja(path, platform, host, options):
       if options.use_icf and not platform.is_darwin():
         ldflags.append('-Wl,--icf=all')
 
+      if options.use_lto:
+        cflags.extend(['-flto', '-fwhole-program-vtables'])
+        ldflags.extend(['-flto', '-fwhole-program-vtables'])
+
     cflags.extend([
         '-D_FILE_OFFSET_BITS=64',
         '-D__STDC_CONSTANT_MACROS', '-D__STDC_FORMAT_MACROS',
@@ -356,15 +360,17 @@ def WriteGNNinja(path, platform, host, options):
     if platform.is_posix() and not platform.is_haiku():
       ldflags.append('-pthread')
 
-    if options.use_lto:
-      cflags.extend(['-flto', '-fwhole-program-vtables'])
-      ldflags.extend(['-flto', '-fwhole-program-vtables'])
-
   elif platform.is_msvc():
     if not options.debug:
-      cflags.extend(['/O2', '/DNDEBUG', '/GL'])
-      libflags.extend(['/LTCG'])
-      ldflags.extend(['/LTCG', '/OPT:REF', '/OPT:ICF'])
+      cflags.extend(['/O2', '/DNDEBUG', '/Zc:inline'])
+      ldflags.extend(['/OPT:REF'])
+
+      if options.use_icf:
+        libflags.extend(['/OPT:ICF'])
+      if options.use_lto:
+        cflags.extend(['/GL'])
+        libflags.extend(['/LTCG'])
+        ldflags.extend(['/LTCG'])
 
     cflags.extend([
         '/DNOMINMAX',
