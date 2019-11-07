@@ -478,7 +478,7 @@ class TargetDescBuilder : public BaseDescBuilder {
     if (target_->output_type() == Target::GENERATED_FILE) {
       if (what(variables::kWriteOutputConversion)) {
         res->SetKey(variables::kWriteOutputConversion,
-                    std::move(ToBaseValue(target_->output_conversion())));
+                    ToBaseValue(target_->output_conversion()));
       }
       if (what(variables::kDataKeys)) {
         base::ListValue keys;

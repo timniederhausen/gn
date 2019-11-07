@@ -140,18 +140,18 @@ LogMessage::SaveLastError::~SaveLastError() {
 #endif  // defined(OS_WIN)
 
 LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
-    : severity_(severity), file_(file), line_(line) {
+    : severity_(severity) {
   Init(file, line);
 }
 
 LogMessage::LogMessage(const char* file, int line, const char* condition)
-    : severity_(LOG_FATAL), file_(file), line_(line) {
+    : severity_(LOG_FATAL) {
   Init(file, line);
   stream_ << "Check failed: " << condition << ". ";
 }
 
 LogMessage::LogMessage(const char* file, int line, std::string* result)
-    : severity_(LOG_FATAL), file_(file), line_(line) {
+    : severity_(LOG_FATAL) {
   Init(file, line);
   stream_ << "Check failed: " << *result;
   delete result;
@@ -161,7 +161,7 @@ LogMessage::LogMessage(const char* file,
                        int line,
                        LogSeverity severity,
                        std::string* result)
-    : severity_(severity), file_(file), line_(line) {
+    : severity_(severity) {
   Init(file, line);
   stream_ << "Check failed: " << *result;
   delete result;

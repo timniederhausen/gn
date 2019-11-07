@@ -490,7 +490,7 @@ base::Value ConditionNode::GetJSONNode() const {
     child.GetList().push_back(if_false_->GetJSONNode());
   }
   dict.SetKey(kJsonNodeChild, std::move(child));
-  return std::move(dict);
+  return dict;
 }
 
 // FunctionCallNode -----------------------------------------------------------

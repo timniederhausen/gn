@@ -59,7 +59,7 @@ int File::Read(int64_t offset, char* data, int size) {
   LARGE_INTEGER offset_li;
   offset_li.QuadPart = offset;
 
-  OVERLAPPED overlapped = {0};
+  OVERLAPPED overlapped = {};
   overlapped.Offset = offset_li.LowPart;
   overlapped.OffsetHigh = offset_li.HighPart;
 
@@ -104,7 +104,7 @@ int File::Write(int64_t offset, const char* data, int size) {
   LARGE_INTEGER offset_li;
   offset_li.QuadPart = offset;
 
-  OVERLAPPED overlapped = {0};
+  OVERLAPPED overlapped = {};
   overlapped.Offset = offset_li.LowPart;
   overlapped.OffsetHigh = offset_li.HighPart;
 

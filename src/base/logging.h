@@ -730,16 +730,7 @@ const LogSeverity LOG_DCHECK = LOG_FATAL;
 #define DCHECK_GE(val1, val2) DCHECK_OP(GE, >=, val1, val2)
 #define DCHECK_GT(val1, val2) DCHECK_OP(GT, >, val1, val2)
 
-#if !DCHECK_IS_ON() && defined(OS_CHROMEOS)
-// Implement logging of NOTREACHED() as a dedicated function to get function
-// call overhead down to a minimum.
-void LogErrorNotReached(const char* file, int line);
-#define NOTREACHED()                                       \
-  true ? ::logging::LogErrorNotReached(__FILE__, __LINE__) \
-       : EAT_STREAM_PARAMETERS
-#else
 #define NOTREACHED() DCHECK(false)
-#endif
 
 // Redefine the standard assert to use our nice log files
 #undef assert
@@ -785,9 +776,6 @@ class LogMessage {
   std::ostringstream stream_;
   size_t message_start_;  // Offset of the start of the message (past prefix
                           // info).
-  // The file and line information passed in to the constructor.
-  const char* file_;
-  const int line_;
 
 #if defined(OS_WIN)
   // Stores the current value of GetLastError in the constructor and restores

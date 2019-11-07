@@ -48,8 +48,6 @@ bool JSONWriter::WriteWithOptions(const Value& node,
 
 JSONWriter::JSONWriter(int options, std::string* json)
     : omit_binary_values_((options & OPTIONS_OMIT_BINARY_VALUES) != 0),
-      omit_double_type_preservation_(
-          (options & OPTIONS_OMIT_DOUBLE_TYPE_PRESERVATION) != 0),
       pretty_print_((options & OPTIONS_PRETTY_PRINT) != 0),
       json_string_(json) {
   DCHECK(json);

@@ -41,8 +41,7 @@ class RustValues {
   void set_crate_root(SourceFile& s) { crate_root_ = s; }
 
   // Crate type for compilation.
-  CrateType crate_type() { return crate_type_; }
-  const CrateType crate_type() const { return crate_type_; }
+  CrateType crate_type() const { return crate_type_; }
   void set_crate_type(CrateType s) { crate_type_ = s; }
 
   // Any renamed dependencies for the `extern` flags.

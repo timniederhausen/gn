@@ -175,7 +175,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, EscapeDefines) {
       "defines = -DBOOL_DEF -DINT_DEF=123 -DSTR_DEF=\\\"ABCD-1\\\"";
 #endif
   std::string out_str = out.str();
-  EXPECT_TRUE(out_str.find(out_str) != std::string::npos);
+  EXPECT_TRUE(out_str.find(expectedSubstr) != std::string::npos);
 }
 
 TEST_F(NinjaCBinaryTargetWriterTest, StaticLibrary) {

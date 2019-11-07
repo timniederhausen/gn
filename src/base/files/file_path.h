@@ -124,11 +124,13 @@
 
 // To print path names portably use PRIsFP (based on PRIuS and friends from
 // C99 and format_macros.h) like this:
-// base::StringPrintf("Path is %" PRIsFP ".\n", path.value().c_str());
+// base::StringPrintf("Path is %" PRIsFP ".\n", PATH_CSTR(path);
 #if defined(OS_WIN)
 #define PRIsFP "ls"
+#define PATH_CSTR(x) reinterpret_cast<const wchar_t*>(x.value().c_str())
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
 #define PRIsFP "s"
+#define PATH_CSTR(x) (x.value().c_str())
 #endif  // OS_WIN
 
 namespace base {

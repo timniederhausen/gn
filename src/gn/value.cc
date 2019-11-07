@@ -37,19 +37,19 @@ Value::Value(const ParseNode* origin, Type t) : type_(t), origin_(origin) {
 }
 
 Value::Value(const ParseNode* origin, bool bool_val)
-    : type_(BOOLEAN), boolean_value_(bool_val), origin_(origin) {}
+    : type_(BOOLEAN), origin_(origin), boolean_value_(bool_val) {}
 
 Value::Value(const ParseNode* origin, int64_t int_val)
-    : type_(INTEGER), int_value_(int_val), origin_(origin) {}
+    : type_(INTEGER), origin_(origin), int_value_(int_val) {}
 
 Value::Value(const ParseNode* origin, std::string str_val)
-    : type_(STRING), string_value_(std::move(str_val)), origin_(origin) {}
+    : type_(STRING), origin_(origin), string_value_(std::move(str_val)) {}
 
 Value::Value(const ParseNode* origin, const char* str_val)
-    : type_(STRING), string_value_(str_val), origin_(origin) {}
+    : type_(STRING), origin_(origin), string_value_(str_val) {}
 
 Value::Value(const ParseNode* origin, std::unique_ptr<Scope> scope)
-    : type_(SCOPE), scope_value_(std::move(scope)), origin_(origin) {}
+    : type_(SCOPE), origin_(origin), scope_value_(std::move(scope)) {}
 
 Value::Value(const Value& other) : type_(other.type_), origin_(other.origin_) {
   switch (type_) {

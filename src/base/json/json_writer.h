@@ -24,12 +24,6 @@ class JSONWriter {
     // encountered, failure will be returned.
     OPTIONS_OMIT_BINARY_VALUES = 1 << 0,
 
-    // This option instructs the writer to write doubles that have no fractional
-    // part as a normal integer (i.e., without using exponential notation
-    // or appending a '.0') as long as the value is within the range of a
-    // 64-bit int.
-    OPTIONS_OMIT_DOUBLE_TYPE_PRESERVATION = 1 << 1,
-
     // Return a slightly nicer formatted json string (pads with whitespace to
     // help with readability).
     OPTIONS_PRETTY_PRINT = 1 << 2,
@@ -60,7 +54,6 @@ class JSONWriter {
   void IndentLine(size_t depth);
 
   bool omit_binary_values_;
-  bool omit_double_type_preservation_;
   bool pretty_print_;
 
   // Where we write JSON data as we generate it.

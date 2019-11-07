@@ -242,7 +242,7 @@ void CompileCommandsWriter::RenderJSON(const BuildSettings* build_settings,
       compile_commands->append(kPrettyPrintLineEnding);
 
       WriteFile(source, path_output, compile_commands);
-      WriteDirectory(base::StringPrintf("%" PRIsFP, build_dir.value().c_str()),
+      WriteDirectory(base::StringPrintf("%" PRIsFP, PATH_CSTR(build_dir)),
                      compile_commands);
       WriteCommand(target, source, flags, tool_outputs, path_output,
                    source_type, tool_name, opts, compile_commands);

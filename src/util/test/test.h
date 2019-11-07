@@ -30,7 +30,6 @@ class Test {
   friend class TestResult;
 
   bool failed_;
-  int assertion_failures_;
 };
 
 extern testing::Test* g_current_test;
