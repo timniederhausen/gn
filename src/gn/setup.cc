@@ -150,7 +150,7 @@ Example .gn file contents
 namespace {
 
 const base::FilePath::CharType kGnFile[] = FILE_PATH_LITERAL(".gn");
-const char kDefaultArgsGn[] = "# Set build arguments here. See `gn buildargs`.";
+const char kDefaultArgsGn[] = "# Set build arguments here. See `gn help buildargs`.";
 
 base::FilePath FindDotFile(const base::FilePath& current_dir) {
   base::FilePath try_this_file = current_dir.Append(kGnFile);
