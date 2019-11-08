@@ -75,12 +75,12 @@ version of how to patch is:
 Then, to upload a change for review:
 
     git commit
-    git cl upload --gerrit
+    git push origin HEAD:refs/for/master
 
 When revising a change, use:
 
     git commit --amend
-    git cl upload --gerrit
+    git push origin HEAD:refs/for/master
 
 which will add the new changes to the existing code review, rather than creating
 a new one.
