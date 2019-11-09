@@ -55,7 +55,9 @@
     *   [set_defaults: Set default values for a target type.](#func_set_defaults)
     *   [set_sources_assignment_filter: Set a pattern to filter source files.](#func_set_sources_assignment_filter)
     *   [split_list: Splits a list into N different sub-lists.](#func_split_list)
+    *   [string_join: Concatenates a list of strings with a separator.](#func_string_join)
     *   [string_replace: Replaces substring in the given string.](#func_string_replace)
+    *   [string_split: Split string into a list of strings.](#func_string_split)
     *   [template: Define a template rule.](#func_template)
     *   [tool: Specify arguments to a toolchain tool.](#func_tool)
     *   [toolchain: Defines a toolchain.](#func_toolchain)
@@ -2960,6 +2962,22 @@
   Will print:
     [[1, 2], [3, 4], [5, 6]
 ```
+### <a name="func_string_join"></a>**string_join**: Concatenates a list of strings with a separator.
+
+```
+  result = string_join(separator, strings)
+
+  Concatenate a list of strings with intervening occurrences of separator.
+```
+
+#### **Examples**
+
+```
+    string_join("", ["a", "b", "c"])    --> "abc"
+    string_join("|", ["a", "b", "c"])   --> "a|b|c"
+    string_join(", ", ["a", "b", "c"])  --> "a, b, c"
+    string_join("s", ["", ""])          --> "s"
+```
 ### <a name="func_string_replace"></a>**string_replace**: Replaces substring in the given string.
 
 ```
@@ -2980,6 +2998,33 @@
 
   Will print:
     Hello, GN!
+```
+### <a name="func_string_split"></a>**string_split**: Split string into a list of strings.
+
+```
+  result = string_split(str[, sep])
+
+  Split string into all substrings separated by separator and returns a list
+  of the substrings between those separators.
+
+  If the separator argument is omitted, the split is by any whitespace, and
+  any leading/trailing whitespace is ignored; similar to Python's str.split().
+```
+
+#### **Examples without a separator (split on whitespace)**:
+
+```
+  string_split("")          --> []
+  string_split("a")         --> ["a"]
+  string_split(" aa  bb")   --> ["aa", "bb"]
+```
+
+#### **Examples with a separator (split on separators)**:
+
+```
+  string_split("", "|")           --> [""]
+  string_split("  a b  ", " ")    --> ["", "", "a", "b", "", ""]
+  string_split("aa+-bb+-c", "+-") --> ["aa", "bb", "c"]
 ```
 ### <a name="func_template"></a>**template**: Define a template rule.
 

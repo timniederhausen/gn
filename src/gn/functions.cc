@@ -5,6 +5,7 @@
 #include "gn/functions.h"
 
 #include <stddef.h>
+#include <cctype>
 #include <iostream>
 #include <memory>
 #include <regex>
@@ -1129,6 +1130,67 @@ Value RunSplitList(Scope* scope,
   return result;
 }
 
+// string_join -----------------------------------------------------------------
+
+const char kStringJoin[] = "string_join";
+const char kStringJoin_HelpShort[] =
+    "string_join: Concatenates a list of strings with a separator.";
+const char kStringJoin_Help[] =
+    R"(string_join: Concatenates a list of strings with a separator.
+
+  result = string_join(separator, strings)
+
+  Concatenate a list of strings with intervening occurrences of separator.
+
+Examples
+
+    string_join("", ["a", "b", "c"])    --> "abc"
+    string_join("|", ["a", "b", "c"])   --> "a|b|c"
+    string_join(", ", ["a", "b", "c"])  --> "a, b, c"
+    string_join("s", ["", ""])          --> "s"
+)";
+
+Value RunStringJoin(Scope* scope,
+                    const FunctionCallNode* function,
+                    const std::vector<Value>& args,
+                    Err* err) {
+  // Check usage: Number of arguments.
+  if (args.size() != 2) {
+    *err = Err(function, "Wrong number of arguments to string_join().",
+               "Expecting exactly two. usage: string_join(separator, strings)");
+    return Value();
+  }
+
+  // Check usage: separator is a string.
+  if (!args[0].VerifyTypeIs(Value::STRING, err)) {
+    *err = Err(function, "separator in string_join(separator, strings) is not "
+               "a string", "Expecting separator argument to be a string.");
+    return Value();
+  }
+  const std::string separator = args[0].string_value();
+
+  // Check usage: strings is a list.
+  if (!args[1].VerifyTypeIs(Value::LIST, err)) {
+    *err = Err(function, "strings in string_join(separator, strings) "
+               "is not a list", "Expecting strings argument to be a list.");
+    return Value();
+  }
+  const std::vector<Value> strings = args[1].list_value();
+
+  // Arguments looks good; do the join.
+  std::stringstream stream;
+  for (size_t i = 0; i < strings.size(); ++i) {
+    if (!strings[i].VerifyTypeIs(Value::STRING, err)) {
+      return Value();
+    }
+    if (i != 0) {
+      stream << separator;
+    }
+    stream << strings[i].string_value();
+  }
+  return Value(function, stream.str());
+}
+
 // string_replace --------------------------------------------------------------
 
 const char kStringReplace[] = "string_replace";
@@ -1196,6 +1258,106 @@ Value RunStringReplace(Scope* scope,
       break;
   }
   return Value(function, std::move(val));
+}
+
+// string_split ----------------------------------------------------------------
+
+const char kStringSplit[] = "string_split";
+const char kStringSplit_HelpShort[] =
+    "string_split: Split string into a list of strings.";
+const char kStringSplit_Help[] =
+    R"(string_split: Split string into a list of strings.
+
+  result = string_split(str[, sep])
+
+  Split string into all substrings separated by separator and returns a list
+  of the substrings between those separators.
+
+  If the separator argument is omitted, the split is by any whitespace, and
+  any leading/trailing whitespace is ignored; similar to Python's str.split().
+
+Examples without a separator (split on whitespace):
+
+  string_split("")          --> []
+  string_split("a")         --> ["a"]
+  string_split(" aa  bb")   --> ["aa", "bb"]
+
+Examples with a separator (split on separators):
+
+  string_split("", "|")           --> [""]
+  string_split("  a b  ", " ")    --> ["", "", "a", "b", "", ""]
+  string_split("aa+-bb+-c", "+-") --> ["aa", "bb", "c"]
+)";
+
+Value RunStringSplit(Scope* scope,
+                     const FunctionCallNode* function,
+                     const std::vector<Value>& args,
+                     Err* err) {
+  // Check usage: argument count.
+  if (args.size() != 1 && args.size() != 2) {
+    *err = Err(function, "Wrong number of arguments to string_split().",
+               "Usage: string_split(str[, sep])");
+    return Value();
+  }
+
+  // Check usage: str is a string.
+  if (!args[0].VerifyTypeIs(Value::STRING, err)) {
+    return Value();
+  }
+  const std::string str = args[0].string_value();
+
+  // Check usage: separator is a non-empty string.
+  std::string separator;
+  if (args.size() == 2) {
+    if (!args[1].VerifyTypeIs(Value::STRING, err)) {
+      return Value();
+    }
+    separator = args[1].string_value();
+    if (separator.empty()) {
+      *err = Err(function, "Separator argument to string_split() "
+                 "cannot be empty string", "Usage: string_split(str[, sep])");
+      return Value();
+    }
+  }
+
+  // Split the string into a std::vector.
+  std::vector<std::string> strings;
+  if (!separator.empty()) {
+    // Case: Explicit separator argument.
+    // Note: split_string("", "x") --> [""] like Python.
+    size_t pos = 0;
+    size_t next_pos = 0;
+    while ((next_pos = str.find(separator, pos)) != std::string::npos) {
+      strings.push_back(str.substr(pos, next_pos - pos));
+      pos = next_pos + separator.length();
+    }
+    strings.push_back(str.substr(pos, std::string::npos));
+  } else {
+    // Case: Split on any whitespace and strip ends.
+    // Note: split_string("") --> [] like Python.
+    std::string::const_iterator pos = str.cbegin();
+    while (pos != str.end()) {
+      // Advance past spaces. After this, pos is pointing to non-whitespace.
+      pos = find_if(pos, str.end(), [](char x) { return !std::isspace(x); });
+      if (pos == str.end()) {
+        // Tail is all whitespace, so we're done.
+        break;
+      }
+      // Advance past non-whitespace to get next chunk.
+      std::string::const_iterator next_whitespace_position =
+          find_if(pos, str.end(), [](char x) { return std::isspace(x); });
+      strings.push_back(std::string(pos, next_whitespace_position));
+      pos = next_whitespace_position;
+    }
+  }
+
+  // Convert vector of std::strings to list of GN strings.
+  Value result(function, Value::LIST);
+  result.list_value().resize(strings.size());
+  for (size_t i = 0; i < strings.size(); ++i) {
+    result.list_value()[i] = Value(function, strings[i]);
+  }
+  return result;
 }
 
 // -----------------------------------------------------------------------------
@@ -1307,7 +1469,9 @@ struct FunctionInfoInitializer {
     INSERT_FUNCTION(SetDefaultToolchain, false)
     INSERT_FUNCTION(SetSourcesAssignmentFilter, false)
     INSERT_FUNCTION(SplitList, false)
+    INSERT_FUNCTION(StringJoin, false)
     INSERT_FUNCTION(StringReplace, false)
+    INSERT_FUNCTION(StringSplit, false)
     INSERT_FUNCTION(Template, false)
     INSERT_FUNCTION(Tool, false)
     INSERT_FUNCTION(Toolchain, false)

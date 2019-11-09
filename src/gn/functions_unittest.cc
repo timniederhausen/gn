@@ -185,6 +185,81 @@ TEST(Functions, SplitList) {
       setup.print_output());
 }
 
+TEST(Functions, StringJoin) {
+  TestWithScope setup;
+
+  // Verify outputs when string_join() is called correctly.
+  {
+    TestParseInput input(R"gn(
+        # No elements in the list and empty separator.
+        print("<" + string_join("", []) + ">")
+
+        # No elements in the list.
+        print("<" + string_join(" ", []) + ">")
+
+        # One element in the list.
+        print(string_join("|", ["a"]))
+
+        # Multiple elements in the list.
+        print(string_join(" ", ["a", "b", "c"]))
+
+        # Multi-character separator.
+        print(string_join("-.", ["a", "b", "c"]))
+
+        # Empty separator.
+        print(string_join("", ["x", "y", "z"]))
+
+        # Empty string list elements.
+        print(string_join("x", ["", "", ""]))
+
+        # Empty string list elements and separator
+        print(string_join("", ["", "", ""]))
+        )gn");
+    ASSERT_FALSE(input.has_error());
+
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_FALSE(err.has_error()) << err.message();
+
+    EXPECT_EQ(
+        "<>\n"
+        "<>\n"
+        "a\n"
+        "a b c\n"
+        "a-.b-.c\n"
+        "xyz\n"
+        "xx\n"
+        "\n",
+        setup.print_output()) << setup.print_output();
+  }
+
+  // Verify usage errors are detected.
+  std::vector<std::string> bad_usage_examples = {
+    // Number of arguments.
+    R"gn(string_join())gn",
+    R"gn(string_join(["oops"]))gn",
+    R"gn(string_join("kk", [], "oops"))gn",
+
+    // Argument types.
+    R"gn(string_join(1, []))gn",
+    R"gn(string_join("kk", "oops"))gn",
+    R"gn(string_join(["oops"], []))gn",
+
+    // Non-string elements in list of strings.
+    R"gn(string_join("kk", [1]))gn",
+    R"gn(string_join("kk", ["hello", 1]))gn",
+    R"gn(string_join("kk", ["hello", []]))gn",
+  };
+  for (const auto& bad_usage_example : bad_usage_examples) {
+    TestParseInput input(bad_usage_example);
+    ASSERT_FALSE(input.has_error());
+
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_TRUE(err.has_error()) << bad_usage_example;
+  }
+}
+
 TEST(Functions, StringReplace) {
   TestWithScope setup;
 
@@ -216,6 +291,106 @@ TEST(Functions, StringReplace) {
       "abbbbcc\n"
       "ba\n",
       setup.print_output());
+}
+
+TEST(Functions, StringSplit) {
+  TestWithScope setup;
+
+  // Verify outputs when string_join() is called correctly.
+  {
+    TestParseInput input(R"gn(
+        # Split on all whitespace: empty string.
+        print(string_split(""))
+
+        # Split on all whitespace: leading, trailing, runs; one element.
+        print(string_split("hello"))
+        print(string_split("  hello"))
+        print(string_split("  hello   "))
+        print(string_split("hello   "))
+
+        # Split on all whitespace: leading, trailing, runs; multiple elements.
+        print(string_split("a b"))          # Pre-stripped
+        print(string_split("  a b"))        # Leading whitespace
+        print(string_split("  a b  "))      # Leading & trailing whitespace
+        print(string_split("a b  "))        # Trailing whitespace
+        print(string_split("a  b  "))       # Whitespace run between words
+        print(string_split(" a b cc ddd"))  # More & multi-character elements
+
+        # Split on string.
+        print(string_split("", "|"))           # Empty string
+        print(string_split("|", "|"))          # Only a separator
+        print(string_split("ab", "|"))         # String is missing separator
+        print(string_split("a|b", "|"))        # Two elements
+        print(string_split("|a|b", "|"))       # Leading separator
+        print(string_split("a|b|", "|"))       # Trailing separator
+        print(string_split("||x", "|"))        # Leading consecutive separators
+        print(string_split("x||", "|"))        # Trailing consecutive separators
+        print(string_split("a|bb|ccc", "|"))   # Multiple elements
+        print(string_split(".x.x.x.", ".x."))  # Self-overlapping separators 1
+        print(string_split("x.x.x.", ".x."))   # Self-overlapping separators 2
+        )gn");
+    ASSERT_FALSE(input.has_error());
+
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_FALSE(err.has_error()) << err.message();
+
+    EXPECT_EQ(
+        // Split on all whitespace: empty string.
+        "[]\n"
+
+        // Split on all whitespace: leading, trailing, runs; one element.
+        "[\"hello\"]\n"
+        "[\"hello\"]\n"
+        "[\"hello\"]\n"
+        "[\"hello\"]\n"
+
+        // Split on all whitespace: leading, trailing, runs; multiple elements.
+        "[\"a\", \"b\"]\n"
+        "[\"a\", \"b\"]\n"
+        "[\"a\", \"b\"]\n"
+        "[\"a\", \"b\"]\n"
+        "[\"a\", \"b\"]\n"
+        "[\"a\", \"b\", \"cc\", \"ddd\"]\n"
+
+        // Split on string.
+        "[\"\"]\n"                   // Empty string (like Python)
+        "[\"\", \"\"]\n"             // Only a separator
+        "[\"ab\"]\n"                 // String is missing separator
+        "[\"a\", \"b\"]\n"           // Two elements
+        "[\"\", \"a\", \"b\"]\n"     // Leading
+        "[\"a\", \"b\", \"\"]\n"     // Trailing
+        "[\"\", \"\", \"x\"]\n"      // Leading consecutive separators
+        "[\"x\", \"\", \"\"]\n"      // Trailing consecutive separators
+        "[\"a\", \"bb\", \"ccc\"]\n" // Multiple elements
+        "[\"\", \"x\", \"\"]\n"      // Self-overlapping separators 1
+        "[\"x\", \"x.\"]\n"          // Self-overlapping separators 2
+        ,
+        setup.print_output()) << setup.print_output();
+  }
+
+  // Verify usage errors are detected.
+  std::vector<std::string> bad_usage_examples = {
+    // Number of arguments.
+    R"gn(string_split())gn",
+    R"gn(string_split("a", "b", "c"))gn",
+
+    // Argument types.
+    R"gn(string_split(1))gn",
+    R"gn(string_split(["oops"]))gn",
+    R"gn(string_split("kk", 1))gn",
+    R"gn(string_split("kk", ["oops"]))gn",
+
+    // Empty separator argument.
+    R"gn(string_split("kk", ""))gn",
+  };
+  for (const auto& bad_usage_example : bad_usage_examples) {
+    TestParseInput input(bad_usage_example);
+    ASSERT_FALSE(input.has_error());
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_TRUE(err.has_error()) << bad_usage_example;
+  }
 }
 
 TEST(Functions, DeclareArgs) {
