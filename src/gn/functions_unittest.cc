@@ -12,6 +12,66 @@
 #include "gn/value.h"
 #include "util/test/test.h"
 
+TEST(Functions, Assert) {
+  TestWithScope setup;
+
+  // Verify cases where the assertion passes.
+  std::vector<std::string> assert_pass_examples = {
+    R"gn(assert(true))gn",
+    R"gn(assert(true, "This message is ignored for passed assertions."))gn",
+  };
+  for (const auto& assert_pass_example : assert_pass_examples) {
+    TestParseInput input(assert_pass_example);
+    ASSERT_FALSE(input.has_error());
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_FALSE(err.has_error()) << assert_pass_example;
+  }
+
+  // Verify case where the assertion fails, with no message.
+  {
+    TestParseInput input("assert(false)");
+    ASSERT_FALSE(input.has_error());
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_TRUE(err.has_error());
+    ASSERT_EQ(err.message(), "Assertion failed.");
+  }
+
+  // Verify case where the assertion fails, with a message.
+  {
+    TestParseInput input("assert(false, \"What failed\")");
+    ASSERT_FALSE(input.has_error());
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_TRUE(err.has_error());
+    ASSERT_EQ(err.message(), "Assertion failed.");
+    ASSERT_EQ(err.help_text(), "What failed");
+  }
+
+  // Verify usage errors are detected.
+  std::vector<std::string> bad_usage_examples = {
+    // Number of arguments.
+    R"gn(assert())gn",
+    R"gn(assert(1, 2, 3))gn",
+
+    // Argument types.
+    R"gn(assert(1))gn",
+    R"gn(assert("oops"))gn",
+    R"gn(assert(true, 1))gn",
+    R"gn(assert(true, []))gn",
+  };
+  for (const auto& bad_usage_example : bad_usage_examples) {
+    TestParseInput input(bad_usage_example);
+    ASSERT_FALSE(input.has_error());
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_TRUE(err.has_error()) << bad_usage_example;
+    // We are checking for usage errors, not assertion failures.
+    ASSERT_NE(err.message(), "Assertion failed.") << bad_usage_example;
+  }
+}
+
 TEST(Functions, Defined) {
   TestWithScope setup;
 
