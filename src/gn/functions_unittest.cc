@@ -302,6 +302,9 @@ TEST(Functions, StringSplit) {
         # Split on all whitespace: empty string.
         print(string_split(""))
 
+        # Split on all whitespace: string is only whitespace
+        print(string_split("      "))
+
         # Split on all whitespace: leading, trailing, runs; one element.
         print(string_split("hello"))
         print(string_split("  hello"))
@@ -319,6 +322,7 @@ TEST(Functions, StringSplit) {
         # Split on string.
         print(string_split("", "|"))           # Empty string
         print(string_split("|", "|"))          # Only a separator
+        print(string_split("||", "|"))         # Only separators
         print(string_split("ab", "|"))         # String is missing separator
         print(string_split("a|b", "|"))        # Two elements
         print(string_split("|a|b", "|"))       # Leading separator
@@ -339,6 +343,9 @@ TEST(Functions, StringSplit) {
         // Split on all whitespace: empty string.
         "[]\n"
 
+        // Split on all whitespace: string is only whitespace.
+        "[]\n"
+
         // Split on all whitespace: leading, trailing, runs; one element.
         "[\"hello\"]\n"
         "[\"hello\"]\n"
@@ -356,6 +363,7 @@ TEST(Functions, StringSplit) {
         // Split on string.
         "[\"\"]\n"                   // Empty string (like Python)
         "[\"\", \"\"]\n"             // Only a separator
+        "[\"\", \"\", \"\"]\n"       // Only separators
         "[\"ab\"]\n"                 // String is missing separator
         "[\"a\", \"b\"]\n"           // Two elements
         "[\"\", \"a\", \"b\"]\n"     // Leading
