@@ -6,9 +6,7 @@
 
 #include <stddef.h>
 #include <cctype>
-#include <iostream>
 #include <memory>
-#include <regex>
 #include <utility>
 
 #include "base/environment.h"

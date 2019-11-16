@@ -5,7 +5,7 @@
 #ifndef TOOLS_GN_OUTPUT_CONVERSION_H_
 #define TOOLS_GN_OUTPUT_CONVERSION_H_
 
-#include <iostream>
+#include <iosfwd>
 #include <string>
 
 class Err;

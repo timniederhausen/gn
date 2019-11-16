@@ -4,7 +4,6 @@
 
 #include "gn/json_project_writer.h"
 
-#include <iostream>
 #include <memory>
 
 #include "base/command_line.h"
@@ -111,8 +110,8 @@ bool InvokePython(const BuildSettings* build_settings,
   }
 
   if (!quiet) {
-    std::cout << output;
-    std::cerr << stderr_output;
+    printf("%s", output.c_str());
+    fprintf(stderr, "%s", stderr_output.c_str());
   }
 
   if (exit_code != 0) {
