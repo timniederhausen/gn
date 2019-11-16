@@ -9,8 +9,8 @@
 
 #include <string>
 
-#include "gn/build_settings.h"
-
+class BuildSettings;
+class SourceDir;
 class SourceFile;
 
 // A simple wrapper around a string that indicates the string is a path

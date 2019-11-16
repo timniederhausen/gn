@@ -11,6 +11,7 @@
 
 #include "base/environment.h"
 #include "base/strings/string_util.h"
+#include "gn/build_settings.h"
 #include "gn/config.h"
 #include "gn/config_values_generator.h"
 #include "gn/err.h"

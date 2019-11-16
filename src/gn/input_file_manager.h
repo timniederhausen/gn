@@ -15,12 +15,12 @@
 #include "base/files/file_path.h"
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
-#include "gn/build_settings.h"
 #include "gn/input_file.h"
 #include "gn/parse_tree.h"
 #include "gn/settings.h"
 #include "util/auto_reset_event.h"
 
+class BuildSettings;
 class Err;
 class LocationRange;
 class ParseNode;

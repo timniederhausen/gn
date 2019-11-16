@@ -5,6 +5,7 @@
 #include "gn/config_values_generator.h"
 
 #include "base/strings/string_util.h"
+#include "gn/build_settings.h"
 #include "gn/config_values.h"
 #include "gn/scope.h"
 #include "gn/settings.h"

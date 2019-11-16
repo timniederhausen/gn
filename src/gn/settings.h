@@ -7,12 +7,13 @@
 
 #include "base/files/file_path.h"
 #include "base/macros.h"
-#include "gn/build_settings.h"
 #include "gn/import_manager.h"
 #include "gn/output_file.h"
 #include "gn/scope.h"
 #include "gn/source_dir.h"
 #include "gn/toolchain.h"
+
+class BuildSettings;
 
 // Holds the settings for one toolchain invocation. There will be one
 // Settings object for each toolchain type, each referring to the same
