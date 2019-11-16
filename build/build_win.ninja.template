@@ -1,10 +1,5 @@
-rule cc
-  command = ninja -t msvc -- $cc /nologo /showIncludes /FC $defines $includes $cflags $cflags_c /c $in /Fo$out
-  description = CC $out
-  deps = msvc
-
 rule cxx
-  command = ninja -t msvc -- $cxx /nologo /showIncludes /FC $defines $includes $cflags $cflags_cc /c $in /Fo$out
+  command = ninja -t msvc -- $cxx /nologo /showIncludes /FC $includes $cflags /c $in /Fo$out
   description = CXX $out
   deps = msvc
 

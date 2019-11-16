@@ -155,11 +155,10 @@ def GenerateLastCommitPosition(host, header):
 
 
 def WriteGenericNinja(path, static_libraries, executables,
-                      cc, cxx, ar, ld, platform, host, options,
-                      cflags=[], cflags_cc=[], ldflags=[], libflags=[],
+                      cxx, ar, ld, platform, host, options,
+                      cflags=[], ldflags=[], libflags=[],
                       include_dirs=[], solibs=[]):
   ninja_header_lines = [
-    'cc = ' + cc,
     'cxx = ' + cxx,
     'ar = ' + ar,
     'ld = ' + ld,
@@ -210,18 +209,14 @@ def WriteGenericNinja(path, static_libraries, executables,
   ninja_lines = []
   def build_source(src_file, settings):
     ninja_lines.extend([
-        'build %s: %s %s' % (src_to_obj(src_file),
-                             settings['tool'],
-                             escape_path_ninja(
-                                 os.path.relpath(
-                                     os.path.join(REPO_ROOT, src_file),
-                                     os.path.dirname(path)))),
+        'build %s: cxx %s' % (src_to_obj(src_file),
+                              escape_path_ninja(
+                                  os.path.relpath(
+                                      os.path.join(REPO_ROOT, src_file),
+                                      os.path.dirname(path)))),
         '  includes = %s' % ' '.join(
-            ['-I' + escape_path_ninja(dirname) for dirname in
-             include_dirs + settings.get('include_dirs', [])]),
-        '  cflags = %s' % ' '.join(cflags + settings.get('cflags', [])),
-        '  cflags_cc = %s' %
-            ' '.join(cflags_cc + settings.get('cflags_cc', [])),
+            ['-I' + escape_path_ninja(dirname) for dirname in include_dirs]),
+        '  cflags = %s' % ' '.join(cflags),
     ])
 
   for library, settings in static_libraries.items():
@@ -265,23 +260,20 @@ def WriteGenericNinja(path, static_libraries, executables,
 
 def WriteGNNinja(path, platform, host, options):
   if platform.is_msvc():
-    cc = os.environ.get('CC', 'cl.exe')
     cxx = os.environ.get('CXX', 'cl.exe')
     ld = os.environ.get('LD', 'link.exe')
     ar = os.environ.get('AR', 'lib.exe')
   elif platform.is_aix():
-    cc = os.environ.get('CC', 'gcc')
     cxx = os.environ.get('CXX', 'g++')
     ld = os.environ.get('LD', 'g++')
     ar = os.environ.get('AR', 'ar -X64')
   else:
-    cc = os.environ.get('CC', 'clang')
     cxx = os.environ.get('CXX', 'clang++')
     ld = cxx
     ar = os.environ.get('AR', 'ar')
 
   cflags = os.environ.get('CFLAGS', '').split()
-  cflags_cc = os.environ.get('CXXFLAGS', '').split()
+  cflags += os.environ.get('CXXFLAGS', '').split()
   ldflags = os.environ.get('LDFLAGS', '').split()
   libflags = os.environ.get('LIBFLAGS', '').split()
   include_dirs = [
@@ -338,8 +330,8 @@ def WriteGNNinja(path, platform, host, options):
         '-Wall',
         '-Wextra',
         '-Wno-unused-parameter',
+        '-std=c++17'
     ])
-    cflags_cc.extend(['-std=c++17'])
 
     if platform.is_linux():
       ldflags.append('-Wl,--as-needed')
@@ -354,11 +346,11 @@ def WriteGNNinja(path, platform, host, options):
       cflags.append(min_mac_version_flag)
       ldflags.append(min_mac_version_flag)
     elif platform.is_aix():
-      cflags_cc.append('-maix64')
+      cflags.append('-maix64')
       ldflags.append('-maix64')
     elif platform.is_haiku():
-      cflags_cc.append('-fPIC')
-      cflags_cc.extend(['-D_BSD_SOURCE'])
+      cflags.append('-fPIC')
+      cflags.extend(['-D_BSD_SOURCE'])
 
     if platform.is_posix() and not platform.is_haiku():
       ldflags.append('-pthread')
@@ -396,8 +388,6 @@ def WriteGNNinja(path, platform, host, options):
         '/wd4505',
         '/wd4838',
         '/wd4996',
-    ])
-    cflags_cc.extend([
         '/std:c++17',
         '/GR-',
         '/D_HAS_EXCEPTIONS=0',
@@ -436,7 +426,7 @@ def WriteGNNinja(path, platform, host, options):
         'src/base/timer/elapsed_timer.cc',
         'src/base/value_iterators.cc',
         'src/base/values.cc',
-      ], 'tool': 'cxx', 'include_dirs': []},
+      ]},
       'gn_lib': {'sources': [
         'src/gn/action_target_generator.cc',
         'src/gn/action_values.cc',
@@ -581,12 +571,11 @@ def WriteGNNinja(path, platform, host, options):
         'src/util/sys_info.cc',
         'src/util/ticks.cc',
         'src/util/worker_pool.cc',
-      ], 'tool': 'cxx', 'include_dirs': []},
+      ]},
   }
 
   executables = {
-      'gn': {'sources': [ 'src/gn/gn_main.cc' ],
-        'tool': 'cxx', 'include_dirs': [], 'libs': []},
+      'gn': {'sources': [ 'src/gn/gn_main.cc' ], 'libs': []},
 
       'gn_unittests': { 'sources': [
         'src/gn/action_target_generator_unittest.cc',
@@ -663,7 +652,7 @@ def WriteGNNinja(path, platform, host, options):
         'src/gn/xcode_object_unittest.cc',
         'src/gn/xml_element_writer_unittest.cc',
         'src/util/test/gn_test.cc',
-      ], 'tool': 'cxx', 'include_dirs': [], 'libs': []},
+      ], 'libs': []},
   }
 
   if platform.is_posix():
@@ -703,8 +692,8 @@ def WriteGNNinja(path, platform, host, options):
   executables['gn']['libs'].extend(static_libraries.keys())
   executables['gn_unittests']['libs'].extend(static_libraries.keys())
 
-  WriteGenericNinja(path, static_libraries, executables, cc, cxx, ar, ld,
-                    platform, host, options, cflags, cflags_cc, ldflags,
+  WriteGenericNinja(path, static_libraries, executables, cxx, ar, ld,
+                    platform, host, options, cflags, ldflags,
                     libflags, include_dirs, libs)
 
 
