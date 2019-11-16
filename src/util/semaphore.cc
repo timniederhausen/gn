@@ -9,6 +9,10 @@
 
 #include "base/logging.h"
 
+#if defined(OS_WIN)
+#include <windows.h>
+#endif
+
 #if defined(OS_MACOSX)
 
 Semaphore::Semaphore(int count) {

@@ -17,6 +17,10 @@
 #include <sys/time.h>
 #endif
 
+#if defined(OS_WIN)
+#include <windows.h>
+#endif
+
 namespace {
 
 // Returns true on success, false if write_file signaled an error.
