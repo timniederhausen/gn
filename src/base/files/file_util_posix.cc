@@ -113,35 +113,6 @@ std::string TempFileName() {
   return std::string(".org.chromium.Chromium.XXXXXX");
 }
 
-#if defined(OS_LINUX) || defined(OS_AIX)
-// Determine if /dev/shm files can be mapped and then mprotect'd PROT_EXEC.
-// This depends on the mount options used for /dev/shm, which vary among
-// different Linux distributions and possibly local configuration.  It also
-// depends on details of kernel--ChromeOS uses the noexec option for /dev/shm
-// but its kernel allows mprotect with PROT_EXEC anyway.
-bool DetermineDevShmExecutable() {
-  bool result = false;
-  FilePath path;
-
-  ScopedFD fd(
-      CreateAndOpenFdForTemporaryFileInDir(FilePath("/dev/shm"), &path));
-  if (fd.is_valid()) {
-    DeleteFile(path, false);
-    long sysconf_result = sysconf(_SC_PAGESIZE);
-    CHECK_GE(sysconf_result, 0);
-    size_t pagesize = static_cast<size_t>(sysconf_result);
-    CHECK_GE(sizeof(pagesize), sizeof(sysconf_result));
-    void* mapping = mmap(nullptr, pagesize, PROT_READ, MAP_SHARED, fd.get(), 0);
-    if (mapping != MAP_FAILED) {
-      if (mprotect(mapping, pagesize, PROT_READ | PROT_EXEC) == 0)
-        result = true;
-      munmap(mapping, pagesize);
-    }
-  }
-  return result;
-}
-#endif  // defined(OS_LINUX) || defined(OS_AIX)
-
 #if !defined(OS_MACOSX)
 bool CopyFileContents(File* infile, File* outfile) {
   static constexpr size_t kBufferSize = 32768;
@@ -298,28 +269,6 @@ bool DirectoryExists(const FilePath& path) {
   return S_ISDIR(file_info.st_mode);
 }
 
-bool ReadFromFD(int fd, char* buffer, size_t bytes) {
-  size_t total_read = 0;
-  while (total_read < bytes) {
-    ssize_t bytes_read =
-        HANDLE_EINTR(read(fd, buffer + total_read, bytes - total_read));
-    if (bytes_read <= 0)
-      break;
-    total_read += bytes_read;
-  }
-  return total_read == bytes;
-}
-
-int CreateAndOpenFdForTemporaryFileInDir(const FilePath& directory,
-                                         FilePath* path) {
-  *path = directory.Append(TempFileName());
-  const std::string& tmpdir_string = path->value();
-  // this should be OK since mkstemp just replaces characters in place
-  char* buffer = const_cast<char*>(tmpdir_string.c_str());
-
-  return HANDLE_EINTR(mkstemp(buffer));
-}
-
 #if !defined(OS_FUCHSIA)
 bool CreateSymbolicLink(const FilePath& target_path,
                         const FilePath& symlink_path) {
@@ -421,33 +370,6 @@ FilePath GetHomeDir() {
   return FilePath("/tmp");
 }
 #endif  // !defined(OS_MACOSX)
-
-bool CreateTemporaryFile(FilePath* path) {
-  FilePath directory;
-  if (!GetTempDir(&directory))
-    return false;
-  int fd = CreateAndOpenFdForTemporaryFileInDir(directory, path);
-  if (fd < 0)
-    return false;
-  close(fd);
-  return true;
-}
-
-FILE* CreateAndOpenTemporaryFileInDir(const FilePath& dir, FilePath* path) {
-  int fd = CreateAndOpenFdForTemporaryFileInDir(dir, path);
-  if (fd < 0)
-    return nullptr;
-
-  FILE* file = fdopen(fd, "a+");
-  if (!file)
-    close(fd);
-  return file;
-}
-
-bool CreateTemporaryFileInDir(const FilePath& dir, FilePath* temp_file) {
-  int fd = CreateAndOpenFdForTemporaryFileInDir(dir, temp_file);
-  return ((fd >= 0) && !IGNORE_EINTR(close(fd)));
-}
 
 static bool CreateTemporaryDirInDirImpl(const FilePath& base_dir,
                                         const FilePath::StringType& name_tmpl,
@@ -721,21 +643,6 @@ bool VerifyPathControlledByAdmin(const FilePath& path) {
 
 int GetMaximumPathComponentLength(const FilePath& path) {
   return pathconf(path.value().c_str(), _PC_NAME_MAX);
-}
-
-bool GetShmemTempDir(bool executable, FilePath* path) {
-#if defined(OS_LINUX) || defined(OS_AIX)
-  bool use_dev_shm = true;
-  if (executable) {
-    static const bool s_dev_shm_executable = DetermineDevShmExecutable();
-    use_dev_shm = s_dev_shm_executable;
-  }
-  if (use_dev_shm) {
-    *path = FilePath("/dev/shm");
-    return true;
-  }
-#endif  // defined(OS_LINUX) || defined(OS_AIX)
-  return GetTempDir(path);
 }
 
 #if !defined(OS_MACOSX)

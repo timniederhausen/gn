@@ -289,8 +289,6 @@ File File::Duplicate() const {
     return File(File::GetLastFileError());
 
   File other(other_fd);
-  if (async())
-    other.async_ = true;
   return other;
 }
 
@@ -327,14 +325,10 @@ File::Error File::OSErrorToFileError(int saved_errno) {
   }
 }
 
-// TODO(erikkay): does it make sense to support FLAG_EXCLUSIVE_* here?
 void File::DoInitialize(const FilePath& path, uint32_t flags) {
   DCHECK(!IsValid());
 
   int open_flags = 0;
-  if (flags & FLAG_CREATE)
-    open_flags = O_CREAT | O_EXCL;
-
   created_ = false;
 
   if (flags & FLAG_CREATE_ALWAYS) {
@@ -343,13 +337,7 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
     open_flags = O_CREAT | O_TRUNC;
   }
 
-  if (flags & FLAG_OPEN_TRUNCATED) {
-    DCHECK(!open_flags);
-    DCHECK(flags & FLAG_WRITE);
-    open_flags = O_TRUNC;
-  }
-
-  if (!open_flags && !(flags & FLAG_OPEN) && !(flags & FLAG_OPEN_ALWAYS)) {
+  if (!open_flags && !(flags & FLAG_OPEN)) {
     NOTREACHED();
     errno = EOPNOTSUPP;
     error_details_ = FILE_ERROR_FAILED;
@@ -360,48 +348,23 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
     open_flags |= O_RDWR;
   } else if (flags & FLAG_WRITE) {
     open_flags |= O_WRONLY;
-  } else if (!(flags & FLAG_READ) && !(flags & FLAG_WRITE_ATTRIBUTES) &&
-             !(flags & FLAG_APPEND) && !(flags & FLAG_OPEN_ALWAYS)) {
+  } else if (!(flags & FLAG_READ)) {
     NOTREACHED();
   }
-
-  if (flags & FLAG_TERMINAL_DEVICE)
-    open_flags |= O_NOCTTY | O_NDELAY;
-
-  if (flags & FLAG_APPEND && flags & FLAG_READ)
-    open_flags |= O_APPEND | O_RDWR;
-  else if (flags & FLAG_APPEND)
-    open_flags |= O_APPEND | O_WRONLY;
 
   static_assert(O_RDONLY == 0, "O_RDONLY must equal zero");
 
   int mode = S_IRUSR | S_IWUSR;
   int descriptor = HANDLE_EINTR(open(path.value().c_str(), open_flags, mode));
 
-  if (flags & FLAG_OPEN_ALWAYS) {
-    if (descriptor < 0) {
-      open_flags |= O_CREAT;
-      if (flags & FLAG_EXCLUSIVE_READ || flags & FLAG_EXCLUSIVE_WRITE)
-        open_flags |= O_EXCL;  // together with O_CREAT implies O_NOFOLLOW
-
-      descriptor = HANDLE_EINTR(open(path.value().c_str(), open_flags, mode));
-      if (descriptor >= 0)
-        created_ = true;
-    }
-  }
-
   if (descriptor < 0) {
     error_details_ = File::GetLastFileError();
     return;
   }
 
-  if (flags & (FLAG_CREATE_ALWAYS | FLAG_CREATE))
+  if (flags & FLAG_CREATE_ALWAYS)
     created_ = true;
 
-  if (flags & FLAG_DELETE_ON_CLOSE)
-    unlink(path.value().c_str());
-
-  async_ = ((flags & FLAG_ASYNC) == FLAG_ASYNC);
   error_details_ = FILE_OK;
   file_.reset(descriptor);
 }

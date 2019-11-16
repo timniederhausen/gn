@@ -52,7 +52,6 @@ int64_t File::Seek(Whence whence, int64_t offset) {
 
 int File::Read(int64_t offset, char* data, int size) {
   DCHECK(IsValid());
-  DCHECK(!async_);
   if (size < 0)
     return -1;
 
@@ -74,7 +73,6 @@ int File::Read(int64_t offset, char* data, int size) {
 
 int File::ReadAtCurrentPos(char* data, int size) {
   DCHECK(IsValid());
-  DCHECK(!async_);
   if (size < 0)
     return -1;
 
@@ -99,7 +97,6 @@ int File::ReadAtCurrentPosNoBestEffort(char* data, int size) {
 
 int File::Write(int64_t offset, const char* data, int size) {
   DCHECK(IsValid());
-  DCHECK(!async_);
 
   LARGE_INTEGER offset_li;
   offset_li.QuadPart = offset;
@@ -117,7 +114,6 @@ int File::Write(int64_t offset, const char* data, int size) {
 
 int File::WriteAtCurrentPos(const char* data, int size) {
   DCHECK(IsValid());
-  DCHECK(!async_);
   if (size < 0)
     return -1;
 
@@ -227,15 +223,7 @@ File File::Duplicate() const {
   }
 
   File other(other_handle);
-  if (async())
-    other.async_ = true;
   return other;
-}
-
-bool File::DeleteOnClose(bool delete_on_close) {
-  FILE_DISPOSITION_INFO disposition = {delete_on_close ? TRUE : FALSE};
-  return ::SetFileInformationByHandle(GetPlatformFile(), FileDispositionInfo,
-                                      &disposition, sizeof(disposition)) != 0;
 }
 
 // Static.
@@ -284,26 +272,10 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
   if (flags & FLAG_OPEN)
     disposition = OPEN_EXISTING;
 
-  if (flags & FLAG_CREATE) {
-    DCHECK(!disposition);
-    disposition = CREATE_NEW;
-  }
-
-  if (flags & FLAG_OPEN_ALWAYS) {
-    DCHECK(!disposition);
-    disposition = OPEN_ALWAYS;
-  }
-
   if (flags & FLAG_CREATE_ALWAYS) {
     DCHECK(!disposition);
     DCHECK(flags & FLAG_WRITE);
     disposition = CREATE_ALWAYS;
-  }
-
-  if (flags & FLAG_OPEN_TRUNCATED) {
-    DCHECK(!disposition);
-    DCHECK(flags & FLAG_WRITE);
-    disposition = TRUNCATE_EXISTING;
   }
 
   if (!disposition) {
@@ -316,49 +288,17 @@ void File::DoInitialize(const FilePath& path, uint32_t flags) {
   DWORD access = 0;
   if (flags & FLAG_WRITE)
     access = GENERIC_WRITE;
-  if (flags & FLAG_APPEND) {
-    DCHECK(!access);
-    access = FILE_APPEND_DATA;
-  }
   if (flags & FLAG_READ)
     access |= GENERIC_READ;
-  if (flags & FLAG_WRITE_ATTRIBUTES)
-    access |= FILE_WRITE_ATTRIBUTES;
-  if (flags & FLAG_EXECUTE)
-    access |= GENERIC_EXECUTE;
-  if (flags & FLAG_CAN_DELETE_ON_CLOSE)
-    access |= DELETE;
 
-  DWORD sharing = (flags & FLAG_EXCLUSIVE_READ) ? 0 : FILE_SHARE_READ;
-  if (!(flags & FLAG_EXCLUSIVE_WRITE))
-    sharing |= FILE_SHARE_WRITE;
-  if (flags & FLAG_SHARE_DELETE)
-    sharing |= FILE_SHARE_DELETE;
-
+  DWORD sharing = FILE_SHARE_READ | FILE_SHARE_WRITE;
   DWORD create_flags = 0;
-  if (flags & FLAG_ASYNC)
-    create_flags |= FILE_FLAG_OVERLAPPED;
-  if (flags & FLAG_TEMPORARY)
-    create_flags |= FILE_ATTRIBUTE_TEMPORARY;
-  if (flags & FLAG_HIDDEN)
-    create_flags |= FILE_ATTRIBUTE_HIDDEN;
-  if (flags & FLAG_DELETE_ON_CLOSE)
-    create_flags |= FILE_FLAG_DELETE_ON_CLOSE;
-  if (flags & FLAG_BACKUP_SEMANTICS)
-    create_flags |= FILE_FLAG_BACKUP_SEMANTICS;
-  if (flags & FLAG_SEQUENTIAL_SCAN)
-    create_flags |= FILE_FLAG_SEQUENTIAL_SCAN;
-
   file_.Set(CreateFile(ToWCharT(&path.value()), access, sharing, NULL,
                        disposition, create_flags, NULL));
 
   if (file_.IsValid()) {
     error_details_ = FILE_OK;
-    async_ = ((flags & FLAG_ASYNC) == FLAG_ASYNC);
-
-    if (flags & (FLAG_OPEN_ALWAYS))
-      created_ = (ERROR_ALREADY_EXISTS != GetLastError());
-    else if (flags & (FLAG_CREATE_ALWAYS | FLAG_CREATE))
+    if (flags & FLAG_CREATE_ALWAYS)
       created_ = true;
   } else {
     error_details_ = GetLastFileError();

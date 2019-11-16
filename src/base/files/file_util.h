@@ -124,20 +124,6 @@ bool ReadFileToStringWithMaxSize(const FilePath& path,
                                  std::string* contents,
                                  size_t max_size);
 
-#if defined(OS_POSIX) || defined(OS_FUCHSIA)
-
-// Read exactly |bytes| bytes from file descriptor |fd|, storing the result
-// in |buffer|. This function is protected against EINTR and partial reads.
-// Returns true iff |bytes| bytes have been successfully read from |fd|.
-bool ReadFromFD(int fd, char* buffer, size_t bytes);
-
-// Performs the same function as CreateAndOpenTemporaryFileInDir(), but returns
-// the file-descriptor directly, rather than wrapping it into a FILE. Returns
-// -1 on failure.
-int CreateAndOpenFdForTemporaryFileInDir(const FilePath& dir, FilePath* path);
-
-#endif  // OS_POSIX || OS_FUCHSIA
-
 #if defined(OS_POSIX)
 
 // Creates a symbolic link at |symlink| pointing to |target|.  Returns
@@ -185,28 +171,7 @@ bool ExecutableExistsInPath(Environment* env,
 bool IsDirectoryEmpty(const FilePath& dir_path);
 
 // Get the temporary directory provided by the system.
-//
-// WARNING: In general, you should use CreateTemporaryFile variants below
-// instead of this function. Those variants will ensure that the proper
-// permissions are set so that other users on the system can't edit them while
-// they're open (which can lead to security issues).
 bool GetTempDir(FilePath* path);
-
-// Creates a temporary file. The full path is placed in |path|, and the
-// function returns true if was successful in creating the file. The file will
-// be empty and all handles closed after this function returns.
-bool CreateTemporaryFile(FilePath* path);
-
-// Same as CreateTemporaryFile but the file is created in |dir|.
-bool CreateTemporaryFileInDir(const FilePath& dir, FilePath* temp_file);
-
-// Create and open a temporary file.  File is opened for read/write.
-// The full path is placed in |path|.
-// Returns a handle to the opened file or NULL if an error occurred.
-FILE* CreateAndOpenTemporaryFile(FilePath* path);
-
-// Similar to CreateAndOpenTemporaryFile, but the file is created in |dir|.
-FILE* CreateAndOpenTemporaryFileInDir(const FilePath& dir, FilePath* path);
 
 // Create a new directory. If prefix is provided, the new directory name is in
 // the format of prefixyyyy.
@@ -378,15 +343,6 @@ enum FileSystemType {
 // Attempts determine the FileSystemType for |path|.
 // Returns false if |path| doesn't exist.
 bool GetFileSystemType(const FilePath& path, FileSystemType* type);
-#endif
-
-#if defined(OS_POSIX) || defined(OS_FUCHSIA)
-// Get a temporary directory for shared memory files. The directory may depend
-// on whether the destination is intended for executable files, which in turn
-// depends on how /dev/shmem was mounted. As a result, you must supply whether
-// you intend to create executable shmem segments so this function can find
-// an appropriate location.
-bool GetShmemTempDir(bool executable, FilePath* path);
 #endif
 
 }  // namespace base

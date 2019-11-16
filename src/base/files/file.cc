@@ -17,44 +17,33 @@ File::Info::Info() : size(0), is_directory(false), is_symbolic_link(false) {}
 File::Info::~Info() = default;
 
 File::File()
-    : error_details_(FILE_ERROR_FAILED), created_(false), async_(false) {}
+    : error_details_(FILE_ERROR_FAILED), created_(false) {}
 
 File::File(const FilePath& path, uint32_t flags)
-    : error_details_(FILE_OK), created_(false), async_(false) {
+    : error_details_(FILE_OK), created_(false) {
   Initialize(path, flags);
 }
 
 File::File(PlatformFile platform_file)
     : file_(platform_file),
       error_details_(FILE_OK),
-      created_(false),
-      async_(false) {
+      created_(false) {
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
   DCHECK_GE(platform_file, -1);
 #endif
 }
 
 File::File(Error error_details)
-    : error_details_(error_details), created_(false), async_(false) {}
+    : error_details_(error_details), created_(false) {}
 
 File::File(File&& other)
     : file_(other.TakePlatformFile()),
       error_details_(other.error_details()),
-      created_(other.created()),
-      async_(other.async_) {}
+      created_(other.created()) {}
 
 File::~File() {
   // Go through the AssertIOAllowed logic.
   Close();
-}
-
-// static
-File File::CreateForAsyncHandle(PlatformFile platform_file) {
-  File file(platform_file);
-  // It would be nice if we could validate that |platform_file| was opened with
-  // FILE_FLAG_OVERLAPPED on Windows but this doesn't appear to be possible.
-  file.async_ = true;
-  return file;
 }
 
 File& File::operator=(File&& other) {
@@ -62,7 +51,6 @@ File& File::operator=(File&& other) {
   SetPlatformFile(other.TakePlatformFile());
   error_details_ = other.error_details();
   created_ = other.created();
-  async_ = other.async_;
   return *this;
 }
 
