@@ -204,6 +204,13 @@ bool ExecProcess(const base::CommandLine& cmdline,
       return false;
     case 0:  // child
     {
+#if defined(OS_MAC)
+      // When debugging the app under Xcode, the child will receive a SIGTRAP
+      // signal which will terminate the child process. Ignore the signal to
+      // allow debugging under macOS.
+      sigignore(SIGTRAP);
+#endif
+
       // DANGER: no calls to malloc are allowed from now on:
       // http://crbug.com/36678
       //
