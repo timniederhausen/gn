@@ -65,7 +65,7 @@
       <key>comment</key>
       <string>targets</string>
       <key>match</key>
-      <string>\b(?:action|action_foreach|copy|executable|group|loadable_module|shared_library|source_set|static_library|generated_file)\b</string>
+      <string>\b(?:action|action_foreach|copy|executable|group|loadable_module|shared_library|source_set|static_library|generated_file|rust_library|rust_proc_macro)\b</string>
       <key>name</key>
       <string>entity.name.tag.gn</string>
     </dict>

@@ -313,6 +313,8 @@ const char* Target::GetStringForOutputType(OutputType type) {
       return functions::kGeneratedFile;
     case RUST_LIBRARY:
       return functions::kRustLibrary;
+    case RUST_PROC_MACRO:
+      return functions::kRustProcMacro;
     default:
       return "";
   }
@@ -400,19 +402,20 @@ bool Target::OnResolved(Err* err) {
 bool Target::IsBinary() const {
   return output_type_ == EXECUTABLE || output_type_ == SHARED_LIBRARY ||
          output_type_ == LOADABLE_MODULE || output_type_ == STATIC_LIBRARY ||
-         output_type_ == SOURCE_SET || output_type_ == RUST_LIBRARY;
+         output_type_ == SOURCE_SET || output_type_ == RUST_LIBRARY ||
+         output_type_ == RUST_PROC_MACRO;
 }
 
 bool Target::IsLinkable() const {
   return output_type_ == STATIC_LIBRARY || output_type_ == SHARED_LIBRARY ||
-         output_type_ == RUST_LIBRARY;
+         output_type_ == RUST_LIBRARY || output_type_ == RUST_PROC_MACRO;
 }
 
 bool Target::IsFinal() const {
   return output_type_ == EXECUTABLE || output_type_ == SHARED_LIBRARY ||
          output_type_ == LOADABLE_MODULE || output_type_ == ACTION ||
          output_type_ == ACTION_FOREACH || output_type_ == COPY_FILES ||
-         output_type_ == CREATE_BUNDLE ||
+         output_type_ == CREATE_BUNDLE || output_type_ == RUST_PROC_MACRO ||
          (output_type_ == STATIC_LIBRARY && complete_static_lib_);
 }
 
@@ -520,7 +523,9 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
   // Direct dependent libraries.
   if (dep->output_type() == STATIC_LIBRARY ||
       dep->output_type() == SHARED_LIBRARY ||
-      dep->output_type() == SOURCE_SET || dep->output_type() == RUST_LIBRARY)
+      dep->output_type() == SOURCE_SET ||
+      dep->output_type() == RUST_LIBRARY ||
+      dep->output_type() == RUST_PROC_MACRO)
     inherited_libraries_.Append(dep, is_public);
 
   if (dep->output_type() == SHARED_LIBRARY) {
@@ -672,6 +677,7 @@ bool Target::FillOutputFiles(Err* err) {
           SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
               this, tool, tool->outputs().list()[0]);
       break;
+    case RUST_PROC_MACRO:
     case SHARED_LIBRARY:
       CHECK(tool->outputs().list().size() >= 1);
       check_tool_outputs = true;

@@ -63,7 +63,7 @@ variable name or the '{{' and '}}' which surround it."
 (defvar gn-font-lock-target-declaration-keywords
   '("action" "action_foreach" "bundle_data" "copy" "create_bundle" "executable"
     "group" "loadable_module" "shared_library" "source_set" "static_library"
-    "generated_file" "target"))
+    "generated_file" "target" "rust_library" "rust_proc_macro"))
 
 ;; pool() is handled specially since it's also a variable name
 (defvar gn-font-lock-buildfile-fun-keywords

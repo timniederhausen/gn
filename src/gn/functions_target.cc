@@ -661,6 +661,38 @@ Value RunRustLibrary(Scope* scope,
                               block, err);
 }
 
+// rust_proc_macro ----------------------------------------------------------------
+
+const char kRustProcMacro[] = "rust_proc_macro";
+const char kRustProcMacro_HelpShort[] =
+    "rust_proc_macro: Declare a Rust procedural macro target.";
+const char kRustProcMacro_Help[] =
+    R"(rust_proc_macro: Declare a Rust procedural macro target.
+
+  A Rust procedural macro allows creating syntax extensions as execution of a
+  function. They are compiled as dynamic libraries and used by the compiler at
+  runtime.
+
+  Their use is the same as of other Rust libraries, but their build has some
+  additional restrictions in terms of supported flags.
+
+Language and compilation
+)" LANGUAGE_HELP
+    R"(
+
+Variables
+
+)" CONFIG_VALUES_VARS_HELP DEPS_VARS DEPENDENT_CONFIG_VARS GENERAL_TARGET_VARS
+        RUST_VARS;
+Value RunRustProcMacro(Scope* scope,
+                   const FunctionCallNode* function,
+                   const std::vector<Value>& args,
+                   BlockNode* block,
+                   Err* err) {
+  return ExecuteGenericTarget(functions::kRustProcMacro, scope, function, args,
+                              block, err);
+}
+
 // shared_library --------------------------------------------------------------
 
 const char kSharedLibrary[] = "shared_library";

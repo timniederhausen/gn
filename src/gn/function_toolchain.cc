@@ -380,7 +380,7 @@ Tool variables
     rlib_output_extension [string, optional, rust tools only]
     dylib_output_extension [string, optional, rust tools only]
     cdylib_output_extension [string, optional, rust tools only]
-    proc_macro_output_extension [string, optional, rust tools only]
+    rust_proc_macro_output_extension [string, optional, rust tools only]
         Valid for: Rust tools
 
         These specify the default tool output for each of the crate types.

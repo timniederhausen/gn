@@ -459,7 +459,7 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
         << target_->label().GetUserVisibleName(false);
 
     if (cur->output_type() == Target::RUST_LIBRARY ||
-        cur->rust_values().crate_type() == RustValues::CRATE_PROC_MACRO)
+        cur->output_type() == Target::RUST_PROC_MACRO)
       continue;
 
     if (cur->dependency_output_file().value() !=

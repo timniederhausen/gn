@@ -38,6 +38,7 @@ void RustTargetGenerator::Run() {
   if (target_->output_type() != Target::EXECUTABLE &&
       target_->output_type() != Target::SHARED_LIBRARY &&
       target_->output_type() != Target::RUST_LIBRARY &&
+      target_->output_type() != Target::RUST_PROC_MACRO &&
       target_->output_type() != Target::STATIC_LIBRARY &&
       target_->output_type() != Target::LOADABLE_MODULE) {
     // Only valid rust output types.

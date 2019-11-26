@@ -231,18 +231,18 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
       "{{root_output_dir}}/{{target_output_name}}{{output_extension}}"));
   toolchain->SetTool(std::move(dylib_tool));
 
-  // PROC_MACRO
-  std::unique_ptr<Tool> proc_macro_tool = Tool::CreateTool(RustTool::kRsToolMacro);
+  // RUST_PROC_MACRO
+  std::unique_ptr<Tool> rust_proc_macro_tool = Tool::CreateTool(RustTool::kRsToolMacro);
   SetCommandForTool(
       "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
       "--crate-type {{crate_type}} {{rustflags}} -o {{output}} "
       "{{rustdeps}} {{externs}}",
-      proc_macro_tool.get());
-  proc_macro_tool->set_output_prefix("lib");
-  proc_macro_tool->set_default_output_extension(".so");
-  proc_macro_tool->set_outputs(SubstitutionList::MakeForTest(
+      rust_proc_macro_tool.get());
+  rust_proc_macro_tool->set_output_prefix("lib");
+  rust_proc_macro_tool->set_default_output_extension(".so");
+  rust_proc_macro_tool->set_outputs(SubstitutionList::MakeForTest(
       "{{target_out_dir}}/{{target_output_name}}{{output_extension}}"));
-  toolchain->SetTool(std::move(proc_macro_tool));
+  toolchain->SetTool(std::move(rust_proc_macro_tool));
 
   // RLIB
   std::unique_ptr<Tool> rlib_tool = Tool::CreateTool(RustTool::kRsToolRlib);

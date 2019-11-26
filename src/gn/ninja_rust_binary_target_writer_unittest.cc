@@ -437,12 +437,12 @@ TEST_F(NinjaRustBinaryTargetWriterTest, LibsAndLibDirs) {
   }
 }
 
-TEST_F(NinjaRustBinaryTargetWriterTest, ProcMacro) {
+TEST_F(NinjaRustBinaryTargetWriterTest, RustProcMacro) {
   Err err;
   TestWithScope setup;
 
   Target procmacro(setup.settings(), Label(SourceDir("//bar/"), "mymacro"));
-  procmacro.set_output_type(Target::LOADABLE_MODULE);
+  procmacro.set_output_type(Target::RUST_PROC_MACRO);
   procmacro.visibility().SetPublic();
   SourceFile barlib("//bar/lib.rs");
   procmacro.sources().push_back(SourceFile("//bar/mylib.rs"));
@@ -507,7 +507,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, ProcMacro) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
-        "../../foo/main.rs || obj/bar/libmymacro.so\n"
+        "../../foo/main.rs obj/bar/libmymacro.so\n"
         "  externs = --extern mymacro=obj/bar/libmymacro.so\n"
         "  rustdeps = -Ldependency=obj/bar\n";
     std::string out_str = out.str();

@@ -28,6 +28,7 @@
     *   [group: Declare a named group of targets.](#func_group)
     *   [loadable_module: Declare a loadable module target.](#func_loadable_module)
     *   [rust_library: Declare a Rust library target.](#func_rust_library)
+    *   [rust_proc_macro: Declare a Rust procedural macro target.](#func_rust_proc_macro)
     *   [shared_library: Declare a shared library target.](#func_shared_library)
     *   [source_set: Declare a source set target.](#func_source_set)
     *   [static_library: Declare a static library target.](#func_static_library)
@@ -1794,6 +1795,41 @@
            visibility
   Rust variables: aliased_deps, crate_root, crate_name
 ```
+### <a name="func_rust_proc_macro"></a>**rust_proc_macro**: Declare a Rust procedural macro target.
+
+```
+  A Rust procedural macro allows creating syntax extensions as execution of a
+  function. They are compiled as dynamic libraries and used by the compiler at
+  runtime.
+
+  Their use is the same as of other Rust libraries, but their build has some
+  additional restrictions in terms of supported flags.
+```
+
+#### **Language and compilation**
+
+```
+  The tools and commands used to create this target type will be
+  determined by the source files in its sources. Targets containing
+  multiple compiler-incompatible languages are not allowed (e.g. a
+  target containing both C and C++ sources is acceptable, but a
+  target containing C and Rust sources is not).
+```
+
+#### **Variables**
+
+```
+  Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
+         asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
+         libs, precompiled_header, precompiled_source, rustflags,
+         rustenv
+  Deps: data_deps, deps, public_deps
+  Dependent configs: all_dependent_configs, public_configs
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_name, output_extension, public, sources, testonly,
+           visibility
+  Rust variables: aliased_deps, crate_root, crate_name
+```
 ### <a name="func_shared_library"></a>**shared_library**: Declare a shared library target.
 
 ```
@@ -3307,7 +3343,7 @@
     rlib_output_extension [string, optional, rust tools only]
     dylib_output_extension [string, optional, rust tools only]
     cdylib_output_extension [string, optional, rust tools only]
-    proc_macro_output_extension [string, optional, rust tools only]
+    rust_proc_macro_output_extension [string, optional, rust tools only]
         Valid for: Rust tools
 
         These specify the default tool output for each of the crate types.

@@ -148,6 +148,10 @@ void TargetGenerator::GenerateTarget(Scope* scope,
     BinaryTargetGenerator generator(target.get(), scope, function_call,
                                     Target::RUST_LIBRARY, err);
     generator.Run();
+  } else if (output_type == functions::kRustProcMacro) {
+    BinaryTargetGenerator generator(target.get(), scope, function_call,
+                                    Target::RUST_PROC_MACRO, err);
+    generator.Run();
   } else {
     *err = Err(function_call, "Not a known target type",
                "I am very confused by the target type \"" + output_type + "\"");

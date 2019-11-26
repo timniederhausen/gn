@@ -337,6 +337,8 @@ const char* Tool::GetToolTypeForTargetFinalOutput(const Target* target) {
             return RustTool::kRsToolStaticlib;
           case Target::RUST_LIBRARY:
             return RustTool::kRsToolRlib;
+          case Target::RUST_PROC_MACRO:
+            return RustTool::kRsToolMacro;
           default:
             break;
         }

@@ -28,6 +28,7 @@ hi def link     gnPredefVar         Constant
 syn keyword     gnTarget action action_foreach copy executable group
 syn keyword     gnTarget shared_library source_set static_library
 syn keyword     gnTarget loadable_module generated_file
+syn keyword     gnTarget rust_library rust_proc_macro
 hi def link     gnTarget            Type
 
 " Buildfile functions
