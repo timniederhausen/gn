@@ -51,47 +51,52 @@ SourceFile::Type GetSourceFileType(const std::string& file) {
   return SourceFile::SOURCE_UNKNOWN;
 }
 
-}  // namespace
-
-SourceFile::SourceFile(const std::string& value) : value_(value) {
-  DCHECK(!value_.empty());
-  AssertValueSourceFileString(value_);
-  NormalizePath(&value_);
-  type_ = GetSourceFileType(value_);
+std::string Normalized(std::string value) {
+  DCHECK(!value.empty());
+  AssertValueSourceFileString(value);
+  NormalizePath(&value);
+  return value;
 }
 
-SourceFile::SourceFile(std::string&& value) : value_(std::move(value)) {
-  DCHECK(!value_.empty());
-  AssertValueSourceFileString(value_);
-  NormalizePath(&value_);
-  type_ = GetSourceFileType(value_);
+}  // namespace
+
+SourceFile::SourceFile(const std::string& value)
+    : SourceFile(StringAtom(Normalized(value))) {}
+
+SourceFile::SourceFile(std::string&& value)
+    : SourceFile(StringAtom(Normalized(std::move(value)))) {}
+
+SourceFile::SourceFile(StringAtom value) : value_(value) {
+  type_ = GetSourceFileType(value_.str());
 }
 
 std::string SourceFile::GetName() const {
   if (is_null())
     return std::string();
 
-  DCHECK(value_.find('/') != std::string::npos);
-  size_t last_slash = value_.rfind('/');
-  return std::string(&value_[last_slash + 1], value_.size() - last_slash - 1);
+  const std::string& value = value_.str();
+  DCHECK(value.find('/') != std::string::npos);
+  size_t last_slash = value.rfind('/');
+  return std::string(&value[last_slash + 1], value.size() - last_slash - 1);
 }
 
 SourceDir SourceFile::GetDir() const {
   if (is_null())
     return SourceDir();
 
-  DCHECK(value_.find('/') != std::string::npos);
-  size_t last_slash = value_.rfind('/');
-  return SourceDir(value_.substr(0, last_slash + 1));
+  const std::string& value = value_.str();
+  DCHECK(value.find('/') != std::string::npos);
+  size_t last_slash = value.rfind('/');
+  return SourceDir(value.substr(0, last_slash + 1));
 }
 
 base::FilePath SourceFile::Resolve(const base::FilePath& source_root) const {
-  return ResolvePath(value_, true, source_root);
+  return ResolvePath(value_.str(), true, source_root);
 }
 
 void SourceFile::SetValue(const std::string& value) {
-  value_ = value;
-  type_ = GetSourceFileType(value_);
+  value_ = StringAtom(value);
+  type_ = GetSourceFileType(value);
 }
 
 SourceFileTypeSet::SourceFileTypeSet() : empty_(true) {

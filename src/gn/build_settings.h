@@ -111,10 +111,10 @@ class BuildSettings {
 
   // A list of files that can call exec_script(). If the returned pointer is
   // null, exec_script may be called from anywhere.
-  const std::set<SourceFile>* exec_script_whitelist() const {
+  const SourceFileSet* exec_script_whitelist() const {
     return exec_script_whitelist_.get();
   }
-  void set_exec_script_whitelist(std::unique_ptr<std::set<SourceFile>> list) {
+  void set_exec_script_whitelist(std::unique_ptr<SourceFileSet> list) {
     exec_script_whitelist_ = std::move(list);
   }
 
@@ -134,7 +134,7 @@ class BuildSettings {
   ItemDefinedCallback item_defined_callback_;
   PrintCallback print_callback_;
 
-  std::unique_ptr<std::set<SourceFile>> exec_script_whitelist_;
+  std::unique_ptr<SourceFileSet> exec_script_whitelist_;
 
   DISALLOW_ASSIGN(BuildSettings);
 };

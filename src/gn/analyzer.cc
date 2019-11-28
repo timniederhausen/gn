@@ -219,7 +219,7 @@ std::string OutputsToJSON(const Outputs& outputs,
 Analyzer::Analyzer(const Builder& builder,
                    const SourceFile& build_config_file,
                    const SourceFile& dot_file,
-                   const std::set<SourceFile>& build_args_dependency_files)
+                   const SourceFileSet& build_args_dependency_files)
     : all_items_(builder.GetAllResolvedItems()),
       default_toolchain_(builder.loader()->GetDefaultToolchain()),
       build_config_file_(build_config_file),

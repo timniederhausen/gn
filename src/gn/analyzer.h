@@ -23,7 +23,7 @@ class Analyzer {
   Analyzer(const Builder& builder,
            const SourceFile& build_config_file,
            const SourceFile& dot_file,
-           const std::set<SourceFile>& build_args_dependency_files);
+           const SourceFileSet& build_args_dependency_files);
   ~Analyzer();
 
   // Figures out from a Buider and a JSON-formatted string containing lists
@@ -98,7 +98,7 @@ class Analyzer {
 
   const SourceFile build_config_file_;
   const SourceFile dot_file_;
-  const std::set<SourceFile> build_args_dependency_files_;
+  const SourceFileSet build_args_dependency_files_;
 };
 
 #endif  // TOOLS_GN_ANALYZER_H_

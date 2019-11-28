@@ -86,12 +86,12 @@ class Args {
 
   // Returns the set of build files that may affect the build arguments, please
   // refer to Scope for how this is determined.
-  const std::set<SourceFile>& build_args_dependency_files() const {
+  const SourceFileSet& build_args_dependency_files() const {
     return build_args_dependency_files_;
   }
 
   void set_build_args_dependency_files(
-      const std::set<SourceFile>& build_args_dependency_files) {
+      const SourceFileSet& build_args_dependency_files) {
     build_args_dependency_files_ = build_args_dependency_files;
   }
 
@@ -139,7 +139,7 @@ class Args {
   // we see an argument declaration.
   mutable ArgumentsPerToolchain toolchain_overrides_;
 
-  std::set<SourceFile> build_args_dependency_files_;
+  SourceFileSet build_args_dependency_files_;
 
   DISALLOW_ASSIGN(Args);
 };

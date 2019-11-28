@@ -27,8 +27,7 @@ namespace {
 bool CheckExecScriptPermissions(const BuildSettings* build_settings,
                                 const FunctionCallNode* function,
                                 Err* err) {
-  const std::set<SourceFile>* whitelist =
-      build_settings->exec_script_whitelist();
+  const SourceFileSet* whitelist = build_settings->exec_script_whitelist();
   if (!whitelist)
     return true;  // No whitelist specified, don't check.
 

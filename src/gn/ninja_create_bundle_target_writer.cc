@@ -236,7 +236,7 @@ void NinjaCreateBundleTargetWriter::WriteCompileAssetsCatalogStep(
   out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
        << GeneralTool::kGeneralToolCompileXCAssets;
 
-  std::set<SourceFile> asset_catalog_bundles;
+  SourceFileSet asset_catalog_bundles;
   for (const auto& source : target_->bundle_data().assets_catalog_sources()) {
     out_ << " ";
     path_output_.WriteFile(out_, source);

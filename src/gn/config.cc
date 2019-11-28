@@ -10,7 +10,7 @@
 
 Config::Config(const Settings* settings,
                const Label& label,
-               const std::set<SourceFile>& build_dependency_files)
+               const SourceFileSet& build_dependency_files)
     : Item(settings, label, build_dependency_files) {}
 
 Config::~Config() = default;

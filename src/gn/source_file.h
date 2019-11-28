@@ -11,8 +11,11 @@
 #include <string>
 #include <string_view>
 
+#include "base/containers/flat_set.h"
 #include "base/files/file_path.h"
 #include "base/logging.h"
+
+#include "gn/string_atom.h"
 
 class SourceDir;
 
@@ -47,11 +50,12 @@ class SourceFile {
   // Takes a known absolute source file. Always begins in a slash.
   explicit SourceFile(const std::string& value);
   explicit SourceFile(std::string&& value);
+  explicit SourceFile(StringAtom value);
 
   ~SourceFile() = default;
 
   bool is_null() const { return value_.empty(); }
-  const std::string& value() const { return value_; }
+  const std::string& value() const { return value_.str(); }
   Type type() const { return type_; }
 
   // Returns everything after the last slash.
@@ -65,7 +69,7 @@ class SourceFile {
   // Returns true if this file starts with a "//" which indicates a path
   // from the source root.
   bool is_source_absolute() const {
-    return value_.size() >= 2 && value_[0] == '/' && value_[1] == '/';
+    return value().size() >= 2 && value()[0] == '/' && value()[1] == '/';
   }
 
   // Returns true if this file starts with a single slash which indicates a
@@ -80,7 +84,7 @@ class SourceFile {
   // return value points into our buffer.
   std::string_view SourceAbsoluteWithOneSlash() const {
     CHECK(is_source_absolute());
-    return std::string_view(&value_[1], value_.size() - 1);
+    return std::string_view(&value()[1], value().size() - 1);
   }
 
   bool operator==(const SourceFile& other) const {
@@ -91,12 +95,29 @@ class SourceFile {
     return value_ < other.value_;
   }
 
+  struct PtrCompare {
+    bool operator()(const SourceFile& a, const SourceFile& b) const noexcept {
+      return StringAtom::PtrCompare()(a.value_, b.value_);
+    }
+  };
+  struct PtrHash {
+    size_t operator()(const SourceFile& s) const noexcept {
+      return StringAtom::PtrHash()(s.value_);
+    }
+  };
+
+  struct PtrEqual {
+    bool operator()(const SourceFile& a, const SourceFile& b) const noexcept {
+      return StringAtom::PtrEqual()(a.value_, b.value_);
+    }
+  };
+
  private:
   friend class SourceDir;
 
   void SetValue(const std::string& value);
 
-  std::string value_;
+  StringAtom value_;
   Type type_ = SOURCE_UNKNOWN;
 };
 
@@ -111,6 +132,12 @@ struct hash<SourceFile> {
 };
 
 }  // namespace std
+
+// Represents a set of source files.
+// NOTE: In practice, this is much faster than using an std::set<> or
+// std::unordered_set<> container. E.g. for the Fuchsia Zircon build, the
+// overall difference in "gn gen" time is about 10%.
+using SourceFileSet = base::flat_set<SourceFile, SourceFile::PtrCompare>;
 
 // Represents a set of tool types.
 class SourceFileTypeSet {

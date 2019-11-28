@@ -9,7 +9,7 @@
 
 Item::Item(const Settings* settings,
            const Label& label,
-           const std::set<SourceFile>& build_dependency_files)
+           const SourceFileSet& build_dependency_files)
     : settings_(settings),
       label_(label),
       build_dependency_files_(build_dependency_files),

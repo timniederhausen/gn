@@ -64,7 +64,7 @@ class Target : public Item {
   // to Scope for how this is determined.
   Target(const Settings* settings,
          const Label& label,
-         const std::set<SourceFile>& build_dependency_files = {});
+         const SourceFileSet& build_dependency_files = {});
   ~Target() override;
 
   // Returns a string naming the output type.

@@ -846,8 +846,8 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline) {
       err.PrintToStdout();
       return false;
     }
-    std::unique_ptr<std::set<SourceFile>> whitelist =
-        std::make_unique<std::set<SourceFile>>();
+    std::unique_ptr<SourceFileSet> whitelist =
+        std::make_unique<SourceFileSet>();
     for (const auto& item : exec_script_whitelist_value->list_value()) {
       if (!item.VerifyTypeIs(Value::STRING, &err)) {
         err.PrintToStdout();
