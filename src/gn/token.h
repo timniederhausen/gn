@@ -59,7 +59,6 @@ class Token {
 
   Token();
   Token(const Location& location, Type t, const std::string_view& v);
-  Token(const Token& other);
 
   Type type() const { return type_; }
   const std::string_view& value() const { return value_; }
