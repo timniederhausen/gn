@@ -57,9 +57,9 @@ void SetupCompileFlags(const Target* target,
       target->config_values().has_precompiled_headers();
 
   std::ostringstream defines_out;
-  RecursiveTargetConfigToStream<std::string>(
-      target, &ConfigValues::defines,
-      DefineWriter(ESCAPE_NINJA_PREFORMATTED_COMMAND, true), defines_out);
+  RecursiveTargetConfigToStream<std::string>(target, &ConfigValues::defines,
+                                             DefineWriter(ESCAPE_SPACE, true),
+                                             defines_out);
   base::EscapeJSONString(defines_out.str(), false, &flags.defines);
 
   std::ostringstream includes_out;

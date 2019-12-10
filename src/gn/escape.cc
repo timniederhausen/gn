@@ -41,6 +41,19 @@ const char kShellValid[0x80] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
 // clang-format on
 
+size_t EscapeStringToString_Space(const std::string_view& str,
+                                  const EscapeOptions& options,
+                                  char* dest,
+                                  bool* needed_quoting) {
+  size_t i = 0;
+  for (const auto& elem : str) {
+    if (elem == ' ')
+      dest[i++] = '\\';
+    dest[i++] = elem;
+  }
+  return i;
+}
+
 // Uses the stack if the space needed is small and the heap otherwise.
 class StackOrHeapBuffer {
  public:
@@ -204,6 +217,8 @@ size_t EscapeStringToString(const std::string_view& str,
     case ESCAPE_NONE:
       strncpy(dest, str.data(), str.size());
       return str.size();
+    case ESCAPE_SPACE:
+      return EscapeStringToString_Space(str, options, dest, needed_quoting);
     case ESCAPE_NINJA:
       return EscapeStringToString_Ninja(str, options, dest, needed_quoting);
     case ESCAPE_DEPFILE:

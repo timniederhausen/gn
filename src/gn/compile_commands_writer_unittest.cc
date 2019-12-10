@@ -239,7 +239,7 @@ TEST_F(CompileCommandsTest, EscapeDefines) {
   target.sources().push_back(SourceFile("//foo/input.cc"));
   target.config_values().defines().push_back("BOOL_DEF");
   target.config_values().defines().push_back("INT_DEF=123");
-  target.config_values().defines().push_back("STR_DEF=\"ABCD-1\"");
+  target.config_values().defines().push_back("STR_DEF=\"ABCD 1\"");
   ASSERT_TRUE(target.OnResolved(&err));
   targets.push_back(&target);
 
@@ -248,7 +248,7 @@ TEST_F(CompileCommandsTest, EscapeDefines) {
   writer.RenderJSON(build_settings(), targets, &out);
 
   const char expected[] =
-      "-DBOOL_DEF -DINT_DEF=123 -DSTR_DEF=\\\\\\\"ABCD-1\\\\\\\"";
+      "-DBOOL_DEF -DINT_DEF=123 -DSTR_DEF=\\\\\\\"ABCD\\\\ 1\\\\\\\"";
   EXPECT_TRUE(out.find(expected) != std::string::npos);
 }
 

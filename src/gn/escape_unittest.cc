@@ -69,3 +69,12 @@ TEST(Escape, NinjaPreformatted) {
   // Only $ is escaped.
   EXPECT_EQ("a: \"$$\\b<;", EscapeString("a: \"$\\b<;", opts, nullptr));
 }
+
+TEST(Escape, Space) {
+  EscapeOptions opts;
+  opts.mode = ESCAPE_SPACE;
+
+  // ' ' is escaped.
+  EXPECT_EQ("-VERSION=\"libsrtp2\\ 2.1.0-pre\"",
+            EscapeString("-VERSION=\"libsrtp2 2.1.0-pre\"", opts, nullptr));
+}

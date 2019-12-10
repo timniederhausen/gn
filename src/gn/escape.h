@@ -12,6 +12,9 @@ enum EscapingMode {
   // No escaping.
   ESCAPE_NONE,
 
+  // Space only.
+  ESCAPE_SPACE,
+
   // Ninja string escaping.
   ESCAPE_NINJA,
 
