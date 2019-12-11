@@ -463,6 +463,7 @@ class TargetDescBuilder : public BaseDescBuilder {
       CONFIG_VALUE_ARRAY_HANDLER(cflags_cc, std::string)
       CONFIG_VALUE_ARRAY_HANDLER(cflags_objc, std::string)
       CONFIG_VALUE_ARRAY_HANDLER(cflags_objcc, std::string)
+      CONFIG_VALUE_ARRAY_HANDLER(rustflags, std::string)
       CONFIG_VALUE_ARRAY_HANDLER(defines, std::string)
       CONFIG_VALUE_ARRAY_HANDLER(include_dirs, SourceDir)
       CONFIG_VALUE_ARRAY_HANDLER(inputs, SourceFile)
