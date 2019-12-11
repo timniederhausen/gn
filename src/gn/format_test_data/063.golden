@@ -33,4 +33,10 @@ source_set("test") {
       a,
     ]
   }
+
+  # Sort lists with "deps" suffix as "deps".
+  foo_deps = [
+    ":z",
+    "//a",
+  ]
 }

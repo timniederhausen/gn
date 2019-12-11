@@ -349,9 +349,10 @@ void Printer::SortIfSourcesOrDeps(const BinaryOpNode* binop) {
        binop->op().value() == "-=") &&
       ident && list) {
     const std::string_view lhs = ident->value().value();
-    if (lhs == "public" || lhs == "sources")
+    if (base::EndsWith(lhs, "sources", base::CompareCase::SENSITIVE) ||
+        lhs == "public")
       const_cast<ListNode*>(list)->SortAsStringsList();
-    else if (lhs == "deps" || lhs == "public_deps")
+    else if (base::EndsWith(lhs, "deps", base::CompareCase::SENSITIVE))
       const_cast<ListNode*>(list)->SortAsDepsList();
   }
 }

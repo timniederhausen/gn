@@ -130,3 +130,9 @@ public = [
 
   # alone!
 ]
+
+# Lists with "sources" suffix should also be sorted.
+foo_sources = [
+  "a",
+  "z",
+]
