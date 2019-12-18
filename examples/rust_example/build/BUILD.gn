@@ -1,11 +1,39 @@
 toolchain("rust") {
-  outfile = "{{target_out_dir}}/{{rustc_output_prefix}}{{crate_name}}{{rustc_output_extension}}"
-  tool("rustc") {
+  tool("rust_bin") {
     depfile = "{{target_out_dir}}/{{crate_name}}.d"
+    outfile = "{{target_out_dir}}/{{crate_name}}"
     command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
     description = "RUST $outfile"
-    cdylib_output_extension = ".so"
-    proc_macro_output_extension = ".so"
+    outputs = [
+      outfile,
+    ]
+  }
+
+  tool("rust_staticlib") {
+    depfile = "{{target_out_dir}}/{{crate_name}}.d"
+    outfile = "{{target_out_dir}}/{{crate_name}}.a"
+    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
+    description = "RUST $outfile"
+    outputs = [
+      outfile,
+    ]
+  }
+
+  tool("rust_rlib") {
+    depfile = "{{target_out_dir}}/{{crate_name}}.d"
+    outfile = "{{target_out_dir}}/lib{{crate_name}}.rlib"
+    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
+    description = "RUST $outfile"
+    outputs = [
+      outfile,
+    ]
+  }
+
+  tool("rust_cdylib") {
+    depfile = "{{target_out_dir}}/{{crate_name}}.d"
+    outfile = "{{target_out_dir}}/lib{{crate_name}}.so"
+    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
+    description = "RUST $outfile"
     outputs = [
       outfile,
     ]
