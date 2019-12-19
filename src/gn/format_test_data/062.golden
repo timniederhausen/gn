@@ -2,9 +2,7 @@
 
 sources = []
 
-sources = [
-  "x.cc",
-]
+sources = [ "x.cc" ]
 
 sources = [
   "/a",

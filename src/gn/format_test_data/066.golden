@@ -4,9 +4,7 @@
 sources = []
 
 # NOSORT
-sources = [
-  "a",
-]
+sources = [ "a" ]
 
 # NOSORT
 sources += [ "a" ]

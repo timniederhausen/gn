@@ -17,30 +17,16 @@ if (true) {
   cflags = [ "x" ]
   cflags_c = [ "x" ]
   cflags_cc = [ "x" ]
-  data = [
-    "x",
-  ]
-  datadeps = [
-    "x",
-  ]
+  data = [ "x" ]
+  datadeps = [ "x" ]
   defines = [ "x" ]
-  deps = [
-    "x",
-  ]
+  deps = [ "x" ]
   include_dirs = [ "x" ]
-  inputs = [
-    "x",
-  ]
+  inputs = [ "x" ]
   ldflags = [ "x" ]
-  outputs = [
-    "x",
-  ]
-  public_deps = [
-    "x",
-  ]
-  sources = [
-    "x",
-  ]
+  outputs = [ "x" ]
+  public_deps = [ "x" ]
+  sources = [ "x" ]
 } else {
   cflags = [
     "x",

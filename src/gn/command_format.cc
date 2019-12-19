@@ -144,9 +144,6 @@ class Printer {
   // Whether there's a blank separator line at the current position.
   bool HaveBlankLine();
 
-  // Flag assignments to sources, deps, etc. to make their RHSs multiline.
-  void AnnotatePreferredMultilineAssignment(const BinaryOpNode* binop);
-
   // Sort a list on the RHS if the LHS is 'sources', 'deps' or 'public_deps'.
   // The 'sources' are sorted alphabetically while the 'deps' and 'public_deps'
   // are sorted putting first the relative targets and then the global ones
@@ -316,21 +313,6 @@ bool Printer::HaveBlankLine() {
   while (n > 0 && output_[n - 1] == ' ')
     --n;
   return n > 2 && output_[n - 1] == '\n' && output_[n - 2] == '\n';
-}
-
-void Printer::AnnotatePreferredMultilineAssignment(const BinaryOpNode* binop) {
-  const IdentifierNode* ident = binop->left()->AsIdentifier();
-  const ListNode* list = binop->right()->AsList();
-  // This is somewhat arbitrary, but we include the 'deps'- and 'sources'-like
-  // things, but not flags things.
-  if (binop->op().value() == "=" && ident && list) {
-    const std::string_view lhs = ident->value().value();
-    if (lhs == "data" || lhs == "datadeps" || lhs == "data_deps" ||
-        lhs == "deps" || lhs == "inputs" || lhs == "outputs" ||
-        lhs == "public" || lhs == "public_deps" || lhs == "sources") {
-      const_cast<ListNode*>(list)->set_prefer_multiline(true);
-    }
-  }
 }
 
 void Printer::SortIfSourcesOrDeps(const BinaryOpNode* binop) {
@@ -587,7 +569,6 @@ int Printer::Expr(const ParseNode* root,
     }
   } else if (const BinaryOpNode* binop = root->AsBinaryOp()) {
     CHECK(precedence_.find(binop->op().value()) != precedence_.end());
-    AnnotatePreferredMultilineAssignment(binop);
 
     SortIfSourcesOrDeps(binop);
 
@@ -625,15 +606,12 @@ int Printer::Expr(const ParseNode* root,
       // common in .gn files, don't indent them + 4, even though they're just
       // continuations when they're simple lists like "x = [ a, b, c, ... ]" or
       // scopes like "x = { a = 1 b = 2 }". Put back to "normal" indenting.
-      const ListNode* right_as_list = binop->right()->AsList();
-      if (right_as_list) {
-        if (right_as_list->prefer_multiline() ||
-            ListWillBeMultiline(right_as_list->contents(),
+      if (const ListNode* right_as_list = binop->right()->AsList()) {
+        if (ListWillBeMultiline(right_as_list->contents(),
                                 right_as_list->End()))
           indent_column = start_column;
       } else {
-        const BlockNode* right_as_block = binop->right()->AsBlock();
-        if (right_as_block)
+        if (binop->right()->AsBlock())
           indent_column = start_column;
       }
     }
@@ -753,10 +731,8 @@ int Printer::Expr(const ParseNode* root,
   } else if (const IdentifierNode* identifier = root->AsIdentifier()) {
     Print(identifier->value().value());
   } else if (const ListNode* list = root->AsList()) {
-    bool force_multiline =
-        list->prefer_multiline() && !list->contents().empty();
     Sequence(kSequenceStyleList, list->contents(), list->End(),
-             force_multiline);
+             /*force_multiline=*/false);
   } else if (const LiteralNode* literal = root->AsLiteral()) {
     Print(literal->value().value());
   } else if (const UnaryOpNode* unaryop = root->AsUnaryOp()) {

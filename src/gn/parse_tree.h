@@ -419,14 +419,6 @@ class ListNode : public ParseNode {
   void SortAsStringsList();
   void SortAsDepsList();
 
-  // During formatting, do we want this list to always be multliline? This is
-  // used to make assignments to deps, sources, etc. always be multiline lists,
-  // rather than collapsed to a single line when they're one element.
-  bool prefer_multiline() const { return prefer_multiline_; }
-  void set_prefer_multiline(bool prefer_multiline) {
-    prefer_multiline_ = prefer_multiline;
-  }
-
   struct SortRange {
     size_t begin;
     size_t end;
@@ -443,7 +435,6 @@ class ListNode : public ParseNode {
   // custom parse node so that it can have comments hung off of it.
   Token begin_token_;
   std::unique_ptr<EndNode> end_;
-  bool prefer_multiline_;
 
   std::vector<std::unique_ptr<const ParseNode>> contents_;
 

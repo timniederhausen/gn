@@ -597,7 +597,7 @@ void IdentifierNode::SetNewLocation(int line_number) {
 
 // ListNode -------------------------------------------------------------------
 
-ListNode::ListNode() : prefer_multiline_(false) {}
+ListNode::ListNode() {}
 
 ListNode::~ListNode() = default;
 
