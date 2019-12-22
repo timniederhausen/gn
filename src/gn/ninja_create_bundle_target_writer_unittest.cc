@@ -195,6 +195,10 @@ TEST(NinjaCreateBundleTargetWriter, AssetCatalog) {
       SourceFile("//foo/Foo.xcassets/foo.imageset/FooIcon-29@2x.png"));
   bundle_data.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.imageset/FooIcon-29@3x.png"));
+  bundle_data.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/foo.dataset/Contents.json"));
+  bundle_data.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/foo.dataset/FooScript.js"));
   bundle_data.action_values().outputs() = SubstitutionList::MakeForTest(
       "{{bundle_resources_dir}}/{{source_file_part}}");
   bundle_data.SetToolchain(setup.toolchain());
@@ -301,6 +305,10 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
       SourceFile("//foo/Foo.xcassets/foo.imageset/FooIcon-29@2x.png"));
   bundle_data2.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.imageset/FooIcon-29@3x.png"));
+  bundle_data2.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/foo.dataset/Contents.json"));
+  bundle_data2.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/foo.dataset/FooScript.js"));
   bundle_data2.action_values().outputs() = SubstitutionList::MakeForTest(
       "{{bundle_resources_dir}}/{{source_file_part}}");
   bundle_data2.SetToolchain(setup.toolchain());
@@ -319,6 +327,10 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
       SourceFile("//quz/Quz.xcassets/quz.imageset/QuzIcon-29@2x.png"));
   bundle_data3.sources().push_back(
       SourceFile("//quz/Quz.xcassets/quz.imageset/QuzIcon-29@3x.png"));
+  bundle_data3.sources().push_back(
+      SourceFile("//quz/Quz.xcassets/quz.dataset/Contents.json"));
+  bundle_data3.sources().push_back(
+      SourceFile("//quz/Quz.xcassets/quz.dataset/QuzScript.js"));
   bundle_data3.action_values().outputs() = SubstitutionList::MakeForTest(
       "{{bundle_resources_dir}}/{{source_file_part}}");
   bundle_data3.SetToolchain(setup.toolchain());

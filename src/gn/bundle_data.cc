@@ -30,6 +30,8 @@ bool IsSourceFileFromAssetsCatalog(std::string_view source,
   //    .*\.xcassets/[^/]*\.appiconset/[^/]*
   //    .*\.xcassets/[^/]*\.imageset/[^/]*
   //    .*\.xcassets/[^/]*\.launchimage/[^/]*
+  //    .*\.xcassets/[^/]*\.colorset/[^/]*
+  //    .*\.xcassets/[^/]*\.dataset/[^/]*
   bool is_file_from_asset_catalog = false;
   std::string_view dir = FindDirNoTrailingSeparator(source);
   if (base::EndsWith(source, "/Contents.json", base::CompareCase::SENSITIVE) &&
@@ -39,7 +41,8 @@ bool IsSourceFileFromAssetsCatalog(std::string_view source,
              base::EndsWith(dir, ".imageset", base::CompareCase::SENSITIVE) ||
              base::EndsWith(dir, ".launchimage",
                             base::CompareCase::SENSITIVE) ||
-             base::EndsWith(dir, ".colorset", base::CompareCase::SENSITIVE)) {
+             base::EndsWith(dir, ".colorset", base::CompareCase::SENSITIVE) ||
+             base::EndsWith(dir, ".dataset", base::CompareCase::SENSITIVE)) {
     dir = FindDirNoTrailingSeparator(dir);
     is_file_from_asset_catalog =
         base::EndsWith(dir, ".xcassets", base::CompareCase::SENSITIVE);
