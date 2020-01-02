@@ -13,7 +13,7 @@
 
 namespace internal {
 
-// This lass allows us to insert things by reference into a hash table which
+// This class allows us to insert things by reference into a hash table which
 // avoids copies. The hash function of a UniquifyRef is that of the object it
 // points to.
 //

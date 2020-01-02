@@ -53,28 +53,22 @@ class AnalyzerTest : public testing::Test {
     tc_name_ = settings_.toolchain_label().name();
   }
 
-  // Ownership of the target will be transfered to the builder, so no leaks.
-  Target* MakeTarget(const std::string& dir, const std::string& name) {
+  std::unique_ptr<Target> MakeTarget(const std::string& dir,
+                                     const std::string& name) {
     Label label(SourceDir(dir), name, tc_dir_, tc_name_);
-    Target* target = new Target(&settings_, label);
-
-    return target;
+    return std::make_unique<Target>(&settings_, label);
   }
 
-  // Ownership of the config will be transfered to the builder, so no leaks.
-  Config* MakeConfig(const std::string& dir, const std::string& name) {
+  std::unique_ptr<Config> MakeConfig(const std::string& dir,
+                                     const std::string& name) {
     Label label(SourceDir(dir), name, tc_dir_, tc_name_);
-    Config* config = new Config(&settings_, label);
-
-    return config;
+    return std::make_unique<Config>(&settings_, label);
   }
 
-  // Ownership of the pool will be transfered to the builder, so no leaks.
-  Pool* MakePool(const std::string& dir, const std::string& name) {
+  std::unique_ptr<Pool> MakePool(const std::string& dir,
+                                 const std::string& name) {
     Label label(SourceDir(dir), name, tc_dir_, tc_name_);
-    Pool* pool = new Pool(&settings_, label);
-
-    return pool;
+    return std::make_unique<Pool>(&settings_, label);
   }
 
   void RunAnalyzerTest(const std::string& input,
@@ -100,8 +94,9 @@ class AnalyzerTest : public testing::Test {
 
 // Tests that a target is marked as affected if its sources are modified.
 TEST_F(AnalyzerTest, TargetRefersToSources) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  Target* t_raw = t.get();
+  builder_.ItemDefined(std::move(t));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/file_name.cc" ],
@@ -114,7 +109,7 @@ TEST_F(AnalyzerTest, TargetRefersToSources) {
       R"("test_targets":[])"
       "}");
 
-  t->sources().push_back(SourceFile("//dir/file_name.cc"));
+  t_raw->sources().push_back(SourceFile("//dir/file_name.cc"));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/file_name.cc" ],
@@ -130,8 +125,9 @@ TEST_F(AnalyzerTest, TargetRefersToSources) {
 
 // Tests that a target is marked as affected if its public headers are modified.
 TEST_F(AnalyzerTest, TargetRefersToPublicHeaders) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  Target* t_raw = t.get();
+  builder_.ItemDefined(std::move(t));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/header_name.h" ],
@@ -144,7 +140,7 @@ TEST_F(AnalyzerTest, TargetRefersToPublicHeaders) {
       R"("test_targets":[])"
       "}");
 
-  t->public_headers().push_back(SourceFile("//dir/header_name.h"));
+  t_raw->public_headers().push_back(SourceFile("//dir/header_name.h"));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/header_name.h" ],
@@ -160,8 +156,9 @@ TEST_F(AnalyzerTest, TargetRefersToPublicHeaders) {
 
 // Tests that a target is marked as affected if its inputs are modified.
 TEST_F(AnalyzerTest, TargetRefersToInputs) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  Target* t_raw = t.get();
+  builder_.ItemDefined(std::move(t));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/extra_input.cc" ],
@@ -175,7 +172,7 @@ TEST_F(AnalyzerTest, TargetRefersToInputs) {
       "}");
 
   SourceFile extra_input(SourceFile("//dir/extra_input.cc"));
-  t->config_values().inputs().push_back(extra_input);
+  t_raw->config_values().inputs().push_back(extra_input);
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/extra_input.cc" ],
@@ -188,11 +185,11 @@ TEST_F(AnalyzerTest, TargetRefersToInputs) {
       R"("test_targets":["//dir:target_name"])"
       "}");
 
-  t->config_values().inputs().clear();
-  Config* c = MakeConfig("//dir", "config_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(c));
+  t_raw->config_values().inputs().clear();
+  std::unique_ptr<Config> c = MakeConfig("//dir", "config_name");
   c->own_values().inputs().push_back(extra_input);
-  t->configs().push_back(LabelConfigPair(c));
+  t_raw->configs().push_back(LabelConfigPair(c.get()));
+  builder_.ItemDefined(std::move(c));
 
   RunAnalyzerTest(
       R"({
@@ -209,8 +206,9 @@ TEST_F(AnalyzerTest, TargetRefersToInputs) {
 
 // Tests that a target is marked as affected if its data are modified.
 TEST_F(AnalyzerTest, TargetRefersToData) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  Target* t_raw = t.get();
+  builder_.ItemDefined(std::move(t));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/data.html" ],
@@ -223,7 +221,7 @@ TEST_F(AnalyzerTest, TargetRefersToData) {
       R"("test_targets":[])"
       "}");
 
-  t->data().push_back("//dir/data.html");
+  t_raw->data().push_back("//dir/data.html");
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/data.html" ],
@@ -240,9 +238,10 @@ TEST_F(AnalyzerTest, TargetRefersToData) {
 // Tests that a target is marked as affected if the target is an action and its
 // action script is modified.
 TEST_F(AnalyzerTest, TargetRefersToActionScript) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  Target* t_raw = t.get();
   t->set_output_type(Target::ACTION);
+  builder_.ItemDefined(std::move(t));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/script.py" ],
@@ -255,7 +254,7 @@ TEST_F(AnalyzerTest, TargetRefersToActionScript) {
       R"("test_targets":[])"
       "}");
 
-  t->action_values().set_script(SourceFile("//dir/script.py"));
+  t_raw->action_values().set_script(SourceFile("//dir/script.py"));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/script.py" ],
@@ -272,8 +271,9 @@ TEST_F(AnalyzerTest, TargetRefersToActionScript) {
 // Tests that a target is marked as affected if its build dependency files are
 // modified.
 TEST_F(AnalyzerTest, TargetRefersToBuildDependencyFiles) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  Target* t_raw = t.get();
+  builder_.ItemDefined(std::move(t));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/BUILD.gn" ],
@@ -286,7 +286,7 @@ TEST_F(AnalyzerTest, TargetRefersToBuildDependencyFiles) {
       R"("test_targets":[])"
       "}");
 
-  t->build_dependency_files().insert(SourceFile("//dir/BUILD.gn"));
+  t_raw->build_dependency_files().insert(SourceFile("//dir/BUILD.gn"));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/BUILD.gn" ],
@@ -303,14 +303,16 @@ TEST_F(AnalyzerTest, TargetRefersToBuildDependencyFiles) {
 // Tests that if a target is marked as affected, then it propagates to dependent
 // test_targets.
 TEST_F(AnalyzerTest, AffectedTargetpropagatesToDependentTargets) {
-  Target* t1 = MakeTarget("//dir", "target_name1");
-  Target* t2 = MakeTarget("//dir", "target_name2");
-  Target* t3 = MakeTarget("//dir", "target_name3");
-  t1->private_deps().push_back(LabelTargetPair(t2));
-  t2->private_deps().push_back(LabelTargetPair(t3));
-  builder_.ItemDefined(std::unique_ptr<Item>(t1));
-  builder_.ItemDefined(std::unique_ptr<Item>(t2));
-  builder_.ItemDefined(std::unique_ptr<Item>(t3));
+  std::unique_ptr<Target> t1 = MakeTarget("//dir", "target_name1");
+  std::unique_ptr<Target> t2 = MakeTarget("//dir", "target_name2");
+  std::unique_ptr<Target> t3 = MakeTarget("//dir", "target_name3");
+  t1->private_deps().push_back(LabelTargetPair(t2.get()));
+  t2->private_deps().push_back(LabelTargetPair(t3.get()));
+  builder_.ItemDefined(std::move(t1));
+  builder_.ItemDefined(std::move(t2));
+
+  Target* t3_raw = t3.get();
+  builder_.ItemDefined(std::move(t3));
 
   RunAnalyzerTest(
       R"({
@@ -324,7 +326,7 @@ TEST_F(AnalyzerTest, AffectedTargetpropagatesToDependentTargets) {
       R"("test_targets":[])"
       "}");
 
-  t3->build_dependency_files().insert(SourceFile("//dir/BUILD.gn"));
+  t3_raw->build_dependency_files().insert(SourceFile("//dir/BUILD.gn"));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/BUILD.gn" ],
@@ -341,11 +343,12 @@ TEST_F(AnalyzerTest, AffectedTargetpropagatesToDependentTargets) {
 // Tests that if a config is marked as affected, then it propagates to dependent
 // test_targets.
 TEST_F(AnalyzerTest, AffectedConfigpropagatesToDependentTargets) {
-  Config* c = MakeConfig("//dir", "config_name");
-  Target* t = MakeTarget("//dir", "target_name");
-  t->configs().push_back(LabelConfigPair(c));
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
-  builder_.ItemDefined(std::unique_ptr<Item>(c));
+  std::unique_ptr<Config> c = MakeConfig("//dir", "config_name");
+  Config* c_raw = c.get();
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  t->configs().push_back(LabelConfigPair(c.get()));
+  builder_.ItemDefined(std::move(t));
+  builder_.ItemDefined(std::move(c));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/BUILD.gn" ],
@@ -358,7 +361,7 @@ TEST_F(AnalyzerTest, AffectedConfigpropagatesToDependentTargets) {
       R"("test_targets":[])"
       "}");
 
-  c->build_dependency_files().insert(SourceFile("//dir/BUILD.gn"));
+  c_raw->build_dependency_files().insert(SourceFile("//dir/BUILD.gn"));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/BUILD.gn" ],
@@ -375,7 +378,7 @@ TEST_F(AnalyzerTest, AffectedConfigpropagatesToDependentTargets) {
 // Tests that if toolchain is marked as affected, then it propagates to
 // dependent test_targets.
 TEST_F(AnalyzerTest, AffectedToolchainpropagatesToDependentTargets) {
-  Target* target = MakeTarget("//dir", "target_name");
+  std::unique_ptr<Target> target = MakeTarget("//dir", "target_name");
   target->set_output_type(Target::EXECUTABLE);
   Toolchain* toolchain = new Toolchain(&settings_, settings_.toolchain_label());
 
@@ -385,7 +388,7 @@ TEST_F(AnalyzerTest, AffectedToolchainpropagatesToDependentTargets) {
   fake_tool->set_outputs(
       SubstitutionList::MakeForTest("//out/debug/output.txt"));
   toolchain->SetTool(std::move(fake_tool));
-  builder_.ItemDefined(std::unique_ptr<Item>(target));
+  builder_.ItemDefined(std::move(target));
   builder_.ItemDefined(std::unique_ptr<Item>(toolchain));
 
   RunAnalyzerTest(
@@ -417,13 +420,14 @@ TEST_F(AnalyzerTest, AffectedToolchainpropagatesToDependentTargets) {
 // Tests that if a pool is marked as affected, then it propagates to dependent
 // targets.
 TEST_F(AnalyzerTest, AffectedPoolpropagatesToDependentTargets) {
-  Target* t = MakeTarget("//dir", "target_name");
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
   t->set_output_type(Target::ACTION);
-  Pool* p = MakePool("//dir", "pool_name");
-  t->action_values().set_pool(LabelPtrPair<Pool>(p));
+  std::unique_ptr<Pool> p = MakePool("//dir", "pool_name");
+  Pool* p_raw = p.get();
+  t->action_values().set_pool(LabelPtrPair<Pool>(p.get()));
 
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
-  builder_.ItemDefined(std::unique_ptr<Item>(p));
+  builder_.ItemDefined(std::move(t));
+  builder_.ItemDefined(std::move(p));
 
   RunAnalyzerTest(
       R"({
@@ -437,7 +441,7 @@ TEST_F(AnalyzerTest, AffectedPoolpropagatesToDependentTargets) {
       R"("test_targets":[])"
       "}");
 
-  p->build_dependency_files().insert(SourceFile("//dir/BUILD.gn"));
+  p_raw->build_dependency_files().insert(SourceFile("//dir/BUILD.gn"));
   RunAnalyzerTest(
       R"({
        "files": [ "//dir/BUILD.gn" ],
@@ -454,11 +458,11 @@ TEST_F(AnalyzerTest, AffectedPoolpropagatesToDependentTargets) {
 // Tests that when dependency was found, the "compile_targets" in the output is
 // not "all".
 TEST_F(AnalyzerTest, CompileTargetsAllWasPruned) {
-  Target* t1 = MakeTarget("//dir", "target_name1");
-  Target* t2 = MakeTarget("//dir", "target_name2");
-  builder_.ItemDefined(std::unique_ptr<Item>(t1));
-  builder_.ItemDefined(std::unique_ptr<Item>(t2));
+  std::unique_ptr<Target> t1 = MakeTarget("//dir", "target_name1");
+  std::unique_ptr<Target> t2 = MakeTarget("//dir", "target_name2");
   t2->build_dependency_files().insert(SourceFile("//dir/BUILD.gn"));
+  builder_.ItemDefined(std::move(t1));
+  builder_.ItemDefined(std::move(t2));
 
   RunAnalyzerTest(
       R"({
@@ -475,8 +479,8 @@ TEST_F(AnalyzerTest, CompileTargetsAllWasPruned) {
 
 // Tests that output is "No dependency" when no dependency is found.
 TEST_F(AnalyzerTest, NoDependency) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  builder_.ItemDefined(std::move(t));
 
   RunAnalyzerTest(
       R"({
@@ -522,7 +526,7 @@ TEST_F(AnalyzerTest, FilesArentSourceAbsolute) {
       "}");
 }
 
-// Tests that output displays proper error message when input is illy-formed.
+// Tests that output displays proper error message when input is ill-formed.
 TEST_F(AnalyzerTest, WrongInputFields) {
   RunAnalyzerTest(
       R"({
@@ -540,8 +544,8 @@ TEST_F(AnalyzerTest, WrongInputFields) {
 
 // Bails out early with "Found dependency (all)" if dot file is modified.
 TEST_F(AnalyzerTest, DotFileWasModified) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  builder_.ItemDefined(std::move(t));
 
   RunAnalyzerTest(
       R"({
@@ -559,8 +563,8 @@ TEST_F(AnalyzerTest, DotFileWasModified) {
 // Bails out early with "Found dependency (all)" if master build config file is
 // modified.
 TEST_F(AnalyzerTest, BuildConfigFileWasModified) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  builder_.ItemDefined(std::move(t));
 
   RunAnalyzerTest(
       R"({
@@ -578,8 +582,8 @@ TEST_F(AnalyzerTest, BuildConfigFileWasModified) {
 // Bails out early with "Found dependency (all)" if a build args dependency file
 // is modified.
 TEST_F(AnalyzerTest, BuildArgsDependencyFileWasModified) {
-  Target* t = MakeTarget("//dir", "target_name");
-  builder_.ItemDefined(std::unique_ptr<Item>(t));
+  std::unique_ptr<Target> t = MakeTarget("//dir", "target_name");
+  builder_.ItemDefined(std::move(t));
 
   RunAnalyzerTest(
       R"({
