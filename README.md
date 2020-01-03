@@ -77,6 +77,10 @@ Then, to upload a change for review:
     git commit
     git push origin HEAD:refs/for/master
 
+The first time you do this you'll get an error from the server about a missing
+change-ID. Follow the directions in the error message to install the change-ID
+hook and run `git commit --amend` to apply the hook to the current commit.
+
 When revising a change, use:
 
     git commit --amend
