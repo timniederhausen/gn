@@ -472,6 +472,17 @@ class TargetDescBuilder : public BaseDescBuilder {
 
       // Libs and lib_dirs are handled specially below.
 
+      if (what(variables::kExterns)) {
+        base::DictionaryValue externs;
+        for (ConfigValuesIterator iter(target_); !iter.done(); iter.Next()) {
+          const ConfigValues& cur = iter.cur();
+          for (const auto& e : cur.externs()) {
+            externs.SetKey(e.first, base::Value(e.second.value()));
+          }
+        }
+        res->SetKey(variables::kExterns, std::move(externs));
+      }
+
       FillInPrecompiledHeader(res.get(), target_->config_values());
     }
 

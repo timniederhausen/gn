@@ -105,6 +105,44 @@ struct RelativeDirConverter {
   const SourceDir& current_dir;
 };
 
+struct ExternConverter {
+  ExternConverter(const BuildSettings* build_settings_in,
+                   const SourceDir& current_dir_in)
+      : build_settings(build_settings_in), current_dir(current_dir_in) {}
+  bool operator()(const Value& v, std::pair<std::string, LibFile>* out,
+                  Err* err) const {
+    if (!v.VerifyTypeIs(Value::SCOPE, err))
+      return false;
+    Scope::KeyValueMap scope;
+    v.scope_value()->GetCurrentScopeValues(&scope);
+    std::string cratename;
+    if (auto it = scope.find("crate_name"); it != scope.end()) {
+      if (!it->second.VerifyTypeIs(Value::STRING, err))
+        return false;
+      cratename = it->second.string_value();
+    } else {
+      return false;
+    }
+    LibFile path;
+    if (auto it = scope.find("path"); it != scope.end()) {
+      if (!it->second.VerifyTypeIs(Value::STRING, err))
+        return false;
+      if (it->second.string_value().find('/') == std::string::npos) {
+        path = LibFile(it->second.string_value());
+      } else {
+        path = LibFile(current_dir.ResolveRelativeFile(
+            it->second, err, build_settings->root_path_utf8()));
+      }
+    } else {
+      return false;
+    }
+    *out = std::pair(cratename, path);
+    return !err->has_error();
+  }
+  const BuildSettings* build_settings;
+  const SourceDir& current_dir;
+};
+
 // Fills in a label.
 template <typename T>
 struct LabelResolver {
@@ -246,4 +284,13 @@ bool ExtractListOfLabelPatterns(const Value& value,
                                 Err* err) {
   return ListValueExtractor(value, patterns, err,
                             LabelPatternResolver(current_dir));
+}
+
+bool ExtractListOfExterns(const BuildSettings* build_settings,
+                         const Value& value,
+                         const SourceDir& current_dir,
+                         std::vector<std::pair<std::string, LibFile>>* externs,
+                         Err* err) {
+  return ListValueExtractor(value, externs, err,
+                            ExternConverter(build_settings, current_dir));
 }

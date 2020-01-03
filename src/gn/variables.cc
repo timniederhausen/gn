@@ -1095,6 +1095,32 @@ Details of dependency propagation
   See also "public_deps".
 )";
 
+const char kExterns[] = "externs";
+const char kExterns_HelpShort[] =
+    "externs: [scope] Set of Rust crate-dependency pairs.";
+const char kExterns_Help[] =
+    R"(externs: [scope] Set of Rust crate-dependency pairs.
+
+  A list, each value being a scope indicating a pair of crate name and the path
+  to the Rust library.
+
+  These libraries will be passed as `--extern crate_name=path` to compiler
+  invocation containing the current target.
+
+Examples
+
+    executable("foo") {
+      sources = [ "main.rs" ]
+      externs = [{
+        crate_name = "bar",
+        path = "path/to/bar.rlib"
+      }]
+    }
+
+  This target would compile the `foo` crate with the following `extern` flag:
+  `--extern bar=path/to/bar.rlib`.
+)";
+
 const char kFriend[] = "friend";
 const char kFriend_HelpShort[] =
     "friend: [label pattern list] Allow targets to include private headers.";
@@ -2176,6 +2202,7 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(Defines)
     INSERT_VARIABLE(Depfile)
     INSERT_VARIABLE(Deps)
+    INSERT_VARIABLE(Externs)
     INSERT_VARIABLE(Friend)
     INSERT_VARIABLE(IncludeDirs)
     INSERT_VARIABLE(Inputs)

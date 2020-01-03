@@ -89,10 +89,17 @@ void ConfigValuesGenerator::Run() {
   }
 
   // Libs
-  const Value* libs_value = scope_->GetValue("libs", true);
+  const Value* libs_value = scope_->GetValue(variables::kLibs, true);
   if (libs_value) {
     ExtractListOfLibs(scope_->settings()->build_settings(), *libs_value,
                       input_dir_, &config_values_->libs(), err_);
+  }
+
+  // Externs
+  const Value* externs_value = scope_->GetValue(variables::kExterns, true);
+  if (externs_value) {
+    ExtractListOfExterns(scope_->settings()->build_settings(), *externs_value,
+                         input_dir_, &config_values_->externs(), err_);
   }
 
   // Precompiled headers.

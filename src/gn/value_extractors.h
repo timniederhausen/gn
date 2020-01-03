@@ -86,4 +86,10 @@ bool ExtractListOfLabelPatterns(const Value& value,
                                 std::vector<LabelPattern>* patterns,
                                 Err* err);
 
+bool ExtractListOfExterns(const BuildSettings* build_settings,
+                          const Value& value,
+                          const SourceDir& current_dir,
+                          std::vector<std::pair<std::string, LibFile>>* externs,
+                          Err* err);
+
 #endif  // TOOLS_GN_VALUE_EXTRACTORS_H_

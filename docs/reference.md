@@ -115,6 +115,7 @@
     *   [defines: [string list] C preprocessor defines.](#var_defines)
     *   [depfile: [string] File name for input dependencies for actions.](#var_depfile)
     *   [deps: [label list] Private linked dependencies.](#var_deps)
+    *   [externs: [scope] Set of Rust crate-dependency pairs.](#var_externs)
     *   [friend: [label pattern list] Allow targets to include private headers.](#var_friend)
     *   [include_dirs: [directory list] Additional include directories.](#var_include_dirs)
     *   [inputs: [file list] Additional compile-time dependencies.](#var_inputs)
@@ -5177,6 +5178,30 @@
   "gn help runtime_deps".
 
   See also "public_deps".
+```
+### <a name="var_externs"></a>**externs**: [scope] Set of Rust crate-dependency pairs.
+
+```
+  A list, each value being a scope indicating a pair of crate name and the path
+  to the Rust library.
+
+  These libraries will be passed as `--extern crate_name=path` to compiler
+  invocation containing the current target.
+```
+
+#### **Examples**
+
+```
+    executable("foo") {
+      sources = [ "main.rs" ]
+      externs = [{
+        crate_name = "bar",
+        path = "path/to/bar.rlib"
+      }]
+    }
+
+  This target would compile the `foo` crate with the following `extern` flag:
+  `--extern bar=path/to/bar.rlib`.
 ```
 ### <a name="var_friend"></a>**friend**: Allow targets to include private headers.
 
