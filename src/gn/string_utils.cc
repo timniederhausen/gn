@@ -346,18 +346,11 @@ std::string_view SpellcheckString(const std::string_view& text,
 }
 
 std::string ReadStdin() {
-  static const int kBufferSize = 256;
-  char buffer[kBufferSize];
+  char buffer[4 << 10];
   std::string result;
-  while (true) {
-    char* input = nullptr;
-    input = fgets(buffer, kBufferSize, stdin);
-    if (input == nullptr && feof(stdin))
-      return result;
-    int length = static_cast<int>(strlen(buffer));
-    if (length == 0)
-      return result;
-    else
-      result += std::string(buffer, length);
-  }
+  size_t len;
+  while ((len = fread(buffer, 1, sizeof(buffer), stdin)) > 0)
+    result.append(buffer, len);
+  // TODO(thakis): Check ferror(stdin)?
+  return result;
 }
