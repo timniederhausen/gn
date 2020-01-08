@@ -79,6 +79,10 @@ Command-specific switches
       until after a build. With this flag, those generated files that
       can be found on disk are also checked.
 
+  --check-system
+     Check system style includes (using <angle brackets>) in addition to
+     "double quote" includes.
+
 What gets checked
 
   The .gn file may specify a list of targets to be checked in the list
@@ -99,7 +103,9 @@ What gets checked
     - Includes with a "nogncheck" annotation are skipped (see
       "gn help nogncheck").
 
-    - Includes using both "quotes" and <brackets> are checked.
+    - Includes using "quotes" are always checked.
+        If system style checking is enabled, includes using <angle brackets>
+        are also checked.
 
     - Include paths are assumed to be relative to any of the "include_dirs" for
       the target (including the implicit current dir).

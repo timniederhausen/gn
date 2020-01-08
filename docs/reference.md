@@ -356,6 +356,10 @@
       Generated files are normally not checked since they do not exist
       until after a build. With this flag, those generated files that
       can be found on disk are also checked.
+
+  --check-system
+     Check system style includes (using <angle brackets>) in addition to
+     "double quote" includes.
 ```
 
 #### **What gets checked**
@@ -379,8 +383,9 @@
     - Includes with a "nogncheck" annotation are skipped (see
       "gn help nogncheck").
 
-    - Only includes using "quotes" are checked. <brackets> are assumed to be
-      system includes.
+    - Includes using "quotes" are always checked.
+        If system style checking is enabled, includes using <angle brackets>
+        are also checked.
 
     - Include paths are assumed to be relative to any of the "include_dirs" for
       the target (including the implicit current dir).
@@ -679,8 +684,9 @@
   Or it can be a directory relative to the current directory such as:
       out/foo
 
-  "gn gen --check" is the same as running "gn check". See "gn help check"
-  for documentation on that mode.
+  "gn gen --check" is the same as running "gn check". "gn gen --check=system" is
+  the same as running "gn check --check-system".  See "gn help check" for
+  documentation on that mode.
 
   See "gn help switches" for the common command-line switches.
 ```
@@ -6332,6 +6338,14 @@
 
       The format of this list is identical to that of "visibility" so see "gn
       help visibility" for examples.
+
+  check_system_includes [optional]
+      Boolean to control whether system style includes are checked by default
+      when running "gn check" or "gn gen --check".  System style includes are
+      includes that use angle brackets <> instead of double quotes "". If this
+      setting is omitted or set to false, these includes will be ignored by
+      default. They can be checked explicitly by running
+      "gn check --check-system" or "gn gen --check=system"
 
   exec_script_whitelist [optional]
       A list of .gn/.gni files (not labels) that have permission to call the
