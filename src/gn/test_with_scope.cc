@@ -69,7 +69,7 @@ bool TestWithScope::ExecuteSnippet(const std::string& str, Err* err) {
 }
 
 // static
-void TestWithScope::SetupToolchain(Toolchain* toolchain) {
+void TestWithScope::SetupToolchain(Toolchain* toolchain, bool use_toc) {
   Err err;
 
   // CC
@@ -137,8 +137,18 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
   solink_tool->set_lib_dir_switch("-L");
   solink_tool->set_output_prefix("lib");
   solink_tool->set_default_output_extension(".so");
-  solink_tool->set_outputs(SubstitutionList::MakeForTest(
-      "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"));
+  if (use_toc) {
+    solink_tool->set_outputs(SubstitutionList::MakeForTest(
+        "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.TOC",
+        "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"));
+    solink_tool->set_link_output(SubstitutionPattern::MakeForTest(
+        "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"));
+    solink_tool->set_depend_output(SubstitutionPattern::MakeForTest(
+        "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.TOC"));
+  } else {
+    solink_tool->set_outputs(SubstitutionList::MakeForTest(
+        "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"));
+  }
   toolchain->SetTool(std::move(solink));
 
   // SOLINK_MODULE
@@ -232,7 +242,8 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
   toolchain->SetTool(std::move(dylib_tool));
 
   // RUST_PROC_MACRO
-  std::unique_ptr<Tool> rust_proc_macro_tool = Tool::CreateTool(RustTool::kRsToolMacro);
+  std::unique_ptr<Tool> rust_proc_macro_tool =
+      Tool::CreateTool(RustTool::kRsToolMacro);
   SetCommandForTool(
       "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
       "--crate-type {{crate_type}} {{rustflags}} -o {{output}} "
@@ -258,7 +269,8 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain) {
   toolchain->SetTool(std::move(rlib_tool));
 
   // STATICLIB
-  std::unique_ptr<Tool> staticlib_tool = Tool::CreateTool(RustTool::kRsToolStaticlib);
+  std::unique_ptr<Tool> staticlib_tool =
+      Tool::CreateTool(RustTool::kRsToolStaticlib);
   SetCommandForTool(
       "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} "
       "--crate-type {{crate_type}} {{rustflags}} -o {{output}} "

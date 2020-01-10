@@ -87,8 +87,8 @@ void WriteCrateVars(const Target* target,
   WriteVar(kRustSubstitutionCrateType.ninja_name, crate_type, opts, out);
 
   WriteVar(SubstitutionOutputExtension.ninja_name,
-           SubstitutionWriter::GetLinkerSubstitution(target, tool,
-                                                     &SubstitutionOutputExtension),
+           SubstitutionWriter::GetLinkerSubstitution(
+               target, tool, &SubstitutionOutputExtension),
            opts, out);
   WriteVar(SubstitutionOutputDir.ninja_name,
            SubstitutionWriter::GetLinkerSubstitution(target, tool,
@@ -146,9 +146,9 @@ void NinjaRustBinaryTargetWriter::Run() {
     }
     for (const auto* linkable_dep : linkable_deps) {
       if (linkable_dep->source_types_used().RustSourceUsed()) {
-        rustdeps.push_back(linkable_dep->dependency_output_file());
+        rustdeps.push_back(linkable_dep->link_output_file());
       } else {
-        nonrustdeps.push_back(linkable_dep->dependency_output_file());
+        nonrustdeps.push_back(linkable_dep->link_output_file());
       }
       deps.push_back(linkable_dep->dependency_output_file());
     }
@@ -184,13 +184,11 @@ void NinjaRustBinaryTargetWriter::WriteCompilerVars() {
   EscapeOptions opts = GetFlagOptions();
   WriteCrateVars(target_, tool_, opts, out_);
 
-  WriteOneFlag(target_, &kRustSubstitutionRustFlags, false,
-               Tool::kToolNone, &ConfigValues::rustflags, opts,
-               path_output_, out_);
+  WriteOneFlag(target_, &kRustSubstitutionRustFlags, false, Tool::kToolNone,
+               &ConfigValues::rustflags, opts, path_output_, out_);
 
-  WriteOneFlag(target_, &kRustSubstitutionRustEnv, false,
-               Tool::kToolNone, &ConfigValues::rustenv, opts,
-               path_output_, out_);
+  WriteOneFlag(target_, &kRustSubstitutionRustEnv, false, Tool::kToolNone,
+               &ConfigValues::rustenv, opts, path_output_, out_);
 
   WriteSharedVars(subst);
 }
@@ -250,18 +248,19 @@ void NinjaRustBinaryTargetWriter::WriteRustdeps(
   const std::string_view lib_prefix("lib");
 
   // Non-Rust native dependencies.
-  for (const auto& rustdep : nonrustdeps) {
+  for (const auto& nonrustdep : nonrustdeps) {
     out_ << " -Lnative=";
     path_output_.WriteDir(
-        out_, rustdep.AsSourceFile(settings_->build_settings()).GetDir(),
+        out_, nonrustdep.AsSourceFile(settings_->build_settings()).GetDir(),
         PathOutput::DIR_NO_LAST_SLASH);
-    std::string_view file = FindFilenameNoExtension(&rustdep.value());
+    std::string_view file = FindFilenameNoExtension(&nonrustdep.value());
     if (!file.compare(0, lib_prefix.size(), lib_prefix)) {
       out_ << " -l";
-      EscapeStringToStream(out_, file.substr(lib_prefix.size()), lib_escape_opts);
+      EscapeStringToStream(out_, file.substr(lib_prefix.size()),
+                           lib_escape_opts);
     } else {
       out_ << " -Clink-arg=";
-      path_output_.WriteFile(out_, rustdep);
+      path_output_.WriteFile(out_, nonrustdep);
     }
   }
 

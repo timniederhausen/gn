@@ -269,6 +269,26 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
   staticlib.SetToolchain(setup.toolchain());
   ASSERT_TRUE(staticlib.OnResolved(&err));
 
+  Target sharedlib(setup.settings(), Label(SourceDir("//foo/"), "shared"));
+  sharedlib.set_output_type(Target::SHARED_LIBRARY);
+  sharedlib.visibility().SetPublic();
+  sharedlib.sources().push_back(SourceFile("//foo/static.cpp"));
+  sharedlib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  sharedlib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(sharedlib.OnResolved(&err));
+
+  Toolchain toolchain_with_toc(
+      setup.settings(), Label(SourceDir("//toolchain_with_toc/"), "with_toc"));
+  TestWithScope::SetupToolchain(&toolchain_with_toc, true);
+  Target sharedlib_with_toc(setup.settings(),
+                            Label(SourceDir("//foo/"), "shared_with_toc"));
+  sharedlib_with_toc.set_output_type(Target::SHARED_LIBRARY);
+  sharedlib_with_toc.visibility().SetPublic();
+  sharedlib_with_toc.sources().push_back(SourceFile("//foo/static.cpp"));
+  sharedlib_with_toc.source_types_used().Set(SourceFile::SOURCE_CPP);
+  sharedlib_with_toc.SetToolchain(&toolchain_with_toc);
+  ASSERT_TRUE(sharedlib_with_toc.OnResolved(&err));
+
   Target nonrust(setup.settings(), Label(SourceDir("//foo/"), "bar"));
   nonrust.set_output_type(Target::EXECUTABLE);
   nonrust.visibility().SetPublic();
@@ -280,6 +300,8 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
   nonrust.rust_values().crate_name() = "foo_bar";
   nonrust.private_deps().push_back(LabelTargetPair(&rlib));
   nonrust.private_deps().push_back(LabelTargetPair(&staticlib));
+  nonrust.private_deps().push_back(LabelTargetPair(&sharedlib));
+  nonrust.private_deps().push_back(LabelTargetPair(&sharedlib_with_toc));
   nonrust.SetToolchain(setup.toolchain());
   ASSERT_TRUE(nonrust.OnResolved(&err));
 
@@ -300,9 +322,11 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
-        "../../foo/main.rs obj/bar/libmylib.rlib obj/foo/libstatic.a\n"
+        "../../foo/main.rs obj/bar/libmylib.rlib obj/foo/libstatic.a "
+        "./libshared.so ./libshared_with_toc.so.TOC\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
-        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/foo -lstatic\n";
+        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/foo -lstatic "
+        "-Lnative=. -lshared -Lnative=. -lshared_with_toc\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
