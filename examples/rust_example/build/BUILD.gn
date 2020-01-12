@@ -2,7 +2,7 @@ toolchain("rust") {
   tool("rust_bin") {
     depfile = "{{target_out_dir}}/{{crate_name}}.d"
     outfile = "{{target_out_dir}}/{{crate_name}}"
-    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
+    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Z dep-info-omit-d-target {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
     description = "RUST $outfile"
     outputs = [ outfile ]
   }
@@ -10,7 +10,7 @@ toolchain("rust") {
   tool("rust_staticlib") {
     depfile = "{{target_out_dir}}/{{crate_name}}.d"
     outfile = "{{target_out_dir}}/{{crate_name}}.a"
-    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
+    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Z dep-info-omit-d-target {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
     description = "RUST $outfile"
     outputs = [ outfile ]
   }
@@ -18,7 +18,7 @@ toolchain("rust") {
   tool("rust_rlib") {
     depfile = "{{target_out_dir}}/{{crate_name}}.d"
     outfile = "{{target_out_dir}}/lib{{crate_name}}.rlib"
-    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
+    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Z dep-info-omit-d-target {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
     description = "RUST $outfile"
     outputs = [ outfile ]
   }
@@ -26,7 +26,7 @@ toolchain("rust") {
   tool("rust_cdylib") {
     depfile = "{{target_out_dir}}/{{crate_name}}.d"
     outfile = "{{target_out_dir}}/lib{{crate_name}}.so"
-    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
+    command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Z dep-info-omit-d-target {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
     description = "RUST $outfile"
     outputs = [ outfile ]
   }
