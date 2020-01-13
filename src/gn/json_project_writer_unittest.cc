@@ -7,10 +7,13 @@
 #include "gn/substitution_list.h"
 #include "gn/target.h"
 #include "gn/test_with_scope.h"
+#include "gn/test_with_scheduler.h"
 #include "util/build_config.h"
 #include "util/test/test.h"
 
-TEST(JSONProjectWriter, ActionWithResponseFile) {
+using JSONWriter = TestWithScheduler;
+
+TEST_F(JSONWriter, ActionWithResponseFile) {
   Err err;
   TestWithScope setup;
 
@@ -37,6 +40,15 @@ TEST(JSONProjectWriter, ActionWithResponseFile) {
       base::FilePath(FILE_PATH_LITERAL("/usr/bin/python")));
   std::vector<const Target*> targets;
   targets.push_back(&target);
+#if defined(OS_WIN)
+  base::FilePath root_path = base::FilePath(FILE_PATH_LITERAL("c:/path/to/src"));
+#else
+  base::FilePath root_path = base::FilePath(FILE_PATH_LITERAL("/path/to/src"));
+#endif
+  setup.build_settings()->SetRootPath(root_path);
+  g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL(".gn")));
+  g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL("BUILD.gn")));
+  g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL("build/BUILD.gn")));
   std::string out =
       JSONProjectWriter::RenderJSON(setup.build_settings(), targets);
 #if defined(OS_WIN)
@@ -47,7 +59,12 @@ TEST(JSONProjectWriter, ActionWithResponseFile) {
       "   \"build_settings\": {\n"
       "      \"build_dir\": \"//out/Debug/\",\n"
       "      \"default_toolchain\": \"//toolchain:default\",\n"
-      "      \"root_path\": \"\"\n"
+      "      \"gen_input_files\": [ \"//.gn\", \"//BUILD.gn\", \"//build/BUILD.gn\" ],\n"
+#if defined(OS_WIN)
+      "      \"root_path\": \"c:/path/to/src\"\n"
+#else
+      "      \"root_path\": \"/path/to/src\"\n"
+#endif
       "   },\n"
       "   \"targets\": {\n"
       "      \"//foo:bar()\": {\n"
@@ -72,7 +89,7 @@ TEST(JSONProjectWriter, ActionWithResponseFile) {
   EXPECT_EQ(expected_json, out);
 }
 
-TEST(JSONProjectWriter, RustTarget) {
+TEST_F(JSONWriter, RustTarget) {
   Err err;
   TestWithScope setup;
 
@@ -99,6 +116,7 @@ TEST(JSONProjectWriter, RustTarget) {
       "   \"build_settings\": {\n"
       "      \"build_dir\": \"//out/Debug/\",\n"
       "      \"default_toolchain\": \"//toolchain:default\",\n"
+      "      \"gen_input_files\": [  ],\n"
       "      \"root_path\": \"\"\n"
       "   },\n"
       "   \"targets\": {\n"
@@ -127,7 +145,7 @@ TEST(JSONProjectWriter, RustTarget) {
   EXPECT_EQ(expected_json, out);
 }
 
-TEST(JSONProjectWriter, ForEachWithResponseFile) {
+TEST_F(JSONWriter, ForEachWithResponseFile) {
   Err err;
   TestWithScope setup;
 
@@ -153,6 +171,14 @@ TEST(JSONProjectWriter, ForEachWithResponseFile) {
       base::FilePath(FILE_PATH_LITERAL("/usr/bin/python")));
   std::vector<const Target*> targets;
   targets.push_back(&target);
+#if defined(OS_WIN)
+  base::FilePath root_path = base::FilePath(FILE_PATH_LITERAL("c:/path/to/src"));
+#else
+  base::FilePath root_path = base::FilePath(FILE_PATH_LITERAL("/path/to/src"));
+#endif
+  setup.build_settings()->SetRootPath(root_path);
+  g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL(".gn")));
+  g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL("BUILD.gn")));
   std::string out =
       JSONProjectWriter::RenderJSON(setup.build_settings(), targets);
 #if defined(OS_WIN)
@@ -163,7 +189,12 @@ TEST(JSONProjectWriter, ForEachWithResponseFile) {
       "   \"build_settings\": {\n"
       "      \"build_dir\": \"//out/Debug/\",\n"
       "      \"default_toolchain\": \"//toolchain:default\",\n"
-      "      \"root_path\": \"\"\n"
+      "      \"gen_input_files\": [ \"//.gn\", \"//BUILD.gn\" ],\n"
+#if defined(OS_WIN)
+      "      \"root_path\": \"c:/path/to/src\"\n"
+#else
+      "      \"root_path\": \"/path/to/src\"\n"
+#endif
       "   },\n"
       "   \"targets\": {\n"
       "      \"//foo:bar()\": {\n"

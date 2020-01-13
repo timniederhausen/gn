@@ -15,6 +15,7 @@
 #include "gn/desc_builder.h"
 #include "gn/exec_process.h"
 #include "gn/filesystem_utils.h"
+#include "gn/scheduler.h"
 #include "gn/settings.h"
 
 // Structure of JSON output file
@@ -207,6 +208,28 @@ std::string JSONProjectWriter::RenderJSON(
   settings->SetKey(
       "default_toolchain",
       base::Value(default_toolchain_label.GetUserVisibleName(false)));
+
+  std::vector<base::FilePath> input_files;
+  g_scheduler->input_file_manager()->GetAllPhysicalInputFileNames(&input_files);
+
+  // Other files read by the build.
+  std::vector<base::FilePath> other_files = g_scheduler->GetGenDependencies();
+
+  // Sort the input files to order them deterministically.
+  // Additionally, remove duplicate filepaths that seem to creep in.
+  std::set<base::FilePath> fileset(input_files.begin(), input_files.end());
+  fileset.insert(other_files.begin(), other_files.end());
+
+  base::ListValue inputs;
+  const auto &build_path = build_settings->root_path();
+  for (const auto& other_file : fileset) {
+    std::string file;
+    if (MakeAbsolutePathRelativeIfPossible(FilePathToUTF8(build_path),
+                                           FilePathToUTF8(other_file), &file)) {
+      inputs.Append(std::make_unique<base::Value>(std::move(file)));
+    }
+  }
+  settings->SetKey("gen_input_files", std::move(inputs));
 
   auto output = std::make_unique<base::DictionaryValue>();
   output->SetWithoutPathExpansion("targets", std::move(targets));
