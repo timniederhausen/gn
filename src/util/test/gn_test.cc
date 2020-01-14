@@ -55,6 +55,7 @@ bool PatternMatchesString(const char* pattern, const char* str) {
   switch (*pattern) {
     case '\0':
     case '-':
+    case ':':
       return *str == '\0';
     case '*':
       return (*str != '\0' && PatternMatchesString(pattern, str + 1)) ||
@@ -64,13 +65,25 @@ bool PatternMatchesString(const char* pattern, const char* str) {
   }
 }
 
+bool PatternListMatchString(const char* pattern, const char* str) {
+  const char* const colon = strchr(pattern, ':');
+  if (PatternMatchesString(pattern, str))
+    return true;
+
+  if (!colon)
+    return false;
+
+  return PatternListMatchString(colon + 1, str);
+}
+
 bool TestMatchesFilter(const char* test, const char* filter) {
   // Split --gtest_filter at '-' into positive and negative filters.
   const char* const dash = strchr(filter, '-');
   const char* pos =
       dash == filter ? "*" : filter;  // Treat '-test1' as '*-test1'
   const char* neg = dash ? dash + 1 : "";
-  return PatternMatchesString(pos, test) && !PatternMatchesString(neg, test);
+  return PatternListMatchString(pos, test) &&
+         !PatternListMatchString(neg, test);
 }
 
 #if defined(OS_WIN)
