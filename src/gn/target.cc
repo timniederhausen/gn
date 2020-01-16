@@ -368,6 +368,10 @@ bool Target::OnResolved(Err* err) {
     const ConfigValues& cur = iter.cur();
     all_lib_dirs_.append(cur.lib_dirs().begin(), cur.lib_dirs().end());
     all_libs_.append(cur.libs().begin(), cur.libs().end());
+
+    all_framework_dirs_.append(cur.framework_dirs().begin(),
+                               cur.framework_dirs().end());
+    all_frameworks_.append(cur.frameworks().begin(), cur.frameworks().end());
   }
 
   PullRecursiveBundleData();
@@ -533,6 +537,11 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
       dep->output_type() == RUST_PROC_MACRO)
     inherited_libraries_.Append(dep, is_public);
 
+  if (dep->output_type() == CREATE_BUNDLE &&
+      dep->bundle_data().is_framework()) {
+    inherited_libraries_.Append(dep, is_public);
+  }
+
   if (dep->output_type() == SHARED_LIBRARY) {
     // Shared library dependendencies are inherited across public shared
     // library boundaries.
@@ -579,6 +588,9 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
   if (!dep->IsFinal() || dep->output_type() == STATIC_LIBRARY) {
     all_lib_dirs_.append(dep->all_lib_dirs());
     all_libs_.append(dep->all_libs());
+
+    all_framework_dirs_.append(dep->all_framework_dirs());
+    all_frameworks_.append(dep->all_frameworks());
   }
 }
 

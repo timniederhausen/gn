@@ -82,6 +82,52 @@ TEST_F(TargetTest, LibInheritance) {
   EXPECT_EQ(0u, exec.all_lib_dirs().size());
 }
 
+// Tests that framework[_dir]s are inherited across deps boundaries for static
+// libraries but not executables.
+TEST_F(TargetTest, FrameworkInheritance) {
+  TestWithScope setup;
+  Err err;
+
+  const std::string framework("Foo.framework");
+  const SourceDir frameworkdir("//out/foo/");
+
+  // Leaf target with ldflags set.
+  TestTarget z(setup, "//foo:z", Target::STATIC_LIBRARY);
+  z.config_values().frameworks().push_back(framework);
+  z.config_values().framework_dirs().push_back(frameworkdir);
+  ASSERT_TRUE(z.OnResolved(&err));
+
+  // All framework[_dir]s should be set when target is resolved.
+  ASSERT_EQ(1u, z.all_frameworks().size());
+  EXPECT_EQ(framework, z.all_frameworks()[0]);
+  ASSERT_EQ(1u, z.all_framework_dirs().size());
+  EXPECT_EQ(frameworkdir, z.all_framework_dirs()[0]);
+
+  // Shared library target should inherit the libs from the static library
+  // and its own. Its own flag should be before the inherited one.
+  const std::string second_framework("Bar.framework");
+  const SourceDir second_frameworkdir("//out/bar/");
+  TestTarget shared(setup, "//foo:shared", Target::SHARED_LIBRARY);
+  shared.config_values().frameworks().push_back(second_framework);
+  shared.config_values().framework_dirs().push_back(second_frameworkdir);
+  shared.private_deps().push_back(LabelTargetPair(&z));
+  ASSERT_TRUE(shared.OnResolved(&err));
+
+  ASSERT_EQ(2u, shared.all_frameworks().size());
+  EXPECT_EQ(second_framework, shared.all_frameworks()[0]);
+  EXPECT_EQ(framework, shared.all_frameworks()[1]);
+  ASSERT_EQ(2u, shared.all_framework_dirs().size());
+  EXPECT_EQ(second_frameworkdir, shared.all_framework_dirs()[0]);
+  EXPECT_EQ(frameworkdir, shared.all_framework_dirs()[1]);
+
+  // Executable target shouldn't get either by depending on shared.
+  TestTarget exec(setup, "//foo:exec", Target::EXECUTABLE);
+  exec.private_deps().push_back(LabelTargetPair(&shared));
+  ASSERT_TRUE(exec.OnResolved(&err));
+  EXPECT_EQ(0u, exec.all_frameworks().size());
+  EXPECT_EQ(0u, exec.all_framework_dirs().size());
+}
+
 // Test all_dependent_configs and public_config inheritance.
 TEST_F(TargetTest, DependentConfigs) {
   TestWithScope setup;

@@ -89,6 +89,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, SourceSet) {
         "|| obj/foo/bar.stamp\n"
         "  ldflags =\n"
         "  libs =\n"
+        "  frameworks =\n"
         "  output_extension = .so\n"
         "  output_dir = \n";
     std::string out_str = out.str();
@@ -338,6 +339,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, OutputExtensionAndInputDeps) {
       "obj/foo/libshlib.input2.o || obj/foo/action.stamp\n"
       "  ldflags =\n"
       "  libs =\n"
+      "  frameworks =\n"
       "  output_extension = .so.6\n"
       "  output_dir = foo\n";
 
@@ -429,6 +431,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, NoHardDepsToNoPublicHeaderTarget) {
       " || obj/foo/gen_obj.stamp\n"
       "  ldflags =\n"
       "  libs =\n"
+      "  frameworks =\n"
       "  output_extension = .so\n"
       "  output_dir = foo\n";
 
@@ -466,6 +469,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, NoHardDepsToNoPublicHeaderTarget) {
       " ./libgen_lib.so\n"
       "  ldflags =\n"
       "  libs =\n"
+      "  frameworks =\n"
       "  output_extension = \n"
       "  output_dir = foo\n";
 
@@ -502,6 +506,60 @@ TEST_F(NinjaCBinaryTargetWriterTest, LibsAndLibDirs) {
       "build ./libshlib.so: solink | ../../foo/lib1.a\n"
       "  ldflags = -L../../foo/bar\n"
       "  libs = ../../foo/lib1.a -lfoo\n"
+      "  frameworks =\n"
+      "  output_extension = .so\n"
+      "  output_dir = \n";
+
+  std::string out_str = out.str();
+  EXPECT_EQ(expected, out_str);
+}
+
+// Tests frameworks are applied.
+TEST_F(NinjaCBinaryTargetWriterTest, FrameworksAndFrameworkDirs) {
+  Err err;
+  TestWithScope setup;
+
+  // A config that force linking with the framework.
+  Config framework_config(setup.settings(),
+                          Label(SourceDir("//bar"), "framework_config"));
+  framework_config.own_values().frameworks().push_back("Bar.framework");
+  framework_config.own_values().framework_dirs().push_back(
+      SourceDir("//out/Debug/"));
+  ASSERT_TRUE(framework_config.OnResolved(&err));
+
+  // A target creating a framework bundle.
+  Target framework(setup.settings(), Label(SourceDir("//bar"), "framework"));
+  framework.set_output_type(Target::CREATE_BUNDLE);
+  framework.bundle_data().product_type() = "com.apple.product-type.framework";
+  framework.public_configs().push_back(LabelConfigPair(&framework_config));
+  framework.SetToolchain(setup.toolchain());
+  framework.visibility().SetPublic();
+  ASSERT_TRUE(framework.OnResolved(&err));
+
+  // A shared library w/ libs and lib_dirs.
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "shlib"));
+  target.set_output_type(Target::SHARED_LIBRARY);
+  target.config_values().frameworks().push_back("System.framework");
+  target.private_deps().push_back(LabelTargetPair(&framework));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream out;
+  NinjaCBinaryTargetWriter writer(&target, out);
+  writer.Run();
+
+  const char expected[] =
+      "defines =\n"
+      "include_dirs =\n"
+      "root_out_dir = .\n"
+      "target_out_dir = obj/foo\n"
+      "target_output_name = libshlib\n"
+      "\n"
+      "\n"
+      "build ./libshlib.so: solink | obj/bar/framework.stamp\n"
+      "  ldflags = -F.\n"
+      "  libs =\n"
+      "  frameworks = -framework System -framework Bar\n"
       "  output_extension = .so\n"
       "  output_dir = \n";
 
@@ -547,6 +605,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, EmptyOutputExtension) {
       "obj/foo/shlib.input2.o\n"
       "  ldflags =\n"
       "  libs =\n"
+      "  frameworks =\n"
       "  output_extension = \n"
       "  output_dir = \n";
 
@@ -631,6 +690,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, SourceSetDataDeps) {
       "obj/foo/inter.stamp\n"
       "  ldflags =\n"
       "  libs =\n"
+      "  frameworks =\n"
       "  output_extension = \n"
       "  output_dir = \n";
   EXPECT_EQ(final_expected, final_out.str());
@@ -667,6 +727,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, SharedLibraryModuleDefinitionFile) {
       "build ./libbar.so: solink obj/foo/libbar.sources.o | ../../foo/bar.def\n"
       "  ldflags = /DEF:../../foo/bar.def\n"
       "  libs =\n"
+      "  frameworks =\n"
       "  output_extension = .so\n"
       "  output_dir = \n";
   EXPECT_EQ(expected, out.str());
@@ -702,6 +763,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, LoadableModule) {
       "build ./libbar.so: solink_module obj/foo/libbar.sources.o\n"
       "  ldflags =\n"
       "  libs =\n"
+      "  frameworks =\n"
       "  output_extension = .so\n"
       "  output_dir = \n";
   EXPECT_EQ(loadable_expected, out.str());
@@ -735,6 +797,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, LoadableModule) {
       "build ./exe: link obj/foo/exe.final.o || ./libbar.so\n"
       "  ldflags =\n"
       "  libs =\n"
+      "  frameworks =\n"
       "  output_extension = \n"
       "  output_dir = \n";
   EXPECT_EQ(final_expected, final_out.str());
@@ -1091,6 +1154,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, InputFiles) {
         "build ./libbar.so: solink | ../../foo/input.data\n"
         "  ldflags =\n"
         "  libs =\n"
+        "  frameworks =\n"
         "  output_extension = .so\n"
         "  output_dir = \n";
 
@@ -1230,6 +1294,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustDeps) {
         "build ./bar: link obj/bar/bar.bar.o obj/foo/libfoo.a\n"
         "  ldflags =\n"
         "  libs =\n"
+        "  frameworks =\n"
         "  output_extension = \n"
         "  output_dir = \n";
 
@@ -1288,6 +1353,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustDeps) {
         "build ./bar: link obj/bar/bar.bar.o obj/foo/libfoo.a\n"
         "  ldflags =\n"
         "  libs =\n"
+        "  frameworks =\n"
         "  output_extension = \n"
         "  output_dir = \n";
 
@@ -1347,6 +1413,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustDeps) {
         "build ./bar: link obj/bar/bar.bar.o obj/foo/libfoo.a\n"
         "  ldflags =\n"
         "  libs =\n"
+        "  frameworks =\n"
         "  output_extension = \n"
         "  output_dir = \n";
 

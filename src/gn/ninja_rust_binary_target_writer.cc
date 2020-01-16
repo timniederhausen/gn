@@ -130,13 +130,17 @@ void NinjaRustBinaryTargetWriter::Run() {
     WriteCompilerVars();
     UniqueVector<const Target*> linkable_deps;
     UniqueVector<const Target*> non_linkable_deps;
-    GetDeps(&deps, &linkable_deps, &non_linkable_deps);
+    UniqueVector<const Target*> framework_deps;
+    GetDeps(&deps, &linkable_deps, &non_linkable_deps, &framework_deps);
 
     if (!input_dep.value().empty())
       order_only_deps.push_back(input_dep);
 
     std::vector<OutputFile> rustdeps;
     std::vector<OutputFile> nonrustdeps;
+    for (const auto* framework_dep : framework_deps) {
+      order_only_deps.push_back(framework_dep->dependency_output_file());
+    }
     for (const auto* non_linkable_dep : non_linkable_deps) {
       if (non_linkable_dep->source_types_used().RustSourceUsed() &&
           non_linkable_dep->output_type() != Target::SOURCE_SET) {

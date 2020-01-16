@@ -47,6 +47,8 @@ struct CompileFlags {
   std::string cflags_cc;
   std::string cflags_objc;
   std::string cflags_objcc;
+  std::string framework_dirs;
+  std::string frameworks;
 };
 
 void SetupCompileFlags(const Target* target,
@@ -61,6 +63,19 @@ void SetupCompileFlags(const Target* target,
                                              DefineWriter(ESCAPE_SPACE, true),
                                              defines_out);
   base::EscapeJSONString(defines_out.str(), false, &flags.defines);
+
+  std::ostringstream framework_dirs_out;
+  RecursiveTargetConfigToStream<SourceDir>(
+      target, &ConfigValues::framework_dirs,
+      FrameworkDirsWriter(path_output, "-F"), framework_dirs_out);
+  base::EscapeJSONString(framework_dirs_out.str(), false,
+                         &flags.framework_dirs);
+
+  std::ostringstream frameworks_out;
+  RecursiveTargetConfigToStream<std::string>(
+      target, &ConfigValues::frameworks,
+      FrameworksWriter(ESCAPE_SPACE, true, "-framework "), frameworks_out);
+  base::EscapeJSONString(frameworks_out.str(), false, &flags.frameworks);
 
   std::ostringstream includes_out;
   RecursiveTargetConfigToStream<SourceDir>(target, &ConfigValues::include_dirs,
@@ -139,6 +154,10 @@ void WriteCommand(const Target* target,
       path_output.WriteFiles(command_out, tool_outputs);
     } else if (range.type == &CSubstitutionDefines) {
       command_out << flags.defines;
+    } else if (range.type == &CSubstitutionFrameworkDirs) {
+      command_out << flags.framework_dirs;
+    } else if (range.type == &CSubstitutionFrameworks) {
+      command_out << flags.frameworks;
     } else if (range.type == &CSubstitutionIncludeDirs) {
       command_out << flags.includes;
     } else if (range.type == &CSubstitutionCFlags) {

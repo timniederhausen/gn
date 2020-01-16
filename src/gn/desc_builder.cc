@@ -519,9 +519,8 @@ class TargetDescBuilder : public BaseDescBuilder {
       res->SetWithoutPathExpansion("runtime_deps", RenderRuntimeDeps());
 
     // libs and lib_dirs are special in that they're inherited. We don't
-    // currently
-    // implement a blame feature for this since the bottom-up inheritance makes
-    // this difficult.
+    // currently implement a blame feature for this since the bottom-up
+    // inheritance makes this difficult.
 
     // Libs can be part of any target and get recursively pushed up the chain,
     // so display them regardless of target type.
@@ -542,6 +541,28 @@ class TargetDescBuilder : public BaseDescBuilder {
         for (size_t i = 0; i < all_lib_dirs.size(); i++)
           lib_dirs->AppendString(FormatSourceDir(all_lib_dirs[i]));
         res->SetWithoutPathExpansion(variables::kLibDirs, std::move(lib_dirs));
+      }
+    }
+
+    if (what(variables::kFrameworks)) {
+      const auto& all_frameworks = target_->all_frameworks();
+      if (!all_frameworks.empty()) {
+        auto frameworks = std::make_unique<base::ListValue>();
+        for (size_t i = 0; i < all_frameworks.size(); i++)
+          frameworks->AppendString(all_frameworks[i]);
+        res->SetWithoutPathExpansion(variables::kFrameworks,
+                                     std::move(frameworks));
+      }
+    }
+
+    if (what(variables::kFrameworkDirs)) {
+      const auto& all_framework_dirs = target_->all_framework_dirs();
+      if (!all_framework_dirs.empty()) {
+        auto framework_dirs = std::make_unique<base::ListValue>();
+        for (size_t i = 0; i < all_framework_dirs.size(); i++)
+          framework_dirs->AppendString(all_framework_dirs[i].value());
+        res->SetWithoutPathExpansion(variables::kFrameworkDirs,
+                                     std::move(framework_dirs));
       }
     }
 

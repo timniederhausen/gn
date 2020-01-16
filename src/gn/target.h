@@ -277,6 +277,13 @@ class Target : public Item {
   const OrderedSet<SourceDir>& all_lib_dirs() const { return all_lib_dirs_; }
   const OrderedSet<LibFile>& all_libs() const { return all_libs_; }
 
+  const OrderedSet<SourceDir>& all_framework_dirs() const {
+    return all_framework_dirs_;
+  }
+  const OrderedSet<std::string>& all_frameworks() const {
+    return all_frameworks_;
+  }
+
   const std::set<const Target*>& recursive_hard_deps() const {
     return recursive_hard_deps_;
   }
@@ -407,6 +414,11 @@ class Target : public Item {
   // configs applying to this target.
   OrderedSet<SourceDir> all_lib_dirs_;
   OrderedSet<LibFile> all_libs_;
+
+  // These frameworks and dirs are inherited from statically linked deps and
+  // all configs applying to this target.
+  OrderedSet<SourceDir> all_framework_dirs_;
+  OrderedSet<std::string> all_frameworks_;
 
   // All hard deps from this target and all dependencies. Filled in when this
   // target is marked resolved. This will not include the current target.

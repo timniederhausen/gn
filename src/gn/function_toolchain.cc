@@ -395,12 +395,32 @@ Tool variables
         Valid for: Linker tools except "alink"
 
         These strings will be prepended to the libraries and library search
-        directories, respectively, because linkers differ on how specify them.
+        directories, respectively, because linkers differ on how to specify
+        them.
+
         If you specified:
           lib_switch = "-l"
           lib_dir_switch = "-L"
-        then the "{{libs}}" expansion for [ "freetype", "expat"] would be
-        "-lfreetype -lexpat".
+        then the "{{libs}}" expansion for
+          [ "freetype", "expat" ]
+        would be
+          "-lfreetype -lexpat".
+
+    framework_switch [string, optional, link tools only]
+    framework_dir_switch [string, optional, link tools only]
+        Valid for: Linker tools
+
+        These strings will be prepended to the frameworks and framework search
+        path directories, respectively, because linkers differ on how to specify
+        them.
+
+        If you specified:
+          framework_switch = "-framework "
+          framework_dir_switch = "-F"
+        then the "{{libs}}" expansion for
+          [ "UIKit.framework", "$root_out_dir/Foo.framework" ]
+        would be
+          "-framework UIKit -F. -framework Foo"
 
     outputs  [list of strings with substitutions]
         Valid for: Linker and compiler tools (required)
@@ -669,6 +689,12 @@ Tool variables
         These should generally be treated the same as libs by your tool.
 
         Example: "libfoo.so libbar.so"
+
+    {{frameworks}}
+        Shared libraries packaged as framework bundle. This is principally
+        used on Apple's platforms (macOS and iOS). All name must be ending
+        with ".framework" suffix; the suffix will be stripped when expanding
+        {{frameworks}} and each item will be preceded by "-framework".
 
 )"  // String break to prevent overflowing the 16K max VC string length.
     R"(  The static library ("alink") tool allows {{arflags}} plus the common tool

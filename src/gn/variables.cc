@@ -1184,6 +1184,40 @@ Example
   }
 )";
 
+const char kFrameworkDirs[] = "framework_dirs";
+const char kFrameworkDirs_HelpShort[] =
+    "framework_dirs: [directory list] Additional framework search directories.";
+const char kFrameworkDirs_Help[] =
+    R"(framework_dirs: [directory list] Additional framework search directories.
+
+  A list of source directories.
+
+  The directories in this list will be added to the framework search path for
+  the files in the affected target.
+)" COMMON_ORDERING_HELP
+    R"(
+Example
+
+  framework_dirs = [ "src/include", "//third_party/foo" ]
+)";
+
+const char kFrameworks[] = "frameworks";
+const char kFrameworks_HelpShort[] =
+    "frameworks: [name list] Name of frameworks that must be linked.";
+const char kFrameworks_Help[] =
+    R"(frameworks: [name list] Name of frameworks that must be linked.
+
+  A list of framework names.
+
+  The frameworks named in that list will be linked with any dynamic link
+  type target.
+)" COMMON_ORDERING_HELP
+    R"(
+Example
+
+  frameworks = [ "Foundation.framework", "Foo.framework" ]
+)";
+
 const char kIncludeDirs[] = "include_dirs";
 const char kIncludeDirs_HelpShort[] =
     "include_dirs: [directory list] Additional include directories.";
@@ -2204,6 +2238,8 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(Deps)
     INSERT_VARIABLE(Externs)
     INSERT_VARIABLE(Friend)
+    INSERT_VARIABLE(FrameworkDirs)
+    INSERT_VARIABLE(Frameworks)
     INSERT_VARIABLE(IncludeDirs)
     INSERT_VARIABLE(Inputs)
     INSERT_VARIABLE(Ldflags)

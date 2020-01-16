@@ -13,11 +13,12 @@ const SubstitutionTypes CSubstitutions = {
     &CSubstitutionAsmFlags,     &CSubstitutionCFlags,
     &CSubstitutionCFlagsC,      &CSubstitutionCFlagsCc,
     &CSubstitutionCFlagsObjC,   &CSubstitutionCFlagsObjCc,
-    &CSubstitutionDefines,      &CSubstitutionIncludeDirs,
+    &CSubstitutionDefines,      &CSubstitutionFrameworkDirs,
+    &CSubstitutionIncludeDirs,
 
     &CSubstitutionLinkerInputs, &CSubstitutionLinkerInputsNewline,
     &CSubstitutionLdFlags,      &CSubstitutionLibs,
-    &CSubstitutionSoLibs,
+    &CSubstitutionSoLibs,       &CSubstitutionFrameworks,
 
     &CSubstitutionArFlags,
 };
@@ -31,6 +32,8 @@ const Substitution CSubstitutionCFlagsObjC = {"{{cflags_objc}}", "cflags_objc"};
 const Substitution CSubstitutionCFlagsObjCc = {"{{cflags_objcc}}",
                                               "cflags_objcc"};
 const Substitution CSubstitutionDefines = {"{{defines}}", "defines"};
+const Substitution CSubstitutionFrameworkDirs = {"{{framework_dirs}}",
+                                                 "framework_dirs"};
 const Substitution CSubstitutionIncludeDirs = {"{{include_dirs}}",
                                               "include_dirs"};
 
@@ -41,6 +44,7 @@ const Substitution CSubstitutionLinkerInputsNewline = {"{{inputs_newline}}",
 const Substitution CSubstitutionLdFlags = {"{{ldflags}}", "ldflags"};
 const Substitution CSubstitutionLibs = {"{{libs}}", "libs"};
 const Substitution CSubstitutionSoLibs = {"{{solibs}}", "solibs"};
+const Substitution CSubstitutionFrameworks = {"{{frameworks}}", "frameworks"};
 
 // Valid for alink only.
 const Substitution CSubstitutionArFlags = {"{{arflags}}", "arflags"};
@@ -51,6 +55,7 @@ bool IsValidCompilerSubstitution(const Substitution* type) {
          type == &CSubstitutionCFlags || type == &CSubstitutionCFlagsC ||
          type == &CSubstitutionCFlagsCc || type == &CSubstitutionCFlagsObjC ||
          type == &CSubstitutionCFlagsObjCc || type == &CSubstitutionDefines ||
+         type == &CSubstitutionFrameworkDirs ||
          type == &CSubstitutionIncludeDirs;
 }
 
@@ -61,14 +66,12 @@ bool IsValidCompilerOutputsSubstitution(const Substitution* type) {
 }
 
 bool IsValidLinkerSubstitution(const Substitution* type) {
-  return IsValidToolSubstitution(type) ||
-         type == &SubstitutionOutputDir ||
+  return IsValidToolSubstitution(type) || type == &SubstitutionOutputDir ||
          type == &SubstitutionOutputExtension ||
          type == &CSubstitutionLinkerInputs ||
          type == &CSubstitutionLinkerInputsNewline ||
-         type == &CSubstitutionLdFlags ||
-         type == &CSubstitutionLibs ||
-         type == &CSubstitutionSoLibs;
+         type == &CSubstitutionLdFlags || type == &CSubstitutionLibs ||
+         type == &CSubstitutionSoLibs || type == &CSubstitutionFrameworks;
 }
 
 bool IsValidLinkerOutputsSubstitution(const Substitution* type) {

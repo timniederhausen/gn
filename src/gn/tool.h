@@ -129,6 +129,14 @@ class Tool {
     framework_switch_ = std::move(s);
   }
 
+  const std::string& framework_dir_switch() const {
+    return framework_dir_switch_;
+  }
+  void set_framework_dir_switch(std::string s) {
+    DCHECK(!complete_);
+    framework_dir_switch_ = std::move(s);
+  }
+
   const std::string& lib_switch() const { return lib_switch_; }
   void set_lib_switch(std::string s) {
     DCHECK(!complete_);
@@ -251,6 +259,7 @@ class Tool {
   SubstitutionPattern depfile_;
   SubstitutionPattern description_;
   std::string framework_switch_;
+  std::string framework_dir_switch_;
   std::string lib_switch_;
   std::string lib_dir_switch_;
   std::string linker_arg_;

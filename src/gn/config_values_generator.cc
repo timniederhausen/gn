@@ -7,6 +7,7 @@
 #include "base/strings/string_util.h"
 #include "gn/build_settings.h"
 #include "gn/config_values.h"
+#include "gn/frameworks_utils.h"
 #include "gn/scope.h"
 #include "gn/settings.h"
 #include "gn/value.h"
@@ -71,6 +72,7 @@ void ConfigValuesGenerator::Run() {
   FILL_STRING_CONFIG_VALUE(cflags_objc)
   FILL_STRING_CONFIG_VALUE(cflags_objcc)
   FILL_STRING_CONFIG_VALUE(defines)
+  FILL_DIR_CONFIG_VALUE(framework_dirs)
   FILL_DIR_CONFIG_VALUE(include_dirs)
   FILL_STRING_CONFIG_VALUE(ldflags)
   FILL_DIR_CONFIG_VALUE(lib_dirs)
@@ -100,6 +102,29 @@ void ConfigValuesGenerator::Run() {
   if (externs_value) {
     ExtractListOfExterns(scope_->settings()->build_settings(), *externs_value,
                          input_dir_, &config_values_->externs(), err_);
+  }
+
+  // Frameworks
+  const Value* frameworks_value =
+      scope_->GetValue(variables::kFrameworks, true);
+  if (frameworks_value) {
+    std::vector<std::string> frameworks;
+    if (!ExtractListOfStringValues(*frameworks_value, &frameworks, err_))
+      return;
+
+    // All strings must end with ".frameworks".
+    for (const std::string& framework : frameworks) {
+      std::string_view framework_name = GetFrameworkName(framework);
+      if (framework_name.empty()) {
+        *err_ = Err(*frameworks_value,
+                    "This frameworks value is wrong."
+                    "All listed frameworks names must not include any\n"
+                    "path component and have \".framework\" extension.");
+        return;
+      }
+    }
+
+    config_values_->frameworks().swap(frameworks);
   }
 
   // Precompiled headers.

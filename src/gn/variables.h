@@ -202,6 +202,14 @@ extern const char kFriend[];
 extern const char kFriend_HelpShort[];
 extern const char kFriend_Help[];
 
+extern const char kFrameworkDirs[];
+extern const char kFrameworkDirs_HelpShort[];
+extern const char kFrameworkDirs_Help[];
+
+extern const char kFrameworks[];
+extern const char kFrameworks_HelpShort[];
+extern const char kFrameworks_Help[];
+
 extern const char kIncludeDirs[];
 extern const char kIncludeDirs_HelpShort[];
 extern const char kIncludeDirs_Help[];

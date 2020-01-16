@@ -37,7 +37,8 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   // object files from source sets we need to link.
   void GetDeps(UniqueVector<OutputFile>* extra_object_files,
                UniqueVector<const Target*>* linkable_deps,
-               UniqueVector<const Target*>* non_linkable_deps) const;
+               UniqueVector<const Target*>* non_linkable_deps,
+               UniqueVector<const Target*>* framework_deps) const;
 
   // Classifies the dependency as linkable or nonlinkable with the current
   // target, adding it to the appropriate vector. If the dependency is a source
@@ -46,7 +47,8 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   void ClassifyDependency(const Target* dep,
                           UniqueVector<OutputFile>* extra_object_files,
                           UniqueVector<const Target*>* linkable_deps,
-                          UniqueVector<const Target*>* non_linkable_deps) const;
+                          UniqueVector<const Target*>* non_linkable_deps,
+                          UniqueVector<const Target*>* framework_deps) const;
 
   OutputFile WriteStampAndGetDep(const UniqueVector<const SourceFile*>& files,
                                  const std::string& stamp_ext) const;
@@ -61,6 +63,7 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
                         const Tool* tool,
                         const SourceFile* optional_def_file);
   void WriteLibs(std::ostream& out, const Tool* tool);
+  void WriteFrameworks(std::ostream& out, const Tool* tool);
 
   virtual void AddSourceSetFiles(const Target* source_set,
                                  UniqueVector<OutputFile>* obj_files) const;
