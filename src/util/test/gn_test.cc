@@ -146,7 +146,14 @@ int main(int argc, char** argv) {
 #if defined(OS_WIN)
   if (enable_vt_processing.is_valid())
 #else
-  if (isatty(1))
+  // When run from Xcode, the console returns "true" to isatty(1) but it
+  // does not interprets ANSI escape sequence resulting in difficult to
+  // read output. There is no portable way to detect if the console is
+  // Xcode's console (term is set to xterm or xterm-256colors) but Xcode
+  // sets the __XCODE_BUILT_PRODUCTS_DIR_PATHS environment variable. Use
+  // this as a proxy to detect that the console does not interpret the
+  // ANSI sequences correctly.
+  if (isatty(1) && getenv("__XCODE_BUILT_PRODUCTS_DIR_PATHS") == NULL)
 #endif
   {
     prefix = "\r";
