@@ -167,9 +167,11 @@ class AccessorNode : public ParseNode {
   const Token& base() const { return base_; }
   void set_base(const Token& b) { base_ = b; }
 
-  // Index is the expression inside the []. Will be null if member is set.
-  const ParseNode* index() const { return index_.get(); }
-  void set_index(std::unique_ptr<ParseNode> i) { index_ = std::move(i); }
+  // Subscript is the expression inside the []. Will be null if member is set.
+  const ParseNode* subscript() const { return subscript_.get(); }
+  void set_subscript(std::unique_ptr<ParseNode> key) {
+    subscript_ = std::move(key);
+  }
 
   // The member is the identifier on the right hand side of the dot. Will be
   // null if the index is set.
@@ -188,14 +190,20 @@ class AccessorNode : public ParseNode {
                                    Err* err) const;
 
  private:
-  Value ExecuteArrayAccess(Scope* scope, Err* err) const;
+  Value ExecuteSubscriptAccess(Scope* scope, Err* err) const;
+  Value ExecuteArrayAccess(Scope* scope,
+                           const Value* base_value,
+                           Err* err) const;
+  Value ExecuteScopeSubscriptAccess(Scope* scope,
+                                    const Value* base_value,
+                                    Err* err) const;
   Value ExecuteScopeAccess(Scope* scope, Err* err) const;
 
   Token base_;
 
   // Either index or member will be set according to what type of access this
   // is.
-  std::unique_ptr<ParseNode> index_;
+  std::unique_ptr<ParseNode> subscript_;
   std::unique_ptr<IdentifierNode> member_;
 
   DISALLOW_COPY_AND_ASSIGN(AccessorNode);

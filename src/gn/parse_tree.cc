@@ -190,8 +190,8 @@ const AccessorNode* AccessorNode::AsAccessor() const {
 }
 
 Value AccessorNode::Execute(Scope* scope, Err* err) const {
-  if (index_)
-    return ExecuteArrayAccess(scope, err);
+  if (subscript_)
+    return ExecuteSubscriptAccess(scope, err);
   else if (member_)
     return ExecuteScopeAccess(scope, err);
   NOTREACHED();
@@ -199,8 +199,8 @@ Value AccessorNode::Execute(Scope* scope, Err* err) const {
 }
 
 LocationRange AccessorNode::GetRange() const {
-  if (index_)
-    return LocationRange(base_.location(), index_->GetRange().end());
+  if (subscript_)
+    return LocationRange(base_.location(), subscript_->GetRange().end());
   else if (member_)
     return LocationRange(base_.location(), member_->GetRange().end());
   NOTREACHED();
@@ -215,28 +215,58 @@ Err AccessorNode::MakeErrorDescribing(const std::string& msg,
 base::Value AccessorNode::GetJSONNode() const {
   base::Value dict(CreateJSONNode("ACCESSOR", base_.value()));
   base::Value child(base::Value::Type::LIST);
-  if (index_)
-    child.GetList().push_back(index_->GetJSONNode());
+  if (subscript_)
+    child.GetList().push_back(subscript_->GetJSONNode());
   else if (member_)
     child.GetList().push_back(member_->GetJSONNode());
   dict.SetKey(kJsonNodeChild, std::move(child));
   return dict;
 }
 
-Value AccessorNode::ExecuteArrayAccess(Scope* scope, Err* err) const {
+Value AccessorNode::ExecuteSubscriptAccess(Scope* scope, Err* err) const {
   const Value* base_value = scope->GetValue(base_.value(), true);
   if (!base_value) {
     *err = MakeErrorDescribing("Undefined identifier.");
     return Value();
   }
-  if (!base_value->VerifyTypeIs(Value::LIST, err))
+  if (base_value->type() == Value::LIST) {
+    return ExecuteArrayAccess(scope, base_value, err);
+  } else if (base_value->type() == Value::SCOPE) {
+    return ExecuteScopeSubscriptAccess(scope, base_value, err);
+  } else {
+    *err = MakeErrorDescribing(
+        std::string("Expecting either a list or a scope for subscript, got ") +
+        Value::DescribeType(base_value->type()) + ".");
     return Value();
+  }
+}
 
+Value AccessorNode::ExecuteArrayAccess(Scope* scope,
+                                       const Value* base_value,
+                                       Err* err) const {
   size_t index = 0;
   if (!ComputeAndValidateListIndex(scope, base_value->list_value().size(),
                                    &index, err))
     return Value();
   return base_value->list_value()[index];
+}
+
+Value AccessorNode::ExecuteScopeSubscriptAccess(Scope* scope,
+                                                const Value* base_value,
+                                                Err* err) const {
+  Value key_value = subscript_->Execute(scope, err);
+  if (err->has_error())
+    return Value();
+  if (!key_value.VerifyTypeIs(Value::STRING, err))
+    return Value();
+  const Value* result =
+      base_value->scope_value()->GetValue(key_value.string_value());
+  if (!result) {
+    *err =
+        Err(subscript_.get(), "No value named \"" + key_value.string_value() +
+                                  "\" in scope \"" + base_.value() + "\"");
+  }
+  return *result;
 }
 
 Value AccessorNode::ExecuteScopeAccess(Scope* scope, Err* err) const {
@@ -292,7 +322,7 @@ bool AccessorNode::ComputeAndValidateListIndex(Scope* scope,
                                                size_t max_len,
                                                size_t* computed_index,
                                                Err* err) const {
-  Value index_value = index_->Execute(scope, err);
+  Value index_value = subscript_->Execute(scope, err);
   if (err->has_error())
     return false;
   if (!index_value.VerifyTypeIs(Value::INTEGER, err))
@@ -300,19 +330,19 @@ bool AccessorNode::ComputeAndValidateListIndex(Scope* scope,
 
   int64_t index_int = index_value.int_value();
   if (index_int < 0) {
-    *err = Err(index_->GetRange(), "Negative array subscript.",
+    *err = Err(subscript_->GetRange(), "Negative array subscript.",
                "You gave me " + base::Int64ToString(index_int) + ".");
     return false;
   }
   if (max_len == 0) {
-    *err = Err(index_->GetRange(), "Array subscript out of range.",
+    *err = Err(subscript_->GetRange(), "Array subscript out of range.",
                "You gave me " + base::Int64ToString(index_int) + " but the " +
                    "array has no elements.");
     return false;
   }
   size_t index_sizet = static_cast<size_t>(index_int);
   if (index_sizet >= max_len) {
-    *err = Err(index_->GetRange(), "Array subscript out of range.",
+    *err = Err(subscript_->GetRange(), "Array subscript out of range.",
                "You gave me " + base::Int64ToString(index_int) +
                    " but I was expecting something from 0 to " +
                    base::NumberToString(max_len - 1) + ", inclusive.");

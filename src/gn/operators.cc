@@ -127,7 +127,7 @@ bool ValueDestination::Init(Scope* exec_scope,
     return false;
   }
 
-  if (dest_accessor->index()) {
+  if (dest_accessor->subscript()) {
     // List access with an index.
     if (!base->VerifyTypeIs(Value::LIST, err)) {
       // Errors here will confusingly refer to the variable declaration (since

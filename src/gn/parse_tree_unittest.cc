@@ -57,6 +57,50 @@ TEST(ParseTree, Accessor) {
   EXPECT_EQ(kBValue, result.int_value());
 }
 
+TEST(ParseTree, SubscriptedAccess) {
+  TestWithScope setup;
+  Err err;
+  TestParseInput values(
+      "list = [ 2, 3 ]\n"
+      "scope = {\n"
+      "  foo = 5\n"
+      "  bar = 8\n"
+      "}\n"
+      "bar_key = \"bar\""
+      "second_element_idx = 1");
+  values.parsed()->Execute(setup.scope(), &err);
+
+  EXPECT_FALSE(err.has_error());
+
+  Value first = setup.ExecuteExpression("list[0]", &err);
+  EXPECT_FALSE(err.has_error());
+  EXPECT_EQ(first.type(), Value::INTEGER);
+  EXPECT_EQ(first.int_value(), 2);
+
+  Value second = setup.ExecuteExpression("list[second_element_idx]", &err);
+  EXPECT_FALSE(err.has_error());
+  EXPECT_EQ(second.type(), Value::INTEGER);
+  EXPECT_EQ(second.int_value(), 3);
+
+  Value foo = setup.ExecuteExpression("scope[\"foo\"]", &err);
+  EXPECT_FALSE(err.has_error());
+  EXPECT_EQ(foo.type(), Value::INTEGER);
+  EXPECT_EQ(foo.int_value(), 5);
+
+  Value bar = setup.ExecuteExpression("scope[bar_key]", &err);
+  EXPECT_FALSE(err.has_error());
+  EXPECT_EQ(bar.type(), Value::INTEGER);
+  EXPECT_EQ(bar.int_value(), 8);
+
+  Value invalid1 = setup.ExecuteExpression("scope[second_element_idx]", &err);
+  EXPECT_TRUE(err.has_error());
+  EXPECT_EQ(invalid1.type(), Value::NONE);
+
+  Value invalid2 = setup.ExecuteExpression("list[bar_key]", &err);
+  EXPECT_TRUE(err.has_error());
+  EXPECT_EQ(invalid2.type(), Value::NONE);
+}
+
 TEST(ParseTree, BlockUnusedVars) {
   TestWithScope setup;
 

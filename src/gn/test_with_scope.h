@@ -53,6 +53,8 @@ class TestWithScope {
   // just blindly resolves all targets in order).
   bool ExecuteSnippet(const std::string& str, Err* err);
 
+  Value ExecuteExpression(const std::string& expr, Err* err);
+
   // Fills in the tools for the given toolchain with reasonable default values.
   // The toolchain in this object will be automatically set up with this
   // function, it is exposed to allow tests to get the same functionality for

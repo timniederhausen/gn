@@ -608,7 +608,7 @@ std::unique_ptr<ParseNode> Parser::Subscript(std::unique_ptr<ParseNode> left,
   Consume(Token::RIGHT_BRACKET, "Expecting ']' after subscript.");
   std::unique_ptr<AccessorNode> accessor = std::make_unique<AccessorNode>();
   accessor->set_base(left->AsIdentifier()->value());
-  accessor->set_index(std::move(value));
+  accessor->set_subscript(std::move(value));
   return std::move(accessor);
 }
 
@@ -785,7 +785,7 @@ void Parser::TraverseOrder(const ParseNode* root,
     pre->push_back(root);
 
     if (const AccessorNode* accessor = root->AsAccessor()) {
-      TraverseOrder(accessor->index(), pre, post);
+      TraverseOrder(accessor->subscript(), pre, post);
       TraverseOrder(accessor->member(), pre, post);
     } else if (const BinaryOpNode* binop = root->AsBinaryOp()) {
       TraverseOrder(binop->left(), pre, post);

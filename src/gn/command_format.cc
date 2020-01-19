@@ -500,7 +500,7 @@ int SuffixCommentTreeWalk(const ParseNode* node) {
     return result;
 
   if (const AccessorNode* accessor = node->AsAccessor()) {
-    RETURN_IF_SET(SuffixCommentTreeWalk(accessor->index()));
+    RETURN_IF_SET(SuffixCommentTreeWalk(accessor->subscript()));
     RETURN_IF_SET(SuffixCommentTreeWalk(accessor->member()));
   } else if (const BinaryOpNode* binop = node->AsBinaryOp()) {
     RETURN_IF_SET(SuffixCommentTreeWalk(binop->right()));
@@ -706,9 +706,9 @@ int Printer::Expr(const ParseNode* root,
       Print(".");
       Expr(accessor->member(), kPrecedenceLowest, std::string());
     } else {
-      CHECK(accessor->index());
+      CHECK(accessor->subscript());
       Print("[");
-      Expr(accessor->index(), kPrecedenceLowest, "]");
+      Expr(accessor->subscript(), kPrecedenceLowest, "]");
     }
   } else if (const BinaryOpNode* binop = root->AsBinaryOp()) {
     CHECK(precedence_.find(binop->op().value()) != precedence_.end());
