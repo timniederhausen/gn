@@ -137,6 +137,8 @@ class Printer {
 
   void PrintTrailingCommentsWrapped(const std::vector<Token>& comments);
 
+  void FlushComments();
+
   void PrintSuffixComments(const ParseNode* node);
 
   // End the current line, flushing end of line comments.
@@ -341,7 +343,7 @@ void Printer::PrintSuffixComments(const ParseNode* node) {
   }
 }
 
-void Printer::Newline() {
+void Printer::FlushComments() {
   if (!comments_.empty()) {
     Print("  ");
     // Save the margin, and temporarily set it to where the first comment
@@ -351,6 +353,10 @@ void Printer::Newline() {
     stack_.pop_back();
     comments_.clear();
   }
+}
+
+void Printer::Newline() {
+  FlushComments();
   Trim();
   Print("\n");
   PrintMargin();
@@ -698,7 +704,7 @@ int Printer::Expr(const ParseNode* root,
         sub1.Expr(binop->right(), prec_right, std::string());
     sub1.Print(suffix);
     sub1.PrintSuffixComments(root);
-    sub1.PrintSuffixComments(binop->right());
+    sub1.FlushComments();
     penalty_current_line += AssessPenalty(sub1.String());
     if (!is_assignment && left_is_multiline) {
       // In e.g. xxx + yyy, if xxx is already multiline, then we want a penalty
@@ -715,7 +721,7 @@ int Printer::Expr(const ParseNode* root,
         sub2.Expr(binop->right(), prec_right, std::string());
     sub2.Print(suffix);
     sub2.PrintSuffixComments(root);
-    sub2.PrintSuffixComments(binop->right());
+    sub2.FlushComments();
     penalty_next_line += AssessPenalty(sub2.String());
 
     // Force a list on the RHS that would normally be a single line into
@@ -732,7 +738,7 @@ int Printer::Expr(const ParseNode* root,
       sub3.Sequence(kSequenceStyleList, rhs_list->contents(), rhs_list->End(),
                     true);
       sub3.PrintSuffixComments(root);
-      sub3.PrintSuffixComments(binop->right());
+      sub3.FlushComments();
       sub3.stack_.pop_back();
       penalty_multiline_rhs_list = AssessPenalty(sub3.String());
       tried_rhs_multiline = true;
@@ -892,12 +898,12 @@ void Printer::Sequence(SequenceStyle style,
 
     stack_.pop_back();
     Newline();
+  }
 
-    // Defer any end of line comment until we reach the newline.
-    if (end->comments() && !end->comments()->suffix().empty()) {
-      std::copy(end->comments()->suffix().begin(),
-                end->comments()->suffix().end(), std::back_inserter(comments_));
-    }
+  // Defer any end of line comment until we reach the newline.
+  if (end->comments() && !end->comments()->suffix().empty()) {
+    std::copy(end->comments()->suffix().begin(),
+              end->comments()->suffix().end(), std::back_inserter(comments_));
   }
 
   if (style == kSequenceStyleList)
