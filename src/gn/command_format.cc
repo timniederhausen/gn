@@ -135,6 +135,10 @@ class Printer {
 
   void TrimAndPrintToken(const Token& token);
 
+  void PrintTrailingCommentsWrapped(const std::vector<Token>& comments);
+
+  void PrintSuffixComments(const ParseNode* node);
+
   // End the current line, flushing end of line comments.
   void Newline();
 
@@ -276,23 +280,74 @@ void Printer::TrimAndPrintToken(const Token& token) {
   Print(trimmed);
 }
 
+// Assumes that the margin is set to the indent level where the comments should
+// be aligned. This doesn't de-wrap, it only wraps. So if a suffix comment
+// causes the line to exceed 80 col it will be wrapped, but the subsequent line
+// would fit on the then-broken line it will not be merged with it. This is
+// partly because it's difficult to implement at this level, but also because
+// it can break hand-authored line breaks where they're starting a new paragraph
+// or statement.
+void Printer::PrintTrailingCommentsWrapped(const std::vector<Token>& comments) {
+  bool have_empty_line = true;
+  auto start_next_line = [this, &have_empty_line]() {
+    Trim();
+    Print("\n");
+    PrintMargin();
+    have_empty_line = true;
+  };
+  for (const auto& c : comments) {
+    if (!have_empty_line) {
+      start_next_line();
+    }
+
+    std::string trimmed;
+    TrimWhitespaceASCII(std::string(c.value()), base::TRIM_ALL, &trimmed);
+
+    if (margin() + trimmed.size() <= kMaximumWidth) {
+      Print(trimmed);
+      have_empty_line = false;
+    } else {
+      bool continuation = false;
+      std::vector<std::string> split_on_spaces = base::SplitString(
+          c.value(), " ", base::WhitespaceHandling::TRIM_WHITESPACE,
+          base::SplitResult::SPLIT_WANT_NONEMPTY);
+      for (size_t j = 0; j < split_on_spaces.size(); ++j) {
+        if (have_empty_line && continuation) {
+          Print("# ");
+        }
+        Print(split_on_spaces[j]) ;
+        Print(" ");
+        if (split_on_spaces[j] != "#") {
+          have_empty_line = false;
+        }
+        if (!have_empty_line &&
+            (j < split_on_spaces.size() - 1 &&
+             CurrentColumn() + split_on_spaces[j + 1].size() > kMaximumWidth)) {
+          start_next_line();
+          continuation = true;
+        }
+      }
+    }
+  }
+}
+
+// Used during penalty evaluation, similar to Newline().
+void Printer::PrintSuffixComments(const ParseNode* node) {
+  if (node->comments() && !node->comments()->suffix().empty()) {
+    Print("  ");
+    stack_.push_back(IndentState(CurrentColumn(), false, false));
+    PrintTrailingCommentsWrapped(node->comments()->suffix());
+    stack_.pop_back();
+  }
+}
+
 void Printer::Newline() {
   if (!comments_.empty()) {
     Print("  ");
     // Save the margin, and temporarily set it to where the first comment
-    // starts so that multiple suffix comments are vertically aligned. This
-    // will need to be fancier once we enforce 80 col.
+    // starts so that multiple suffix comments are vertically aligned.
     stack_.push_back(IndentState(CurrentColumn(), false, false));
-    int i = 0;
-    for (const auto& c : comments_) {
-      if (i > 0) {
-        Trim();
-        Print("\n");
-        PrintMargin();
-      }
-      TrimAndPrintToken(c);
-      ++i;
-    }
+    PrintTrailingCommentsWrapped(comments_);
     stack_.pop_back();
     comments_.clear();
   }
@@ -519,8 +574,11 @@ int Printer::AssessPenalty(const std::string& output) {
 bool Printer::ExceedsMaximumWidth(const std::string& output) {
   for (const auto& line : base::SplitString(output, "\n", base::KEEP_WHITESPACE,
                                             base::SPLIT_WANT_ALL)) {
-    if (line.size() > kMaximumWidth)
+    std::string_view trimmed =
+        TrimString(line, " ", base::TrimPositions::TRIM_TRAILING);
+    if (trimmed.size() > kMaximumWidth) {
       return true;
+    }
   }
   return false;
 }
@@ -639,6 +697,8 @@ int Printer::Expr(const ParseNode* root,
     int penalty_current_line =
         sub1.Expr(binop->right(), prec_right, std::string());
     sub1.Print(suffix);
+    sub1.PrintSuffixComments(root);
+    sub1.PrintSuffixComments(binop->right());
     penalty_current_line += AssessPenalty(sub1.String());
     if (!is_assignment && left_is_multiline) {
       // In e.g. xxx + yyy, if xxx is already multiline, then we want a penalty
@@ -654,6 +714,8 @@ int Printer::Expr(const ParseNode* root,
     int penalty_next_line =
         sub2.Expr(binop->right(), prec_right, std::string());
     sub2.Print(suffix);
+    sub2.PrintSuffixComments(root);
+    sub2.PrintSuffixComments(binop->right());
     penalty_next_line += AssessPenalty(sub2.String());
 
     // Force a list on the RHS that would normally be a single line into
@@ -669,6 +731,8 @@ int Printer::Expr(const ParseNode* root,
       sub3.stack_.push_back(IndentState(start_column, false, false));
       sub3.Sequence(kSequenceStyleList, rhs_list->contents(), rhs_list->End(),
                     true);
+      sub3.PrintSuffixComments(root);
+      sub3.PrintSuffixComments(binop->right());
       sub3.stack_.pop_back();
       penalty_multiline_rhs_list = AssessPenalty(sub3.String());
       tried_rhs_multiline = true;
@@ -1026,10 +1090,13 @@ bool Printer::ListWillBeMultiline(
   if (end && end->comments() && !end->comments()->before().empty())
     return true;
 
-  // If there's before line comments, make sure we have a place to put them.
+  // If there's before or suffix line comments, make sure we have a place to put
+  // them.
   for (const auto& i : list) {
-    if (i->comments() && !i->comments()->before().empty())
+    if (i->comments() && (!i->comments()->before().empty() ||
+                          !i->comments()->suffix().empty())) {
       return true;
+    }
   }
 
   // When a scope is used as a list entry, it's too complicated to go one a

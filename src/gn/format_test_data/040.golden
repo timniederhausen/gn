@@ -3,7 +3,8 @@
 if (true) {
   if (is_win) {
     cflags = [
-      "/wd4267", # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+      "/wd4267",  # TODO(jschuh): crbug.com/167187 fix size_t to int
+                  # truncations.
     ]
   }
 }
