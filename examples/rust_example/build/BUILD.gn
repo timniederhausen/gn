@@ -4,9 +4,7 @@ toolchain("rust") {
     outfile = "{{target_out_dir}}/{{crate_name}}"
     command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
     description = "RUST $outfile"
-    outputs = [
-      outfile,
-    ]
+    outputs = [ outfile ]
   }
 
   tool("rust_staticlib") {
@@ -14,9 +12,7 @@ toolchain("rust") {
     outfile = "{{target_out_dir}}/{{crate_name}}.a"
     command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
     description = "RUST $outfile"
-    outputs = [
-      outfile,
-    ]
+    outputs = [ outfile ]
   }
 
   tool("rust_rlib") {
@@ -24,9 +20,7 @@ toolchain("rust") {
     outfile = "{{target_out_dir}}/lib{{crate_name}}.rlib"
     command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
     description = "RUST $outfile"
-    outputs = [
-      outfile,
-    ]
+    outputs = [ outfile ]
   }
 
   tool("rust_cdylib") {
@@ -34,9 +28,7 @@ toolchain("rust") {
     outfile = "{{target_out_dir}}/lib{{crate_name}}.so"
     command = "rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link {{rustflags}} -o $outfile {{rustdeps}} {{externs}}"
     description = "RUST $outfile"
-    outputs = [
-      outfile,
-    ]
+    outputs = [ outfile ]
   }
 
   tool("stamp") {

@@ -1,10 +1,6 @@
 executable("hello_world") {
-  sources = [
-    "main.rs",
-  ]
-  deps = [
-    "//hello_world/foo/src:foo",
-  ]
+  sources = [ "main.rs" ]
+  deps = [ "//hello_world/foo/src:foo" ]
   aliased_deps = {
     baz = "//hello_world/foo/src:foo"
   }

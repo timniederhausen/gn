@@ -4,14 +4,10 @@
 
 if (current_toolchain == host_toolchain) {
   executable("username") {
-    sources = [
-      "main.cc",
-    ]
+    sources = [ "main.cc" ]
   }
 } else {
   group("username") {
-    deps = [
-      ":username($host_toolchain)",
-    ]
+    deps = [ ":username($host_toolchain)" ]
   }
 }

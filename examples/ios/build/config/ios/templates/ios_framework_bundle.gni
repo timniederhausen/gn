@@ -79,15 +79,9 @@ template("ios_framework_bundle") {
   }
 
   bundle_data(_dylib_bundle) {
-    public_deps = [
-      ":$_dylib_target",
-    ]
-    sources = [
-      "$target_out_dir/$_dylib_target/$_output_name",
-    ]
-    outputs = [
-      "{{bundle_executable_dir}}/{{source_file_part}}",
-    ]
+    public_deps = [ ":$_dylib_target" ]
+    sources = [ "$target_out_dir/$_dylib_target/$_output_name" ]
+    outputs = [ "{{bundle_executable_dir}}/{{source_file_part}}" ]
   }
 
   if (defined(invoker.public_headers)) {
@@ -97,9 +91,7 @@ template("ios_framework_bundle") {
     action(_umbrella_target) {
       script = "//build/config/ios/scripts/generate_umbrella_header.py"
       sources = []
-      outputs = [
-        _umbrella_output,
-      ]
+      outputs = [ _umbrella_output ]
       args = [ "-o=" + rebase_path(_umbrella_output, root_build_dir) ] +
              rebase_path(invoker.public_headers, root_build_dir)
     }
@@ -108,12 +100,8 @@ template("ios_framework_bundle") {
 
     bundle_data(_headers_bundle) {
       sources = invoker.public_headers + [ _umbrella_output ]
-      outputs = [
-        "{{bundle_resources_dir}}/Headers/{{source_file_part}}",
-      ]
-      public_deps = [
-        ":$_umbrella_target",
-      ]
+      outputs = [ "{{bundle_resources_dir}}/Headers/{{source_file_part}}" ]
+      public_deps = [ ":$_umbrella_target" ]
     }
   }
 
@@ -145,9 +133,7 @@ template("ios_framework_bundle") {
     bundle_extension = "framework"
     bundle_type = "FMWK"
 
-    public_deps = [
-      ":$_dylib_bundle",
-    ]
+    public_deps = [ ":$_dylib_bundle" ]
 
     if (defined(invoker.public_headers)) {
       public_deps += [ ":$_headers_bundle" ]
@@ -159,14 +145,8 @@ template("ios_framework_bundle") {
   _target_name = target_name
 
   bundle_data("$target_name+bundle") {
-    public_deps = [
-      ":$_target_name",
-    ]
-    sources = [
-      "$root_out_dir/$_output_name.framework",
-    ]
-    outputs = [
-      "{{bundle_contents_dir}}/Frameworks/{{source_file_part}}",
-    ]
+    public_deps = [ ":$_target_name" ]
+    sources = [ "$root_out_dir/$_output_name.framework" ]
+    outputs = [ "{{bundle_contents_dir}}/Frameworks/{{source_file_part}}" ]
   }
 }

@@ -48,9 +48,7 @@ template("ios_app_bundle") {
   action(_app_prefix_target) {
     script = "//build/config/ios/scripts/find_app_identifier_prefix.py"
     sources = []
-    outputs = [
-      _app_prefix_output,
-    ]
+    outputs = [ _app_prefix_output ]
     args = [
       "-b=" + _bundle_identifier,
       "-o=" + rebase_path(_app_prefix_output, root_build_dir),
@@ -67,9 +65,7 @@ template("ios_app_bundle") {
       output = _simu_xcent_output
       plists = [ "//build/config/ios/resources/Entitlements-Simulated.plist" ]
       substitutions_json = _app_prefix_output
-      deps = [
-        ":$_app_prefix_target",
-      ]
+      deps = [ ":$_app_prefix_target" ]
     }
   }
 
@@ -121,15 +117,9 @@ template("ios_app_bundle") {
   }
 
   bundle_data(_executable_bundle) {
-    public_deps = [
-      ":$_executable_target",
-    ]
-    sources = [
-      "$target_out_dir/$_executable_target/$_output_name",
-    ]
-    outputs = [
-      "{{bundle_executable_dir}}/{{source_file_part}}",
-    ]
+    public_deps = [ ":$_executable_target" ]
+    sources = [ "$target_out_dir/$_executable_target/$_output_name" ]
+    outputs = [ "{{bundle_executable_dir}}/{{source_file_part}}" ]
   }
 
   ios_binary_bundle(target_name) {
@@ -152,8 +142,6 @@ template("ios_app_bundle") {
     bundle_extension = "app"
     bundle_type = "AAPL"
 
-    public_deps = [
-      ":$_executable_bundle",
-    ]
+    public_deps = [ ":$_executable_bundle" ]
   }
 }

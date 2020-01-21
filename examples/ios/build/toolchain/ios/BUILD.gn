@@ -30,9 +30,7 @@ template("ios_toolchain") {
       rspfile = output + ".rsp"
       rspfile_content = "{{inputs_newline}}"
 
-      outputs = [
-        output,
-      ]
+      outputs = [ output ]
       command = "$cxx {{ldflags}} -o $output -Wl,-filelist,$rspfile {{libs}} {{solibs}} {{frameworks}}"
       description = "LINK {{output}}"
 
@@ -46,9 +44,7 @@ template("ios_toolchain") {
       rspfile = dylib + ".rsp"
       rspfile_content = "{{inputs_newline}}"
 
-      outputs = [
-        dylib,
-      ]
+      outputs = [ dylib ]
       command = "$cxx -dynamiclib {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{libs}} {{solibs}} {{frameworks}}"
       description = "SOLINK {{output}}"
 
@@ -63,9 +59,7 @@ template("ios_toolchain") {
       command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CC {{output}}"
-      outputs = [
-        "{{target_out_dir}}/{{label_name}}/{{source_name_part}}.o",
-      ]
+      outputs = [ "{{target_out_dir}}/{{label_name}}/{{source_name_part}}.o" ]
     }
 
     tool("cxx") {
@@ -74,9 +68,7 @@ template("ios_toolchain") {
       command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX {{output}}"
-      outputs = [
-        "{{target_out_dir}}/{{label_name}}/{{source_name_part}}.o",
-      ]
+      outputs = [ "{{target_out_dir}}/{{label_name}}/{{source_name_part}}.o" ]
     }
 
     tool("objc") {
@@ -85,9 +77,7 @@ template("ios_toolchain") {
       command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{framework_dirs}} {{cflags}} {{cflags_objc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJC {{output}}"
-      outputs = [
-        "{{target_out_dir}}/{{label_name}}/{{source_name_part}}.o",
-      ]
+      outputs = [ "{{target_out_dir}}/{{label_name}}/{{source_name_part}}.o" ]
     }
 
     tool("objcxx") {
@@ -96,9 +86,7 @@ template("ios_toolchain") {
       command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{framework_dirs}} {{cflags}} {{cflags_objcc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJCXX {{output}}"
-      outputs = [
-        "{{target_out_dir}}/{{label_name}}/{{source_name_part}}.o",
-      ]
+      outputs = [ "{{target_out_dir}}/{{label_name}}/{{source_name_part}}.o" ]
     }
 
     tool("stamp") {

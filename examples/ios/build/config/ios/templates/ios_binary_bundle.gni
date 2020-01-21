@@ -90,21 +90,13 @@ template("ios_binary_bundle") {
       plists += [ invoker.info_plist ]
     }
 
-    deps = [
-      "//build/config/ios:compiler_plist",
-    ]
+    deps = [ "//build/config/ios:compiler_plist" ]
   }
 
   bundle_data(_plist_bundle) {
-    public_deps = [
-      ":$_plist_target",
-    ]
-    sources = [
-      "$target_out_dir/$_plist_target/Info.plist",
-    ]
-    outputs = [
-      "{{bundle_contents_dir}}/Info.plist",
-    ]
+    public_deps = [ ":$_plist_target" ]
+    sources = [ "$target_out_dir/$_plist_target/Info.plist" ]
+    outputs = [ "{{bundle_contents_dir}}/Info.plist" ]
   }
 
   create_bundle(target_name) {

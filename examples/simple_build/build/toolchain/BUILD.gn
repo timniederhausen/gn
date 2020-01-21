@@ -8,9 +8,8 @@ toolchain("gcc") {
     command = "gcc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CC {{output}}"
-    outputs = [
-      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-    ]
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
   }
 
   tool("cxx") {
@@ -18,9 +17,8 @@ toolchain("gcc") {
     command = "g++ -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CXX {{output}}"
-    outputs = [
-      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
-    ]
+    outputs =
+        [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
   }
 
   tool("alink") {
@@ -28,9 +26,8 @@ toolchain("gcc") {
     command = "rm -f {{output}} && ar rcs {{output}} @$rspfile"
     description = "AR {{target_output_name}}{{output_extension}}"
     rspfile_content = "{{inputs}}"
-    outputs = [
-      "{{target_out_dir}}/{{target_output_name}}{{output_extension}}",
-    ]
+    outputs =
+        [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
     default_output_extension = ".a"
     output_prefix = "lib"
   }
@@ -54,9 +51,7 @@ toolchain("gcc") {
     # it (in which case {{output_dir}} will be what the target specifies).
     default_output_dir = "{{root_out_dir}}"
 
-    outputs = [
-      sofile,
-    ]
+    outputs = [ sofile ]
     link_output = sofile
     depend_output = sofile
     output_prefix = "lib"
@@ -69,9 +64,7 @@ toolchain("gcc") {
     description = "LINK $outfile"
     default_output_dir = "{{root_out_dir}}"
     rspfile_content = "{{inputs}}"
-    outputs = [
-      outfile,
-    ]
+    outputs = [ outfile ]
   }
 
   tool("stamp") {

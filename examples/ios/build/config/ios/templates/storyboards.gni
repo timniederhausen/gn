@@ -15,9 +15,7 @@ template("storyboards") {
   action_foreach(_compile_target) {
     script = "//build/config/ios/scripts/compile_storyboard.py"
     sources = invoker.sources
-    outputs = [
-      _compile_output,
-    ]
+    outputs = [ _compile_output ]
     args = [
       "{{source}}",
       "-o=" + rebase_path(_compile_output, root_build_dir),
@@ -26,12 +24,8 @@ template("storyboards") {
   }
 
   bundle_data(target_name) {
-    public_deps = [
-      ":$_compile_target",
-    ]
+    public_deps = [ ":$_compile_target" ]
     sources = get_target_outputs(":$_compile_target")
-    outputs = [
-      "{{bundle_root_dir}}/Base.lproj/{{source_file_part}}",
-    ]
+    outputs = [ "{{bundle_root_dir}}/Base.lproj/{{source_file_part}}" ]
   }
 }

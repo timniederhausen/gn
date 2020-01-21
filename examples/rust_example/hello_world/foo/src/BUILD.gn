@@ -1,8 +1,4 @@
 rust_library("foo") {
-  sources = [
-    "lib.rs",
-  ]
-  deps = [
-    "//hello_world/bar/src:bar",
-  ]
+  sources = [ "lib.rs" ]
+  deps = [ "//hello_world/bar/src:bar" ]
 }

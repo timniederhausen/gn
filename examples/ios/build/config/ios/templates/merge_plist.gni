@@ -63,9 +63,7 @@ template("merge_plist") {
 
     script = "//build/config/ios/scripts/merge_plist.py"
     sources = invoker.plists
-    outputs = [
-      invoker.output,
-    ]
+    outputs = [ invoker.output ]
 
     _format = "json"
     if (defined(invoker.format)) {
@@ -78,9 +76,7 @@ template("merge_plist") {
     ]
 
     if (defined(_substitutions_json)) {
-      inputs = [
-        _substitutions_json,
-      ]
+      inputs = [ _substitutions_json ]
       args += [ "-s=" + rebase_path(_substitutions_json) ]
     }
 
