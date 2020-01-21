@@ -486,13 +486,92 @@ void Printer::SortImports(std::vector<std::unique_ptr<PARSENODE>>& statements) {
   }
 }
 
+namespace {
+
+int SuffixCommentTreeWalk(const ParseNode* node) {
+  // Check all the children for suffix comments. This is conceptually simple,
+  // but ugly as there's not a generic parse tree walker. This walker goes
+  // lowest child first so that if it's valid that's returned.
+  if (!node)
+    return -1;
+
+#define RETURN_IF_SET(x)             \
+  if (int result = (x); result >= 0) \
+    return result;
+
+  if (const AccessorNode* accessor = node->AsAccessor()) {
+    RETURN_IF_SET(SuffixCommentTreeWalk(accessor->index()));
+    RETURN_IF_SET(SuffixCommentTreeWalk(accessor->member()));
+  } else if (const BinaryOpNode* binop = node->AsBinaryOp()) {
+    RETURN_IF_SET(SuffixCommentTreeWalk(binop->right()));
+  } else if (const BlockNode* block = node->AsBlock()) {
+    RETURN_IF_SET(SuffixCommentTreeWalk(block->End()));
+  } else if (const ConditionNode* condition = node->AsConditionNode()) {
+    RETURN_IF_SET(SuffixCommentTreeWalk(condition->if_false()));
+    RETURN_IF_SET(SuffixCommentTreeWalk(condition->if_true()));
+    RETURN_IF_SET(SuffixCommentTreeWalk(condition->condition()));
+  } else if (const FunctionCallNode* func_call = node->AsFunctionCall()) {
+    RETURN_IF_SET(SuffixCommentTreeWalk(func_call->block()));
+    RETURN_IF_SET(SuffixCommentTreeWalk(func_call->args()));
+  } else if (node->AsIdentifier()) {
+    // Nothing.
+  } else if (const ListNode* list = node->AsList()) {
+    RETURN_IF_SET(SuffixCommentTreeWalk(list->End()));
+  } else if (node->AsLiteral()) {
+    // Nothing.
+  } else if (const UnaryOpNode* unaryop = node->AsUnaryOp()) {
+    RETURN_IF_SET(SuffixCommentTreeWalk(unaryop->operand()));
+  } else if (node->AsBlockComment()) {
+    // Nothing.
+  } else if (node->AsEnd()) {
+    // Nothing.
+  } else {
+    CHECK(false) << "Unhandled case in SuffixCommentTreeWalk.";
+  }
+
+#undef RETURN_IF_SET
+
+  // Check this node if there are no child comments.
+  if (node->comments() && !node->comments()->suffix().empty()) {
+    return node->comments()->suffix().back().location().line_number();
+  }
+
+  return -1;
+};
+
+// If there are suffix comments on the first node or its children, they might
+// carry down multiple lines. Otherwise, use the node's normal end range. This
+// function is needed because the parse tree doesn't include comments in the
+// location ranges, and it's not a straightforword change to add them. So this
+// is effectively finding the "real" range for |root| including suffix comments.
+// Note that it's not enough to simply look at |root|'s suffix comments because
+// in the case of:
+//
+//   a =
+//       b + c  # something
+//              # or other
+//   x = y
+//
+// the comments are attached to a BinOp+ which is a child of BinOp=, not
+// directly to the BinOp= which will be what's being used to determine if there
+// should be a blank line inserted before the |x| line.
+int FindLowestSuffixComment(const ParseNode* root) {
+  LocationRange range = root->GetRange();
+  int end = range.end().line_number();
+  int result = SuffixCommentTreeWalk(root);
+  return (result == -1 || result < end) ? end : result;
+}
+
+}  // namespace
+
 bool Printer::ShouldAddBlankLineInBetween(const ParseNode* a,
                                           const ParseNode* b) {
-  LocationRange a_range = a->GetRange();
   LocationRange b_range = b->GetRange();
+  int a_end = FindLowestSuffixComment(a);
+
   // If they're already separated by 1 or more lines, then we want to keep a
   // blank line.
-  return (b_range.begin().line_number() > a_range.end().line_number() + 1) ||
+  return (b_range.begin().line_number() > a_end + 1) ||
          // Always put a blank line before a block comment.
          b->AsBlockComment();
 }
