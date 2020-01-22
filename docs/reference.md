@@ -5639,7 +5639,7 @@
     }
   }
 ```
-### <a name="var_output_conversion"></a>**"output_conversion**: Data format for generated_file targets.
+### <a name="var_output_conversion"></a>**output_conversion**: Data format for generated_file targets.
 
 ```
   Controls how the "contents" of a generated_file target is formatted.

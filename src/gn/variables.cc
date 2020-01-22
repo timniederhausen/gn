@@ -2128,7 +2128,7 @@ const char kWriteOutputConversion[] = "output_conversion";
 const char kWriteOutputConversion_HelpShort[] =
     "output_conversion: Data format for generated_file targets.";
 const char kWriteOutputConversion_Help[] =
-    R"("output_conversion: Data format for generated_file targets.
+    R"(output_conversion: Data format for generated_file targets.
 
   Controls how the "contents" of a generated_file target is formatted.
   See "gn help io_conversion".
