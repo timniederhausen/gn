@@ -18,6 +18,7 @@ import difflib
 import subprocess
 import sys
 import vim
+from __future__ import print_function
 
 # Change this to the full path if gn is not on the path.
 binary = 'gn'
@@ -44,8 +45,8 @@ def main():
                        shell=is_win, universal_newlines=True)
   stdout, stderr = p.communicate(input=text)
   if p.returncode != 0:
-    print 'Formatting failed, please report to gn-dev@chromium.org.'
-    print stdout, stderr
+    print('Formatting failed, please report to gn-dev@chromium.org.')
+    print(stdout, stderr)
   else:
     # Otherwise, replace current buffer.
     lines = stdout.split('\n')
