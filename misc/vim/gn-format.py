@@ -14,11 +14,11 @@
 # be used. It operates on the current, potentially unsaved buffer and does not
 # create or save any files. To revert a formatting, just undo.
 
+from __future__ import print_function
 import difflib
 import subprocess
 import sys
 import vim
-from __future__ import print_function
 
 # Change this to the full path if gn is not on the path.
 binary = 'gn'
