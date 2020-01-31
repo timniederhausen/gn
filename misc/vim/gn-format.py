@@ -8,7 +8,7 @@
 # - Change 'binary' if gn is not on the path (see below).
 # - Add to your .vimrc:
 #
-#   map <F1> :pyf <path-to-this-file>/gn-format.py<CR>
+#   map <F1> :pyxf <path-to-this-file>/gn-format.py<CR>
 #
 # gn format currently formats only a complete file so visual ranges, etc. won't
 # be used. It operates on the current, potentially unsaved buffer and does not
