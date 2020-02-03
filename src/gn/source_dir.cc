@@ -13,7 +13,7 @@
 
 namespace {
 
-void AssertValueSourceDirString(const std::string& s) {
+void AssertValueSourceDirString(const std::string_view s) {
   if (!s.empty()) {
 #if defined(OS_WIN)
     DCHECK(s[0] == '/' ||
@@ -57,19 +57,24 @@ bool ValidateResolveInput(bool as_file,
   return true;
 }
 
+static StringAtom SourceDirStringAtom(const std::string_view s) {
+  if (EndsWithSlash(s)) {  // Avoid allocation when possible.
+    AssertValueSourceDirString(s);
+    return StringAtom(s);
+  }
+
+  std::string str;
+  str.reserve(s.size() + 1);
+  str += s;
+  str.push_back('/');
+  AssertValueSourceDirString(str);
+  return StringAtom(str);
+}
+
 }  // namespace
 
-SourceDir::SourceDir(const std::string& s) : value_(s) {
-  if (!EndsWithSlash(value_))
-    value_.push_back('/');
-  AssertValueSourceDirString(value_);
-}
-
-SourceDir::SourceDir(std::string&& s) : value_(std::move(s)) {
-  if (!EndsWithSlash(value_))
-    value_.push_back('/');
-  AssertValueSourceDirString(value_);
-}
+SourceDir::SourceDir(const std::string_view s)
+    : value_(SourceDirStringAtom(s)) {}
 
 template <typename StringType>
 std::string SourceDir::ResolveRelativeAs(
@@ -82,7 +87,7 @@ std::string SourceDir::ResolveRelativeAs(
                                         err)) {
     return std::string();
   }
-  return ResolveRelative(input_value, value_, as_file, source_root);
+  return ResolveRelative(input_value, value_.str(), as_file, source_root);
 }
 
 SourceFile SourceDir::ResolveRelativeFile(
@@ -98,7 +103,7 @@ SourceFile SourceDir::ResolveRelativeFile(
   if (!ValidateResolveInput<std::string>(true, p, input_string, err))
     return ret;
 
-  ret.SetValue(ResolveRelative(input_string, value_, true, source_root));
+  ret.SetValue(ResolveRelative(input_string, value_.str(), true, source_root));
   return ret;
 }
 
@@ -131,7 +136,7 @@ SourceDir SourceDir::ResolveRelativeDir(
 }
 
 base::FilePath SourceDir::Resolve(const base::FilePath& source_root) const {
-  return ResolvePath(value_, false, source_root);
+  return ResolvePath(value_.str(), false, source_root);
 }
 
 // Explicit template instantiation

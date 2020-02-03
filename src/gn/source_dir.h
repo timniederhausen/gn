@@ -14,6 +14,8 @@
 #include "base/files/file_path.h"
 #include "base/logging.h"
 
+#include "gn/string_atom.h"
+
 class Err;
 class SourceFile;
 class Value;
@@ -29,8 +31,7 @@ class SourceDir {
  public:
   SourceDir() = default;
 
-  SourceDir(const std::string& s);
-  explicit SourceDir(std::string&& s);
+  SourceDir(const std::string_view s);
 
   // Resolves a file or dir name (based on as_file parameter) relative
   // to this source directory. Will return an empty string on error
@@ -74,8 +75,8 @@ class SourceDir {
       Err* err,
       const std::string_view& source_root = std::string_view()) const {
     SourceDir ret;
-    ret.value_ = ResolveRelativeAs<StringType>(false, blame_input_value,
-                                               input_value, err, source_root);
+    ret.value_ = StringAtom(ResolveRelativeAs<StringType>(
+        false, blame_input_value, input_value, err, source_root));
     return ret;
   }
 
@@ -91,12 +92,13 @@ class SourceDir {
   base::FilePath Resolve(const base::FilePath& source_root) const;
 
   bool is_null() const { return value_.empty(); }
-  const std::string& value() const { return value_; }
+  const std::string& value() const { return value_.str(); }
 
   // Returns true if this path starts with a "//" which indicates a path
   // from the source root.
   bool is_source_absolute() const {
-    return value_.size() >= 2 && value_[0] == '/' && value_[1] == '/';
+    const std::string& v = value_.str();
+    return v.size() >= 2 && v[0] == '/' && v[1] == '/';
   }
 
   // Returns true if this path starts with a single slash which indicates a
@@ -112,7 +114,8 @@ class SourceDir {
   // return value points into our buffer.
   std::string_view SourceAbsoluteWithOneSlash() const {
     CHECK(is_source_absolute());
-    return std::string_view(&value_[1], value_.size() - 1);
+    const std::string& v = value_.str();
+    return std::string_view(&v[1], v.size() - 1);
   }
 
   // Returns a path that does not end with a slash.
@@ -120,32 +123,30 @@ class SourceDir {
   // This function simply returns the reference to the value if the path is a
   // root, e.g. "/" or "//".
   std::string_view SourceWithNoTrailingSlash() const {
-    if (value_.size() > 2)
-      return std::string_view(&value_[0], value_.size() - 1);
-    return std::string_view(value_);
+    const std::string& v = value_.str();
+    if (v.size() > 2)
+      return std::string_view(&v[0], v.size() - 1);
+    return std::string_view(v);
   }
 
-  void SwapValue(std::string* v);
-
   bool operator==(const SourceDir& other) const {
-    return value_ == other.value_;
+    return value_.SameAs(other.value_);
   }
   bool operator!=(const SourceDir& other) const { return !operator==(other); }
   bool operator<(const SourceDir& other) const { return value_ < other.value_; }
 
+  size_t hash() const { return value_.hash(); }
+
  private:
   friend class SourceFile;
-  std::string value_;
+  StringAtom value_;
 };
 
 namespace std {
 
 template <>
 struct hash<SourceDir> {
-  std::size_t operator()(const SourceDir& v) const {
-    hash<std::string> h;
-    return h(v.value());
-  }
+  std::size_t operator()(const SourceDir& v) const { return v.hash(); }
 };
 
 }  // namespace std

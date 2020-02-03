@@ -60,7 +60,7 @@ inline bool IsSlash(const char ch) {
 }
 
 // Returns true if the given path ends with a slash.
-bool EndsWithSlash(const std::string& s);
+bool EndsWithSlash(const std::string_view s);
 
 // Path parts -----------------------------------------------------------------
 

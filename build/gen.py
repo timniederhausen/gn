@@ -620,6 +620,7 @@ def WriteGNNinja(path, platform, host, options):
         'src/gn/functions_target_rust_unittest.cc',
         'src/gn/functions_target_unittest.cc',
         'src/gn/functions_unittest.cc',
+        'src/gn/hash_table_base_unittest.cc',
         'src/gn/header_checker_unittest.cc',
         'src/gn/inherited_libraries_unittest.cc',
         'src/gn/input_conversion_unittest.cc',

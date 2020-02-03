@@ -283,7 +283,7 @@ void RemoveFilename(std::string* path) {
   path->resize(FindFilenameOffset(*path));
 }
 
-bool EndsWithSlash(const std::string& s) {
+bool EndsWithSlash(const std::string_view s) {
   return !s.empty() && IsSlash(s[s.size() - 1]);
 }
 

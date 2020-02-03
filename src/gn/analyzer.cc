@@ -101,7 +101,7 @@ void WriteLabels(const Label& default_toolchain,
                  const std::set<Label>& labels) {
   std::vector<std::string> strings;
   auto value = std::make_unique<base::ListValue>();
-  for (const auto l : labels)
+  for (const auto& l : labels)
     strings.push_back(l.GetUserVisibleName(default_toolchain));
   std::sort(strings.begin(), strings.end());
   value->AppendStrings(strings);
