@@ -72,7 +72,15 @@ Value ExecuteGenericTarget(const char* target_type,
   "  to your script, see \"gn help rebase_path\" for how to convert\n"        \
   "  file names to be relative to the build directory (file names in the\n"   \
   "  sources, outputs, and inputs will be all treated as relative to the\n"   \
-  "  current build file and converted as needed automatically).\n"
+  "  current build file and converted as needed automatically).\n"            \
+  "\n"                                                                        \
+  "  GN sets Ninja's flag 'restat = 1` for all action commands. This means\n" \
+  "  that Ninja will check the timestamp of the output after the action\n"    \
+  "  completes. If output timestamp is unchanged, the step will be treated\n" \
+  "  as if it never needed to be rebuilt, potentially eliminating some\n"     \
+  "  downstream steps for incremental builds. Scripts can improve build\n"    \
+  "  performance by taking care not to change the timstamp of the output\n"   \
+  "  file(s) if the contents have not changed.\n"
 
 // Common help paragraph on script output directories.
 #define SCRIPT_EXECUTION_OUTPUTS                                           \

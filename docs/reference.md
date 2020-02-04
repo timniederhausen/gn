@@ -1186,6 +1186,14 @@
   file names to be relative to the build directory (file names in the
   sources, outputs, and inputs will be all treated as relative to the
   current build file and converted as needed automatically).
+
+  GN sets Ninja's flag 'restat = 1` for all action commands. This means
+  that Ninja will check the timestamp of the output after the action
+  completes. If output timestamp is unchanged, the step will be treated
+  as if it never needed to be rebuilt, potentially eliminating some
+  downstream steps for incremental builds. Scripts can improve build
+  performance by taking care not to change the timstamp of the output
+  file(s) if the contents have not changed.
 ```
 
 #### **File name handling**
@@ -1267,6 +1275,14 @@
   file names to be relative to the build directory (file names in the
   sources, outputs, and inputs will be all treated as relative to the
   current build file and converted as needed automatically).
+
+  GN sets Ninja's flag 'restat = 1` for all action commands. This means
+  that Ninja will check the timestamp of the output after the action
+  completes. If output timestamp is unchanged, the step will be treated
+  as if it never needed to be rebuilt, potentially eliminating some
+  downstream steps for incremental builds. Scripts can improve build
+  performance by taking care not to change the timstamp of the output
+  file(s) if the contents have not changed.
 ```
 
 #### **File name handling**
