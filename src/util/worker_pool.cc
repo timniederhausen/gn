@@ -32,7 +32,7 @@ void ProcessorGroupSetter::SetProcessorGroup(std::thread* thread) {
   if (num_groups_ <= 1)
     return;
 
-  const HANDLE thread_handle = thread->native_handle();
+  const HANDLE thread_handle = HANDLE(thread->native_handle());
   ::GetThreadGroupAffinity(thread_handle, &group_affinity_);
   group_affinity_.Group = group_;
   const bool success =

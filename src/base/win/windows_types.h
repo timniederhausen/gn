@@ -9,6 +9,7 @@
 #define BASE_WIN_WINDOWS_TYPES_H
 
 // Needed for function prototypes.
+#include <inttypes.h>
 #include <concurrencysal.h>
 #include <sal.h>
 #include <specstrings.h>

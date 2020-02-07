@@ -47,7 +47,7 @@ class Platform(object):
 
   @staticmethod
   def known_platforms():
-    return ['linux', 'darwin', 'msvc', 'aix', 'fuchsia', 'freebsd', 'openbsd', 'haiku']
+    return ['linux', 'darwin', 'mingw', 'msvc', 'aix', 'fuchsia', 'freebsd', 'openbsd', 'haiku']
 
   def platform(self):
     return self._platform
@@ -178,6 +178,7 @@ def WriteGenericNinja(path, static_libraries, executables,
 
   template_filename = os.path.join(SCRIPT_DIR, {
       'msvc': 'build_win.ninja.template',
+      'mingw': 'build_linux.ninja.template',
       'darwin': 'build_mac.ninja.template',
       'linux': 'build_linux.ninja.template',
       'freebsd': 'build_linux.ninja.template',
@@ -334,14 +335,15 @@ def WriteGNNinja(path, platform, host, options):
         '-std=c++17'
     ])
 
-    if platform.is_linux():
+    if platform.is_linux() or platform.is_mingw():
       ldflags.append('-Wl,--as-needed')
 
       if not options.no_static_libstdcpp:
         ldflags.append('-static-libstdc++')
 
       # This is needed by libc++.
-      libs.append('-ldl')
+      if not platform.is_mingw():
+        libs.append('-ldl')
     elif platform.is_darwin():
       min_mac_version_flag = '-mmacosx-version-min=10.9'
       cflags.append(min_mac_version_flag)
@@ -356,6 +358,17 @@ def WriteGNNinja(path, platform, host, options):
     if platform.is_posix() and not platform.is_haiku():
       ldflags.append('-pthread')
 
+    if platform.is_mingw():
+      cflags.extend(['-DUNICODE',
+                     '-DNOMINMAX',
+                     '-DWIN32_LEAN_AND_MEAN',
+                     '-DWINVER=0x0A00',
+                     '-D_CRT_SECURE_NO_DEPRECATE',
+                     '-D_SCL_SECURE_NO_DEPRECATE',
+                     '-D_UNICODE',
+                     '-D_WIN32_WINNT=0x0A00',
+                     '-D_HAS_EXCEPTIONS=0'
+      ])
   elif platform.is_msvc():
     if not options.debug:
       cflags.extend(['/O2', '/DNDEBUG', '/Zc:inline'])
@@ -680,19 +693,35 @@ def WriteGNNinja(path, platform, host, options):
         'src/base/win/scoped_process_information.cc',
     ])
 
-    libs.extend([
-        'advapi32.lib',
-        'dbghelp.lib',
-        'kernel32.lib',
-        'ole32.lib',
-        'shell32.lib',
-        'user32.lib',
-        'userenv.lib',
-        'version.lib',
-        'winmm.lib',
-        'ws2_32.lib',
-        'Shlwapi.lib',
-    ])
+    if platform.is_msvc():
+      libs.extend([
+          'advapi32.lib',
+          'dbghelp.lib',
+          'kernel32.lib',
+          'ole32.lib',
+          'shell32.lib',
+          'user32.lib',
+          'userenv.lib',
+          'version.lib',
+          'winmm.lib',
+          'ws2_32.lib',
+          'Shlwapi.lib',
+      ])
+    else:
+      libs.extend([
+          '-ladvapi32',
+          '-ldbghelp',
+          '-lkernel32',
+          '-lole32',
+          '-lshell32',
+          '-luser32',
+          '-luserenv',
+          '-lversion',
+          '-lwinmm',
+          '-lws2_32',
+          '-lshlwapi',
+      ])
+
 
   # we just build static libraries that GN needs
   executables['gn']['libs'].extend(static_libraries.keys())
