@@ -381,6 +381,8 @@ std::string SubstitutionWriter::GetSourceSubstitution(
     NOTREACHED() << "Cannot use substitution " << type->name
                  << " without target";
     return std::string();
+  } else if (IsValidRustSubstitution(type)) {
+    to_rebase = source.value();
   } else {
     NOTREACHED() << "Unsupported substitution for this function: "
                  << type->name;

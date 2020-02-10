@@ -501,6 +501,11 @@ bool Target::GetOutputFilesForSource(const SourceFile& source,
     return true;
   }
 
+  // Rust generates on a module level, not source.
+  if (file_type == SourceFile::SOURCE_RS) {
+    return false;
+  }
+
   *computed_tool_type = Tool::GetToolTypeForSourceType(file_type);
   if (*computed_tool_type == Tool::kToolNone)
     return false;  // No tool for this file (it's a header file or something).

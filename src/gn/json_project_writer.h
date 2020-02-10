@@ -25,6 +25,7 @@ class JSONProjectWriter {
  private:
   FRIEND_TEST_ALL_PREFIXES(JSONProjectWriter, ActionWithResponseFile);
   FRIEND_TEST_ALL_PREFIXES(JSONProjectWriter, ForEachWithResponseFile);
+  FRIEND_TEST_ALL_PREFIXES(JSONProjectWriter, RustTarget);
 
   static std::string RenderJSON(const BuildSettings* build_settings,
                                 std::vector<const Target*>& all_targets);

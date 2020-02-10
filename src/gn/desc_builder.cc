@@ -53,6 +53,8 @@
 //   "metadata" : [ dictionary of target metadata values ]
 //   "data_keys" : [ list of target data keys ]
 //   "walk_keys" : [ list of target walk keys ]
+//   "crate_root" : "root file of a Rust target"
+//   "crate_name" : "name of a Rust target"
 //   "rebase" : true or false
 //   "output_conversion" : "string for output conversion"
 //   "response_file_contents": [ list of response file contents entries ]
@@ -315,6 +317,13 @@ class TargetDescBuilder : public BaseDescBuilder {
           "toolchain",
           base::Value(
               target_->label().GetToolchainLabel().GetUserVisibleName(false)));
+    }
+
+    if (target_->source_types_used().RustSourceUsed()) {
+      res->SetWithoutPathExpansion(
+          "crate_root", RenderValue(target_->rust_values().crate_root()));
+      res->SetKey("crate_name",
+                  base::Value(target_->rust_values().crate_name()));
     }
 
     // General target meta variables.

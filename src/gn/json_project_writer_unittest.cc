@@ -72,6 +72,61 @@ TEST(JSONProjectWriter, ActionWithResponseFile) {
   EXPECT_EQ(expected_json, out);
 }
 
+TEST(JSONProjectWriter, RustTarget) {
+  Err err;
+  TestWithScope setup;
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::RUST_LIBRARY);
+  target.visibility().SetPublic();
+  SourceFile lib("//foo/lib.rs");
+  target.sources().push_back(lib);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(lib);
+  target.rust_values().crate_name() = "foo";
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::vector<const Target*> targets;
+  targets.push_back(&target);
+  std::string out =
+      JSONProjectWriter::RenderJSON(setup.build_settings(), targets);
+#if defined(OS_WIN)
+  base::ReplaceSubstringsAfterOffset(&out, 0, "\r\n", "\n");
+#endif
+  const char expected_json[] =
+      "{\n"
+      "   \"build_settings\": {\n"
+      "      \"build_dir\": \"//out/Debug/\",\n"
+      "      \"default_toolchain\": \"//toolchain:default\",\n"
+      "      \"root_path\": \"\"\n"
+      "   },\n"
+      "   \"targets\": {\n"
+      "      \"//foo:bar()\": {\n"
+      "         \"allow_circular_includes_from\": [  ],\n"
+      "         \"check_includes\": true,\n"
+      "         \"crate_name\": \"foo\",\n"
+      "         \"crate_root\": \"//foo/lib.rs\",\n"
+      "         \"deps\": [  ],\n"
+      "         \"externs\": {\n"
+      "\n"
+      "         },\n"
+      "         \"metadata\": {\n"
+      "\n"
+      "         },\n"
+      "         \"outputs\": [ \"//out/Debug/obj/foo/libbar.rlib\" ],\n"
+      "         \"public\": \"*\",\n"
+      "         \"sources\": [ \"//foo/lib.rs\" ],\n"
+      "         \"testonly\": false,\n"
+      "         \"toolchain\": \"\",\n"
+      "         \"type\": \"rust_library\",\n"
+      "         \"visibility\": [ \"*\" ]\n"
+      "      }\n"
+      "   }\n"
+      "}\n";
+  EXPECT_EQ(expected_json, out);
+}
+
 TEST(JSONProjectWriter, ForEachWithResponseFile) {
   Err err;
   TestWithScope setup;
