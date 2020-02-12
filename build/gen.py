@@ -138,10 +138,11 @@ def GenerateLastCommitPosition(host, header):
 #ifndef OUT_LAST_COMMIT_POSITION_H_
 #define OUT_LAST_COMMIT_POSITION_H_
 
+#define LAST_COMMIT_POSITION_NUM %s
 #define LAST_COMMIT_POSITION "%s (%s)"
 
 #endif  // OUT_LAST_COMMIT_POSITION_H_
-''' % (mo.group(1), mo.group(2))
+''' % (mo.group(1), mo.group(1), mo.group(2))
 
   # Only write/touch this file if the commit position has changed.
   old_contents = ''

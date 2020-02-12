@@ -36,6 +36,10 @@ extern const char kDefaultToolchain[];
 extern const char kDefaultToolchain_HelpShort[];
 extern const char kDefaultToolchain_Help[];
 
+extern const char kGnVersion[];
+extern const char kGnVersion_HelpShort[];
+extern const char kGnVersion_Help[];
+
 extern const char kInvoker[];
 extern const char kInvoker_HelpShort[];
 extern const char kInvoker_Help[];

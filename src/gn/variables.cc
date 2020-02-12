@@ -10,6 +10,19 @@ namespace variables {
 
 // Built-in variables ----------------------------------------------------------
 
+const char kGnVersion[] = "gn_version";
+const char kGnVersion_HelpShort[] =
+    "gn_version: [number] The version of gn.";
+const char kGnVersion_Help[] =
+  R"(gn_version: [number] The version of gn.
+
+  Corresponds to the number printed by `gn --version`.
+
+Example
+
+  assert(gn_version >= 1700, "need GN version 1700 for the frobulate feature")
+)";
+
 const char kHostCpu[] = "host_cpu";
 const char kHostCpu_HelpShort[] =
     "host_cpu: [string] The processor architecture that GN is running on.";
@@ -2188,6 +2201,7 @@ const VariableInfoMap& GetBuiltinVariables() {
     INSERT_VARIABLE(CurrentOs)
     INSERT_VARIABLE(CurrentToolchain)
     INSERT_VARIABLE(DefaultToolchain)
+    INSERT_VARIABLE(GnVersion)
     INSERT_VARIABLE(HostCpu)
     INSERT_VARIABLE(HostOs)
     INSERT_VARIABLE(Invoker)
@@ -2196,9 +2210,9 @@ const VariableInfoMap& GetBuiltinVariables() {
     INSERT_VARIABLE(RootGenDir)
     INSERT_VARIABLE(RootOutDir)
     INSERT_VARIABLE(TargetCpu)
-    INSERT_VARIABLE(TargetOs)
     INSERT_VARIABLE(TargetGenDir)
     INSERT_VARIABLE(TargetName)
+    INSERT_VARIABLE(TargetOs)
     INSERT_VARIABLE(TargetOutDir)
   }
   return info_map;

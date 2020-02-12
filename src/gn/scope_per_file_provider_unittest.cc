@@ -31,6 +31,9 @@ TEST(ScopePerFileProvider, Expected) {
     EXPECT_EQ("//out/Debug", GPV(variables::kRootOutDir));
     EXPECT_EQ("//out/Debug/gen/source", GPV(variables::kTargetGenDir));
     EXPECT_EQ("//out/Debug/obj/source", GPV(variables::kTargetOutDir));
+
+    EXPECT_GE(provider.GetProgrammaticValue(variables::kGnVersion)->int_value(),
+              0);
   }
 
   // Test some with an alternate toolchain.
