@@ -176,14 +176,22 @@ Value RunExecScript(Scope* scope,
   }
 
   // Make the command line.
-  const base::FilePath& interpreter_path = build_settings->python_path();
-  base::CommandLine cmdline(interpreter_path);
+  base::CommandLine cmdline(base::CommandLine::NO_PROGRAM);
 
   // CommandLine tries to interpret arguments by default.  Disable that so
   // that the arguments will be passed through exactly as specified.
   cmdline.SetParseSwitches(false);
 
-  cmdline.AppendArgPath(script_path);
+  // If an interpreter path is set, initialize it as the first entry and
+  // pass script_path as the first argument. Otherwise, set the
+  // program to script_path directly.
+  const base::FilePath& interpreter_path = build_settings->python_path();
+  if (!interpreter_path.empty()) {
+    cmdline.SetProgram(interpreter_path);
+    cmdline.AppendArgPath(script_path);
+  } else {
+    cmdline.SetProgram(script_path);
+  }
 
   if (args.size() >= 2) {
     // Optional command-line arguments to the script.

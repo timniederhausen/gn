@@ -68,6 +68,7 @@
     *   [current_os: [string] The operating system of the current toolchain.](#var_current_os)
     *   [current_toolchain: [string] Label of the current toolchain.](#var_current_toolchain)
     *   [default_toolchain: [string] Label of the default toolchain.](#var_default_toolchain)
+    *   [gn_version: [number] The version of gn.](#var_gn_version)
     *   [host_cpu: [string] The processor architecture that GN is running on.](#var_host_cpu)
     *   [host_os: [string] The operating system that GN is running on.](#var_host_os)
     *   [invoker: [string] The invoking scope inside a template.](#var_invoker)
@@ -4036,6 +4037,17 @@
   A fully-qualified label representing the default toolchain, which may not
   necessarily be the current one (see "current_toolchain").
 ```
+### <a name="var_gn_version"></a>**gn_version**: [number] The version of gn.
+
+```
+  Corresponds to the number printed by `gn --version`.
+```
+
+#### **Example**
+
+```
+  assert(gn_version >= 1700, "need GN version 1700 for the frobulate feature")
+```
 ### <a name="var_host_cpu"></a>**host_cpu**: The processor architecture that GN is running on.
 
 ```
@@ -6482,9 +6494,12 @@
       cause the file //BUILD.gn to be loaded.
 
   script_executable [optional]
-      Path to specific Python executable or potentially a different language
-      interpreter that is used to execute scripts in action targets and
-      exec_script calls.
+      Path to specific Python executable or other interpreter to use in
+      action targets and exec_script calls. By default GN searches the
+      PATH for Python to execute these scripts.
+
+      If set to the empty string, the path specified in action targets
+      and exec_script calls will be executed directly.
 
   secondary_source [optional]
       Label of an alternate directory tree to find input files. When searching

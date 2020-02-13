@@ -105,10 +105,12 @@ const char kScriptExecutable_HelpShort[] =
 const char kScriptExecutable_Help[] =
     R"(--script-executable: Set the executable used to execute scripts.
 
-  By default GN searches the PATH for Python to execute scripts in action
-  targets and exec_script calls. This flag allows the specification of a
-  specific Python executable or potentially a different language
-  interpreter.
+  Path to specific Python executable or other interpreter to use in
+  action targets and exec_script calls. By default GN searches the
+  PATH for Python to execute these scripts.
+
+  If set to the empty string, the path specified in action targets
+  and exec_script calls will be executed directly.
 )";
 
 const char kMetaDataKeys[] = "data";

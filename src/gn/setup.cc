@@ -110,9 +110,12 @@ Variables
       cause the file //BUILD.gn to be loaded.
 
   script_executable [optional]
-      Path to specific Python executable or potentially a different language
-      interpreter that is used to execute scripts in action targets and
-      exec_script calls.
+      Path to specific Python executable or other interpreter to use in
+      action targets and exec_script calls. By default GN searches the
+      PATH for Python to execute these scripts.
+
+      If set to the empty string, the path specified in action targets
+      and exec_script calls will be executed directly.
 
   secondary_source [optional]
       Label of an alternate directory tree to find input files. When searching
