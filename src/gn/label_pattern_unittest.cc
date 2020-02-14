@@ -75,8 +75,8 @@ TEST(LabelPattern, PatternParse) {
   for (size_t i = 0; i < std::size(cases); i++) {
     const PatternCase& cur = cases[i];
     Err err;
-    LabelPattern result =
-        LabelPattern::GetPattern(current_dir, Value(nullptr, cur.input), &err);
+    LabelPattern result = LabelPattern::GetPattern(
+        current_dir, std::string_view(), Value(nullptr, cur.input), &err);
 
     EXPECT_EQ(cur.success, !err.has_error()) << i << " " << cur.input;
     EXPECT_EQ(cur.type, result.type()) << i << " " << cur.input;
@@ -85,4 +85,19 @@ TEST(LabelPattern, PatternParse) {
     EXPECT_EQ(cur.toolchain, result.toolchain().GetUserVisibleName(false))
         << i << " " << cur.input;
   }
+}
+
+// Tests a non-empty source root which allows patterns to reference above the
+// source root.
+TEST(LabelPattern, PatternParseAboveSourceRoot) {
+  SourceDir current_dir("//foo/");
+  std::string source_root = "/foo/bar/baz/";
+
+  Err err;
+  LabelPattern result = LabelPattern::GetPattern(
+      current_dir, source_root, Value(nullptr, "../../../*"), &err);
+  ASSERT_FALSE(err.has_error());
+
+  EXPECT_EQ(LabelPattern::RECURSIVE_DIRECTORY, result.type());
+  EXPECT_EQ("/foo/", result.dir().value()) << result.dir().value();
 }

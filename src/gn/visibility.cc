@@ -22,6 +22,7 @@ Visibility::Visibility() = default;
 Visibility::~Visibility() = default;
 
 bool Visibility::Set(const SourceDir& current_dir,
+                     const std::string_view& source_root,
                      const Value& value,
                      Err* err) {
   patterns_.clear();
@@ -32,7 +33,8 @@ bool Visibility::Set(const SourceDir& current_dir,
   }
 
   for (const auto& item : value.list_value()) {
-    patterns_.push_back(LabelPattern::GetPattern(current_dir, item, err));
+    patterns_.push_back(
+        LabelPattern::GetPattern(current_dir, source_root, item, err));
     if (err->has_error())
       return false;
   }
@@ -109,7 +111,9 @@ bool Visibility::CheckItemVisibility(const Item* from,
 bool Visibility::FillItemVisibility(Item* item, Scope* scope, Err* err) {
   const Value* vis_value = scope->GetValue(variables::kVisibility, true);
   if (vis_value)
-    item->visibility().Set(scope->GetSourceDir(), *vis_value, err);
+    item->visibility().Set(
+        scope->GetSourceDir(),
+        scope->settings()->build_settings()->root_path_utf8(), *vis_value, err);
   else  // Default to public.
     item->visibility().SetPublic();
   return !err->has_error();

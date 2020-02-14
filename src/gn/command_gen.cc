@@ -490,7 +490,8 @@ int RunGen(const std::vector<std::string>& args) {
     return 1;
   }
 
-  if (!WriteRuntimeDepsFilesIfNecessary(setup->builder(), &err)) {
+  if (!WriteRuntimeDepsFilesIfNecessary(&setup->build_settings(),
+                                        setup->builder(), &err)) {
     err.PrintToStdout();
     return 1;
   }

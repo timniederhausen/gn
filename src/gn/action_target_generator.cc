@@ -162,8 +162,10 @@ bool ActionTargetGenerator::FillPool() {
   if (!value)
     return true;
 
-  Label label = Label::Resolve(scope_->GetSourceDir(),
-                               ToolchainLabelForScope(scope_), *value, err_);
+  Label label =
+      Label::Resolve(scope_->GetSourceDir(),
+                     scope_->settings()->build_settings()->root_path_utf8(),
+                     ToolchainLabelForScope(scope_), *value, err_);
   if (err_->has_error())
     return false;
 

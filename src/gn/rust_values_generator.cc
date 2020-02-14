@@ -175,8 +175,9 @@ bool RustTargetGenerator::FillAliasedDeps() {
   value->scope_value()->GetCurrentScopeValues(&aliased_deps);
   for (const auto& pair : aliased_deps) {
     Label dep_label =
-        Label::Resolve(scope_->GetSourceDir(), ToolchainLabelForScope(scope_),
-                       pair.second, err_);
+        Label::Resolve(scope_->GetSourceDir(),
+                       scope_->settings()->build_settings()->root_path_utf8(),
+                       ToolchainLabelForScope(scope_), pair.second, err_);
 
     if (err_->has_error())
       return false;

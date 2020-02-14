@@ -29,6 +29,7 @@ std::string DirWithNoTrailingSlash(const SourceDir& dir) {
 // used. The value is used only for generating error messages.
 bool ComputeBuildLocationFromDep(const Value& input_value,
                                  const SourceDir& current_dir,
+                                 const std::string_view& source_root,
                                  const std::string_view& input,
                                  SourceDir* result,
                                  Err* err) {
@@ -38,7 +39,8 @@ bool ComputeBuildLocationFromDep(const Value& input_value,
     return true;
   }
 
-  *result = current_dir.ResolveRelativeDir(input_value, input, err);
+  *result =
+      current_dir.ResolveRelativeDir(input_value, input, err, source_root);
   return true;
 }
 
@@ -86,6 +88,7 @@ bool ComputeTargetNameFromDep(const Value& input_value,
 // Returns true on success. On failure, the out* variables might be written to
 // but shouldn't be used.
 bool Resolve(const SourceDir& current_dir,
+             const std::string_view& source_root,
              const Label& current_toolchain,
              const Value& original_value,
              const std::string_view& input,
@@ -167,8 +170,8 @@ bool Resolve(const SourceDir& current_dir,
     return false;
   }
 
-  if (!ComputeBuildLocationFromDep(original_value, current_dir, location_piece,
-                                   out_dir, err))
+  if (!ComputeBuildLocationFromDep(original_value, current_dir, source_root,
+                                   location_piece, out_dir, err))
     return false;
 
   if (!ComputeTargetNameFromDep(original_value, *out_dir, name_piece, out_name,
@@ -185,9 +188,9 @@ bool Resolve(const SourceDir& current_dir,
       *out_toolchain_name = current_toolchain.name();
       return true;
     } else {
-      return Resolve(current_dir, current_toolchain, original_value,
-                     toolchain_piece, out_toolchain_dir, out_toolchain_name,
-                     nullptr, nullptr, err);
+      return Resolve(current_dir, source_root, current_toolchain,
+                     original_value, toolchain_piece, out_toolchain_dir,
+                     out_toolchain_name, nullptr, nullptr, err);
     }
   }
   return true;
@@ -265,6 +268,7 @@ Label::Label(const SourceDir& dir, const std::string_view& name) : dir_(dir) {
 
 // static
 Label Label::Resolve(const SourceDir& current_dir,
+                     const std::string_view& source_root,
                      const Label& current_toolchain,
                      const Value& input,
                      Err* err) {
@@ -279,8 +283,9 @@ Label Label::Resolve(const SourceDir& current_dir,
     return ret;
   }
 
-  if (!::Resolve(current_dir, current_toolchain, input, input_string, &ret.dir_,
-                 &ret.name_, &ret.toolchain_dir_, &ret.toolchain_name_, err))
+  if (!::Resolve(current_dir, source_root, current_toolchain, input,
+                 input_string, &ret.dir_, &ret.name_, &ret.toolchain_dir_,
+                 &ret.toolchain_name_, err))
     return Label();
   return ret;
 }

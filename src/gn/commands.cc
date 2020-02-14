@@ -38,7 +38,7 @@ bool ResolveTargetsFromCommandLinePattern(Setup* setup,
   Err err;
   LabelPattern pattern = LabelPattern::GetPattern(
       SourceDirForCurrentDirectory(setup->build_settings().root_path()),
-      pattern_value, &err);
+      setup->build_settings().root_path_utf8(), pattern_value, &err);
   if (err.has_error()) {
     err.PrintToStdout();
     return false;
@@ -86,9 +86,9 @@ bool ResolveStringFromCommandLineInput(
 
   // Try to figure out what this thing is.
   Err err;
-  Label label =
-      Label::Resolve(current_dir, setup->loader()->default_toolchain_label(),
-                     Value(nullptr, input), &err);
+  Label label = Label::Resolve(
+      current_dir, setup->build_settings().root_path_utf8(),
+      setup->loader()->default_toolchain_label(), Value(nullptr, input), &err);
   if (err.has_error()) {
     // Not a valid label, assume this must be a file.
     err = Err();
@@ -405,7 +405,8 @@ const Target* ResolveTargetFromCommandLineString(
   Err err;
   Label label = Label::Resolve(
       SourceDirForCurrentDirectory(setup->build_settings().root_path()),
-      default_toolchain, arg_value, &err);
+      setup->build_settings().root_path_utf8(), default_toolchain, arg_value,
+      &err);
   if (err.has_error()) {
     err.PrintToStdout();
     return nullptr;
@@ -496,7 +497,8 @@ bool FilterPatternsFromString(const BuildSettings* build_settings,
   filters->reserve(tokens.size());
   for (const std::string& token : tokens) {
     LabelPattern pattern = LabelPattern::GetPattern(
-        root_dir, Value(nullptr, FixGitBashLabelEdit(token)), err);
+        root_dir, build_settings->root_path_utf8(),
+        Value(nullptr, FixGitBashLabelEdit(token)), err);
     if (err->has_error())
       return false;
     filters->push_back(pattern);

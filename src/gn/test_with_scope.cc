@@ -40,8 +40,8 @@ TestWithScope::~TestWithScope() = default;
 
 Label TestWithScope::ParseLabel(const std::string& str) const {
   Err err;
-  Label result = Label::Resolve(SourceDir("//"), toolchain_.label(),
-                                Value(nullptr, str), &err);
+  Label result = Label::Resolve(SourceDir("//"), std::string_view(),
+                                toolchain_.label(), Value(nullptr, str), &err);
   CHECK(!err.has_error());
   return result;
 }

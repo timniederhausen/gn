@@ -82,8 +82,8 @@ TEST(Label, Resolve) {
     Err err;
     Value v(nullptr, Value::STRING);
     v.string_value() = cur.str;
-    Label result =
-        Label::Resolve(SourceDir(cur.cur_dir), default_toolchain, v, &err);
+    Label result = Label::Resolve(SourceDir(cur.cur_dir), std::string_view(),
+                                  default_toolchain, v, &err);
     EXPECT_EQ(cur.success, !err.has_error()) << i << " " << cur.str;
     if (!err.has_error() && cur.success) {
       EXPECT_EQ(cur.expected_dir, result.dir().value()) << i << " " << cur.str;
@@ -94,4 +94,47 @@ TEST(Label, Resolve) {
           << i << " " << cur.str;
     }
   }
+}
+
+// Tests the case where the path resolves to something above "//". It should get
+// converted to an absolute path "/foo/bar".
+TEST(Label, ResolveAboveRootBuildDir) {
+  Label default_toolchain(SourceDir("//t/"), "d");
+
+  std::string location, name;
+  Err err;
+
+  SourceDir cur_dir("//cur/");
+  std::string source_root("/foo/bar/baz");
+
+  // No source root given, should not go above the root build dir.
+  Label result = Label::Resolve(cur_dir, std::string_view(), default_toolchain,
+                                Value(nullptr, "../../..:target"), &err);
+  EXPECT_FALSE(err.has_error());
+  EXPECT_EQ("//", result.dir().value()) << result.dir().value();
+  EXPECT_EQ("target", result.name());
+
+  // Source root provided, it should go into that.
+  result = Label::Resolve(cur_dir, source_root, default_toolchain,
+                          Value(nullptr, "../../..:target"), &err);
+  EXPECT_FALSE(err.has_error());
+  EXPECT_EQ("/foo/", result.dir().value()) << result.dir().value();
+  EXPECT_EQ("target", result.name());
+
+  // It should't go up higher than the system root.
+  result = Label::Resolve(cur_dir, source_root, default_toolchain,
+                          Value(nullptr, "../../../../..:target"), &err);
+  EXPECT_FALSE(err.has_error());
+  EXPECT_EQ("/", result.dir().value()) << result.dir().value();
+  EXPECT_EQ("target", result.name());
+
+  // Test an absolute label that goes above the source root. This currently
+  // stops at the source root. It should arguably keep going and produce "/foo/"
+  // but this test just makes sure the current behavior isn't regressed by
+  // accident.
+  result = Label::Resolve(cur_dir, source_root, default_toolchain,
+                          Value(nullptr, "//../.."), &err);
+  EXPECT_FALSE(err.has_error()) << err.message();
+  EXPECT_EQ("/foo/", result.dir().value()) << result.dir().value();
+  EXPECT_EQ("foo", result.name());
 }

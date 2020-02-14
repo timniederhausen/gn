@@ -314,7 +314,8 @@ bool TargetGenerator::FillTestonly() {
 bool TargetGenerator::FillAssertNoDeps() {
   const Value* value = scope_->GetValue(variables::kAssertNoDeps, true);
   if (value) {
-    return ExtractListOfLabelPatterns(*value, scope_->GetSourceDir(),
+    return ExtractListOfLabelPatterns(scope_->settings()->build_settings(),
+                                      *value, scope_->GetSourceDir(),
                                       &target_->assert_no_deps(), err_);
   }
   return true;
@@ -412,7 +413,8 @@ bool TargetGenerator::FillGenericConfigs(const char* var_name,
                                          UniqueVector<LabelConfigPair>* dest) {
   const Value* value = scope_->GetValue(var_name, true);
   if (value) {
-    ExtractListOfUniqueLabels(*value, scope_->GetSourceDir(),
+    ExtractListOfUniqueLabels(scope_->settings()->build_settings(), *value,
+                              scope_->GetSourceDir(),
                               ToolchainLabelForScope(scope_), dest, err_);
   }
   return !err_->has_error();
@@ -422,8 +424,9 @@ bool TargetGenerator::FillGenericDeps(const char* var_name,
                                       LabelTargetVector* dest) {
   const Value* value = scope_->GetValue(var_name, true);
   if (value) {
-    ExtractListOfLabels(*value, scope_->GetSourceDir(),
-                        ToolchainLabelForScope(scope_), dest, err_);
+    ExtractListOfLabels(scope_->settings()->build_settings(), *value,
+                        scope_->GetSourceDir(), ToolchainLabelForScope(scope_),
+                        dest, err_);
   }
   return !err_->has_error();
 }

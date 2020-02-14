@@ -73,8 +73,10 @@ Value RunGetTargetOutputs(Scope* scope,
   }
 
   // Resolve the requested label.
-  Label label = Label::Resolve(scope->GetSourceDir(),
-                               ToolchainLabelForScope(scope), args[0], err);
+  Label label =
+      Label::Resolve(scope->GetSourceDir(),
+                     scope->settings()->build_settings()->root_path_utf8(),
+                     ToolchainLabelForScope(scope), args[0], err);
   if (label.is_null())
     return Value();
 

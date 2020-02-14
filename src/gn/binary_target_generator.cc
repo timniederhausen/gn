@@ -130,7 +130,8 @@ bool BinaryTargetGenerator::FillCompleteStaticLib() {
 bool BinaryTargetGenerator::FillFriends() {
   const Value* value = scope_->GetValue(variables::kFriend, true);
   if (value) {
-    return ExtractListOfLabelPatterns(*value, scope_->GetSourceDir(),
+    return ExtractListOfLabelPatterns(scope_->settings()->build_settings(),
+                                      *value, scope_->GetSourceDir(),
                                       &target_->friends(), err_);
   }
   return true;
@@ -186,7 +187,8 @@ bool BinaryTargetGenerator::FillAllowCircularIncludesFrom() {
     return true;
 
   UniqueVector<Label> circular;
-  ExtractListOfUniqueLabels(*value, scope_->GetSourceDir(),
+  ExtractListOfUniqueLabels(scope_->settings()->build_settings(), *value,
+                            scope_->GetSourceDir(),
                             ToolchainLabelForScope(scope_), &circular, err_);
   if (err_->has_error())
     return false;

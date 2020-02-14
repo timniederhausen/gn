@@ -161,7 +161,8 @@ Example .gn file contents
 namespace {
 
 const base::FilePath::CharType kGnFile[] = FILE_PATH_LITERAL(".gn");
-const char kDefaultArgsGn[] = "# Set build arguments here. See `gn help buildargs`.";
+const char kDefaultArgsGn[] =
+    "# Set build arguments here. See `gn help buildargs`.";
 
 base::FilePath FindDotFile(const base::FilePath& current_dir) {
   base::FilePath try_this_file = current_dir.Append(kGnFile);
@@ -789,7 +790,8 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline) {
       return false;
     }
 
-    root_target_label = Label::Resolve(current_dir, Label(), *root_value, &err);
+    root_target_label = Label::Resolve(current_dir, std::string_view(), Label(),
+                                       *root_value, &err);
     if (err.has_error()) {
       err.PrintToStdout();
       return false;
@@ -821,8 +823,8 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline) {
       dotfile_scope_.GetValue("check_targets", true);
   if (check_targets_value) {
     check_patterns_.reset(new std::vector<LabelPattern>);
-    ExtractListOfLabelPatterns(*check_targets_value, current_dir,
-                               check_patterns_.get(), &err);
+    ExtractListOfLabelPatterns(&build_settings_, *check_targets_value,
+                               current_dir, check_patterns_.get(), &err);
     if (err.has_error()) {
       err.PrintToStdout();
       return false;
@@ -838,7 +840,6 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline) {
     }
     check_system_includes_ = check_system_includes_value->boolean_value();
   }
-
 
   // Fill exec_script_whitelist.
   const Value* exec_script_whitelist_value =

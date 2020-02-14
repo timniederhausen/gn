@@ -9,6 +9,7 @@
 #include <vector>
 
 class Builder;
+class BuildSettings;
 class Err;
 class OutputFile;
 class Target;
@@ -23,6 +24,8 @@ std::vector<std::pair<OutputFile, const Target*>> ComputeRuntimeDeps(
 
 // Writes all runtime deps files requested on the command line, or does nothing
 // if no files were specified.
-bool WriteRuntimeDepsFilesIfNecessary(const Builder& builder, Err* err);
+bool WriteRuntimeDepsFilesIfNecessary(const BuildSettings* build_settings,
+                                      const Builder& builder,
+                                      Err* err);
 
 #endif  // TOOLS_GN_RUNTIME_DEPS_H

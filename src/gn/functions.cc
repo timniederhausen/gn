@@ -259,8 +259,8 @@ Value RunAssert(Scope* scope,
 
   // Assertion failed; try to make a useful message and report it.
   if (args.size() == 2) {
-    *err = Err(function->function(), "Assertion failed.",
-               args[1].string_value());
+    *err =
+        Err(function->function(), "Assertion failed.", args[1].string_value());
   } else {
     *err = Err(function->function(), "Assertion failed.");
   }
@@ -383,7 +383,8 @@ Value RunConfig(const FunctionCallNode* function,
   // Read sub-configs.
   const Value* configs_value = scope->GetValue(variables::kConfigs, true);
   if (configs_value) {
-    ExtractListOfUniqueLabels(*configs_value, scope->GetSourceDir(),
+    ExtractListOfUniqueLabels(scope->settings()->build_settings(),
+                              *configs_value, scope->GetSourceDir(),
                               ToolchainLabelForScope(scope), &config->configs(),
                               err);
   }
@@ -794,7 +795,7 @@ Value RunNotNeeded(Scope* scope,
       // We don't need the return value, we invoke scope::GetValue only to mark
       // the value as used. Note that we cannot use Scope::MarkUsed because we
       // want to also search in the parent scope.
-      (void) source->GetValue(cur.string_value(), true);
+      (void)source->GetValue(cur.string_value(), true);
     }
     return Value();
   }
@@ -1162,16 +1163,20 @@ Value RunStringJoin(Scope* scope,
 
   // Check usage: separator is a string.
   if (!args[0].VerifyTypeIs(Value::STRING, err)) {
-    *err = Err(function, "separator in string_join(separator, strings) is not "
-               "a string", "Expecting separator argument to be a string.");
+    *err = Err(function,
+               "separator in string_join(separator, strings) is not "
+               "a string",
+               "Expecting separator argument to be a string.");
     return Value();
   }
   const std::string separator = args[0].string_value();
 
   // Check usage: strings is a list.
   if (!args[1].VerifyTypeIs(Value::LIST, err)) {
-    *err = Err(function, "strings in string_join(separator, strings) "
-               "is not a list", "Expecting strings argument to be a list.");
+    *err = Err(function,
+               "strings in string_join(separator, strings) "
+               "is not a list",
+               "Expecting strings argument to be a list.");
     return Value();
   }
   const std::vector<Value> strings = args[1].list_value();
@@ -1313,8 +1318,10 @@ Value RunStringSplit(Scope* scope,
     }
     separator = args[1].string_value();
     if (separator.empty()) {
-      *err = Err(function, "Separator argument to string_split() "
-                 "cannot be empty string", "Usage: string_split(str[, sep])");
+      *err = Err(function,
+                 "Separator argument to string_split() "
+                 "cannot be empty string",
+                 "Usage: string_split(str[, sep])");
       return Value();
     }
   }

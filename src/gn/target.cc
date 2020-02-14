@@ -537,8 +537,7 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
   // Direct dependent libraries.
   if (dep->output_type() == STATIC_LIBRARY ||
       dep->output_type() == SHARED_LIBRARY ||
-      dep->output_type() == SOURCE_SET ||
-      dep->output_type() == RUST_LIBRARY ||
+      dep->output_type() == SOURCE_SET || dep->output_type() == RUST_LIBRARY ||
       dep->output_type() == RUST_PROC_MACRO)
     inherited_libraries_.Append(dep, is_public);
 
@@ -972,8 +971,9 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
 
     // Otherwise, look through the target's deps for the specified one.
     // Canonicalize the label if possible.
-    Label next_label =
-        Label::Resolve(current_dir, settings()->toolchain_label(), next, err);
+    Label next_label = Label::Resolve(
+        current_dir, settings()->build_settings()->root_path_utf8(),
+        settings()->toolchain_label(), next, err);
     if (next_label.is_null()) {
       *err = Err(next.origin(), std::string("Failed to canonicalize ") +
                                     next.string_value() + std::string("."));

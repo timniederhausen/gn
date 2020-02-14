@@ -6,6 +6,7 @@
 #define TOOLS_GN_VISIBILITY_H_
 
 #include <memory>
+#include <string_view>
 #include <vector>
 
 #include "base/macros.h"
@@ -30,7 +31,10 @@ class Visibility {
 
   // Set the visibility to the thing specified by the given value. On failure,
   // returns false and sets the error.
-  bool Set(const SourceDir& current_dir, const Value& value, Err* err);
+  bool Set(const SourceDir& current_dir,
+           const std::string_view& source_root,
+           const Value& value,
+           Err* err);
 
   // Sets the visibility to be public.
   void SetPublic();

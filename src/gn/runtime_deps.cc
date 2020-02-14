@@ -127,7 +127,8 @@ void RecursiveCollectRuntimeDeps(const Target* target,
   }
 }
 
-bool CollectRuntimeDepsFromFlag(const Builder& builder,
+bool CollectRuntimeDepsFromFlag(const BuildSettings* build_settings,
+                                const Builder& builder,
                                 RuntimeDepsVector* files_to_write,
                                 Err* err) {
   std::string deps_target_list_file =
@@ -155,8 +156,9 @@ bool CollectRuntimeDepsFromFlag(const Builder& builder,
            list_contents, "\n", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL)) {
     if (line.empty())
       continue;
-    Label label = Label::Resolve(root_dir, default_toolchain_label,
-                                 Value(nullptr, line), err);
+    Label label =
+        Label::Resolve(root_dir, build_settings->root_path_utf8(),
+                       default_toolchain_label, Value(nullptr, line), err);
     if (err->has_error())
       return false;
 
@@ -292,9 +294,12 @@ RuntimeDepsVector ComputeRuntimeDeps(const Target* target) {
   return result;
 }
 
-bool WriteRuntimeDepsFilesIfNecessary(const Builder& builder, Err* err) {
+bool WriteRuntimeDepsFilesIfNecessary(const BuildSettings* build_settings,
+                                      const Builder& builder,
+                                      Err* err) {
   RuntimeDepsVector files_to_write;
-  if (!CollectRuntimeDepsFromFlag(builder, &files_to_write, err))
+  if (!CollectRuntimeDepsFromFlag(build_settings, builder, &files_to_write,
+                                  err))
     return false;
 
   // Files scheduled by write_runtime_deps.

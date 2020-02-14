@@ -75,8 +75,9 @@ Value RunSetDefaultToolchain(Scope* scope,
 
   if (!EnsureSingleStringArg(function, args, err))
     return Value();
-  Label toolchain_label(
-      Label::Resolve(current_dir, default_toolchain, args[0], err));
+  Label toolchain_label(Label::Resolve(
+      current_dir, scope->settings()->build_settings()->root_path_utf8(),
+      default_toolchain, args[0], err));
   if (toolchain_label.is_null())
     return Value();
 

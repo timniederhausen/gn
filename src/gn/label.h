@@ -35,6 +35,7 @@ class Label {
   // current directory into a fully qualified label. On failure returns an
   // is_null() label and sets the error.
   static Label Resolve(const SourceDir& current_dir,
+                       const std::string_view& source_root,
                        const Label& current_toolchain,
                        const Value& input,
                        Err* err);

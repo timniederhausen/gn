@@ -38,6 +38,7 @@ class LabelPattern {
   // Converts the given input string to a pattern. This does special stuff
   // to treat the pattern as a label. Sets the error on failure.
   static LabelPattern GetPattern(const SourceDir& current_dir,
+                                 const std::string_view& source_root,
                                  const Value& value,
                                  Err* err);
 

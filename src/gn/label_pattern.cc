@@ -63,6 +63,7 @@ LabelPattern::~LabelPattern() = default;
 
 // static
 LabelPattern LabelPattern::GetPattern(const SourceDir& current_dir,
+                                      const std::string_view& source_root,
                                       const Value& value,
                                       Err* err) {
   if (!value.VerifyTypeIs(Value::STRING, err))
@@ -78,7 +79,7 @@ LabelPattern LabelPattern::GetPattern(const SourceDir& current_dir,
   // label resolution code to get all the implicit name stuff.
   size_t star = str.find('*');
   if (star == std::string::npos) {
-    Label label = Label::Resolve(current_dir, Label(), value, err);
+    Label label = Label::Resolve(current_dir, source_root, Label(), value, err);
     if (err->has_error())
       return LabelPattern();
 
@@ -110,8 +111,8 @@ LabelPattern LabelPattern::GetPattern(const SourceDir& current_dir,
 
     // Parse the inside of the parens as a label for a toolchain.
     Value value_for_toolchain(value.origin(), toolchain_string);
-    toolchain_label =
-        Label::Resolve(current_dir, Label(), value_for_toolchain, err);
+    toolchain_label = Label::Resolve(current_dir, source_root, Label(),
+                                     value_for_toolchain, err);
     if (err->has_error())
       return LabelPattern();
 
@@ -180,7 +181,7 @@ LabelPattern LabelPattern::GetPattern(const SourceDir& current_dir,
     }
 
     // Resolve the non-wildcard stuff.
-    dir = current_dir.ResolveRelativeDir(value, path, err);
+    dir = current_dir.ResolveRelativeDir(value, path, err, source_root);
     if (err->has_error())
       return LabelPattern();
   }

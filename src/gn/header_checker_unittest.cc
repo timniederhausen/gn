@@ -404,8 +404,8 @@ TEST_F(HeaderCheckerTest, Friend) {
 
   // List A as a friend of C.
   Err err;
-  c_.friends().push_back(
-      LabelPattern::GetPattern(SourceDir("//"), Value(nullptr, "//a:*"), &err));
+  c_.friends().push_back(LabelPattern::GetPattern(
+      SourceDir("//"), std::string_view(), Value(nullptr, "//a:*"), &err));
   ASSERT_FALSE(err.has_error());
 
   // Must be after setting everything up for it to find the files.

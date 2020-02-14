@@ -49,7 +49,8 @@ bool ExtractListOfRelativeDirs(const BuildSettings* build_settings,
 
 // Extracts the list of labels and their origins to the given vector. Only the
 // labels are filled in, the ptr for each pair in the vector will be null.
-bool ExtractListOfLabels(const Value& value,
+bool ExtractListOfLabels(const BuildSettings* build_settings,
+                         const Value& value,
                          const SourceDir& current_dir,
                          const Label& current_toolchain,
                          LabelTargetVector* dest,
@@ -59,17 +60,20 @@ bool ExtractListOfLabels(const Value& value,
 // version taking Label*Pair, only the labels are filled in, the ptr for each
 // pair in the vector will be null. Sets an error and returns false if a label
 // is maformed or there are duplicates.
-bool ExtractListOfUniqueLabels(const Value& value,
+bool ExtractListOfUniqueLabels(const BuildSettings* build_settings,
+                               const Value& value,
                                const SourceDir& current_dir,
                                const Label& current_toolchain,
                                UniqueVector<Label>* dest,
                                Err* err);
-bool ExtractListOfUniqueLabels(const Value& value,
+bool ExtractListOfUniqueLabels(const BuildSettings* build_settings,
+                               const Value& value,
                                const SourceDir& current_dir,
                                const Label& current_toolchain,
                                UniqueVector<LabelConfigPair>* dest,
                                Err* err);
-bool ExtractListOfUniqueLabels(const Value& value,
+bool ExtractListOfUniqueLabels(const BuildSettings* build_settings,
+                               const Value& value,
                                const SourceDir& current_dir,
                                const Label& current_toolchain,
                                UniqueVector<LabelTargetPair>* dest,
@@ -81,7 +85,8 @@ bool ExtractRelativeFile(const BuildSettings* build_settings,
                          SourceFile* file,
                          Err* err);
 
-bool ExtractListOfLabelPatterns(const Value& value,
+bool ExtractListOfLabelPatterns(const BuildSettings* build_settings,
+                                const Value& value,
                                 const SourceDir& current_dir,
                                 std::vector<LabelPattern>* patterns,
                                 Err* err);

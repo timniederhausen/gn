@@ -7,6 +7,7 @@
 #include "gn/c_tool.h"
 #include "gn/general_tool.h"
 #include "gn/rust_tool.h"
+#include "gn/settings.h"
 #include "gn/target.h"
 
 const char* Tool::kToolNone = "";
@@ -156,7 +157,9 @@ bool Tool::ReadLabel(Scope* scope,
     return true;  // Not present is fine.
 
   Label label =
-      Label::Resolve(scope->GetSourceDir(), current_toolchain, *v, err);
+      Label::Resolve(scope->GetSourceDir(),
+                     scope->settings()->build_settings()->root_path_utf8(),
+                     current_toolchain, *v, err);
   if (err->has_error())
     return false;
 

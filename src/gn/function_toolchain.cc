@@ -221,7 +221,8 @@ Value RunToolchain(Scope* scope,
   // Read deps (if any).
   const Value* deps_value = block_scope.GetValue(variables::kDeps, true);
   if (deps_value) {
-    ExtractListOfLabels(*deps_value, block_scope.GetSourceDir(),
+    ExtractListOfLabels(scope->settings()->build_settings(), *deps_value,
+                        block_scope.GetSourceDir(),
                         ToolchainLabelForScope(&block_scope),
                         &toolchain->deps(), err);
     if (err->has_error())

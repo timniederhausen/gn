@@ -116,8 +116,8 @@ Label AbsoluteOrSourceAbsoluteStringToLabel(const Label& default_toolchain,
                "\"" + s + "\" is not a source-absolute or absolute path.");
     return Label();
   }
-  return Label::Resolve(SourceDir("//"), default_toolchain, Value(nullptr, s),
-                        err);
+  return Label::Resolve(SourceDir("//"), std::string_view(), default_toolchain,
+                        Value(nullptr, s), err);
 }
 
 Err JSONToInputs(const Label& default_toolchain,
