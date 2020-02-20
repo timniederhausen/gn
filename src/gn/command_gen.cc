@@ -42,6 +42,7 @@ const char kSwitchIdeValueVs2019[] = "vs2019";
 const char kSwitchIdeValueWinSdk[] = "winsdk";
 const char kSwitchIdeValueXcode[] = "xcode";
 const char kSwitchIdeValueJson[] = "json";
+const char kSwitchNinjaExecutable[] = "ninja-executable";
 const char kSwitchNinjaExtraArgs[] = "ninja-extra-args";
 const char kSwitchNoDeps[] = "no-deps";
 const char kSwitchRootTarget[] = "root-target";
@@ -237,6 +238,7 @@ bool RunIdeWriter(const std::string& ide,
     bool res = XcodeWriter::RunAndWriteFiles(
         command_line->GetSwitchValueASCII(kSwitchWorkspace),
         command_line->GetSwitchValueASCII(kSwitchRootTarget),
+        command_line->GetSwitchValueASCII(kSwitchNinjaExecutable),
         command_line->GetSwitchValueASCII(kSwitchNinjaExtraArgs),
         command_line->GetSwitchValueASCII(kSwitchFilters), build_settings,
         builder, err);
@@ -374,6 +376,9 @@ Xcode Flags
   --workspace=<file_name>
       Override defaut workspace file name ("all"). The workspace file is
       written to the root build directory.
+
+  --ninja-executable=<string>
+      Can be used to specify the ninja executable to use when building.
 
   --ninja-extra-args=<string>
       This string is passed without any quoting to the ninja invocation
