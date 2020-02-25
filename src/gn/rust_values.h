@@ -8,6 +8,7 @@
 #include <map>
 
 #include "base/containers/flat_map.h"
+#include "gn/inherited_libraries.h"
 #include "gn/label.h"
 #include "gn/source_file.h"
 
@@ -50,11 +51,16 @@ class RustValues {
   }
   std::map<Label, std::string>& aliased_deps() { return aliased_deps_; }
 
+  // Transitive closure of libraries that are depended on by this target
+  InheritedLibraries& transitive_libs() { return rust_libs_; }
+  const InheritedLibraries& transitive_libs() const { return rust_libs_; }
+
  private:
   std::string crate_name_;
   SourceFile crate_root_;
   CrateType crate_type_ = CRATE_AUTO;
   std::map<Label, std::string> aliased_deps_;
+  InheritedLibraries rust_libs_;
 
   DISALLOW_COPY_AND_ASSIGN(RustValues);
 };

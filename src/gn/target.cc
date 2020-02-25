@@ -536,17 +536,36 @@ void Target::PullDependentTargetConfigs() {
 void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
   // Direct dependent libraries.
   if (dep->output_type() == STATIC_LIBRARY ||
-      dep->output_type() == SHARED_LIBRARY ||
-      dep->output_type() == SOURCE_SET || dep->output_type() == RUST_LIBRARY ||
-      dep->output_type() == RUST_PROC_MACRO)
+      dep->output_type() == SHARED_LIBRARY) {
     inherited_libraries_.Append(dep, is_public);
+    rust_values().transitive_libs().Append(dep, is_public);
+  }
 
-  if (dep->output_type() == CREATE_BUNDLE &&
-      dep->bundle_data().is_framework()) {
+  if (dep->output_type() == RUST_LIBRARY ||
+      dep->output_type() == RUST_PROC_MACRO ||
+      dep->output_type() == SOURCE_SET ||
+      (dep->output_type() == CREATE_BUNDLE &&
+       dep->bundle_data().is_framework())) {
     inherited_libraries_.Append(dep, is_public);
   }
 
-  if (dep->output_type() == SHARED_LIBRARY) {
+  if (dep->output_type() == RUST_LIBRARY ||
+      dep->output_type() == RUST_PROC_MACRO) {
+    rust_values().transitive_libs().Append(dep, is_public);
+    rust_values().transitive_libs().AppendInherited(
+        dep->rust_values().transitive_libs(), is_public);
+
+    // If there is a transitive dependency that is not a rust library, place it
+    // in the normal location
+    for (const auto& inherited :
+         rust_values().transitive_libs().GetOrderedAndPublicFlag()) {
+      if (!(inherited.first->output_type() == RUST_LIBRARY ||
+            inherited.first->output_type() == RUST_PROC_MACRO)) {
+        inherited_libraries_.Append(inherited.first,
+                                    is_public && inherited.second);
+      }
+    }
+  } else if (dep->output_type() == SHARED_LIBRARY) {
     // Shared library dependendencies are inherited across public shared
     // library boundaries.
     //
@@ -572,6 +591,8 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     // The current target isn't linked, so propogate linked deps and
     // libraries up the dependency tree.
     inherited_libraries_.AppendInherited(dep->inherited_libraries(), is_public);
+    rust_values().transitive_libs().AppendInherited(
+        dep->rust_values().transitive_libs(), is_public);
   } else if (dep->complete_static_lib()) {
     // Inherit only final targets through _complete_ static libraries.
     //

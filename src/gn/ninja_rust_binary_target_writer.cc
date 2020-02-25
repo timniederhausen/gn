@@ -162,9 +162,17 @@ void NinjaRustBinaryTargetWriter::Run() {
       const ConfigValues& cur = iter.cur();
       for (const auto& e : cur.externs()) {
         if (e.second.is_source_file()) {
-          deps.push_back(OutputFile(settings_->build_settings(),
-                                    e.second.source_file()));
+          deps.push_back(
+              OutputFile(settings_->build_settings(), e.second.source_file()));
         }
+      }
+    }
+
+    std::vector<OutputFile> transitive_rustlibs;
+    for (const auto* dep :
+         target_->rust_values().transitive_libs().GetOrdered()) {
+      if (dep->source_types_used().RustSourceUsed()) {
+        transitive_rustlibs.push_back(dep->dependency_output_file());
       }
     }
 
@@ -178,7 +186,7 @@ void NinjaRustBinaryTargetWriter::Run() {
     std::copy(non_linkable_deps.begin(), non_linkable_deps.end(),
               std::back_inserter(extern_deps));
     WriteExterns(extern_deps);
-    WriteRustdeps(rustdeps, nonrustdeps);
+    WriteRustdeps(transitive_rustlibs, rustdeps, nonrustdeps);
   }
 }
 
@@ -235,12 +243,14 @@ void NinjaRustBinaryTargetWriter::WriteExterns(
 }
 
 void NinjaRustBinaryTargetWriter::WriteRustdeps(
+    const std::vector<OutputFile>& transitive_rustdeps,
     const std::vector<OutputFile>& rustdeps,
     const std::vector<OutputFile>& nonrustdeps) {
   out_ << "  rustdeps =";
 
   // Rust dependencies.
-  for (const auto& rustdep : rustdeps) {
+  for (const auto& rustdep : transitive_rustdeps) {
+    // TODO switch to using --extern priv: after stabilization
     out_ << " -Ldependency=";
     path_output_.WriteDir(
         out_, rustdep.AsSourceFile(settings_->build_settings()).GetDir(),

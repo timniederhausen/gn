@@ -33,9 +33,9 @@ const RustTool* RustTool::AsRust() const {
 }
 
 bool RustTool::ValidateName(const char* name) const {
-  return name == kRsToolBin || name == kRsToolCDylib ||
-         name == kRsToolDylib || name == kRsToolMacro ||
-         name == kRsToolRlib || name == kRsToolStaticlib;
+  return name == kRsToolBin || name == kRsToolCDylib || name == kRsToolDylib ||
+         name == kRsToolMacro || name == kRsToolRlib ||
+         name == kRsToolStaticlib;
 }
 
 void RustTool::SetComplete() {
@@ -105,9 +105,9 @@ bool RustTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
 }
 
 bool RustTool::ValidateSubstitution(const Substitution* sub_type) const {
-  if (name_ == kRsToolBin || name_ == kRsToolCDylib ||
-      name_ == kRsToolDylib || name_ == kRsToolMacro ||
-      name_ == kRsToolRlib || name_ == kRsToolStaticlib)
+  if (name_ == kRsToolBin || name_ == kRsToolCDylib || name_ == kRsToolDylib ||
+      name_ == kRsToolMacro || name_ == kRsToolRlib ||
+      name_ == kRsToolStaticlib)
     return IsValidRustSubstitution(sub_type);
   NOTREACHED();
   return false;
