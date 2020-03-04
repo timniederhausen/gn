@@ -152,15 +152,22 @@ bool IsXCTestFile(const SourceFile& file) {
 }
 
 const Target* FindApplicationTargetByName(
+    const ParseNode* node,
     const std::string& target_name,
-    const std::vector<const Target*>& targets) {
+    const std::vector<const Target*>& targets,
+    Err* err) {
   for (const Target* target : targets) {
     if (target->label().name() == target_name) {
-      DCHECK(IsApplicationTarget(target));
+      if (!IsApplicationTarget(target)) {
+        *err = Err(node, "host application target \"" + target_name +
+                             "\" not an application bundle");
+        return nullptr;
+      }
       return target;
     }
   }
-  NOTREACHED();
+  *err =
+      Err(node, "cannot find host application bundle \"" + target_name + "\"");
   return nullptr;
 }
 
@@ -179,16 +186,21 @@ void AddPBXTargetDependency(const PBXTarget* base_pbxtarget,
 
 // Adds the corresponding test application target as dependency of xctest or
 // xcuitest module target in the generated Xcode project.
-void AddDependencyTargetForTestModuleTargets(
+bool AddDependencyTargetForTestModuleTargets(
     const std::vector<const Target*>& targets,
     const TargetToPBXTarget& bundle_target_to_pbxtarget,
-    const PBXProject* project) {
+    const PBXProject* project,
+    Err* err) {
   for (const Target* target : targets) {
     if (!IsXCTestModuleTarget(target) && !IsXCUITestModuleTarget(target))
       continue;
 
     const Target* test_application_target = FindApplicationTargetByName(
-        target->bundle_data().xcode_test_application_name(), targets);
+        target->defined_from(),
+        target->bundle_data().xcode_test_application_name(), targets, err);
+    if (!test_application_target)
+      return false;
+
     const PBXTarget* test_application_pbxtarget =
         bundle_target_to_pbxtarget.at(test_application_target);
     PBXTarget* module_pbxtarget = bundle_target_to_pbxtarget.at(target);
@@ -198,6 +210,8 @@ void AddDependencyTargetForTestModuleTargets(
     AddPBXTargetDependency(test_application_pbxtarget, module_pbxtarget,
                            project);
   }
+
+  return true;
 }
 
 // Searches the list of xctest files recursively under |target|.
@@ -405,10 +419,12 @@ bool XcodeWriter::RunAndWriteFiles(const std::string& workspace_name,
   }
 
   XcodeWriter workspace(workspace_name);
-  workspace.CreateProductsProject(targets, all_targets, attributes, source_path,
-                                  config_name, root_target_name,
-                                  ninja_executable, ninja_extra_args,
-                                  build_settings, target_os);
+  if (!workspace.CreateProductsProject(
+          targets, all_targets, attributes, source_path, config_name,
+          root_target_name, ninja_executable, ninja_extra_args, build_settings,
+          target_os, err)) {
+    return false;
+  }
 
   return workspace.WriteFiles(build_settings, err);
 }
@@ -474,7 +490,7 @@ bool XcodeWriter::FilterTargets(const BuildSettings* build_settings,
   return true;
 }
 
-void XcodeWriter::CreateProductsProject(
+bool XcodeWriter::CreateProductsProject(
     const std::vector<const Target*>& targets,
     const std::vector<const Target*>& all_targets,
     const PBXAttributes& attributes,
@@ -484,7 +500,8 @@ void XcodeWriter::CreateProductsProject(
     const std::string& ninja_executable,
     const std::string& ninja_extra_args,
     const BuildSettings* build_settings,
-    TargetOsType target_os) {
+    TargetOsType target_os,
+    Err* err) {
   std::unique_ptr<PBXProject> main_project(
       new PBXProject("products", config_name, source_path, attributes));
 
@@ -563,11 +580,14 @@ void XcodeWriter::CreateProductsProject(
         const Target* target_with_xctest_files = nullptr;
         if (IsXCTestModuleTarget(target)) {
           target_with_xctest_files = FindApplicationTargetByName(
-              target->bundle_data().xcode_test_application_name(), targets);
-        } else if (IsXCUITestModuleTarget(target)) {
-          target_with_xctest_files = target;
+              target->defined_from(),
+              target->bundle_data().xcode_test_application_name(), targets,
+              err);
+          if (!target_with_xctest_files)
+            return false;
         } else {
-          NOTREACHED();
+          DCHECK(IsXCUITestModuleTarget(target));
+          target_with_xctest_files = target;
         }
 
         SearchXCTestFilesForTarget(target_with_xctest_files,
@@ -592,10 +612,14 @@ void XcodeWriter::CreateProductsProject(
   // Adding the corresponding test application target as a dependency of xctest
   // or xcuitest module target in the generated Xcode project so that the
   // application target is re-compiled when compiling the test module target.
-  AddDependencyTargetForTestModuleTargets(
-      bundle_targets, bundle_target_to_pbxtarget, main_project.get());
+  if (!AddDependencyTargetForTestModuleTargets(bundle_targets,
+                                               bundle_target_to_pbxtarget,
+                                               main_project.get(), err)) {
+    return false;
+  }
 
   projects_.push_back(std::move(main_project));
+  return true;
 }
 
 bool XcodeWriter::WriteFiles(const BuildSettings* build_settings, Err* err) {
