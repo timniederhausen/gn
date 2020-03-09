@@ -351,10 +351,12 @@ bool VisualStudioWriter::RunAndWriteFiles(const BuildSettings* build_settings,
 
   for (const Target* target : targets) {
     // Skip actions and bundle targets.
-    if (target->output_type() == Target::COPY_FILES ||
-        target->output_type() == Target::ACTION ||
+    if (target->output_type() == Target::ACTION ||
         target->output_type() == Target::ACTION_FOREACH ||
-        target->output_type() == Target::BUNDLE_DATA) {
+        target->output_type() == Target::BUNDLE_DATA ||
+        target->output_type() == Target::COPY_FILES ||
+        target->output_type() == Target::CREATE_BUNDLE ||
+        target->output_type() == Target::GENERATED_FILE) {
       continue;
     }
 
