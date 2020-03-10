@@ -12,82 +12,66 @@
 #include <vector>
 
 #include "base/macros.h"
+#include "gn/xcode_object.h"
 
 class Builder;
 class BuildSettings;
 class Err;
-class Target;
 
-using PBXAttributes = std::map<std::string, std::string>;
-class PBXProject;
-
+// Writes an Xcode workspace to build and debug code.
 class XcodeWriter {
  public:
-  enum TargetOsType {
-    WRITER_TARGET_OS_IOS,
-    WRITER_TARGET_OS_MACOS,
+  // Controls some parameters and behaviour of the RunAndWriteFiles().
+  struct Options {
+    // Name of the generated workspace file. Defaults to "all" is empty.
+    std::string workspace_name;
+
+    // Name of the ninja target to use for the "All" target in the generated
+    // project. If empty, no target will be passed to ninja which will thus
+    // try to build all defined targets.
+    std::string root_target_name;
+
+    // Name of the ninja executable. Defaults to "ninja" is empty.
+    std::string ninja_executable;
+
+    // Extra parameters to pass to ninja. Deprecated.
+    std::string ninja_extra_args;
+
+    // If specified, should be a semicolon-separated list of label patterns.
+    // It will be used to filter the list of targets generated in the project
+    // (in the same way that the other filtering is done, source and header
+    // files for those target will still be listed in the generated project).
+    std::string dir_filters_string;
   };
 
-  // Writes Xcode workspace and project files.
+  // Writes an Xcode workspace with a single project file.
   //
-  // |workspace_name| is the optional name of the workspace file name ("all"
-  // is used if not specified). |root_target_name| is the name of the main
-  // target corresponding to building "All" (for example "gn_all" in Chromium).
-  // |ninja_executable| can be used to control which ninja executable will be
-  // run. When empty, regular ninja will be used.
-  // |ninja_extra_args| are additional arguments to pass to ninja invocation
-  // (can be used to increase limit of concurrent processes when using goma).
-  // |dir_filters_string| is optional semicolon-separated list of label patterns
-  // used to limit the set of generated projects. Only matching targets will be
-  // included to the workspace. On failure will populate |err| and return false.
-  static bool RunAndWriteFiles(const std::string& workspace_name,
-                               const std::string& root_target_name,
-                               const std::string& ninja_executable,
-                               const std::string& ninja_extra_args,
-                               const std::string& dir_filters_string,
-                               const BuildSettings* build_settings,
+  // The project will lists all files referenced for the build (including the
+  // sources, headers and some supporting files). The project can be used to
+  // build, develop and debug from Xcode (though adding files, changing build
+  // settings, etc. still needs to be done via BUILD.gn files).
+  //
+  // The list of targets is filtered to only include relevant targets for
+  // debugging (mostly binaries and bundles) so it is not possible to build
+  // individuals targets (i.e. source_set) via Xcode. This filtering is done
+  // to improve the performances when loading the solution in Xcode (project
+  // like Chromium cannot be opened if all targets are generated).
+  //
+  // The source and header files are still listed in the generated generated
+  // Xcode project, even if the target they are defined in are filtered (not
+  // doing so would make it less pleasant to use Xcode to debug without any
+  // significant performance improvement).
+  //
+  // Extra behaviour is controlled by the |options| parameter. See comments
+  // of the Options type for more informations.
+  //
+  // Returns true on success, fails on failure. |err| is set in that case.
+  static bool RunAndWriteFiles(const BuildSettings* build_settings,
                                const Builder& builder,
+                               Options options,
                                Err* err);
 
  private:
-  XcodeWriter(const std::string& name);
-  ~XcodeWriter();
-
-  // Filters the list of targets to only return the targets with artifacts
-  // usable from Xcode (mostly application bundles). On failure populate |err|
-  // and return false.
-  static bool FilterTargets(const BuildSettings* build_settings,
-                            const std::vector<const Target*>& all_targets,
-                            const std::string& dir_filters_string,
-                            std::vector<const Target*>* targets,
-                            Err* err);
-
-  // Generate the "products.xcodeproj" project that reference all products
-  // (i.e. targets that have a build artefact usable from Xcode, mostly
-  // application bundles).
-  bool CreateProductsProject(const std::vector<const Target*>& targets,
-                             const std::vector<const Target*>& all_targets,
-                             const PBXAttributes& attributes,
-                             const std::string& source_path,
-                             const std::string& config_name,
-                             const std::string& root_target,
-                             const std::string& ninja_executable,
-                             const std::string& ninja_extra_args,
-                             const BuildSettings* build_settings,
-                             TargetOsType target_os,
-                             Err* err);
-
-  bool WriteFiles(const BuildSettings* build_settings, Err* err);
-  bool WriteProjectFile(const BuildSettings* build_settings,
-                        PBXProject* project,
-                        Err* err);
-
-  void WriteWorkspaceContent(std::ostream& out);
-  void WriteProjectContent(std::ostream& out, PBXProject* project);
-
-  std::string name_;
-  std::vector<std::unique_ptr<PBXProject>> projects_;
-
   DISALLOW_COPY_AND_ASSIGN(XcodeWriter);
 };
 

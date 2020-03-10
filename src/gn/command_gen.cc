@@ -53,6 +53,18 @@ const char kSwitchJsonIdeScript[] = "json-ide-script";
 const char kSwitchJsonIdeScriptArgs[] = "json-ide-script-args";
 const char kSwitchExportCompileCommands[] = "export-compile-commands";
 
+// Extracts extra parameters for XcodeWriter from command-line flags.
+XcodeWriter::Options XcodeWriterOptionsFromCommandLine(
+    const base::CommandLine& command_line) {
+  return {
+      command_line.GetSwitchValueASCII(kSwitchWorkspace),
+      command_line.GetSwitchValueASCII(kSwitchRootTarget),
+      command_line.GetSwitchValueASCII(kSwitchNinjaExecutable),
+      command_line.GetSwitchValueASCII(kSwitchNinjaExtraArgs),
+      command_line.GetSwitchValueASCII(kSwitchFilters),
+  };
+}
+
 // Collects Ninja rules for each toolchain. The lock protectes the rules.
 struct TargetWriteInfo {
   std::mutex lock;
@@ -236,12 +248,8 @@ bool RunIdeWriter(const std::string& ide,
     return res;
   } else if (ide == kSwitchIdeValueXcode) {
     bool res = XcodeWriter::RunAndWriteFiles(
-        command_line->GetSwitchValueASCII(kSwitchWorkspace),
-        command_line->GetSwitchValueASCII(kSwitchRootTarget),
-        command_line->GetSwitchValueASCII(kSwitchNinjaExecutable),
-        command_line->GetSwitchValueASCII(kSwitchNinjaExtraArgs),
-        command_line->GetSwitchValueASCII(kSwitchFilters), build_settings,
-        builder, err);
+        build_settings, builder,
+        XcodeWriterOptionsFromCommandLine(*command_line), err);
     if (res && !quiet) {
       OutputString("Generating Xcode projects took " +
                    base::Int64ToString(timer.Elapsed().InMilliseconds()) +

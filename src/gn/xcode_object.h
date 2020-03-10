@@ -82,6 +82,18 @@ class PBXObjectVisitor {
   DISALLOW_COPY_AND_ASSIGN(PBXObjectVisitor);
 };
 
+// PBXObjectVisitorConst ------------------------------------------------------
+
+class PBXObjectVisitorConst {
+ public:
+  PBXObjectVisitorConst();
+  virtual ~PBXObjectVisitorConst();
+  virtual void Visit(const PBXObject* object) = 0;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(PBXObjectVisitorConst);
+};
+
 // PBXObject ------------------------------------------------------------------
 
 class PBXObject {
@@ -98,6 +110,7 @@ class PBXObject {
   virtual std::string Name() const = 0;
   virtual std::string Comment() const;
   virtual void Visit(PBXObjectVisitor& visitor);
+  virtual void Visit(PBXObjectVisitorConst& visitor) const;
   virtual void Print(std::ostream& out, unsigned indent) const = 0;
 
  private:
@@ -132,6 +145,7 @@ class PBXTarget : public PBXObject {
   // PBXObject implementation.
   std::string Name() const override;
   void Visit(PBXObjectVisitor& visitor) override;
+  void Visit(PBXObjectVisitorConst& visitor) const override;
 
  protected:
   std::unique_ptr<XCConfigurationList> configurations_;
@@ -193,7 +207,6 @@ class PBXContainerItemProxy : public PBXObject {
   // PBXObject implementation.
   PBXObjectClass Class() const override;
   std::string Name() const override;
-  void Visit(PBXObjectVisitor& visitor) override;
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:
@@ -263,6 +276,7 @@ class PBXGroup : public PBXObject {
   PBXObjectClass Class() const override;
   std::string Name() const override;
   void Visit(PBXObjectVisitor& visitor) override;
+  void Visit(PBXObjectVisitorConst& visitor) const override;
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:
@@ -339,6 +353,7 @@ class PBXProject : public PBXObject {
   std::string Name() const override;
   std::string Comment() const override;
   void Visit(PBXObjectVisitor& visitor) override;
+  void Visit(PBXObjectVisitorConst& visitor) const override;
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:
@@ -391,6 +406,7 @@ class PBXSourcesBuildPhase : public PBXBuildPhase {
   PBXObjectClass Class() const override;
   std::string Name() const override;
   void Visit(PBXObjectVisitor& visitor) override;
+  void Visit(PBXObjectVisitorConst& visitor) const override;
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:
@@ -411,6 +427,7 @@ class PBXTargetDependency : public PBXObject {
   PBXObjectClass Class() const override;
   std::string Name() const override;
   void Visit(PBXObjectVisitor& visitor) override;
+  void Visit(PBXObjectVisitorConst& visitor) const override;
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:
@@ -453,6 +470,7 @@ class XCConfigurationList : public PBXObject {
   PBXObjectClass Class() const override;
   std::string Name() const override;
   void Visit(PBXObjectVisitor& visitor) override;
+  void Visit(PBXObjectVisitorConst& visitor) const override;
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:

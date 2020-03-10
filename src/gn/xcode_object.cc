@@ -278,6 +278,12 @@ PBXObjectVisitor::PBXObjectVisitor() = default;
 
 PBXObjectVisitor::~PBXObjectVisitor() = default;
 
+// PBXObjectVisitorConst ------------------------------------------------------
+
+PBXObjectVisitorConst::PBXObjectVisitorConst() = default;
+
+PBXObjectVisitorConst::~PBXObjectVisitorConst() = default;
+
 // PBXObject ------------------------------------------------------------------
 
 PBXObject::PBXObject() = default;
@@ -303,6 +309,10 @@ std::string PBXObject::Comment() const {
 }
 
 void PBXObject::Visit(PBXObjectVisitor& visitor) {
+  visitor.Visit(this);
+}
+
+void PBXObject::Visit(PBXObjectVisitorConst& visitor) const {
   visitor.Visit(this);
 }
 
@@ -338,6 +348,15 @@ std::string PBXTarget::Name() const {
 }
 
 void PBXTarget::Visit(PBXObjectVisitor& visitor) {
+  PBXObject::Visit(visitor);
+  configurations_->Visit(visitor);
+  for (const auto& dependency : dependencies_)
+    dependency->Visit(visitor);
+  for (const auto& build_phase : build_phases_)
+    build_phase->Visit(visitor);
+}
+
+void PBXTarget::Visit(PBXObjectVisitorConst& visitor) const {
   PBXObject::Visit(visitor);
   configurations_->Visit(visitor);
   for (const auto& dependency : dependencies_)
@@ -419,10 +438,6 @@ PBXContainerItemProxy::~PBXContainerItemProxy() = default;
 
 PBXObjectClass PBXContainerItemProxy::Class() const {
   return PBXContainerItemProxyClass;
-}
-
-void PBXContainerItemProxy::Visit(PBXObjectVisitor& visitor) {
-  PBXObject::Visit(visitor);
 }
 
 std::string PBXContainerItemProxy::Name() const {
@@ -584,6 +599,13 @@ std::string PBXGroup::Name() const {
 }
 
 void PBXGroup::Visit(PBXObjectVisitor& visitor) {
+  PBXObject::Visit(visitor);
+  for (const auto& child : children_) {
+    child->Visit(visitor);
+  }
+}
+
+void PBXGroup::Visit(PBXObjectVisitorConst& visitor) const {
   PBXObject::Visit(visitor);
   for (const auto& child : children_) {
     child->Visit(visitor);
@@ -803,6 +825,14 @@ void PBXProject::Visit(PBXObjectVisitor& visitor) {
   }
 }
 
+void PBXProject::Visit(PBXObjectVisitorConst& visitor) const {
+  PBXObject::Visit(visitor);
+  configurations_->Visit(visitor);
+  main_group_->Visit(visitor);
+  for (const auto& target : targets_) {
+    target->Visit(visitor);
+  }
+}
 void PBXProject::Print(std::ostream& out, unsigned indent) const {
   const std::string indent_str(indent, '\t');
   const IndentRules rules = {false, indent + 1};
@@ -882,6 +912,13 @@ void PBXSourcesBuildPhase::Visit(PBXObjectVisitor& visitor) {
   }
 }
 
+void PBXSourcesBuildPhase::Visit(PBXObjectVisitorConst& visitor) const {
+  PBXBuildPhase::Visit(visitor);
+  for (const auto& file : files_) {
+    file->Visit(visitor);
+  }
+}
+
 void PBXSourcesBuildPhase::Print(std::ostream& out, unsigned indent) const {
   const std::string indent_str(indent, '\t');
   const IndentRules rules = {false, indent + 1};
@@ -903,13 +940,21 @@ PBXTargetDependency::~PBXTargetDependency() = default;
 PBXObjectClass PBXTargetDependency::Class() const {
   return PBXTargetDependencyClass;
 }
+
 std::string PBXTargetDependency::Name() const {
   return "PBXTargetDependency";
 }
+
 void PBXTargetDependency::Visit(PBXObjectVisitor& visitor) {
   PBXObject::Visit(visitor);
   container_item_proxy_->Visit(visitor);
 }
+
+void PBXTargetDependency::Visit(PBXObjectVisitorConst& visitor) const {
+  PBXObject::Visit(visitor);
+  container_item_proxy_->Visit(visitor);
+}
+
 void PBXTargetDependency::Print(std::ostream& out, unsigned indent) const {
   const std::string indent_str(indent, '\t');
   const IndentRules rules = {false, indent + 1};
@@ -972,6 +1017,13 @@ std::string XCConfigurationList::Name() const {
 }
 
 void XCConfigurationList::Visit(PBXObjectVisitor& visitor) {
+  PBXObject::Visit(visitor);
+  for (const auto& configuration : configurations_) {
+    configuration->Visit(visitor);
+  }
+}
+
+void XCConfigurationList::Visit(PBXObjectVisitorConst& visitor) const {
   PBXObject::Visit(visitor);
   for (const auto& configuration : configurations_) {
     configuration->Visit(visitor);
