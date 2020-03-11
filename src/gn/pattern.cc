@@ -6,6 +6,40 @@
 
 #include "gn/value.h"
 
+const char kFilePattern_Help[] =
+    R"*(File patterns
+
+  File patterns are VERY limited regular expressions. They must match the
+  entire input string to be counted as a match. In regular expression parlance,
+  there is an implicit "^...$" surrounding your input. If you want to match a
+  substring, you need to use wildcards at the beginning and end.
+
+  There are only two special tokens understood by the pattern matcher.
+  Everything else is a literal.
+
+   - "*" Matches zero or more of any character. It does not depend on the
+     preceding character (in regular expression parlance it is equivalent to
+     ".*").
+
+   - "\b" Matches a path boundary. This will match the beginning or end of a
+     string, or a slash.
+
+Pattern examples
+
+  "*asdf*"
+      Matches a string containing "asdf" anywhere.
+
+  "asdf"
+      Matches only the exact string "asdf".
+
+  "*.cc"
+      Matches strings ending in the literal ".cc".
+
+  "\bwin/*"
+      Matches "win/foo" and "foo/win/bar.cc" but not "iwin/foo".
+
+)*";
+
 namespace {
 
 void ParsePattern(const std::string& s, std::vector<Pattern::Subrange>* out) {

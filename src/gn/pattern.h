@@ -12,6 +12,8 @@
 
 #include "gn/value.h"
 
+extern const char kFilePattern_Help[];
+
 class Pattern {
  public:
   struct Subrange {

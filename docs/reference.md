@@ -39,6 +39,8 @@
     *   [declare_args: Declare build arguments.](#func_declare_args)
     *   [defined: Returns whether an identifier is defined.](#func_defined)
     *   [exec_script: Synchronously run a script and return the output.](#func_exec_script)
+    *   [filter_exclude: Remove values that match a set of patterns.](#func_filter_exclude)
+    *   [filter_include: Remove values that do not match a set of patterns.](#func_filter_include)
     *   [foreach: Iterate over a list.](#func_foreach)
     *   [forward_variables_from: Copies variables from a different scope.](#func_forward_variables_from)
     *   [get_label_info: Get an attribute from a target's label.](#func_get_label_info)
@@ -158,6 +160,7 @@
     *   [execution: Build graph and execution overview.](#execution)
     *   [grammar: Language and grammar for GN build files.](#grammar)
     *   [input_conversion: Processing input from exec_script and read_file.](#io_conversion)
+    *   [file_pattern: Matching more than one file.](#file_pattern)
     *   [label_pattern: Matching more than one label.](#label_pattern)
     *   [labels: About labels.](#labels)
     *   [metadata_collection: About metadata and its collection.](#metadata_collection)
@@ -748,6 +751,9 @@
   --workspace=<file_name>
       Override defaut workspace file name ("all"). The workspace file is
       written to the root build directory.
+
+  --ninja-executable=<string>
+      Can be used to specify the ninja executable to use when building.
 
   --ninja-extra-args=<string>
       This string is passed without any quoting to the ninja invocation
@@ -2249,6 +2255,42 @@
   # result.
   exec_script("//foo/bar/myscript.py")
 ```
+### <a name="func_filter_exclude"></a>**filter_exclude**: Remove values that match a set of patterns.
+
+```
+  filter_exclude(values, exclude_patterns)
+
+  The argument values must be a list of strings.
+
+  The argument exclude_patterns must be a list of file patterns (see
+  "gn help file_pattern"). Any elements in values matching at least one
+  of those patterns will be excluded.
+```
+
+#### **Examples**
+```
+  values = [ "foo.cc", "foo.h", "foo.proto" ]
+  result = filter_exclude(values, [ "*.proto" ])
+  # result will be [ "foo.cc", "foo.h" ]
+```
+### <a name="func_filter_include"></a>**filter_include**: Remove values that do not match a set of patterns.
+
+```
+  filter_include(values, include_patterns)
+
+  The argument values must be a list of strings.
+
+  The argument include_patterns must be a list of file patterns (see
+  "gn help file_pattern"). Only elements from values matching at least
+  one of the pattern will be included.
+```
+
+#### **Examples**
+```
+  values = [ "foo.cc", "foo.h", "foo.proto" ]
+  result = filter_include(values, [ "*.proto" ])
+  # result will be [ "foo.proto" ]
+```
 ### <a name="func_foreach"></a>**foreach**: Iterate over a list.
 
 ```
@@ -2956,42 +2998,9 @@
 
   If you want to bypass the filter and add a file even if it might be filtered
   out, call set_sources_assignment_filter([]) to clear the list of filters.
-  This will apply until the current scope exits
-```
+  This will apply until the current scope exits.
 
-#### **How to use patterns**
-
-```
-  File patterns are VERY limited regular expressions. They must match the
-  entire input string to be counted as a match. In regular expression parlance,
-  there is an implicit "^...$" surrounding your input. If you want to match a
-  substring, you need to use wildcards at the beginning and end.
-
-  There are only two special tokens understood by the pattern matcher.
-  Everything else is a literal.
-
-   - "*" Matches zero or more of any character. It does not depend on the
-     preceding character (in regular expression parlance it is equivalent to
-     ".*").
-
-   - "\b" Matches a path boundary. This will match the beginning or end of a
-     string, or a slash.
-```
-
-#### **Pattern examples**
-
-```
-  "*asdf*"
-      Matches a string containing "asdf" anywhere.
-
-  "asdf"
-      Matches only the exact string "asdf".
-
-  "*.cc"
-      Matches strings ending in the literal ".cc".
-
-  "\bwin/*"
-      Matches "win/foo" and "foo/win/bar.cc" but not "iwin/foo".
+  See "gn help file_pattern" for more information on file pattern.
 ```
 
 #### **Sources assignment example**
@@ -6957,6 +6966,40 @@
 
       Note that "trim value" is useless because the value parser skips
       whitespace anyway.
+```
+### <a name="file_pattern"></a>**File patterns**
+
+```
+  File patterns are VERY limited regular expressions. They must match the
+  entire input string to be counted as a match. In regular expression parlance,
+  there is an implicit "^...$" surrounding your input. If you want to match a
+  substring, you need to use wildcards at the beginning and end.
+
+  There are only two special tokens understood by the pattern matcher.
+  Everything else is a literal.
+
+   - "*" Matches zero or more of any character. It does not depend on the
+     preceding character (in regular expression parlance it is equivalent to
+     ".*").
+
+   - "\b" Matches a path boundary. This will match the beginning or end of a
+     string, or a slash.
+```
+
+#### **Pattern examples**
+
+```
+  "*asdf*"
+      Matches a string containing "asdf" anywhere.
+
+  "asdf"
+      Matches only the exact string "asdf".
+
+  "*.cc"
+      Matches strings ending in the literal ".cc".
+
+  "\bwin/*"
+      Matches "win/foo" and "foo/win/bar.cc" but not "iwin/foo".
 ```
 ### <a name="label_pattern"></a>**Label patterns**
 
