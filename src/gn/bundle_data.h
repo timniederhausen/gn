@@ -74,6 +74,9 @@ class BundleData {
   // Performs GetBundleRootDirOutput but returns the result as a directory.
   SourceDir GetBundleRootDirOutputAsDir(const Settings* settings) const;
 
+  // Returns directory where bundle is
+  SourceDir GetBundleDir(const Settings* settings) const;
+
   // Returns the list of inputs for the compilation of the asset catalog.
   SourceFiles& assets_catalog_sources() { return assets_catalog_sources_; }
   const SourceFiles& assets_catalog_sources() const {

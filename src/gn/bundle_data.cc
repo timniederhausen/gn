@@ -187,3 +187,7 @@ SourceDir BundleData::GetBundleRootDirOutputAsDir(
     const Settings* settings) const {
   return SourceDir(GetBundleRootDirOutput(settings).value());
 }
+
+SourceDir BundleData::GetBundleDir(const Settings* settings) const{
+  return GetBundleRootDirOutput(settings).GetDir();
+}

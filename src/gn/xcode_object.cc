@@ -784,6 +784,7 @@ PBXNativeTarget* PBXProject::AddNativeTarget(
     const std::string& type,
     const std::string& output_name,
     const std::string& output_type,
+    const std::string& output_dir,
     const std::string& shell_script,
     const PBXAttributes& extra_attributes) {
   std::string_view ext = FindExtension(&output_name);
@@ -805,7 +806,8 @@ PBXNativeTarget* PBXProject::AddNativeTarget(
 
   PBXAttributes attributes = extra_attributes;
   attributes["CODE_SIGNING_REQUIRED"] = "NO";
-  attributes["CONFIGURATION_BUILD_DIR"] = ".";
+
+  attributes["CONFIGURATION_BUILD_DIR"] = output_dir;
   attributes["PRODUCT_NAME"] = product_name;
 
   targets_.push_back(std::make_unique<PBXNativeTarget>(

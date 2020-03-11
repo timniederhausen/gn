@@ -742,11 +742,15 @@ PBXNativeTarget* XcodeProject::AddBinaryTarget(const Target* target,
                                                Err* err) {
   DCHECK_EQ(target->output_type(), Target::EXECUTABLE);
 
+  const std::string output_dir = RebasePath(target->output_dir().value(),
+      build_settings_->build_dir());
+
   return project_.AddNativeTarget(
       target->label().name(), "compiled.mach-o.executable",
       target->output_name().empty() ? target->label().name()
                                     : target->output_name(),
       "com.apple.product-type.tool",
+      output_dir,
       GetBuildScript(target->label().name(), options_.ninja_executable,
                      options_.ninja_extra_args, env));
 }
@@ -769,9 +773,14 @@ PBXNativeTarget* XcodeProject::AddBundleTarget(const Target* target,
   const std::string& target_output_name = RebasePath(
       target->bundle_data().GetBundleRootDirOutput(target->settings()).value(),
       build_settings_->build_dir());
+  const std::string output_dir = RebasePath(target->bundle_data()
+          .GetBundleDir(target->settings())
+          .value(),
+      build_settings_->build_dir());
   return project_.AddNativeTarget(
       pbxtarget_name, std::string(), target_output_name,
       target->bundle_data().product_type(),
+      output_dir,
       GetBuildScript(pbxtarget_name, options_.ninja_executable,
                      options_.ninja_extra_args, env),
       xcode_extra_attributes);
