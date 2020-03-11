@@ -6,6 +6,8 @@
 
 #include "util/test/test.h"
 
+#include <algorithm>
+#include <array>
 #include <set>
 #include <string>
 #include <vector>
@@ -78,8 +80,20 @@ TEST(StringAtomTest, FastSet) {
   auto bar_ret = set.insert(std::string_view("bar"));
   auto zoo_ret = set.insert(std::string_view("zoo"));
 
+  auto atom_to_ptr = [](const StringAtom& atom) -> const std::string* {
+    return &atom.str();
+  };
+
+  EXPECT_TRUE(foo_ret.second);
+  EXPECT_TRUE(bar_ret.second);
+  EXPECT_TRUE(zoo_ret.second);
+
+  const std::string* foo_ptr = atom_to_ptr(*foo_ret.first);
+  const std::string* bar_ptr = atom_to_ptr(*bar_ret.first);
+  const std::string* zoo_ptr = atom_to_ptr(*zoo_ret.first);
+
   StringAtom foo_key("foo");
-  EXPECT_EQ(*foo_ret.first, foo_key);
+  EXPECT_EQ(foo_ptr, atom_to_ptr(foo_key));
 
   auto foo_it = set.find(foo_key);
   EXPECT_NE(foo_it, set.end());
@@ -89,16 +103,26 @@ TEST(StringAtomTest, FastSet) {
   EXPECT_EQ(set.find(std::string_view("zoo")), zoo_ret.first);
 
   // Fast sets are ordered according to the key pointer.
-  // Because of the underlying bump allocator, addresses
-  // for the first three inserts are in increasing order.
+  // Even though a bump allocator is used to allocate AtomString
+  // strings, there is no guarantee that the global StringAtom
+  // set was not already populated by a different test previously,
+  // which means the pointers value need to be sorted before
+  // iterating over the set for comparison.
+  std::array<const std::string*, 3> ptrs = {
+      foo_ptr,
+      bar_ptr,
+      zoo_ptr,
+  };
+  std::sort(ptrs.begin(), ptrs.end());
+
   auto it = set.begin();
-  EXPECT_EQ(it, foo_ret.first);
+  EXPECT_EQ(atom_to_ptr(*it), ptrs[0]);
   ++it;
 
-  EXPECT_EQ(it, bar_ret.first);
+  EXPECT_EQ(atom_to_ptr(*it), ptrs[1]);
   ++it;
 
-  EXPECT_EQ(it, zoo_ret.first);
+  EXPECT_EQ(atom_to_ptr(*it), ptrs[2]);
   ++it;
 
   EXPECT_EQ(it, set.end());
