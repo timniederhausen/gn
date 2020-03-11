@@ -25,6 +25,9 @@
 #include "gn/commands.h"
 #include "gn/deps_iterator.h"
 #include "gn/filesystem_utils.h"
+#include "gn/item.h"
+#include "gn/loader.h"
+#include "gn/scheduler.h"
 #include "gn/settings.h"
 #include "gn/source_file.h"
 #include "gn/target.h"
@@ -430,6 +433,9 @@ class XcodeProject {
   // Generates the content of the .xcodeproj file into |out|.
   void WriteFileContent(std::ostream& out) const;
 
+  // Returns whether the file should be added to the project.
+  bool ShouldIncludeFileInProject(const SourceFile& source) const;
+
   const BuildSettings* build_settings_;
   XcodeWriter::Options options_;
   PBXProject project_;
@@ -447,32 +453,74 @@ XcodeProject::XcodeProject(const BuildSettings* build_settings,
 
 XcodeProject::~XcodeProject() = default;
 
+bool XcodeProject::ShouldIncludeFileInProject(const SourceFile& source) const {
+  if (IsStringInOutputDir(build_settings_->build_dir(), source.value()))
+    return false;
+
+  if (IsPathAbsolute(source.value()))
+    return false;
+
+  return true;
+}
+
 bool XcodeProject::AddSourcesFromBuilder(const Builder& builder, Err* err) {
   SourceFileSet sources;
 
   // Add sources from all targets.
   for (const Target* target : builder.GetAllResolvedTargets()) {
     for (const SourceFile& source : target->sources()) {
-      if (IsStringInOutputDir(build_settings_->build_dir(), source.value()))
-        continue;
+      if (ShouldIncludeFileInProject(source))
+        sources.insert(source);
+    }
 
-      if (IsPathAbsolute(source.value()))
-        continue;
-
-      sources.insert(source);
+    for (const SourceFile& source : target->config_values().inputs()) {
+      if (ShouldIncludeFileInProject(source))
+        sources.insert(source);
     }
 
     for (const SourceFile& source : target->public_headers()) {
-      if (IsStringInOutputDir(build_settings_->build_dir(), source.value()))
-        continue;
+      if (ShouldIncludeFileInProject(source))
+        sources.insert(source);
+    }
 
-      if (IsPathAbsolute(source.value()))
-        continue;
-
-      sources.insert(source);
+    if (target->output_type() == Target::ACTION ||
+        target->output_type() == Target::ACTION_FOREACH) {
+      if (ShouldIncludeFileInProject(target->action_values().script()))
+        sources.insert(target->action_values().script());
     }
   }
 
+  // Add BUILD.gn and *.gni for targets, configs and toolchains.
+  for (const Item* item : builder.GetAllResolvedItems()) {
+    if (!item->AsConfig() && !item->AsTarget() && !item->AsToolchain())
+      continue;
+
+    const SourceFile build = Loader::BuildFileForLabel(item->label());
+    if (ShouldIncludeFileInProject(build))
+      sources.insert(build);
+
+    for (const SourceFile& source :
+         item->settings()->import_manager().GetImportedFiles()) {
+      if (ShouldIncludeFileInProject(source))
+        sources.insert(source);
+    }
+  }
+
+  // Add other files read by gn (the main dotfile, exec_script scripts, ...).
+  for (const auto& path : g_scheduler->GetGenDependencies()) {
+    if (!build_settings_->root_path().IsParent(path))
+      continue;
+
+    const std::string as8bit = path.As8Bit();
+    const SourceFile source(
+        "//" + as8bit.substr(build_settings_->root_path().value().size() + 1));
+
+    if (ShouldIncludeFileInProject(source))
+      sources.insert(source);
+  }
+
+  // Sort files to ensure deterministic generation of the project file (and
+  // nicely sorted file list in Xcode).
   std::vector<SourceFile> sorted_sources(sources.begin(), sources.end());
   std::sort(sorted_sources.begin(), sorted_sources.end());
 

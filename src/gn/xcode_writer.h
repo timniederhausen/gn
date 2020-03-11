@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "gn/xcode_object.h"
 
 class Builder;
 class BuildSettings;
