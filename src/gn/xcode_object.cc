@@ -235,6 +235,25 @@ void PrintProperty(std::ostream& out,
   PrintValue(out, rules, std::forward<ValueType>(value));
   out << ";" << (rules.one_line ? " " : "\n");
 }
+
+struct PBXGroupComparator {
+  using PBXObjectPtr = std::unique_ptr<PBXObject>;
+  bool operator()(const PBXObjectPtr& lhs, const PBXObjectPtr& rhs) {
+    if (lhs->Class() != rhs->Class())
+      return rhs->Class() < lhs->Class();
+
+    if (lhs->Class() == PBXGroupClass) {
+      PBXGroup* lhs_group = static_cast<PBXGroup*>(lhs.get());
+      PBXGroup* rhs_group = static_cast<PBXGroup*>(rhs.get());
+      return lhs_group->name() < rhs_group->name();
+    }
+
+    DCHECK_EQ(lhs->Class(), PBXFileReferenceClass);
+    PBXFileReference* lhs_file = static_cast<PBXFileReference*>(lhs.get());
+    PBXFileReference* rhs_file = static_cast<PBXFileReference*>(rhs.get());
+    return lhs_file->Name() < rhs_file->Name();
+  }
+};
 }  // namespace
 
 // PBXObjectClass -------------------------------------------------------------
@@ -532,12 +551,6 @@ PBXGroup::PBXGroup(const std::string& path, const std::string& name)
 
 PBXGroup::~PBXGroup() = default;
 
-PBXObject* PBXGroup::AddChild(std::unique_ptr<PBXObject> child) {
-  DCHECK(child);
-  children_.push_back(std::move(child));
-  return children_.back().get();
-}
-
 PBXFileReference* PBXGroup::AddSourceFile(const std::string& navigator_path,
                                           const std::string& source_path) {
   DCHECK(!navigator_path.empty());
@@ -557,9 +570,8 @@ PBXFileReference* PBXGroup::AddSourceFile(const std::string& navigator_path,
       }
     }
 
-    children_.push_back(std::make_unique<PBXFileReference>(
-        navigator_path, source_path, std::string()));
-    return static_cast<PBXFileReference*>(children_.back().get());
+    return CreateChild<PBXFileReference>(navigator_path, source_path,
+                                         std::string());
   }
 
   PBXGroup* group = nullptr;
@@ -576,9 +588,8 @@ PBXFileReference* PBXGroup::AddSourceFile(const std::string& navigator_path,
   }
 
   if (!group) {
-    children_.push_back(std::make_unique<PBXGroup>(std::string(component),
-                                                   std::string(component)));
-    group = static_cast<PBXGroup*>(children_.back().get());
+    group =
+        CreateChild<PBXGroup>(std::string(component), std::string(component));
   }
 
   DCHECK(group);
@@ -624,6 +635,22 @@ void PBXGroup::Print(std::ostream& out, unsigned indent) const {
     PrintProperty(out, rules, "path", path_);
   PrintProperty(out, rules, "sourceTree", "<group>");
   out << indent_str << "};\n";
+}
+
+PBXObject* PBXGroup::AddChildImpl(std::unique_ptr<PBXObject> child) {
+  DCHECK(child);
+  DCHECK(child->Class() == PBXGroupClass ||
+         child->Class() == PBXFileReferenceClass);
+
+  PBXObject* child_ptr = child.get();
+  if (autosorted()) {
+    auto iter = std::lower_bound(children_.begin(), children_.end(), child,
+                                 PBXGroupComparator());
+    children_.insert(iter, std::move(child));
+  } else {
+    children_.push_back(std::move(child));
+  }
+  return child_ptr;
 }
 
 // PBXNativeTarget ------------------------------------------------------------
@@ -686,12 +713,12 @@ PBXProject::PBXProject(const std::string& name,
   attributes_["BuildIndependentTargetsInParallel"] = "YES";
 
   main_group_.reset(new PBXGroup);
-  sources_ = static_cast<PBXGroup*>(
-      main_group_->AddChild(std::make_unique<PBXGroup>(source_path, "Source")));
+  main_group_->set_autosorted(false);
+
+  sources_ = main_group_->CreateChild<PBXGroup>(source_path, "Source");
   sources_->set_is_source(true);
-  products_ = static_cast<PBXGroup*>(main_group_->AddChild(
-      std::make_unique<PBXGroup>(std::string(), "Product")));
-  main_group_->AddChild(std::make_unique<PBXGroup>(std::string(), "Build"));
+
+  products_ = main_group_->CreateChild<PBXGroup>(std::string(), "Products");
 
   configurations_.reset(new XCConfigurationList(config_name, attributes, this));
 }
@@ -741,9 +768,9 @@ void PBXProject::AddIndexingTarget() {
   attributes["HEADER_SEARCH_PATHS"] = sources_->path();
   attributes["PRODUCT_NAME"] = "sources";
 
-  PBXFileReference* product_reference = static_cast<PBXFileReference*>(
-      products_->AddChild(std::make_unique<PBXFileReference>(
-          std::string(), "sources", "compiled.mach-o.executable")));
+  PBXFileReference* product_reference =
+      products_->CreateChild<PBXFileReference>(std::string(), "sources",
+                                               "compiled.mach-o.executable");
 
   const char product_type[] = "com.apple.product-type.tool";
   targets_.push_back(std::make_unique<PBXNativeTarget>(
@@ -760,10 +787,8 @@ PBXNativeTarget* PBXProject::AddNativeTarget(
     const std::string& shell_script,
     const PBXAttributes& extra_attributes) {
   std::string_view ext = FindExtension(&output_name);
-  PBXFileReference* product = static_cast<PBXFileReference*>(
-      products_->AddChild(std::make_unique<PBXFileReference>(
-          std::string(), output_name,
-          type.empty() ? GetSourceType(ext) : type)));
+  PBXFileReference* product = products_->CreateChild<PBXFileReference>(
+      std::string(), output_name, type.empty() ? GetSourceType(ext) : type);
 
   // Per Xcode build settings documentation: Product Name (PRODUCT_NAME) should
   // the basename of the product generated by the target.
