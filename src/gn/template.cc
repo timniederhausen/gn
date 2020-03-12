@@ -64,6 +64,11 @@ Value Template::Invoke(Scope* scope,
   Scope template_scope(closure_.get());
   template_scope.set_source_dir(scope->GetSourceDir());
 
+  // Propogate build dependency files from invoker scope (template scope already
+  // propagated via parent scope).
+  template_scope.AddBuildDependencyFiles(
+      invocation_scope->build_dependency_files());
+
   ScopePerFileProvider per_file_provider(&template_scope, true);
 
   // Targets defined in the template go in the collector for the invoking file.

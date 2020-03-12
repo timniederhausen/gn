@@ -40,6 +40,10 @@ class InputFileManager : public base::RefCountedThreadSafe<InputFileManager> {
   // refer to the root block of the file. On failure, this will be NULL.
   using FileLoadCallback = std::function<void(const ParseNode*)>;
 
+  // Callback to emulate SyncLoadFile in tests.
+  using SyncLoadFileCallback =
+      std::function<bool(const SourceFile& file_name, InputFile* file)>;
+
   InputFileManager();
 
   // Loads the given file and executes the callback on the worker pool.
@@ -89,6 +93,10 @@ class InputFileManager : public base::RefCountedThreadSafe<InputFileManager> {
 
   // Fills the vector with all input files.
   void GetAllPhysicalInputFileNames(std::vector<base::FilePath>* result) const;
+
+  void set_load_file_callback(SyncLoadFileCallback load_file_callback) {
+    load_file_callback_ = load_file_callback;
+  }
 
  private:
   friend class base::RefCountedThreadSafe<InputFileManager>;
@@ -148,6 +156,9 @@ class InputFileManager : public base::RefCountedThreadSafe<InputFileManager> {
   //
   // See AddDynamicInput().
   std::vector<std::unique_ptr<InputFileData>> dynamic_inputs_;
+
+  // Used by unit tests to mock out SyncLoadFile().
+  SyncLoadFileCallback load_file_callback_;
 
   DISALLOW_COPY_AND_ASSIGN(InputFileManager);
 };

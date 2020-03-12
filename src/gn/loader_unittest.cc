@@ -54,9 +54,10 @@ class MockInputFileManager {
  public:
   using Callback = std::function<void(const ParseNode*)>;
 
-  MockInputFileManager() = default;
+  MockInputFileManager();
+  ~MockInputFileManager();
 
-  LoaderImpl::AsyncLoadFileCallback GetCallback();
+  LoaderImpl::AsyncLoadFileCallback GetAsyncCallback();
 
   // Sets a given response for a given source file.
   void AddCannedResponse(const SourceFile& source_file,
@@ -75,6 +76,8 @@ class MockInputFileManager {
     std::unique_ptr<ParseNode> root;
   };
 
+  InputFileManager::SyncLoadFileCallback GetSyncCallback();
+
   bool AsyncLoadFile(const LocationRange& origin,
                      const BuildSettings* build_settings,
                      const SourceFile& file_name,
@@ -90,11 +93,30 @@ class MockInputFileManager {
   std::vector<std::pair<SourceFile, Callback>> pending_;
 };
 
-LoaderImpl::AsyncLoadFileCallback MockInputFileManager::GetCallback() {
+MockInputFileManager::MockInputFileManager() {
+  g_scheduler->input_file_manager()->set_load_file_callback(GetSyncCallback());
+}
+
+MockInputFileManager::~MockInputFileManager() {
+  g_scheduler->input_file_manager()->set_load_file_callback(nullptr);
+}
+
+LoaderImpl::AsyncLoadFileCallback MockInputFileManager::GetAsyncCallback() {
   return
       [this](const LocationRange& origin, const BuildSettings* build_settings,
              const SourceFile& file_name, const Callback& callback, Err* err) {
         return AsyncLoadFile(origin, build_settings, file_name, callback, err);
+      };
+}
+
+InputFileManager::SyncLoadFileCallback MockInputFileManager::GetSyncCallback() {
+  return
+      [this](const SourceFile& file_name, InputFile* file) {
+        CannedResponseMap::const_iterator found = canned_responses_.find(file_name);
+        if (found == canned_responses_.end())
+          return false;
+        file->SetContents(found->second->input_file->contents());
+        return true;
       };
 }
 
@@ -112,6 +134,8 @@ void MockInputFileManager::AddCannedResponse(const SourceFile& source_file,
 
   // Parse.
   canned->root = Parser::Parse(canned->tokens, &err);
+  if (err.has_error())
+    err.PrintToStdout();
   EXPECT_FALSE(err.has_error());
 
   canned_responses_[source_file] = std::move(canned);
@@ -167,7 +191,7 @@ TEST_F(LoaderTest, Foo) {
   mock_ifm_.AddCannedResponse(build_config,
                               "set_default_toolchain(\"//tc:tc\")");
 
-  loader->set_async_load_file(mock_ifm_.GetCallback());
+  loader->set_async_load_file(mock_ifm_.GetAsyncCallback());
 
   // Request the root build file be loaded. This should kick off the default
   // build config loading.
@@ -228,7 +252,6 @@ TEST_F(LoaderTest, BuildDependencyFilesAreCollected) {
   scoped_refptr<LoaderImpl> loader(new LoaderImpl(&build_settings_));
   mock_ifm_.AddCannedResponse(build_config,
                               "set_default_toolchain(\"//tc:tc\")");
-  mock_ifm_.AddCannedResponse(SourceFile("//test.gni"), "concurrent_jobs = 1");
   std::string root_build_content =
       "executable(\"a\") { sources = [ \"a.cc\" ] }\n"
       "config(\"b\") { configs = [\"//t:t\"] }\n"
@@ -236,7 +259,7 @@ TEST_F(LoaderTest, BuildDependencyFilesAreCollected) {
       "pool(\"d\") { depth = 1 }";
   mock_ifm_.AddCannedResponse(root_build, root_build_content);
 
-  loader->set_async_load_file(mock_ifm_.GetCallback());
+  loader->set_async_load_file(mock_ifm_.GetAsyncCallback());
 
   // Request the root build file be loaded. This should kick off the default
   // build config loading.
@@ -262,6 +285,53 @@ TEST_F(LoaderTest, BuildDependencyFilesAreCollected) {
   EXPECT_TRUE(ItemContainsBuildDependencyFile(items[2], root_build));
   EXPECT_TRUE(items[3]->AsPool());
   EXPECT_TRUE(ItemContainsBuildDependencyFile(items[3], root_build));
+
+  EXPECT_FALSE(scheduler().is_failed());
+}
+
+TEST_F(LoaderTest, TemplateBuildDependencyFilesAreCollected) {
+  SourceFile build_config("//build/config/BUILDCONFIG.gn");
+  SourceFile root_build("//BUILD.gn");
+  build_settings_.set_build_config_file(build_config);
+  build_settings_.set_item_defined_callback(
+      [builder = &mock_builder_](std::unique_ptr<Item> item) {
+        builder->OnItemDefined(std::move(item));
+      });
+
+  scoped_refptr<LoaderImpl> loader(new LoaderImpl(&build_settings_));
+  mock_ifm_.AddCannedResponse(build_config,
+                              "set_default_toolchain(\"//tc:tc\")");
+  mock_ifm_.AddCannedResponse(
+      SourceFile("//test.gni"),
+      "template(\"tmpl\") {\n"
+      "  executable(target_name) { sources = invoker.sources }\n"
+      "}\n");
+  mock_ifm_.AddCannedResponse(root_build,
+                              "import(\"//test.gni\")\n"
+                              "tmpl(\"a\") {sources = [ \"a.cc\" ]}\n");
+
+  loader->set_async_load_file(mock_ifm_.GetAsyncCallback());
+
+  // Request the root build file be loaded. This should kick off the default
+  // build config loading.
+  loader->Load(root_build, LocationRange(), Label());
+  EXPECT_TRUE(mock_ifm_.HasOnePending(build_config));
+
+  // Completing the build config load should kick off the root build file load.
+  mock_ifm_.IssueAllPending();
+  MsgLoop::Current()->RunUntilIdleForTesting();
+  EXPECT_TRUE(mock_ifm_.HasOnePending(root_build));
+
+  // Completing the root build file should define a target which must have
+  // set of source files hashes.
+  mock_ifm_.IssueAllPending();
+  MsgLoop::Current()->RunUntilIdleForTesting();
+
+  std::vector<const Item*> items = mock_builder_.GetAllItems();
+  EXPECT_TRUE(items[0]->AsTarget());
+  // Ensure the target as a dep on BUILD.gn even though it was defined via
+  // a template.
+  EXPECT_TRUE(ItemContainsBuildDependencyFile(items[0], root_build));
 
   EXPECT_FALSE(scheduler().is_failed());
 }

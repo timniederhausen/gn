@@ -36,6 +36,7 @@ void InvokeFileLoadCallback(const InputFileManager::FileLoadCallback& cb,
 bool DoLoadFile(const LocationRange& origin,
                 const BuildSettings* build_settings,
                 const SourceFile& name,
+                InputFileManager::SyncLoadFileCallback load_file_callback,
                 InputFile* file,
                 std::vector<Token>* tokens,
                 std::unique_ptr<ParseNode>* root,
@@ -52,7 +53,13 @@ bool DoLoadFile(const LocationRange& origin,
   // Read.
   base::FilePath primary_path = build_settings->GetFullPath(name);
   ScopedTrace load_trace(TraceItem::TRACE_FILE_LOAD, name.value());
-  if (!file->Load(primary_path)) {
+  if (load_file_callback) {
+    if (!load_file_callback(name, file)) {
+      *err = Err(origin, "Can't load input file.",
+                 "File not mocked by load_file_callback:\n  " + name.value());
+      return false;
+    }
+  } else if (!file->Load(primary_path)) {
     if (!build_settings->secondary_source_path().empty()) {
       // Fall back to secondary source tree.
       base::FilePath secondary_path =
@@ -283,7 +290,7 @@ bool InputFileManager::LoadFile(const LocationRange& origin,
   std::vector<Token> tokens;
   std::unique_ptr<ParseNode> root;
   bool success =
-      DoLoadFile(origin, build_settings, name, file, &tokens, &root, err);
+      DoLoadFile(origin, build_settings, name, load_file_callback_, file, &tokens, &root, err);
   // Can't return early. We have to ensure that the completion event is
   // signaled in all cases bacause another thread could be blocked on this one.
 

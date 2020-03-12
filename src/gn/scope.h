@@ -293,6 +293,7 @@ class Scope {
     return build_dependency_files_;
   }
   void AddBuildDependencyFile(const SourceFile& build_dependency_file);
+  void AddBuildDependencyFiles(const SourceFileSet& build_dependency_files);
 
   // The item collector is where Items (Targets, Configs, etc.) go that have
   // been defined. If a scope can generate items, this non-owning pointer will

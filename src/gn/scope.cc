@@ -435,8 +435,7 @@ bool Scope::NonRecursiveMergeTo(Scope* dest,
   }
 
   // Propogate build dependency files,
-  dest->build_dependency_files_.insert(build_dependency_files_.begin(),
-                                       build_dependency_files_.end());
+  dest->AddBuildDependencyFiles(build_dependency_files_);
 
   return true;
 }
@@ -538,6 +537,12 @@ const SourceDir& Scope::GetSourceDir() const {
 
 void Scope::AddBuildDependencyFile(const SourceFile& build_dependency_file) {
   build_dependency_files_.insert(build_dependency_file);
+}
+
+void Scope::AddBuildDependencyFiles(
+    const SourceFileSet& build_dependency_files) {
+  build_dependency_files_.insert(build_dependency_files.begin(),
+                                 build_dependency_files.end());
 }
 
 Scope::ItemVector* Scope::GetItemCollector() {
