@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/strings/string_util.h"
 #include "gn/json_project_writer.h"
+#include "base/strings/string_util.h"
 #include "gn/substitution_list.h"
 #include "gn/target.h"
-#include "gn/test_with_scope.h"
 #include "gn/test_with_scheduler.h"
+#include "gn/test_with_scope.h"
 #include "util/build_config.h"
 #include "util/test/test.h"
 
@@ -41,14 +41,17 @@ TEST_F(JSONWriter, ActionWithResponseFile) {
   std::vector<const Target*> targets;
   targets.push_back(&target);
 #if defined(OS_WIN)
-  base::FilePath root_path = base::FilePath(FILE_PATH_LITERAL("c:/path/to/src"));
+  base::FilePath root_path =
+      base::FilePath(FILE_PATH_LITERAL("c:/path/to/src"));
 #else
   base::FilePath root_path = base::FilePath(FILE_PATH_LITERAL("/path/to/src"));
 #endif
   setup.build_settings()->SetRootPath(root_path);
   g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL(".gn")));
-  g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL("BUILD.gn")));
-  g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL("build/BUILD.gn")));
+  g_scheduler->AddGenDependency(
+      root_path.Append(FILE_PATH_LITERAL("BUILD.gn")));
+  g_scheduler->AddGenDependency(
+      root_path.Append(FILE_PATH_LITERAL("build/BUILD.gn")));
   std::string out =
       JSONProjectWriter::RenderJSON(setup.build_settings(), targets);
 #if defined(OS_WIN)
@@ -59,7 +62,8 @@ TEST_F(JSONWriter, ActionWithResponseFile) {
       "   \"build_settings\": {\n"
       "      \"build_dir\": \"//out/Debug/\",\n"
       "      \"default_toolchain\": \"//toolchain:default\",\n"
-      "      \"gen_input_files\": [ \"//.gn\", \"//BUILD.gn\", \"//build/BUILD.gn\" ],\n"
+      "      \"gen_input_files\": [ \"//.gn\", \"//BUILD.gn\", "
+      "\"//build/BUILD.gn\" ],\n"
 #if defined(OS_WIN)
       "      \"root_path\": \"c:/path/to/src\"\n"
 #else
@@ -86,7 +90,7 @@ TEST_F(JSONWriter, ActionWithResponseFile) {
       "      }\n"
       "   }\n"
       "}\n";
-  EXPECT_EQ(expected_json, out);
+  EXPECT_EQ(expected_json, out) << out;
 }
 
 TEST_F(JSONWriter, RustTarget) {
@@ -172,13 +176,15 @@ TEST_F(JSONWriter, ForEachWithResponseFile) {
   std::vector<const Target*> targets;
   targets.push_back(&target);
 #if defined(OS_WIN)
-  base::FilePath root_path = base::FilePath(FILE_PATH_LITERAL("c:/path/to/src"));
+  base::FilePath root_path =
+      base::FilePath(FILE_PATH_LITERAL("c:/path/to/src"));
 #else
   base::FilePath root_path = base::FilePath(FILE_PATH_LITERAL("/path/to/src"));
 #endif
   setup.build_settings()->SetRootPath(root_path);
   g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL(".gn")));
-  g_scheduler->AddGenDependency(root_path.Append(FILE_PATH_LITERAL("BUILD.gn")));
+  g_scheduler->AddGenDependency(
+      root_path.Append(FILE_PATH_LITERAL("BUILD.gn")));
   std::string out =
       JSONProjectWriter::RenderJSON(setup.build_settings(), targets);
 #if defined(OS_WIN)
@@ -211,6 +217,9 @@ TEST_F(JSONWriter, ForEachWithResponseFile) {
       "         \"response_file_contents\": [ \"-j\", \"{{source_name_part}}\" "
       "],\n"
       "         \"script\": \"//foo/script.py\",\n"
+      "         \"source_outputs\": {\n"
+      "            \"//foo/input1.txt\": [ \"input1.out\" ]\n"
+      "         },\n"
       "         \"sources\": [ \"//foo/input1.txt\" ],\n"
       "         \"testonly\": false,\n"
       "         \"toolchain\": \"\",\n"

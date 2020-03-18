@@ -61,14 +61,20 @@
 // }
 //
 // Optionally, if "what" is specified while generating description, two other
-// properties can be requested that are not included by default
+// properties can be requested that are not included by default. First the
+// runtime dependendencies (see "gn help runtime_deps"):
 //
-// "runtime_deps" : [list of computed runtime dependencies]
-// "source_outputs" : {
-//    "source_file x" : [ list of outputs for source file x ]
-//    "source_file y" : [ list of outputs for source file y ]
-//    ...
-// }
+//   "runtime_deps" : [list of computed runtime dependencies]
+//
+// Second, for targets whose sources map to outputs (binary targets,
+// action_foreach, and copies with non-constant outputs), the "source_outputs"
+// indicates the mapping from source to output file(s):
+//
+//   "source_outputs" : {
+//      "source_file x" : [ list of outputs for source file x ]
+//      "source_file y" : [ list of outputs for source file y ]
+//      ...
+//   }
 
 namespace {
 
@@ -684,6 +690,19 @@ class TargetDescBuilder : public BaseDescBuilder {
   }
 
   void FillInSourceOutputs(base::DictionaryValue* res) {
+    // Only include "source outputs" if there are sources that map to outputs.
+    // Things like actions have constant per-target outputs that don't depend on
+    // the list of sources. These don't need source outputs.
+    if (target_->output_type() != Target::ACTION_FOREACH &&
+        target_->output_type() != Target::COPY_FILES && !target_->IsBinary())
+      return;  // Everything else has constant outputs.
+
+    // "copy" targets may have patterns or not. If there's only one file, the
+    // user can specify a constant output name.
+    if (target_->output_type() == Target::COPY_FILES &&
+        target_->action_values().outputs().required_types().empty())
+      return;  // Constant output.
+
     auto dict = std::make_unique<base::DictionaryValue>();
     for (const auto& source : target_->sources()) {
       std::vector<OutputFile> outputs;
@@ -728,53 +747,28 @@ class TargetDescBuilder : public BaseDescBuilder {
   }
 
   void FillInOutputs(base::DictionaryValue* res) {
-    if (target_->output_type() == Target::ACTION) {
-      auto list = std::make_unique<base::ListValue>();
-      for (const auto& elem : target_->action_values().outputs().list())
-        list->AppendString(elem.AsString());
+    std::vector<SourceFile> output_files;
+    Err err;
+    if (!target_->GetOutputsAsSourceFiles(LocationRange(), true, &output_files,
+                                          &err)) {
+      err.PrintToStdout();
+      return;
+    }
+    res->SetWithoutPathExpansion(variables::kOutputs,
+                                 RenderValue(output_files));
 
-      res->SetWithoutPathExpansion(variables::kOutputs, std::move(list));
-    } else if (target_->output_type() == Target::CREATE_BUNDLE ||
-               target_->output_type() == Target::GENERATED_FILE) {
-      Err err;
-      std::vector<SourceFile> output_files;
-      if (!target_->bundle_data().GetOutputsAsSourceFiles(
-              target_->settings(), target_, &output_files, &err)) {
-        err.PrintToStdout();
-      }
-      res->SetWithoutPathExpansion(variables::kOutputs,
-                                   RenderValue(output_files));
-    } else if (target_->output_type() == Target::ACTION_FOREACH ||
-               target_->output_type() == Target::COPY_FILES) {
+    // Write some extra data for certain output types.
+    if (target_->output_type() == Target::ACTION_FOREACH ||
+        target_->output_type() == Target::COPY_FILES) {
       const SubstitutionList& outputs = target_->action_values().outputs();
       if (!outputs.required_types().empty()) {
+        // Write out the output patterns if there are any.
         auto patterns = std::make_unique<base::ListValue>();
         for (const auto& elem : outputs.list())
           patterns->AppendString(elem.AsString());
 
         res->SetWithoutPathExpansion("output_patterns", std::move(patterns));
       }
-      std::vector<SourceFile> output_files;
-      SubstitutionWriter::ApplyListToSources(target_, target_->settings(),
-                                             outputs, target_->sources(),
-                                             &output_files);
-      res->SetWithoutPathExpansion(variables::kOutputs,
-                                   RenderValue(output_files));
-    } else {
-      DCHECK(target_->IsBinary());
-      const Tool* tool =
-          target_->toolchain()->GetToolForTargetFinalOutput(target_);
-
-      std::vector<OutputFile> output_files;
-      SubstitutionWriter::ApplyListToLinkerAsOutputFile(
-          target_, tool, tool->outputs(), &output_files);
-      std::vector<SourceFile> output_files_as_source_file;
-      for (const OutputFile& output_file : output_files)
-        output_files_as_source_file.push_back(
-            output_file.AsSourceFile(target_->settings()->build_settings()));
-
-      res->SetWithoutPathExpansion(variables::kOutputs,
-                                   RenderValue(output_files_as_source_file));
     }
   }
 

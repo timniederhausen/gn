@@ -4,11 +4,15 @@
 
 #include "gn/commands.h"
 
+#include <optional>
+
 #include "base/command_line.h"
 #include "base/environment.h"
 #include "base/strings/string_split.h"
+#include "base/strings/string_util.h"
 #include "base/values.h"
 #include "gn/builder.h"
+#include "gn/config_values_extractors.h"
 #include "gn/filesystem_utils.h"
 #include "gn/item.h"
 #include "gn/label.h"
@@ -362,6 +366,48 @@ inline std::string FixGitBashLabelEdit(const std::string& label) {
 }
 #endif
 
+std::optional<HowTargetContainsFile> TargetContainsFile(
+    const Target* target,
+    const SourceFile& file) {
+  for (const auto& cur_file : target->sources()) {
+    if (cur_file == file)
+      return HowTargetContainsFile::kSources;
+  }
+  for (const auto& cur_file : target->public_headers()) {
+    if (cur_file == file)
+      return HowTargetContainsFile::kPublic;
+  }
+  for (ConfigValuesIterator iter(target); !iter.done(); iter.Next()) {
+    for (const auto& cur_file : iter.cur().inputs()) {
+      if (cur_file == file)
+        return HowTargetContainsFile::kInputs;
+    }
+  }
+  for (const auto& cur_file : target->data()) {
+    if (cur_file == file.value())
+      return HowTargetContainsFile::kData;
+    if (cur_file.back() == '/' &&
+        base::StartsWith(file.value(), cur_file, base::CompareCase::SENSITIVE))
+      return HowTargetContainsFile::kData;
+  }
+
+  if (target->action_values().script().value() == file.value())
+    return HowTargetContainsFile::kScript;
+
+  std::vector<SourceFile> output_sources;
+  target->action_values().GetOutputsAsSourceFiles(target, &output_sources);
+  for (const auto& cur_file : output_sources) {
+    if (cur_file == file)
+      return HowTargetContainsFile::kOutput;
+  }
+
+  for (const auto& cur_file : target->computed_outputs()) {
+    if (cur_file.AsSourceFile(target->settings()->build_settings()) == file)
+      return HowTargetContainsFile::kOutput;
+  }
+  return std::nullopt;
+}
+
 }  // namespace
 
 CommandInfo::CommandInfo()
@@ -388,6 +434,7 @@ const CommandInfoMap& GetCommands() {
     INSERT_COMMAND(Help)
     INSERT_COMMAND(Meta)
     INSERT_COMMAND(Ls)
+    INSERT_COMMAND(Outputs)
     INSERT_COMMAND(Path)
     INSERT_COMMAND(Refs)
 
@@ -556,6 +603,23 @@ void FilterAndPrintTargetSet(const std::set<const Target*>& targets,
                              base::ListValue* out) {
   std::vector<const Target*> target_vector(targets.begin(), targets.end());
   FilterAndPrintTargets(&target_vector, out);
+}
+
+void GetTargetsContainingFile(Setup* setup,
+                              const std::vector<const Target*>& all_targets,
+                              const SourceFile& file,
+                              bool all_toolchains,
+                              std::vector<TargetContainingFile>* matches) {
+  Label default_toolchain = setup->loader()->default_toolchain_label();
+  for (auto* target : all_targets) {
+    if (!all_toolchains) {
+      // Only check targets in the default toolchain.
+      if (target->label().GetToolchainLabel() != default_toolchain)
+        continue;
+    }
+    if (auto how = TargetContainsFile(target, file))
+      matches->emplace_back(target, *how);
+  }
 }
 
 }  // namespace commands

@@ -113,21 +113,19 @@ Value RunGetTargetOutputs(Scope* scope,
     return Value();
   }
 
-  // Compute the output list.
+  // Range for GetOutputsAsSourceFiles to blame for errors.
+  LocationRange arg_range;
+  if (args[0].origin())
+    arg_range = args[0].origin()->GetRange();
+
   std::vector<SourceFile> files;
-  if (target->output_type() == Target::ACTION ||
-      target->output_type() == Target::COPY_FILES ||
-      target->output_type() == Target::ACTION_FOREACH ||
-      target->output_type() == Target::GENERATED_FILE) {
-    target->action_values().GetOutputsAsSourceFiles(target, &files);
-  } else {
-    // Other types of targets are not supported.
-    *err =
-        Err(args[0],
-            "Target is not an action, action_foreach, generated_file, or copy.",
-            "Only these target types are supported by get_target_outputs.");
+
+  // The build is currently running so only non-binary targets (they don't
+  // depend on the toolchain definition which may not have been loaded yet) can
+  // be queried. Pass false for build_complete so it will flag such queries as
+  // an error.
+  if (!target->GetOutputsAsSourceFiles(arg_range, false, &files, err))
     return Value();
-  }
 
   // Convert to Values.
   Value ret(function, Value::LIST);

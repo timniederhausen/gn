@@ -340,10 +340,41 @@ class Target : public Item {
     return runtime_outputs_;
   }
 
+  // Computes and returns the outputs of this target expressed as SourceFiles.
+  //
+  // For binary target this depends on the tool for this target so the toolchain
+  // must have been loaded beforehand. This will happen asynchronously so
+  // calling this on a binary target before the build is complete will produce a
+  // race condition.
+  //
+  // To resolve this, the caller passes in whether the entire build is complete
+  // (this is used for the introspection commands which run after everything
+  // else).
+  //
+  // If the build is complete, the toolchain will be used for binary targets to
+  // compute the outputs. If the build is not complete, calling this function
+  // for binary targets will produce an error.
+  //
+  // The |loc_for_error| is used to blame a location for any errors produced. It
+  // can be empty if there is no range (like this is being called based on the
+  // command-line.
+  bool GetOutputsAsSourceFiles(const LocationRange& loc_for_error,
+                               bool build_complete,
+                               std::vector<SourceFile>* outputs,
+                               Err* err) const;
+
   // Computes the set of output files resulting from compiling the given source
-  // file. If the file can be compiled and the tool exists, fills the outputs
-  // in and writes the tool type to computed_tool_type. If the file is not
-  // compilable, returns false.
+  // file.
+  //
+  // For binary targets, if the file can be compiled and the tool exists, fills
+  // the outputs in and writes the tool type to computed_tool_type. If the file
+  // is not compilable, returns false.
+  //
+  // For action_foreach and copy targets, applies the output pattern to the
+  // given file name to compute the outputs.
+  //
+  // For all other target types, just returns the target outputs because such
+  // targets conceptually process all of their inputs as one step.
   //
   // The function can succeed with a "NONE" tool type for object files which
   // are just passed to the output. The output will always be overwritten, not

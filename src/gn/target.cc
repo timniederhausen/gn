@@ -486,36 +486,115 @@ bool Target::SetToolchain(const Toolchain* toolchain, Err* err) {
   return false;
 }
 
+bool Target::GetOutputsAsSourceFiles(const LocationRange& loc_for_error,
+                                     bool build_complete,
+                                     std::vector<SourceFile>* outputs,
+                                     Err* err) const {
+  const static char kBuildIncompleteMsg[] =
+      "This target is a binary target which can't be queried for its "
+      "outputs\nduring the build. It will work for action, action_foreach, "
+      "generated_file,\nand copy targets.";
+
+  outputs->clear();
+
+  std::vector<SourceFile> files;
+  if (output_type() == Target::ACTION || output_type() == Target::COPY_FILES ||
+      output_type() == Target::ACTION_FOREACH ||
+      output_type() == Target::GENERATED_FILE) {
+    action_values().GetOutputsAsSourceFiles(this, outputs);
+  } else if (output_type() == Target::CREATE_BUNDLE ||
+             output_type() == Target::GENERATED_FILE) {
+    if (!bundle_data().GetOutputsAsSourceFiles(settings(), this, outputs, err))
+      return false;
+  } else if (IsBinary() && output_type() != Target::SOURCE_SET) {
+    // Binary target with normal outputs (source sets have stamp outputs like
+    // groups).
+    DCHECK(IsBinary()) << static_cast<int>(output_type());
+    if (!build_complete) {
+      // Can't access the toolchain for a target before the build is complete.
+      // Otherwise it will race with loading and setting the toolchain
+      // definition.
+      *err = Err(loc_for_error, kBuildIncompleteMsg);
+      return false;
+    }
+
+    const Tool* tool = toolchain()->GetToolForTargetFinalOutput(this);
+
+    std::vector<OutputFile> output_files;
+    SubstitutionWriter::ApplyListToLinkerAsOutputFile(
+        this, tool, tool->outputs(), &output_files);
+    for (const OutputFile& output_file : output_files) {
+      outputs->push_back(
+          output_file.AsSourceFile(settings()->build_settings()));
+    }
+  } else {
+    // Everything else (like a group or something) has a stamp output. The
+    // dependency output file should have computed what this is. This won't be
+    // valid unless the build is complete.
+    if (!build_complete) {
+      *err = Err(loc_for_error, kBuildIncompleteMsg);
+      return false;
+    }
+    outputs->push_back(
+        dependency_output_file().AsSourceFile(settings()->build_settings()));
+  }
+  return true;
+}
+
 bool Target::GetOutputFilesForSource(const SourceFile& source,
                                      const char** computed_tool_type,
                                      std::vector<OutputFile>* outputs) const {
+  DCHECK(toolchain());  // Should be resolved before calling.
+
   outputs->clear();
   *computed_tool_type = Tool::kToolNone;
 
-  SourceFile::Type file_type = source.type();
-  if (file_type == SourceFile::SOURCE_UNKNOWN)
-    return false;
-  if (file_type == SourceFile::SOURCE_O) {
-    // Object files just get passed to the output and not compiled.
-    outputs->push_back(OutputFile(settings()->build_settings(), source));
-    return true;
+  if (output_type() == Target::COPY_FILES ||
+      output_type() == Target::ACTION_FOREACH) {
+    // These target types apply the output pattern to the input.
+    std::vector<SourceFile> output_files;
+    SubstitutionWriter::ApplyListToSourceAsOutputFile(
+        this, settings(), action_values().outputs(), source, outputs);
+  } else if (!IsBinary()) {
+    // All other non-binary target types just return the target outputs. We
+    // don't know if the build is complete and it doesn't matter for non-binary
+    // targets, so just assume it's not and pass "false".
+    std::vector<SourceFile> outputs_as_source_files;
+    Err err;  // We can ignore the error and return empty for failure.
+    GetOutputsAsSourceFiles(LocationRange(), false, &outputs_as_source_files,
+                            &err);
+
+    // Convert to output files.
+    for (const auto& cur : outputs_as_source_files)
+      outputs->emplace_back(OutputFile(settings()->build_settings(), cur));
+  } else {
+    // All binary targets do a tool lookup.
+    DCHECK(IsBinary());
+
+    SourceFile::Type file_type = source.type();
+    if (file_type == SourceFile::SOURCE_UNKNOWN)
+      return false;
+    if (file_type == SourceFile::SOURCE_O) {
+      // Object files just get passed to the output and not compiled.
+      outputs->emplace_back(OutputFile(settings()->build_settings(), source));
+      return true;
+    }
+
+    // Rust generates on a module level, not source.
+    if (file_type == SourceFile::SOURCE_RS)
+      return false;
+
+    *computed_tool_type = Tool::GetToolTypeForSourceType(file_type);
+    if (*computed_tool_type == Tool::kToolNone)
+      return false;  // No tool for this file (it's a header file or something).
+    const Tool* tool = toolchain_->GetTool(*computed_tool_type);
+    if (!tool)
+      return false;  // Tool does not apply for this toolchain.file.
+
+    // Figure out what output(s) this compiler produces.
+    SubstitutionWriter::ApplyListToCompilerAsOutputFile(
+        this, source, tool->outputs(), outputs);
   }
-
-  // Rust generates on a module level, not source.
-  if (file_type == SourceFile::SOURCE_RS) {
-    return false;
-  }
-
-  *computed_tool_type = Tool::GetToolTypeForSourceType(file_type);
-  if (*computed_tool_type == Tool::kToolNone)
-    return false;  // No tool for this file (it's a header file or something).
-  const Tool* tool = toolchain_->GetTool(*computed_tool_type);
-  if (!tool)
-    return false;  // Tool does not apply for this toolchain.file.
-
-  // Figure out what output(s) this compiler produces.
-  SubstitutionWriter::ApplyListToCompilerAsOutputFile(this, source,
-                                                      tool->outputs(), outputs);
   return !outputs->empty();
 }
 

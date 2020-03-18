@@ -79,6 +79,11 @@ extern const char kLs_HelpShort[];
 extern const char kLs_Help[];
 int RunLs(const std::vector<std::string>& args);
 
+extern const char kOutputs[];
+extern const char kOutputs_HelpShort[];
+extern const char kOutputs_Help[];
+int RunOutputs(const std::vector<std::string>& args);
+
 extern const char kPath[];
 extern const char kPath_HelpShort[];
 extern const char kPath_Help[];
@@ -117,6 +122,9 @@ const Target* ResolveTargetFromCommandLineString(
 
 // Resolves a vector of command line inputs and figures out the full set of
 // things they resolve to.
+//
+// On success, returns true and populates the vectors. On failure, prints the
+// error and returns false.
 //
 // Patterns with wildcards will only match targets. The file_matches aren't
 // validated that they are real files or referenced by any targets. They're just
@@ -203,6 +211,23 @@ void FilterAndPrintTargetSet(bool indent,
                              const std::set<const Target*>& targets);
 void FilterAndPrintTargetSet(const std::set<const Target*>& targets,
                              base::ListValue* out);
+
+// Computes which targets reference the given file and also stores how the
+// target references the file.
+enum class HowTargetContainsFile {
+  kSources,
+  kPublic,
+  kInputs,
+  kData,
+  kScript,
+  kOutput,
+};
+using TargetContainingFile = std::pair<const Target*, HowTargetContainsFile>;
+void GetTargetsContainingFile(Setup* setup,
+                              const std::vector<const Target*>& all_targets,
+                              const SourceFile& file,
+                              bool all_toolchains,
+                              std::vector<TargetContainingFile>* matches);
 
 // Extra help from command_check.cc
 extern const char kNoGnCheck_Help[];

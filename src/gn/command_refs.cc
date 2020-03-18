@@ -129,63 +129,6 @@ void RecursiveCollectChildRefs(const DepMap& dep_map,
     RecursiveCollectRefs(dep_map, cur_dep->second, results);
 }
 
-bool TargetContainsFile(const Target* target, const SourceFile& file) {
-  for (const auto& cur_file : target->sources()) {
-    if (cur_file == file)
-      return true;
-  }
-  for (const auto& cur_file : target->public_headers()) {
-    if (cur_file == file)
-      return true;
-  }
-  for (ConfigValuesIterator iter(target); !iter.done(); iter.Next()) {
-    for (const auto& cur_file : iter.cur().inputs()) {
-      if (cur_file == file)
-        return true;
-    }
-  }
-  for (const auto& cur_file : target->data()) {
-    if (cur_file == file.value())
-      return true;
-    if (cur_file.back() == '/' &&
-        base::StartsWith(file.value(), cur_file, base::CompareCase::SENSITIVE))
-      return true;
-  }
-
-  if (target->action_values().script().value() == file.value())
-    return true;
-
-  std::vector<SourceFile> output_sources;
-  target->action_values().GetOutputsAsSourceFiles(target, &output_sources);
-  for (const auto& cur_file : output_sources) {
-    if (cur_file == file)
-      return true;
-  }
-
-  for (const auto& cur_file : target->computed_outputs()) {
-    if (cur_file.AsSourceFile(target->settings()->build_settings()) == file)
-      return true;
-  }
-  return false;
-}
-
-void GetTargetsContainingFile(Setup* setup,
-                              const std::vector<const Target*>& all_targets,
-                              const SourceFile& file,
-                              bool all_toolchains,
-                              UniqueVector<const Target*>* matches) {
-  Label default_toolchain = setup->loader()->default_toolchain_label();
-  for (auto* target : all_targets) {
-    if (!all_toolchains) {
-      // Only check targets in the default toolchain.
-      if (target->label().GetToolchainLabel() != default_toolchain)
-        continue;
-    }
-    if (TargetContainsFile(target, file))
-      matches->push_back(target);
-  }
-}
-
 bool TargetReferencesConfig(const Target* target, const Config* config) {
   for (const LabelConfigPair& cur : target->configs()) {
     if (cur.ptr == config)
@@ -457,8 +400,13 @@ int RunRefs(const std::vector<std::string>& args) {
       setup->builder().GetAllResolvedTargets();
   UniqueVector<const Target*> explicit_target_matches;
   for (const auto& file : file_matches) {
+    std::vector<TargetContainingFile> target_containing;
     GetTargetsContainingFile(setup, all_targets, file, all_toolchains,
-                             &explicit_target_matches);
+                             &target_containing);
+
+    // Extract just the Target*.
+    for (const TargetContainingFile& pair : target_containing)
+      explicit_target_matches.push_back(pair.first);
   }
   for (auto* config : config_matches) {
     GetTargetsReferencingConfig(setup, all_targets, config, all_toolchains,
