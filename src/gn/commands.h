@@ -132,7 +132,7 @@ const Target* ResolveTargetFromCommandLineString(
 bool ResolveFromCommandLineInput(
     Setup* setup,
     const std::vector<std::string>& input,
-    bool all_toolchains,
+    bool default_toolchain_only,
     UniqueVector<const Target*>* target_matches,
     UniqueVector<const Config*>* config_matches,
     UniqueVector<const Toolchain*>* toolchain_matches,
@@ -226,7 +226,7 @@ using TargetContainingFile = std::pair<const Target*, HowTargetContainsFile>;
 void GetTargetsContainingFile(Setup* setup,
                               const std::vector<const Target*>& all_targets,
                               const SourceFile& file,
-                              bool all_toolchains,
+                              bool default_toolchain_only,
                               std::vector<TargetContainingFile>* matches);
 
 // Extra help from command_check.cc

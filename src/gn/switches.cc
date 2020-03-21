@@ -273,7 +273,7 @@ const char kVersion_HelpShort[] =
 // immediately if this switch is used.
 const char kVersion_Help[] = "";
 
-const char kAllToolchains[] = "all-toolchains";
+const char kDefaultToolchain[] = "default-toolchain";
 
 // -----------------------------------------------------------------------------
 

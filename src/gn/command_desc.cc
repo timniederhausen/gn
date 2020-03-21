@@ -519,9 +519,10 @@ Possibilities for <what to show>
       "--blame" to see the source of the dependency.
 
 Shared flags
+
 )"
 
-    ALL_TOOLCHAINS_SWITCH_HELP
+    DEFAULT_TOOLCHAIN_SWITCH_HELP
 
     R"(
   --format=json
@@ -557,6 +558,7 @@ Printing deps
   --all
       Collects all recursive dependencies and prints a sorted flat list. Also
       usable with --tree (see below).
+
 )"
 
     TARGET_PRINTING_MODE_COMMAND_LINE_HELP
@@ -572,11 +574,13 @@ Printing deps
 
       Tree output can not be used with the filtering or output flags: --as,
       --type, --testonly.
+
 )"
 
     TARGET_TYPE_FILTER_COMMAND_LINE_HELP
 
-    R"(Note
+    R"(
+Note
 
   This command will show the full name of directories and source files, but
   when directories and source paths are written to the build file, they will be
@@ -623,7 +627,7 @@ int RunDesc(const std::vector<std::string>& args) {
   target_list.push_back(args[1]);
 
   if (!ResolveFromCommandLineInput(
-          setup, target_list, cmdline->HasSwitch(switches::kAllToolchains),
+          setup, target_list, cmdline->HasSwitch(switches::kDefaultToolchain),
           &target_matches, &config_matches, &toolchain_matches, &file_matches))
     return 1;
 

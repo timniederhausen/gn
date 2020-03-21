@@ -31,11 +31,12 @@ namespace {
 // returns false. If the pattern is valid, fills the vector (which might be
 // empty if there are no matches) and returns true.
 //
-// If all_toolchains is false, a pattern with an unspecified toolchain will
-// match the default toolchain only. If true, all toolchains will be matched.
+// If default_toolchain_only is true, a pattern with an unspecified toolchain
+// will match the default toolchain only. If true, all toolchains will be
+// matched.
 bool ResolveTargetsFromCommandLinePattern(Setup* setup,
                                           const std::string& label_pattern,
-                                          bool all_toolchains,
+                                          bool default_toolchain_only,
                                           std::vector<const Target*>* matches) {
   Value pattern_value(nullptr, label_pattern);
 
@@ -48,7 +49,7 @@ bool ResolveTargetsFromCommandLinePattern(Setup* setup,
     return false;
   }
 
-  if (!all_toolchains) {
+  if (default_toolchain_only) {
     // By default a pattern with an empty toolchain will match all toolchains.
     // If the caller wants to default to the main toolchain only, set it
     // explicitly.
@@ -70,7 +71,7 @@ bool ResolveStringFromCommandLineInput(
     Setup* setup,
     const SourceDir& current_dir,
     const std::string& input,
-    bool all_toolchains,
+    bool default_toolchain_only,
     UniqueVector<const Target*>* target_matches,
     UniqueVector<const Config*>* config_matches,
     UniqueVector<const Toolchain*>* toolchain_matches,
@@ -80,8 +81,8 @@ bool ResolveStringFromCommandLineInput(
     // future to allow the user to specify which types of things they want to
     // match, but it should probably only match targets by default.
     std::vector<const Target*> target_match_vector;
-    if (!ResolveTargetsFromCommandLinePattern(setup, input, all_toolchains,
-                                              &target_match_vector))
+    if (!ResolveTargetsFromCommandLinePattern(
+            setup, input, default_toolchain_only, &target_match_vector))
       return false;
     for (const Target* target : target_match_vector)
       target_matches->push_back(target);
@@ -485,7 +486,7 @@ const Target* ResolveTargetFromCommandLineString(
 bool ResolveFromCommandLineInput(
     Setup* setup,
     const std::vector<std::string>& input,
-    bool all_toolchains,
+    bool default_toolchain_only,
     UniqueVector<const Target*>* target_matches,
     UniqueVector<const Config*>* config_matches,
     UniqueVector<const Toolchain*>* toolchain_matches,
@@ -499,9 +500,9 @@ bool ResolveFromCommandLineInput(
   SourceDir cur_dir =
       SourceDirForCurrentDirectory(setup->build_settings().root_path());
   for (const auto& cur : input) {
-    if (!ResolveStringFromCommandLineInput(setup, cur_dir, cur, all_toolchains,
-                                           target_matches, config_matches,
-                                           toolchain_matches, file_matches))
+    if (!ResolveStringFromCommandLineInput(
+            setup, cur_dir, cur, default_toolchain_only, target_matches,
+            config_matches, toolchain_matches, file_matches))
       return false;
   }
   return true;
@@ -608,11 +609,11 @@ void FilterAndPrintTargetSet(const std::set<const Target*>& targets,
 void GetTargetsContainingFile(Setup* setup,
                               const std::vector<const Target*>& all_targets,
                               const SourceFile& file,
-                              bool all_toolchains,
+                              bool default_toolchain_only,
                               std::vector<TargetContainingFile>* matches) {
   Label default_toolchain = setup->loader()->default_toolchain_label();
   for (auto* target : all_targets) {
-    if (!all_toolchains) {
+    if (default_toolchain_only) {
       // Only check targets in the default toolchain.
       if (target->label().GetToolchainLabel() != default_toolchain)
         continue;

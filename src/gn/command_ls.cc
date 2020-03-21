@@ -18,7 +18,7 @@ namespace commands {
 const char kLs[] = "ls";
 const char kLs_HelpShort[] = "ls: List matching targets.";
 const char kLs_Help[] =
-    R"(gn ls <out_dir> [<label_pattern>] [--all-toolchains] [--as=...]
+    R"(gn ls <out_dir> [<label_pattern>] [--default-toolchain] [--as=...]
       [--type=...] [--testonly=...]
 
   Lists all targets matching the given pattern for the given build directory.
@@ -31,7 +31,7 @@ const char kLs_Help[] =
 
 Options
 
-)" TARGET_PRINTING_MODE_COMMAND_LINE_HELP "\n" ALL_TOOLCHAINS_SWITCH_HELP
+)" TARGET_PRINTING_MODE_COMMAND_LINE_HELP "\n" DEFAULT_TOOLCHAIN_SWITCH_HELP
     "\n" TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP
     "\n" TARGET_TYPE_FILTER_COMMAND_LINE_HELP
     R"(
@@ -54,10 +54,6 @@ Examples
 
   gn ls out/Debug "//base/*" --as=output | xargs ninja -C out/Debug
       Builds all targets in //base and all subdirectories.
-
-  gn ls out/Debug //base --all-toolchains
-      Lists all variants of the target //base:base (it may be referenced
-      in multiple toolchains).
 )";
 
 int RunLs(const std::vector<std::string>& args) {
@@ -74,7 +70,7 @@ int RunLs(const std::vector<std::string>& args) {
     return 1;
 
   const base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
-  bool all_toolchains = cmdline->HasSwitch(switches::kAllToolchains);
+  bool default_toolchain_only = cmdline->HasSwitch(switches::kDefaultToolchain);
 
   std::vector<const Target*> matches;
   if (args.size() > 1) {
@@ -85,21 +81,21 @@ int RunLs(const std::vector<std::string>& args) {
     UniqueVector<const Config*> config_matches;
     UniqueVector<const Toolchain*> toolchain_matches;
     UniqueVector<SourceFile> file_matches;
-    if (!ResolveFromCommandLineInput(setup, inputs, all_toolchains,
+    if (!ResolveFromCommandLineInput(setup, inputs, default_toolchain_only,
                                      &target_matches, &config_matches,
                                      &toolchain_matches, &file_matches))
       return 1;
     matches.insert(matches.begin(), target_matches.begin(),
                    target_matches.end());
-  } else if (all_toolchains) {
-    // List all resolved targets.
-    matches = setup->builder().GetAllResolvedTargets();
-  } else {
+  } else if (default_toolchain_only) {
     // List all resolved targets in the default toolchain.
     for (auto* target : setup->builder().GetAllResolvedTargets()) {
       if (target->settings()->is_default())
         matches.push_back(target);
     }
+  } else {
+    // List all resolved targets.
+    matches = setup->builder().GetAllResolvedTargets();
   }
   FilterAndPrintTargets(false, &matches);
   return 0;

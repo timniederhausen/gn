@@ -144,11 +144,11 @@ bool TargetReferencesConfig(const Target* target, const Config* config) {
 void GetTargetsReferencingConfig(Setup* setup,
                                  const std::vector<const Target*>& all_targets,
                                  const Config* config,
-                                 bool all_toolchains,
+                                 bool default_toolchain_only,
                                  UniqueVector<const Target*>* matches) {
   Label default_toolchain = setup->loader()->default_toolchain_label();
   for (auto* target : all_targets) {
-    if (!all_toolchains) {
+    if (default_toolchain_only) {
       // Only check targets in the default toolchain.
       if (target->label().GetToolchainLabel() != default_toolchain)
         continue;
@@ -238,7 +238,7 @@ const char kRefs_Help[] =
     R"(gn refs
 
   gn refs <out_dir> (<label_pattern>|<label>|<file>|@<response_file>)*
-          [--all] [--all-toolchains] [--as=...] [--testonly=...] [--type=...]
+          [--all] [--default-toolchain] [--as=...] [--testonly=...] [--type=...]
 
   Finds reverse dependencies (which targets reference something). The input is
   a list containing:
@@ -272,15 +272,17 @@ Options
       directly or indirectly on that file.
 
       When used with --tree, turns off eliding to show a complete tree.
+
 )"
 
-    ALL_TOOLCHAINS_SWITCH_HELP "\n" TARGET_PRINTING_MODE_COMMAND_LINE_HELP
+    TARGET_PRINTING_MODE_COMMAND_LINE_HELP "\n" DEFAULT_TOOLCHAIN_SWITCH_HELP
 
     R"(
   -q
      Quiet. If nothing matches, don't print any output. Without this option, if
      there are no matches there will be an informational message printed which
      might interfere with scripts processing the output.
+
 )"
 
     TARGET_TESTONLY_FILTER_COMMAND_LINE_HELP
@@ -292,6 +294,7 @@ Options
 
       Tree output can not be used with the filtering or output flags: --as,
       --type, --testonly.
+
 )"
 
     TARGET_TYPE_FILTER_COMMAND_LINE_HELP
@@ -350,7 +353,7 @@ int RunRefs(const std::vector<std::string>& args) {
   const base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
   bool tree = cmdline->HasSwitch("tree");
   bool all = cmdline->HasSwitch("all");
-  bool all_toolchains = cmdline->HasSwitch(switches::kAllToolchains);
+  bool default_toolchain_only = cmdline->HasSwitch(switches::kDefaultToolchain);
 
   // Deliberately leaked to avoid expensive process teardown.
   Setup* setup = new Setup;
@@ -386,7 +389,7 @@ int RunRefs(const std::vector<std::string>& args) {
   UniqueVector<const Config*> config_matches;
   UniqueVector<const Toolchain*> toolchain_matches;
   UniqueVector<SourceFile> file_matches;
-  if (!ResolveFromCommandLineInput(setup, inputs, all_toolchains,
+  if (!ResolveFromCommandLineInput(setup, inputs, default_toolchain_only,
                                    &target_matches, &config_matches,
                                    &toolchain_matches, &file_matches))
     return 1;
@@ -401,7 +404,7 @@ int RunRefs(const std::vector<std::string>& args) {
   UniqueVector<const Target*> explicit_target_matches;
   for (const auto& file : file_matches) {
     std::vector<TargetContainingFile> target_containing;
-    GetTargetsContainingFile(setup, all_targets, file, all_toolchains,
+    GetTargetsContainingFile(setup, all_targets, file, default_toolchain_only,
                              &target_containing);
 
     // Extract just the Target*.
@@ -409,7 +412,8 @@ int RunRefs(const std::vector<std::string>& args) {
       explicit_target_matches.push_back(pair.first);
   }
   for (auto* config : config_matches) {
-    GetTargetsReferencingConfig(setup, all_targets, config, all_toolchains,
+    GetTargetsReferencingConfig(setup, all_targets, config,
+                                default_toolchain_only,
                                 &explicit_target_matches);
   }
 

@@ -87,7 +87,7 @@ int RunOutputs(const std::vector<std::string>& args) {
   UniqueVector<const Config*> config_matches;
   UniqueVector<const Toolchain*> toolchain_matches;
   UniqueVector<SourceFile> file_matches;
-  if (!ResolveFromCommandLineInput(setup, inputs, true, &target_matches,
+  if (!ResolveFromCommandLineInput(setup, inputs, false, &target_matches,
                                    &config_matches, &toolchain_matches,
                                    &file_matches))
     return 1;
@@ -106,7 +106,7 @@ int RunOutputs(const std::vector<std::string>& args) {
       setup->builder().GetAllResolvedTargets();
   for (const SourceFile& file : file_matches) {
     std::vector<TargetContainingFile> targets;
-    GetTargetsContainingFile(setup, all_targets, file, true, &targets);
+    GetTargetsContainingFile(setup, all_targets, file, false, &targets);
     if (targets.empty()) {
       Err(Location(), base::StringPrintf("No targets reference the file '%s'.",
                                          file.value().c_str()))

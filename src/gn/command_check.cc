@@ -70,10 +70,6 @@ const char kCheck_Help[] =
 
 Command-specific switches
 
-  --force
-      Ignores specifications of "check_includes = false" and checks all
-      target's files that match the target label.
-
   --check-generated
       Generated files are normally not checked since they do not exist
       until after a build. With this flag, those generated files that
@@ -82,6 +78,12 @@ Command-specific switches
   --check-system
      Check system style includes (using <angle brackets>) in addition to
      "double quote" includes.
+
+)" DEFAULT_TOOLCHAIN_SWITCH_HELP
+    R"(
+  --force
+      Ignores specifications of "check_includes = false" and checks all
+      target's files that match the target label.
 
 What gets checked
 
@@ -190,6 +192,9 @@ int RunCheck(const std::vector<std::string>& args) {
   if (!setup->Run())
     return 1;
 
+  const base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
+  bool default_toolchain_only = cmdline->HasSwitch(switches::kDefaultToolchain);
+
   std::vector<const Target*> all_targets =
       setup->builder().GetAllResolvedTargets();
 
@@ -202,9 +207,9 @@ int RunCheck(const std::vector<std::string>& args) {
     UniqueVector<const Config*> config_matches;
     UniqueVector<const Toolchain*> toolchain_matches;
     UniqueVector<SourceFile> file_matches;
-    if (!ResolveFromCommandLineInput(setup, inputs, false, &target_matches,
-                                     &config_matches, &toolchain_matches,
-                                     &file_matches))
+    if (!ResolveFromCommandLineInput(setup, inputs, default_toolchain_only,
+                                     &target_matches, &config_matches,
+                                     &toolchain_matches, &file_matches))
       return 1;
 
     if (target_matches.size() == 0) {
@@ -226,11 +231,10 @@ int RunCheck(const std::vector<std::string>& args) {
     }
   }
 
-  const base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
   bool force = cmdline->HasSwitch("force");
   bool check_generated = cmdline->HasSwitch("check-generated");
-  bool check_system = setup->check_system_includes() ||
-                      cmdline->HasSwitch("check-system");
+  bool check_system =
+      setup->check_system_includes() || cmdline->HasSwitch("check-system");
 
   if (!CheckPublicHeaders(&setup->build_settings(), all_targets,
                           targets_to_check, force, check_generated,
@@ -254,12 +258,13 @@ int RunCheck(const std::vector<std::string>& args) {
 bool CheckPublicHeaders(const BuildSettings* build_settings,
                         const std::vector<const Target*>& all_targets,
                         const std::vector<const Target*>& to_check,
-                        bool force_check, bool check_generated,
+                        bool force_check,
+                        bool check_generated,
                         bool check_system) {
   ScopedTrace trace(TraceItem::TRACE_CHECK_HEADERS, "Check headers");
 
-  scoped_refptr<HeaderChecker> header_checker(
-      new HeaderChecker(build_settings, all_targets, check_generated, check_system));
+  scoped_refptr<HeaderChecker> header_checker(new HeaderChecker(
+      build_settings, all_targets, check_generated, check_system));
 
   std::vector<Err> header_errors;
   header_checker->Run(to_check, force_check, &header_errors);
