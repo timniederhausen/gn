@@ -13,6 +13,14 @@ Related resources:
   * An introductory [presentation](https://docs.google.com/presentation/d/15Zwb53JcncHfEwHpnG_PoIbbzQ3GQi_cpujYwbpcbZo/edit?usp=sharing).
   * The [mailing list](https://groups.google.com/a/chromium.org/forum/#!forum/gn-dev).
 
+## This is a fork!
+
+Contains changes not wanted/needed by the upstream project.
+
+So far:
+
+* Custom description labels for action / action_foreach targets
+
 ## Getting a binary
 
 You can download the latest version of GN binary for
@@ -22,7 +30,7 @@ You can download the latest version of GN binary for
 
 Alternatively, you can build GN from source:
 
-    git clone https://gn.googlesource.com/gn
+    git clone https://github.com/timniederhausen/gn.git
     cd gn
     python build/gen.py
     ninja -C out
@@ -55,11 +63,13 @@ For a maximal configuration see the Chromium setup:
   * [Toolchain setup](https://cs.chromium.org/chromium/src/build/toolchain/)
   * [Compiler setup](https://cs.chromium.org/chromium/src/build/config/compiler/BUILD.gn)
 
-and the Fuchsia setup:
+the Fuchsia setup:
   * [.gn](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/.gn)
   * [BUILDCONFIG.gn](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/build/config/BUILDCONFIG.gn)
   * [Toolchain setup](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/build/toolchain/)
   * [Compiler setup](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/build/config/BUILD.gn)
+
+and the [standalone version](https://github.com/timniederhausen/gn-build)
 
 ## Reporting bugs
 
@@ -103,3 +113,4 @@ project').
 You may ask questions and follow along with GN's development on Chromium's
 [gn-dev@](https://groups.google.com/a/chromium.org/forum/#!forum/gn-dev)
 Google Group.
+
