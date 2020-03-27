@@ -183,10 +183,11 @@ class Printer {
   // will be set so it can be closed at the end of the expression.
   void AddParen(int prec, int outer_prec, bool* parenthesized);
 
-  // Print the expression to the output buffer. Returns the type of element
-  // added to the output. The value of outer_prec gives the precedence of the
-  // operator outside this Expr. If that operator binds tighter than root's,
-  // Expr must introduce parentheses.
+  // Print the expression given by |root| to the output buffer and appends
+  // |suffix| to that output. Returns a penalty that represents the cost of
+  // adding that output to the buffer (where higher is worse). The value of
+  // outer_prec gives the precedence of the operator outside this Expr. If that
+  // operator binds tighter than root's, Expr() must introduce parentheses.
   int Expr(const ParseNode* root, int outer_prec, const std::string& suffix);
 
   // Generic penalties for exceeding maximum width, adding more lines, etc.
@@ -740,6 +741,9 @@ int Printer::Expr(const ParseNode* root,
       AddParen(prec_left, outer_prec, &parenthesized);
     }
 
+    if (parenthesized)
+      at_end = ")" + at_end;
+
     int start_line = CurrentLine();
     int start_column = CurrentColumn();
     bool is_assignment = binop->op().value() == "=" ||
@@ -785,9 +789,7 @@ int Printer::Expr(const ParseNode* root,
     Printer sub1;
     InitializeSub(&sub1);
     sub1.Print(" ");
-    int penalty_current_line =
-        sub1.Expr(binop->right(), prec_right, std::string());
-    sub1.Print(suffix);
+    int penalty_current_line = sub1.Expr(binop->right(), prec_right, at_end);
     sub1.PrintSuffixComments(root);
     sub1.FlushComments();
     penalty_current_line += AssessPenalty(sub1.String());
@@ -802,9 +804,7 @@ int Printer::Expr(const ParseNode* root,
     Printer sub2;
     InitializeSub(&sub2);
     sub2.Newline();
-    int penalty_next_line =
-        sub2.Expr(binop->right(), prec_right, std::string());
-    sub2.Print(suffix);
+    int penalty_next_line = sub2.Expr(binop->right(), prec_right, at_end);
     sub2.PrintSuffixComments(root);
     sub2.FlushComments();
     penalty_next_line += AssessPenalty(sub2.String());
@@ -841,7 +841,8 @@ int Printer::Expr(const ParseNode* root,
 
     if (penalty_current_line < penalty_next_line || exceeds_maximum_all_ways) {
       Print(" ");
-      Expr(binop->right(), prec_right, std::string());
+      Expr(binop->right(), prec_right, at_end);
+      at_end = "";
     } else if (tried_rhs_multiline &&
                penalty_multiline_rhs_list < penalty_next_line) {
       // Force a multiline list on the right.
@@ -854,7 +855,8 @@ int Printer::Expr(const ParseNode* root,
       Newline();
       penalty += std::abs(CurrentColumn() - start_column) *
                  kPenaltyHorizontalSeparation;
-      Expr(binop->right(), prec_right, std::string());
+      Expr(binop->right(), prec_right, at_end);
+      at_end = "";
     }
     stack_.pop_back();
     penalty += (CurrentLine() - start_line) * GetPenaltyForLineBreak();
@@ -863,6 +865,7 @@ int Printer::Expr(const ParseNode* root,
              false);
   } else if (const ConditionNode* condition = root->AsConditionNode()) {
     Print("if (");
+    CHECK(at_end.empty());
     Expr(condition->condition(), kPrecedenceLowest, ") {");
     Sequence(kSequenceStyleBracedBlockAlreadyOpen,
              condition->if_true()->statements(), condition->if_true()->End(),
@@ -900,9 +903,6 @@ int Printer::Expr(const ParseNode* root,
   } else {
     CHECK(false) << "Unhandled case in Expr.";
   }
-
-  if (parenthesized)
-    Print(")");
 
   // Defer any end of line comment until we reach the newline.
   if (root->comments() && !root->comments()->suffix().empty()) {
