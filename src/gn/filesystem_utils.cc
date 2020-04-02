@@ -7,9 +7,9 @@
 #include <algorithm>
 
 #include "base/files/file_util.h"
-#include "base/logging.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
+#include "gn/file_writer.h"
 #include "gn/location.h"
 #include "gn/settings.h"
 #include "gn/source_dir.h"
@@ -969,44 +969,10 @@ bool WriteFile(const base::FilePath& file_path,
     return false;
   }
 
-  int size = static_cast<int>(data.size());
-  bool write_success = false;
-
-#if defined(OS_WIN)
-  // On Windows, provide a custom implementation of base::WriteFile. Sometimes
-  // the base version fails, especially on the bots. The guess is that Windows
-  // Defender or other antivirus programs still have the file open (after
-  // checking for the read) when the write happens immediately after. This
-  // version opens with FILE_SHARE_READ (normally not what you want when
-  // replacing the entire contents of the file) which lets us continue even if
-  // another program has the file open for reading. See http://crbug.com/468437
-  base::win::ScopedHandle file(::CreateFile(
-      reinterpret_cast<LPCWSTR>(file_path.value().c_str()), GENERIC_WRITE,
-      FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL));
-  if (file.IsValid()) {
-    DWORD written;
-    BOOL result = ::WriteFile(file.Get(), data.c_str(), size, &written, NULL);
-    if (result) {
-      if (static_cast<int>(written) == size) {
-        write_success = true;
-      } else {
-        // Didn't write all the bytes.
-        LOG(ERROR) << "wrote" << written << " bytes to "
-                   << base::UTF16ToUTF8(file_path.value()) << " expected "
-                   << size;
-      }
-    } else {
-      // WriteFile failed.
-      PLOG(ERROR) << "writing file " << base::UTF16ToUTF8(file_path.value())
-                  << " failed";
-    }
-  } else {
-    PLOG(ERROR) << "CreateFile failed for path "
-                << base::UTF16ToUTF8(file_path.value());
-  }
-#else
-  write_success = base::WriteFile(file_path, data.c_str(), size) == size;
-#endif
+  FileWriter writer;
+  writer.Create(file_path);
+  writer.Write(data);
+  bool write_success = writer.Close();
 
   if (!write_success && err) {
     *err = Err(Location(), "Unable to write file.",
