@@ -14,6 +14,7 @@
 #include "gn/ninja_target_command_util.h"
 #include "gn/rust_tool.h"
 #include "gn/source_file.h"
+#include "gn/string_output_buffer.h"
 #include "gn/tool.h"
 
 #if defined(OS_WINDOWS)
@@ -58,15 +59,16 @@ bool RustProjectWriter::RunAndWriteFiles(const BuildSettings* build_settings,
 
   std::vector<const Target*> all_targets = builder.GetAllResolvedTargets();
 
-  std::ofstream json;
-  json.open(FilePathToUTF8(output_path).c_str(),
-            std::ios_base::out | std::ios_base::binary);
-  if (json.fail())
-    return false;
+  StringOutputBuffer out_buffer;
+  std::ostream out(&out_buffer);
 
-  RenderJSON(build_settings, all_targets, json);
+  RenderJSON(build_settings, all_targets, out);
 
-  return true;
+  if (out_buffer.ContentsEqual(output_path)) {
+    return true;
+  }
+
+  return out_buffer.WriteToFile(output_path, err);
 }
 
 using TargetIdxMap = std::unordered_map<const Target*, uint32_t>;
@@ -189,10 +191,10 @@ void AddSysrootCrate(const std::string_view crate,
         rust_project << ",";
       }
       first = false;
-      rust_project << NEWLINE << "        {" NEWLINE
+      rust_project << NEWLINE "        {" NEWLINE
                    << "          \"crate\": " << std::to_string(idx)
-                   << "," NEWLINE << "          \"name\": \"" << dep
-                   << "\"" NEWLINE << "        }";
+                   << "," NEWLINE "          \"name\": \"" << dep
+                   << "\"" NEWLINE "        }";
     }
   }
   rust_project << NEWLINE "      ]," NEWLINE;
