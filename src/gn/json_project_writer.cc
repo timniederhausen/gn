@@ -209,26 +209,34 @@ std::string JSONProjectWriter::RenderJSON(
       "default_toolchain",
       base::Value(default_toolchain_label.GetUserVisibleName(false)));
 
-  std::vector<base::FilePath> input_files;
-  g_scheduler->input_file_manager()->GetAllPhysicalInputFileNames(&input_files);
-
   // Other files read by the build.
   std::vector<base::FilePath> other_files = g_scheduler->GetGenDependencies();
 
-  // Sort the input files to order them deterministically.
-  // Additionally, remove duplicate filepaths that seem to creep in.
-  std::set<base::FilePath> fileset(input_files.begin(), input_files.end());
-  fileset.insert(other_files.begin(), other_files.end());
+  const InputFileManager* input_file_manager =
+      g_scheduler->input_file_manager();
 
   base::ListValue inputs;
-  const auto &build_path = build_settings->root_path();
-  for (const auto& other_file : fileset) {
-    std::string file;
-    if (MakeAbsolutePathRelativeIfPossible(FilePathToUTF8(build_path),
-                                           FilePathToUTF8(other_file), &file)) {
-      inputs.Append(std::make_unique<base::Value>(std::move(file)));
-    }
+  {
+    VectorSetSorter<base::FilePath> sorter(
+        input_file_manager->GetInputFileCount() + other_files.size());
+
+    input_file_manager->AddAllPhysicalInputFileNamesToVectorSetSorter(&sorter);
+
+    sorter.Add(other_files.begin(), other_files.end());
+
+    std::string build_path = FilePathToUTF8(build_settings->root_path());
+    auto item_callback = [&inputs,
+                          &build_path](const base::FilePath& input_file) {
+      std::string file;
+      if (MakeAbsolutePathRelativeIfPossible(
+              build_path, FilePathToUTF8(input_file), &file)) {
+        inputs.Append(std::make_unique<base::Value>(std::move(file)));
+      }
+    };
+
+    sorter.IterateOver(item_callback);
   }
+
   settings->SetKey("gen_input_files", std::move(inputs));
 
   auto output = std::make_unique<base::DictionaryValue>();

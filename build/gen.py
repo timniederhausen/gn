@@ -675,6 +675,7 @@ def WriteGNNinja(path, platform, host, options):
         'src/gn/tokenizer_unittest.cc',
         'src/gn/unique_vector_unittest.cc',
         'src/gn/value_unittest.cc',
+        'src/gn/vector_utils_unittest.cc',
         'src/gn/visibility_unittest.cc',
         'src/gn/visual_studio_utils_unittest.cc',
         'src/gn/visual_studio_writer_unittest.cc',
