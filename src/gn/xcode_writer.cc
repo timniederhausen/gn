@@ -251,12 +251,12 @@ const SourceFileSet& XCTestFilesResolver::SearchFilesForTarget(
 
 // Add xctest files to the "Compiler Sources" of corresponding test module
 // native targets.
-void AddXCTestFilesToTestModuleTarget(const SourceFileSet& xctest_file_list,
+void AddXCTestFilesToTestModuleTarget(const std::vector<SourceFile>& sources,
                                       PBXNativeTarget* native_target,
                                       PBXProject* project,
                                       SourceDir source_dir,
                                       const BuildSettings* build_settings) {
-  for (const SourceFile& source : xctest_file_list) {
+  for (const SourceFile& source : sources) {
     std::string source_path = RebasePath(source.value(), source_dir,
                                          build_settings->root_path_utf8());
 
@@ -631,13 +631,18 @@ bool XcodeProject::AddCXTestSourceFilesForTestModuleTargets(
       target_with_xctest_files = target;
     }
 
-    const SourceFileSet& xctest_file_list =
+    const SourceFileSet& sources =
         resolver.SearchFilesForTarget(target_with_xctest_files);
+
+    // Sort files to ensure deterministic generation of the project file (and
+    // nicely sorted file list in Xcode).
+    std::vector<SourceFile> sorted_sources(sources.begin(), sources.end());
+    std::sort(sorted_sources.begin(), sorted_sources.end());
 
     // Add xctest files to the "Compiler Sources" of corresponding xctest
     // and xcuitest native targets for proper indexing and for discovery of
     // tests function.
-    AddXCTestFilesToTestModuleTarget(xctest_file_list, pair.second, &project_,
+    AddXCTestFilesToTestModuleTarget(sorted_sources, pair.second, &project_,
                                      source_dir, build_settings_);
   }
 
