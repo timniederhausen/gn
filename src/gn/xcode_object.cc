@@ -137,6 +137,8 @@ const SourceTypeForExt kSourceTypeForExt[] = {
     {"xcconfig", "text.xcconfig"},
     {"xcdatamodel", "wrapper.xcdatamodel"},
     {"xcdatamodeld", "wrapper.xcdatamodeld"},
+    {"xctest", "wrapper.cfbundle"},
+    {"xpc", "wrapper.xpc-service"},
     {"xib", "file.xib"},
     {"y", "sourcecode.yacc"},
 };
