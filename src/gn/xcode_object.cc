@@ -177,6 +177,18 @@ void PrintValue(std::ostream& out, IndentRules rules, const PBXObject* value) {
   out << value->Reference();
 }
 
+void PrintValue(std::ostream& out, IndentRules rules, CompilerFlags flags) {
+  out << "{COMPILER_FLAGS = \"";
+  switch (flags) {
+    case CompilerFlags::HELP:
+      out << "--help";
+      break;
+    case CompilerFlags::NONE:
+      break;
+  }
+  out << "\"; }";
+}
+
 template <typename ObjectClass>
 void PrintValue(std::ostream& out,
                 IndentRules rules,
@@ -439,11 +451,8 @@ void PBXBuildFile::Print(std::ostream& out, unsigned indent) const {
   out << indent_str << Reference() << " = {";
   PrintProperty(out, rules, "isa", ToString(Class()));
   PrintProperty(out, rules, "fileRef", file_reference_);
-  if (compiler_flag_ == CompilerFlags::HELP) {
-    std::map<std::string, std::string> settings = {
-        {"COMPILER_FLAGS", "--help"},
-    };
-    PrintProperty(out, rules, "settings", settings);
+  if (compiler_flag_ != CompilerFlags::NONE) {
+    PrintProperty(out, rules, "settings", compiler_flag_);
   }
   out << "};\n";
 }
