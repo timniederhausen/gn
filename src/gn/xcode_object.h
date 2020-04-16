@@ -228,6 +228,7 @@ class PBXFileReference : public PBXObject {
   // PBXObject implementation.
   PBXObjectClass Class() const override;
   std::string Name() const override;
+  std::string Comment() const override;
   void Print(std::ostream& out, unsigned indent) const override;
 
   const std::string& path() const { return path_; }

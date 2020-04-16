@@ -516,6 +516,10 @@ std::string PBXFileReference::Name() const {
   return name_;
 }
 
+std::string PBXFileReference::Comment() const {
+  return !name_.empty() ? name_ : path_;
+}
+
 void PBXFileReference::Print(std::ostream& out, unsigned indent) const {
   const std::string indent_str(indent, '\t');
   const IndentRules rules = {true, 0};
@@ -533,7 +537,7 @@ void PBXFileReference::Print(std::ostream& out, unsigned indent) const {
       PrintProperty(out, rules, "lastKnownFileType", GetSourceType(ext));
   }
 
-  if (!name_.empty())
+  if (!name_.empty() && name_ != path_)
     PrintProperty(out, rules, "name", name_);
 
   DCHECK(!path_.empty());
