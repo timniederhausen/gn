@@ -161,6 +161,15 @@ bool IsSourceFileForIndexing(const std::string_view& ext) {
          ext == "m" || ext == "mm";
 }
 
+// Wrapper around a const PBXObject* allowing to print just the object
+// identifier instead of a reference (i.e. identitifer and name). This
+// is used in a few place where Xcode uses the short identifier only.
+struct NoReference {
+  const PBXObject* value;
+
+  explicit NoReference(const PBXObject* value) : value(value) {}
+};
+
 void PrintValue(std::ostream& out, IndentRules rules, unsigned value) {
   out << value;
 }
@@ -173,6 +182,10 @@ void PrintValue(std::ostream& out,
                 IndentRules rules,
                 const std::string& value) {
   out << EncodeString(value);
+}
+
+void PrintValue(std::ostream& out, IndentRules rules, const NoReference& obj) {
+  out << obj.value->id();
 }
 
 void PrintValue(std::ostream& out, IndentRules rules, const PBXObject* value) {
@@ -476,12 +489,12 @@ std::string PBXContainerItemProxy::Name() const {
 
 void PBXContainerItemProxy::Print(std::ostream& out, unsigned indent) const {
   const std::string indent_str(indent, '\t');
-  const IndentRules rules = {true, 0};
-  out << indent_str << Reference() << " = {";
+  const IndentRules rules = {false, indent + 1};
+  out << indent_str << Reference() << " = {\n";
   PrintProperty(out, rules, "isa", ToString(Class()));
   PrintProperty(out, rules, "containerPortal", project_);
   PrintProperty(out, rules, "proxyType", 1u);
-  PrintProperty(out, rules, "remoteGlobalIDString", target_);
+  PrintProperty(out, rules, "remoteGlobalIDString", NoReference(target_));
   PrintProperty(out, rules, "remoteInfo", target_->Name());
   out << indent_str << "};\n";
 }
