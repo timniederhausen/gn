@@ -151,7 +151,7 @@ class PBXTarget : public PBXObject {
   std::unique_ptr<XCConfigurationList> configurations_;
   std::vector<std::unique_ptr<PBXBuildPhase>> build_phases_;
   std::vector<std::unique_ptr<PBXTargetDependency>> dependencies_;
-  PBXSourcesBuildPhase* source_build_phase_;
+  PBXSourcesBuildPhase* source_build_phase_ = nullptr;
   std::string name_;
 
  private:
@@ -191,8 +191,8 @@ class PBXBuildFile : public PBXObject {
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:
-  const PBXFileReference* file_reference_;
-  const PBXSourcesBuildPhase* build_phase_;
+  const PBXFileReference* file_reference_ = nullptr;
+  const PBXSourcesBuildPhase* build_phase_ = nullptr;
   const CompilerFlags compiler_flag_;
 
   DISALLOW_COPY_AND_ASSIGN(PBXBuildFile);
@@ -210,8 +210,8 @@ class PBXContainerItemProxy : public PBXObject {
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:
-  const PBXProject* project_;
-  const PBXTarget* target_;
+  const PBXProject* project_ = nullptr;
+  const PBXTarget* target_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(PBXContainerItemProxy);
 };
@@ -323,7 +323,7 @@ class PBXNativeTarget : public PBXTarget {
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:
-  const PBXFileReference* product_reference_;
+  const PBXFileReference* product_reference_ = nullptr;
   std::string product_type_;
   std::string product_name_;
 
@@ -381,9 +381,9 @@ class PBXProject : public PBXObject {
   std::string name_;
   std::string config_name_;
 
-  PBXGroup* sources_;
-  PBXGroup* products_;
-  PBXNativeTarget* target_for_indexing_;
+  PBXGroup* sources_ = nullptr;
+  PBXGroup* products_ = nullptr;
+  PBXNativeTarget* target_for_indexing_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(PBXProject);
 };
@@ -446,7 +446,7 @@ class PBXTargetDependency : public PBXObject {
   void Print(std::ostream& out, unsigned indent) const override;
 
  private:
-  const PBXTarget* target_;
+  const PBXTarget* target_ = nullptr;
   std::unique_ptr<PBXContainerItemProxy> container_item_proxy_;
 
   DISALLOW_COPY_AND_ASSIGN(PBXTargetDependency);
@@ -490,7 +490,7 @@ class XCConfigurationList : public PBXObject {
 
  private:
   std::vector<std::unique_ptr<XCBuildConfiguration>> configurations_;
-  const PBXObject* owner_reference_;
+  const PBXObject* owner_reference_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(XCConfigurationList);
 };
