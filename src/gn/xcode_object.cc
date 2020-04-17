@@ -303,6 +303,8 @@ const char* ToString(PBXObjectClass cls) {
       return "PBXNativeTarget";
     case PBXProjectClass:
       return "PBXProject";
+    case PBXResourcesBuildPhaseClass:
+      return "PBXResourcesBuildPhase";
     case PBXShellScriptBuildPhaseClass:
       return "PBXShellScriptBuildPhase";
     case PBXSourcesBuildPhaseClass:
@@ -367,6 +369,25 @@ void PBXObject::Visit(PBXObjectVisitorConst& visitor) const {
 PBXBuildPhase::PBXBuildPhase() = default;
 
 PBXBuildPhase::~PBXBuildPhase() = default;
+
+void PBXBuildPhase::AddBuildFile(std::unique_ptr<PBXBuildFile> build_file) {
+  DCHECK(build_file);
+  files_.push_back(std::move(build_file));
+}
+
+void PBXBuildPhase::Visit(PBXObjectVisitor& visitor) {
+  PBXObject::Visit(visitor);
+  for (const auto& file : files_) {
+    file->Visit(visitor);
+  }
+}
+
+void PBXBuildPhase::Visit(PBXObjectVisitorConst& visitor) const {
+  PBXObject::Visit(visitor);
+  for (const auto& file : files_) {
+    file->Visit(visitor);
+  }
+}
 
 // PBXTarget ------------------------------------------------------------------
 
@@ -442,7 +463,7 @@ void PBXAggregateTarget::Print(std::ostream& out, unsigned indent) const {
 // PBXBuildFile ---------------------------------------------------------------
 
 PBXBuildFile::PBXBuildFile(const PBXFileReference* file_reference,
-                           const PBXSourcesBuildPhase* build_phase,
+                           const PBXBuildPhase* build_phase,
                            const CompilerFlags compiler_flag)
     : file_reference_(file_reference),
       build_phase_(build_phase),
@@ -568,7 +589,7 @@ void PBXFrameworksBuildPhase::Print(std::ostream& out, unsigned indent) const {
   out << indent_str << Reference() << " = {\n";
   PrintProperty(out, rules, "isa", ToString(Class()));
   PrintProperty(out, rules, "buildActionMask", 0x7fffffffu);
-  PrintProperty(out, rules, "files", EmptyPBXObjectVector());
+  PrintProperty(out, rules, "files", files_);
   PrintProperty(out, rules, "runOnlyForDeploymentPostprocessing", 0u);
   out << indent_str << "};\n";
 }
@@ -701,9 +722,18 @@ PBXNativeTarget::PBXNativeTarget(const std::string& name,
       static_cast<PBXSourcesBuildPhase*>(build_phases_.back().get());
 
   build_phases_.push_back(std::make_unique<PBXFrameworksBuildPhase>());
+  build_phases_.push_back(std::make_unique<PBXResourcesBuildPhase>());
+  resource_build_phase_ =
+      static_cast<PBXResourcesBuildPhase*>(build_phases_.back().get());
 }
 
 PBXNativeTarget::~PBXNativeTarget() = default;
+
+void PBXNativeTarget::AddResourceFile(const PBXFileReference* file_reference) {
+  DCHECK(file_reference);
+  resource_build_phase_->AddBuildFile(std::make_unique<PBXBuildFile>(
+      file_reference, resource_build_phase_, CompilerFlags::NONE));
+}
 
 void PBXNativeTarget::AddFileForIndexing(const PBXFileReference* file_reference,
                                          const CompilerFlags compiler_flag) {
@@ -913,6 +943,31 @@ void PBXProject::Print(std::ostream& out, unsigned indent) const {
   out << indent_str << "};\n";
 }
 
+// PBXResourcesBuildPhase -----------------------------------------------------
+
+PBXResourcesBuildPhase::PBXResourcesBuildPhase() = default;
+
+PBXResourcesBuildPhase::~PBXResourcesBuildPhase() = default;
+
+PBXObjectClass PBXResourcesBuildPhase::Class() const {
+  return PBXResourcesBuildPhaseClass;
+}
+
+std::string PBXResourcesBuildPhase::Name() const {
+  return "Resources";
+}
+
+void PBXResourcesBuildPhase::Print(std::ostream& out, unsigned indent) const {
+  const std::string indent_str(indent, '\t');
+  const IndentRules rules = {false, indent + 1};
+  out << indent_str << Reference() << " = {\n";
+  PrintProperty(out, rules, "isa", ToString(Class()));
+  PrintProperty(out, rules, "buildActionMask", 0x7fffffffu);
+  PrintProperty(out, rules, "files", files_);
+  PrintProperty(out, rules, "runOnlyForDeploymentPostprocessing", 0u);
+  out << indent_str << "};\n";
+}
+
 // PBXShellScriptBuildPhase ---------------------------------------------------
 
 PBXShellScriptBuildPhase::PBXShellScriptBuildPhase(
@@ -937,7 +992,7 @@ void PBXShellScriptBuildPhase::Print(std::ostream& out, unsigned indent) const {
   out << indent_str << Reference() << " = {\n";
   PrintProperty(out, rules, "isa", ToString(Class()));
   PrintProperty(out, rules, "buildActionMask", 0x7fffffffu);
-  PrintProperty(out, rules, "files", EmptyPBXObjectVector());
+  PrintProperty(out, rules, "files", files_);
   PrintProperty(out, rules, "inputPaths", EmptyPBXObjectVector());
   PrintProperty(out, rules, "name", name_);
   PrintProperty(out, rules, "outputPaths", EmptyPBXObjectVector());
@@ -954,31 +1009,12 @@ PBXSourcesBuildPhase::PBXSourcesBuildPhase() = default;
 
 PBXSourcesBuildPhase::~PBXSourcesBuildPhase() = default;
 
-void PBXSourcesBuildPhase::AddBuildFile(
-    std::unique_ptr<PBXBuildFile> build_file) {
-  files_.push_back(std::move(build_file));
-}
-
 PBXObjectClass PBXSourcesBuildPhase::Class() const {
   return PBXSourcesBuildPhaseClass;
 }
 
 std::string PBXSourcesBuildPhase::Name() const {
   return "Sources";
-}
-
-void PBXSourcesBuildPhase::Visit(PBXObjectVisitor& visitor) {
-  PBXBuildPhase::Visit(visitor);
-  for (const auto& file : files_) {
-    file->Visit(visitor);
-  }
-}
-
-void PBXSourcesBuildPhase::Visit(PBXObjectVisitorConst& visitor) const {
-  PBXBuildPhase::Visit(visitor);
-  for (const auto& file : files_) {
-    file->Visit(visitor);
-  }
 }
 
 void PBXSourcesBuildPhase::Print(std::ostream& out, unsigned indent) const {
