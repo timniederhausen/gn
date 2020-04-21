@@ -302,7 +302,7 @@ void AddTarget(const Target* target,
 
   rust_project << "      \"key_value_cfgs\": {";
   bool first_kv = true;
-  for (const auto cfg : kvs) {
+  for (const auto& cfg : kvs) {
     if (!first_kv) {
       rust_project << ",";
     }
