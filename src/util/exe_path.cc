@@ -22,6 +22,8 @@
 #elif defined(OS_HAIKU)
 #include <OS.h>
 #include <image.h>
+#elif defined(OS_SOLARIS)
+#include <stdlib.h>
 #endif
 
 #if defined(OS_MACOSX)
@@ -78,6 +80,16 @@ base::FilePath GetExePath() {
     }
   }
   return base::FilePath(std::string(i_info.name));
+}
+
+#elif defined(OS_SOLARIS)
+
+base::FilePath GetExePath() {
+  const char *raw = getexecname();
+  if (raw == NULL) {
+    return base::FilePath();
+  }
+  return base::FilePath(raw);
 }
 
 #else

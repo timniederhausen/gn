@@ -26,6 +26,11 @@ std::string OperatingSystemArchitecture() {
   std::string arch(info.machine);
   if (arch == "i386" || arch == "i486" || arch == "i586" || arch == "i686") {
     arch = "x86";
+  } else if (arch == "i86pc") {
+    // Solaris and illumos systems report 'i86pc' (an Intel x86 PC) as their
+    // machine for both 32-bit and 64-bit x86 systems.  Considering the rarity
+    // of 32-bit systems at this point, it is safe to assume 64-bit.
+    arch = "x86_64";
   } else if (arch == "amd64") {
     arch = "x86_64";
   } else if (std::string(info.sysname) == "AIX") {
