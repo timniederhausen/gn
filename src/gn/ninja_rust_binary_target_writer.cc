@@ -249,12 +249,15 @@ void NinjaRustBinaryTargetWriter::WriteRustdeps(
   out_ << "  rustdeps =";
 
   // Rust dependencies.
+  UniqueVector<SourceDir> transitive_rustdep_dirs;
   for (const auto& rustdep : transitive_rustdeps) {
     // TODO switch to using --extern priv: after stabilization
+    transitive_rustdep_dirs.push_back(
+        rustdep.AsSourceFile(settings_->build_settings()).GetDir());
+  }
+  for (const auto& rustdepdir : transitive_rustdep_dirs) {
     out_ << " -Ldependency=";
-    path_output_.WriteDir(
-        out_, rustdep.AsSourceFile(settings_->build_settings()).GetDir(),
-        PathOutput::DIR_NO_LAST_SLASH);
+    path_output_.WriteDir(out_, rustdepdir, PathOutput::DIR_NO_LAST_SLASH);
   }
 
   EscapeOptions lib_escape_opts;

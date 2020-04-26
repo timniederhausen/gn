@@ -307,7 +307,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
         "build ./foo_bar: rust_bin ../../foo/main.rs | "
         "../../foo/source.rs ../../foo/main.rs obj/bar/libmylib.rlib\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
-        "  rustdeps = -Ldependency=obj/bar -Ldependency=obj/bar\n";
+        "  rustdeps = -Ldependency=obj/bar\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
