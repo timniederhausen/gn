@@ -265,11 +265,18 @@ void NinjaRustBinaryTargetWriter::WriteRustdeps(
   const std::string_view lib_prefix("lib");
 
   // Non-Rust native dependencies.
+  UniqueVector<SourceDir> nonrustdep_dirs;
   for (const auto& nonrustdep : nonrustdeps) {
+    nonrustdep_dirs.push_back(
+        nonrustdep.AsSourceFile(settings_->build_settings()).GetDir());
+  }
+  // First -Lnative to specify search directories
+  for (const auto& nonrustdep_dir : nonrustdep_dirs) {
     out_ << " -Lnative=";
-    path_output_.WriteDir(
-        out_, nonrustdep.AsSourceFile(settings_->build_settings()).GetDir(),
-        PathOutput::DIR_NO_LAST_SLASH);
+    path_output_.WriteDir(out_, nonrustdep_dir, PathOutput::DIR_NO_LAST_SLASH);
+  }
+  // Now the dependencies themselves.
+  for (const auto& nonrustdep : nonrustdeps) {
     std::string_view file = FindFilenameNoExtension(&nonrustdep.value());
     if (!file.compare(0, lib_prefix.size(), lib_prefix)) {
       out_ << " -l";

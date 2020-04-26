@@ -448,8 +448,8 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "../../foo/main.rs obj/bar/libmylib.rlib obj/foo/libstatic.a "
         "./libshared.so ./libshared_with_toc.so.TOC\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
-        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/foo -lstatic "
-        "-Lnative=. -lshared -Lnative=. -lshared_with_toc\n";
+        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/foo -Lnative=. "
+        "-lstatic -lshared -lshared_with_toc\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
