@@ -78,7 +78,8 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
                         const std::vector<SourceFile>& other_files,
                         const OutputFile& input_dep);
   void WriteOutputSubstitutions();
-  void WriteSolibs(const std::vector<OutputFile>& solibs);
+  void WriteLibsList(const std::string& label,
+                     const std::vector<OutputFile>& libs);
 
   // Writes the implicit dependencies for the link or stamp line. This is
   // the "||" and everything following it on the ninja line.

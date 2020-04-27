@@ -542,7 +542,7 @@ Tool variables
           tool("link") {
             command = "link -o {{output}} {{ldflags}} @{{output}}.rsp"
             rspfile = "{{output}}.rsp"
-            rspfile_content = "{{inputs}} {{solibs}} {{libs}}"
+            rspfile_content = "{{inputs}} {{solibs}} {{libs}} {{rlibs}}"
           }
 
     runtime_outputs  [string list with substitutions]
@@ -690,6 +690,13 @@ Tool variables
         These should generally be treated the same as libs by your tool.
 
         Example: "libfoo.so libbar.so"
+
+    {{rlibs}}
+        Any Rust .rlibs which need to be linked into a final C++ target.
+        These should be treated as {{inputs}} except that sometimes
+        they might have different linker directives applied.
+
+        Example: "obj/foo/libfoo.rlib"
 
     {{frameworks}}
         Shared libraries packaged as framework bundle. This is principally
