@@ -108,7 +108,19 @@ NinjaRustBinaryTargetWriter::~NinjaRustBinaryTargetWriter() = default;
 // TODO(juliehockett): add inherited library support? and IsLinkable support?
 // for c-cross-compat
 void NinjaRustBinaryTargetWriter::Run() {
+  DCHECK(target_->output_type() != Target::SOURCE_SET);
+
   OutputFile input_dep = WriteInputsStampAndGetDep();
+
+  WriteCompilerVars();
+
+  // Classify our dependencies.
+  UniqueVector<const Target*> linkable_deps;
+  UniqueVector<const Target*> non_linkable_deps;
+  UniqueVector<const Target*> framework_deps;
+  UniqueVector<OutputFile> extra_obj_files;
+  GetDeps(&extra_obj_files, &linkable_deps, &non_linkable_deps,
+          &framework_deps);
 
   // The input dependencies will be an order-only dependency. This will cause
   // Ninja to make sure the inputs are up to date before compiling this source,
@@ -117,24 +129,21 @@ void NinjaRustBinaryTargetWriter::Run() {
   size_t num_stamp_uses = target_->sources().size();
   std::vector<OutputFile> order_only_deps = WriteInputDepsStampAndGetDep(
       std::vector<const Target*>(), num_stamp_uses);
-
-  // Public rust_library deps go in a --extern rlibs, public non-rust deps go in
-  // -Ldependency rustdeps, and non-public source_sets get passed in as normal
-  // source files
-  UniqueVector<OutputFile> deps;
-  DCHECK(target_->output_type() != Target::SOURCE_SET);
-  WriteCompilerVars();
-  UniqueVector<const Target*> linkable_deps;
-  UniqueVector<const Target*> non_linkable_deps;
-  UniqueVector<const Target*> framework_deps;
-  GetDeps(&deps, &linkable_deps, &non_linkable_deps, &framework_deps);
-  AppendSourcesToImplicitDeps(&deps);
-
   if (!input_dep.value().empty())
     order_only_deps.push_back(input_dep);
 
+  // Build lists which will go into different bits of the rustc command line.
+  // Public rust_library deps go in a --extern rlibs, public non-rust deps go in
+  // -Ldependency. Also assemble a list of extra (i.e. implicit) deps
+  // for ninja dependency tracking.
+  UniqueVector<OutputFile> implicit_deps;
+  AppendSourcesToImplicitDeps(&implicit_deps);
+  implicit_deps.Append(extra_obj_files.begin(), extra_obj_files.end());
+
   std::vector<OutputFile> rustdeps;
   std::vector<OutputFile> nonrustdeps;
+  nonrustdeps.insert(nonrustdeps.end(), extra_obj_files.begin(),
+                     extra_obj_files.end());
   for (const auto* framework_dep : framework_deps) {
     order_only_deps.push_back(framework_dep->dependency_output_file());
   }
@@ -151,7 +160,7 @@ void NinjaRustBinaryTargetWriter::Run() {
     } else {
       nonrustdeps.push_back(linkable_dep->link_output_file());
     }
-    deps.push_back(linkable_dep->dependency_output_file());
+    implicit_deps.push_back(linkable_dep->dependency_output_file());
   }
 
   // Rust libraries specified by paths.
@@ -159,12 +168,13 @@ void NinjaRustBinaryTargetWriter::Run() {
     const ConfigValues& cur = iter.cur();
     for (const auto& e : cur.externs()) {
       if (e.second.is_source_file()) {
-        deps.push_back(
+        implicit_deps.push_back(
             OutputFile(settings_->build_settings(), e.second.source_file()));
       }
     }
   }
 
+  // Bubble up the full list of transitive rlib dependencies.
   std::vector<OutputFile> transitive_rustlibs;
   for (const auto* dep :
        target_->rust_values().transitive_libs().GetOrdered()) {
@@ -176,8 +186,9 @@ void NinjaRustBinaryTargetWriter::Run() {
   std::vector<OutputFile> tool_outputs;
   SubstitutionWriter::ApplyListToLinkerAsOutputFile(
       target_, tool_, tool_->outputs(), &tool_outputs);
-  WriteCompilerBuildLine(target_->rust_values().crate_root(), deps.vector(),
-                         order_only_deps, tool_->name(), tool_outputs);
+  WriteCompilerBuildLine(target_->rust_values().crate_root(),
+                         implicit_deps.vector(), order_only_deps, tool_->name(),
+                         tool_outputs);
 
   std::vector<const Target*> extern_deps(linkable_deps.vector());
   std::copy(non_linkable_deps.begin(), non_linkable_deps.end(),

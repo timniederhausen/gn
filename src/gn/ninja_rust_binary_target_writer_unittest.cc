@@ -372,6 +372,14 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
   sharedlib.SetToolchain(setup.toolchain());
   ASSERT_TRUE(sharedlib.OnResolved(&err));
 
+  Target csourceset(setup.settings(), Label(SourceDir("//baz/"), "sourceset"));
+  csourceset.set_output_type(Target::SOURCE_SET);
+  csourceset.visibility().SetPublic();
+  csourceset.sources().push_back(SourceFile("//baz/csourceset.cpp"));
+  csourceset.source_types_used().Set(SourceFile::SOURCE_CPP);
+  csourceset.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(csourceset.OnResolved(&err));
+
   Toolchain toolchain_with_toc(
       setup.settings(), Label(SourceDir("//toolchain_with_toc/"), "with_toc"));
   TestWithScope::SetupToolchain(&toolchain_with_toc, true);
@@ -396,6 +404,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
   nonrust.private_deps().push_back(LabelTargetPair(&rlib));
   nonrust.private_deps().push_back(LabelTargetPair(&staticlib));
   nonrust.private_deps().push_back(LabelTargetPair(&sharedlib));
+  nonrust.private_deps().push_back(LabelTargetPair(&csourceset));
   nonrust.private_deps().push_back(LabelTargetPair(&sharedlib_with_toc));
   nonrust.SetToolchain(setup.toolchain());
   ASSERT_TRUE(nonrust.OnResolved(&err));
@@ -417,11 +426,14 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
-        "../../foo/main.rs obj/bar/libmylib.rlib obj/foo/libstatic.a "
-        "./libshared.so ./libshared_with_toc.so.TOC\n"
+        "../../foo/main.rs obj/baz/sourceset.csourceset.o "
+        "obj/bar/libmylib.rlib "
+        "obj/foo/libstatic.a ./libshared.so ./libshared_with_toc.so.TOC "
+        "|| obj/baz/sourceset.stamp\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
-        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/foo -Lnative=. "
-        "-lstatic -lshared -lshared_with_toc\n";
+        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/baz -Lnative=obj/foo "
+        "-Lnative=. -Clink-arg=obj/baz/sourceset.csourceset.o -lstatic "
+        "-lshared -lshared_with_toc\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
