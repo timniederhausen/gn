@@ -26,38 +26,12 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustSourceSet) {
   target.sources().push_back(SourceFile("//foo/main.rs"));
   target.source_types_used().Set(SourceFile::SOURCE_RS);
   target.SetToolchain(setup.toolchain());
-  ASSERT_TRUE(target.OnResolved(&err));
-
-  // Source set itself.
-  {
-    std::ostringstream out;
-    NinjaRustBinaryTargetWriter writer(&target, out);
-    writer.Run();
-
-    const char expected[] =
-        "root_out_dir = .\n"
-        "target_out_dir = obj/foo\n"
-        "target_output_name = bar\n"
-        "\n"
-        "build obj/foo/bar.stamp: stamp ../../foo/input1.rs "
-        "../../foo/main.rs\n";
-    std::string out_str = out.str();
-    EXPECT_EQ(expected, out_str) << out_str;
-  }
+  ASSERT_FALSE(target.OnResolved(&err));
 }
 
 TEST_F(NinjaRustBinaryTargetWriterTest, RustExecutable) {
   Err err;
   TestWithScope setup;
-
-  Target source_set(setup.settings(), Label(SourceDir("//foo/"), "sources"));
-  source_set.set_output_type(Target::SOURCE_SET);
-  source_set.visibility().SetPublic();
-  source_set.sources().push_back(SourceFile("//foo/input1.rs"));
-  source_set.sources().push_back(SourceFile("//foo/input2.rs"));
-  source_set.source_types_used().Set(SourceFile::SOURCE_RS);
-  source_set.SetToolchain(setup.toolchain());
-  ASSERT_TRUE(source_set.OnResolved(&err));
 
   Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
   target.set_output_type(Target::EXECUTABLE);
@@ -68,7 +42,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustExecutable) {
   target.source_types_used().Set(SourceFile::SOURCE_RS);
   target.rust_values().set_crate_root(main);
   target.rust_values().crate_name() = "foo_bar";
-  target.private_deps().push_back(LabelTargetPair(&source_set));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
 
@@ -89,8 +62,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustExecutable) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/input3.rs "
-        "../../foo/main.rs ../../foo/input1.rs ../../foo/input2.rs || "
-        "obj/foo/sources.stamp\n"
+        "../../foo/main.rs\n"
         "  externs =\n"
         "  rustdeps =\n";
     std::string out_str = out.str();
@@ -495,15 +467,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustOutputExtensionAndDir) {
   Err err;
   TestWithScope setup;
 
-  Target source_set(setup.settings(), Label(SourceDir("//foo/"), "sources"));
-  source_set.set_output_type(Target::SOURCE_SET);
-  source_set.visibility().SetPublic();
-  source_set.sources().push_back(SourceFile("//foo/input1.rs"));
-  source_set.sources().push_back(SourceFile("//foo/input2.rs"));
-  source_set.source_types_used().Set(SourceFile::SOURCE_RS);
-  source_set.SetToolchain(setup.toolchain());
-  ASSERT_TRUE(source_set.OnResolved(&err));
-
   Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
   target.set_output_type(Target::EXECUTABLE);
   target.visibility().SetPublic();
@@ -515,7 +478,6 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustOutputExtensionAndDir) {
   target.set_output_dir(SourceDir("//out/Debug/foo/"));
   target.rust_values().set_crate_root(main);
   target.rust_values().crate_name() = "foo_bar";
-  target.private_deps().push_back(LabelTargetPair(&source_set));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
 
@@ -536,8 +498,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustOutputExtensionAndDir) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar.exe: rust_bin ../../foo/main.rs | ../../foo/input3.rs "
-        "../../foo/main.rs ../../foo/input1.rs ../../foo/input2.rs || "
-        "obj/foo/sources.stamp\n"
+        "../../foo/main.rs\n"
         "  externs =\n"
         "  rustdeps =\n";
     std::string out_str = out.str();

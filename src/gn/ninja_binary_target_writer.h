@@ -65,8 +65,8 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   void WriteLibs(std::ostream& out, const Tool* tool);
   void WriteFrameworks(std::ostream& out, const Tool* tool);
 
-  virtual void AddSourceSetFiles(const Target* source_set,
-                                 UniqueVector<OutputFile>* obj_files) const;
+  void AddSourceSetFiles(const Target* source_set,
+                         UniqueVector<OutputFile>* obj_files) const;
 
   // Cached version of the prefix used for rule types for this toolchain.
   std::string rule_prefix_;

@@ -122,72 +122,68 @@ void NinjaRustBinaryTargetWriter::Run() {
   // -Ldependency rustdeps, and non-public source_sets get passed in as normal
   // source files
   UniqueVector<OutputFile> deps;
-  AddSourceSetFiles(target_, &deps);
-  if (target_->output_type() == Target::SOURCE_SET) {
-    WriteSharedVars(target_->toolchain()->substitution_bits());
-    WriteSourceSetStamp(deps.vector());
-  } else {
-    WriteCompilerVars();
-    UniqueVector<const Target*> linkable_deps;
-    UniqueVector<const Target*> non_linkable_deps;
-    UniqueVector<const Target*> framework_deps;
-    GetDeps(&deps, &linkable_deps, &non_linkable_deps, &framework_deps);
+  DCHECK(target_->output_type() != Target::SOURCE_SET);
+  WriteCompilerVars();
+  UniqueVector<const Target*> linkable_deps;
+  UniqueVector<const Target*> non_linkable_deps;
+  UniqueVector<const Target*> framework_deps;
+  GetDeps(&deps, &linkable_deps, &non_linkable_deps, &framework_deps);
+  AppendSourcesToImplicitDeps(&deps);
 
-    if (!input_dep.value().empty())
-      order_only_deps.push_back(input_dep);
+  if (!input_dep.value().empty())
+    order_only_deps.push_back(input_dep);
 
-    std::vector<OutputFile> rustdeps;
-    std::vector<OutputFile> nonrustdeps;
-    for (const auto* framework_dep : framework_deps) {
-      order_only_deps.push_back(framework_dep->dependency_output_file());
-    }
-    for (const auto* non_linkable_dep : non_linkable_deps) {
-      if (non_linkable_dep->source_types_used().RustSourceUsed() &&
-          non_linkable_dep->output_type() != Target::SOURCE_SET) {
-        rustdeps.push_back(non_linkable_dep->dependency_output_file());
-      }
-      order_only_deps.push_back(non_linkable_dep->dependency_output_file());
-    }
-    for (const auto* linkable_dep : linkable_deps) {
-      if (linkable_dep->source_types_used().RustSourceUsed()) {
-        rustdeps.push_back(linkable_dep->link_output_file());
-      } else {
-        nonrustdeps.push_back(linkable_dep->link_output_file());
-      }
-      deps.push_back(linkable_dep->dependency_output_file());
-    }
-
-    // Rust libraries specified by paths.
-    for (ConfigValuesIterator iter(target_); !iter.done(); iter.Next()) {
-      const ConfigValues& cur = iter.cur();
-      for (const auto& e : cur.externs()) {
-        if (e.second.is_source_file()) {
-          deps.push_back(
-              OutputFile(settings_->build_settings(), e.second.source_file()));
-        }
-      }
-    }
-
-    std::vector<OutputFile> transitive_rustlibs;
-    for (const auto* dep :
-         target_->rust_values().transitive_libs().GetOrdered()) {
-      if (dep->source_types_used().RustSourceUsed()) {
-        transitive_rustlibs.push_back(dep->dependency_output_file());
-      }
-    }
-
-    std::vector<OutputFile> tool_outputs;
-    SubstitutionWriter::ApplyListToLinkerAsOutputFile(
-        target_, tool_, tool_->outputs(), &tool_outputs);
-    WriteCompilerBuildLine(target_->rust_values().crate_root(), deps.vector(),
-                           order_only_deps, tool_->name(), tool_outputs);
-
-    std::vector<const Target*> extern_deps(linkable_deps.vector());
-    std::copy(non_linkable_deps.begin(), non_linkable_deps.end(),
-              std::back_inserter(extern_deps));
-    WriteExterns(extern_deps);
-    WriteRustdeps(transitive_rustlibs, rustdeps, nonrustdeps);
+  std::vector<OutputFile> rustdeps;
+  std::vector<OutputFile> nonrustdeps;
+  for (const auto* framework_dep : framework_deps) {
+    order_only_deps.push_back(framework_dep->dependency_output_file());
   }
+  for (const auto* non_linkable_dep : non_linkable_deps) {
+    if (non_linkable_dep->source_types_used().RustSourceUsed() &&
+        non_linkable_dep->output_type() != Target::SOURCE_SET) {
+      rustdeps.push_back(non_linkable_dep->dependency_output_file());
+    }
+    order_only_deps.push_back(non_linkable_dep->dependency_output_file());
+  }
+  for (const auto* linkable_dep : linkable_deps) {
+    if (linkable_dep->source_types_used().RustSourceUsed()) {
+      rustdeps.push_back(linkable_dep->link_output_file());
+    } else {
+      nonrustdeps.push_back(linkable_dep->link_output_file());
+    }
+    deps.push_back(linkable_dep->dependency_output_file());
+  }
+
+  // Rust libraries specified by paths.
+  for (ConfigValuesIterator iter(target_); !iter.done(); iter.Next()) {
+    const ConfigValues& cur = iter.cur();
+    for (const auto& e : cur.externs()) {
+      if (e.second.is_source_file()) {
+        deps.push_back(
+            OutputFile(settings_->build_settings(), e.second.source_file()));
+      }
+    }
+  }
+
+  std::vector<OutputFile> transitive_rustlibs;
+  for (const auto* dep :
+       target_->rust_values().transitive_libs().GetOrdered()) {
+    if (dep->source_types_used().RustSourceUsed()) {
+      transitive_rustlibs.push_back(dep->dependency_output_file());
+    }
+  }
+
+  std::vector<OutputFile> tool_outputs;
+  SubstitutionWriter::ApplyListToLinkerAsOutputFile(
+      target_, tool_, tool_->outputs(), &tool_outputs);
+  WriteCompilerBuildLine(target_->rust_values().crate_root(), deps.vector(),
+                         order_only_deps, tool_->name(), tool_outputs);
+
+  std::vector<const Target*> extern_deps(linkable_deps.vector());
+  std::copy(non_linkable_deps.begin(), non_linkable_deps.end(),
+            std::back_inserter(extern_deps));
+  WriteExterns(extern_deps);
+  WriteRustdeps(transitive_rustlibs, rustdeps, nonrustdeps);
 }
 
 void NinjaRustBinaryTargetWriter::WriteCompilerVars() {
@@ -203,6 +199,18 @@ void NinjaRustBinaryTargetWriter::WriteCompilerVars() {
                &ConfigValues::rustenv, opts, path_output_, out_);
 
   WriteSharedVars(subst);
+}
+
+void NinjaRustBinaryTargetWriter::AppendSourcesToImplicitDeps(
+    UniqueVector<OutputFile>* deps) const {
+  // Only the crate_root file needs to be given to rustc as input.
+  // Any other 'sources' are just implicit deps.
+  // Most Rust targets won't bother specifying the "sources =" line
+  // because it is handled sufficiently by crate_root and the generation
+  // of depfiles by rustc. But for those which do...
+  for (const auto& source : target_->sources()) {
+    deps->push_back(OutputFile(settings_->build_settings(), source));
+  }
 }
 
 void NinjaRustBinaryTargetWriter::WriteExterns(

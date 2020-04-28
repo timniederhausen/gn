@@ -22,11 +22,6 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
 
   void Run() override;
 
- protected:
-  // Adds source_set files to the list of object files.
-  void AddSourceSetFiles(const Target* source_set,
-                         UniqueVector<OutputFile>* obj_files) const override;
-
  private:
   using OutputFileSet = std::set<OutputFile>;
 

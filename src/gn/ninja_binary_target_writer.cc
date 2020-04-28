@@ -196,9 +196,49 @@ void NinjaBinaryTargetWriter::ClassifyDependency(
 void NinjaBinaryTargetWriter::AddSourceSetFiles(
     const Target* source_set,
     UniqueVector<OutputFile>* obj_files) const {
-  // Just add all sources to the list.
+  std::vector<OutputFile> tool_outputs;  // Prevent allocation in loop.
+
+  // Compute object files for all sources. Only link the first output from
+  // the tool if there are more than one.
   for (const auto& source : source_set->sources()) {
-    obj_files->push_back(OutputFile(settings_->build_settings(), source));
+    const char* tool_name = Tool::kToolNone;
+    if (source_set->GetOutputFilesForSource(source, &tool_name, &tool_outputs))
+      obj_files->push_back(tool_outputs[0]);
+  }
+
+  // Add MSVC precompiled header object files. GCC .gch files are not object
+  // files so they are omitted.
+  if (source_set->config_values().has_precompiled_headers()) {
+    if (source_set->source_types_used().Get(SourceFile::SOURCE_C)) {
+      const CTool* tool = source_set->toolchain()->GetToolAsC(CTool::kCToolCc);
+      if (tool && tool->precompiled_header_type() == CTool::PCH_MSVC) {
+        GetPCHOutputFiles(source_set, CTool::kCToolCc, &tool_outputs);
+        obj_files->Append(tool_outputs.begin(), tool_outputs.end());
+      }
+    }
+    if (source_set->source_types_used().Get(SourceFile::SOURCE_CPP)) {
+      const CTool* tool = source_set->toolchain()->GetToolAsC(CTool::kCToolCxx);
+      if (tool && tool->precompiled_header_type() == CTool::PCH_MSVC) {
+        GetPCHOutputFiles(source_set, CTool::kCToolCxx, &tool_outputs);
+        obj_files->Append(tool_outputs.begin(), tool_outputs.end());
+      }
+    }
+    if (source_set->source_types_used().Get(SourceFile::SOURCE_M)) {
+      const CTool* tool =
+          source_set->toolchain()->GetToolAsC(CTool::kCToolObjC);
+      if (tool && tool->precompiled_header_type() == CTool::PCH_MSVC) {
+        GetPCHOutputFiles(source_set, CTool::kCToolObjC, &tool_outputs);
+        obj_files->Append(tool_outputs.begin(), tool_outputs.end());
+      }
+    }
+    if (source_set->source_types_used().Get(SourceFile::SOURCE_MM)) {
+      const CTool* tool =
+          source_set->toolchain()->GetToolAsC(CTool::kCToolObjCxx);
+      if (tool && tool->precompiled_header_type() == CTool::PCH_MSVC) {
+        GetPCHOutputFiles(source_set, CTool::kCToolObjCxx, &tool_outputs);
+        obj_files->Append(tool_outputs.begin(), tool_outputs.end());
+      }
+    }
   }
 }
 

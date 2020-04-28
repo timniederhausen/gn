@@ -383,6 +383,8 @@ bool Target::OnResolved(Err* err) {
   if (!FillOutputFiles(err))
     return false;
 
+  if (!CheckSourceSetLanguages(err))
+    return false;
   if (!CheckVisibility(err))
     return false;
   if (!CheckTestonly(err))
@@ -930,6 +932,17 @@ bool Target::CheckVisibility(Err* err) const {
   for (const auto& pair : GetDeps(DEPS_ALL)) {
     if (!Visibility::CheckItemVisibility(this, pair.ptr, err))
       return false;
+  }
+  return true;
+}
+
+bool Target::CheckSourceSetLanguages(Err* err) const {
+  if (output_type() == Target::SOURCE_SET &&
+      source_types_used().RustSourceUsed()) {
+    *err = Err(defined_from(), "source_set contained Rust code.",
+               label().GetUserVisibleName(false) +
+                   " has Rust code. Only C/C++ source_sets are supported.");
+    return false;
   }
   return true;
 }

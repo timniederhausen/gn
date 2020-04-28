@@ -740,8 +740,7 @@ const char kSourceSet_HelpShort[] = "source_set: Declare a source set target.";
 const char kSourceSet_Help[] =
     R"(source_set: Declare a source set target.
 
-  The language of a source_set target is determined by the extensions present
-  in its sources.
+  Only C-language source sets are supported at the moment.
 
 C-language source_sets
 
@@ -765,13 +764,6 @@ C-language source_sets
   "exported symbol" notation indicate "export from the final shared library and
   not from the intermediate targets." There is no way to express this concept
   when linking multiple static libraries into a shared library.
-
-Rust-language source_sets
-
-  A Rust source set is a collection of sources that get passed along to the
-  final target that depends on it. No compilation is performed, and the source
-  files are simply added as dependencies on the eventual rustc invocation that
-  would produce a binary.
 
 Variables
 

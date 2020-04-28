@@ -407,6 +407,7 @@ class Target : public Item {
   bool CheckAssertNoDeps(Err* err) const;
   void CheckSourcesGenerated() const;
   void CheckSourceGenerated(const SourceFile& source) const;
+  bool CheckSourceSetLanguages(Err* err) const;
 
   OutputType output_type_ = UNKNOWN;
   std::string output_name_;
