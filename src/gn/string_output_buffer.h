@@ -6,6 +6,7 @@
 #define TOOLS_GN_STRING_OUTPUT_BUFFER_H_
 
 #include <array>
+#include <memory>
 #include <streambuf>
 #include <string>
 #include <vector>
