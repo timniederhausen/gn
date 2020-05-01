@@ -566,6 +566,19 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustProcMacro) {
   Err err;
   TestWithScope setup;
 
+  Target procmacrodep(setup.settings(),
+                      Label(SourceDir("//baz/"), "mymacrodep"));
+  procmacrodep.set_output_type(Target::RUST_LIBRARY);
+  procmacrodep.visibility().SetPublic();
+  SourceFile bazlib("//baz/lib.rs");
+  procmacrodep.sources().push_back(SourceFile("//baz/mylib.rs"));
+  procmacrodep.sources().push_back(bazlib);
+  procmacrodep.source_types_used().Set(SourceFile::SOURCE_RS);
+  procmacrodep.rust_values().set_crate_root(bazlib);
+  procmacrodep.rust_values().crate_name() = "mymacrodep";
+  procmacrodep.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(procmacrodep.OnResolved(&err));
+
   Target procmacro(setup.settings(), Label(SourceDir("//bar/"), "mymacro"));
   procmacro.set_output_type(Target::RUST_PROC_MACRO);
   procmacro.visibility().SetPublic();
@@ -576,6 +589,9 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustProcMacro) {
   procmacro.rust_values().set_crate_root(barlib);
   procmacro.rust_values().crate_name() = "mymacro";
   procmacro.rust_values().set_crate_type(RustValues::CRATE_PROC_MACRO);
+  // Add a dependency to the procmacro so we can be sure its output
+  // directory is not propagated downstream beyond the proc macro.
+  procmacro.private_deps().push_back(LabelTargetPair(&procmacrodep));
   procmacro.SetToolchain(setup.toolchain());
   ASSERT_TRUE(procmacro.OnResolved(&err));
 
@@ -596,9 +612,9 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RustProcMacro) {
         "target_output_name = libmymacro\n"
         "\n"
         "build obj/bar/libmymacro.so: rust_macro ../../bar/lib.rs | "
-        "../../bar/mylib.rs ../../bar/lib.rs\n"
-        "  externs =\n"
-        "  rustdeps =\n";
+        "../../bar/mylib.rs ../../bar/lib.rs obj/baz/libmymacrodep.rlib\n"
+        "  externs = --extern mymacrodep=obj/baz/libmymacrodep.rlib\n"
+        "  rustdeps = -Ldependency=obj/baz\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }

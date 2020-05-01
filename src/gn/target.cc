@@ -630,8 +630,7 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     inherited_libraries_.Append(dep, is_public);
   }
 
-  if (dep->output_type() == RUST_LIBRARY ||
-      dep->output_type() == RUST_PROC_MACRO) {
+  if (dep->output_type() == RUST_LIBRARY) {
     rust_values().transitive_libs().Append(dep, is_public);
     rust_values().transitive_libs().AppendInherited(
         dep->rust_values().transitive_libs(), is_public);
@@ -646,6 +645,11 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
                                     is_public && inherited.second);
       }
     }
+  } else if (dep->output_type() == RUST_PROC_MACRO) {
+    // We will need to specify the path to find a procedural macro,
+    // but have no need to specify the paths to find its dependencies
+    // as the procedural macro is now a complete .so.
+    rust_values().transitive_libs().Append(dep, is_public);
   } else if (dep->output_type() == SHARED_LIBRARY) {
     // Shared library dependendencies are inherited across public shared
     // library boundaries.
