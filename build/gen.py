@@ -15,6 +15,11 @@ import subprocess
 import sys
 import tempfile
 
+try:  # py3
+    from shlex import quote as shell_quote
+except ImportError:  # py2
+    from pipes import quote as shell_quote
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(SCRIPT_DIR)
 
@@ -102,6 +107,16 @@ def main(argv):
   parser.add_option('--no-static-libstdc++', action='store_true',
                     default=False, dest='no_static_libstdcpp',
                     help='Don\'t link libstdc++ statically')
+  parser.add_option('--link-lib',
+                    action='append',
+                    metavar='LINK_LIB',
+                    default=[],
+                    dest='link_libs',
+                    help=('Add a library to the final executable link. ' +
+                          'LINK_LIB must be the path to a static or shared ' +
+                          'library, or \'-l<name>\' on POSIX systems. Can be ' +
+                          'used multiple times. Useful to link custom malloc ' +
+                          'or cpu profiling libraries.'))
   options, args = parser.parse_args(argv)
 
   if args:
@@ -159,14 +174,17 @@ def WriteGenericNinja(path, static_libraries, executables,
                       cxx, ar, ld, platform, host, options,
                       cflags=[], ldflags=[], libflags=[],
                       include_dirs=[], solibs=[]):
+  args = ' -d' if options.debug else ''
+  for link_lib in options.link_libs:
+    args +=  ' --link-lib=' + shell_quote(link_lib)
+
   ninja_header_lines = [
     'cxx = ' + cxx,
     'ar = ' + ar,
     'ld = ' + ld,
     '',
     'rule regen',
-    '  command = %s ../build/gen.py%s' % (
-        sys.executable, ' -d' if options.debug else ''),
+    '  command = %s ../build/gen.py%s' % (sys.executable, args),
     '  description = Regenerating ninja files',
     '',
     'build build.ninja: regen',
@@ -733,6 +751,8 @@ def WriteGNNinja(path, platform, host, options):
           '-lshlwapi',
       ])
 
+
+  libs.extend(options.link_libs)
 
   # we just build static libraries that GN needs
   executables['gn']['libs'].extend(static_libraries.keys())
