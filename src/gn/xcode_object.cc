@@ -394,9 +394,12 @@ void PBXBuildPhase::Visit(PBXObjectVisitorConst& visitor) const {
 PBXTarget::PBXTarget(const std::string& name,
                      const std::string& shell_script,
                      const std::string& config_name,
-                     const PBXAttributes& attributes)
-    : configurations_(
-          std::make_unique<XCConfigurationList>(config_name, attributes, this)),
+                     const PBXAttributes& attributes,
+                     const std::vector<std::string>& include_path)
+    : configurations_(std::make_unique<XCConfigurationList>(config_name,
+                                                            attributes,
+                                                            this,
+                                                            include_path)),
       name_(name) {
   if (!shell_script.empty()) {
     build_phases_.push_back(
@@ -439,7 +442,7 @@ PBXAggregateTarget::PBXAggregateTarget(const std::string& name,
                                        const std::string& shell_script,
                                        const std::string& config_name,
                                        const PBXAttributes& attributes)
-    : PBXTarget(name, shell_script, config_name, attributes) {}
+    : PBXTarget(name, shell_script, config_name, attributes, {}) {}
 
 PBXAggregateTarget::~PBXAggregateTarget() = default;
 
@@ -711,8 +714,9 @@ PBXNativeTarget::PBXNativeTarget(const std::string& name,
                                  const PBXAttributes& attributes,
                                  const std::string& product_type,
                                  const std::string& product_name,
-                                 const PBXFileReference* product_reference)
-    : PBXTarget(name, shell_script, config_name, attributes),
+                                 const PBXFileReference* product_reference,
+                                 const std::vector<std::string>& include_paths)
+    : PBXTarget(name, shell_script, config_name, attributes, include_paths),
       product_reference_(product_reference),
       product_type_(product_type),
       product_name_(product_name) {
@@ -777,21 +781,33 @@ PBXProject::PBXProject(const std::string& name,
 
   products_ = main_group_->CreateChild<PBXGroup>(std::string(), "Products");
 
-  configurations_ =
-      std::make_unique<XCConfigurationList>(config_name, attributes, this);
+  configurations_ = std::make_unique<XCConfigurationList>(
+      config_name, attributes, this, std::vector<std::string>());
 }
 
 PBXProject::~PBXProject() = default;
 
-void PBXProject::AddSourceFileToIndexingTarget(
+void PBXProject::AddSourceFileToTargetForIndexing(
+    const std::string& target_name,
     const std::string& navigator_path,
     const std::string& source_path,
     const CompilerFlags compiler_flag) {
   if (!target_for_indexing_) {
     AddIndexingTarget();
   }
-  AddSourceFile(navigator_path, source_path, compiler_flag,
-                target_for_indexing_);
+
+  // If target with this name don't exists, we add source file to special
+  // target.
+  PBXNativeTarget* target = target_for_indexing_;
+  auto iter = std::find_if(targets_.begin(), targets_.end(),
+                           [&target_name](std::unique_ptr<PBXTarget>& target) {
+                             return target->Name() == target_name;
+                           });
+  if (iter != targets_.end() &&
+      iter->get()->Class() == PBXObjectClass::PBXNativeTargetClass) {
+    target = static_cast<PBXNativeTarget*>(iter->get());
+  }
+  AddSourceFile(navigator_path, source_path, compiler_flag, target);
 }
 
 void PBXProject::AddSourceFile(const std::string& navigator_path,
@@ -838,7 +854,7 @@ void PBXProject::AddIndexingTarget() {
   const char product_type[] = "com.apple.product-type.tool";
   targets_.push_back(std::make_unique<PBXNativeTarget>(
       "sources", std::string(), config_name_, attributes, product_type,
-      "sources", product_reference));
+      "sources", product_reference, std::vector<std::string>()));
   target_for_indexing_ = static_cast<PBXNativeTarget*>(targets_.back().get());
 }
 
@@ -849,7 +865,8 @@ PBXNativeTarget* PBXProject::AddNativeTarget(
     const std::string& output_type,
     const std::string& output_dir,
     const std::string& shell_script,
-    const PBXAttributes& extra_attributes) {
+    const PBXAttributes& extra_attributes,
+    const std::vector<std::string>& include_paths) {
   std::string_view ext = FindExtension(&output_name);
   PBXFileReference* product = products_->CreateChild<PBXFileReference>(
       std::string(), output_name, type.empty() ? GetSourceType(ext) : type);
@@ -876,7 +893,7 @@ PBXNativeTarget* PBXProject::AddNativeTarget(
 
   targets_.push_back(std::make_unique<PBXNativeTarget>(
       name, shell_script, config_name_, attributes, output_type, product_name,
-      product));
+      product, include_paths));
   return static_cast<PBXNativeTarget*>(targets_.back().get());
 }
 
@@ -1065,9 +1082,11 @@ void PBXTargetDependency::Print(std::ostream& out, unsigned indent) const {
 
 // XCBuildConfiguration -------------------------------------------------------
 
-XCBuildConfiguration::XCBuildConfiguration(const std::string& name,
-                                           const PBXAttributes& attributes)
-    : attributes_(attributes), name_(name) {}
+XCBuildConfiguration::XCBuildConfiguration(
+    const std::string& name,
+    const PBXAttributes& attributes,
+    const std::vector<std::string>& include_path)
+    : attributes_(attributes), name_(name), include_paths_(include_path) {}
 
 XCBuildConfiguration::~XCBuildConfiguration() = default;
 
@@ -1084,20 +1103,38 @@ void XCBuildConfiguration::Print(std::ostream& out, unsigned indent) const {
   const IndentRules rules = {false, indent + 1};
   out << indent_str << Reference() << " = {\n";
   PrintProperty(out, rules, "isa", ToString(Class()));
-  PrintProperty(out, rules, "buildSettings", attributes_);
+
+  out << indent_str << "buildSettings"
+      << " = \n";
+  out << indent_str << "{" << (rules.one_line ? " " : "\n");
+
+  for (const auto& pair : attributes_) {
+    PrintProperty(out, rules, pair.first.c_str(), pair.second);
+  }
+
+  out << indent_str << "HEADER_SEARCH_PATHS"
+      << " = ";
+  PrintValue(out, rules, include_paths_);
+  out << ";" << (rules.one_line ? " " : "\n");
+
+  out << std::string(rules.level, '\t');
+  out << "};\n";
+
   PrintProperty(out, rules, "name", name_);
   out << indent_str << "};\n";
 }
 
 // XCConfigurationList --------------------------------------------------------
 
-XCConfigurationList::XCConfigurationList(const std::string& name,
-                                         const PBXAttributes& attributes,
-                                         const PBXObject* owner_reference)
+XCConfigurationList::XCConfigurationList(
+    const std::string& name,
+    const PBXAttributes& attributes,
+    const PBXObject* owner_reference,
+    const std::vector<std::string>& include_paths)
     : owner_reference_(owner_reference) {
   DCHECK(owner_reference_);
   configurations_.push_back(
-      std::make_unique<XCBuildConfiguration>(name, attributes));
+      std::make_unique<XCBuildConfiguration>(name, attributes, include_paths));
 }
 
 XCConfigurationList::~XCConfigurationList() = default;

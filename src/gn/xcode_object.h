@@ -148,7 +148,8 @@ class PBXTarget : public PBXObject {
   PBXTarget(const std::string& name,
             const std::string& shell_script,
             const std::string& config_name,
-            const PBXAttributes& attributes);
+            const PBXAttributes& attributes,
+            const std::vector<std::string>& include_paths);
   ~PBXTarget() override;
 
   void AddDependency(std::unique_ptr<PBXTargetDependency> dependency);
@@ -324,7 +325,8 @@ class PBXNativeTarget : public PBXTarget {
                   const PBXAttributes& attributes,
                   const std::string& product_type,
                   const std::string& product_name,
-                  const PBXFileReference* product_reference);
+                  const PBXFileReference* product_reference,
+                  const std::vector<std::string>& include_paths);
   ~PBXNativeTarget() override;
 
   void AddResourceFile(const PBXFileReference* file_reference);
@@ -354,9 +356,10 @@ class PBXProject : public PBXObject {
              const PBXAttributes& attributes);
   ~PBXProject() override;
 
-  void AddSourceFileToIndexingTarget(const std::string& navigator_path,
-                                     const std::string& source_path,
-                                     const CompilerFlags compiler_flag);
+  void AddSourceFileToTargetForIndexing(const std::string& target_name,
+                                        const std::string& navigator_path,
+                                        const std::string& source_path,
+                                        const CompilerFlags compiler_flag);
   void AddSourceFile(const std::string& navigator_path,
                      const std::string& source_path,
                      const CompilerFlags compiler_flag,
@@ -371,7 +374,9 @@ class PBXProject : public PBXObject {
       const std::string& output_name,
       const std::string& output_type,
       const std::string& shell_script,
-      const PBXAttributes& extra_attributes = PBXAttributes());
+      const PBXAttributes& extra_attributes = PBXAttributes(),
+      const std::vector<std::string>& include_paths =
+          std::vector<std::string>());
 
   void SetProjectDirPath(const std::string& project_dir_path);
   void SetProjectRoot(const std::string& project_root);
@@ -481,7 +486,8 @@ class PBXTargetDependency : public PBXObject {
 class XCBuildConfiguration : public PBXObject {
  public:
   XCBuildConfiguration(const std::string& name,
-                       const PBXAttributes& attributes);
+                       const PBXAttributes& attributes,
+                       const std::vector<std::string>& include_paths);
   ~XCBuildConfiguration() override;
 
   // PBXObject implementation.
@@ -492,6 +498,7 @@ class XCBuildConfiguration : public PBXObject {
  private:
   PBXAttributes attributes_;
   std::string name_;
+  std::vector<std::string> include_paths_;
 
   DISALLOW_COPY_AND_ASSIGN(XCBuildConfiguration);
 };
@@ -502,7 +509,8 @@ class XCConfigurationList : public PBXObject {
  public:
   XCConfigurationList(const std::string& name,
                       const PBXAttributes& attributes,
-                      const PBXObject* owner_reference);
+                      const PBXObject* owner_reference,
+                      const std::vector<std::string>& include_paths);
   ~XCConfigurationList() override;
 
   // PBXObject implementation.
