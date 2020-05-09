@@ -698,6 +698,19 @@ const char kBundleExecutableDir_Help[] =
   See "gn help bundle_root_dir" for examples.
 )";
 
+const char kXcassetCompilerFlags[] = "xcasset_compiler_flags";
+const char kXcassetCompilerFlags_HelpShort[] =
+    "xcasset_compiler_flags: [string list] Flags passed to xcassets compiler";
+const char kXcassetCompilerFlags_Help[] =
+    R"(xcasset_compiler_flags: Flags passed to xcassets compiler.
+
+  A list of strings.
+
+  Valid for create_bundle target. Those flags are directly passed to
+  xcassets compiler, corresponding to {{xcasset_compiler_flags}} substitution
+  in compile_xcassets tool.
+)";
+
 const char kCflags[] = "cflags";
 const char kCflags_HelpShort[] =
     "cflags: [string list] Flags passed to all C compiler variants.";
@@ -2232,6 +2245,7 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(BundleResourcesDir)
     INSERT_VARIABLE(BundleDepsFilter)
     INSERT_VARIABLE(BundleExecutableDir)
+    INSERT_VARIABLE(XcassetCompilerFlags)
     INSERT_VARIABLE(Cflags)
     INSERT_VARIABLE(CflagsC)
     INSERT_VARIABLE(CflagsCC)

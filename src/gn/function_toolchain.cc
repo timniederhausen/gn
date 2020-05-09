@@ -738,6 +738,10 @@ Tool variables
         assets catalog compiler. Usually based on the target_name of
         the create_bundle target.
 
+    {{xcasset_compiler_flags}}
+        Expands to the list of flags specified in corresponding
+        create_bundle target.
+
   Rust tools have the notion of a single input and a single output, along
   with a set of compiler-specific flags. The following expansions are
   available:
