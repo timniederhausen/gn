@@ -415,7 +415,7 @@ bool MakeAbsolutePathRelativeIfPossible(const std::string_view& source_root,
   // part after it.
 
   if (!IsSlash(path[after_common_index])) {
-    // path is ${source-root}SUFIX/...
+    // path is ${source-root}SUFFIX/...
     return false;
   }
   // A source-root relative path, The input may have an unknown number of
@@ -440,7 +440,7 @@ bool MakeAbsolutePathRelativeIfPossible(const std::string_view& source_root,
       *dest = "//";
       return true;
     } else if (!IsSlash(path[source_root_len])) {
-      // path is ${source-root}SUFIX/...
+      // path is ${source-root}SUFFIX/...
       return false;
     }
     // A source-root relative path, The input may have an unknown number of
@@ -671,14 +671,16 @@ std::string MakeRelativePath(const std::string& input,
   }
 #endif
 
+  DCHECK(EndsWithSlash(dest));
   std::string ret;
 
   // Skip the common prefixes of the source and dest as long as they end in
-  // a [back]slash.
+  // a [back]slash or end the string. dest always ends with a (back)slash in
+  // this function, so checking dest for just that is sufficient.
   size_t common_prefix_len = 0;
   size_t max_common_length = std::min(input.size(), dest.size());
-  for (size_t i = common_prefix_len; i < max_common_length; i++) {
-    if (IsSlash(input[i]) && IsSlash(dest[i]))
+  for (size_t i = common_prefix_len; i <= max_common_length; i++) {
+    if ((IsSlash(input[i]) || input[i] == '\0') && IsSlash(dest[i]))
       common_prefix_len = i + 1;
     else if (input[i] != dest[i])
       break;
@@ -691,7 +693,10 @@ std::string MakeRelativePath(const std::string& input,
   }
 
   // Append any remaining unique input.
-  ret.append(&input[common_prefix_len], input.size() - common_prefix_len);
+  if (common_prefix_len <= input.size())
+    ret.append(&input[common_prefix_len], input.size() - common_prefix_len);
+  else if (input.back() != '/' && !ret.empty())
+    ret.pop_back();
 
   // If the result is still empty, the paths are the same.
   if (ret.empty())
@@ -745,7 +750,7 @@ std::string RebasePath(const std::string& input,
     }
     ret = MakeRelativePath(input_full, dest_full);
     if (remove_slash && ret.size() > 1)
-      ret.resize(ret.size() - 1);
+      ret.pop_back();
     return ret;
   }
 
