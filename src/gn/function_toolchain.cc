@@ -408,6 +408,7 @@ Tool variables
           "-lfreetype -lexpat".
 
     framework_switch [string, optional, link tools only]
+    weak_framework_switch [string, optional, link tools only]
     framework_dir_switch [string, optional, link tools only]
         Valid for: Linker tools
 
@@ -417,11 +418,14 @@ Tool variables
 
         If you specified:
           framework_switch = "-framework "
+          weak_framework_switch = "-weak_framework "
           framework_dir_switch = "-F"
-        then the "{{libs}}" expansion for
-          [ "UIKit.framework", "$root_out_dir/Foo.framework" ]
-        would be
-          "-framework UIKit -F. -framework Foo"
+        and:
+          framework_dirs = [ "$root_out_dir" ]
+          frameworks = [ "UIKit.framework", "Foo.framework" ]
+          weak_frameworks = [ "MediaPlayer.framework" ]
+        would be:
+          "-F. -framework UIKit -framework Foo -weak_framework MediaPlayer"
 
     outputs  [list of strings with substitutions]
         Valid for: Linker and compiler tools (required)
@@ -702,7 +706,8 @@ Tool variables
         Shared libraries packaged as framework bundle. This is principally
         used on Apple's platforms (macOS and iOS). All name must be ending
         with ".framework" suffix; the suffix will be stripped when expanding
-        {{frameworks}} and each item will be preceded by "-framework".
+        {{frameworks}} and each item will be preceded by "-framework" or
+        "-weak_framework".
 
 )"  // String break to prevent overflowing the 16K max VC string length.
     R"(  The static library ("alink") tool allows {{arflags}} plus the common tool

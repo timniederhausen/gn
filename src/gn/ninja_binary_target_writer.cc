@@ -341,11 +341,16 @@ void NinjaBinaryTargetWriter::WriteLibs(std::ostream& out, const Tool* tool) {
 
 void NinjaBinaryTargetWriter::WriteFrameworks(std::ostream& out,
                                               const Tool* tool) {
-  FrameworksWriter writer(tool->framework_switch());
-
   // Frameworks that have been recursively pushed through the dependency tree.
+  FrameworksWriter writer(tool->framework_switch());
   const auto& all_frameworks = target_->all_frameworks();
   for (size_t i = 0; i < all_frameworks.size(); i++) {
     writer(all_frameworks[i], out);
+  }
+
+  FrameworksWriter weak_writer(tool->weak_framework_switch());
+  const auto& all_weak_frameworks = target_->all_weak_frameworks();
+  for (size_t i = 0; i < all_weak_frameworks.size(); i++) {
+    weak_writer(all_weak_frameworks[i], out);
   }
 }

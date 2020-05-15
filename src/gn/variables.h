@@ -330,6 +330,10 @@ extern const char kWalkKeys[];
 extern const char kWalkKeys_HelpShort[];
 extern const char kWalkKeys_Help[];
 
+extern const char kWeakFrameworks[];
+extern const char kWeakFrameworks_HelpShort[];
+extern const char kWeakFrameworks_Help[];
+
 extern const char kWriteValueContents[];
 extern const char kWriteValueContents_HelpShort[];
 extern const char kWriteValueContents_Help[];

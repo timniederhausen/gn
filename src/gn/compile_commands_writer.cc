@@ -85,6 +85,9 @@ void SetupCompileFlags(const Target* target,
   flags.frameworks = FlagsGetter<std::string>(
       target, &ConfigValues::frameworks,
       FrameworksWriter(ESCAPE_SPACE, true, "-framework"));
+  flags.frameworks += FlagsGetter<std::string>(
+      target, &ConfigValues::weak_frameworks,
+      FrameworksWriter(ESCAPE_SPACE, true, "-weak_framework"));
 
   flags.includes = FlagsGetter<SourceDir>(target, &ConfigValues::include_dirs,
                                           IncludeWriter(path_output));

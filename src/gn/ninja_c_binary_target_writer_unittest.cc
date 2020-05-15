@@ -540,6 +540,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, FrameworksAndFrameworkDirs) {
   Target target(setup.settings(), Label(SourceDir("//foo/"), "shlib"));
   target.set_output_type(Target::SHARED_LIBRARY);
   target.config_values().frameworks().push_back("System.framework");
+  target.config_values().weak_frameworks().push_back("Whizbang.framework");
   target.private_deps().push_back(LabelTargetPair(&framework));
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -559,7 +560,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, FrameworksAndFrameworkDirs) {
       "build ./libshlib.so: solink | obj/bar/framework.stamp\n"
       "  ldflags = -F.\n"
       "  libs =\n"
-      "  frameworks = -framework System -framework Bar\n"
+      "  frameworks = -framework System -framework Bar "
+      "-weak_framework Whizbang\n"
       "  output_extension = .so\n"
       "  output_dir = \n";
 

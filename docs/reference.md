@@ -151,6 +151,7 @@
     *   [testonly: [boolean] Declares a target must only be used for testing.](#var_testonly)
     *   [visibility: [label list] A list of labels that can depend on a target.](#var_visibility)
     *   [walk_keys: [string list] Key(s) for managing the metadata collection walk.](#var_walk_keys)
+    *   [weak_frameworks: [name list] Name of frameworks that must be weak linked.](#var_weak_frameworks)
     *   [write_runtime_deps: Writes the target's runtime_deps to the given path.](#var_write_runtime_deps)
     *   [xcode_extra_attributes: [scope] Extra attributes for Xcode projects.](#var_xcode_extra_attributes)
     *   [xcode_test_application_name: [string] Name for Xcode test target.](#var_xcode_test_application_name)
@@ -355,10 +356,6 @@
 #### **Command-specific switches**
 
 ```
-  --force
-      Ignores specifications of "check_includes = false" and checks all
-      target's files that match the target label.
-
   --check-generated
       Generated files are normally not checked since they do not exist
       until after a build. With this flag, those generated files that
@@ -367,6 +364,18 @@
   --check-system
      Check system style includes (using <angle brackets>) in addition to
      "double quote" includes.
+
+  --default-toolchain
+      Normally wildcard targets are matched in all toolchains. This
+      switch makes wildcard labels with no explicit toolchain reference
+      only match targets in the default toolchain.
+
+      Non-wildcard inputs with no explicit toolchain specification will
+      always match only a target in the default toolchain if one exists.
+
+  --force
+      Ignores specifications of "check_includes = false" and checks all
+      target's files that match the target label.
 ```
 
 #### **What gets checked**
@@ -465,7 +474,7 @@
   gn check out/Default "//foo/*
       Check only the files in targets in the //foo directory tree.
 ```
-### <a name="cmd_clean"></a>**gn clean &lt;out_dir&gt;**
+### <a name="cmd_clean"></a>**gn clean &lt;out_dir&gt;...**
 
 ```
   Deletes the contents of the output directory except for args.gn and
@@ -521,6 +530,7 @@
   testonly
   visibility
   walk_keys
+  weak_frameworks
 
   runtime_deps
       Compute all runtime deps for the given target. This is a computed list
@@ -533,15 +543,15 @@
 ```
 
 #### **Shared flags**
-```
-  --all-toolchains
-      Normally only inputs in the default toolchain will be included.
-      This switch will turn on matching all toolchains.
 
-      For example, a file is in a target might be compiled twice:
-      once in the default toolchain and once in a secondary one. Without
-      this flag, only the default toolchain one will be matched by
-      wildcards. With this flag, both will be matched.
+```
+  --default-toolchain
+      Normally wildcard targets are matched in all toolchains. This
+      switch makes wildcard labels with no explicit toolchain reference
+      only match targets in the default toolchain.
+
+      Non-wildcard inputs with no explicit toolchain specification will
+      always match only a target in the default toolchain if one exists.
 
   --format=json
       Format the output as JSON instead of text.
@@ -553,8 +563,9 @@
   --blame
       Used with any value specified on a config, this will name the config that
       causes that target to get the flag. This doesn't currently work for libs,
-      lib_dirs, frameworks and framework_dirs because those are inherited and
-      are more complicated to figure out the blame (patches welcome).
+      lib_dirs, frameworks, weak_frameworks and framework_dirs because those are
+      inherited and are more complicated to figure out the blame (patches
+      welcome).
 ```
 
 #### **Configs**
@@ -584,6 +595,7 @@
   --all
       Collects all recursive dependencies and prints a sorted flat list. Also
       usable with --tree (see below).
+
   --as=(buildfile|label|output)
       How to print targets.
 
@@ -610,6 +622,7 @@
 
       Tree output can not be used with the filtering or output flags: --as,
       --type, --testonly.
+
   --type=(action|copy|executable|group|loadable_module|shared_library|
           source_set|static_library)
       Restrict outputs to targets matching the given type. If
@@ -810,6 +823,12 @@
 #### **Compilation Database**
 
 ```
+  --export-rust-project
+      Produces a rust-project.json file in the root of the build directory
+      This is used for various tools in the Rust ecosystem allowing for the
+      replay of individual compilations independent of the build system.
+      This is an unstable format and likely to change without warning.
+
   --export-compile-commands[=<target_name1,target_name2...>]
       Produces a compile_commands.json file in the root of the build directory
       containing an array of “command objects”, where each command object
@@ -842,7 +861,7 @@
   gn help --markdown all
       Dump all help to stdout in markdown format.
 ```
-### <a name="cmd_ls"></a>**gn ls &lt;out_dir&gt; [&lt;label_pattern&gt;] [\--all-toolchains] [\--as=...]**
+### <a name="cmd_ls"></a>**gn ls &lt;out_dir&gt; [&lt;label_pattern&gt;] [\--default-toolchain] [\--as=...]**
 ```
       [--type=...] [--testonly=...]
 
@@ -870,14 +889,13 @@
           Prints the first output file for the target relative to the
           root build directory.
 
-  --all-toolchains
-      Normally only inputs in the default toolchain will be included.
-      This switch will turn on matching all toolchains.
+  --default-toolchain
+      Normally wildcard targets are matched in all toolchains. This
+      switch makes wildcard labels with no explicit toolchain reference
+      only match targets in the default toolchain.
 
-      For example, a file is in a target might be compiled twice:
-      once in the default toolchain and once in a secondary one. Without
-      this flag, only the default toolchain one will be matched by
-      wildcards. With this flag, both will be matched.
+      Non-wildcard inputs with no explicit toolchain specification will
+      always match only a target in the default toolchain if one exists.
 
   --testonly=(true|false)
       Restrict outputs to targets with the testonly flag set
@@ -910,10 +928,6 @@
 
   gn ls out/Debug "//base/*" --as=output | xargs ninja -C out/Debug
       Builds all targets in //base and all subdirectories.
-
-  gn ls out/Debug //base --all-toolchains
-      Lists all variants of the target //base:base (it may be referenced
-      in multiple toolchains).
 ```
 ### <a name="cmd_meta"></a>**gn meta**
 
@@ -1075,7 +1089,7 @@
 
 ```
   gn refs <out_dir> (<label_pattern>|<label>|<file>|@<response_file>)*
-          [--all] [--all-toolchains] [--as=...] [--testonly=...] [--type=...]
+          [--all] [--default-toolchain] [--as=...] [--testonly=...] [--type=...]
 
   Finds reverse dependencies (which targets reference something). The input is
   a list containing:
@@ -1111,14 +1125,6 @@
       directly or indirectly on that file.
 
       When used with --tree, turns off eliding to show a complete tree.
-  --all-toolchains
-      Normally only inputs in the default toolchain will be included.
-      This switch will turn on matching all toolchains.
-
-      For example, a file is in a target might be compiled twice:
-      once in the default toolchain and once in a secondary one. Without
-      this flag, only the default toolchain one will be matched by
-      wildcards. With this flag, both will be matched.
 
   --as=(buildfile|label|output)
       How to print targets.
@@ -1132,10 +1138,19 @@
           Prints the first output file for the target relative to the
           root build directory.
 
+  --default-toolchain
+      Normally wildcard targets are matched in all toolchains. This
+      switch makes wildcard labels with no explicit toolchain reference
+      only match targets in the default toolchain.
+
+      Non-wildcard inputs with no explicit toolchain specification will
+      always match only a target in the default toolchain if one exists.
+
   -q
      Quiet. If nothing matches, don't print any output. Without this option, if
      there are no matches there will be an informational message printed which
      might interfere with scripts processing the output.
+
   --testonly=(true|false)
       Restrict outputs to targets with the testonly flag set
       accordingly. When unspecified, the target's testonly flags are
@@ -1147,6 +1162,7 @@
 
       Tree output can not be used with the filtering or output flags: --as,
       --type, --testonly.
+
   --type=(action|copy|executable|group|loadable_module|shared_library|
           source_set|static_library)
       Restrict outputs to targets matching the given type. If
@@ -1956,8 +1972,7 @@
 ### <a name="func_source_set"></a>**source_set**: Declare a source set target.
 
 ```
-  The language of a source_set target is determined by the extensions present
-  in its sources.
+  Only C-language source sets are supported at the moment.
 ```
 
 #### **C-language source_sets**
@@ -1983,15 +1998,6 @@
   "exported symbol" notation indicate "export from the final shared library and
   not from the intermediate targets." There is no way to express this concept
   when linking multiple static libraries into a shared library.
-```
-
-#### **Rust-language source_sets**
-
-```
-  A Rust source set is a collection of sources that get passed along to the
-  final target that depends on it. No compilation is performed, and the source
-  files are simply added as dependencies on the eventual rustc invocation that
-  would produce a binary.
 ```
 
 #### **Variables**
@@ -2890,14 +2896,14 @@
   with a double slash like "//foo/bar"), you should use the get_path_info()
   function. This function won't work because it will always make relative
   paths, and it needs to support making paths relative to the source root, so
-  can't also generate source-absolute paths without more special-cases.
+  it can't also generate source-absolute paths without more special-cases.
 ```
 
 #### **Arguments**
 
 ```
   input
-      A string or list of strings representing file or directory names These
+      A string or list of strings representing file or directory names. These
       can be relative paths ("foo/bar.txt"), system absolute paths
       ("/foo/bar.txt"), or source absolute paths ("//foo/bar.txt").
 
@@ -3462,6 +3468,7 @@
           "-lfreetype -lexpat".
 
     framework_switch [string, optional, link tools only]
+    weak_framework_switch [string, optional, link tools only]
     framework_dir_switch [string, optional, link tools only]
         Valid for: Linker tools
 
@@ -3471,11 +3478,14 @@
 
         If you specified:
           framework_switch = "-framework "
+          weak_framework_switch = "-weak_framework "
           framework_dir_switch = "-F"
-        then the "{{libs}}" expansion for
-          [ "UIKit.framework", "$root_out_dir/Foo.framework" ]
-        would be
-          "-framework UIKit -F. -framework Foo"
+        and:
+          framework_dirs = [ "$root_out_dir" ]
+          frameworks = [ "UIKit.framework", "Foo.framework" ]
+          weak_frameworks = [ "MediaPlayer.framework" ]
+        would be:
+          "-F. -framework UIKit -framework Foo -weak_framework MediaPlayer"
 
     outputs  [list of strings with substitutions]
         Valid for: Linker and compiler tools (required)
@@ -3757,7 +3767,8 @@
         Shared libraries packaged as framework bundle. This is principally
         used on Apple's platforms (macOS and iOS). All name must be ending
         with ".framework" suffix; the suffix will be stripped when expanding
-        {{frameworks}} and each item will be preceded by "-framework".
+        {{frameworks}} and each item will be preceded by "-framework" or
+        "-weak_framework".
 
   The static library ("alink") tool allows {{arflags}} plus the common tool
   substitutions.
@@ -6381,6 +6392,42 @@
   walk will touch all deps and data_deps of the specified target recursively.
 
   See "gn help generated_file".
+```
+### <a name="var_weak_frameworks"></a>**weak_frameworks**: [name list] Name of frameworks that must be weak linked.
+
+```
+  A list of framework names.
+
+  The frameworks named in that list will be weak linked with any dynamic link
+  type target. Weak linking instructs the dynamic loader to attempt to load
+  the framework, but if it is not able to do so, it leaves any imported symbols
+  unresolved. This is typically used when a framework is present in a new
+  version of an SDK but not on older versions of the OS that the software runs
+  on.
+```
+
+#### **Ordering of flags and values**
+
+```
+  1. Those set on the current target (not in a config).
+  2. Those set on the "configs" on the target in order that the
+     configs appear in the list.
+  3. Those set on the "all_dependent_configs" on the target in order
+     that the configs appear in the list.
+  4. Those set on the "public_configs" on the target in order that
+     those configs appear in the list.
+  5. all_dependent_configs pulled from dependencies, in the order of
+     the "deps" list. This is done recursively. If a config appears
+     more than once, only the first occurence will be used.
+  6. public_configs pulled from dependencies, in the order of the
+     "deps" list. If a dependency is public, they will be applied
+     recursively.
+```
+
+#### **Example**
+
+```
+  weak_frameworks = [ "OnlyOnNewerOSes.framework" ]
 ```
 ### <a name="var_write_runtime_deps"></a>**write_runtime_deps**: Writes the target's runtime_deps to the given path.
 
