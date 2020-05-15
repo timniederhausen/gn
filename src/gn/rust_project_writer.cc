@@ -10,6 +10,7 @@
 
 #include "base/json/string_escape.h"
 #include "gn/builder.h"
+#include "gn/deps_iterator.h"
 #include "gn/filesystem_utils.h"
 #include "gn/ninja_target_command_util.h"
 #include "gn/rust_tool.h"
@@ -75,6 +76,30 @@ using TargetIdxMap = std::unordered_map<const Target*, uint32_t>;
 using SysrootIdxMap =
     std::unordered_map<std::string_view,
                        std::unordered_map<std::string_view, uint32_t>>;
+using TargetsVec = UniqueVector<const Target*>;
+
+// Get the Rust deps for a target, recursively expanding OutputType::GROUPS
+// that are present in the GN structure.  This will return a flattened list of
+// deps from the groups, but will not expand a Rust lib dependency to find any
+// transitive Rust dependencies.
+void GetRustDeps(const Target* target, TargetsVec* rust_deps) {
+  for (const auto& pair : target->GetDeps(Target::DEPS_LINKED)) {
+    const Target* dep = pair.ptr;
+
+    if (dep->source_types_used().RustSourceUsed()) {
+      // Include any Rust dep.
+      rust_deps->push_back(dep);
+    } else if (dep->output_type() == Target::OutputType::GROUP) {
+      // Inspect (recursively) any group to see if it contains Rust deps.
+      GetRustDeps(dep, rust_deps);
+    }
+  }
+}
+TargetsVec GetRustDeps(const Target* target) {
+  TargetsVec deps;
+  GetRustDeps(target, &deps);
+  return deps;
+}
 
 void WriteDeps(const Target* target,
                TargetIdxMap& lookup,
@@ -102,7 +127,7 @@ void WriteDeps(const Target* target,
     }
   }
 
-  for (const auto& dep : target->rust_values().transitive_libs().GetOrdered()) {
+  for (const auto& dep : GetRustDeps(target)) {
     auto idx = lookup[dep];
     if (!first)
       rust_project << ",";
@@ -228,11 +253,12 @@ void AddTarget(const Target* target,
     }
   }
 
-  // Add each dependency first before we write any of the parent target.
-  for (const auto& dep : target->rust_values().transitive_libs().GetOrdered()) {
-    AddTarget(dep, count, lookup, sysroot_lookup, build_settings, rust_project,
-              first);
-    first = false;
+  for (const auto& dep : GetRustDeps(target)) {
+    if (dep->source_types_used().RustSourceUsed()) {
+      AddTarget(dep, count, lookup, sysroot_lookup, build_settings,
+                rust_project, first);
+      first = false;
+    }
   }
 
   if (!first) {
@@ -253,6 +279,8 @@ void AddTarget(const Target* target,
 
   rust_project << "      \"root_module\": \"" << FilePathToUTF8(crate_root)
                << "\"," NEWLINE;
+  rust_project << "      \"label\": \""
+               << target->label().GetUserVisibleName(false) << "\"," NEWLINE;
 
   WriteDeps(target, lookup, sysroot_lookup, rust_project);
 

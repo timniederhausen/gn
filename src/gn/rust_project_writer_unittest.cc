@@ -43,6 +43,7 @@ TEST_F(RustProjectJSONWriter, OneRustTarget) {
       "    {\n"
       "      \"crate_id\": 0,\n"
       "      \"root_module\": \"foo/lib.rs\",\n"
+      "      \"label\": \"//foo:bar\",\n"
       "      \"deps\": [\n"
       "      ],\n"
       "      \"edition\": \"2015\",\n"
@@ -98,6 +99,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDep) {
       "    {\n"
       "      \"crate_id\": 0,\n"
       "      \"root_module\": \"tortoise/lib.rs\",\n"
+      "      \"label\": \"//tortoise:bar\",\n"
       "      \"deps\": [\n"
       "      ],\n"
       "      \"edition\": \"2015\",\n"
@@ -109,6 +111,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDep) {
       "    {\n"
       "      \"crate_id\": 1,\n"
       "      \"root_module\": \"hare/lib.rs\",\n"
+      "      \"label\": \"//hare:bar\",\n"
       "      \"deps\": [\n"
       "        {\n"
       "          \"crate\": 0,\n"
@@ -179,6 +182,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
       "    {\n"
       "      \"crate_id\": 0,\n"
       "      \"root_module\": \"tortoise/lib.rs\",\n"
+      "      \"label\": \"//tortoise:bar\",\n"
       "      \"deps\": [\n"
       "      ],\n"
       "      \"edition\": \"2015\",\n"
@@ -190,6 +194,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
       "    {\n"
       "      \"crate_id\": 1,\n"
       "      \"root_module\": \"achilles/lib.rs\",\n"
+      "      \"label\": \"//achilles:bar\",\n"
       "      \"deps\": [\n"
       "      ],\n"
       "      \"edition\": \"2015\",\n"
@@ -201,6 +206,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
       "    {\n"
       "      \"crate_id\": 2,\n"
       "      \"root_module\": \"hare/lib.rs\",\n"
+      "      \"label\": \"//hare:bar\",\n"
       "      \"deps\": [\n"
       "        {\n"
       "          \"crate\": 0,\n"
@@ -219,5 +225,119 @@ TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
       "    }\n"
       "  ]\n"
       "}\n";
+  EXPECT_EQ(expected_json, out);
+}
+
+// Test that when outputting dependencies, only Rust deps are returned,
+// and that any groups are inspected to see if they include Rust deps.
+TEST_F(RustProjectJSONWriter, RustTargetGetDepRustOnly) {
+  Err err;
+  TestWithScope setup;
+
+  Target dep(setup.settings(), Label(SourceDir("//tortoise/"), "bar"));
+  dep.set_output_type(Target::RUST_LIBRARY);
+  dep.visibility().SetPublic();
+  SourceFile tlib("//tortoise/lib.rs");
+  dep.sources().push_back(tlib);
+  dep.source_types_used().Set(SourceFile::SOURCE_RS);
+  dep.rust_values().set_crate_root(tlib);
+  dep.rust_values().crate_name() = "tortoise";
+  dep.SetToolchain(setup.toolchain());
+
+  Target dep2(setup.settings(), Label(SourceDir("//achilles/"), "bar"));
+  dep2.set_output_type(Target::STATIC_LIBRARY);
+  dep2.visibility().SetPublic();
+  SourceFile alib("//achilles/lib.o");
+  dep2.SetToolchain(setup.toolchain());
+
+  Target dep3(setup.settings(), Label(SourceDir("//achilles/"), "group"));
+  dep3.set_output_type(Target::GROUP);
+  dep3.visibility().SetPublic();
+  dep3.public_deps().push_back(LabelTargetPair(&dep));
+  dep3.SetToolchain(setup.toolchain());
+
+  Target dep4(setup.settings(), Label(SourceDir("//tortoise/"), "macro"));
+  dep4.set_output_type(Target::RUST_PROC_MACRO);
+  dep4.visibility().SetPublic();
+  SourceFile tmlib("//tortoise/macro/lib.rs");
+  dep4.sources().push_back(tmlib);
+  dep4.source_types_used().Set(SourceFile::SOURCE_RS);
+  dep4.rust_values().set_crate_root(tmlib);
+  dep4.rust_values().crate_name() = "tortoise_macro";
+  dep4.SetToolchain(setup.toolchain());
+
+  Target target(setup.settings(), Label(SourceDir("//hare/"), "bar"));
+  target.set_output_type(Target::RUST_LIBRARY);
+  target.visibility().SetPublic();
+  SourceFile harelib("//hare/lib.rs");
+  target.sources().push_back(harelib);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(harelib);
+  target.rust_values().crate_name() = "hare";
+  target.public_deps().push_back(LabelTargetPair(&dep));
+  target.public_deps().push_back(LabelTargetPair(&dep3));
+  target.public_deps().push_back(LabelTargetPair(&dep4));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream stream;
+  std::vector<const Target*> targets;
+  targets.push_back(&target);
+  RustProjectWriter::RenderJSON(setup.build_settings(), targets, stream);
+  std::string out = stream.str();
+#if defined(OS_WIN)
+  base::ReplaceSubstringsAfterOffset(&out, 0, "\r\n", "\n");
+#endif
+  const char expected_json[] =
+      "{\n"
+      "  \"roots\": [],\n"
+      "  \"crates\": [\n"
+      "    {\n"
+      "      \"crate_id\": 0,\n"
+      "      \"root_module\": \"tortoise/lib.rs\",\n"
+      "      \"label\": \"//tortoise:bar\",\n"
+      "      \"deps\": [\n"
+      "      ],\n"
+      "      \"edition\": \"2015\",\n"
+      "      \"atom_cfgs\": [\n"
+      "      ],\n"
+      "      \"key_value_cfgs\": {\n"
+      "      }\n"
+      "    },\n"
+      "    {\n"
+      "      \"crate_id\": 1,\n"
+      "      \"root_module\": \"tortoise/macro/lib.rs\",\n"
+      "      \"label\": \"//tortoise:macro\",\n"
+      "      \"deps\": [\n"
+      "      ],\n"
+      "      \"edition\": \"2015\",\n"
+      "      \"atom_cfgs\": [\n"
+      "      ],\n"
+      "      \"key_value_cfgs\": {\n"
+      "      }\n"
+      "    },\n"
+      "    {\n"
+      "      \"crate_id\": 2,\n"
+      "      \"root_module\": \"hare/lib.rs\",\n"
+      "      \"label\": \"//hare:bar\",\n"
+      "      \"deps\": [\n"
+      "        {\n"
+      "          \"crate\": 0,\n"
+      "          \"name\": \"tortoise\"\n"
+      "        },\n"
+      "        {\n"
+      "          \"crate\": 1,\n"
+      "          \"name\": \"tortoise_macro\"\n"
+      "        }\n"
+      "      ],\n"
+      "      \"edition\": \"2015\",\n"
+      "      \"atom_cfgs\": [\n"
+      "      ],\n"
+      "      \"key_value_cfgs\": {\n"
+      "      }\n"
+      "    }\n"
+      "  ]\n"
+      "}\n";
+
   EXPECT_EQ(expected_json, out);
 }
