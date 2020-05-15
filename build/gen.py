@@ -652,6 +652,7 @@ def WriteGNNinja(path, platform, host, options):
         'src/gn/input_conversion_unittest.cc',
         'src/gn/json_project_writer_unittest.cc',
         'src/gn/rust_project_writer_unittest.cc',
+        'src/gn/rust_project_writer_helpers_unittest.cc',
         'src/gn/label_pattern_unittest.cc',
         'src/gn/label_unittest.cc',
         'src/gn/loader_unittest.cc',
