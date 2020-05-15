@@ -30,7 +30,6 @@
 //    "roots": [] // always empty for GN. To be deprecated.
 //    "crates": [
 //        {
-//            "atom_cfgs": [], // atom config options
 //            "deps": [
 //                {
 //                    "crate": 1, // index into crate array
@@ -38,9 +37,10 @@
 //                },
 //            ],
 //            "edition": "2018", // edition of crate
-//            "key_value_cfgs": {
-//              "rust_panic": "abort" // key value config options
-//            },
+//            "cfg": [
+//              "unix", // "atomic" value config options
+//              "rust_panic=\"abort\""", // key="value" config options
+//            ]
 //            "root_module": "absolute path to crate"
 //        },
 // }
@@ -224,8 +224,8 @@ void AddSysrootCrate(const std::string_view crate,
   }
   rust_project << NEWLINE "      ]," NEWLINE;
 
-  rust_project << "      \"atom_cfgs\": []," NEWLINE
-                  "      \"key_value_cfgs\": {}" NEWLINE;
+  rust_project << "      \"cfg\": []" NEWLINE;
+
   rust_project << "    }";
 }
 
@@ -286,8 +286,7 @@ void AddTarget(const Target* target,
 
   std::string cfg_prefix("--cfg=");
   std::string edition_prefix("--edition=");
-  std::vector<std::string> atoms;
-  std::vector<std::tuple<std::string, std::string>> kvs;
+  std::vector<std::string> cfgs;
 
   bool edition_set = false;
   for (ConfigValuesIterator iter(target); !iter.done(); iter.Next()) {
@@ -298,50 +297,31 @@ void AddTarget(const Target* target,
         rust_project << "      \"edition\": \"" << edition << "\"," NEWLINE;
         edition_set = true;
       }
-      // Can't directly print cfgs since they come in any order.
-      // If they have an = they are a k/v cfg, otherwise an atom cfg.
       if (!flag.compare(0, cfg_prefix.size(), cfg_prefix)) {
         auto cfg = flag.substr(cfg_prefix.size());
-        auto idx = cfg.rfind("=");
-        if (idx == std::string::npos) {
-          atoms.push_back(cfg);
-        } else {
-          std::string key = cfg.substr(0, idx);
-          std::string value = cfg.substr(idx + 1);
-          kvs.push_back(std::make_pair(key, value));
-        }
+        std::string escaped_config;
+        base::EscapeJSONString(cfg, false, &escaped_config);
+        cfgs.push_back(escaped_config);
       }
     }
   }
 
-  if (!edition_set)
+if (!edition_set)
     rust_project << "      \"edition\": \"2015\"," NEWLINE;
 
-  rust_project << "      \"atom_cfgs\": [";
-  bool first_atom = true;
-  for (const auto& cfg : atoms) {
-    if (!first_atom) {
+  rust_project << "      \"cfg\": [";
+  bool first_cfg = true;
+  for (const auto& cfg : cfgs) {
+    if (!first_cfg) {
       rust_project << ",";
     }
-    first_atom = false;
+    first_cfg = false;
     rust_project << NEWLINE;
     rust_project << "        \"" << cfg << "\"";
   }
   rust_project << NEWLINE;
-  rust_project << "      ]," NEWLINE;
+  rust_project << "      ]" NEWLINE;
 
-  rust_project << "      \"key_value_cfgs\": {";
-  bool first_kv = true;
-  for (const auto& cfg : kvs) {
-    if (!first_kv) {
-      rust_project << ",";
-    }
-    first_kv = false;
-    rust_project << NEWLINE << "        \"" << std::get<0>(cfg)
-                 << "\" : " << std::get<1>(cfg);
-  }
-  rust_project << NEWLINE;
-  rust_project << "      }" NEWLINE;
   rust_project << "    }";
 }
 
