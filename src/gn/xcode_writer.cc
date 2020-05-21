@@ -528,7 +528,7 @@ bool XcodeProject::AddSourcesFromBuilder(const Builder& builder, Err* err) {
     if (!item->AsConfig() && !item->AsTarget() && !item->AsToolchain())
       continue;
 
-    const SourceFile build = Loader::BuildFileForLabel(item->label());
+    const SourceFile build = builder.loader()->BuildFileForLabel(item->label());
     if (ShouldIncludeFileInProject(build))
       sources.insert(build);
 

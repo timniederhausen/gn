@@ -223,6 +223,9 @@ Overall build flow
 
   6. When all targets are resolved, write out the root build.ninja file.
 
+  Note that the BUILD.gn file name may be modulated by .gn arguments such as
+  build_file_extension.
+
 Executing target definitions and templates
 
   Build files are loaded in parallel. This means it is impossible to

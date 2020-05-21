@@ -35,6 +35,9 @@ class MockLoader : public Loader {
   const Settings* GetToolchainSettings(const Label& label) const override {
     return nullptr;
   }
+  SourceFile BuildFileForLabel(const Label& label) const override {
+    return SourceFile(label.dir().value() + "BUILD.gn");
+  }
 
  private:
   ~MockLoader() override = default;
