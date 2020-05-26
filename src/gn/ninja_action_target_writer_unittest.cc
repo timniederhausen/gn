@@ -286,10 +286,12 @@ TEST(NinjaActionTargetWriter, ForEachWithDepfile) {
       " | obj/foo/bar.inputdeps.stamp\n"
       "  source_name_part = input1\n"
       "  depfile = gen/input1.d\n"
+      "  deps = gcc\n"
       "build input2.out: __foo_bar___rule ../../foo/input2.txt"
       " | obj/foo/bar.inputdeps.stamp\n"
       "  source_name_part = input2\n"
       "  depfile = gen/input2.d\n"
+      "  deps = gcc\n"
       "\n"
       "build obj/foo/bar.stamp: stamp input1.out input2.out\n";
   EXPECT_EQ(expected_linux, out.str());
