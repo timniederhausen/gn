@@ -159,7 +159,7 @@ void WriteCommand(const Target* target,
   for (const auto& range : tool->command().ranges()) {
     // TODO: this is emitting a bonus space prior to each substitution.
     if (range.type == &SubstitutionLiteral) {
-      EscapeStringToStream(out, range.literal, no_quoting);
+      EscapeJSONStringToStream(out, range.literal, no_quoting);
     } else if (range.type == &SubstitutionOutput) {
       path_output.WriteFiles(out, tool_outputs);
     } else if (range.type == &CSubstitutionDefines) {
