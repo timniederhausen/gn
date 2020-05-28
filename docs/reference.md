@@ -6662,6 +6662,11 @@
       GN will look for build files named "BUILD.$build_file_extension.gn".
       This is intended to be used during migrations or other situations where
       there are two independent GN builds in the same directories.
+
+  ninja_required_version [optional]
+      When set specifies the minimum required version of Ninja. The default
+      required version is 1.7.2. Specifying a higher version might enable the
+      use of some of newer features that can make the build more efficient.
 ```
 
 #### **Example .gn file contents**
