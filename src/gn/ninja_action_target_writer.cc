@@ -75,7 +75,6 @@ void NinjaActionTargetWriter::Run() {
       out_ << "  depfile = ";
       WriteDepfile(SourceFile());
       out_ << std::endl;
-      out_ << "  deps = gcc" << std::endl;
     }
     if (target_->action_values().pool().ptr) {
       out_ << "  pool = ";
@@ -207,7 +206,6 @@ void NinjaActionTargetWriter::WriteSourceRules(
       out_ << "  depfile = ";
       WriteDepfile(sources[i]);
       out_ << std::endl;
-      out_ << "  deps = gcc" << std::endl;
     }
     if (target_->action_values().pool().ptr) {
       out_ << "  pool = ";
