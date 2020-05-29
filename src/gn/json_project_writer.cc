@@ -28,14 +28,14 @@
 
 // Structure of JSON output file
 // {
-//   "build_settings" = {
+//   "build_settings" : {
 //     "root_path" : "absolute path of project root",
 //     "build_dir" : "build directory (project relative)",
 //     "default_toolchain" : "name of default toolchain"
 //   }
-//   "targets" = {
-//      "target x name" : { target x properties },
-//      "target y name" : { target y properties },
+//   "targets" : {
+//      "target x full label" : { target x properties },
+//      "target y full label" : { target y properties },
 //      ...
 //    }
 // }
