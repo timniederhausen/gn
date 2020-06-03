@@ -153,6 +153,7 @@
     *   [walk_keys: [string list] Key(s) for managing the metadata collection walk.](#var_walk_keys)
     *   [weak_frameworks: [name list] Name of frameworks that must be weak linked.](#var_weak_frameworks)
     *   [write_runtime_deps: Writes the target's runtime_deps to the given path.](#var_write_runtime_deps)
+    *   [xcasset_compiler_flags: [string list] Flags passed to xcassets compiler](#var_xcasset_compiler_flags)
     *   [xcode_extra_attributes: [scope] Extra attributes for Xcode projects.](#var_xcode_extra_attributes)
     *   [xcode_test_application_name: [string] Name for Xcode test target.](#var_xcode_test_application_name)
 *   [Other help topics](#other)
@@ -716,7 +717,8 @@
 #### **IDE options**
 
 ```
-  GN optionally generates files for IDE. Possibilities for <ide options>
+  GN optionally generates files for IDE. Files won't be overwritten if their
+  contents don't change. Possibilities for <ide options>
 
   --ide=<ide_name>
       Generate files for an IDE. Currently supported values:
@@ -811,10 +813,10 @@
       Overrides default file name (project.json) of generated JSON file.
 
   --json-ide-script=<path_to_python_script>
-      Executes python script after the JSON file is generated. Path can be
-      project absolute (//), system absolute (/) or relative, in which case the
-      output directory will be base. Path to generated JSON file will be first
-      argument when invoking script.
+      Executes python script after the JSON file is generated or updated with
+      new content. Path can be project absolute (//), system absolute (/) or
+      relative, in which case the output directory will be base. Path to
+      generated JSON file will be first argument when invoking script.
 
   --json-ide-script-args=<argument>
       Optional second argument that will passed to executed script.
@@ -3803,6 +3805,10 @@
         assets catalog compiler. Usually based on the target_name of
         the create_bundle target.
 
+    {{xcasset_compiler_flags}}
+        Expands to the list of flags specified in corresponding
+        create_bundle target.
+
   Rust tools have the notion of a single input and a single output, along
   with a set of compiler-specific flags. The following expansions are
   available:
@@ -6449,6 +6455,15 @@
   same as requesting the runtime deps be written on the command line (see "gn
   help --runtime-deps-list-file").
 ```
+### <a name="var_xcasset_compiler_flags"></a>**xcasset_compiler_flags**: Flags passed to xcassets compiler.
+
+```
+  A list of strings.
+
+  Valid for create_bundle target. Those flags are directly passed to
+  xcassets compiler, corresponding to {{xcasset_compiler_flags}} substitution
+  in compile_xcassets tool.
+```
 ### <a name="var_xcode_extra_attributes"></a>**xcode_extra_attributes**: [scope] Extra attributes for Xcode projects.
 
 ```
@@ -6609,7 +6624,8 @@
   root [optional]
       Label of the root build target. The GN build will start by loading the
       build file containing this target name. This defaults to "//:" which will
-      cause the file //BUILD.gn to be loaded.
+      cause the file //BUILD.gn to be loaded. Note that build_file_extension
+      applies to the default case as well.
 
   script_executable [optional]
       Path to specific Python executable or other interpreter to use in
@@ -6639,6 +6655,13 @@
 
       This is intended to be used when subprojects declare arguments with
       default values that need to be changed for whatever reason.
+
+  build_file_extension [optional]
+      If set to a non-empty string, this is added to the name of all build files
+      to load.
+      GN will look for build files named "BUILD.$build_file_extension.gn".
+      This is intended to be used during migrations or other situations where
+      there are two independent GN builds in the same directories.
 ```
 
 #### **Example .gn file contents**
@@ -6686,6 +6709,9 @@
      file to disk.
 
   6. When all targets are resolved, write out the root build.ninja file.
+
+  Note that the BUILD.gn file name may be modulated by .gn arguments such as
+  build_file_extension.
 ```
 
 #### **Executing target definitions and templates**

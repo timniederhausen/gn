@@ -360,7 +360,8 @@ const char kGen_Help[] =
 
 IDE options
 
-  GN optionally generates files for IDE. Possibilities for <ide options>
+  GN optionally generates files for IDE. Files won't be overwritten if their
+  contents don't change. Possibilities for <ide options>
 
   --ide=<ide_name>
       Generate files for an IDE. Currently supported values:
@@ -446,10 +447,10 @@ Generic JSON Output
       Overrides default file name (project.json) of generated JSON file.
 
   --json-ide-script=<path_to_python_script>
-      Executes python script after the JSON file is generated. Path can be
-      project absolute (//), system absolute (/) or relative, in which case the
-      output directory will be base. Path to generated JSON file will be first
-      argument when invoking script.
+      Executes python script after the JSON file is generated or updated with
+      new content. Path can be project absolute (//), system absolute (/) or
+      relative, in which case the output directory will be base. Path to
+      generated JSON file will be first argument when invoking script.
 
   --json-ide-script-args=<argument>
       Optional second argument that will passed to executed script.
