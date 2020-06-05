@@ -7,37 +7,94 @@
 
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <tuple>
 #include <unordered_map>
+#include <vector>
 
 #include "build_settings.h"
+#include "gn/source_file.h"
 #include "gn/target.h"
 
 // These are internal types and helper functions for RustProjectWriter that have
 // been extracted for easier testability.
 
+// Crate Index in the generated file
+using CrateIndex = size_t;
+
+using ConfigList = std::vector<std::string>;
+using Dependency = std::pair<CrateIndex, std::string>;
+using DependencyList = std::vector<Dependency>;
+
+// This class represents a crate to be serialized out as part of the
+// rust-project.json file.  This is used to separate the generating
+// of the data that needs to be in the file, from the file itself.
+class Crate {
+ public:
+  Crate(SourceFile root,
+        CrateIndex index,
+        std::string label,
+        std::string edition)
+      : root_(root), index_(index), label_(label), edition_(edition) {}
+
+  ~Crate() = default;
+
+  // Add a config item to the crate.
+  void AddConfigItem(std::string cfg_item) { configs_.push_back(cfg_item); }
+
+  // Add another crate as a dependency of this one.
+  void AddDependency(CrateIndex index, std::string name) {
+    deps_.push_back(std::make_pair(index, name));
+  }
+
+  // Returns the root file for the crate.
+  SourceFile& root() { return root_; }
+
+  // Returns the crate index.
+  CrateIndex index() { return index_; };
+
+  // Returns the displayable crate label.
+  const std::string& label() { return label_; }
+
+  // Returns the Rust Edition this crate uses.
+  const std::string& edition() { return edition_; }
+
+  // Return the set of config items for this crate.
+  ConfigList& configs() { return configs_; }
+
+  // Return the set of dependencies for this crate.
+  DependencyList& dependencies() { return deps_; }
+
+ private:
+  SourceFile root_;
+  CrateIndex index_;
+  std::string label_;
+  std::string edition_;
+  ConfigList configs_;
+  DependencyList deps_;
+};
+
+using CrateList = std::vector<Crate>;
+
 // Mapping of a sysroot crate (path) to it's index in the crates list.
-using SysrootCrateIdxMap = std::unordered_map<std::string_view, uint32_t>;
+using SysrootCrateIndexMap = std::unordered_map<std::string_view, CrateIndex>;
 
 // Mapping of a sysroot (path) to the mapping of each of the sysroot crates to
 // their index in the crates list.
-using SysrootIdxMap = std::unordered_map<std::string_view, SysrootCrateIdxMap>;
+using SysrootIndexMap =
+    std::unordered_map<std::string_view, SysrootCrateIndexMap>;
 
 // Add all of the crates for a sysroot (path) to the rust_project ostream.
-void AddSysroot(const std::string_view sysroot,
-                uint32_t* count,
-                SysrootIdxMap& sysroot_lookup,
-                std::ostream& rust_project,
-                const BuildSettings* build_settings,
-                bool first_crate);
+// Add the given sysroot to the project, if it hasn't already been added.
+void AddSysroot(const BuildSettings* build_settings,
+                const std::string_view sysroot,
+                SysrootIndexMap& sysroot_lookup,
+                CrateList& crate_list);
 
-// Add a sysroot crate to the rust_project ostream, first recursively adding its
-// sysroot crate depedencies.
-void AddSysrootCrate(const std::string_view crate,
-                     const std::string_view current_sysroot,
-                     uint32_t* count,
-                     SysrootCrateIdxMap& sysroot_crate_lookup,
-                     std::ostream& rust_project,
-                     const BuildSettings* build_settings,
-                     bool first_crate);
+// Write the entire rust-project.json file contents into the given stream, based
+// on the the given crates list.
+void WriteCrates(const BuildSettings* build_settings,
+                 CrateList& crate_list,
+                 std::ostream& rust_project);
 
 #endif  // TOOLS_GN_RUST_PROJECT_WRITER_HELPERS_H_

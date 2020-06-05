@@ -4,6 +4,8 @@
 
 #include "gn/rust_project_writer.h"
 #include "base/strings/string_util.h"
+#include "base/files/file_path.h"
+#include "gn/filesystem_utils.h"
 #include "gn/substitution_list.h"
 #include "gn/target.h"
 #include "gn/test_with_scheduler.h"
@@ -16,6 +18,7 @@ using RustProjectJSONWriter = TestWithScheduler;
 TEST_F(RustProjectJSONWriter, OneRustTarget) {
   Err err;
   TestWithScope setup;
+  setup.build_settings()->SetRootPath(UTF8ToFilePath("path"));
 
   Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
   target.set_output_type(Target::RUST_LIBRARY);
@@ -39,11 +42,13 @@ TEST_F(RustProjectJSONWriter, OneRustTarget) {
 #endif
   const char expected_json[] =
       "{\n"
-      "  \"roots\": [],\n"
+      "  \"roots\": [\n"
+      "    \"path/foo/\"\n"
+      "  ],\n"
       "  \"crates\": [\n"
       "    {\n"
       "      \"crate_id\": 0,\n"
-      "      \"root_module\": \"foo/lib.rs\",\n"
+      "      \"root_module\": \"path/foo/lib.rs\",\n"
       "      \"label\": \"//foo:bar\",\n"
       "      \"deps\": [\n"
       "      ],\n"
@@ -94,7 +99,10 @@ TEST_F(RustProjectJSONWriter, RustTargetDep) {
 #endif
   const char expected_json[] =
       "{\n"
-      "  \"roots\": [],\n"
+      "  \"roots\": [\n"
+      "    \"tortoise/\",\n"
+      "    \"hare/\"\n"
+      "  ],\n"
       "  \"crates\": [\n"
       "    {\n"
       "      \"crate_id\": 0,\n"
@@ -173,7 +181,11 @@ TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
 #endif
   const char expected_json[] =
       "{\n"
-      "  \"roots\": [],\n"
+      "  \"roots\": [\n"
+      "    \"tortoise/\",\n"
+      "    \"achilles/\",\n"
+      "    \"hare/\"\n"
+      "  ],\n"
       "  \"crates\": [\n"
       "    {\n"
       "      \"crate_id\": 0,\n"
@@ -280,7 +292,11 @@ TEST_F(RustProjectJSONWriter, RustTargetGetDepRustOnly) {
 #endif
   const char expected_json[] =
       "{\n"
-      "  \"roots\": [],\n"
+      "  \"roots\": [\n"
+      "    \"tortoise/\",\n"
+      "    \"tortoise/macro/\",\n"
+      "    \"hare/\"\n"
+      "  ],\n"
       "  \"crates\": [\n"
       "    {\n"
       "      \"crate_id\": 0,\n"
