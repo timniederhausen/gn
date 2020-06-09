@@ -169,6 +169,8 @@ void AddSysrootCrate(const BuildSettings* build_settings,
   Crate sysroot_crate =
       Crate(SourceFile(crate_path), crate_index, std::string(crate), "2018");
 
+  sysroot_crate.AddConfigItem("debug_assertions");
+
   if (deps_lookup != sysroot_deps_map.end()) {
     auto deps = (*deps_lookup).second;
     for (auto dep : deps) {
@@ -254,6 +256,9 @@ void AddTarget(const BuildSettings* build_settings,
   }
 
   Crate crate = Crate(crate_root, crate_id, crate_label, edition);
+
+  crate.AddConfigItem("test");
+  crate.AddConfigItem("debug_assertions");
 
   for (auto& cfg : cfgs) {
     crate.AddConfigItem(cfg);
