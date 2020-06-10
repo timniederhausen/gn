@@ -50,6 +50,7 @@ TEST_F(RustProjectJSONWriter, OneRustTarget) {
       "      \"crate_id\": 0,\n"
       "      \"root_module\": \"path/foo/lib.rs\",\n"
       "      \"label\": \"//foo:bar\",\n"
+      "      \"compiler_args\": [\"--cfg=feature=\\\"foo_enabled\\\"\"],\n"
       "      \"deps\": [\n"
       "      ],\n"
       "      \"edition\": \"2015\",\n"
@@ -102,8 +103,8 @@ TEST_F(RustProjectJSONWriter, RustTargetDep) {
   const char expected_json[] =
       "{\n"
       "  \"roots\": [\n"
-      "    \"tortoise/\",\n"
-      "    \"hare/\"\n"
+      "    \"hare/\",\n"
+      "    \"tortoise/\"\n"
       "  ],\n"
       "  \"crates\": [\n"
       "    {\n"
@@ -188,9 +189,9 @@ TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
   const char expected_json[] =
       "{\n"
       "  \"roots\": [\n"
-      "    \"tortoise/\",\n"
       "    \"achilles/\",\n"
-      "    \"hare/\"\n"
+      "    \"hare/\",\n"
+      "    \"tortoise/\"\n"
       "  ],\n"
       "  \"crates\": [\n"
       "    {\n"
@@ -305,9 +306,9 @@ TEST_F(RustProjectJSONWriter, RustTargetGetDepRustOnly) {
   const char expected_json[] =
       "{\n"
       "  \"roots\": [\n"
+      "    \"hare/\",\n"
       "    \"tortoise/\",\n"
-      "    \"tortoise/macro/\",\n"
-      "    \"hare/\"\n"
+      "    \"tortoise/macro/\"\n"
       "  ],\n"
       "  \"crates\": [\n"
       "    {\n"
@@ -349,6 +350,159 @@ TEST_F(RustProjectJSONWriter, RustTargetGetDepRustOnly) {
       "        }\n"
       "      ],\n"
       "      \"edition\": \"2015\",\n"
+      "      \"cfg\": [\n"
+      "        \"test\",\n"
+      "        \"debug_assertions\"\n"
+      "      ]\n"
+      "    }\n"
+      "  ]\n"
+      "}\n";
+
+  EXPECT_EQ(expected_json, out);
+}
+
+TEST_F(RustProjectJSONWriter, OneRustTargetWithRustcTargetSet) {
+  Err err;
+  TestWithScope setup;
+  setup.build_settings()->SetRootPath(UTF8ToFilePath("path"));
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::RUST_LIBRARY);
+  target.visibility().SetPublic();
+  SourceFile lib("//foo/lib.rs");
+  target.sources().push_back(lib);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(lib);
+  target.rust_values().crate_name() = "foo";
+  target.config_values().rustflags().push_back("--target");
+  target.config_values().rustflags().push_back("x86-64_unknown");
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream stream;
+  std::vector<const Target*> targets;
+  targets.push_back(&target);
+  RustProjectWriter::RenderJSON(setup.build_settings(), targets, stream);
+  std::string out = stream.str();
+#if defined(OS_WIN)
+  base::ReplaceSubstringsAfterOffset(&out, 0, "\r\n", "\n");
+#endif
+  const char expected_json[] =
+      "{\n"
+      "  \"roots\": [\n"
+      "    \"path/foo/\"\n"
+      "  ],\n"
+      "  \"crates\": [\n"
+      "    {\n"
+      "      \"crate_id\": 0,\n"
+      "      \"root_module\": \"path/foo/lib.rs\",\n"
+      "      \"label\": \"//foo:bar\",\n"
+      "      \"target\": \"x86-64_unknown\",\n"
+      "      \"compiler_args\": [\"--target\", \"x86-64_unknown\"],\n"
+      "      \"deps\": [\n"
+      "      ],\n"
+      "      \"edition\": \"2015\",\n"
+      "      \"cfg\": [\n"
+      "        \"test\",\n"
+      "        \"debug_assertions\"\n"
+      "      ]\n"
+      "    }\n"
+      "  ]\n"
+      "}\n";
+
+  EXPECT_EQ(expected_json, out);
+}
+
+TEST_F(RustProjectJSONWriter, OneRustTargetWithEditionSet) {
+  Err err;
+  TestWithScope setup;
+  setup.build_settings()->SetRootPath(UTF8ToFilePath("path"));
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::RUST_LIBRARY);
+  target.visibility().SetPublic();
+  SourceFile lib("//foo/lib.rs");
+  target.sources().push_back(lib);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(lib);
+  target.rust_values().crate_name() = "foo";
+  target.config_values().rustflags().push_back("--edition=2018");
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream stream;
+  std::vector<const Target*> targets;
+  targets.push_back(&target);
+  RustProjectWriter::RenderJSON(setup.build_settings(), targets, stream);
+  std::string out = stream.str();
+#if defined(OS_WIN)
+  base::ReplaceSubstringsAfterOffset(&out, 0, "\r\n", "\n");
+#endif
+  const char expected_json[] =
+      "{\n"
+      "  \"roots\": [\n"
+      "    \"path/foo/\"\n"
+      "  ],\n"
+      "  \"crates\": [\n"
+      "    {\n"
+      "      \"crate_id\": 0,\n"
+      "      \"root_module\": \"path/foo/lib.rs\",\n"
+      "      \"label\": \"//foo:bar\",\n"
+      "      \"compiler_args\": [\"--edition=2018\"],\n"
+      "      \"deps\": [\n"
+      "      ],\n"
+      "      \"edition\": \"2018\",\n"
+      "      \"cfg\": [\n"
+      "        \"test\",\n"
+      "        \"debug_assertions\"\n"
+      "      ]\n"
+      "    }\n"
+      "  ]\n"
+      "}\n";
+
+  EXPECT_EQ(expected_json, out);
+}
+
+TEST_F(RustProjectJSONWriter, OneRustTargetWithEditionSetAlternate) {
+  Err err;
+  TestWithScope setup;
+  setup.build_settings()->SetRootPath(UTF8ToFilePath("path"));
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::RUST_LIBRARY);
+  target.visibility().SetPublic();
+  SourceFile lib("//foo/lib.rs");
+  target.sources().push_back(lib);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(lib);
+  target.rust_values().crate_name() = "foo";
+  target.config_values().rustflags().push_back("--edition");
+  target.config_values().rustflags().push_back("2018");
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream stream;
+  std::vector<const Target*> targets;
+  targets.push_back(&target);
+  RustProjectWriter::RenderJSON(setup.build_settings(), targets, stream);
+  std::string out = stream.str();
+#if defined(OS_WIN)
+  base::ReplaceSubstringsAfterOffset(&out, 0, "\r\n", "\n");
+#endif
+  const char expected_json[] =
+      "{\n"
+      "  \"roots\": [\n"
+      "    \"path/foo/\"\n"
+      "  ],\n"
+      "  \"crates\": [\n"
+      "    {\n"
+      "      \"crate_id\": 0,\n"
+      "      \"root_module\": \"path/foo/lib.rs\",\n"
+      "      \"label\": \"//foo:bar\",\n"
+      "      \"compiler_args\": [\"--edition\", \"2018\"],\n"
+      "      \"deps\": [\n"
+      "      ],\n"
+      "      \"edition\": \"2018\",\n"
       "      \"cfg\": [\n"
       "        \"test\",\n"
       "        \"debug_assertions\"\n"
