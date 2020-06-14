@@ -64,7 +64,10 @@ NinjaCBinaryTargetWriter::~NinjaCBinaryTargetWriter() = default;
 void NinjaCBinaryTargetWriter::Run() {
   WriteCompilerVars();
 
-  OutputFile input_dep = WriteInputsStampAndGetDep();
+  size_t num_stamp_uses = target_->sources().size();
+
+  std::vector<OutputFile> input_deps = WriteInputsStampAndGetDep(
+      num_stamp_uses);
 
   // The input dependencies will be an order-only dependency. This will cause
   // Ninja to make sure the inputs are up to date before compiling this source,
@@ -96,7 +99,6 @@ void NinjaCBinaryTargetWriter::Run() {
   // that also use PCH files won't have a stamp file even though having
   // one would make output ninja file size a bit lower. That's ok, binary
   // targets with a single source are rare.
-  size_t num_stamp_uses = target_->sources().size();
   std::vector<OutputFile> order_only_deps = WriteInputDepsStampAndGetDep(
       std::vector<const Target*>(), num_stamp_uses);
 
@@ -105,7 +107,7 @@ void NinjaCBinaryTargetWriter::Run() {
   // |pch_other_files|. This is to prevent linking against them.
   std::vector<OutputFile> pch_obj_files;
   std::vector<OutputFile> pch_other_files;
-  WritePCHCommands(input_dep, order_only_deps, &pch_obj_files,
+  WritePCHCommands(input_deps, order_only_deps, &pch_obj_files,
                    &pch_other_files);
   std::vector<OutputFile>* pch_files =
       !pch_obj_files.empty() ? &pch_obj_files : &pch_other_files;
@@ -124,7 +126,7 @@ void NinjaCBinaryTargetWriter::Run() {
   //    object file list.
   std::vector<OutputFile> obj_files;
   std::vector<SourceFile> other_files;
-  WriteSources(*pch_files, input_dep, order_only_deps, &obj_files,
+  WriteSources(*pch_files, input_deps, order_only_deps, &obj_files,
                &other_files);
 
   // Link all MSVC pch object files. The vector will be empty on GCC toolchains.
@@ -144,7 +146,7 @@ void NinjaCBinaryTargetWriter::Run() {
       DCHECK_NE(static_cast<size_t>(-1), computed_obj.IndexOf(obj));
 #endif
   } else {
-    WriteLinkerStuff(obj_files, other_files, input_dep);
+    WriteLinkerStuff(obj_files, other_files, input_deps);
   }
 }
 
@@ -228,7 +230,7 @@ void NinjaCBinaryTargetWriter::WriteCompilerVars() {
 }
 
 void NinjaCBinaryTargetWriter::WritePCHCommands(
-    const OutputFile& input_dep,
+    const std::vector<OutputFile>& input_deps,
     const std::vector<OutputFile>& order_only_deps,
     std::vector<OutputFile>* object_files,
     std::vector<OutputFile>* other_files) {
@@ -239,14 +241,14 @@ void NinjaCBinaryTargetWriter::WritePCHCommands(
   if (tool_c && tool_c->precompiled_header_type() != CTool::PCH_NONE &&
       target_->source_types_used().Get(SourceFile::SOURCE_C)) {
     WritePCHCommand(&CSubstitutionCFlagsC, CTool::kCToolCc,
-                    tool_c->precompiled_header_type(), input_dep,
+                    tool_c->precompiled_header_type(), input_deps,
                     order_only_deps, object_files, other_files);
   }
   const CTool* tool_cxx = target_->toolchain()->GetToolAsC(CTool::kCToolCxx);
   if (tool_cxx && tool_cxx->precompiled_header_type() != CTool::PCH_NONE &&
       target_->source_types_used().Get(SourceFile::SOURCE_CPP)) {
     WritePCHCommand(&CSubstitutionCFlagsCc, CTool::kCToolCxx,
-                    tool_cxx->precompiled_header_type(), input_dep,
+                    tool_cxx->precompiled_header_type(), input_deps,
                     order_only_deps, object_files, other_files);
   }
 
@@ -254,7 +256,7 @@ void NinjaCBinaryTargetWriter::WritePCHCommands(
   if (tool_objc && tool_objc->precompiled_header_type() == CTool::PCH_GCC &&
       target_->source_types_used().Get(SourceFile::SOURCE_M)) {
     WritePCHCommand(&CSubstitutionCFlagsObjC, CTool::kCToolObjC,
-                    tool_objc->precompiled_header_type(), input_dep,
+                    tool_objc->precompiled_header_type(), input_deps,
                     order_only_deps, object_files, other_files);
   }
 
@@ -263,7 +265,7 @@ void NinjaCBinaryTargetWriter::WritePCHCommands(
   if (tool_objcxx && tool_objcxx->precompiled_header_type() == CTool::PCH_GCC &&
       target_->source_types_used().Get(SourceFile::SOURCE_MM)) {
     WritePCHCommand(&CSubstitutionCFlagsObjCc, CTool::kCToolObjCxx,
-                    tool_objcxx->precompiled_header_type(), input_dep,
+                    tool_objcxx->precompiled_header_type(), input_deps,
                     order_only_deps, object_files, other_files);
   }
 }
@@ -272,17 +274,17 @@ void NinjaCBinaryTargetWriter::WritePCHCommand(
     const Substitution* flag_type,
     const char* tool_name,
     CTool::PrecompiledHeaderType header_type,
-    const OutputFile& input_dep,
+    const std::vector<OutputFile>& input_deps,
     const std::vector<OutputFile>& order_only_deps,
     std::vector<OutputFile>* object_files,
     std::vector<OutputFile>* other_files) {
   switch (header_type) {
     case CTool::PCH_MSVC:
-      WriteWindowsPCHCommand(flag_type, tool_name, input_dep, order_only_deps,
+      WriteWindowsPCHCommand(flag_type, tool_name, input_deps, order_only_deps,
                              object_files);
       break;
     case CTool::PCH_GCC:
-      WriteGCCPCHCommand(flag_type, tool_name, input_dep, order_only_deps,
+      WriteGCCPCHCommand(flag_type, tool_name, input_deps, order_only_deps,
                          other_files);
       break;
     case CTool::PCH_NONE:
@@ -294,7 +296,7 @@ void NinjaCBinaryTargetWriter::WritePCHCommand(
 void NinjaCBinaryTargetWriter::WriteGCCPCHCommand(
     const Substitution* flag_type,
     const char* tool_name,
-    const OutputFile& input_dep,
+    const std::vector<OutputFile>& input_deps,
     const std::vector<OutputFile>& order_only_deps,
     std::vector<OutputFile>* gch_files) {
   // Compute the pch output file (it will be language-specific).
@@ -306,8 +308,8 @@ void NinjaCBinaryTargetWriter::WriteGCCPCHCommand(
   gch_files->insert(gch_files->end(), outputs.begin(), outputs.end());
 
   std::vector<OutputFile> extra_deps;
-  if (!input_dep.value().empty())
-    extra_deps.push_back(input_dep);
+  std::copy(input_deps.begin(), input_deps.end(),
+            std::back_inserter(extra_deps));
 
   // Build line to compile the file.
   WriteCompilerBuildLine(target_->config_values().precompiled_source(),
@@ -346,7 +348,7 @@ void NinjaCBinaryTargetWriter::WriteGCCPCHCommand(
 void NinjaCBinaryTargetWriter::WriteWindowsPCHCommand(
     const Substitution* flag_type,
     const char* tool_name,
-    const OutputFile& input_dep,
+    const std::vector<OutputFile>& input_deps,
     const std::vector<OutputFile>& order_only_deps,
     std::vector<OutputFile>* object_files) {
   // Compute the pch output file (it will be language-specific).
@@ -358,8 +360,8 @@ void NinjaCBinaryTargetWriter::WriteWindowsPCHCommand(
   object_files->insert(object_files->end(), outputs.begin(), outputs.end());
 
   std::vector<OutputFile> extra_deps;
-  if (!input_dep.value().empty())
-    extra_deps.push_back(input_dep);
+  std::copy(input_deps.begin(), input_deps.end(),
+            std::back_inserter(extra_deps));
 
   // Build line to compile the file.
   WriteCompilerBuildLine(target_->config_values().precompiled_source(),
@@ -381,7 +383,7 @@ void NinjaCBinaryTargetWriter::WriteWindowsPCHCommand(
 
 void NinjaCBinaryTargetWriter::WriteSources(
     const std::vector<OutputFile>& pch_deps,
-    const OutputFile& input_dep,
+    const std::vector<OutputFile>& input_deps,
     const std::vector<OutputFile>& order_only_deps,
     std::vector<OutputFile>* object_files,
     std::vector<SourceFile>* other_files) {
@@ -399,8 +401,8 @@ void NinjaCBinaryTargetWriter::WriteSources(
       continue;  // No output for this source.
     }
 
-    if (!input_dep.value().empty())
-      deps.push_back(input_dep);
+
+    std::copy(input_deps.begin(), input_deps.end(), std::back_inserter(deps));
 
     if (tool_name != Tool::kToolNone) {
       // Only include PCH deps that correspond to the tool type, for instance,
@@ -445,7 +447,7 @@ void NinjaCBinaryTargetWriter::WriteSources(
 void NinjaCBinaryTargetWriter::WriteLinkerStuff(
     const std::vector<OutputFile>& object_files,
     const std::vector<SourceFile>& other_files,
-    const OutputFile& input_dep) {
+    const std::vector<OutputFile>& input_deps) {
   std::vector<OutputFile> output_files;
   SubstitutionWriter::ApplyListToLinkerAsOutputFile(
       target_, tool_, tool_->outputs(), &output_files);
@@ -527,8 +529,8 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
 
   // The input dependency is only needed if there are no object files, as the
   // dependency is normally provided transitively by the source files.
-  if (!input_dep.value().empty() && object_files.empty())
-    implicit_deps.push_back(input_dep);
+  std::copy(input_deps.begin(), input_deps.end(),
+            std::back_inserter(implicit_deps));
 
   // Any C++ target which depends on a Rust .rlib has to depend on its
   // entire tree of transitive rlibs.

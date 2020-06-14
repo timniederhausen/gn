@@ -110,7 +110,10 @@ NinjaRustBinaryTargetWriter::~NinjaRustBinaryTargetWriter() = default;
 void NinjaRustBinaryTargetWriter::Run() {
   DCHECK(target_->output_type() != Target::SOURCE_SET);
 
-  OutputFile input_dep = WriteInputsStampAndGetDep();
+  size_t num_stamp_uses = target_->sources().size();
+
+  std::vector<OutputFile> input_deps = WriteInputsStampAndGetDep(
+      num_stamp_uses);
 
   WriteCompilerVars();
 
@@ -126,11 +129,10 @@ void NinjaRustBinaryTargetWriter::Run() {
   // Ninja to make sure the inputs are up to date before compiling this source,
   // but changes in the inputs deps won't cause the file to be recompiled. See
   // the comment on NinjaCBinaryTargetWriter::Run for more detailed explanation.
-  size_t num_stamp_uses = target_->sources().size();
   std::vector<OutputFile> order_only_deps = WriteInputDepsStampAndGetDep(
       std::vector<const Target*>(), num_stamp_uses);
-  if (!input_dep.value().empty())
-    order_only_deps.push_back(input_dep);
+  std::copy(input_deps.begin(), input_deps.end(),
+            std::back_inserter(order_only_deps));
 
   // Build lists which will go into different bits of the rustc command line.
   // Public rust_library deps go in a --extern rlibs, public non-rust deps go in

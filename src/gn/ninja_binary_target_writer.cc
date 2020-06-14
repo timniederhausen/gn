@@ -50,7 +50,8 @@ void NinjaBinaryTargetWriter::Run() {
   writer.Run();
 }
 
-OutputFile NinjaBinaryTargetWriter::WriteInputsStampAndGetDep() const {
+std::vector<OutputFile> NinjaBinaryTargetWriter::WriteInputsStampAndGetDep(
+    size_t num_stamp_uses) const {
   CHECK(target_->toolchain()) << "Toolchain not set on target "
                               << target_->label().GetUserVisibleName(true);
 
@@ -62,12 +63,23 @@ OutputFile NinjaBinaryTargetWriter::WriteInputsStampAndGetDep() const {
   }
 
   if (inputs.size() == 0)
-    return OutputFile();  // No inputs
+    return std::vector<OutputFile>();  // No inputs
 
   // If we only have one input, return it directly instead of writing a stamp
   // file for it.
-  if (inputs.size() == 1)
-    return OutputFile(settings_->build_settings(), *inputs[0]);
+  if (inputs.size() == 1) {
+    return std::vector<OutputFile>{
+      OutputFile(settings_->build_settings(), *inputs[0])};
+  }
+
+  std::vector<OutputFile> outs;
+  for (const SourceFile* source : inputs)
+    outs.push_back(OutputFile(settings_->build_settings(), *source));
+
+  // If there are multiple inputs, but the stamp file would be referenced only
+  // once, don't write it but depend on the inputs directly.
+  if (num_stamp_uses == 1u)
+    return outs;
 
   // Make a stamp file.
   OutputFile stamp_file =
@@ -87,7 +99,7 @@ OutputFile NinjaBinaryTargetWriter::WriteInputsStampAndGetDep() const {
   }
 
   out_ << std::endl;
-  return stamp_file;
+  return {stamp_file};
 }
 
 void NinjaBinaryTargetWriter::WriteSourceSetStamp(
