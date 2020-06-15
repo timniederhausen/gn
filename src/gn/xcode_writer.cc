@@ -23,7 +23,6 @@
 #include "gn/build_settings.h"
 #include "gn/builder.h"
 #include "gn/commands.h"
-#include "gn/config_values_extractors.h"
 #include "gn/deps_iterator.h"
 #include "gn/filesystem_utils.h"
 #include "gn/item.h"
@@ -405,22 +404,6 @@ PBXAttributes ProjectAttributesFromBuildSettings(
   return attributes;
 }
 
-std::vector<std::string> GetIncludeDirs(const Target* target,
-                                        const BuildSettings* build_settings_) {
-  std::vector<std::string> paths;
-  if (!target || !build_settings_)
-    return paths;
-
-  for (ConfigValuesIterator iter(target); !iter.done(); iter.Next()) {
-    for (const SourceDir& include_dir : iter.cur().include_dirs()) {
-      paths.push_back(
-          FilePathToUTF8(build_settings_->GetFullPath(include_dir)));
-    }
-  }
-
-  return paths;
-}
-
 }  // namespace
 
 class XcodeProject;
@@ -560,16 +543,6 @@ class XcodeProject {
                                    base::Environment* env,
                                    Err* err);
 
-  // Adds a target of type STATIC_LIBRARY to the project.
-  PBXNativeTarget* AddStaticLibraryTarget(const Target* target,
-                                          base::Environment* env,
-                                          Err* err);
-
-  // Adds a target of type SHARED_LIBRARY to the project.
-  PBXNativeTarget* AddSharedLibraryTarget(const Target* target,
-                                          base::Environment* env,
-                                          Err* err);
-
   // Adds the XCTest source files for all test xctest or xcuitest module target
   // to allow Xcode to index the list of tests (thus allowing to run individual
   // tests from Xcode UI).
@@ -588,10 +561,6 @@ class XcodeProject {
 
   // Returns whether the file should be added to the project.
   bool ShouldIncludeFileInProject(const SourceFile& source) const;
-
-  // Adds the file to specified target if it has the suitable extension
-  void TryToAddFileForIndexing(std::string& target_name,
-                               const SourceFile& source);
 
   const BuildSettings* build_settings_;
   XcodeWriter::Options options_;
@@ -620,40 +589,30 @@ bool XcodeProject::ShouldIncludeFileInProject(const SourceFile& source) const {
   return true;
 }
 
-void XcodeProject::TryToAddFileForIndexing(std::string& target_name,
-                                           const SourceFile& source) {
-  if (!ShouldIncludeFileInProject(source))
-    return;
-  const std::string source_file = RebasePath(source.value(), SourceDir("//"),
-                                             build_settings_->root_path_utf8());
-  project_.AddSourceFileToTargetForIndexing(target_name, source_file,
-                                            source_file, CompilerFlags::NONE);
-}
-
 bool XcodeProject::AddSourcesFromBuilder(const Builder& builder, Err* err) {
   SourceFileSet sources;
 
-  const std::optional<std::vector<const Target*>> targets =
-      GetTargetsFromBuilder(builder, err);
-
-  for (const Target* target : *targets) {
-    std::string target_name = target->label().name();
-
+  // Add sources from all targets.
+  for (const Target* target : builder.GetAllResolvedTargets()) {
     for (const SourceFile& source : target->sources()) {
-      TryToAddFileForIndexing(target_name, source);
+      if (ShouldIncludeFileInProject(source))
+        sources.insert(source);
     }
 
     for (const SourceFile& source : target->config_values().inputs()) {
-      TryToAddFileForIndexing(target_name, source);
+      if (ShouldIncludeFileInProject(source))
+        sources.insert(source);
     }
 
     for (const SourceFile& source : target->public_headers()) {
-      TryToAddFileForIndexing(target_name, source);
+      if (ShouldIncludeFileInProject(source))
+        sources.insert(source);
     }
 
     if (target->output_type() == Target::ACTION ||
         target->output_type() == Target::ACTION_FOREACH) {
-      TryToAddFileForIndexing(target_name, target->action_values().script());
+      if (ShouldIncludeFileInProject(target->action_values().script()))
+        sources.insert(target->action_values().script());
     }
   }
 
@@ -695,8 +654,8 @@ bool XcodeProject::AddSourcesFromBuilder(const Builder& builder, Err* err) {
   for (const SourceFile& source : sorted_sources) {
     const std::string source_file = RebasePath(
         source.value(), source_dir, build_settings_->root_path_utf8());
-    project_.AddSourceFileToTargetForIndexing(std::string(), source_file,
-                                              source_file, CompilerFlags::NONE);
+    project_.AddSourceFileToIndexingTarget(source_file, source_file,
+                                           CompilerFlags::NONE);
   }
 
   return true;
@@ -749,12 +708,7 @@ bool XcodeProject::AddTargetsFromBuilder(const Builder& builder, Err* err) {
         bundle_targets.insert(std::make_pair(target, native_target));
         break;
       }
-      case Target::STATIC_LIBRARY:
-        native_target = AddStaticLibraryTarget(target, env.get(), err);
-        break;
-      case Target::SHARED_LIBRARY:
-        native_target = AddSharedLibraryTarget(target, env.get(), err);
-        break;
+
       default:
         break;
     }
@@ -932,46 +886,10 @@ PBXNativeTarget* XcodeProject::AddBinaryTarget(const Target* target,
       target->label().name(), "compiled.mach-o.executable",
       target->output_name().empty() ? target->label().name()
                                     : target->output_name(),
-      "com.apple.product-type.tool", output_dir,
+      "com.apple.product-type.tool",
+      output_dir,
       GetBuildScript(target->label().name(), options_.ninja_executable,
-                     options_.ninja_extra_args, env),
-      PBXAttributes(), GetIncludeDirs(target, build_settings_));
-}
-
-PBXNativeTarget* XcodeProject::AddStaticLibraryTarget(const Target* target,
-                                                      base::Environment* env,
-                                                      Err* err) {
-  DCHECK_EQ(target->output_type(), Target::STATIC_LIBRARY);
-
-  const std::string output_dir =
-      RebasePath(target->output_dir().value(), build_settings_->build_dir());
-
-  return project_.AddNativeTarget(
-      target->label().name(), std::string(),
-      target->output_name().empty() ? target->label().name()
-                                    : target->output_name(),
-      "com.apple.product-type.library.static", output_dir,
-      GetBuildScript(target->label().name(), options_.ninja_executable,
-                     options_.ninja_extra_args, env),
-      PBXAttributes(), GetIncludeDirs(target, build_settings_));
-}
-
-PBXNativeTarget* XcodeProject::AddSharedLibraryTarget(const Target* target,
-                                                      base::Environment* env,
-                                                      Err* err) {
-  DCHECK_EQ(target->output_type(), Target::SHARED_LIBRARY);
-
-  const std::string output_dir =
-      RebasePath(target->output_dir().value(), build_settings_->build_dir());
-
-  return project_.AddNativeTarget(
-      target->label().name(), std::string(),
-      target->output_name().empty() ? target->label().name()
-                                    : target->output_name(),
-      "com.apple.product-type.library.dynamic", output_dir,
-      GetBuildScript(target->label().name(), options_.ninja_executable,
-                     options_.ninja_extra_args, env),
-      PBXAttributes(), GetIncludeDirs(target, build_settings_));
+                     options_.ninja_extra_args, env));
 }
 
 PBXNativeTarget* XcodeProject::AddBundleTarget(const Target* target,
@@ -998,10 +916,11 @@ PBXNativeTarget* XcodeProject::AddBundleTarget(const Target* target,
       build_settings_->build_dir());
   return project_.AddNativeTarget(
       pbxtarget_name, std::string(), target_output_name,
-      target->bundle_data().product_type(), output_dir,
+      target->bundle_data().product_type(),
+      output_dir,
       GetBuildScript(pbxtarget_name, options_.ninja_executable,
                      options_.ninja_extra_args, env),
-      xcode_extra_attributes, GetIncludeDirs(target, build_settings_));
+      xcode_extra_attributes);
 }
 
 void XcodeProject::WriteFileContent(std::ostream& out) const {
@@ -1138,10 +1057,10 @@ bool XcodeWriter::RunAndWriteFiles(const BuildSettings* build_settings,
   XcodeOuterWorkspace workspace(build_settings, options);
 
   XcodeProject* products = workspace.CreateProject("products");
-  if (!products->AddTargetsFromBuilder(builder, err))
+  if (!products->AddSourcesFromBuilder(builder, err))
     return false;
 
-  if (!products->AddSourcesFromBuilder(builder, err))
+  if (!products->AddTargetsFromBuilder(builder, err))
     return false;
 
   if (!products->AssignIds(err))
