@@ -406,105 +406,91 @@ PBXAttributes ProjectAttributesFromBuildSettings(
 
 }  // namespace
 
-class XcodeProject;
-
-// Xcode uses workspace to:
-// - group multiple projects together
-// - configure settings shared by all targets (like build setting).
-//
-// The class XcodeBaseWorkspace is used to share code to generate the two
-// types of workspace. The only difference between them is where they are
-// located (either besides the .xcodeproj or inside them) and how the
-// projects are references (either by path or by referencing the containing
-// project).
-//
-// As the generator only creates a single project, the standalone workspace
-// is not technically required, but developers are used to opening it instead
-// opening the project directly.
-//
-// The embedded workspace is not needed if developer open the standalone
-// workspace (as the settings from the standalone workspace will be used
-// in that case). However, there have been multiple occurrences of developer
-// encountering tricky build failure because they opened the project directly.
-//
-// Having the two kind of workspace is a temporary solution to avoid breaking
-// workflow of developer used to opening the standalone workspace while still
-// ensuring that developers opening the project directly have an environment
-// that is working.
-class XcodeBaseWorkspace {
+// Class representing the workspace embedded in an xcodeproj file used to
+// configure the build settings shared by all targets in the project (used
+// to configure the build system to "Legacy build system").
+class XcodeWorkspace {
  public:
-  XcodeBaseWorkspace(const BuildSettings* settings);
-  virtual ~XcodeBaseWorkspace();
+  XcodeWorkspace(const BuildSettings* settings);
+  ~XcodeWorkspace();
 
-  XcodeBaseWorkspace(const XcodeBaseWorkspace&) = delete;
-  XcodeBaseWorkspace& operator=(const XcodeBaseWorkspace&) = delete;
+  XcodeWorkspace(const XcodeWorkspace&) = delete;
+  XcodeWorkspace& operator=(const XcodeWorkspace&) = delete;
 
   // Generates the .xcworkspace files to disk.
   bool WriteWorkspace(const std::string& name, Err* err) const;
 
- protected:
-  const BuildSettings* build_settings() const { return build_settings_; }
-
  private:
-  using FileContentGenerator =
-      void (XcodeBaseWorkspace::*)(std::ostream&) const;
+  // Writes the workspace data file.
+  bool WriteWorkspaceDataFile(const std::string& name, Err* err) const;
 
-  // Helper function to write workspace file.
-  bool WriteWorkspaceFile(const std::string& filename,
-                          FileContentGenerator file_content_generator,
-                          Err* err) const;
-
-  // Writes the $name.xcworkspace/contents.xcworkspacedata file to |out|.
-  virtual void WriteWorkspaceDataFileContent(std::ostream& out) const = 0;
-
-  // Writes the $name.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
-  // file to |out|.
-  void WriteSettingsFileContent(std::ostream& out) const;
+  // Writes the settings file.
+  bool WriteSettingsFile(const std::string& name, Err* err) const;
 
   const BuildSettings* build_settings_ = nullptr;
 };
 
-// Class corresponding to the generated workspace contained in a project.
-class XcodeInnerWorkspace : public XcodeBaseWorkspace {
- public:
-  XcodeInnerWorkspace(const BuildSettings* settings);
-  ~XcodeInnerWorkspace() override;
+XcodeWorkspace::XcodeWorkspace(const BuildSettings* build_settings)
+    : build_settings_(build_settings) {}
 
- private:
-  // XcodeBaseWorkspace implementation.
-  void WriteWorkspaceDataFileContent(std::ostream& out) const override;
-};
+XcodeWorkspace::~XcodeWorkspace() = default;
 
-// Sub-class XcodeOuterWorkspace corresponds to a standalone workspace that
-// points to .xcodeproj located next to the .xcworkspace. It can refer to
-// multiple project (in the generator it owns the projects).
-class XcodeOuterWorkspace : public XcodeBaseWorkspace {
- public:
-  XcodeOuterWorkspace(const BuildSettings* settings,
-                      XcodeWriter::Options options);
-  ~XcodeOuterWorkspace() override;
+bool XcodeWorkspace::WriteWorkspace(const std::string& name, Err* err) const {
+  return WriteWorkspaceDataFile(name, err) && WriteSettingsFile(name, err);
+}
 
-  // Adds a project to the workspace.
-  XcodeProject* CreateProject(const std::string& name);
+bool XcodeWorkspace::WriteWorkspaceDataFile(const std::string& name,
+                                            Err* err) const {
+  const SourceFile source_file =
+      build_settings_->build_dir().ResolveRelativeFile(
+          Value(nullptr, name + "/contents.xcworkspacedata"), err);
+  if (source_file.is_null())
+    return false;
 
-  // Returns the name of the workspace.
-  const std::string& Name() const;
+  std::stringstream out;
+  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+      << "<Workspace\n"
+      << "   version = \"1.0\">\n"
+      << "   <FileRef\n"
+      << "      location = \"self:\">\n"
+      << "   </FileRef>\n"
+      << "</Workspace>\n";
 
- private:
-  // XcodeBaseWorkspace implementation
-  void WriteWorkspaceDataFileContent(std::ostream& out) const override;
+  return WriteFileIfChanged(build_settings_->GetFullPath(source_file),
+                            out.str(), err);
+}
 
-  XcodeWriter::Options options_;
-  std::map<std::string, std::unique_ptr<XcodeProject>> projects_;
-};
+bool XcodeWorkspace::WriteSettingsFile(const std::string& name,
+                                       Err* err) const {
+  const SourceFile source_file =
+      build_settings_->build_dir().ResolveRelativeFile(
+          Value(nullptr, name + "/xcshareddata/WorkspaceSettings.xcsettings"),
+          err);
+  if (source_file.is_null())
+    return false;
 
-// Sub-class XcodeInnerWorkspace corresponds to a workspace that is embedded
-// inside an .xcodeproj. It only refer to the surrounding project via :self.
+  std::stringstream out;
+  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+      << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
+      << "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+      << "<plist version=\"1.0\">\n"
+      << "<dict>\n"
+      << "\t<key>BuildSystemType</key>\n"
+      << "\t<string>Original</string>\n"
+      << "</dict>\n"
+      << "</plist>\n";
+
+  return WriteFileIfChanged(build_settings_->GetFullPath(source_file),
+                            out.str(), err);
+}
+
+// Class responsible for constructing and writing the .xcodeproj from the
+// targets known to gn. It currently requires using the "Legacy build system"
+// so it will embed an .xcworkspace file to force the setting.
 class XcodeProject {
  public:
   XcodeProject(const BuildSettings* build_settings,
-               XcodeWriter::Options options,
-               const std::string& name);
+               XcodeWriter::Options options);
   ~XcodeProject();
 
   // Recursively finds "source" files from |builder| and adds them to the
@@ -568,11 +554,10 @@ class XcodeProject {
 };
 
 XcodeProject::XcodeProject(const BuildSettings* build_settings,
-                           XcodeWriter::Options options,
-                           const std::string& name)
+                           XcodeWriter::Options options)
     : build_settings_(build_settings),
       options_(options),
-      project_(name,
+      project_(options.project_name,
                ConfigNameFromBuildSettings(build_settings),
                SourcePathFromBuildSettings(build_settings),
                ProjectAttributesFromBuildSettings(build_settings)) {}
@@ -817,9 +802,9 @@ bool XcodeProject::WriteFile(Err* err) const {
     return false;
   }
 
-  XcodeInnerWorkspace inner_workspace(build_settings_);
-  return inner_workspace.WriteWorkspace(project_.Name() + ".xcodeproj/project",
-                                        err);
+  XcodeWorkspace workspace(build_settings_);
+  return workspace.WriteWorkspace(
+      project_.Name() + ".xcodeproj/project.xcworkspace", err);
 }
 
 std::optional<std::vector<const Target*>> XcodeProject::GetTargetsFromBuilder(
@@ -950,126 +935,22 @@ void XcodeProject::WriteFileContent(std::ostream& out) const {
       << "}\n";
 }
 
-XcodeBaseWorkspace::XcodeBaseWorkspace(const BuildSettings* build_settings)
-    : build_settings_(build_settings) {}
-
-XcodeBaseWorkspace::~XcodeBaseWorkspace() = default;
-
-bool XcodeBaseWorkspace::WriteWorkspace(const std::string& name,
-                                        Err* err) const {
-  if (!WriteWorkspaceFile(name + ".xcworkspace/contents.xcworkspacedata",
-                          &XcodeBaseWorkspace::WriteWorkspaceDataFileContent,
-                          err)) {
-    return false;
-  }
-
-  if (!WriteWorkspaceFile(
-          name + ".xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
-          &XcodeBaseWorkspace::WriteSettingsFileContent, err)) {
-    return false;
-  }
-
-  return true;
-}
-
-bool XcodeBaseWorkspace::WriteWorkspaceFile(
-    const std::string& filename,
-    FileContentGenerator file_content_generator,
-    Err* err) const {
-  const SourceFile source_file =
-      build_settings_->build_dir().ResolveRelativeFile(Value(nullptr, filename),
-                                                       err);
-  if (source_file.is_null())
-    return false;
-
-  std::stringstream string_out;
-  (this->*file_content_generator)(string_out);
-
-  return WriteFileIfChanged(build_settings_->GetFullPath(source_file),
-                            string_out.str(), err);
-}
-
-void XcodeBaseWorkspace::WriteSettingsFileContent(std::ostream& out) const {
-  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-      << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
-      << "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-      << "<plist version=\"1.0\">\n"
-      << "<dict>\n"
-      << "\t<key>BuildSystemType</key>\n"
-      << "\t<string>Original</string>\n"
-      << "</dict>\n"
-      << "</plist>\n";
-}
-
-XcodeInnerWorkspace::XcodeInnerWorkspace(const BuildSettings* build_settings)
-    : XcodeBaseWorkspace(build_settings) {}
-
-XcodeInnerWorkspace::~XcodeInnerWorkspace() = default;
-
-void XcodeInnerWorkspace::WriteWorkspaceDataFileContent(
-    std::ostream& out) const {
-  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-      << "<Workspace\n"
-      << "   version = \"1.0\">\n"
-      << "   <FileRef\n"
-      << "      location = \"self:\">\n"
-      << "   </FileRef>\n"
-      << "</Workspace>\n";
-}
-
-XcodeOuterWorkspace::XcodeOuterWorkspace(const BuildSettings* build_settings,
-                                         XcodeWriter::Options options)
-    : XcodeBaseWorkspace(build_settings), options_(options) {}
-
-XcodeOuterWorkspace::~XcodeOuterWorkspace() = default;
-
-XcodeProject* XcodeOuterWorkspace::CreateProject(const std::string& name) {
-  DCHECK(!base::ContainsKey(projects_, name));
-  projects_.insert(std::make_pair(
-      name, std::make_unique<XcodeProject>(build_settings(), options_, name)));
-  auto iter = projects_.find(name);
-  DCHECK(iter != projects_.end());
-  DCHECK(iter->second);
-  return iter->second.get();
-}
-
-const std::string& XcodeOuterWorkspace::Name() const {
-  static std::string all("all");
-  return !options_.workspace_name.empty() ? options_.workspace_name : all;
-}
-
-void XcodeOuterWorkspace::WriteWorkspaceDataFileContent(
-    std::ostream& out) const {
-  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-      << "<Workspace version = \"1.0\">\n";
-  for (const auto& pair : projects_) {
-    out << "  <FileRef location = \"group:" << pair.first
-        << ".xcodeproj\"></FileRef>\n";
-  }
-  out << "</Workspace>\n";
-}
-
 // static
 bool XcodeWriter::RunAndWriteFiles(const BuildSettings* build_settings,
                                    const Builder& builder,
                                    Options options,
                                    Err* err) {
-  XcodeOuterWorkspace workspace(build_settings, options);
-
-  XcodeProject* products = workspace.CreateProject("products");
-  if (!products->AddSourcesFromBuilder(builder, err))
+  XcodeProject project(build_settings, options);
+  if (!project.AddSourcesFromBuilder(builder, err))
     return false;
 
-  if (!products->AddTargetsFromBuilder(builder, err))
+  if (!project.AddTargetsFromBuilder(builder, err))
     return false;
 
-  if (!products->AssignIds(err))
+  if (!project.AssignIds(err))
     return false;
 
-  if (!products->WriteFile(err))
-    return false;
-
-  if (!workspace.WriteWorkspace(workspace.Name(), err))
+  if (!project.WriteFile(err))
     return false;
 
   return true;

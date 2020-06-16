@@ -48,7 +48,7 @@ const char kSwitchNinjaExtraArgs[] = "ninja-extra-args";
 const char kSwitchNoDeps[] = "no-deps";
 const char kSwitchRootTarget[] = "root-target";
 const char kSwitchSln[] = "sln";
-const char kSwitchWorkspace[] = "workspace";
+const char kSwitchXcodeProject[] = "xcode-project";
 const char kSwitchJsonFileName[] = "json-file-name";
 const char kSwitchJsonIdeScript[] = "json-ide-script";
 const char kSwitchJsonIdeScriptArgs[] = "json-ide-script-args";
@@ -58,8 +58,13 @@ const char kSwitchExportRustProject[] = "export-rust-project";
 // Extracts extra parameters for XcodeWriter from command-line flags.
 XcodeWriter::Options XcodeWriterOptionsFromCommandLine(
     const base::CommandLine& command_line) {
+  std::string project_name =
+      command_line.GetSwitchValueASCII(kSwitchXcodeProject);
+  if (project_name.empty())
+    project_name = "all";
+
   return {
-      command_line.GetSwitchValueASCII(kSwitchWorkspace),
+      std::move(project_name),
       command_line.GetSwitchValueASCII(kSwitchRootTarget),
       command_line.GetSwitchValueASCII(kSwitchNinjaExecutable),
       command_line.GetSwitchValueASCII(kSwitchNinjaExtraArgs),
@@ -403,8 +408,8 @@ Visual Studio Flags
 
 Xcode Flags
 
-  --workspace=<file_name>
-      Override defaut workspace file name ("all"). The workspace file is
+  --xcode-project=<file_name>
+      Override defaut Xcode project file name ("all"). The project file is
       written to the root build directory.
 
   --ninja-executable=<string>

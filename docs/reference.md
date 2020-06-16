@@ -764,8 +764,8 @@
 #### **Xcode Flags**
 
 ```
-  --workspace=<file_name>
-      Override defaut workspace file name ("all"). The workspace file is
+  --xcode-project=<file_name>
+      Override defaut Xcode project file name ("all"). The project file is
       written to the root build directory.
 
   --ninja-executable=<string>

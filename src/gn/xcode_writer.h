@@ -22,8 +22,8 @@ class XcodeWriter {
  public:
   // Controls some parameters and behaviour of the RunAndWriteFiles().
   struct Options {
-    // Name of the generated workspace file. Defaults to "all" is empty.
-    std::string workspace_name;
+    // Name of the generated project file. Defaults to "all" is empty.
+    std::string project_name;
 
     // Name of the ninja target to use for the "All" target in the generated
     // project. If empty, no target will be passed to ninja which will thus
