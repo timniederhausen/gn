@@ -11,6 +11,30 @@
 
 using FunctionToolchain = TestWithScheduler;
 
+TEST_F(FunctionToolchain, NoArguments) {
+  TestWithScope setup;
+
+  // Check that creating a toolchain with no name reports an error.
+  {
+    TestParseInput input(R"(toolchain() {})");
+    ASSERT_FALSE(input.has_error());
+
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_TRUE(err.has_error()) << err.message();
+  }
+
+  // Check that creating a toolchain with too many arguments is an error.
+  {
+    TestParseInput input(R"(toolchain("too", "many", "arguments") {})");
+    ASSERT_FALSE(input.has_error());
+
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_TRUE(err.has_error()) << err.message();
+  }
+}
+
 TEST_F(FunctionToolchain, RuntimeOutputs) {
   TestWithScope setup;
 

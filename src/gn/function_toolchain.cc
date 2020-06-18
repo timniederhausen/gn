@@ -196,6 +196,9 @@ Value RunToolchain(Scope* scope,
       !EnsureNotProcessingBuildConfig(function, scope, err))
     return Value();
 
+  if (!EnsureSingleStringArg(function, args, err))
+    return Value();
+
   // Note that we don't want to use MakeLabelForScope since that will include
   // the toolchain name in the label, and toolchain labels don't themselves
   // have toolchain names.
