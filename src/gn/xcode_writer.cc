@@ -30,6 +30,7 @@
 #include "gn/scheduler.h"
 #include "gn/settings.h"
 #include "gn/source_file.h"
+#include "gn/substitution_writer.h"
 #include "gn/target.h"
 #include "gn/value.h"
 #include "gn/variables.h"
@@ -864,8 +865,25 @@ PBXNativeTarget* XcodeProject::AddBinaryTarget(const Target* target,
                                                Err* err) {
   DCHECK_EQ(target->output_type(), Target::EXECUTABLE);
 
-  const std::string output_dir = RebasePath(target->output_dir().value(),
-      build_settings_->build_dir());
+  std::string output_dir = target->output_dir().value();
+  if (output_dir.empty()) {
+    const Tool* tool = target->toolchain()->GetToolForTargetFinalOutput(target);
+    if (!tool) {
+      std::string tool_name = Tool::GetToolTypeForTargetFinalOutput(target);
+      *err = Err(nullptr, tool_name + " tool not defined",
+                 "The toolchain " +
+                     target->toolchain()->label().GetUserVisibleName(false) +
+                     " used by target " +
+                     target->label().GetUserVisibleName(false) +
+                     " doesn't define a \"" + tool_name + "\" tool.");
+      return nullptr;
+    }
+    output_dir = SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
+                     target, tool, tool->default_output_dir())
+                     .value();
+  } else {
+    output_dir = RebasePath(output_dir, build_settings_->build_dir());
+  }
 
   return project_.AddNativeTarget(
       target->label().name(), "compiled.mach-o.executable",
