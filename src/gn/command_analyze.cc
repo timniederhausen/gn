@@ -23,7 +23,7 @@ const char kAnalyze[] = "analyze";
 const char kAnalyze_HelpShort[] =
     "analyze: Analyze which targets are affected by a list of files.";
 const char kAnalyze_Help[] =
-    R"DOC(gn analyze <out_dir> <input_path> <output_path>
+    R"*(gn analyze <out_dir> <input_path> <output_path>
 
   Analyze which targets are affected by a list of files.
 
@@ -95,7 +95,7 @@ const char kAnalyze_Help[] =
   "error" key is non-empty and a non-fatal error occurred. In other words, it
   tries really hard to always write something to the output JSON and convey
   errors that way rather than via return codes.
-)DOC";
+)*";
 
 int RunAnalyze(const std::vector<std::string>& args) {
   if (args.size() != 3) {
