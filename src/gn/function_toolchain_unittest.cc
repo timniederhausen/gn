@@ -43,6 +43,7 @@ TEST_F(FunctionToolchain, RuntimeOutputs) {
     TestParseInput input(
         R"(toolchain("good") {
           tool("link") {
+            command = "link"
             outputs = [ "foo" ]
             runtime_outputs = [ "foo" ]
           }
@@ -116,12 +117,27 @@ TEST_F(FunctionToolchain, Rust) {
   }
 }
 
+TEST_F(FunctionToolchain, Command) {
+  TestWithScope setup;
+
+  TestParseInput input(
+      R"(toolchain("missing_command") {
+        tool("cxx") {}
+      })");
+  ASSERT_FALSE(input.has_error());
+
+  Err err;
+  input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_TRUE(err.has_error()) << err.message();
+}
+
 TEST_F(FunctionToolchain, CommandLauncher) {
   TestWithScope setup;
 
   TestParseInput input(
       R"(toolchain("good") {
         tool("cxx") {
+          command = "cxx"
           command_launcher = "/usr/goma/gomacc"
         }
       })");
