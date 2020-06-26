@@ -373,6 +373,7 @@ PBXAttributes ProjectAttributesFromBuildSettings(
   // not set. Since the generated Xcode project is only used for debugging
   // and the source of truth for build settings is the .gn files themselves,
   // we can safely set them in the project as they won't be used by "ninja".
+  attributes["ALWAYS_SEARCH_USER_PATHS"] = "NO";
   attributes["CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED"] = "YES";
   attributes["CLANG_WARN__DUPLICATE_METHOD_MATCH"] = "YES";
   attributes["CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING"] = "YES";
@@ -387,6 +388,7 @@ PBXAttributes ProjectAttributesFromBuildSettings(
   attributes["CLANG_WARN_NON_LITERAL_NULL_CONVERSION"] = "YES";
   attributes["CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF"] = "YES";
   attributes["CLANG_WARN_OBJC_LITERAL_CONVERSION"] = "YES";
+  attributes["CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER"] = "YES";
   attributes["CLANG_WARN_RANGE_LOOP_ANALYSIS"] = "YES";
   attributes["CLANG_WARN_STRICT_PROTOTYPES"] = "YES";
   attributes["CLANG_WARN_SUSPICIOUS_MOVE"] = "YES";
@@ -409,10 +411,11 @@ PBXAttributes ProjectAttributesFromBuildSettings(
 
 // Class representing the workspace embedded in an xcodeproj file used to
 // configure the build settings shared by all targets in the project (used
-// to configure the build system to "Legacy build system").
+// to configure the build system).
 class XcodeWorkspace {
  public:
-  XcodeWorkspace(const BuildSettings* settings);
+  XcodeWorkspace(const BuildSettings* build_settings,
+                 XcodeWriter::Options options);
   ~XcodeWorkspace();
 
   XcodeWorkspace(const XcodeWorkspace&) = delete;
@@ -429,10 +432,12 @@ class XcodeWorkspace {
   bool WriteSettingsFile(const std::string& name, Err* err) const;
 
   const BuildSettings* build_settings_ = nullptr;
+  XcodeWriter::Options options_;
 };
 
-XcodeWorkspace::XcodeWorkspace(const BuildSettings* build_settings)
-    : build_settings_(build_settings) {}
+XcodeWorkspace::XcodeWorkspace(const BuildSettings* build_settings,
+                               XcodeWriter::Options options)
+    : build_settings_(build_settings), options_(options) {}
 
 XcodeWorkspace::~XcodeWorkspace() = default;
 
@@ -475,10 +480,18 @@ bool XcodeWorkspace::WriteSettingsFile(const std::string& name,
       << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
       << "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
       << "<plist version=\"1.0\">\n"
-      << "<dict>\n"
-      << "\t<key>BuildSystemType</key>\n"
-      << "\t<string>Original</string>\n"
-      << "</dict>\n"
+      << "<dict>\n";
+
+  switch (options_.build_system) {
+    case XcodeBuildSystem::kLegacy:
+      out << "\t<key>BuildSystemType</key>\n"
+          << "\t<string>Original</string>\n";
+      break;
+    case XcodeBuildSystem::kNew:
+      break;
+  }
+
+  out << "</dict>\n"
       << "</plist>\n";
 
   return WriteFileIfChanged(build_settings_->GetFullPath(source_file),
@@ -803,7 +816,7 @@ bool XcodeProject::WriteFile(Err* err) const {
     return false;
   }
 
-  XcodeWorkspace workspace(build_settings_);
+  XcodeWorkspace workspace(build_settings_, options_);
   return workspace.WriteWorkspace(
       project_.Name() + ".xcodeproj/project.xcworkspace", err);
 }
@@ -909,6 +922,9 @@ PBXNativeTarget* XcodeProject::AddBundleTarget(const Target* target,
 
   PBXAttributes xcode_extra_attributes =
       target->bundle_data().xcode_extra_attributes();
+  if (options_.build_system == XcodeBuildSystem::kLegacy) {
+    xcode_extra_attributes["CODE_SIGN_IDENTITY"] = "";
+  }
 
   const std::string& target_output_name = RebasePath(
       target->bundle_data().GetBundleRootDirOutput(target->settings()).value(),

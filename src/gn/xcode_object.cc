@@ -812,7 +812,6 @@ void PBXProject::AddAggregateTarget(const std::string& name,
                                     const std::string& shell_script) {
   PBXAttributes attributes;
   attributes["CLANG_ENABLE_OBJC_WEAK"] = "YES";
-  attributes["CODE_SIGN_IDENTITY"] = "";
   attributes["CODE_SIGNING_REQUIRED"] = "NO";
   attributes["CONFIGURATION_BUILD_DIR"] = ".";
   attributes["PRODUCT_NAME"] = name;
@@ -825,7 +824,6 @@ void PBXProject::AddIndexingTarget() {
   DCHECK(!target_for_indexing_);
   PBXAttributes attributes;
   attributes["CLANG_ENABLE_OBJC_WEAK"] = "YES";
-  attributes["CODE_SIGN_IDENTITY"] = "";
   attributes["CODE_SIGNING_REQUIRED"] = "NO";
   attributes["EXECUTABLE_PREFIX"] = "";
   attributes["HEADER_SEARCH_PATHS"] = sources_->path();
@@ -869,7 +867,6 @@ PBXNativeTarget* PBXProject::AddNativeTarget(
 
   PBXAttributes attributes = extra_attributes;
   attributes["CLANG_ENABLE_OBJC_WEAK"] = "YES";
-  attributes["CODE_SIGN_IDENTITY"] = "";
   attributes["CODE_SIGNING_REQUIRED"] = "NO";
   attributes["CONFIGURATION_BUILD_DIR"] = output_dir;
   attributes["PRODUCT_NAME"] = product_name;

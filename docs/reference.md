@@ -229,7 +229,7 @@
 
        - "Found dependency"
        - "No dependency"
-       - "Found dependency (all) "
+       - "Found dependency (all)"
 
      In the first case, the lists returned in compile_targets and test_targets
      should be passed to ninja to build. In the second case, nothing was
@@ -767,6 +767,12 @@
   --xcode-project=<file_name>
       Override defaut Xcode project file name ("all"). The project file is
       written to the root build directory.
+
+  --xcode-build-system=<value>
+      Configure the build system to use for the Xcode project. Supported
+      values are (default to "legacy"):
+      "legacy" - Legacy Build system
+      "new" - New Build System
 
   --ninja-executable=<string>
       Can be used to specify the ninja executable to use when building.
@@ -1609,7 +1615,7 @@
           bundle_resources_dir = bundle_contents_dir
           bundle_executable_dir = bundle_contents_dir
 
-          extra_attributes = {
+          xcode_extra_attributes = {
             ONLY_ACTIVE_ARCH = "YES"
             DEBUG_INFORMATION_FORMAT = "dwarf"
           }

@@ -443,7 +443,7 @@ Example
           bundle_resources_dir = bundle_contents_dir
           bundle_executable_dir = bundle_contents_dir
 
-          extra_attributes = {
+          xcode_extra_attributes = {
             ONLY_ACTIVE_ARCH = "YES"
             DEBUG_INFORMATION_FORMAT = "dwarf"
           }

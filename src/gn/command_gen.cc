@@ -49,28 +49,14 @@ const char kSwitchNoDeps[] = "no-deps";
 const char kSwitchRootTarget[] = "root-target";
 const char kSwitchSln[] = "sln";
 const char kSwitchXcodeProject[] = "xcode-project";
+const char kSwitchXcodeBuildSystem[] = "xcode-build-system";
+const char kSwitchXcodeBuildsystemValueLegacy[] = "legacy";
+const char kSwitchXcodeBuildsystemValueNew[] = "new";
 const char kSwitchJsonFileName[] = "json-file-name";
 const char kSwitchJsonIdeScript[] = "json-ide-script";
 const char kSwitchJsonIdeScriptArgs[] = "json-ide-script-args";
 const char kSwitchExportCompileCommands[] = "export-compile-commands";
 const char kSwitchExportRustProject[] = "export-rust-project";
-
-// Extracts extra parameters for XcodeWriter from command-line flags.
-XcodeWriter::Options XcodeWriterOptionsFromCommandLine(
-    const base::CommandLine& command_line) {
-  std::string project_name =
-      command_line.GetSwitchValueASCII(kSwitchXcodeProject);
-  if (project_name.empty())
-    project_name = "all";
-
-  return {
-      std::move(project_name),
-      command_line.GetSwitchValueASCII(kSwitchRootTarget),
-      command_line.GetSwitchValueASCII(kSwitchNinjaExecutable),
-      command_line.GetSwitchValueASCII(kSwitchNinjaExtraArgs),
-      command_line.GetSwitchValueASCII(kSwitchFilters),
-  };
-}
 
 // Collects Ninja rules for each toolchain. The lock protectes the rules.
 struct TargetWriteInfo {
@@ -254,9 +240,34 @@ bool RunIdeWriter(const std::string& ide,
     }
     return res;
   } else if (ide == kSwitchIdeValueXcode) {
-    bool res = XcodeWriter::RunAndWriteFiles(
-        build_settings, builder,
-        XcodeWriterOptionsFromCommandLine(*command_line), err);
+    XcodeWriter::Options options = {
+        command_line->GetSwitchValueASCII(kSwitchXcodeProject),
+        command_line->GetSwitchValueASCII(kSwitchRootTarget),
+        command_line->GetSwitchValueASCII(kSwitchNinjaExecutable),
+        command_line->GetSwitchValueASCII(kSwitchNinjaExtraArgs),
+        command_line->GetSwitchValueASCII(kSwitchFilters),
+        XcodeBuildSystem::kLegacy,
+    };
+
+    if (options.project_name.empty()) {
+      options.project_name = "all";
+    }
+
+    const std::string build_system =
+        command_line->GetSwitchValueASCII(kSwitchXcodeBuildSystem);
+    if (!build_system.empty()) {
+      if (build_system == kSwitchXcodeBuildsystemValueNew) {
+        options.build_system = XcodeBuildSystem::kNew;
+      } else if (build_system == kSwitchXcodeBuildsystemValueLegacy) {
+        options.build_system = XcodeBuildSystem::kLegacy;
+      } else {
+        *err = Err(Location(), "Unknown build system: " + build_system);
+        return false;
+      }
+    }
+
+    bool res =
+        XcodeWriter::RunAndWriteFiles(build_settings, builder, options, err);
     if (res && !quiet) {
       OutputString("Generating Xcode projects took " +
                    base::Int64ToString(timer.Elapsed().InMilliseconds()) +
@@ -411,6 +422,12 @@ Xcode Flags
   --xcode-project=<file_name>
       Override defaut Xcode project file name ("all"). The project file is
       written to the root build directory.
+
+  --xcode-build-system=<value>
+      Configure the build system to use for the Xcode project. Supported
+      values are (default to "legacy"):
+      "legacy" - Legacy Build system
+      "new" - New Build System
 
   --ninja-executable=<string>
       Can be used to specify the ninja executable to use when building.
