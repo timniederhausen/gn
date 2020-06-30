@@ -67,7 +67,7 @@ void BinaryTargetGenerator::DoRun() {
     return;
 
   if (target_->source_types_used().RustSourceUsed()) {
-    RustTargetGenerator rustgen(target_, scope_, function_call_, err_);
+    RustValuesGenerator rustgen(target_, scope_, function_call_, err_);
     rustgen.Run();
     if (err_->has_error())
       return;

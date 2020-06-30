@@ -15,6 +15,7 @@
 #include "gn/input_file.h"
 #include "gn/parse_tree.h"
 #include "gn/runtime_deps.h"
+#include "gn/rust_variables.h"
 #include "gn/scope.h"
 #include "gn/settings.h"
 #include "gn/standard_out.h"
@@ -326,10 +327,15 @@ class TargetDescBuilder : public BaseDescBuilder {
     }
 
     if (target_->source_types_used().RustSourceUsed()) {
-      res->SetWithoutPathExpansion(
-          "crate_root", RenderValue(target_->rust_values().crate_root()));
-      res->SetKey("crate_name",
-                  base::Value(target_->rust_values().crate_name()));
+      if (what(variables::kRustCrateRoot)) {
+        res->SetWithoutPathExpansion(
+            variables::kRustCrateRoot,
+            RenderValue(target_->rust_values().crate_root()));
+      }
+      if (what(variables::kRustCrateName)) {
+        res->SetKey(variables::kRustCrateName,
+                    base::Value(target_->rust_values().crate_name()));
+      }
     }
 
     // General target meta variables.

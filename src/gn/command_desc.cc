@@ -21,6 +21,7 @@
 #include "gn/switches.h"
 #include "gn/target.h"
 #include "gn/variables.h"
+#include "gn/rust_variables.h"
 
 namespace commands {
 
@@ -301,6 +302,8 @@ std::map<std::string, DescHandlerFunc> GetHandlers() {
           {variables::kWalkKeys, DefaultHandler},
           {variables::kWeakFrameworks, DefaultHandler},
           {variables::kWriteOutputConversion, DefaultHandler},
+          {variables::kRustCrateName, DefaultHandler},
+          {variables::kRustCrateRoot, DefaultHandler},
           {"runtime_deps", DefaultHandler}};
 }
 
@@ -351,6 +354,8 @@ bool PrintTarget(const Target* target,
   // Entries with DefaultHandler are present to enforce order
   HandleProperty("type", handler_map, v, dict);
   HandleProperty("toolchain", handler_map, v, dict);
+  HandleProperty(variables::kRustCrateName, handler_map, v, dict);
+  HandleProperty(variables::kRustCrateRoot, handler_map, v, dict);
   HandleProperty(variables::kVisibility, handler_map, v, dict);
   HandleProperty(variables::kMetadata, handler_map, v, dict);
   HandleProperty(variables::kTestonly, handler_map, v, dict);
