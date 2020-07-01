@@ -538,11 +538,15 @@ void FilterOutTargetsByPatterns(const std::vector<const Target*>& input,
                                 const std::vector<LabelPattern>& filter,
                                 std::vector<const Target*>* output) {
   for (auto* target : input) {
+    bool match = false;
     for (const auto& pattern : filter) {
-      if (!pattern.Matches(target->label())) {
-        output->push_back(target);
+      if (pattern.Matches(target->label())) {
+        match = true;
         break;
       }
+    }
+    if (!match) {
+      output->push_back(target);
     }
   }
 }
