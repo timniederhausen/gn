@@ -464,6 +464,9 @@ bool Setup::RunPostMessageLoop(const base::CommandLine& cmdline) {
     if (check_patterns()) {
       commands::FilterTargetsByPatterns(all_targets, *check_patterns(),
                                         &to_check);
+    } else if (no_check_patterns()) {
+      commands::FilterOutTargetsByPatterns(all_targets, *no_check_patterns(),
+                                           &to_check);
     } else {
       to_check = all_targets;
     }
