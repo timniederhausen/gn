@@ -776,6 +776,12 @@ bool XcodeProject::AddTargetsFromBuilder(const Builder& builder, Err* err) {
 bool XcodeProject::AddCXTestSourceFilesForTestModuleTargets(
     const std::map<const Target*, PBXNativeTarget*>& bundle_targets,
     Err* err) {
+  // With the New Build System, the hack of calling clang with --help to get
+  // Xcode to see and parse the file without building them no longer work so
+  // disable it for the moment. See https://crbug.com/1103230 for details.
+  if (options_.build_system == XcodeBuildSystem::kNew)
+    return true;
+
   const SourceDir source_dir("//");
 
   // Needs to search for xctest files under the application targets, and this
