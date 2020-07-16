@@ -139,7 +139,7 @@ void NinjaRustBinaryTargetWriter::Run() {
   // -Ldependency. Also assemble a list of extra (i.e. implicit) deps
   // for ninja dependency tracking.
   UniqueVector<OutputFile> implicit_deps;
-  AppendSourcesToImplicitDeps(&implicit_deps);
+  AppendSourcesAndInputsToImplicitDeps(&implicit_deps);
   implicit_deps.Append(extra_obj_files.begin(), extra_obj_files.end());
 
   std::vector<OutputFile> rustdeps;
@@ -197,6 +197,7 @@ void NinjaRustBinaryTargetWriter::Run() {
             std::back_inserter(extern_deps));
   WriteExterns(extern_deps);
   WriteRustdeps(transitive_rustlibs, rustdeps, nonrustdeps);
+  WriteSourcesAndInputs();
 }
 
 void NinjaRustBinaryTargetWriter::WriteCompilerVars() {
@@ -214,7 +215,7 @@ void NinjaRustBinaryTargetWriter::WriteCompilerVars() {
   WriteSharedVars(subst);
 }
 
-void NinjaRustBinaryTargetWriter::AppendSourcesToImplicitDeps(
+void NinjaRustBinaryTargetWriter::AppendSourcesAndInputsToImplicitDeps(
     UniqueVector<OutputFile>* deps) const {
   // Only the crate_root file needs to be given to rustc as input.
   // Any other 'sources' are just implicit deps.
@@ -224,6 +225,22 @@ void NinjaRustBinaryTargetWriter::AppendSourcesToImplicitDeps(
   for (const auto& source : target_->sources()) {
     deps->push_back(OutputFile(settings_->build_settings(), source));
   }
+  for (const auto& data : target_->config_values().inputs()) {
+    deps->push_back(OutputFile(settings_->build_settings(), data));
+  }
+}
+
+void NinjaRustBinaryTargetWriter::WriteSourcesAndInputs() {
+  out_ << "  sources =";
+  for (const auto& source : target_->sources()) {
+    out_ << " ";
+    path_output_.WriteFile(out_, OutputFile(settings_->build_settings(), source));
+  }
+  for (const auto& data : target_->config_values().inputs()) {
+    out_ << " ";
+    path_output_.WriteFile(out_, OutputFile(settings_->build_settings(), data));
+  }
+  out_ << std::endl;
 }
 
 void NinjaRustBinaryTargetWriter::WriteExterns(
