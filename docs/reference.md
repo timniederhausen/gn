@@ -3729,10 +3729,6 @@
         Expands to the list of system libraries to link to. Each will be
         prefixed by the "lib_switch".
 
-        As a special case to support Mac, libraries with names ending in
-        ".framework" will be added to the {{libs}} with "-framework" preceding
-        it, and the lib prefix will be ignored.
-
         Example: "-lfoo -lbar"
 
     {{output_dir}}
@@ -5699,12 +5695,6 @@
       "lib_dirs" so the given library is found. Your BUILD.gn file should not
       specify the switch (like "-l"): this will be encoded in the "lib_switch"
       of the tool.
-
-  Apple frameworks
-      System libraries ending in ".framework" will be special-cased: the switch
-      "-framework" will be prepended instead of the lib_switch, and the
-      ".framework" suffix will be trimmed. This is to support the way Mac links
-      framework dependencies.
 ```
 
 #### **Ordering of flags and values**
@@ -7347,7 +7337,7 @@
     group("a") {
       metadata = {
         my_files = [ "foo.cpp" ]
-        my_files_barrier [ ":b" ]
+        my_files_barrier = [ ":b" ]
       }
 
       deps = [ ":b", ":c" ]
@@ -7367,7 +7357,8 @@
 
     generated_file("metadata") {
       outputs = [ "$root_build_dir/my_files.json" ]
-      data_keys = [ "my_files", "my_extra_files" ]
+      data_keys = [ "my_files" ]
+      walk_keys = [ "my_files_barrier" ]
 
       deps = [ ":a" ]
     }

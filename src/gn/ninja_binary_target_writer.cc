@@ -333,17 +333,9 @@ void NinjaBinaryTargetWriter::WriteLibs(std::ostream& out, const Tool* tool) {
   for (size_t i = 0; i < all_libs.size(); i++) {
     const LibFile& lib_file = all_libs[i];
     const std::string& lib_value = lib_file.value();
-    std::string_view framework_name = GetFrameworkName(lib_value);
     if (lib_file.is_source_file()) {
       out << " " << tool->linker_arg();
       path_output_.WriteFile(out, lib_file.source_file());
-    } else if (!framework_name.empty()) {
-      // Special-case libraries ending in ".framework" to support Mac: Add the
-      // -framework switch and don't add the extension to the output.
-      // TODO(crbug.com/gn/119): remove this once all code has been ported to
-      // use "frameworks" and "framework_dirs" instead.
-      out << " " << tool->framework_switch();
-      EscapeStringToStream(out, framework_name, lib_escape_opts);
     } else {
       out << " " << tool->lib_switch();
       EscapeStringToStream(out, lib_value, lib_escape_opts);

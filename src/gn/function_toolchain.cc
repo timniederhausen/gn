@@ -661,10 +661,6 @@ Tool variables
         Expands to the list of system libraries to link to. Each will be
         prefixed by the "lib_switch".
 
-        As a special case to support Mac, libraries with names ending in
-        ".framework" will be added to the {{libs}} with "-framework" preceding
-        it, and the lib prefix will be ignored.
-
         Example: "-lfoo -lbar"
 
     {{output_dir}}
