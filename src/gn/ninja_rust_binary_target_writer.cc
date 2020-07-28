@@ -188,7 +188,7 @@ void NinjaRustBinaryTargetWriter::Run() {
   std::vector<OutputFile> tool_outputs;
   SubstitutionWriter::ApplyListToLinkerAsOutputFile(
       target_, tool_, tool_->outputs(), &tool_outputs);
-  WriteCompilerBuildLine(target_->rust_values().crate_root(),
+  WriteCompilerBuildLine({target_->rust_values().crate_root()},
                          implicit_deps.vector(), order_only_deps, tool_->name(),
                          tool_outputs);
 

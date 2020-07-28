@@ -57,7 +57,7 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   OutputFile WriteStampAndGetDep(const UniqueVector<const SourceFile*>& files,
                                  const std::string& stamp_ext) const;
 
-  void WriteCompilerBuildLine(const SourceFile& source,
+  void WriteCompilerBuildLine(const std::vector<SourceFile>& sources,
                               const std::vector<OutputFile>& extra_deps,
                               const std::vector<OutputFile>& order_only_deps,
                               const char* tool_name,

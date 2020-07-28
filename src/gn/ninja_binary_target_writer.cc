@@ -255,7 +255,7 @@ void NinjaBinaryTargetWriter::AddSourceSetFiles(
 }
 
 void NinjaBinaryTargetWriter::WriteCompilerBuildLine(
-    const SourceFile& source,
+    const std::vector<SourceFile>& sources,
     const std::vector<OutputFile>& extra_deps,
     const std::vector<OutputFile>& order_only_deps,
     const char* tool_name,
@@ -264,8 +264,7 @@ void NinjaBinaryTargetWriter::WriteCompilerBuildLine(
   path_output_.WriteFiles(out_, outputs);
 
   out_ << ": " << rule_prefix_ << tool_name;
-  out_ << " ";
-  path_output_.WriteFile(out_, source);
+  path_output_.WriteFiles(out_, sources);
 
   if (!extra_deps.empty()) {
     out_ << " |";

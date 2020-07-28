@@ -312,7 +312,7 @@ void NinjaCBinaryTargetWriter::WriteGCCPCHCommand(
             std::back_inserter(extra_deps));
 
   // Build line to compile the file.
-  WriteCompilerBuildLine(target_->config_values().precompiled_source(),
+  WriteCompilerBuildLine({target_->config_values().precompiled_source()},
                          extra_deps, order_only_deps, tool_name, outputs);
 
   // This build line needs a custom language-specific flags value. Rule-specific
@@ -364,7 +364,7 @@ void NinjaCBinaryTargetWriter::WriteWindowsPCHCommand(
             std::back_inserter(extra_deps));
 
   // Build line to compile the file.
-  WriteCompilerBuildLine(target_->config_values().precompiled_source(),
+  WriteCompilerBuildLine({target_->config_values().precompiled_source()},
                          extra_deps, order_only_deps, tool_name, outputs);
 
   // This build line needs a custom language-specific flags value. Rule-specific
@@ -433,7 +433,7 @@ void NinjaCBinaryTargetWriter::WriteSources(
           }
         }
       }
-      WriteCompilerBuildLine(source, deps, order_only_deps, tool_name,
+      WriteCompilerBuildLine({source}, deps, order_only_deps, tool_name,
                              tool_outputs);
     }
 
