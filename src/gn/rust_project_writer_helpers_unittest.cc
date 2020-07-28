@@ -12,6 +12,15 @@
 #include "util/build_config.h"
 #include "util/test/test.h"
 
+static void ExpectEqOrShowDiff(const char* expected,
+                               const std::string& actual) {
+  if (expected != actual) {
+    printf("\nExpected: >>>\n%s<<<\n", expected);
+    printf("  Actual: >>>\n%s<<<\n", actual.c_str());
+  }
+  EXPECT_EQ(expected, actual);
+}
+
 using RustProjectWriterHelper = TestWithScheduler;
 
 TEST_F(RustProjectWriterHelper, WriteCrates) {
@@ -71,7 +80,7 @@ TEST_F(RustProjectWriterHelper, WriteCrates) {
       "  ]\n"
       "}\n";
 
-  EXPECT_EQ(expected_json, out);
+  ExpectEqOrShowDiff(expected_json, out);
 }
 
 TEST_F(RustProjectWriterHelper, SysrootDepsAreCorrect) {
@@ -419,7 +428,7 @@ TEST_F(RustProjectWriterHelper, SysrootDepsAreCorrect) {
       "  ]\n"
       "}\n";
 
-  EXPECT_EQ(expected_json, out);
+  ExpectEqOrShowDiff(expected_json, out);
 }
 
 TEST_F(RustProjectWriterHelper, ExtractCompilerTargetTupleSimple) {

@@ -13,6 +13,15 @@
 #include "util/build_config.h"
 #include "util/test/test.h"
 
+
+static void ExpectEqOrShowDiff(const char* expected, const std::string& actual) {
+  if(expected != actual) {
+    printf("\nExpected: >>>\n%s<<<\n", expected);
+    printf("  Actual: >>>\n%s<<<\n", actual.c_str());
+  }
+  EXPECT_EQ(expected, actual);
+}
+
 using RustProjectJSONWriter = TestWithScheduler;
 
 TEST_F(RustProjectJSONWriter, OneRustTarget) {
@@ -63,7 +72,7 @@ TEST_F(RustProjectJSONWriter, OneRustTarget) {
       "  ]\n"
       "}\n";
 
-  EXPECT_EQ(expected_json, out);
+  ExpectEqOrShowDiff(expected_json, out);
 }
 
 TEST_F(RustProjectJSONWriter, RustTargetDep) {
@@ -138,7 +147,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDep) {
       "  ]\n"
       "}\n";
 
-  EXPECT_EQ(expected_json, out);
+  ExpectEqOrShowDiff(expected_json, out);
 }
 
 TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
@@ -240,7 +249,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
       "    }\n"
       "  ]\n"
       "}\n";
-  EXPECT_EQ(expected_json, out);
+  ExpectEqOrShowDiff(expected_json, out);
 }
 
 // Test that when outputting dependencies, only Rust deps are returned,
@@ -358,7 +367,7 @@ TEST_F(RustProjectJSONWriter, RustTargetGetDepRustOnly) {
       "  ]\n"
       "}\n";
 
-  EXPECT_EQ(expected_json, out);
+  ExpectEqOrShowDiff(expected_json, out);
 }
 
 TEST_F(RustProjectJSONWriter, OneRustTargetWithRustcTargetSet) {
@@ -410,7 +419,7 @@ TEST_F(RustProjectJSONWriter, OneRustTargetWithRustcTargetSet) {
       "  ]\n"
       "}\n";
 
-  EXPECT_EQ(expected_json, out);
+  ExpectEqOrShowDiff(expected_json, out);
 }
 
 TEST_F(RustProjectJSONWriter, OneRustTargetWithEditionSet) {
@@ -460,7 +469,7 @@ TEST_F(RustProjectJSONWriter, OneRustTargetWithEditionSet) {
       "  ]\n"
       "}\n";
 
-  EXPECT_EQ(expected_json, out);
+  ExpectEqOrShowDiff(expected_json, out);
 }
 
 TEST_F(RustProjectJSONWriter, OneRustTargetWithEditionSetAlternate) {
@@ -511,5 +520,5 @@ TEST_F(RustProjectJSONWriter, OneRustTargetWithEditionSetAlternate) {
       "  ]\n"
       "}\n";
 
-  EXPECT_EQ(expected_json, out);
+  ExpectEqOrShowDiff(expected_json, out);
 }
