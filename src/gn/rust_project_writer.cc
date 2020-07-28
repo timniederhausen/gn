@@ -199,6 +199,15 @@ void AddSysroot(const BuildSettings* build_settings,
   }
 }
 
+void AddSysrootDependencyToCrate(Crate* crate,
+                                 const SysrootCrateIndexMap& sysroot,
+                                 const std::string_view crate_name) {
+  if (const auto crate_idx = sysroot.find(crate_name);
+      crate_idx != sysroot.end()) {
+    crate->AddDependency(crate_idx->second, std::string(crate_name));
+  }
+}
+
 void AddTarget(const BuildSettings* build_settings,
                const Target* target,
                TargetIndexMap& lookup,
@@ -264,13 +273,12 @@ void AddTarget(const BuildSettings* build_settings,
     crate.AddConfigItem(cfg);
   }
 
-  // Add the sysroot dependency, if there is one.
+  // Add the sysroot dependencies, if there is one.
   if (current_sysroot != "") {
-    // TODO(bwb) If this library doesn't depend on std, use core instead
-    auto std_idx = sysroot_lookup[current_sysroot].find("std");
-    if (std_idx != sysroot_lookup[current_sysroot].end()) {
-      crate.AddDependency(std_idx->second, "std");
-    }
+    const auto& sysroot = sysroot_lookup[current_sysroot];
+    AddSysrootDependencyToCrate(&crate, sysroot, "core");
+    AddSysrootDependencyToCrate(&crate, sysroot, "alloc");
+    AddSysrootDependencyToCrate(&crate, sysroot, "std");
   }
 
   // Add the rest of the crate dependencies.
