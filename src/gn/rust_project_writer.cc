@@ -221,7 +221,7 @@ void AddSysrootCrate(const BuildSettings* build_settings,
       build_settings->GetFullPath(build_settings->build_dir());
   auto crate_path =
       FilePathToUTF8(rebased_out_dir) + std::string(current_sysroot) +
-      "/lib/rustlib/src/rust/src/lib" + std::string(crate) + "/lib.rs";
+      "/lib/rustlib/src/rust/library/" + std::string(crate) + "/src/lib.rs";
 
   Crate sysroot_crate =
       Crate(SourceFile(crate_path), crate_index, std::string(crate), "2018");
