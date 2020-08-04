@@ -108,53 +108,44 @@ void NinjaBinaryTargetWriter::WriteSourceSetStamp(
   // depend on this will reference the object files directly. However, writing
   // this rule allows the user to type the name of the target and get a build
   // which can be convenient for development.
-  UniqueVector<OutputFile> extra_object_files;
-  UniqueVector<const Target*> linkable_deps;
-  UniqueVector<const Target*> non_linkable_deps;
-  UniqueVector<const Target*> framework_deps;
-  GetDeps(&extra_object_files, &linkable_deps, &non_linkable_deps,
-          &framework_deps);
+  ClassifiedDeps classified_deps = GetClassifiedDeps();
 
   // The classifier should never put extra object files in a source sets: any
   // source sets that we depend on should appear in our non-linkable deps
   // instead.
-  DCHECK(extra_object_files.empty());
+  DCHECK(classified_deps.extra_object_files.empty());
 
   std::vector<OutputFile> order_only_deps;
-  for (auto* dep : non_linkable_deps)
+  for (auto* dep : classified_deps.non_linkable_deps)
     order_only_deps.push_back(dep->dependency_output_file());
 
   WriteStampForTarget(object_files, order_only_deps);
 }
 
-void NinjaBinaryTargetWriter::GetDeps(
-    UniqueVector<OutputFile>* extra_object_files,
-    UniqueVector<const Target*>* linkable_deps,
-    UniqueVector<const Target*>* non_linkable_deps,
-    UniqueVector<const Target*>* framework_deps) const {
+NinjaBinaryTargetWriter::ClassifiedDeps
+NinjaBinaryTargetWriter::GetClassifiedDeps() const {
+  ClassifiedDeps classified_deps;
+
   // Normal public/private deps.
   for (const auto& pair : target_->GetDeps(Target::DEPS_LINKED)) {
-    ClassifyDependency(pair.ptr, extra_object_files, linkable_deps,
-                       non_linkable_deps, framework_deps);
+    ClassifyDependency(pair.ptr, &classified_deps);
   }
 
   // Inherited libraries.
   for (auto* inherited_target : target_->inherited_libraries().GetOrdered()) {
-    ClassifyDependency(inherited_target, extra_object_files, linkable_deps,
-                       non_linkable_deps, framework_deps);
+    ClassifyDependency(inherited_target, &classified_deps);
   }
 
   // Data deps.
   for (const auto& data_dep_pair : target_->data_deps())
-    non_linkable_deps->push_back(data_dep_pair.ptr);
+    classified_deps.non_linkable_deps.push_back(data_dep_pair.ptr);
+
+  return classified_deps;
 }
 
 void NinjaBinaryTargetWriter::ClassifyDependency(
     const Target* dep,
-    UniqueVector<OutputFile>* extra_object_files,
-    UniqueVector<const Target*>* linkable_deps,
-    UniqueVector<const Target*>* non_linkable_deps,
-    UniqueVector<const Target*>* framework_deps) const {
+    ClassifiedDeps* classified_deps) const {
   // Only the following types of outputs have libraries linked into them:
   //  EXECUTABLE
   //  SHARED_LIBRARY
@@ -180,28 +171,28 @@ void NinjaBinaryTargetWriter::ClassifyDependency(
     // set can easily get linked more than once which will cause
     // multiple definition errors.
     if (can_link_libs)
-      AddSourceSetFiles(dep, extra_object_files);
+      AddSourceSetFiles(dep, &classified_deps->extra_object_files);
 
     // Add the source set itself as a non-linkable dependency on the current
     // target. This will make sure that anything the source set's stamp file
     // depends on (like data deps) are also built before the current target
     // can be complete. Otherwise, these will be skipped since this target
     // will depend only on the source set's object files.
-    non_linkable_deps->push_back(dep);
+    classified_deps->non_linkable_deps.push_back(dep);
   } else if (target_->output_type() == Target::RUST_LIBRARY &&
              dep->IsLinkable()) {
     // Rust libraries aren't final, but need to have the link lines of all
     // transitive deps specified.
-    linkable_deps->push_back(dep);
+    classified_deps->linkable_deps.push_back(dep);
   } else if (target_->complete_static_lib() && dep->IsFinal()) {
-    non_linkable_deps->push_back(dep);
+    classified_deps->non_linkable_deps.push_back(dep);
   } else if (can_link_libs && dep->IsLinkable()) {
-    linkable_deps->push_back(dep);
+    classified_deps->linkable_deps.push_back(dep);
   } else if (dep->output_type() == Target::CREATE_BUNDLE &&
              dep->bundle_data().is_framework()) {
-    framework_deps->push_back(dep);
+    classified_deps->framework_deps.push_back(dep);
   } else {
-    non_linkable_deps->push_back(dep);
+    classified_deps->non_linkable_deps.push_back(dep);
   }
 }
 

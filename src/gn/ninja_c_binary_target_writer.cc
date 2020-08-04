@@ -458,21 +458,16 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   out_ << ": " << rule_prefix_
        << Tool::GetToolTypeForTargetFinalOutput(target_);
 
-  UniqueVector<OutputFile> extra_object_files;
-  UniqueVector<const Target*> linkable_deps;
-  UniqueVector<const Target*> non_linkable_deps;
-  UniqueVector<const Target*> framework_deps;
-  GetDeps(&extra_object_files, &linkable_deps, &non_linkable_deps,
-          &framework_deps);
+  ClassifiedDeps classified_deps = GetClassifiedDeps();
 
   // Object files.
   path_output_.WriteFiles(out_, object_files);
-  path_output_.WriteFiles(out_, extra_object_files);
+  path_output_.WriteFiles(out_, classified_deps.extra_object_files);
 
   // Dependencies.
   std::vector<OutputFile> implicit_deps;
   std::vector<OutputFile> solibs;
-  for (const Target* cur : linkable_deps) {
+  for (const Target* cur : classified_deps.linkable_deps) {
     // All linkable deps should have a link output file.
     DCHECK(!cur->link_output_file().value().empty())
         << "No link output file for "
@@ -521,10 +516,8 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   // always necessary to relink the current target if one of the framework
   // is regenerated, but it ensure that if one of the framework API changes,
   // any dependent target will relink it (see crbug.com/1037607).
-  if (!framework_deps.empty()) {
-    for (const Target* dep : framework_deps) {
-      implicit_deps.push_back(dep->dependency_output_file());
-    }
+  for (const Target* dep : classified_deps.framework_deps) {
+    implicit_deps.push_back(dep->dependency_output_file());
   }
 
   // The input dependency is only needed if there are no object files, as the
@@ -564,7 +557,7 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   // the sources, there is already an implicit order-only dependency. However,
   // it's extra work to separate these out and there's no disadvantage to
   // listing them again.
-  WriteOrderOnlyDependencies(non_linkable_deps);
+  WriteOrderOnlyDependencies(classified_deps.non_linkable_deps);
 
   // End of the link "build" line.
   out_ << std::endl;
