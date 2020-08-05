@@ -33,6 +33,7 @@ class SourceFile {
     SOURCE_H,
     SOURCE_M,
     SOURCE_MM,
+    SOURCE_MODULEMAP,
     SOURCE_S,
     SOURCE_RC,
     SOURCE_O,  // Object files can be inputs, too. Also counts .obj.

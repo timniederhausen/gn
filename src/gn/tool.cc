@@ -253,6 +253,8 @@ std::unique_ptr<Tool> Tool::CreateTool(const std::string& name) {
     return std::make_unique<CTool>(CTool::kCToolCc);
   else if (name == CTool::kCToolCxx)
     return std::make_unique<CTool>(CTool::kCToolCxx);
+  else if (name == CTool::kCToolCxxModule)
+    return std::make_unique<CTool>(CTool::kCToolCxxModule);
   else if (name == CTool::kCToolObjC)
     return std::make_unique<CTool>(CTool::kCToolObjC);
   else if (name == CTool::kCToolObjCxx)
@@ -308,6 +310,8 @@ const char* Tool::GetToolTypeForSourceType(SourceFile::Type type) {
       return CTool::kCToolCc;
     case SourceFile::SOURCE_CPP:
       return CTool::kCToolCxx;
+    case SourceFile::SOURCE_MODULEMAP:
+      return CTool::kCToolCxxModule;
     case SourceFile::SOURCE_M:
       return CTool::kCToolObjC;
     case SourceFile::SOURCE_MM:

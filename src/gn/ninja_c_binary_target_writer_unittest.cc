@@ -1477,3 +1477,39 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustDeps) {
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
 }
+
+TEST_F(NinjaCBinaryTargetWriterTest, ModuleMapInStaticLibrary) {
+  TestWithScope setup;
+  Err err;
+
+  std::unique_ptr<Tool> cxx_module_tool =
+      Tool::CreateTool(CTool::kCToolCxxModule);
+  cxx_module_tool->set_outputs(SubstitutionList::MakeForTest(
+      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.pcm"));
+  setup.toolchain()->SetTool(std::move(cxx_module_tool));
+
+  TestTarget target(setup, "//foo:bar", Target::STATIC_LIBRARY);
+  target.sources().push_back(SourceFile("//foo/bar.modulemap"));
+  target.source_types_used().Set(SourceFile::SOURCE_MODULEMAP);
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream out;
+  NinjaCBinaryTargetWriter writer(&target, out);
+  writer.Run();
+
+  const char expected[] =
+      "defines =\n"
+      "include_dirs =\n"
+      "root_out_dir = .\n"
+      "target_out_dir = obj/foo\n"
+      "target_output_name = libbar\n"
+      "\n"
+      "build obj/foo/libbar.bar.pcm: cxx_module ../../foo/bar.modulemap\n"
+      "\n"
+      "build obj/foo/libbar.a: alink obj/foo/libbar.bar.pcm\n"
+      "  arflags =\n"
+      "  output_extension = \n"
+      "  output_dir = \n";
+  std::string out_str = out.str();
+  EXPECT_EQ(expected, out_str);
+}

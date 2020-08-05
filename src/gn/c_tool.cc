@@ -8,6 +8,7 @@
 
 const char* CTool::kCToolCc = "cc";
 const char* CTool::kCToolCxx = "cxx";
+const char* CTool::kCToolCxxModule = "cxx_module";
 const char* CTool::kCToolObjC = "objc";
 const char* CTool::kCToolObjCxx = "objcxx";
 const char* CTool::kCToolRc = "rc";
@@ -38,9 +39,9 @@ const CTool* CTool::AsC() const {
 }
 
 bool CTool::ValidateName(const char* name) const {
-  return name == kCToolCc || name == kCToolCxx || name == kCToolObjC ||
-         name == kCToolObjCxx || name == kCToolRc || name == kCToolAsm ||
-         name == kCToolAlink || name == kCToolSolink ||
+  return name == kCToolCc || name == kCToolCxx || name == kCToolCxxModule ||
+         name == kCToolObjC || name == kCToolObjCxx || name == kCToolRc ||
+         name == kCToolAsm || name == kCToolAlink || name == kCToolSolink ||
          name == kCToolSolinkModule || name == kCToolLink;
 }
 
@@ -217,8 +218,9 @@ bool CTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
 }
 
 bool CTool::ValidateSubstitution(const Substitution* sub_type) const {
-  if (name_ == kCToolCc || name_ == kCToolCxx || name_ == kCToolObjC ||
-      name_ == kCToolObjCxx || name_ == kCToolRc || name_ == kCToolAsm)
+  if (name_ == kCToolCc || name_ == kCToolCxx || name_ == kCToolCxxModule ||
+      name_ == kCToolObjC || name_ == kCToolObjCxx || name_ == kCToolRc ||
+      name_ == kCToolAsm)
     return IsValidCompilerSubstitution(sub_type);
   else if (name_ == kCToolAlink)
     return IsValidALinkSubstitution(sub_type);
@@ -230,8 +232,9 @@ bool CTool::ValidateSubstitution(const Substitution* sub_type) const {
 }
 
 bool CTool::ValidateOutputSubstitution(const Substitution* sub_type) const {
-  if (name_ == kCToolCc || name_ == kCToolCxx || name_ == kCToolObjC ||
-      name_ == kCToolObjCxx || name_ == kCToolRc || name_ == kCToolAsm)
+  if (name_ == kCToolCc || name_ == kCToolCxx || name_ == kCToolCxxModule ||
+      name_ == kCToolObjC || name_ == kCToolObjCxx || name_ == kCToolRc ||
+      name_ == kCToolAsm)
     return IsValidCompilerOutputsSubstitution(sub_type);
   // ALink uses the standard output file patterns as other linker tools.
   else if (name_ == kCToolAlink || name_ == kCToolSolink ||

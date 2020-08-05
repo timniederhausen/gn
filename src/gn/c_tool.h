@@ -22,6 +22,7 @@ class CTool : public Tool {
   // C compiler tools
   static const char* kCToolCc;
   static const char* kCToolCxx;
+  static const char* kCToolCxxModule;
   static const char* kCToolObjC;
   static const char* kCToolObjCxx;
   static const char* kCToolRc;

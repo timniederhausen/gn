@@ -35,6 +35,8 @@ SourceFile::Type GetSourceFileType(const std::string& file) {
     return SourceFile::SOURCE_M;
   if (extension == "mm")
     return SourceFile::SOURCE_MM;
+  if (extension == "modulemap")
+    return SourceFile::SOURCE_MODULEMAP;
   if (extension == "rc")
     return SourceFile::SOURCE_RC;
   if (extension == "S" || extension == "s" || extension == "asm")
@@ -105,7 +107,8 @@ SourceFileTypeSet::SourceFileTypeSet() : empty_(true) {
 }
 
 bool SourceFileTypeSet::CSourceUsed() const {
-  return empty_ || Get(SourceFile::SOURCE_CPP) || Get(SourceFile::SOURCE_H) ||
+  return empty_ || Get(SourceFile::SOURCE_CPP) ||
+         Get(SourceFile::SOURCE_MODULEMAP) || Get(SourceFile::SOURCE_H) ||
          Get(SourceFile::SOURCE_C) || Get(SourceFile::SOURCE_M) ||
          Get(SourceFile::SOURCE_MM) || Get(SourceFile::SOURCE_RC) ||
          Get(SourceFile::SOURCE_S) || Get(SourceFile::SOURCE_O) ||

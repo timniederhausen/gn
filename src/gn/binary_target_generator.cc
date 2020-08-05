@@ -87,6 +87,7 @@ bool BinaryTargetGenerator::FillSources() {
     const auto& source = target_->sources()[i];
     switch (source.type()) {
       case SourceFile::SOURCE_CPP:
+      case SourceFile::SOURCE_MODULEMAP:
       case SourceFile::SOURCE_H:
       case SourceFile::SOURCE_C:
       case SourceFile::SOURCE_M:

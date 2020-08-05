@@ -284,6 +284,7 @@ Tool types
     Compiler tools:
       "cc": C compiler
       "cxx": C++ compiler
+      "cxx_module": C++ compiler used for Clang .modulemap files
       "objc": Objective C compiler
       "objcxx": Objective C++ compiler
       "rc": Resource compiler (Windows .rc files)
