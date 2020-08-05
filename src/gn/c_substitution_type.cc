@@ -14,7 +14,8 @@ const SubstitutionTypes CSubstitutions = {
     &CSubstitutionCFlagsC,         &CSubstitutionCFlagsCc,
     &CSubstitutionCFlagsObjC,      &CSubstitutionCFlagsObjCc,
     &CSubstitutionDefines,         &CSubstitutionFrameworkDirs,
-    &CSubstitutionIncludeDirs,     &CSubstitutionSwiftModules,
+    &CSubstitutionIncludeDirs,     &CSubstitutionModuleDeps,
+    &CSubstitutionSwiftModules,
 
     &CSubstitutionLinkerInputs,    &CSubstitutionLinkerInputsNewline,
     &CSubstitutionLdFlags,         &CSubstitutionLibs,
@@ -40,11 +41,12 @@ const Substitution CSubstitutionFrameworkDirs = {"{{framework_dirs}}",
                                                  "framework_dirs"};
 const Substitution CSubstitutionIncludeDirs = {"{{include_dirs}}",
                                               "include_dirs"};
+const Substitution CSubstitutionModuleDeps = {"{{module_deps}}", "module_deps"};
 
 // Valid for linker tools.
 const Substitution CSubstitutionLinkerInputs = {"{{inputs}}", "in"};
 const Substitution CSubstitutionLinkerInputsNewline = {"{{inputs_newline}}",
-                                                      "in_newline"};
+                                                       "in_newline"};
 const Substitution CSubstitutionLdFlags = {"{{ldflags}}", "ldflags"};
 const Substitution CSubstitutionLibs = {"{{libs}}", "libs"};
 const Substitution CSubstitutionSoLibs = {"{{solibs}}", "solibs"};
@@ -72,7 +74,7 @@ bool IsValidCompilerSubstitution(const Substitution* type) {
          type == &CSubstitutionCFlagsCc || type == &CSubstitutionCFlagsObjC ||
          type == &CSubstitutionCFlagsObjCc || type == &CSubstitutionDefines ||
          type == &CSubstitutionFrameworkDirs ||
-         type == &CSubstitutionIncludeDirs;
+         type == &CSubstitutionIncludeDirs || type == &CSubstitutionModuleDeps;
 }
 
 bool IsValidCompilerOutputsSubstitution(const Substitution* type) {

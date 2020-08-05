@@ -603,6 +603,11 @@ Tool variables
         {{target_output_name}}, this is not affected by the "output_prefix" in
         the tool or the "output_name" set on the target.
 
+    {{label_no_toolchain}}
+        The label of the current target, never including the toolchain
+        (otherwise, this is identical to {{label}}). This is used as the module
+        name when using .modulemap files.
+
     {{output}}
         The relative path and name of the output(s) of the current build step.
         If there is more than one output, this will expand to a list of all of

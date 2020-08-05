@@ -139,9 +139,15 @@ void NinjaTargetWriter::WriteSharedVars(const SubstitutionBits& bits) {
     written_anything = true;
   }
 
-  // Target label name
+  // Target label name.
   if (bits.used.count(&SubstitutionLabelName)) {
     WriteEscapedSubstitution(&SubstitutionLabelName);
+    written_anything = true;
+  }
+
+  // Target label name without toolchain.
+  if (bits.used.count(&SubstitutionLabelNoToolchain)) {
+    WriteEscapedSubstitution(&SubstitutionLabelNoToolchain);
     written_anything = true;
   }
 

@@ -12,6 +12,7 @@
 #include "gn/unique_vector.h"
 
 struct EscapeOptions;
+struct ModuleDep;
 
 // Writes a .ninja file for a binary target type (an executable, a shared
 // library, or a static library).
@@ -26,7 +27,7 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
   using OutputFileSet = std::set<OutputFile>;
 
   // Writes all flags for the compiler: includes, defines, cflags, etc.
-  void WriteCompilerVars();
+  void WriteCompilerVars(const std::vector<ModuleDep>& module_dep_info);
 
   // Writes build lines required for precompiled headers. Any generated
   // object files will be appended to the |object_files|. Any generated
@@ -71,6 +72,7 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
   void WriteSources(const std::vector<OutputFile>& pch_deps,
                     const std::vector<OutputFile>& input_deps,
                     const std::vector<OutputFile>& order_only_deps,
+                    const std::vector<ModuleDep>& module_dep_info,
                     std::vector<OutputFile>* object_files,
                     std::vector<SourceFile>* other_files);
   void WriteSwiftSources(const std::vector<OutputFile>& input_deps,
