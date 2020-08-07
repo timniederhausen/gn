@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "gn/c_tool.h"
+
+#include "base/strings/stringprintf.h"
 #include "gn/c_substitution_type.h"
 #include "gn/target.h"
 
@@ -13,6 +15,7 @@ const char* CTool::kCToolObjC = "objc";
 const char* CTool::kCToolObjCxx = "objcxx";
 const char* CTool::kCToolRc = "rc";
 const char* CTool::kCToolAsm = "asm";
+const char* CTool::kCToolSwift = "swift";
 const char* CTool::kCToolAlink = "alink";
 const char* CTool::kCToolSolink = "solink";
 const char* CTool::kCToolSolinkModule = "solink_module";
@@ -41,8 +44,9 @@ const CTool* CTool::AsC() const {
 bool CTool::ValidateName(const char* name) const {
   return name == kCToolCc || name == kCToolCxx || name == kCToolCxxModule ||
          name == kCToolObjC || name == kCToolObjCxx || name == kCToolRc ||
-         name == kCToolAsm || name == kCToolAlink || name == kCToolSolink ||
-         name == kCToolSolinkModule || name == kCToolLink;
+         name == kCToolSwift || name == kCToolAsm || name == kCToolAlink ||
+         name == kCToolSolink || name == kCToolSolinkModule ||
+         name == kCToolLink;
 }
 
 void CTool::SetComplete() {
@@ -141,6 +145,7 @@ bool CTool::ReadDepsFormat(Scope* scope, Err* err) {
 
 bool CTool::ReadOutputsPatternList(Scope* scope,
                                    const char* var,
+                                   bool required,
                                    SubstitutionList* field,
                                    Err* err) {
   DCHECK(!complete_);
@@ -155,8 +160,10 @@ bool CTool::ReadOutputsPatternList(Scope* scope,
     return false;
 
   // Validate the right kinds of patterns are used.
-  if (list.list().empty()) {
-    *err = Err(defined_from(), "\"outputs\" must be specified for this tool.");
+  if (list.list().empty() && required) {
+    *err =
+        Err(defined_from(),
+            base::StringPrintf("\"%s\" must be specified for this tool.", var));
     return false;
   }
 
@@ -180,7 +187,8 @@ bool CTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
   }
 
   // All C tools should have outputs.
-  if (!ReadOutputsPatternList(scope, "outputs", &outputs_, err)) {
+  if (!ReadOutputsPatternList(scope, "outputs", /*required=*/true, &outputs_,
+                              err)) {
     return false;
   }
 
@@ -192,8 +200,17 @@ bool CTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
       !ReadString(scope, "lib_switch", &lib_switch_, err) ||
       !ReadString(scope, "lib_dir_switch", &lib_dir_switch_, err) ||
       !ReadPattern(scope, "link_output", &link_output_, err) ||
+      !ReadString(scope, "swiftmodule_switch", &swiftmodule_switch_, err) ||
       !ReadPattern(scope, "depend_output", &depend_output_, err)) {
     return false;
+  }
+
+  // Swift tool can optionally specify partial_outputs.
+  if (name_ == kCToolSwift) {
+    if (!ReadOutputsPatternList(scope, "partial_outputs", /*required=*/false,
+                                &partial_outputs_, err)) {
+      return false;
+    }
   }
 
   // Validate link_output and depend_output.
@@ -222,6 +239,8 @@ bool CTool::ValidateSubstitution(const Substitution* sub_type) const {
       name_ == kCToolObjC || name_ == kCToolObjCxx || name_ == kCToolRc ||
       name_ == kCToolAsm)
     return IsValidCompilerSubstitution(sub_type);
+  if (name_ == kCToolSwift)
+    return IsValidSwiftCompilerSubstitution(sub_type);
   else if (name_ == kCToolAlink)
     return IsValidALinkSubstitution(sub_type);
   else if (name_ == kCToolSolink || name_ == kCToolSolinkModule ||
@@ -236,6 +255,8 @@ bool CTool::ValidateOutputSubstitution(const Substitution* sub_type) const {
       name_ == kCToolObjC || name_ == kCToolObjCxx || name_ == kCToolRc ||
       name_ == kCToolAsm)
     return IsValidCompilerOutputsSubstitution(sub_type);
+  if (name_ == kCToolSwift)
+    return IsValidSwiftCompilerOutputsSubstitution(sub_type);
   // ALink uses the standard output file patterns as other linker tools.
   else if (name_ == kCToolAlink || name_ == kCToolSolink ||
            name_ == kCToolSolinkModule || name_ == kCToolLink)

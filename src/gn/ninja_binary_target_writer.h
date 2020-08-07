@@ -30,6 +30,7 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
     UniqueVector<const Target*> linkable_deps;
     UniqueVector<const Target*> non_linkable_deps;
     UniqueVector<const Target*> framework_deps;
+    UniqueVector<const Target*> swiftmodule_deps;
   };
 
   // Writes to the output stream a stamp rule for inputs, and
@@ -70,6 +71,9 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
                         const SourceFile* optional_def_file);
   void WriteLibs(std::ostream& out, const Tool* tool);
   void WriteFrameworks(std::ostream& out, const Tool* tool);
+  void WriteSwiftModules(std::ostream& out,
+                         const Tool* tool,
+                         const std::vector<OutputFile>& swiftmodules);
 
   void AddSourceSetFiles(const Target* source_set,
                          UniqueVector<OutputFile>* obj_files) const;

@@ -156,6 +156,9 @@ void NinjaBinaryTargetWriter::ClassifyDependency(
   // don't link at all.
   bool can_link_libs = target_->IsFinal();
 
+  if (can_link_libs && dep->swift_values().builds_module())
+    classified_deps->swiftmodule_deps.push_back(dep);
+
   if (dep->output_type() == Target::SOURCE_SET ||
       // If a complete static library depends on an incomplete static library,
       // manually link in the object files of the dependent library as if it
@@ -207,6 +210,25 @@ void NinjaBinaryTargetWriter::AddSourceSetFiles(
     const char* tool_name = Tool::kToolNone;
     if (source_set->GetOutputFilesForSource(source, &tool_name, &tool_outputs))
       obj_files->push_back(tool_outputs[0]);
+  }
+
+  // Swift files may generate one object file per module or one per source file
+  // depending on how the compiler is invoked (whole module optimization).
+  if (source_set->source_types_used().SwiftSourceUsed()) {
+    const Tool* tool = source_set->toolchain()->GetToolForSourceTypeAsC(
+        SourceFile::SOURCE_SWIFT);
+
+    std::vector<OutputFile> outputs;
+    SubstitutionWriter::ApplyListToLinkerAsOutputFile(
+        source_set, tool, tool->outputs(), &outputs);
+
+    for (const OutputFile& output : outputs) {
+      SourceFile output_as_source =
+          output.AsSourceFile(source_set->settings()->build_settings());
+      if (output_as_source.type() == SourceFile::SOURCE_O) {
+        obj_files->push_back(output);
+      }
+    }
   }
 
   // Add MSVC precompiled header object files. GCC .gch files are not object
@@ -346,5 +368,21 @@ void NinjaBinaryTargetWriter::WriteFrameworks(std::ostream& out,
   const auto& all_weak_frameworks = target_->all_weak_frameworks();
   for (size_t i = 0; i < all_weak_frameworks.size(); i++) {
     weak_writer(all_weak_frameworks[i], out);
+  }
+}
+
+void NinjaBinaryTargetWriter::WriteSwiftModules(
+    std::ostream& out,
+    const Tool* tool,
+    const std::vector<OutputFile>& swiftmodules) {
+  // Since we're passing these on the command line to the linker and not
+  // to Ninja, we need to do shell escaping.
+  PathOutput swiftmodule_path_output(
+      path_output_.current_dir(), settings_->build_settings()->root_path_utf8(),
+      ESCAPE_NINJA_COMMAND);
+
+  for (const OutputFile& swiftmodule : swiftmodules) {
+    out << " " << tool->swiftmodule_switch();
+    swiftmodule_path_output.WriteFile(out, swiftmodule);
   }
 }

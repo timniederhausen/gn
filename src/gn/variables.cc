@@ -5,6 +5,7 @@
 #include "gn/variables.h"
 
 #include "gn/rust_variables.h"
+#include "gn/swift_variables.h"
 
 namespace variables {
 
@@ -727,7 +728,8 @@ const char kCommonCflagsHelp[] =
   versions of cflags* will be appended on the compiler command line after
   "cflags".
 
-  See also "asmflags" for flags for assembly-language files.
+  See also "asmflags" for flags for assembly-language files and "swiftflags"
+  for swift files.
 )" COMMON_ORDERING_HELP;
 const char* kCflags_Help = kCommonCflagsHelp;
 
@@ -2017,6 +2019,18 @@ Sources for non-binary targets
     The source are the source files to copy.
 )";
 
+const char kSwiftflags[] = "swiftflags";
+const char kSwiftflags_HelpShort[] =
+    "swiftflags: [string list] Flags passed to the swift compiler.";
+const char* kSwiftflags_Help =
+    R"(swiftflags: Flags passed to the swift compiler.
+
+  A list of strings.
+
+  "swiftflags" are passed to any invocation of a tool that takes an .swift
+  file as input.
+)" COMMON_ORDERING_HELP;
+
 const char kXcodeTestApplicationName[] = "xcode_test_application_name";
 const char kXcodeTestApplicationName_HelpShort[] =
     "xcode_test_application_name: [string] Name for Xcode test target.";
@@ -2307,6 +2321,7 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(ResponseFileContents)
     INSERT_VARIABLE(Script)
     INSERT_VARIABLE(Sources)
+    INSERT_VARIABLE(Swiftflags)
     INSERT_VARIABLE(XcodeTestApplicationName)
     INSERT_VARIABLE(Testonly)
     INSERT_VARIABLE(Visibility)
@@ -2317,6 +2332,7 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(WriteRuntimeDeps)
     INSERT_VARIABLE(XcodeExtraAttributes)
     InsertRustVariables(&info_map);
+    InsertSwiftVariables(&info_map);
   }
   return info_map;
 }

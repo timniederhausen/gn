@@ -14,6 +14,7 @@
 #include "gn/rust_variables.h"
 #include "gn/scope.h"
 #include "gn/settings.h"
+#include "gn/swift_values_generator.h"
 #include "gn/value_extractors.h"
 #include "gn/variables.h"
 
@@ -73,6 +74,13 @@ void BinaryTargetGenerator::DoRun() {
       return;
   }
 
+  if (target_->source_types_used().SwiftSourceUsed()) {
+    SwiftValuesGenerator swiftgen(target_, scope_, err_);
+    swiftgen.Run();
+    if (err_->has_error())
+      return;
+  }
+
   // Config values (compiler flags, etc.) set directly on this target.
   ConfigValuesGenerator gen(&target_->config_values(), scope_,
                             scope_->GetSourceDir(), err_);
@@ -99,9 +107,11 @@ bool BinaryTargetGenerator::FillSources() {
       case SourceFile::SOURCE_GO:
       case SourceFile::SOURCE_RS:
       case SourceFile::SOURCE_RC:
+      case SourceFile::SOURCE_SWIFT:
         // These are allowed.
         break;
       case SourceFile::SOURCE_UNKNOWN:
+      case SourceFile::SOURCE_SWIFTMODULE:
       case SourceFile::SOURCE_NUMTYPES:
         *err_ =
             Err(scope_->GetValue(variables::kSources, true)->list_value()[i],
