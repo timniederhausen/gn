@@ -1724,8 +1724,9 @@ TEST_F(NinjaCBinaryTargetWriterTest, DependOnModule) {
   std::unique_ptr<Tool> cxx_module_tool =
       Tool::CreateTool(CTool::kCToolCxxModule);
   TestWithScope::SetCommandForTool(
-      "c++ {{source}} {{cflags}} {{cflags_cc}} {{defines}} {{include_dirs}} "
-      "-fmodule-name={{label}} -c -x c++ -Xclang -emit-module -o {{output}}",
+      "c++ {{source}} {{cflags}} {{cflags_cc}} {{module_deps_no_self}} "
+      "{{defines}} {{include_dirs}} -fmodule-name={{label}} -c -x c++ "
+      "-Xclang -emit-module -o {{output}}",
       cxx_module_tool.get());
   cxx_module_tool->set_outputs(SubstitutionList::MakeForTest(
       "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.pcm"));
@@ -1774,7 +1775,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, DependOnModule) {
 
     const char expected[] = R"(defines =
 include_dirs =
-module_deps = -fmodules-embed-all-files -fmodule-file=//blah$:a=obj/blah/liba.a.pcm
+module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm
+module_deps_no_self = -Xclang -fmodules-embed-all-files
 cflags =
 cflags_cc =
 label = //blah$:a
@@ -1814,7 +1816,8 @@ build obj/blah/liba.a: alink obj/blah/liba.a.o
 
     const char expected[] = R"(defines =
 include_dirs =
-module_deps = -fmodules-embed-all-files -fmodule-file=//stuff$:b=obj/stuff/libb.b.pcm
+module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/stuff/libb.b.pcm
+module_deps_no_self = -Xclang -fmodules-embed-all-files
 cflags =
 cflags_cc =
 label = //stuff$:b
@@ -1826,6 +1829,45 @@ build obj/stuff/libb.b.pcm: cxx_module ../../stuff/b.modulemap
 build obj/stuff/libb.b.o: cxx ../../stuff/b.cc | obj/stuff/libb.b.pcm
 
 build obj/stuff/libb.a: alink obj/stuff/libb.b.o
+  arflags =
+  output_extension = 
+  output_dir = 
+)";
+
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+  }
+
+  Target target3(&module_settings, Label(SourceDir("//things/"), "c"));
+  target3.set_output_type(Target::STATIC_LIBRARY);
+  target3.visibility().SetPublic();
+  target3.sources().push_back(SourceFile("//stuff/c.modulemap"));
+  target3.source_types_used().Set(SourceFile::SOURCE_MODULEMAP);
+  target3.private_deps().push_back(LabelTargetPair(&target));
+  target3.SetToolchain(&module_toolchain);
+  ASSERT_TRUE(target3.OnResolved(&err));
+
+  // A third library that depends on one of the previous static libraries, to
+  // check module_deps_no_self.
+  {
+    std::ostringstream out;
+    NinjaCBinaryTargetWriter writer(&target3, out);
+    writer.Run();
+
+    const char expected[] = R"(defines =
+include_dirs =
+module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/stuff/libc.c.pcm -fmodule-file=obj/blah/liba.a.pcm
+module_deps_no_self = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm
+cflags =
+cflags_cc =
+label = //things$:c
+root_out_dir = withmodules
+target_out_dir = obj/things
+target_output_name = libc
+
+build obj/stuff/libc.c.pcm: cxx_module ../../stuff/c.modulemap | obj/blah/liba.a.pcm
+
+build obj/things/libc.a: alink || obj/blah/liba.a
   arflags =
   output_extension = 
   output_dir = 
@@ -1853,7 +1895,8 @@ build obj/stuff/libb.a: alink obj/stuff/libb.b.o
 
     const char expected[] = R"(defines =
 include_dirs =
-module_deps = -fmodules-embed-all-files -fmodule-file=//blah$:a=obj/blah/liba.a.pcm -fmodule-file=//stuff$:b=obj/stuff/libb.b.pcm
+module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm -fmodule-file=obj/stuff/libb.b.pcm
+module_deps_no_self = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm -fmodule-file=obj/stuff/libb.b.pcm
 cflags =
 cflags_cc =
 label = //zap$:c

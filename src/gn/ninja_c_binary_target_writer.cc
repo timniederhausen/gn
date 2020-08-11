@@ -31,8 +31,12 @@
 struct ModuleDep {
   ModuleDep(const SourceFile* modulemap,
             const std::string& module_name,
-            const OutputFile& pcm)
-      : modulemap(modulemap), module_name(module_name), pcm(pcm) {}
+            const OutputFile& pcm,
+            bool is_self)
+      : modulemap(modulemap),
+        module_name(module_name),
+        pcm(pcm),
+        is_self(is_self) {}
 
   // The input module.modulemap source file.
   const SourceFile* modulemap;
@@ -42,6 +46,9 @@ struct ModuleDep {
 
   // The compiled version of the module.
   OutputFile pcm;
+
+  // Is this the module for the current target.
+  bool is_self;
 };
 
 namespace {
@@ -80,7 +87,7 @@ const SourceFile* GetModuleMapFromTargetSources(const Target* target) {
 std::vector<ModuleDep> GetModuleDepsInformation(const Target* target) {
   std::vector<ModuleDep> ret;
 
-  auto add = [&ret](const Target* t) {
+  auto add = [&ret](const Target* t, bool is_self) {
     const SourceFile* modulemap = GetModuleMapFromTargetSources(t);
     CHECK(modulemap);
 
@@ -94,17 +101,17 @@ std::vector<ModuleDep> GetModuleDepsInformation(const Target* target) {
         t->GetOutputFilesForSource(*modulemap, &tool_type, &modulemap_outputs));
     // Must be only one .pcm from .modulemap.
     CHECK(modulemap_outputs.size() == 1u);
-    ret.emplace_back(modulemap, label, modulemap_outputs[0]);
+    ret.emplace_back(modulemap, label, modulemap_outputs[0], is_self);
   };
 
   if (target->source_types_used().Get(SourceFile::SOURCE_MODULEMAP)) {
-    add(target);
+    add(target, true);
   }
 
   for (const auto& pair: target->GetDeps(Target::DEPS_LINKED)) {
     // Having a .modulemap source means that the dependency is modularized.
     if (pair.ptr->source_types_used().Get(SourceFile::SOURCE_MODULEMAP)) {
-      add(pair.ptr);
+      add(pair.ptr, false);
     }
   }
 
@@ -256,25 +263,13 @@ void NinjaCBinaryTargetWriter::WriteCompilerVars(
   }
 
   if (!module_dep_info.empty()) {
-    // TODO(scottmg): Currently clang modules only supported for C++.
-    if (target_->source_types_used().Get(SourceFile::SOURCE_CPP)) {
-      if (target_->toolchain()->substitution_bits().used.count(
-              &CSubstitutionModuleDeps)) {
-        EscapeOptions options;
-        options.mode = ESCAPE_NINJA_COMMAND;
-
-        out_ << CSubstitutionModuleDeps.ninja_name << " = ";
-        EscapeStringToStream(out_, "-fmodules-embed-all-files", options);
-
-        for (const auto& module_dep : module_dep_info) {
-          out_ << " ";
-          EscapeStringToStream(
-              out_, "-fmodule-file=" + module_dep.module_name + "=", options);
-          path_output_.WriteFile(out_, module_dep.pcm);
-        }
-
-        out_ << std::endl;
-      }
+    // TODO(scottmg): Currently clang modules only working for C++.
+    if (target_->source_types_used().Get(SourceFile::SOURCE_CPP) ||
+        target_->source_types_used().Get(SourceFile::SOURCE_MODULEMAP)) {
+      WriteModuleDepsSubstitution(&CSubstitutionModuleDeps, module_dep_info,
+                                  true);
+      WriteModuleDepsSubstitution(&CSubstitutionModuleDepsNoSelf,
+                                  module_dep_info, false);
     }
   }
 
@@ -290,7 +285,8 @@ void NinjaCBinaryTargetWriter::WriteCompilerVars(
   if (target_->source_types_used().Get(SourceFile::SOURCE_C) ||
       target_->source_types_used().Get(SourceFile::SOURCE_CPP) ||
       target_->source_types_used().Get(SourceFile::SOURCE_M) ||
-      target_->source_types_used().Get(SourceFile::SOURCE_MM)) {
+      target_->source_types_used().Get(SourceFile::SOURCE_MM) ||
+      target_->source_types_used().Get(SourceFile::SOURCE_MODULEMAP)) {
     WriteOneFlag(target_, &CSubstitutionCFlags, false, Tool::kToolNone,
                  &ConfigValues::cflags, opts, path_output_, out_);
   }
@@ -299,7 +295,8 @@ void NinjaCBinaryTargetWriter::WriteCompilerVars(
                  CTool::kCToolCc, &ConfigValues::cflags_c, opts, path_output_,
                  out_);
   }
-  if (target_->source_types_used().Get(SourceFile::SOURCE_CPP)) {
+  if (target_->source_types_used().Get(SourceFile::SOURCE_CPP) ||
+      target_->source_types_used().Get(SourceFile::SOURCE_MODULEMAP)) {
     WriteOneFlag(target_, &CSubstitutionCFlagsCc, has_precompiled_headers,
                  CTool::kCToolCxx, &ConfigValues::cflags_cc, opts, path_output_,
                  out_);
@@ -354,6 +351,30 @@ void NinjaCBinaryTargetWriter::WriteCompilerVars(
   }
 
   WriteSharedVars(subst);
+}
+
+void NinjaCBinaryTargetWriter::WriteModuleDepsSubstitution(
+    const Substitution* substitution,
+    const std::vector<ModuleDep>& module_dep_info,
+    bool include_self) {
+  if (target_->toolchain()->substitution_bits().used.count(
+          substitution)) {
+    EscapeOptions options;
+    options.mode = ESCAPE_NINJA_COMMAND;
+
+    out_ << substitution->ninja_name << " = -Xclang ";
+    EscapeStringToStream(out_, "-fmodules-embed-all-files", options);
+
+    for (const auto& module_dep : module_dep_info) {
+      if (!module_dep.is_self || include_self) {
+        out_ << " ";
+        EscapeStringToStream(out_, "-fmodule-file=", options);
+        path_output_.WriteFile(out_, module_dep.pcm);
+      }
+    }
+
+    out_ << std::endl;
+  }
 }
 
 void NinjaCBinaryTargetWriter::WritePCHCommands(

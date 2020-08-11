@@ -29,6 +29,12 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
   // Writes all flags for the compiler: includes, defines, cflags, etc.
   void WriteCompilerVars(const std::vector<ModuleDep>& module_dep_info);
 
+  // Write module_deps or module_deps_no_self flags for clang modulemaps.
+  void WriteModuleDepsSubstitution(
+      const Substitution* substitution,
+      const std::vector<ModuleDep>& module_dep_info,
+      bool include_self);
+
   // Writes build lines required for precompiled headers. Any generated
   // object files will be appended to the |object_files|. Any generated
   // non-object files (for instance, .gch files from a GCC toolchain, are

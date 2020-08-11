@@ -3718,6 +3718,13 @@
         prefixed by "-I" (these work with Posix tools as well as Microsoft
         ones).
 
+    {{module_deps}}
+    {{module_deps_no_self}}
+        Strings that correspond to the flags necessary to depend upon the Clang
+        modules referenced by the current target. The "_no_self" version doesn't
+        include the module for the current target, and can be used to compile
+        the pcm itself.
+
     {{source}}
         The relative path and name of the current input file.
         Example: "../../base/my_file.cc"
