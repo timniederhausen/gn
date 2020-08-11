@@ -37,6 +37,8 @@ class Platform(object):
       self._platform = 'darwin'
     elif self._platform.startswith('mingw'):
       self._platform = 'mingw'
+    elif self._platform.startswith('msys'):
+      self._platform = 'msys'
     elif self._platform.startswith('win'):
       self._platform = 'msvc'
     elif self._platform.startswith('aix'):
@@ -54,7 +56,7 @@ class Platform(object):
 
   @staticmethod
   def known_platforms():
-    return ['linux', 'darwin', 'mingw', 'msvc', 'aix', 'fuchsia', 'freebsd', 'openbsd', 'haiku', 'solaris']
+    return ['linux', 'darwin', 'mingw', 'msys', 'msvc', 'aix', 'fuchsia', 'freebsd', 'openbsd', 'haiku', 'solaris']
 
   def platform(self):
     return self._platform
@@ -64,6 +66,9 @@ class Platform(object):
 
   def is_mingw(self):
     return self._platform == 'mingw'
+
+  def is_msys(self):
+    return self._platform == 'msys'
 
   def is_msvc(self):
     return self._platform == 'msvc'
@@ -84,7 +89,7 @@ class Platform(object):
     return self._platform == 'solaris'
 
   def is_posix(self):
-    return self._platform in ['linux', 'freebsd', 'darwin', 'aix', 'openbsd', 'haiku', 'solaris']
+    return self._platform in ['linux', 'freebsd', 'darwin', 'aix', 'openbsd', 'haiku', 'solaris', 'msys']
 
 
 def main(argv):
@@ -202,6 +207,7 @@ def WriteGenericNinja(path, static_libraries, executables,
   template_filename = os.path.join(SCRIPT_DIR, {
       'msvc': 'build_win.ninja.template',
       'mingw': 'build_linux.ninja.template',
+      'msys': 'build_linux.ninja.template',
       'darwin': 'build_mac.ninja.template',
       'linux': 'build_linux.ninja.template',
       'freebsd': 'build_linux.ninja.template',
@@ -293,6 +299,10 @@ def WriteGNNinja(path, platform, host, options):
     cxx = os.environ.get('CXX', 'g++')
     ld = os.environ.get('LD', 'g++')
     ar = os.environ.get('AR', 'ar -X64')
+  elif platform.is_msys():
+    cxx = os.environ.get('CXX', 'g++')
+    ld = os.environ.get('LD', 'g++')
+    ar = os.environ.get('AR', 'ar')
   else:
     cxx = os.environ.get('CXX', 'clang++')
     ld = cxx
@@ -361,14 +371,23 @@ def WriteGNNinja(path, platform, host, options):
         '-std=c++17'
     ])
 
-    if platform.is_linux() or platform.is_mingw():
+    if platform.is_linux() or platform.is_mingw() or platform.is_msys():
       ldflags.append('-Wl,--as-needed')
 
       if not options.no_static_libstdcpp:
         ldflags.append('-static-libstdc++')
 
-      # This is needed by libc++.
-      if not platform.is_mingw():
+      if platform.is_mingw() or platform.is_msys():
+        cflags.remove('-std=c++17')
+        cflags.extend([
+          '-Wno-deprecated-copy',
+          '-Wno-implicit-fallthrough',
+          '-Wno-redundant-move',
+          '-Wno-unused-variable',
+          '-std=gnu++17'
+        ])
+      else:
+        # This is needed by libc++.
         libs.append('-ldl')
     elif platform.is_darwin():
       min_mac_version_flag = '-mmacosx-version-min=10.9'
@@ -384,7 +403,7 @@ def WriteGNNinja(path, platform, host, options):
     if platform.is_posix() and not platform.is_haiku():
       ldflags.append('-pthread')
 
-    if platform.is_mingw():
+    if platform.is_mingw() or platform.is_msys():
       cflags.extend(['-DUNICODE',
                      '-DNOMINMAX',
                      '-DWIN32_LEAN_AND_MEAN',
