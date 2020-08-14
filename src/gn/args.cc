@@ -318,6 +318,8 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
   os = "haiku";
 #elif defined(OS_SOLARIS)
   os = "solaris";
+#elif defined(OS_NETBSD)
+  os = "netbsd";
 #else
 #error Unknown OS type.
 #endif
