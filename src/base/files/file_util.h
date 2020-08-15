@@ -26,7 +26,7 @@
 #include "util/build_config.h"
 
 #if defined(OS_WIN)
-#include "base/win/windows_types.h"
+#include <windows.h>
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"

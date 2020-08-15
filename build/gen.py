@@ -299,7 +299,7 @@ def WriteGNNinja(path, platform, host, options):
     cxx = os.environ.get('CXX', 'g++')
     ld = os.environ.get('LD', 'g++')
     ar = os.environ.get('AR', 'ar -X64')
-  elif platform.is_msys():
+  elif platform.is_msys() or platform.is_mingw():
     cxx = os.environ.get('CXX', 'g++')
     ld = os.environ.get('LD', 'g++')
     ar = os.environ.get('AR', 'ar')
@@ -384,7 +384,10 @@ def WriteGNNinja(path, platform, host, options):
           '-Wno-implicit-fallthrough',
           '-Wno-redundant-move',
           '-Wno-unused-variable',
-          '-std=gnu++17'
+          '-Wno-format',             # Use of %llx, which is supported by _UCRT, false positive
+          '-Wno-strict-aliasing',    # Dereferencing punned pointer
+          '-Wno-cast-function-type', # Casting FARPROC to RegDeleteKeyExPtr
+          '-std=gnu++17',
         ])
       else:
         # This is needed by libc++.
