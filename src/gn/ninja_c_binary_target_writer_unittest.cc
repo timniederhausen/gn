@@ -527,6 +527,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, FrameworksAndFrameworkDirs) {
   // A config that force linking with the framework.
   Config framework_config(setup.settings(),
                           Label(SourceDir("//bar"), "framework_config"));
+  framework_config.visibility().SetPublic();
   framework_config.own_values().frameworks().push_back("Bar.framework");
   framework_config.own_values().framework_dirs().push_back(
       SourceDir("//out/Debug/"));
@@ -1222,6 +1223,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, InputFiles) {
     ASSERT_TRUE(far_config.OnResolved(&err));
 
     Config config(setup.settings(), Label(SourceDir("//foo/"), "baz"));
+    config.visibility().SetPublic();
     config.own_values().inputs().push_back(SourceFile("//foo/input2.data"));
     config.configs().push_back(LabelConfigPair(&far_config));
     ASSERT_TRUE(config.OnResolved(&err));
