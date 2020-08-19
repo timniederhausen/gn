@@ -91,6 +91,13 @@ class Target : public Item {
   // dependencies, because they also don't propogate libraries up.
   bool IsFinal() const;
 
+  // Set when the target should normally be treated as a data dependency. These
+  // do not need to be treated as inputs or hard dependencies for normal build
+  // steps, but have to be kept in the dependency tree to be properly
+  // propagated. Treating these as data only decreases superfluous rebuilds and
+  // increases parallelism.
+  bool IsDataOnly() const;
+
   // Will be the empty string to use the target label as the output name.
   // See GetComputedOutputName().
   const std::string& output_name() const { return output_name_; }

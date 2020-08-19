@@ -438,6 +438,15 @@ bool Target::IsFinal() const {
          (output_type_ == STATIC_LIBRARY && complete_static_lib_);
 }
 
+bool Target::IsDataOnly() const {
+  // BUNDLE_DATA exists only to declare inputs to subsequent CREATE_BUNDLE
+  // targets. Changing only contents of the bundle data target should not cause
+  // a binary to be re-linked. It should affect only the CREATE_BUNDLE steps
+  // instead. As a result, normal targets should treat this as a data
+  // dependency.
+  return output_type_ == BUNDLE_DATA;
+}
+
 DepsIteratorRange Target::GetDeps(DepsIterationType type) const {
   if (type == DEPS_LINKED) {
     return DepsIteratorRange(
