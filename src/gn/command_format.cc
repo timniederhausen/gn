@@ -156,11 +156,12 @@ class Printer {
   // Whether there's a blank separator line at the current position.
   bool HaveBlankLine();
 
-  // Sort a list on the RHS if the LHS is 'sources', 'deps' or 'public_deps'.
-  // The 'sources' are sorted alphabetically while the 'deps' and 'public_deps'
-  // are sorted putting first the relative targets and then the global ones
-  // (both sorted alphabetically).
-  void SortIfSourcesOrDeps(const BinaryOpNode* binop);
+  // Sort a list on the RHS if the LHS is one of the following:
+  // 'sources': sorted alphabetically.
+  // 'deps' or ends in 'deps': sorted such that relative targets are first,
+  //   followed by global targets, each internally sorted alphabetically.
+  // 'visibility': same as 'deps'.
+  void SortIfApplicable(const BinaryOpNode* binop);
 
   // Sort contiguous import() function calls in the given ordered list of
   // statements (the body of a block or scope).
@@ -383,7 +384,7 @@ bool Printer::HaveBlankLine() {
   return n > 2 && output_[n - 1] == '\n' && output_[n - 2] == '\n';
 }
 
-void Printer::SortIfSourcesOrDeps(const BinaryOpNode* binop) {
+void Printer::SortIfApplicable(const BinaryOpNode* binop) {
   if (const Comments* comments = binop->comments()) {
     const std::vector<Token>& before = comments->before();
     if (!before.empty() && (before.front().value() == "# NOSORT" ||
@@ -402,8 +403,9 @@ void Printer::SortIfSourcesOrDeps(const BinaryOpNode* binop) {
     if (base::EndsWith(lhs, "sources", base::CompareCase::SENSITIVE) ||
         lhs == "public")
       const_cast<ListNode*>(list)->SortAsStringsList();
-    else if (base::EndsWith(lhs, "deps", base::CompareCase::SENSITIVE))
-      const_cast<ListNode*>(list)->SortAsDepsList();
+    else if (base::EndsWith(lhs, "deps", base::CompareCase::SENSITIVE) ||
+        lhs == "visibility")
+      const_cast<ListNode*>(list)->SortAsTargetsList();
   }
 }
 
@@ -725,7 +727,7 @@ int Printer::Expr(const ParseNode* root,
   } else if (const BinaryOpNode* binop = root->AsBinaryOp()) {
     CHECK(precedence_.find(binop->op().value()) != precedence_.end());
 
-    SortIfSourcesOrDeps(binop);
+    SortIfApplicable(binop);
 
     Precedence prec = precedence_[binop->op().value()];
 

@@ -748,7 +748,7 @@ void ListNode::SortAsStringsList() {
   });
 }
 
-void ListNode::SortAsDepsList() {
+void ListNode::SortAsTargetsList() {
   // Sorts first relative targets, then absolute, each group is sorted
   // alphabetically.
   SortList([](const ParseNode* a, const ParseNode* b) {

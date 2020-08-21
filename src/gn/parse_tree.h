@@ -425,7 +425,7 @@ class ListNode : public ParseNode {
   }
 
   void SortAsStringsList();
-  void SortAsDepsList();
+  void SortAsTargetsList();
 
   struct SortRange {
     size_t begin;
