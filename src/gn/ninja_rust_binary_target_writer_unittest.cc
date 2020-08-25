@@ -436,7 +436,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "../../foo/main.rs obj/baz/sourceset.csourceset.o "
         "obj/bar/libmylib.rlib "
         "obj/foo/libstatic.a ./libshared.so ./libshared_with_toc.so.TOC "
-        "|| obj/baz/sourceset.stamp\n"
+        "|| phony/baz/sourceset\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
         "  rustdeps = -Ldependency=obj/bar -Lnative=obj/baz -Lnative=obj/foo "
         "-Lnative=. -Clink-arg=obj/baz/sourceset.csourceset.o -lstatic "

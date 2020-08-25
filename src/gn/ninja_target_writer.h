@@ -57,6 +57,11 @@ class NinjaTargetWriter {
   void WriteStampForTarget(const std::vector<OutputFile>& deps,
                            const std::vector<OutputFile>& order_only_deps);
 
+  // Writes to the output file a final phony rule for the target that aliases
+  // the given list of files.
+  void WritePhonyForTarget(const std::vector<OutputFile>& deps,
+                           const std::vector<OutputFile>& order_only_deps);
+
   const Settings* settings_;  // Non-owning.
   const Target* target_;      // Non-owning.
   std::ostream& out_;

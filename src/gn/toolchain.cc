@@ -9,13 +9,15 @@
 #include <utility>
 
 #include "base/logging.h"
+#include "gn/builtin_tool.h"
 #include "gn/target.h"
 #include "gn/value.h"
 
 Toolchain::Toolchain(const Settings* settings,
                      const Label& label,
                      const SourceFileSet& build_dependency_files)
-    : Item(settings, label, build_dependency_files) {}
+    : Item(settings, label, build_dependency_files),
+      phony_tool_(BuiltinTool::kBuiltinToolPhony) {}
 
 Toolchain::~Toolchain() = default;
 
@@ -29,6 +31,9 @@ const Toolchain* Toolchain::AsToolchain() const {
 
 Tool* Toolchain::GetTool(const char* name) {
   DCHECK(name != Tool::kToolNone);
+  if (name == BuiltinTool::kBuiltinToolPhony) {
+    return &phony_tool_;
+  }
   auto pair = tools_.find(name);
   if (pair != tools_.end()) {
     return pair->second.get();
@@ -38,6 +43,9 @@ Tool* Toolchain::GetTool(const char* name) {
 
 const Tool* Toolchain::GetTool(const char* name) const {
   DCHECK(name != Tool::kToolNone);
+  if (name == BuiltinTool::kBuiltinToolPhony) {
+    return &phony_tool_;
+  }
   auto pair = tools_.find(name);
   if (pair != tools_.end()) {
     return pair->second.get();
@@ -87,6 +95,20 @@ const RustTool* Toolchain::GetToolAsRust(const char* name) const {
   return nullptr;
 }
 
+BuiltinTool* Toolchain::GetToolAsBuiltin(const char* name) {
+  if (Tool* tool = GetTool(name)) {
+    return tool->AsBuiltin();
+  }
+  return nullptr;
+}
+
+const BuiltinTool* Toolchain::GetToolAsBuiltin(const char* name) const {
+  if (const Tool* tool = GetTool(name)) {
+    return tool->AsBuiltin();
+  }
+  return nullptr;
+}
+
 void Toolchain::SetTool(std::unique_ptr<Tool> t) {
   DCHECK(t->name() != Tool::kToolNone);
   DCHECK(tools_.find(t->name()) == tools_.end());
@@ -120,6 +142,11 @@ const RustTool* Toolchain::GetToolForSourceTypeAsRust(
   return GetToolAsRust(Tool::GetToolTypeForSourceType(type));
 }
 
+const BuiltinTool* Toolchain::GetToolForSourceTypeAsBuiltin(
+    SourceFile::Type type) const {
+  return GetToolAsBuiltin(Tool::GetToolTypeForSourceType(type));
+}
+
 const Tool* Toolchain::GetToolForTargetFinalOutput(const Target* target) const {
   return GetTool(Tool::GetToolTypeForTargetFinalOutput(target));
 }
@@ -137,4 +164,9 @@ const GeneralTool* Toolchain::GetToolForTargetFinalOutputAsGeneral(
 const RustTool* Toolchain::GetToolForTargetFinalOutputAsRust(
     const Target* target) const {
   return GetToolAsRust(Tool::GetToolTypeForTargetFinalOutput(target));
+}
+
+const BuiltinTool* Toolchain::GetToolForTargetFinalOutputAsBuiltin(
+    const Target* target) const {
+  return GetToolAsBuiltin(Tool::GetToolTypeForTargetFinalOutput(target));
 }

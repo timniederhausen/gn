@@ -89,8 +89,10 @@ void NinjaActionTargetWriter::Run() {
   // TODO(thakis): If the action has just a single output, make things depend
   // on that output directly without writing a stamp file.
   std::vector<OutputFile> data_outs;
-  for (const auto& dep : target_->data_deps())
-    data_outs.push_back(dep.ptr->dependency_output_file());
+  for (const auto& dep : target_->data_deps()) {
+    if (dep.ptr->dependency_output_file_or_phony())
+      data_outs.push_back(*dep.ptr->dependency_output_file_or_phony());
+  }
   WriteStampForTarget(output_files, data_outs);
 }
 

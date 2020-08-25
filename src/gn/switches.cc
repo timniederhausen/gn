@@ -199,8 +199,9 @@ Runtime deps output file
   build directory.
 
   If a source set, action, copy, or group is listed, the runtime deps file will
-  correspond to the .stamp file corresponding to that target. This is probably
-  not useful; the use-case for this feature is generally executable targets.
+  correspond to the .stamp file or phony rule corresponding to that target. This
+  is probably not useful; the use-case for this feature is generally executable
+  targets.
 
   The runtime dependency file will list one file per line, with no escaping.
   The files will be relative to the root_build_dir. The first line of the file

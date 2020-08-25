@@ -43,8 +43,8 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   std::vector<OutputFile> WriteInputsStampAndGetDep(
       size_t num_stamp_uses) const;
 
-  // Writes the stamp line for a source set. These are not linked.
-  void WriteSourceSetStamp(const std::vector<OutputFile>& object_files);
+  // Writes the phony line for a source set. These are not linked.
+  void WriteSourceSetPhony(const std::vector<OutputFile>& object_files);
 
   // Gets all target dependencies and classifies them, as well as accumulates
   // object files from source sets we need to link.

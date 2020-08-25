@@ -504,6 +504,7 @@ def WriteGNNinja(path, platform, host, options):
         'src/gn/bundle_data.cc',
         'src/gn/bundle_data_target_generator.cc',
         'src/gn/bundle_file_rule.cc',
+        'src/gn/builtin_tool.cc',
         'src/gn/c_include_iterator.cc',
         'src/gn/c_substitution_type.cc',
         'src/gn/c_tool.cc',

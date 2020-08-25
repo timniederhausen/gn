@@ -74,8 +74,10 @@ void NinjaCopyTargetWriter::WriteCopyRules(
       std::vector<const Target*>(), num_stamp_uses);
 
   std::vector<OutputFile> data_outs;
-  for (const auto& dep : target_->data_deps())
-    data_outs.push_back(dep.ptr->dependency_output_file());
+  for (const auto& dep : target_->data_deps()) {
+    if (dep.ptr->dependency_output_file_or_phony())
+      data_outs.push_back(*dep.ptr->dependency_output_file_or_phony());
+  }
 
   // Note that we don't write implicit deps for copy steps. "copy" only
   // depends on the output files themselves, rather than having includes
