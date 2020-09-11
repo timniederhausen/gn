@@ -999,7 +999,7 @@
       target and all of its dependency tree, rebasing the strings in the `files`
       key onto the source directory of the target's declaration relative to "/".
 ```
-### <a name="cmd_outputs"></a>**gn outputs &lt;out_dir&gt; &lt;list of target or file names...&gt; ***
+### <a name="cmd_outputs"></a>**gn outputs &lt;out_dir&gt; &lt;list of target or file names...&gt;**
 
 ```
   Lists the output files corresponding to the given target(s) or file name(s).
