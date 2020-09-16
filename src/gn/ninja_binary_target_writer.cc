@@ -7,10 +7,10 @@
 #include <sstream>
 
 #include "base/strings/string_util.h"
+#include "gn/builtin_tool.h"
 #include "gn/config_values_extractors.h"
 #include "gn/deps_iterator.h"
 #include "gn/filesystem_utils.h"
-#include "gn/general_tool.h"
 #include "gn/ninja_c_binary_target_writer.h"
 #include "gn/ninja_rust_binary_target_writer.h"
 #include "gn/ninja_target_command_util.h"
@@ -50,8 +50,8 @@ void NinjaBinaryTargetWriter::Run() {
   writer.Run();
 }
 
-std::vector<OutputFile> NinjaBinaryTargetWriter::WriteInputsStampAndGetDep(
-    size_t num_stamp_uses) const {
+std::vector<OutputFile> NinjaBinaryTargetWriter::WriteInputsPhonyAndGetDep(
+    size_t num_output_uses) const {
   CHECK(target_->toolchain()) << "Toolchain not set on target "
                               << target_->label().GetUserVisibleName(true);
 
@@ -65,8 +65,8 @@ std::vector<OutputFile> NinjaBinaryTargetWriter::WriteInputsStampAndGetDep(
   if (inputs.size() == 0)
     return std::vector<OutputFile>();  // No inputs
 
-  // If we only have one input, return it directly instead of writing a stamp
-  // file for it.
+  // If we only have one input, return it directly instead of writing a phony
+  // target for it.
   if (inputs.size() == 1) {
     return std::vector<OutputFile>{
       OutputFile(settings_->build_settings(), *inputs[0])};
@@ -76,21 +76,22 @@ std::vector<OutputFile> NinjaBinaryTargetWriter::WriteInputsStampAndGetDep(
   for (const SourceFile* source : inputs)
     outs.push_back(OutputFile(settings_->build_settings(), *source));
 
-  // If there are multiple inputs, but the stamp file would be referenced only
+  // If there are multiple inputs, but the phony target would be referenced only
   // once, don't write it but depend on the inputs directly.
-  if (num_stamp_uses == 1u)
+  if (num_output_uses == 1u)
     return outs;
 
-  // Make a stamp file.
-  OutputFile stamp_file =
-      GetBuildDirForTargetAsOutputFile(target_, BuildDirType::OBJ);
-  stamp_file.value().append(target_->label().name());
-  stamp_file.value().append(".inputs.stamp");
+  // Make a phony target. We don't need to worry about an empty phony target, as
+  // those would have been peeled off already.
+  CHECK(!inputs.empty());
+  OutputFile phony_file =
+      GetBuildDirForTargetAsOutputFile(target_, BuildDirType::PHONY);
+  phony_file.value().append(target_->label().name());
+  phony_file.value().append(".inputs");
 
   out_ << "build ";
-  path_output_.WriteFile(out_, stamp_file);
-  out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
-       << GeneralTool::kGeneralToolStamp;
+  path_output_.WriteFile(out_, phony_file);
+  out_ << ": " << BuiltinTool::kBuiltinToolPhony;
 
   // File inputs.
   for (const auto* input : inputs) {
@@ -99,7 +100,7 @@ std::vector<OutputFile> NinjaBinaryTargetWriter::WriteInputsStampAndGetDep(
   }
 
   out_ << std::endl;
-  return {stamp_file};
+  return {phony_file};
 }
 
 void NinjaBinaryTargetWriter::WriteSourceSetPhony(

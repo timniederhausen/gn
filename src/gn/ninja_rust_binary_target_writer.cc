@@ -110,10 +110,10 @@ NinjaRustBinaryTargetWriter::~NinjaRustBinaryTargetWriter() = default;
 void NinjaRustBinaryTargetWriter::Run() {
   DCHECK(target_->output_type() != Target::SOURCE_SET);
 
-  size_t num_stamp_uses = target_->sources().size();
+  size_t num_output_uses = target_->sources().size();
 
-  std::vector<OutputFile> input_deps = WriteInputsStampAndGetDep(
-      num_stamp_uses);
+  std::vector<OutputFile> input_deps =
+      WriteInputsPhonyAndGetDep(num_output_uses);
 
   WriteCompilerVars();
 
@@ -124,8 +124,8 @@ void NinjaRustBinaryTargetWriter::Run() {
   // Ninja to make sure the inputs are up to date before compiling this source,
   // but changes in the inputs deps won't cause the file to be recompiled. See
   // the comment on NinjaCBinaryTargetWriter::Run for more detailed explanation.
-  std::vector<OutputFile> order_only_deps = WriteInputDepsStampAndGetDep(
-      std::vector<const Target*>(), num_stamp_uses);
+  std::vector<OutputFile> order_only_deps = WriteInputDepsPhonyAndGetDep(
+      std::vector<const Target*>(), num_output_uses);
   std::copy(input_deps.begin(), input_deps.end(),
             std::back_inserter(order_only_deps));
 

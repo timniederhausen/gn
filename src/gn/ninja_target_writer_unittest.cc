@@ -22,17 +22,17 @@ class TestingNinjaTargetWriter : public NinjaTargetWriter {
   void Run() override {}
 
   // Make this public so the test can call it.
-  std::vector<OutputFile> WriteInputDepsStampAndGetDep(
+  std::vector<OutputFile> WriteInputDepsPhonyAndGetDep(
       const std::vector<const Target*>& extra_hard_deps,
-      size_t num_stamp_uses) {
-    return NinjaTargetWriter::WriteInputDepsStampAndGetDep(extra_hard_deps,
-                                                           num_stamp_uses);
+      size_t num_output_uses) {
+    return NinjaTargetWriter::WriteInputDepsPhonyAndGetDep(extra_hard_deps,
+                                                           num_output_uses);
   }
 };
 
 }  // namespace
 
-TEST(NinjaTargetWriter, WriteInputDepsStampAndGetDep) {
+TEST(NinjaTargetWriter, WriteInputDepsPhonyAndGetDep) {
   TestWithScope setup;
   Err err;
 
@@ -72,7 +72,7 @@ TEST(NinjaTargetWriter, WriteInputDepsStampAndGetDep) {
     std::ostringstream stream;
     TestingNinjaTargetWriter writer(&base_target, setup.toolchain(), stream);
     std::vector<OutputFile> dep =
-        writer.WriteInputDepsStampAndGetDep(std::vector<const Target*>(), 10u);
+        writer.WriteInputDepsPhonyAndGetDep(std::vector<const Target*>(), 10u);
 
     // Since there is only one dependency, it should just be returned and
     // nothing written to the stream.
@@ -86,12 +86,12 @@ TEST(NinjaTargetWriter, WriteInputDepsStampAndGetDep) {
     std::ostringstream stream;
     TestingNinjaTargetWriter writer(&target, setup.toolchain(), stream);
     std::vector<OutputFile> dep =
-        writer.WriteInputDepsStampAndGetDep(std::vector<const Target*>(), 10u);
+        writer.WriteInputDepsPhonyAndGetDep(std::vector<const Target*>(), 10u);
 
-    // Since there is only one dependency, a stamp file will be returned
+    // Since there is only one dependency, a phony target will be returned
     // directly without writing any additional rules.
     ASSERT_EQ(1u, dep.size());
-    EXPECT_EQ("obj/foo/base.stamp", dep[0].value());
+    EXPECT_EQ("phony/foo/base", dep[0].value());
   }
 
   {
@@ -107,7 +107,7 @@ TEST(NinjaTargetWriter, WriteInputDepsStampAndGetDep) {
         "build: __foo_action___rule | ../../foo/script.py"
         " ../../foo/action_source.txt ./target\n"
         "\n"
-        "build obj/foo/action.stamp: stamp\n",
+        "build phony/foo/action: phony\n",
         stream.str());
   }
 
@@ -117,19 +117,19 @@ TEST(NinjaTargetWriter, WriteInputDepsStampAndGetDep) {
     std::ostringstream stream;
     TestingNinjaTargetWriter writer(&action, setup.toolchain(), stream);
     std::vector<OutputFile> dep =
-        writer.WriteInputDepsStampAndGetDep(std::vector<const Target*>(), 10u);
+        writer.WriteInputDepsPhonyAndGetDep(std::vector<const Target*>(), 10u);
 
     ASSERT_EQ(1u, dep.size());
-    EXPECT_EQ("obj/foo/action.inputdeps.stamp", dep[0].value());
+    EXPECT_EQ("phony/foo/action.inputdeps", dep[0].value());
     EXPECT_EQ(
-        "build obj/foo/action.inputdeps.stamp: stamp ../../foo/script.py "
+        "build phony/foo/action.inputdeps: phony ../../foo/script.py "
         "../../foo/action_source.txt ./target\n",
         stream.str());
   }
 }
 
-// Tests WriteInputDepsStampAndGetDep when toolchain deps are present.
-TEST(NinjaTargetWriter, WriteInputDepsStampAndGetDepWithToolchainDeps) {
+// Tests WriteInputDepsPhonyAndGetDep when toolchain deps are present.
+TEST(NinjaTargetWriter, WriteInputDepsPhonyAndGetDepWithToolchainDeps) {
   TestWithScope setup;
   Err err;
 
@@ -153,11 +153,11 @@ TEST(NinjaTargetWriter, WriteInputDepsStampAndGetDepWithToolchainDeps) {
   std::ostringstream stream;
   TestingNinjaTargetWriter writer(&target, setup.toolchain(), stream);
   std::vector<OutputFile> dep =
-      writer.WriteInputDepsStampAndGetDep(std::vector<const Target*>(), 10u);
+      writer.WriteInputDepsPhonyAndGetDep(std::vector<const Target*>(), 10u);
 
-  // Since there is more than one dependency, a stamp file will be returned
-  // and the rule for the stamp file will be written to the stream.
+  // Since there is more than one dependency, a phony target will be returned
+  // and the rule for the phony target will be written to the stream.
   ASSERT_EQ(1u, dep.size());
-  EXPECT_EQ("obj/foo/setup.stamp", dep[0].value());
+  EXPECT_EQ("phony/foo/setup", dep[0].value());
   EXPECT_EQ("", stream.str());
 }

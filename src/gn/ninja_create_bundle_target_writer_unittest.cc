@@ -75,17 +75,17 @@ TEST(NinjaCreateBundleTargetWriter, Run) {
   writer.Run();
 
   const char expected[] =
-      "build obj/baz/bar.inputdeps.stamp: stamp obj/foo/bar.stamp "
-      "obj/foo/data.stamp\n"
+      "build phony/baz/bar.inputdeps: phony phony/foo/bar "
+      "phony/foo/data\n"
       "build bar.bundle/Contents/Resources/input1.txt: copy_bundle_data "
-      "../../foo/input1.txt || obj/baz/bar.inputdeps.stamp\n"
+      "../../foo/input1.txt || phony/baz/bar.inputdeps\n"
       "build bar.bundle/Contents/Resources/input2.txt: copy_bundle_data "
-      "../../foo/input2.txt || obj/baz/bar.inputdeps.stamp\n"
-      "build obj/baz/bar.stamp: stamp "
+      "../../foo/input2.txt || phony/baz/bar.inputdeps\n"
+      "build phony/baz/bar: phony "
       "bar.bundle/Contents/Resources/input1.txt "
       "bar.bundle/Contents/Resources/input2.txt"
-      " || obj/baz/bar.inputdeps.stamp\n"
-      "build bar.bundle: phony obj/baz/bar.stamp\n";
+      " || phony/baz/bar.inputdeps\n"
+      "build bar.bundle: phony phony/baz/bar\n";
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str);
 }
@@ -124,17 +124,17 @@ TEST(NinjaCreateBundleTargetWriter, InSubDirectory) {
   writer.Run();
 
   const char expected[] =
-      "build obj/baz/bar.inputdeps.stamp: stamp obj/foo/bar.stamp "
-      "obj/foo/data.stamp\n"
+      "build phony/baz/bar.inputdeps: phony phony/foo/bar "
+      "phony/foo/data\n"
       "build gen/bar.bundle/Contents/Resources/input1.txt: copy_bundle_data "
-      "../../foo/input1.txt || obj/baz/bar.inputdeps.stamp\n"
+      "../../foo/input1.txt || phony/baz/bar.inputdeps\n"
       "build gen/bar.bundle/Contents/Resources/input2.txt: copy_bundle_data "
-      "../../foo/input2.txt || obj/baz/bar.inputdeps.stamp\n"
-      "build obj/baz/bar.stamp: stamp "
+      "../../foo/input2.txt || phony/baz/bar.inputdeps\n"
+      "build phony/baz/bar: phony "
       "gen/bar.bundle/Contents/Resources/input1.txt "
       "gen/bar.bundle/Contents/Resources/input2.txt || "
-      "obj/baz/bar.inputdeps.stamp\n"
-      "build gen/bar.bundle: phony obj/baz/bar.stamp\n";
+      "phony/baz/bar.inputdeps\n"
+      "build gen/bar.bundle: phony phony/baz/bar\n";
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str);
 }
@@ -165,10 +165,10 @@ TEST(NinjaCreateBundleTargetWriter, JustPartialInfoPlist) {
   writer.Run();
 
   const char expected[] =
-      "build baz/bar/bar_partial_info.plist: stamp || obj/foo/bar.stamp\n"
-      "build obj/baz/bar.stamp: stamp "
-      "baz/bar/bar_partial_info.plist || obj/foo/bar.stamp\n"
-      "build bar.bundle: phony obj/baz/bar.stamp\n";
+      "build baz/bar/bar_partial_info.plist: stamp || phony/foo/bar\n"
+      "build phony/baz/bar: phony "
+      "baz/bar/bar_partial_info.plist || phony/foo/bar\n"
+      "build bar.bundle: phony phony/baz/bar\n";
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str);
 }
@@ -225,17 +225,17 @@ TEST(NinjaCreateBundleTargetWriter, AssetCatalog) {
   writer.Run();
 
   const char expected[] =
-      "build obj/baz/bar.inputdeps.stamp: stamp obj/foo/bar.stamp "
-      "obj/foo/data.stamp\n"
+      "build phony/baz/bar.inputdeps: phony phony/foo/bar "
+      "phony/foo/data\n"
       "build bar.bundle/Contents/Resources/Assets.car: compile_xcassets "
-      "../../foo/Foo.xcassets | obj/foo/data.stamp || "
-      "obj/baz/bar.inputdeps.stamp\n"
+      "../../foo/Foo.xcassets | phony/foo/data || "
+      "phony/baz/bar.inputdeps\n"
       "  product_type = com.apple.product-type\n"
       "  xcasset_compiler_flags = --app-icon foo\n"
-      "build obj/baz/bar.stamp: stamp "
+      "build phony/baz/bar: phony "
       "bar.bundle/Contents/Resources/Assets.car || "
-      "obj/baz/bar.inputdeps.stamp\n"
-      "build bar.bundle: phony obj/baz/bar.stamp\n";
+      "phony/baz/bar.inputdeps\n"
+      "build bar.bundle: phony phony/baz/bar\n";
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str);
 }
@@ -253,6 +253,8 @@ TEST(NinjaCreateBundleTargetWriter, PhonyTarget) {
   SetupBundleDataDir(&create_bundle.bundle_data(), "//out/Debug");
   create_bundle.set_output_type(Target::CREATE_BUNDLE);
   create_bundle.SetToolchain(setup.toolchain());
+  create_bundle.bundle_data().set_partial_info_plist(
+      SourceFile("//out/Debug/baz/bar/bar_partial_info.plist"));
   ASSERT_TRUE(create_bundle.OnResolved(&err));
 
   std::ostringstream out;
@@ -260,10 +262,11 @@ TEST(NinjaCreateBundleTargetWriter, PhonyTarget) {
   writer.Run();
 
   const char expected[] =
-      "build obj/baz/bar.stamp: stamp\n"
-      "build bar.bundle: phony obj/baz/bar.stamp\n";
+      "build baz/bar/bar_partial_info.plist: stamp\n"
+      "build phony/baz/bar: phony baz/bar/bar_partial_info.plist\n"
+      "build bar.bundle: phony phony/baz/bar\n";
   std::string out_str = out.str();
-  EXPECT_EQ(expected, out_str);
+  EXPECT_EQ(expected, out_str) << out_str;
 }
 
 // Tests complex target with multiple bundle_data sources, including
@@ -376,32 +379,32 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
   writer.Run();
 
   const char expected[] =
-      "build obj/baz/bar.inputdeps.stamp: stamp obj/biz/assets.stamp "
-      "obj/foo/assets.stamp obj/foo/bar.stamp obj/foo/data.stamp "
-      "obj/qux/info_plist.stamp obj/quz/assets.stamp\n"
+      "build phony/baz/bar.inputdeps: phony phony/biz/assets "
+      "phony/foo/assets phony/foo/bar phony/foo/data "
+      "phony/qux/info_plist phony/quz/assets\n"
       "build bar.bundle/Contents/Info.plist: copy_bundle_data "
-      "../../qux/qux-Info.plist || obj/baz/bar.inputdeps.stamp\n"
+      "../../qux/qux-Info.plist || phony/baz/bar.inputdeps\n"
       "build bar.bundle/Contents/Resources/input1.txt: copy_bundle_data "
-      "../../foo/input1.txt || obj/baz/bar.inputdeps.stamp\n"
+      "../../foo/input1.txt || phony/baz/bar.inputdeps\n"
       "build bar.bundle/Contents/Resources/input2.txt: copy_bundle_data "
-      "../../foo/input2.txt || obj/baz/bar.inputdeps.stamp\n"
-      "build obj/baz/bar.xcassets.inputdeps.stamp: stamp "
-      "obj/foo/assets.stamp "
-      "obj/quz/assets.stamp obj/biz/assets.stamp\n"
+      "../../foo/input2.txt || phony/baz/bar.inputdeps\n"
+      "build phony/baz/bar.xcassets.inputdeps: phony "
+      "phony/foo/assets "
+      "phony/quz/assets phony/biz/assets\n"
       "build bar.bundle/Contents/Resources/Assets.car | "
       "baz/bar/bar_partial_info.plist: compile_xcassets "
       "../../foo/Foo.xcassets ../../quz/Quz.xcassets "
-      "../../biz/Biz.xcassets | obj/baz/bar.xcassets.inputdeps.stamp || "
-      "obj/baz/bar.inputdeps.stamp\n"
+      "../../biz/Biz.xcassets | phony/baz/bar.xcassets.inputdeps || "
+      "phony/baz/bar.inputdeps\n"
       "  product_type = com.apple.product-type\n"
       "  partial_info_plist = baz/bar/bar_partial_info.plist\n"
-      "build obj/baz/bar.stamp: stamp "
+      "build phony/baz/bar: phony "
       "bar.bundle/Contents/Info.plist "
       "bar.bundle/Contents/Resources/input1.txt "
       "bar.bundle/Contents/Resources/input2.txt "
       "bar.bundle/Contents/Resources/Assets.car "
-      "baz/bar/bar_partial_info.plist || obj/baz/bar.inputdeps.stamp\n"
-      "build bar.bundle: phony obj/baz/bar.stamp\n";
+      "baz/bar/bar_partial_info.plist || phony/baz/bar.inputdeps\n"
+      "build bar.bundle: phony phony/baz/bar\n";
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str);
 }
@@ -458,30 +461,30 @@ TEST(NinjaCreateBundleTargetWriter, CodeSigning) {
   writer.Run();
 
   const char expected[] =
-      "build obj/baz/bar.inputdeps.stamp: stamp ./quz obj/foo/bar.stamp "
-      "obj/foo/data.stamp\n"
+      "build phony/baz/bar.inputdeps: phony ./quz phony/foo/bar "
+      "phony/foo/data\n"
       "rule __baz_bar___toolchain_default__code_signing_rule\n"
       "  command =  ../../build/codesign.py -b=quz bar.bundle\n"
       "  description = CODE SIGNING //baz:bar(//toolchain:default)\n"
       "  restat = 1\n"
       "\n"
       "build bar.bundle/Contents/Resources/input1.txt: copy_bundle_data "
-      "../../foo/input1.txt || obj/baz/bar.inputdeps.stamp\n"
+      "../../foo/input1.txt || phony/baz/bar.inputdeps\n"
       "build bar.bundle/Contents/Resources/input2.txt: copy_bundle_data "
-      "../../foo/input2.txt || obj/baz/bar.inputdeps.stamp\n"
-      "build obj/baz/bar.codesigning.inputdeps.stamp: stamp "
+      "../../foo/input2.txt || phony/baz/bar.inputdeps\n"
+      "build phony/baz/bar.codesigning.inputdeps: phony "
       "../../build/codesign.py "
       "quz "
       "bar.bundle/Contents/Resources/input1.txt "
       "bar.bundle/Contents/Resources/input2.txt || "
-      "obj/baz/bar.inputdeps.stamp\n"
+      "phony/baz/bar.inputdeps\n"
       "build bar.bundle/Contents/quz bar.bundle/_CodeSignature/CodeResources: "
       "__baz_bar___toolchain_default__code_signing_rule "
-      "| obj/baz/bar.codesigning.inputdeps.stamp\n"
-      "build obj/baz/bar.stamp: stamp "
+      "| phony/baz/bar.codesigning.inputdeps\n"
+      "build phony/baz/bar: phony "
       "bar.bundle/Contents/quz "
-      "bar.bundle/_CodeSignature/CodeResources || obj/baz/bar.inputdeps.stamp\n"
-      "build bar.bundle: phony obj/baz/bar.stamp\n";
+      "bar.bundle/_CodeSignature/CodeResources || phony/baz/bar.inputdeps\n"
+      "build bar.bundle: phony phony/baz/bar\n";
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str);
 }

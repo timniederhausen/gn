@@ -26,7 +26,7 @@ void NinjaGeneratedFileTargetWriter::Run() {
   // Write the file.
   GenerateFile();
 
-  // A generated_file target should generate a stamp file with dependencies
+  // A generated_file target should generate a phony target with dependencies
   // on each of the deps and data_deps in the target. The actual collection is
   // done at gen time, and so ninja doesn't need to know about it.
   std::vector<OutputFile> output_files;
@@ -42,7 +42,7 @@ void NinjaGeneratedFileTargetWriter::Run() {
       data_output_files.push_back(*pair.ptr->dependency_output_file_or_phony());
   }
 
-  WriteStampForTarget(output_files, data_output_files);
+  WritePhonyForTarget(output_files, data_output_files);
 }
 
 void NinjaGeneratedFileTargetWriter::GenerateFile() {

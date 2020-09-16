@@ -45,7 +45,7 @@ TEST(NinjaGroupTargetWriter, Run) {
   writer.Run();
 
   const char expected[] =
-      "build obj/foo/bar.stamp: stamp obj/foo/dep.stamp obj/foo/dep2.stamp || "
-      "obj/foo/datadep.stamp\n";
+      "build phony/foo/bar: phony phony/foo/dep phony/foo/dep2 || "
+      "phony/foo/datadep\n";
   EXPECT_EQ(expected, out.str());
 }

@@ -244,7 +244,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
         "\n"
         "build obj/bar/libmylib.rlib: rust_rlib ../../bar/lib.rs | "
         "../../bar/mylib.rs ../../bar/lib.rs obj/bar/libmymacro.so || "
-        "obj/baz/group.stamp\n"
+        "phony/baz/group\n"
         "  externs = --extern mymacro=obj/bar/libmymacro.so\n"
         "  rustdeps = -Ldependency=obj/bar\n"
         "  sources = ../../bar/mylib.rs ../../bar/lib.rs\n";
@@ -748,7 +748,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, GroupDeps) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
-        "../../foo/main.rs obj/bar/libmylib.rlib || obj/baz/group.stamp\n"
+        "../../foo/main.rs obj/bar/libmylib.rlib || phony/baz/group\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
         "  rustdeps = -Ldependency=obj/bar\n"
         "  sources = ../../foo/source.rs ../../foo/main.rs\n";
@@ -828,7 +828,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, Inputs) {
     writer.Run();
 
     const char expected[] =
-        "build obj/foo/bar.inputs.stamp: stamp ../../foo/config.json ../../foo/template.h\n"
+        "build phony/foo/bar.inputs: phony ../../foo/config.json ../../foo/template.h\n"
         "crate_name = foo_bar\n"
         "crate_type = bin\n"
         "output_extension = \n"
@@ -841,7 +841,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, Inputs) {
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
         "../../foo/main.rs ../../foo/config.json ../../foo/template.h "
-        "|| obj/foo/bar.inputs.stamp\n"
+        "|| phony/foo/bar.inputs\n"
         "  externs =\n"
         "  rustdeps =\n"
         "  sources = ../../foo/source.rs ../../foo/main.rs "

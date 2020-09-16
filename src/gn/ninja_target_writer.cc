@@ -188,16 +188,16 @@ void NinjaTargetWriter::WriteSharedVars(const SubstitutionBits& bits) {
     out_ << std::endl;
 }
 
-std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
+std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsPhonyAndGetDep(
     const std::vector<const Target*>& extra_hard_deps,
-    size_t num_stamp_uses) const {
+    size_t num_output_uses) const {
   CHECK(target_->toolchain()) << "Toolchain not set on target "
                               << target_->label().GetUserVisibleName(true);
 
   // ----------
   // Collect all input files that are input deps of this target. Knowing the
   // number before writing allows us to either skip writing the input deps
-  // stamp or optimize it. Use pointers to avoid copies here.
+  // phony or optimize it. Use pointers to avoid copies here.
   std::vector<const SourceFile*> input_deps_sources;
   input_deps_sources.reserve(32);
 
@@ -246,7 +246,7 @@ std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
   // Toolchain dependencies. These must be resolved before doing anything.
   // This just writes all toolchain deps for simplicity. If we find that
   // toolchains often have more than one dependency, we could consider writing
-  // a toolchain-specific stamp file and only include the stamp here.
+  // a toolchain-specific phony target and only include the phony here.
   // Note that these are usually empty/small.
   const LabelTargetVector& toolchain_deps = target_->toolchain()->deps();
   for (const auto& toolchain_dep : toolchain_deps) {
@@ -263,7 +263,7 @@ std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
     return std::vector<OutputFile>();  // No input dependencies.
 
   // If we're only generating one input dependency, return it directly instead
-  // of writing a stamp file for it.
+  // of writing a phony target for it.
   if (input_deps_sources.size() == 1 && input_deps_targets.size() == 0)
     return std::vector<OutputFile>{
         OutputFile(settings_->build_settings(), *input_deps_sources[0])};
@@ -290,52 +290,26 @@ std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
       outs.push_back(*dep->dependency_output_file_or_phony());
   }
 
-  // If there are multiple inputs, but the stamp file would be referenced only
+  // If there are multiple inputs, but the phony target would be referenced only
   // once, don't write it but depend on the inputs directly.
-  if (num_stamp_uses == 1u)
+  if (num_output_uses == 1u)
     return outs;
 
-  // Make a stamp file.
-  OutputFile input_stamp_file =
-      GetBuildDirForTargetAsOutputFile(target_, BuildDirType::OBJ);
-  input_stamp_file.value().append(target_->label().name());
-  input_stamp_file.value().append(".inputdeps.stamp");
+  // Make a phony target. We don't need to worry about an empty phony target, as
+  // we would return early if there were no inputs.
+  CHECK(!outs.empty());
+  OutputFile input_phony_file =
+      GetBuildDirForTargetAsOutputFile(target_, BuildDirType::PHONY);
+  input_phony_file.value().append(target_->label().name());
+  input_phony_file.value().append(".inputdeps");
 
   out_ << "build ";
-  path_output_.WriteFile(out_, input_stamp_file);
-  out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
-       << GeneralTool::kGeneralToolStamp;
+  path_output_.WriteFile(out_, input_phony_file);
+  out_ << ": " << BuiltinTool::kBuiltinToolPhony;
   path_output_.WriteFiles(out_, outs);
 
   out_ << "\n";
-  return std::vector<OutputFile>{input_stamp_file};
-}
-
-void NinjaTargetWriter::WriteStampForTarget(
-    const std::vector<OutputFile>& files,
-    const std::vector<OutputFile>& order_only_deps) {
-  CHECK(target_->dependency_output_file());
-  const OutputFile& stamp_file = *target_->dependency_output_file();
-
-  // First validate that the target's dependency is a stamp file. Otherwise,
-  // we shouldn't have gotten here!
-  CHECK(base::EndsWith(stamp_file.value(), ".stamp",
-                       base::CompareCase::INSENSITIVE_ASCII))
-      << "Output should end in \".stamp\" for stamp file output. Instead got: "
-      << "\"" << stamp_file.value() << "\"";
-
-  out_ << "build ";
-  path_output_.WriteFile(out_, stamp_file);
-
-  out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
-       << GeneralTool::kGeneralToolStamp;
-  path_output_.WriteFiles(out_, files);
-
-  if (!order_only_deps.empty()) {
-    out_ << " ||";
-    path_output_.WriteFiles(out_, order_only_deps);
-  }
-  out_ << std::endl;
+  return std::vector<OutputFile>{input_phony_file};
 }
 
 void NinjaTargetWriter::WritePhonyForTarget(

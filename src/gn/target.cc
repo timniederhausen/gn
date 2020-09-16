@@ -542,9 +542,9 @@ bool Target::GetOutputsAsSourceFiles(const LocationRange& loc_for_error,
           output_file.AsSourceFile(settings()->build_settings()));
     }
   } else {
-    // Everything else (like a group or bundle_data) has a stamp or phony
-    // output. The dependency output file should have computed what this is.
-    // This won't be valid unless the build is complete.
+    // Everything else (like a group or bundle_data) has a phony output. The
+    // dependency output phony should have computed what this is. This won't be
+    // valid unless the build is complete.
     if (!build_complete) {
       *err = Err(loc_for_error, kBuildIncompleteMsg);
       return false;
@@ -790,10 +790,12 @@ bool Target::HasRealInputs() const {
   // This check is only necessary if this target will result in a phony target.
   // Phony targets with no real inputs are treated as always dirty.
 
-  // TODO(bug 194): This method is currently just checking the relevant inputs
-  // for the current list of output types that result in phony targets. As the
-  // list of phony targets expands, this method should be updated to properly
-  // account for which inputs matter for the given output type.
+  // Actions always have at least one input file: the script used to execute
+  // the action. As such, they will never have an input-less phony target. We
+  // check this first to elide the common checks.
+  if (output_type() == ACTION || output_type() == ACTION_FOREACH) {
+    return true;
+  }
 
   // If any of this target's dependencies is non-phony target or a phony target
   // with real inputs, then this target should be considered to have inputs.
@@ -801,6 +803,19 @@ bool Target::HasRealInputs() const {
     if (pair.ptr->dependency_output_file_or_phony()) {
       return true;
     }
+  }
+
+  if (output_type() == BUNDLE_DATA) {
+    return !sources().empty();
+  }
+  if (output_type() == CREATE_BUNDLE) {
+    // CREATE_BUNDLE targets pick up most of their inputs in the form of
+    // dependencies on bundle_data targets, which were checked above when
+    // looping through GetDeps. This code handles the remaining possible
+    // CREATE_BUNDLE inputs.
+    return !bundle_data().assets_catalog_sources().empty() ||
+           !bundle_data().partial_info_plist().is_null() ||
+           !bundle_data().code_signing_script().is_null();
   }
 
   // If any of this target's sources will result in output files, then this
@@ -817,28 +832,19 @@ bool Target::FillOutputFiles(Err* err) {
   const Tool* tool = toolchain_->GetToolForTargetFinalOutput(this);
   bool check_tool_outputs = false;
   switch (output_type_) {
+    case ACTION:
+    case ACTION_FOREACH:
+    case BUNDLE_DATA:
+    case COPY_FILES:
+    case CREATE_BUNDLE:
+    case GENERATED_FILE:
+    case GROUP:
     case SOURCE_SET: {
       if (HasRealInputs()) {
         dependency_output_phony_ =
             GetBuildDirForTargetAsOutputFile(this, BuildDirType::PHONY);
         dependency_output_phony_->value().append(GetComputedOutputName());
       }
-      break;
-    }
-    case GROUP:
-    case BUNDLE_DATA:
-    case CREATE_BUNDLE:
-    case COPY_FILES:
-    case ACTION:
-    case ACTION_FOREACH:
-    case GENERATED_FILE: {
-      // These don't get linked to and use stamps which should be the first
-      // entry in the outputs. These stamps are named
-      // "<target_out_dir>/<targetname>.stamp".
-      dependency_output_file_ =
-          GetBuildDirForTargetAsOutputFile(this, BuildDirType::OBJ);
-      dependency_output_file_->value().append(GetComputedOutputName());
-      dependency_output_file_->value().append(".stamp");
       break;
     }
     case EXECUTABLE:
