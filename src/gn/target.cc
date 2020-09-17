@@ -518,8 +518,7 @@ bool Target::GetOutputsAsSourceFiles(const LocationRange& loc_for_error,
       output_type() == Target::ACTION_FOREACH ||
       output_type() == Target::GENERATED_FILE) {
     action_values().GetOutputsAsSourceFiles(this, outputs);
-  } else if (output_type() == Target::CREATE_BUNDLE ||
-             output_type() == Target::GENERATED_FILE) {
+  } else if (output_type() == Target::CREATE_BUNDLE) {
     if (!bundle_data().GetOutputsAsSourceFiles(settings(), this, outputs, err))
       return false;
   } else if (IsBinary() && output_type() != Target::SOURCE_SET) {
@@ -543,9 +542,9 @@ bool Target::GetOutputsAsSourceFiles(const LocationRange& loc_for_error,
           output_file.AsSourceFile(settings()->build_settings()));
     }
   } else {
-    // Everything else (like a group or something) has a stamp or phony output.
-    // The dependency output file should have computed what this is. This won't
-    // be valid unless the build is complete.
+    // Everything else (like a group or bundle_data) has a stamp or phony
+    // output. The dependency output file should have computed what this is.
+    // This won't be valid unless the build is complete.
     if (!build_complete) {
       *err = Err(loc_for_error, kBuildIncompleteMsg);
       return false;
