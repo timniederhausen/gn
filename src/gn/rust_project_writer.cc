@@ -167,25 +167,11 @@ std::vector<std::string> FindAllArgValuesAfterPrefix(
 const std::string_view sysroot_crates[] = {"std",
                                            "core",
                                            "alloc",
-                                           "collections",
-                                           "libc",
                                            "panic_unwind",
                                            "proc_macro",
-                                           "rustc_unicode",
-                                           "std_unicode",
                                            "test",
-                                           "alloc_jemalloc",
-                                           "alloc_system",
-                                           "compiler_builtins",
-                                           "getopts",
                                            "panic_abort",
-                                           "unwind",
-                                           "build_helper",
-                                           "rustc_asan",
-                                           "rustc_lsan",
-                                           "rustc_msan",
-                                           "rustc_tsan",
-                                           "syntax"};
+                                           "unwind"};
 
 // Multiple sysroot crates have dependenices on each other.  This provides a
 // mechanism for specifiying that in an extendible manner.
