@@ -1,5 +1,8 @@
 # GN
 
+[![Build Status](https://travis-ci.com/timniederhausen/gn.svg?branch=master)](https://travis-ci.com/timniederhausen/gn)
+[![Build status](https://ci.appveyor.com/api/projects/status/h6csk52w7dr73tgn/branch/master?svg=true)](https://ci.appveyor.com/project/timniederhausen/gn/branch/master)
+
 GN is a meta-build system that generates build files for
 [Ninja](https://ninja-build.org).
 
