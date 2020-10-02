@@ -399,6 +399,7 @@ def WriteGNNinja(path, platform, host, options):
       min_mac_version_flag = '-mmacosx-version-min=10.9'
       cflags.append(min_mac_version_flag)
       ldflags.append(min_mac_version_flag)
+      ldflags.append('-Wl,-rpath,@loader_path/.')
     elif platform.is_aix():
       cflags.append('-maix64')
       ldflags.append('-maix64')
