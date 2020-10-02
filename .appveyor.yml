@@ -1,0 +1,57 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+
+environment:
+  VISUAL_STUDIO_PATH: "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Community"
+
+  matrix:
+    - TARGET_CPU: x86
+      SLUG: "win-i386"
+    - TARGET_CPU: x64
+      SLUG: "win-amd64"
+
+branches:
+  except:
+    - infra/config
+
+matrix:
+  fast_finish: true
+
+init:
+  - call "%VISUAL_STUDIO_PATH%\VC\Auxiliary\Build\vcvarsall.bat" %TARGET_CPU%
+
+install:
+  # All external dependencies are installed in C:\projects\deps
+  - mkdir C:\projects\deps
+  - echo %PATH%
+
+  # Install Ninja
+  - set NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-win.zip"
+  - appveyor DownloadFile %NINJA_URL% -FileName C:\projects\deps\ninja.zip
+  - 7z x C:\projects\deps\ninja.zip -oC:\projects\deps > nul
+  - ninja --version
+
+  - git fetch --tags
+
+build_script:
+  - build\gen.py --use-lto --use-icf
+  - ninja -C out
+
+test_script:
+  - out\gn_unittests.exe
+
+after_build:
+  - 7z a -tzip out\gn-%SLUG%.zip .\out\gn.exe
+
+artifacts:
+  - path: out\gn-$(SLUG).zip
+
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure: xGft8eTCnPKawtkbprgpN4z0RMU5xxmQT8nBTTF2mZzkpIhUwNM/uLDaubIlf6dL
+    draft: false
+    prerelease: false
+    on:
+      branch: master                # release from master branch only
+      APPVEYOR_REPO_TAG: true       # deploy on tag push only
