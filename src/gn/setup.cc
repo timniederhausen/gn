@@ -122,6 +122,9 @@ Variables
       cause the file //BUILD.gn to be loaded. Note that build_file_extension
       applies to the default case as well.
 
+      The command-line switch --root-target will override this value (see "gn
+      help --root-target").
+
   script_executable [optional]
       Path to specific Python executable or other interpreter to use in
       action targets and exec_script calls. By default GN searches the
@@ -840,16 +843,31 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline, Err* err) {
   }
 
   // Root build file.
-  const Value* root_value = dotfile_scope_.GetValue("root", true);
-  if (root_value) {
-    if (!root_value->VerifyTypeIs(Value::STRING, err)) {
-      return false;
-    }
-
+  if (cmdline.HasSwitch(switches::kRootTarget)) {
+    auto switch_value =
+        cmdline.GetSwitchValueASCII(switches::kRootTarget);
+    Value root_value(nullptr, switch_value);
     root_target_label = Label::Resolve(current_dir, std::string_view(), Label(),
-                                       *root_value, err);
+                                       root_value, err);
     if (err->has_error()) {
       return false;
+    }
+    if (dotfile_scope_.GetValue("root", true)) {
+      // The "kRootTarget" switch overwrites the "root" variable in ".gn".
+      dotfile_scope_.MarkUsed("root");
+    }
+  } else {
+    const Value* root_value = dotfile_scope_.GetValue("root", true);
+    if (root_value) {
+      if (!root_value->VerifyTypeIs(Value::STRING, err)) {
+        return false;
+      }
+
+      root_target_label = Label::Resolve(current_dir, std::string_view(),
+                                         Label(), *root_value, err);
+      if (err->has_error()) {
+        return false;
+      }
     }
   }
   // Set the root build file here in order to take into account the values of
