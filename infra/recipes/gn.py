@@ -159,7 +159,7 @@ def RunSteps(api, repository):
                                            'git_revision:' + revision)
                 if cipd_pin:
                   api.step('Package is up-to-date', cmd=None)
-                  return
+                  continue
 
                 api.cipd.register(
                     package_name=cipd_pkg_name,
