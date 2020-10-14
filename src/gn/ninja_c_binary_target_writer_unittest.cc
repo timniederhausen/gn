@@ -1422,14 +1422,14 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustDeps) {
         "build obj/bar/bar.bar.o: cxx ../../bar/bar.cc\n"
         "\n"
         "build ./bar: link obj/bar/bar.bar.o obj/foo/libfoo.a | "
-        "obj/quux/lib4.rlib obj/qux/lib2.rlib\n"
+        "obj/baz/lib.rlib obj/quux/lib4.rlib obj/qux/lib2.rlib\n"
         "  ldflags =\n"
         "  libs =\n"
         "  frameworks =\n"
         "  swiftmodules =\n"
         "  output_extension = \n"
         "  output_dir = \n"
-        "  rlibs = obj/quux/lib4.rlib obj/qux/lib2.rlib\n";
+        "  rlibs = obj/baz/lib.rlib obj/quux/lib4.rlib obj/qux/lib2.rlib\n";
 
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
