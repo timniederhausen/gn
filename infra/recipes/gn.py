@@ -50,8 +50,8 @@ def RunSteps(api, repository):
             'refs/changes/%s/%s/%s' %
             (str(change.change)[-2:], change.change, change.patchset)
         ])
-        api.step('cherry-pick %s/%s' % (change.change, change.patchset),
-                 ['git', 'cherry-pick', 'FETCH_HEAD'])
+        api.step('checkout %s/%s' % (change.change, change.patchset),
+                 ['git', 'checkout', 'FETCH_HEAD'])
 
   with api.context(infra_steps=True):
     cipd_dir = api.path['start_dir'].join('cipd')
