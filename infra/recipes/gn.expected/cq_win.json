@@ -74,12 +74,12 @@
   {
     "cmd": [
       "git",
-      "checkout",
+      "cherry-pick",
       "FETCH_HEAD"
     ],
     "cwd": "[START_DIR]\\gn",
     "infra_step": true,
-    "name": "git.checkout 123456/7",
+    "name": "git.cherry-pick 123456/7",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
     ]
