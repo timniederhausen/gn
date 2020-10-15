@@ -179,10 +179,6 @@ Lists
     mylist = []
     mylist = otherlist
 
-  When assigning to a list named 'sources' using '=' or '+=', list items may be
-  automatically filtered out. See "gn help set_sources_assignment_filter" for
-  more.
-
 Scopes
 
   All execution happens in the context of a scope which holds the current state
