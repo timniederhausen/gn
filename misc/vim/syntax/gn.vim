@@ -47,10 +47,10 @@ syn keyword     gnVariable all_dependent_configs allow_circular_includes_from
 syn keyword     gnVariable args asmflags cflags cflags_c cflags_cc cflags_objc
 syn keyword     gnVariable cflags_objcc check_includes complete_static_lib
 syn keyword     gnVariable configs data data_deps defines depfile deps
-syn keyword     gnVariable include_dirs inputs ldflags lib_dirs libs
-syn keyword     gnVariable output_extension output_name outputs public
-syn keyword     gnVariable public_configs public_deps scripte sources testonly
-syn keyword     gnVariable visibility contents output_conversion rebase
+syn keyword     gnVariable framework_dirs frameworks include_dirs inputs ldflags
+syn keyword     gnVariable lib_dirs libs output_extension output_name outputs
+syn keyword     gnVariable public public_configs public_deps scripte sources
+syn keyword     gnVariable testonly visibility contents output_conversion rebase
 syn keyword     gnVariable data_keys walk_keys
 hi def link     gnVariable          Keyword
 

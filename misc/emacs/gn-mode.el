@@ -88,13 +88,13 @@ variable name or the '{{' and '}}' which surround it."
     "cflags_objc" "cflags_objcc" "check_includes" "code_signing_args"
     "code_signing_outputs" "code_signing_script" "code_signing_sources"
     "complete_static_lib" "configs" "data" "data_deps" "defines" "depfile"
-    "deps" "include_dirs" "inputs" "ldflags" "lib_dirs" "libs" "output_dir"
-    "output_extension" "output_name" "output_prefix_override" "outputs" "pool"
-    "precompiled_header" "precompiled_header_type" "precompiled_source"
-    "product_type" "public" "public_configs" "public_deps"
-    "response_file_contents" "script" "sources" "testonly" "visibility"
-    "write_runtime_deps" "bundle_contents_dir" "contents" "output_conversion"
-    "rebase" "data_keys" "walk_keys"))
+    "deps" "framework_dir" "frameworks" "include_dirs" "inputs" "ldflags"
+    "lib_dirs" "libs" "output_dir" "output_extension" "output_name"
+    "output_prefix_override" "outputs" "pool" "precompiled_header"
+    "precompiled_header_type" "precompiled_source" "product_type" "public"
+    "public_configs" "public_deps" "response_file_contents" "script" "sources"
+    "testonly" "visibility" "write_runtime_deps" "bundle_contents_dir"
+    "contents" "output_conversion" "rebase" "data_keys" "walk_keys"))
 
 (defconst gn-font-lock-keywords
   `((,(regexp-opt gn-font-lock-reserved-keywords 'words) .
