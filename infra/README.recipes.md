@@ -93,7 +93,7 @@ Raises:
 
 Recipe for building GN.
 
-&mdash; **def [RunSteps](/infra/recipes/gn.py#30)(api, repository):**
+&mdash; **def [RunSteps](/infra/recipes/gn.py#101)(api, repository):**
 ### *recipes* / [macos\_sdk:examples/full](/infra/recipe_modules/macos_sdk/examples/full.py)
 
 [DEPS](/infra/recipe_modules/macos_sdk/examples/full.py#5): [macos\_sdk](#recipe_modules-macos_sdk), [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/properties][recipe_engine/recipe_modules/properties], [recipe\_engine/step][recipe_engine/recipe_modules/step]

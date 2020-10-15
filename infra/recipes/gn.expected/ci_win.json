@@ -199,6 +199,7 @@
     "cmd": [
       "[START_DIR]\\gn\\out\\gn_unittests"
     ],
+    "cwd": "[START_DIR]\\gn",
     "env": {
       "VSINSTALLDIR": "[CACHE]\\windows_sdk"
     },
@@ -269,6 +270,7 @@
     "cmd": [
       "[START_DIR]\\gn\\out\\gn_unittests"
     ],
+    "cwd": "[START_DIR]\\gn",
     "env": {
       "VSINSTALLDIR": "[CACHE]\\windows_sdk"
     },
@@ -302,6 +304,7 @@
       "-json-output",
       "/path/to/tmp/json"
     ],
+    "cwd": "[START_DIR]\\gn",
     "env": {
       "VSINSTALLDIR": "[CACHE]\\windows_sdk"
     },
