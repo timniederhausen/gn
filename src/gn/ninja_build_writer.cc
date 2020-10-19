@@ -113,6 +113,15 @@ base::CommandLine GetSelfInvocationCommandLine(
     }
   }
 
+  // Add the regeneration switch if not already present. This is so that when
+  // the regeneration is invoked by ninja, the gen command is aware that it is a
+  // regeneration invocation and not an user invocation. This allows the gen
+  // command to elide ninja post processing steps that ninja will perform
+  // itself.
+  if (!cmdline.HasSwitch(switches::kRegeneration)) {
+    cmdline.AppendSwitch(switches::kRegeneration);
+  }
+
   return cmdline;
 }
 

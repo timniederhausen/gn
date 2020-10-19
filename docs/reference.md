@@ -718,6 +718,16 @@
   See "gn help switches" for the common command-line switches.
 ```
 
+#### **General options**
+
+```
+  --ninja-executable=<string>
+      Can be used to specify the ninja executable to use. This executable will
+      be used as an IDE option to indicate which ninja to use for building. This
+      executable will also be used as part of the gen process for triggering a
+      restat on generated ninja files.
+```
+
 #### **IDE options**
 
 ```
@@ -7760,6 +7770,7 @@
     *   --dotfile: Override the name of the ".gn" file.
     *   --fail-on-unused-args: Treat unused build args as fatal errors.
     *   --markdown: Write help output in the Markdown format.
+    *   --ninja-executable: Set the Ninja executable.
     *   --nocolor: Force non-colored output.
     *   -q: Quiet mode. Don't print output on success.
     *   --root: Explicitly specify source root.

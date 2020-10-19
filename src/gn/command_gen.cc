@@ -12,8 +12,10 @@
 #include "gn/commands.h"
 #include "gn/compile_commands_writer.h"
 #include "gn/eclipse_writer.h"
+#include "gn/filesystem_utils.h"
 #include "gn/json_project_writer.h"
 #include "gn/ninja_target_writer.h"
+#include "gn/ninja_tools.h"
 #include "gn/ninja_writer.h"
 #include "gn/qt_creator_writer.h"
 #include "gn/runtime_deps.h"
@@ -352,6 +354,38 @@ bool RunCompileCommandsWriter(const BuildSettings* build_settings,
   return res;
 }
 
+bool RunNinjaPostProcessTools(const BuildSettings* build_settings,
+                              base::FilePath ninja_executable,
+                              bool is_regeneration,
+                              Err* err) {
+  // If the user did not specify an executable, skip running the post processing
+  // tools. Since these tools can re-write ninja build log and dep logs, it is
+  // really important that ninja executable used for tools matches the
+  // executable that is used for builds.
+  if (ninja_executable.empty()) {
+    return true;
+  }
+
+  base::FilePath build_dir =
+      build_settings->GetFullPath(build_settings->build_dir());
+
+  // If we have a ninja version that supports restat, we should restat the
+  // build.ninja file so the next ninja invocation will use the right mtime. If
+  // gen is being invoked as part of a re-gen (ie, ninja is invoking gn gen),
+  // then we can elide this restat, as ninja will restat build.ninja anyways
+  // after it is complete.
+  if (!is_regeneration &&
+      build_settings->ninja_required_version() >= Version{1, 10, 0}) {
+    std::vector<base::FilePath> files_to_restat{
+        base::FilePath(FILE_PATH_LITERAL("build.ninja"))};
+    if (!InvokeNinjaRestatTool(ninja_executable, build_dir, files_to_restat,
+                               err)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 }  // namespace
 
 const char kGen[] = "gen";
@@ -372,6 +406,14 @@ const char kGen_Help[] =
   documentation on that mode.
 
   See "gn help switches" for the common command-line switches.
+
+General options
+
+  --ninja-executable=<string>
+      Can be used to specify the ninja executable to use. This executable will
+      be used as an IDE option to indicate which ninja to use for building. This
+      executable will also be used as part of the gen process for triggering a
+      restat on generated ninja files.
 
 IDE options
 
@@ -554,6 +596,14 @@ int RunGen(const std::vector<std::string>& args) {
   // Write the root ninja files.
   if (!NinjaWriter::RunAndWriteFiles(&setup->build_settings(), setup->builder(),
                                      write_info.rules, &err)) {
+    err.PrintToStdout();
+    return 1;
+  }
+
+  if (!RunNinjaPostProcessTools(
+          &setup->build_settings(),
+          command_line->GetSwitchValuePath(switches::kNinjaExecutable),
+          command_line->HasSwitch(switches::kRegeneration), &err)) {
     err.PrintToStdout();
     return 1;
   }

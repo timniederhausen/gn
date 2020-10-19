@@ -99,6 +99,16 @@ const char kNoColor[] = "nocolor";
 const char kNoColor_HelpShort[] = "--nocolor: Force non-colored output.";
 const char kNoColor_Help[] = COLOR_HELP_LONG;
 
+const char kNinjaExecutable[] = "ninja-executable";
+const char kNinjaExecutable_HelpShort[] =
+    "--ninja-executable: Set the Ninja executable.";
+const char kNinjaExecutable_Help[] =
+    R"(--ninja-executable: Set the Ninja executable.
+
+  When set specifies the Ninja executable that will be used to perform some
+  post-processing on the generated files for more consistent builds.
+)";
+
 const char kScriptExecutable[] = "script-executable";
 const char kScriptExecutable_HelpShort[] =
     "--script-executable: Set the executable used to execute scripts.";
@@ -306,6 +316,7 @@ const char kVersion_Help[] = "";
 
 const char kDefaultToolchain[] = "default-toolchain";
 
+const char kRegeneration[] = "regeneration";
 // -----------------------------------------------------------------------------
 
 SwitchInfo::SwitchInfo() : short_help(""), long_help("") {}
@@ -324,6 +335,7 @@ const SwitchInfoMap& GetSwitches() {
     INSERT_VARIABLE(Dotfile)
     INSERT_VARIABLE(FailOnUnusedArgs)
     INSERT_VARIABLE(Markdown)
+    INSERT_VARIABLE(NinjaExecutable)
     INSERT_VARIABLE(NoColor)
     INSERT_VARIABLE(Root)
     INSERT_VARIABLE(RootTarget)
