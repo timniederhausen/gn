@@ -74,12 +74,12 @@
   {
     "cmd": [
       "git",
-      "cherry-pick",
+      "checkout",
       "FETCH_HEAD"
     ],
     "cwd": "[START_DIR]/gn",
     "infra_step": true,
-    "name": "git.cherry-pick 123456/7",
+    "name": "git.checkout 123456/7",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
     ]
@@ -171,23 +171,23 @@
     "name": "debug"
   },
   {
-    "cmd": [
-      "xcrun",
-      "--show-sdk-path"
-    ],
-    "name": "debug.xcrun",
-    "stdout": "/path/to/tmp/",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
-      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
-    ]
-  },
-  {
     "cmd": [],
     "name": "debug.mac-amd64",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "xcrun",
+      "--show-sdk-path"
+    ],
+    "name": "debug.mac-amd64.xcrun",
+    "stdout": "/path/to/tmp/",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@2@@@",
+      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
+      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
     ]
   },
   {
@@ -243,23 +243,23 @@
     "name": "release"
   },
   {
-    "cmd": [
-      "xcrun",
-      "--show-sdk-path"
-    ],
-    "name": "release.xcrun",
-    "stdout": "/path/to/tmp/",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
-      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
-    ]
-  },
-  {
     "cmd": [],
     "name": "release.mac-amd64",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "xcrun",
+      "--show-sdk-path"
+    ],
+    "name": "release.mac-amd64.xcrun",
+    "stdout": "/path/to/tmp/",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@2@@@",
+      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
+      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
     ]
   },
   {
