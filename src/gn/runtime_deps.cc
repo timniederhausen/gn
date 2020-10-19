@@ -188,8 +188,10 @@ bool CollectRuntimeDepsFromFlag(const BuildSettings* build_settings,
     } else if (target->dependency_output_file()) {
       output_file =
           OutputFile(target->dependency_output_file()->value() + extension);
-    } else if (target->dependency_output_phony()) {
-      // If the dependency is a phony target, there is no file to add an additional
+    } else {
+      // If there is no dependency_output_file, this target's dependency output
+      // is either a phony alias or was elided entirely (due to lack of real
+      // inputs). In either case, there is no file to add an additional
       // extension to, so we should compute our own name in the OBJ BuildDir.
       output_file = GetBuildDirForTargetAsOutputFile(target, BuildDirType::OBJ);
       output_file->value().append(target->GetComputedOutputName());
