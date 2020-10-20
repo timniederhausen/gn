@@ -27,4 +27,18 @@ bool InvokeNinjaRestatTool(const base::FilePath& ninja_executable,
                            const std::vector<base::FilePath>& files_to_restat,
                            Err* err);
 
+// Invokes the ninja cleandead tool (ie, ninja -C build_dir -t cleandead). This
+// tool removes files produced by previous builds that are no longer in the
+// build file.
+bool InvokeNinjaCleanDeadTool(const base::FilePath& ninja_executable,
+                              const base::FilePath& build_dir,
+                              Err* err);
+
+// Invokes the ninja recompact tool (ie, ninja -C build_dir -t recompact). This
+// tool prunes the .ninja_log and .ninja_deps entries that are no longer part of
+// the build graph.
+bool InvokeNinjaRecompactTool(const base::FilePath& ninja_executable,
+                              const base::FilePath& build_dir,
+                              Err* err);
+
 #endif // TOOLS_GN_NINJA_TOOLS_H_

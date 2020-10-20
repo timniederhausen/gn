@@ -511,6 +511,7 @@ def WriteGNNinja(path, platform, host, options):
         'src/gn/command_args.cc',
         'src/gn/command_check.cc',
         'src/gn/command_clean.cc',
+        'src/gn/command_clean_stale.cc',
         'src/gn/command_desc.cc',
         'src/gn/command_format.cc',
         'src/gn/command_gen.cc',

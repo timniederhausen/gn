@@ -62,3 +62,21 @@ bool InvokeNinjaRestatTool(const base::FilePath& ninja_executable,
   std::string output;
   return RunNinja(cmdline, build_dir, &output, err);
 }
+
+bool InvokeNinjaCleanDeadTool(const base::FilePath& ninja_executable,
+                              const base::FilePath& build_dir,
+                              Err* err) {
+  base::CommandLine cmdline =
+      CreateNinjaToolCommandLine(ninja_executable, "cleandead");
+  std::string output;
+  return RunNinja(cmdline, build_dir, &output, err);
+}
+
+bool InvokeNinjaRecompactTool(const base::FilePath& ninja_executable,
+                              const base::FilePath& build_dir,
+                              Err* err) {
+  base::CommandLine cmdline =
+      CreateNinjaToolCommandLine(ninja_executable, "recompact");
+  std::string output;
+  return RunNinja(cmdline, build_dir, &output, err);
+}

@@ -9,6 +9,7 @@
     *   [args: Display or configure arguments declared by the build.](#cmd_args)
     *   [check: Check header dependencies.](#cmd_check)
     *   [clean: Cleans the output directory.](#cmd_clean)
+    *   [clean_stale: Cleans the stale output files from the output directory.](#cmd_clean_stale)
     *   [desc: Show lots of insightful information about a target or config.](#cmd_desc)
     *   [format: Format .gn files.](#cmd_format)
     *   [gen: Generate ninja files.](#cmd_gen)
@@ -486,6 +487,24 @@
   Deletes the contents of the output directory except for args.gn and
   creates a Ninja build environment sufficient to regenerate the build.
 ```
+### <a name="cmd_clean_stale"></a>**gn clean_stale [\--ninja-executable=...] &lt;out_dir&gt;...**
+
+```
+  Removes the no longer needed output files from the build directory and prunes
+  their records from the ninja build log and dependency database. These are
+  output files that were generated from previous builds, but the current build
+  graph no longer references them.
+
+  This command requires a ninja executable of at least version 1.10.0. The
+  executable must be provided by the --ninja-executable switch.
+```
+
+#### **Options**
+
+```
+  --ninja-executable=<string>
+      Can be used to specify the ninja executable to use.
+```
 ### <a name="cmd_desc"></a>**gn desc**
 
 ```
@@ -691,6 +710,12 @@
   --stdin
       Read input from stdin and write to stdout rather than update a file
       in-place.
+
+  --read-tree=json
+      Reads an AST from stdin in the format output by --dump-tree=json and
+      uses that as the parse tree. (The only read-tree format currently
+      supported is json.) The given .gn file will be overwritten. This can be
+      used to programmatically transform .gn files.
 ```
 
 #### **Examples**
@@ -699,6 +724,7 @@
   gn format some\\BUILD.gn
   gn format /abspath/some/BUILD.gn
   gn format --stdin
+  gn format --read-tree=json //rewritten/BUILD.gn
 ```
 ### <a name="cmd_gen"></a>**gn gen [\--check] [&lt;ide options&gt;] &lt;out_dir&gt;**
 
@@ -725,7 +751,14 @@
       Can be used to specify the ninja executable to use. This executable will
       be used as an IDE option to indicate which ninja to use for building. This
       executable will also be used as part of the gen process for triggering a
-      restat on generated ninja files.
+      restat on generated ninja files and for use with --clean-stale.
+
+  --clean-stale
+      This option will cause no longer needed output files to be removed from
+      the build directory, and their records pruned from the ninja build log and
+      dependency database after the ninja build graph has been generated. This
+      option requires a ninja executable of at least version 1.10.0. It can be
+      provided by the --ninja-executable switch. Also see "gn help clean_stale".
 ```
 
 #### **IDE options**
@@ -866,7 +899,6 @@
       - "//foo:foo"
       and not match:
       - "//foo:bar"
-
 ```
 ### <a name="cmd_help"></a>**gn help &lt;anything&gt;**
 
