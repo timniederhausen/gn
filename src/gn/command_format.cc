@@ -1209,19 +1209,19 @@ void DoFormat(const ParseNode* root,
               TreeDumpMode dump_tree,
               std::string* output) {
 #if defined(OS_WIN)
-    // Set stderr to binary mode to prevent converting newlines to \r\n.
-    _setmode(_fileno(stderr), _O_BINARY);
+    // Set stdout to binary mode to prevent converting newlines to \r\n.
+    _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
   if (dump_tree == TreeDumpMode::kPlainText) {
     std::ostringstream os;
     RenderToText(root->GetJSONNode(), 0, os);
-    fprintf(stderr, "%s", os.str().c_str());
+    fprintf(stdout, "%s", os.str().c_str());
   } else if (dump_tree == TreeDumpMode::kJSON) {
     std::string os;
     base::JSONWriter::WriteWithOptions(
         root->GetJSONNode(), base::JSONWriter::OPTIONS_PRETTY_PRINT, &os);
-    fprintf(stderr, "%s", os.c_str());
+    fprintf(stdout, "%s", os.c_str());
   }
 
   Printer pr;
