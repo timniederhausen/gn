@@ -59,9 +59,8 @@ const char kFormat_Help[] =
 Arguments
 
   --dry-run
-      Does not change or output anything, but sets the process exit code based
-      on whether output would be different than what's on disk. This is useful
-      for presubmit/lint-type checks.
+      Prints the list of files that would be reformatted but does not write
+      anything to disk. This is useful for presubmit/lint-type checks.
       - Exit code 0: successful format, matches on disk.
       - Exit code 1: general failure (parse error, etc.)
       - Exit code 2: successful format, but differs from on disk.
@@ -1320,12 +1319,14 @@ int RunFormat(const std::vector<std::string>& args) {
 
   // TODO(scottmg): Eventually, this list of files should be processed in
   // parallel.
+  int exit_code = 0;
   for (const auto& arg : args) {
     Err err;
     SourceFile file = source_dir.ResolveRelativeFile(Value(nullptr, arg), &err);
     if (err.has_error()) {
       err.PrintToStdout();
-      return 1;
+      exit_code = 1;
+      continue;
     }
 
     base::FilePath to_format = setup.build_settings().GetFullPath(file);
@@ -1334,17 +1335,24 @@ int RunFormat(const std::vector<std::string>& args) {
       Err(Location(),
           std::string("Couldn't read \"") + FilePathToUTF8(to_format))
           .PrintToStdout();
-      return 1;
+      exit_code = 1;
+      continue;
     }
 
     std::string output_string;
     if (!FormatStringToString(original_contents, dump_tree, &output_string)) {
-      return 1;
+      exit_code = 1;
+      continue;
     }
     if (dump_tree == TreeDumpMode::kInactive) {
+      if (dry_run) {
+        if (original_contents != output_string) {
+          printf("%s\n", arg.c_str());
+          exit_code = 2;
+        }
+        continue;
+      }
       // Update the file in-place.
-      if (dry_run)
-        return original_contents == output_string ? 0 : 2;
       if (original_contents != output_string) {
         if (base::WriteFile(to_format, output_string.data(),
                             static_cast<int>(output_string.size())) == -1) {
@@ -1352,17 +1360,18 @@ int RunFormat(const std::vector<std::string>& args) {
               std::string("Failed to write formatted output back to \"") +
                   FilePathToUTF8(to_format) + std::string("\"."))
               .PrintToStdout();
-          return 1;
+          exit_code = 1;
+          continue;
         }
         if (!quiet) {
           printf("Wrote formatted to '%s'.\n",
-                 FilePathToUTF8(to_format).c_str());
+                FilePathToUTF8(to_format).c_str());
         }
       }
     }
   }
 
-  return 0;
+  return exit_code;
 }
 
 }  // namespace commands
