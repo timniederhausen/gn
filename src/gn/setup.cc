@@ -265,7 +265,7 @@ base::FilePath PythonBatToExe(const base::FilePath& bat_path) {
   // two quotes at the end.
   std::u16string command = u"cmd.exe /c \"\"";
   command.append(bat_path.value());
-  command.append(u"\" -c \"import sys; print sys.executable\"\"");
+  command.append(u"\" -c \"import sys; print(sys.executable)\"\"");
 
   std::string python_path;
   std::string std_err;
@@ -727,8 +727,12 @@ bool Setup::FillPythonPath(const base::CommandLine& cmdline, Err* err) {
   ScopedTrace setup_trace(TraceItem::TRACE_SETUP, "Fill Python Path");
   const Value* value = dotfile_scope_.GetValue("script_executable", true);
   if (cmdline.HasSwitch(switches::kScriptExecutable)) {
-    build_settings_.set_python_path(
-        cmdline.GetSwitchValuePath(switches::kScriptExecutable));
+    auto script_executable = cmdline.GetSwitchValuePath(switches::kScriptExecutable);
+#if defined(OS_WIN)
+    if (script_executable.FinalExtension() == u".bat")
+      script_executable = PythonBatToExe(script_executable);
+#endif
+    build_settings_.set_python_path(script_executable);
   } else if (value) {
     if (!value->VerifyTypeIs(Value::STRING, err)) {
       return false;
