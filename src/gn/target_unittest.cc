@@ -726,8 +726,7 @@ TEST_F(TargetTest, LinkAndDepOutputs) {
   ASSERT_TRUE(target.OnResolved(&err));
 
   EXPECT_EQ("./liba.so", target.link_output_file().value());
-  ASSERT_TRUE(target.dependency_output_file());
-  EXPECT_EQ("./liba.so.TOC", target.dependency_output_file()->value());
+  EXPECT_EQ("./liba.so.TOC", target.dependency_output_file().value());
 
   ASSERT_EQ(1u, target.runtime_outputs().size());
   EXPECT_EQ("./liba.so", target.runtime_outputs()[0].value());
@@ -773,8 +772,7 @@ TEST_F(TargetTest, RuntimeOuputs) {
   ASSERT_TRUE(target.OnResolved(&err));
 
   EXPECT_EQ("./a.dll.lib", target.link_output_file().value());
-  ASSERT_TRUE(target.dependency_output_file());
-  EXPECT_EQ("./a.dll.lib", target.dependency_output_file()->value());
+  EXPECT_EQ("./a.dll.lib", target.dependency_output_file().value());
 
   ASSERT_EQ(2u, target.runtime_outputs().size());
   EXPECT_EQ("./a.dll", target.runtime_outputs()[0].value());
@@ -804,7 +802,6 @@ TEST_F(TargetTest, GetOutputFilesForSource_Binary) {
 
   Target target(setup.settings(), Label(SourceDir("//a/"), "a"));
   target.set_output_type(Target::SOURCE_SET);
-  target.sources().push_back(SourceFile("//a/source_file1.cc"));
   target.SetToolchain(&toolchain);
   Err err;
   ASSERT_TRUE(target.OnResolved(&err));
@@ -821,12 +818,12 @@ TEST_F(TargetTest, GetOutputFilesForSource_Binary) {
   EXPECT_EQ("input.cc.o", output[0].value()) << output[0].value();
 
   // Test GetOutputsAsSourceFiles(). Since this is a source set it should give a
-  // phony target.
+  // stamp file.
   std::vector<SourceFile> computed_outputs;
   EXPECT_TRUE(target.GetOutputsAsSourceFiles(LocationRange(), true,
                                              &computed_outputs, &err));
   ASSERT_EQ(1u, computed_outputs.size());
-  EXPECT_EQ("//out/Debug/phony/a/a", computed_outputs[0].value());
+  EXPECT_EQ("//out/Debug/obj/a/a.stamp", computed_outputs[0].value());
 }
 
 // Tests Target::GetOutputFilesForSource for action_foreach targets (these, like

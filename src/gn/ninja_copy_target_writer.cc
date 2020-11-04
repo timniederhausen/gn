@@ -33,13 +33,28 @@ void NinjaCopyTargetWriter::Run() {
     return;
   }
 
-  // General target-related substitutions needed by the copy tool.
-  WriteSharedVars(copy_tool->substitution_bits());
+  const Tool* stamp_tool = target_->toolchain()->GetTool(GeneralTool::kGeneralToolStamp);
+  if (!stamp_tool) {
+    g_scheduler->FailWithError(Err(
+        nullptr, "Copy tool not defined",
+        "The toolchain " +
+            target_->toolchain()->label().GetUserVisibleName(false) +
+            "\n used by target " + target_->label().GetUserVisibleName(false) +
+            "\n doesn't define a \"stamp\" tool."));
+    return;
+  }
+
+  // Figure out the substitutions used by the copy and stamp tools.
+  SubstitutionBits required_bits = copy_tool->substitution_bits();
+  required_bits.MergeFrom(stamp_tool->substitution_bits());
+
+  // General target-related substitutions needed by both tools.
+  WriteSharedVars(required_bits);
 
   std::vector<OutputFile> output_files;
   WriteCopyRules(&output_files);
   out_ << std::endl;
-  WritePhonyForTarget(output_files, std::vector<OutputFile>());
+  WriteStampForTarget(output_files, std::vector<OutputFile>());
 }
 
 void NinjaCopyTargetWriter::WriteCopyRules(
@@ -54,15 +69,13 @@ void NinjaCopyTargetWriter::WriteCopyRules(
   std::string tool_name = GetNinjaRulePrefixForToolchain(settings_) +
                           GeneralTool::kGeneralToolCopy;
 
-  size_t num_output_uses = target_->sources().size();
-  std::vector<OutputFile> input_deps = WriteInputDepsPhonyAndGetDep(
-      std::vector<const Target*>(), num_output_uses);
+  size_t num_stamp_uses = target_->sources().size();
+  std::vector<OutputFile> input_deps = WriteInputDepsStampAndGetDep(
+      std::vector<const Target*>(), num_stamp_uses);
 
   std::vector<OutputFile> data_outs;
-  for (const auto& dep : target_->data_deps()) {
-    if (dep.ptr->dependency_output_file_or_phony())
-      data_outs.push_back(*dep.ptr->dependency_output_file_or_phony());
-  }
+  for (const auto& dep : target_->data_deps())
+    data_outs.push_back(dep.ptr->dependency_output_file());
 
   // Note that we don't write implicit deps for copy steps. "copy" only
   // depends on the output files themselves, rather than having includes

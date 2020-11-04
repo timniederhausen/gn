@@ -2654,7 +2654,7 @@
   process_file_template").
 
   source sets and groups: this will return a list containing the path of the
-  phony target that Ninja completes once all outputs are generated. This
+  "stamp" file that Ninja will produce once all outputs are generated. This
   probably isn't very useful.
 ```
 

@@ -132,10 +132,10 @@ void NinjaCBinaryTargetWriter::Run() {
 
   WriteCompilerVars(module_dep_info);
 
-  size_t num_output_uses = target_->sources().size();
+  size_t num_stamp_uses = target_->sources().size();
 
-  std::vector<OutputFile> input_deps =
-      WriteInputsPhonyAndGetDep(num_output_uses);
+  std::vector<OutputFile> input_deps = WriteInputsStampAndGetDep(
+      num_stamp_uses);
 
   // The input dependencies will be an order-only dependency. This will cause
   // Ninja to make sure the inputs are up to date before compiling this source,
@@ -164,11 +164,11 @@ void NinjaCBinaryTargetWriter::Run() {
   // The order only deps are referenced by each source file compile,
   // but also by PCH compiles.  The latter are annoying to count, so omit
   // them here.  This means that binary targets with a single source file
-  // that also use PCH files won't have a phony target even though having
+  // that also use PCH files won't have a stamp file even though having
   // one would make output ninja file size a bit lower. That's ok, binary
   // targets with a single source are rare.
-  std::vector<OutputFile> order_only_deps = WriteInputDepsPhonyAndGetDep(
-      std::vector<const Target*>(), num_output_uses);
+  std::vector<OutputFile> order_only_deps = WriteInputDepsStampAndGetDep(
+      std::vector<const Target*>(), num_stamp_uses);
 
   // For GCC builds, the .gch files are not object files, but still need to be
   // added as explicit dependencies below. The .gch output files are placed in
@@ -207,7 +207,7 @@ void NinjaCBinaryTargetWriter::Run() {
     return;
 
   if (target_->output_type() == Target::SOURCE_SET) {
-    WriteSourceSetPhony(obj_files);
+    WriteSourceSetStamp(obj_files);
 #ifndef NDEBUG
     // Verify that the function that separately computes a source set's object
     // files match the object files just computed.
@@ -667,11 +667,8 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
     swift_order_only_deps.Append(order_only_deps.begin(),
                                  order_only_deps.end());
 
-    for (const Target* swiftmodule : target_->swift_values().modules()) {
-      CHECK(swiftmodule->dependency_output_file_or_phony());
-      swift_order_only_deps.push_back(
-          *swiftmodule->dependency_output_file_or_phony());
-    }
+    for (const Target* swiftmodule : target_->swift_values().modules())
+      swift_order_only_deps.push_back(swiftmodule->dependency_output_file());
 
     WriteCompilerBuildLine(target_->sources(), input_deps,
                            swift_order_only_deps.vector(), tool->name(),
@@ -722,12 +719,11 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
         cur->output_type() == Target::RUST_PROC_MACRO)
       continue;
 
-    if (cur->dependency_output_file_or_phony() &&
-        (cur->dependency_output_file_or_phony()->value() !=
-         cur->link_output_file().value())) {
+    if (cur->dependency_output_file().value() !=
+        cur->link_output_file().value()) {
       // This is a shared library with separate link and deps files. Save for
       // later.
-      implicit_deps.push_back(*cur->dependency_output_file_or_phony());
+      implicit_deps.push_back(cur->dependency_output_file());
       solibs.push_back(cur->link_output_file());
     } else {
       // Normal case, just link to this target.
@@ -758,13 +754,12 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   }
 
   // If any target creates a framework bundle, then treat it as an implicit
-  // dependency via the phony target. This is a pessimisation as it is not
+  // dependency via the .stamp file. This is a pessimisation as it is not
   // always necessary to relink the current target if one of the framework
   // is regenerated, but it ensure that if one of the framework API changes,
   // any dependent target will relink it (see crbug.com/1037607).
   for (const Target* dep : classified_deps.framework_deps) {
-    if (dep->dependency_output_file_or_phony())
-      implicit_deps.push_back(*dep->dependency_output_file_or_phony());
+    implicit_deps.push_back(dep->dependency_output_file());
   }
 
   // The input dependency is only needed if there are no object files, as the
@@ -779,9 +774,8 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
     for (const auto* dep :
          target_->rust_values().transitive_libs().GetOrdered()) {
       if (dep->output_type() == Target::RUST_LIBRARY) {
-        CHECK(dep->dependency_output_file());
-        transitive_rustlibs.push_back(*dep->dependency_output_file());
-        implicit_deps.push_back(*dep->dependency_output_file());
+        transitive_rustlibs.push_back(dep->dependency_output_file());
+        implicit_deps.push_back(dep->dependency_output_file());
       }
     }
   }
@@ -813,11 +807,11 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   // this target.
   //
   // The action dependencies are not strictly necessary in this case. They
-  // should also have been collected via the input deps phony alias that each
-  // source file has for an order-only dependency, and since this target depends
-  // on the sources, there is already an implicit order-only dependency.
-  // However, it's extra work to separate these out and there's no disadvantage
-  // to listing them again.
+  // should also have been collected via the input deps stamp that each source
+  // file has for an order-only dependency, and since this target depends on
+  // the sources, there is already an implicit order-only dependency. However,
+  // it's extra work to separate these out and there's no disadvantage to
+  // listing them again.
   WriteOrderOnlyDependencies(classified_deps.non_linkable_deps);
 
   // End of the link "build" line.
@@ -879,11 +873,8 @@ void NinjaCBinaryTargetWriter::WriteOrderOnlyDependencies(
 
     // Non-linkable targets.
     for (auto* non_linkable_dep : non_linkable_deps) {
-      if (non_linkable_dep->dependency_output_file_or_phony()) {
-        out_ << " ";
-        path_output_.WriteFile(
-            out_, *non_linkable_dep->dependency_output_file_or_phony());
-      }
+      out_ << " ";
+      path_output_.WriteFile(out_, non_linkable_dep->dependency_output_file());
     }
   }
 }

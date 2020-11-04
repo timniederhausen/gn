@@ -40,20 +40,21 @@ class NinjaTargetWriter {
   // identified by the given bits will be written.
   void WriteSharedVars(const SubstitutionBits& bits);
 
-  // Writes to the output stream a phony rule for input dependencies, and
+  // Writes to the output stream a stamp rule for input dependencies, and
   // returns the file to be appended to source rules that encodes the
   // order-only dependencies for the current target.
-  // If num_output_uses is small, this might return all input dependencies
-  // directly, without writing a phony rule.
+  // If num_stamp_uses is small, this might return all input dependencies
+  // directly, without writing a stamp file.
   // If there are no implicit dependencies and no extra target dependencies
   // are passed in, this returns an empty vector.
-  std::vector<OutputFile> WriteInputDepsPhonyAndGetDep(
+  std::vector<OutputFile> WriteInputDepsStampAndGetDep(
       const std::vector<const Target*>& extra_hard_deps,
-      size_t num_output_uses) const;
+      size_t num_stamp_uses) const;
 
-  // Writes to the output file a final phony rule for the target that aliases
-  // the given list of files.
-  void WritePhonyForTarget(const std::vector<OutputFile>& deps,
+  // Writes to the output file a final stamp rule for the target that stamps
+  // the given list of files. This function assumes the stamp is for the target
+  // as a whole so the stamp file is set as the target's dependency output.
+  void WriteStampForTarget(const std::vector<OutputFile>& deps,
                            const std::vector<OutputFile>& order_only_deps);
 
   const Settings* settings_;  // Non-owning.

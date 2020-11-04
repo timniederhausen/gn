@@ -44,7 +44,7 @@ TEST_F(NinjaBinaryTargetWriterTest, CSources) {
       "build obj/foo/bar.input1.o: cxx ../../foo/input1.cc\n"
       "build obj/foo/bar.input2.o: cxx ../../foo/input2.cc\n"
       "\n"
-      "build phony/foo/bar: phony obj/foo/bar.input1.o "
+      "build obj/foo/bar.stamp: stamp obj/foo/bar.input1.o "
       "obj/foo/bar.input2.o ../../foo/input3.o ../../foo/input4.obj\n";
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str);
@@ -71,7 +71,8 @@ TEST_F(NinjaBinaryTargetWriterTest, NoSourcesSourceSet) {
       "target_out_dir = obj/foo\n"
       "target_output_name = bar\n"
       "\n"
-      "\n";
+      "\n"
+      "build obj/foo/bar.stamp: stamp\n";
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str);
 }
@@ -137,7 +138,7 @@ TEST_F(NinjaBinaryTargetWriterTest, Inputs) {
         "build obj/foo/bar.source1.o: cxx ../../foo/source1.cc | "
         "../../foo/input1 ../../foo/input2\n"
         "\n"
-        "build phony/foo/bar: phony obj/foo/bar.source1.o\n";
+        "build obj/foo/bar.stamp: stamp obj/foo/bar.source1.o\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
@@ -167,14 +168,14 @@ TEST_F(NinjaBinaryTargetWriterTest, Inputs) {
         "target_out_dir = obj/foo\n"
         "target_output_name = bar\n"
         "\n"
-        "build phony/foo/bar.inputs: phony "
+        "build obj/foo/bar.inputs.stamp: stamp "
         "../../foo/input1 ../../foo/input2\n"
         "build obj/foo/bar.source1.o: cxx ../../foo/source1.cc | "
-        "phony/foo/bar.inputs\n"
+        "obj/foo/bar.inputs.stamp\n"
         "build obj/foo/bar.source2.o: cxx ../../foo/source2.cc | "
-        "phony/foo/bar.inputs\n"
+        "obj/foo/bar.inputs.stamp\n"
         "\n"
-        "build phony/foo/bar: phony obj/foo/bar.source1.o "
+        "build obj/foo/bar.stamp: stamp obj/foo/bar.source1.o "
         "obj/foo/bar.source2.o\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;

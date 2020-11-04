@@ -244,7 +244,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
         "\n"
         "build obj/bar/libmylib.rlib: rust_rlib ../../bar/lib.rs | "
         "../../bar/mylib.rs ../../bar/lib.rs obj/bar/libmymacro.so || "
-        "phony/baz/group\n"
+        "obj/baz/group.stamp\n"
         "  externs = --extern mymacro=obj/bar/libmymacro.so\n"
         "  rustdeps = -Ldependency=obj/bar\n"
         "  sources = ../../bar/mylib.rs ../../bar/lib.rs\n";
@@ -436,7 +436,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "../../foo/main.rs obj/baz/sourceset.csourceset.o "
         "obj/bar/libmylib.rlib "
         "obj/foo/libstatic.a ./libshared.so ./libshared_with_toc.so.TOC "
-        "|| phony/baz/sourceset\n"
+        "|| obj/baz/sourceset.stamp\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
         "  rustdeps = -Ldependency=obj/bar -Lnative=obj/baz -Lnative=obj/foo "
         "-Lnative=. -Clink-arg=obj/baz/sourceset.csourceset.o -lstatic "
@@ -748,7 +748,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, GroupDeps) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
-        "../../foo/main.rs obj/bar/libmylib.rlib || phony/baz/group\n"
+        "../../foo/main.rs obj/bar/libmylib.rlib || obj/baz/group.stamp\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
         "  rustdeps = -Ldependency=obj/bar\n"
         "  sources = ../../foo/source.rs ../../foo/main.rs\n";
@@ -828,7 +828,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, Inputs) {
     writer.Run();
 
     const char expected[] =
-        "build phony/foo/bar.inputs: phony ../../foo/config.json ../../foo/template.h\n"
+        "build obj/foo/bar.inputs.stamp: stamp ../../foo/config.json ../../foo/template.h\n"
         "crate_name = foo_bar\n"
         "crate_type = bin\n"
         "output_extension = \n"
@@ -841,7 +841,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, Inputs) {
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
         "../../foo/main.rs ../../foo/config.json ../../foo/template.h "
-        "|| phony/foo/bar.inputs\n"
+        "|| obj/foo/bar.inputs.stamp\n"
         "  externs =\n"
         "  rustdeps =\n"
         "  sources = ../../foo/source.rs ../../foo/main.rs "

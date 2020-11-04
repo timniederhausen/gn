@@ -127,8 +127,7 @@ class VisualStudioWriter {
   // and updates |root_folder_dir_|. Also sets |parent_folder| for |projects_|.
   void ResolveSolutionFolders();
 
-  // Returns the ninja target string and whether the target is phony.
-  std::pair<std::string, bool> GetNinjaTarget(const Target* target);
+  std::string GetNinjaTarget(const Target* target);
 
   const BuildSettings* build_settings_;
 

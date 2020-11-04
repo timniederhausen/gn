@@ -33,18 +33,18 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
     UniqueVector<const Target*> swiftmodule_deps;
   };
 
-  // Writes to the output stream a phony rule for inputs, and
-  // returns the target to be appended to source rules that encodes the
+  // Writes to the output stream a stamp rule for inputs, and
+  // returns the file to be appended to source rules that encodes the
   // implicit dependencies for the current target.
-  // If num_output_uses is small, this might return all input dependencies
-  // directly, without writing a phony rule.
+  // If num_stamp_uses is small, this might return all input dependencies
+  // directly, without writing a stamp file.
   // If there are no implicit dependencies and no extra target dependencies
   // are passed in, this returns an empty vector.
-  std::vector<OutputFile> WriteInputsPhonyAndGetDep(
-      size_t num_phony_uses) const;
+  std::vector<OutputFile> WriteInputsStampAndGetDep(
+      size_t num_stamp_uses) const;
 
-  // Writes the phony line for a source set. These are not linked.
-  void WriteSourceSetPhony(const std::vector<OutputFile>& object_files);
+  // Writes the stamp line for a source set. These are not linked.
+  void WriteSourceSetStamp(const std::vector<OutputFile>& object_files);
 
   // Gets all target dependencies and classifies them, as well as accumulates
   // object files from source sets we need to link.
