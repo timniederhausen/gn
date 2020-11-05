@@ -286,16 +286,14 @@ base::FilePath PythonBatToExe(const base::FilePath& bat_path) {
   return base::FilePath();
 }
 
-const char16_t kPythonExeName[] = u"python.exe";
-const char16_t kPythonBatName[] = u"python.bat";
-
-base::FilePath FindWindowsPython() {
+base::FilePath FindWindowsPython(const base::FilePath& python_exe_name,
+                                 const base::FilePath& python_bat_name) {
   char16_t current_directory[MAX_PATH];
   ::GetCurrentDirectory(MAX_PATH, reinterpret_cast<LPWSTR>(current_directory));
 
   // First search for python.exe in the current directory.
   base::FilePath cur_dir_candidate_exe =
-      base::FilePath(current_directory).Append(kPythonExeName);
+      base::FilePath(current_directory).Append(python_exe_name);
   if (base::PathExists(cur_dir_candidate_exe))
     return cur_dir_candidate_exe;
 
@@ -316,13 +314,13 @@ base::FilePath FindWindowsPython() {
            std::u16string_view(full_path.get(), path_length), u";",
            base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY)) {
     base::FilePath candidate_exe =
-        base::FilePath(component).Append(kPythonExeName);
+        base::FilePath(component).Append(python_exe_name);
     if (base::PathExists(candidate_exe))
       return candidate_exe;
 
     // Also allow python.bat, but convert into the .exe.
     base::FilePath candidate_bat =
-        base::FilePath(component).Append(kPythonBatName);
+        base::FilePath(component).Append(python_bat_name);
     if (base::PathExists(candidate_bat)) {
       base::FilePath python_exe = PythonBatToExe(candidate_bat);
       if (!python_exe.empty())
@@ -652,7 +650,8 @@ bool Setup::FillSourceDir(const base::CommandLine& cmdline, Err* err) {
     base::GetCurrentDirectory(&cur_dir);
     dotfile_name_ = FindDotFile(cur_dir);
     if (dotfile_name_.empty()) {
-      *err = Err(Location(), "Can't find source root.",
+      *err = Err(
+          Location(), "Can't find source root.",
           "I could not find a \".gn\" file in the current directory or any "
           "parent,\nand the --root command-line argument was not specified.");
       return false;
@@ -727,10 +726,20 @@ bool Setup::FillPythonPath(const base::CommandLine& cmdline, Err* err) {
   ScopedTrace setup_trace(TraceItem::TRACE_SETUP, "Fill Python Path");
   const Value* value = dotfile_scope_.GetValue("script_executable", true);
   if (cmdline.HasSwitch(switches::kScriptExecutable)) {
-    auto script_executable = cmdline.GetSwitchValuePath(switches::kScriptExecutable);
+    auto script_executable =
+        cmdline.GetSwitchValuePath(switches::kScriptExecutable);
 #if defined(OS_WIN)
-    if (script_executable.FinalExtension() == u".bat")
-      script_executable = PythonBatToExe(script_executable);
+    // If we have a relative path with no extension such as "python" or
+    // "python3" then do a path search on the name with .exe and .bat appended.
+    if (!script_executable.IsAbsolute() &&
+        script_executable.FinalExtension() == u"") {
+      script_executable =
+          FindWindowsPython(script_executable.ReplaceExtension(u".exe"),
+                            script_executable.ReplaceExtension(u".bat"));
+    } else {
+      if (script_executable.FinalExtension() == u".bat")
+        script_executable = PythonBatToExe(script_executable);
+    }
 #endif
     build_settings_.set_python_path(script_executable);
   } else if (value) {
@@ -741,12 +750,15 @@ bool Setup::FillPythonPath(const base::CommandLine& cmdline, Err* err) {
         base::FilePath(UTF8ToFilePath(value->string_value())));
   } else {
 #if defined(OS_WIN)
-    base::FilePath python_path = FindWindowsPython();
+    const base::FilePath python_exe_name(u"python.exe");
+    const base::FilePath python_bat_name(u"python.bat");
+    base::FilePath python_path =
+        FindWindowsPython(python_exe_name, python_bat_name);
     if (python_path.empty()) {
       scheduler_.Log("WARNING",
                      "Could not find python on path, using "
                      "just \"python.exe\"");
-      python_path = base::FilePath(kPythonExeName);
+      python_path = python_exe_name;
     }
     build_settings_.set_python_path(python_path.NormalizePathSeparatorsTo('/'));
 #else
@@ -848,8 +860,7 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline, Err* err) {
 
   // Root build file.
   if (cmdline.HasSwitch(switches::kRootTarget)) {
-    auto switch_value =
-        cmdline.GetSwitchValueASCII(switches::kRootTarget);
+    auto switch_value = cmdline.GetSwitchValueASCII(switches::kRootTarget);
     Value root_value(nullptr, switch_value);
     root_target_label = Label::Resolve(current_dir, std::string_view(), Label(),
                                        root_value, err);
