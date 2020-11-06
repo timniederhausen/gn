@@ -24,6 +24,7 @@ std::string OperatingSystemArchitecture() {
     return std::string();
   }
   std::string arch(info.machine);
+  std::string os(info.sysname);
   if (arch == "i386" || arch == "i486" || arch == "i586" || arch == "i686") {
     arch = "x86";
   } else if (arch == "i86pc") {
@@ -33,7 +34,7 @@ std::string OperatingSystemArchitecture() {
     arch = "x86_64";
   } else if (arch == "amd64") {
     arch = "x86_64";
-  } else if (std::string(info.sysname) == "AIX") {
+  } else if (os == "AIX" || os == "OS400") {
     arch = "ppc64";
   }
   return arch;
