@@ -678,9 +678,8 @@
 
 ```
   --dry-run
-      Does not change or output anything, but sets the process exit code based
-      on whether output would be different than what's on disk. This is useful
-      for presubmit/lint-type checks.
+      Prints the list of files that would be reformatted but does not write
+      anything to disk. This is useful for presubmit/lint-type checks.
       - Exit code 0: successful format, matches on disk.
       - Exit code 1: general failure (parse error, etc.)
       - Exit code 2: successful format, but differs from on disk.
@@ -1101,8 +1100,8 @@
 ### <a name="cmd_refs"></a>**gn refs**
 
 ```
-  gn refs <out_dir> (<label_pattern>|<label>|<file>|@<response_file>)*
-          [--all] [--default-toolchain] [--as=...] [--testonly=...] [--type=...]
+  gn refs <out_dir> (<label_pattern>|<label>|<file>|@<response_file>)* [--all]
+          [--default-toolchain] [--as=...] [--testonly=...] [--type=...]
 
   Finds reverse dependencies (which targets reference something). The input is
   a list containing:
@@ -3511,8 +3510,7 @@
         {{target_output_name}}, {{output_extension}} and {{output_dir}} allows
         the target to override these values.
           outputs = [
-            "{{output_dir}}/{{target_output_name}}"
-                "{{output_extension}}",
+            "{{output_dir}}/{{target_output_name}}{{output_extension}}",
             "{{output_dir}}/{{target_output_name}}.lib",
           ]
 
@@ -3897,14 +3895,12 @@
       command = "..."
       outputs = [
         "{{output_dir}}/{{target_output_name}}{{output_extension}}",
-        "{{output_dir}}/{{target_output_name}}"
-            "{{output_extension}}.TOC",
+        "{{output_dir}}/{{target_output_name}}{{output_extension}}.TOC",
       ]
       link_output =
         "{{output_dir}}/{{target_output_name}}{{output_extension}}"
       depend_output =
-        "{{output_dir}}/{{target_output_name}}"
-            "{{output_extension}}.TOC"
+        "{{output_dir}}/{{target_output_name}}{{output_extension}}.TOC"
       restat = true
     }
 ```
@@ -4347,7 +4343,7 @@
 ```
   action("myscript") {
     # Pass the generated output dir to the script.
-    args = [ "-o", rebase_path(target_gen_dir, root_build_dir) ]"
+    args = [ "-o", rebase_path(target_gen_dir, root_build_dir) ]
   }
 ```
 ### <a name="var_target_name"></a>**target_name**: [string] The name of the current target.
@@ -4450,7 +4446,7 @@
 ```
   action("myscript") {
     # Pass the output dir to the script.
-    args = [ "-o", rebase_path(target_out_dir, root_build_dir) ]"
+    args = [ "-o", rebase_path(target_out_dir, root_build_dir) ]
   }
 ```
 ## <a name="target_variables"></a>Variables you set in targets
@@ -5324,7 +5320,7 @@
   The .d file should go in the target output directory. If you have more than
   one source file that the script is being run over, you can use the output
   file expansions described in "gn help action_foreach" to name the .d file
-  according to the input."
+  according to the input.
 
   The format is that of a Makefile and all paths must be relative to the root
   build directory. Only one output may be listed and it must match the first
@@ -6717,6 +6713,9 @@
       cause the file //BUILD.gn to be loaded. Note that build_file_extension
       applies to the default case as well.
 
+      The command-line switch --root-target will override this value (see "gn
+      help --root-target").
+
   script_executable [optional]
       Path to specific Python executable or other interpreter to use in
       action targets and exec_script calls. By default GN searches the
@@ -6923,12 +6922,10 @@
 
       string           = `"` { char | escape | expansion } `"` .
       escape           = `\` ( "$" | `"` | char ) .
-      BracketExpansion = "{" ( identifier | ArrayAccess | ScopeAccess "
-                         ") "}" .
+      BracketExpansion = "{" ( identifier | ArrayAccess | ScopeAccess ) "}" .
       Hex              = "0x" [0-9A-Fa-f][0-9A-Fa-f]
       expansion        = "$" ( identifier | BracketExpansion | Hex ) .
-      char             = /* any character except "$", `"`, or newline "
-                        "*/ .
+      char             = /* any character except "$", `"`, or newline */ .
 
   After a backslash, certain sequences represent special characters:
 
@@ -7759,6 +7756,7 @@
     *   --nocolor: Force non-colored output.
     *   -q: Quiet mode. Don't print output on success.
     *   --root: Explicitly specify source root.
+    *   --root-target: Override the root target.
     *   --runtime-deps-list-file: Save runtime dependencies for targets in file.
     *   --script-executable: Set the executable used to execute scripts.
     *   --threads: Specify number of worker threads.

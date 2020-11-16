@@ -470,8 +470,7 @@ Tool variables
         {{target_output_name}}, {{output_extension}} and {{output_dir}} allows
         the target to override these values.
           outputs = [
-            "{{output_dir}}/{{target_output_name}}"
-                "{{output_extension}}",
+            "{{output_dir}}/{{target_output_name}}{{output_extension}}",
             "{{output_dir}}/{{target_output_name}}.lib",
           ]
 
@@ -854,14 +853,12 @@ Separate linking and dependencies for shared libraries
       command = "..."
       outputs = [
         "{{output_dir}}/{{target_output_name}}{{output_extension}}",
-        "{{output_dir}}/{{target_output_name}}"
-            "{{output_extension}}.TOC",
+        "{{output_dir}}/{{target_output_name}}{{output_extension}}.TOC",
       ]
       link_output =
         "{{output_dir}}/{{target_output_name}}{{output_extension}}"
       depend_output =
-        "{{output_dir}}/{{target_output_name}}"
-            "{{output_extension}}.TOC"
+        "{{output_dir}}/{{target_output_name}}{{output_extension}}.TOC"
       restat = true
     }
 

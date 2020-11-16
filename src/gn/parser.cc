@@ -60,12 +60,10 @@ String literals
 
       string           = `"` { char | escape | expansion } `"` .
       escape           = `\` ( "$" | `"` | char ) .
-      BracketExpansion = "{" ( identifier | ArrayAccess | ScopeAccess "
-                         ") "}" .
+      BracketExpansion = "{" ( identifier | ArrayAccess | ScopeAccess ) "}" .
       Hex              = "0x" [0-9A-Fa-f][0-9A-Fa-f]
       expansion        = "$" ( identifier | BracketExpansion | Hex ) .
-      char             = /* any character except "$", `"`, or newline "
-                        "*/ .
+      char             = /* any character except "$", `"`, or newline */ .
 
   After a backslash, certain sequences represent special characters:
 
