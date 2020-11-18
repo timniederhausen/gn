@@ -788,7 +788,7 @@ void Parser::TraverseOrder(const ParseNode* root,
       for (const auto& statement : block->statements())
         TraverseOrder(statement.get(), pre, post);
       TraverseOrder(block->End(), pre, post);
-    } else if (const ConditionNode* condition = root->AsConditionNode()) {
+    } else if (const ConditionNode* condition = root->AsCondition()) {
       TraverseOrder(condition->condition(), pre, post);
       TraverseOrder(condition->if_true(), pre, post);
       TraverseOrder(condition->if_false(), pre, post);
@@ -931,5 +931,11 @@ void RenderToText(const base::Value& node,
     for (const base::Value& n : child->GetList()) {
       RenderToText(n, indent_level + 1, os);
     }
+  }
+  const base::Value* end = node.FindKey("end");
+  if (end &&
+      (end->FindKey(kJsonBeforeComment) || end->FindKey(kJsonSuffixComment) ||
+       end->FindKey(kJsonAfterComment))) {
+    RenderToText(*end, indent_level + 1, os);
   }
 }

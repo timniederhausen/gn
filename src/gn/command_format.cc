@@ -10,6 +10,7 @@
 
 #include "base/command_line.h"
 #include "base/files/file_util.h"
+#include "base/json/json_reader.h"
 #include "base/json/json_writer.h"
 #include "base/macros.h"
 #include "base/strings/string_split.h"
@@ -35,9 +36,10 @@ namespace commands {
 
 const char kSwitchDryRun[] = "dry-run";
 const char kSwitchDumpTree[] = "dump-tree";
-const char kSwitchDumpTreeText[] = "text";
-const char kSwitchDumpTreeJSON[] = "json";
+const char kSwitchReadTree[] = "read-tree";
 const char kSwitchStdin[] = "stdin";
+const char kSwitchTreeTypeJSON[] = "json";
+const char kSwitchTreeTypeText[] = "text";
 
 const char kFormat[] = "format";
 const char kFormat_HelpShort[] = "format: Format .gn files.";
@@ -73,11 +75,18 @@ Arguments
       Read input from stdin and write to stdout rather than update a file
       in-place.
 
+  --read-tree=json
+      Reads an AST from stdin in the format output by --dump-tree=json and
+      uses that as the parse tree. (The only read-tree format currently
+      supported is json.) The given .gn file will be overwritten. This can be
+      used to programmatically transform .gn files.
+
 Examples
   gn format //some/BUILD.gn //some/other/BUILD.gn //and/another/BUILD.gn
   gn format some\\BUILD.gn
   gn format /abspath/some/BUILD.gn
   gn format --stdin
+  gn format --read-tree=json //rewritten/BUILD.gn
 )";
 
 namespace {
@@ -324,7 +333,7 @@ void Printer::PrintTrailingCommentsWrapped(const std::vector<Token>& comments) {
         if (have_empty_line && continuation) {
           Print("# ");
         }
-        Print(split_on_spaces[j]) ;
+        Print(split_on_spaces[j]);
         Print(" ");
         if (split_on_spaces[j] != "#") {
           have_empty_line = false;
@@ -403,7 +412,7 @@ void Printer::SortIfApplicable(const BinaryOpNode* binop) {
         lhs == "public")
       const_cast<ListNode*>(list)->SortAsStringsList();
     else if (base::EndsWith(lhs, "deps", base::CompareCase::SENSITIVE) ||
-        lhs == "visibility")
+             lhs == "visibility")
       const_cast<ListNode*>(list)->SortAsTargetsList();
   }
 }
@@ -519,7 +528,7 @@ int SuffixCommentTreeWalk(const ParseNode* node) {
     RETURN_IF_SET(SuffixCommentTreeWalk(binop->right()));
   } else if (const BlockNode* block = node->AsBlock()) {
     RETURN_IF_SET(SuffixCommentTreeWalk(block->End()));
-  } else if (const ConditionNode* condition = node->AsConditionNode()) {
+  } else if (const ConditionNode* condition = node->AsCondition()) {
     RETURN_IF_SET(SuffixCommentTreeWalk(condition->if_false()));
     RETURN_IF_SET(SuffixCommentTreeWalk(condition->if_true()));
     RETURN_IF_SET(SuffixCommentTreeWalk(condition->condition()));
@@ -869,7 +878,7 @@ int Printer::Expr(const ParseNode* root,
   } else if (const BlockNode* block = root->AsBlock()) {
     Sequence(kSequenceStyleBracedBlock, block->statements(), block->End(),
              false);
-  } else if (const ConditionNode* condition = root->AsConditionNode()) {
+  } else if (const ConditionNode* condition = root->AsCondition()) {
     Print("if (");
     CHECK(at_end.empty());
     Expr(condition->condition(), kPrecedenceLowest, ") {");
@@ -1206,21 +1215,17 @@ bool Printer::ListWillBeMultiline(
 
 void DoFormat(const ParseNode* root,
               TreeDumpMode dump_tree,
-              std::string* output) {
-#if defined(OS_WIN)
-    // Set stdout to binary mode to prevent converting newlines to \r\n.
-    _setmode(_fileno(stdout), _O_BINARY);
-#endif
-
+              std::string* output,
+              std::string* dump_output) {
   if (dump_tree == TreeDumpMode::kPlainText) {
     std::ostringstream os;
     RenderToText(root->GetJSONNode(), 0, os);
-    fprintf(stdout, "%s", os.str().c_str());
+    *dump_output = os.str();
   } else if (dump_tree == TreeDumpMode::kJSON) {
     std::string os;
     base::JSONWriter::WriteWithOptions(
         root->GetJSONNode(), base::JSONWriter::OPTIONS_PRETTY_PRINT, &os);
-    fprintf(stdout, "%s", os.c_str());
+    *dump_output = os;
   }
 
   Printer pr;
@@ -1230,9 +1235,18 @@ void DoFormat(const ParseNode* root,
 
 }  // namespace
 
+bool FormatJsonToString(const std::string& json, std::string* output) {
+  base::JSONReader reader;
+  std::unique_ptr<base::Value> json_root = reader.Read(json);
+  std::unique_ptr<ParseNode> root = ParseNode::BuildFromJSON(*json_root);
+  DoFormat(root.get(), TreeDumpMode::kInactive, output, nullptr);
+  return true;
+}
+
 bool FormatStringToString(const std::string& input,
                           TreeDumpMode dump_tree,
-                          std::string* output) {
+                          std::string* output,
+                          std::string* dump_output) {
   SourceFile source_file;
   InputFile file(source_file);
   file.SetContents(input);
@@ -1252,11 +1266,17 @@ bool FormatStringToString(const std::string& input,
     return false;
   }
 
-  DoFormat(parse_node.get(), dump_tree, output);
+  DoFormat(parse_node.get(), dump_tree, output, dump_output);
   return true;
 }
 
 int RunFormat(const std::vector<std::string>& args) {
+#if defined(OS_WIN)
+  // Set to binary mode to prevent converting newlines to \r\n.
+  _setmode(_fileno(stdout), _O_BINARY);
+  _setmode(_fileno(stderr), _O_BINARY);
+#endif
+
   bool dry_run =
       base::CommandLine::ForCurrentProcess()->HasSwitch(kSwitchDryRun);
   TreeDumpMode dump_tree = TreeDumpMode::kInactive;
@@ -1264,16 +1284,16 @@ int RunFormat(const std::vector<std::string>& args) {
     std::string tree_type =
         base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
             kSwitchDumpTree);
-    if (tree_type == kSwitchDumpTreeJSON) {
+    if (tree_type == kSwitchTreeTypeJSON) {
       dump_tree = TreeDumpMode::kJSON;
-    } else if (tree_type.empty() || tree_type == kSwitchDumpTreeText) {
+    } else if (tree_type.empty() || tree_type == kSwitchTreeTypeText) {
       dump_tree = TreeDumpMode::kPlainText;
     } else {
       Err(Location(), tree_type +
                           " is an invalid value for --dump-tree. Specify "
                           "\"" +
-                          kSwitchDumpTreeText + "\" or \"" +
-                          kSwitchDumpTreeJSON + "\".\n")
+                          kSwitchTreeTypeText + "\" or \"" +
+                          kSwitchTreeTypeJSON + "\".\n")
           .PrintToStdout();
       return 1;
     }
@@ -1297,12 +1317,10 @@ int RunFormat(const std::vector<std::string>& args) {
     }
     std::string input = ReadStdin();
     std::string output;
-    if (!FormatStringToString(input, dump_tree, &output))
+    std::string dump_output;
+    if (!FormatStringToString(input, dump_tree, &output, &dump_output))
       return 1;
-#if defined(OS_WIN)
-    // Set stdout to binary mode to prevent converting newlines to \r\n.
-    _setmode(_fileno(stdout), _O_BINARY);
-#endif
+    printf("%s", dump_output.c_str());
     printf("%s", output.c_str());
     return 0;
   }
@@ -1316,6 +1334,45 @@ int RunFormat(const std::vector<std::string>& args) {
   Setup setup;
   SourceDir source_dir =
       SourceDirForCurrentDirectory(setup.build_settings().root_path());
+
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(kSwitchReadTree)) {
+    std::string tree_type =
+        base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
+            kSwitchReadTree);
+    if (tree_type != kSwitchTreeTypeJSON) {
+      Err(Location(), "Only json supported for read-tree.\n").PrintToStdout();
+      return 1;
+    }
+
+    if (args.size() != 1) {
+      Err(Location(),
+          "Expect exactly one .gn when reading tree from json on stdin.\n")
+          .PrintToStdout();
+      return 1;
+    }
+    Err err;
+    SourceFile file =
+        source_dir.ResolveRelativeFile(Value(nullptr, args[0]), &err);
+    if (err.has_error()) {
+      err.PrintToStdout();
+      return 1;
+    }
+    base::FilePath to_format = setup.build_settings().GetFullPath(file);
+    std::string output;
+    FormatJsonToString(ReadStdin(), &output);
+    if (base::WriteFile(to_format, output.data(),
+                        static_cast<int>(output.size())) == -1) {
+      Err(Location(), std::string("Failed to write output to \"") +
+                          FilePathToUTF8(to_format) + std::string("\"."))
+          .PrintToStdout();
+      return 1;
+    }
+    if (!quiet) {
+      printf("Wrote rebuilt from json to '%s'.\n",
+             FilePathToUTF8(to_format).c_str());
+    }
+    return 0;
+  }
 
   // TODO(scottmg): Eventually, this list of files should be processed in
   // parallel.
@@ -1340,10 +1397,13 @@ int RunFormat(const std::vector<std::string>& args) {
     }
 
     std::string output_string;
-    if (!FormatStringToString(original_contents, dump_tree, &output_string)) {
+    std::string dump_output_string;
+    if (!FormatStringToString(original_contents, dump_tree, &output_string,
+                              &dump_output_string)) {
       exit_code = 1;
       continue;
     }
+    printf("%s", dump_output_string.c_str());
     if (dump_tree == TreeDumpMode::kInactive) {
       if (dry_run) {
         if (original_contents != output_string) {
@@ -1365,7 +1425,7 @@ int RunFormat(const std::vector<std::string>& args) {
         }
         if (!quiet) {
           printf("Wrote formatted to '%s'.\n",
-                FilePathToUTF8(to_format).c_str());
+                 FilePathToUTF8(to_format).c_str());
         }
       }
     }
