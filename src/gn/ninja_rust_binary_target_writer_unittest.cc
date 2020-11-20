@@ -438,9 +438,11 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "obj/foo/libstatic.a ./libshared.so ./libshared_with_toc.so.TOC "
         "|| obj/baz/sourceset.stamp\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
-        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/baz -Lnative=obj/foo "
-        "-Lnative=. -Clink-arg=obj/baz/sourceset.csourceset.o -lstatic "
-        "-lshared -lshared_with_toc\n"
+        "  rustdeps = -Ldependency=obj/bar "
+        "-Lnative=obj/baz -Lnative=obj/foo -Lnative=. "
+        "-Clink-arg=obj/baz/sourceset.csourceset.o "
+        "-Clink-arg=obj/foo/libstatic.a -Clink-arg=./libshared.so "
+        "-Clink-arg=./libshared_with_toc.so\n"
         "  sources = ../../foo/source.rs ../../foo/main.rs\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
@@ -477,7 +479,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
         "../../foo/main.rs obj/foo/libstatic.a\n"
         "  externs =\n"
-        "  rustdeps = -Lnative=obj/foo -lstatic\n"
+        "  rustdeps = -Lnative=obj/foo -Clink-arg=obj/foo/libstatic.a\n"
         "  sources = ../../foo/source.rs ../../foo/main.rs\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
@@ -511,10 +513,11 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "target_out_dir = obj/baz\n"
         "target_output_name = libbaz\n"
         "\n"
-        "build obj/baz/libbaz.a: rust_staticlib ../../baz/lib.rs | ../../baz/lib.rs "
+        "build obj/baz/libbaz.a: rust_staticlib ../../baz/lib.rs | "
+        "../../baz/lib.rs "
         "obj/foo/libstatic.a\n"
         "  externs =\n"
-        "  rustdeps = -Lnative=obj/foo -lstatic\n"
+        "  rustdeps = -Lnative=obj/foo -Clink-arg=obj/foo/libstatic.a\n"
         "  sources = ../../baz/lib.rs\n";
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
