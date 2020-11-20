@@ -592,7 +592,7 @@ std::string Builder::CheckForCircularDependencies(
 
   std::string ret;
   for (size_t i = 0; i < cycle.size(); i++) {
-    ret += "  " + cycle[i]->label().GetUserVisibleName(false);
+    ret += "  " + cycle[i]->label().GetUserVisibleName(loader_->GetDefaultToolchain());
     if (i != cycle.size() - 1)
       ret += " ->";
     ret += "\n";
