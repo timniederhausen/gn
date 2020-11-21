@@ -65,6 +65,14 @@ def RunSteps(api, repository):
                        'sysroot')
     api.cipd.ensure(cipd_dir, pkgs)
 
+  def release_targets():
+    if api.platform.is_linux:
+      return [api.target('linux-amd64'), api.target('linux-arm64')]
+    elif api.platform.is_mac:
+      return [api.target('mac-amd64'), api.target('mac-arm64')]
+    else:
+      return [api.target.host]
+
   # The order is important since release build will get uploaded to CIPD.
   configs = [
       {
@@ -75,11 +83,28 @@ def RunSteps(api, repository):
       {
           'name': 'release',
           'args': ['--use-lto', '--use-icf'],
-          'targets': [api.target('linux-amd64'),
-                      api.target('linux-arm64')]
-                     if api.platform.is_linux else [api.target.host],
+          'targets': release_targets(),
       },
   ]
+
+  def get_libcxx_include_path():
+    # Run the preprocessor with an empty input and print all include paths.
+    lines = api.step(
+        'xcrun toolchain', [
+            'xcrun', '--toolchain', 'clang', 'clang++', '-xc++',
+            '-fsyntax-only', '-Wp,-v', '-'
+        ],
+        stderr=api.raw_io.output(name='toolchain', add_output_log=True),
+        step_test_data=lambda: api.raw_io.test_api.stream_output(
+            str(api.macos_sdk.sdk_dir.join('include', 'c++', 'v1')),
+            stream='stderr')).stderr.splitlines()
+    # Iterate over all include paths and look for the SDK libc++ one.
+    sdk_dir = str(api.macos_sdk.sdk_dir)
+    for line in lines:
+      line = line.strip()
+      if line.startswith(sdk_dir) and 'include/c++/v1' in line:
+        return line
+    return None  # pragma: no cover
 
   with api.macos_sdk(), api.windows_sdk():
     for config in configs:
@@ -99,18 +124,31 @@ def RunSteps(api, repository):
             elif target.is_mac:
               triple = '--target=%s' % target.triple
               sysroot = '--sysroot=%s' % api.step(
-                  'xcrun', ['xcrun', '--show-sdk-path'],
+                  'xcrun sdk-path', ['xcrun', '--show-sdk-path'],
                   stdout=api.raw_io.output(
                       name='sdk-path', add_output_log=True),
                   step_test_data=lambda: api.raw_io.test_api.stream_output(
                       '/some/xcode/path')).stdout.strip()
               stdlib = cipd_dir.join('lib', 'libc++.a')
+              cxx_include = get_libcxx_include_path()
+              assert cxx_include, 'cannot find C++ header directory'
               env = {
-                  'CC': cipd_dir.join('bin', 'clang'),
-                  'CXX': cipd_dir.join('bin', 'clang++'),
-                  'AR': cipd_dir.join('bin', 'llvm-ar'),
-                  'CFLAGS': '%s %s' % (triple, sysroot),
-                  'LDFLAGS': '%s %s -nostdlib++ %s' % (triple, sysroot, stdlib),
+                  'CC':
+                      cipd_dir.join('bin', 'clang'),
+                  'CXX':
+                      cipd_dir.join('bin', 'clang++'),
+                  'AR':
+                      cipd_dir.join('bin', 'llvm-ar'),
+                  # TODO(phosek): temporarily use XCode C++ headers to make
+                  # sure these are compatible with the system libc++.
+                  'CFLAGS':
+                      '%s %s -nostdinc++ -cxx-isystem %s' %
+                      (triple, sysroot, cxx_include),
+                  # TODO(phosek): Use the system libc++ temporarily until we
+                  # have universal libc++.a for macOS that supports both x86_64
+                  # and arm64.
+                  'LDFLAGS':
+                      '%s %s' % (triple, sysroot),
               }
             else:
               env = {}

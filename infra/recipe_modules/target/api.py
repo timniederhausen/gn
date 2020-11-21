@@ -11,7 +11,7 @@ PLATFORM_TO_TRIPLE = {
   'linux-amd64': 'x86_64-linux-gnu',
   'linux-arm64': 'aarch64-linux-gnu',
   'mac-amd64': 'x86_64-apple-darwin',
-  'mac-arm64': 'aarch64-apple-darwin',
+  'mac-arm64': 'arm64-apple-darwin',
 }
 PLATFORMS = PLATFORM_TO_TRIPLE.keys()
 
