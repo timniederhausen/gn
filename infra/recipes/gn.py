@@ -204,23 +204,14 @@ def RunSteps(api, repository):
           rpmalloc_os = RPMALLOC_MAP.get(rpmalloc_os, rpmalloc_os)
           rpmalloc_arch = RPMALLOC_MAP.get(rpmalloc_arch, rpmalloc_arch)
 
-          # The rpmalloc build system doesn't support out-of-tree builds, and
-          # trying to build binaries for multiple target architectures doesn't
-          # work unless one cleans the build. To work around these issues,
-          # simply copy the source tree into a new clean directory.
-          rpmalloc_build_dir = api.path['cleanup'].join('rpmalloc-' + platform)
-          api.file.rmtree('remove sources ' + platform, rpmalloc_build_dir)
-          api.file.copytree('copy sources ' + platform, rpmalloc_src_dir,
-                            rpmalloc_build_dir)
-
           env = _get_compilation_environment(api,
                                              all_config_platforms[platform],
                                              cipd_dir)
           with api.step.nest('build rpmalloc-' + platform), api.context(
-              env=env, cwd=rpmalloc_build_dir):
+              env=env, cwd=rpmalloc_src_dir):
             api.python(
                 'configure',
-                rpmalloc_build_dir.join('configure.py'),
+                rpmalloc_src_dir.join('configure.py'),
                 args=['-c', 'release', '-a', rpmalloc_arch, '--lto'])
 
             # NOTE: Only build the static library.
@@ -229,7 +220,7 @@ def RunSteps(api, repository):
                                                 'librpmallocwrap.a')
             api.step('ninja', [cipd_dir.join('ninja'), rpmalloc_static_lib])
 
-          rpmalloc_static_libs[platform] = rpmalloc_build_dir.join(
+          rpmalloc_static_libs[platform] = rpmalloc_src_dir.join(
               rpmalloc_static_lib)
 
     for config in configs:

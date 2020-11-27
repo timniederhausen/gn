@@ -165,39 +165,6 @@
     ]
   },
   {
-    "cmd": [
-      "python",
-      "-u",
-      "RECIPE_MODULE[recipe_engine::file]/resources/fileutil.py",
-      "--json-output",
-      "/path/to/tmp/json",
-      "rmtree",
-      "[CLEANUP]/rpmalloc-linux-amd64"
-    ],
-    "infra_step": true,
-    "name": "rpmalloc.remove sources linux-amd64",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
-    ]
-  },
-  {
-    "cmd": [
-      "python",
-      "-u",
-      "RECIPE_MODULE[recipe_engine::file]/resources/fileutil.py",
-      "--json-output",
-      "/path/to/tmp/json",
-      "copytree",
-      "[START_DIR]/rpmalloc",
-      "[CLEANUP]/rpmalloc-linux-amd64"
-    ],
-    "infra_step": true,
-    "name": "rpmalloc.copy sources linux-amd64",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
-    ]
-  },
-  {
     "cmd": [],
     "name": "rpmalloc.build rpmalloc-linux-amd64",
     "~followup_annotations": [
@@ -208,14 +175,14 @@
     "cmd": [
       "python",
       "-u",
-      "[CLEANUP]/rpmalloc-linux-amd64/configure.py",
+      "[START_DIR]/rpmalloc/configure.py",
       "-c",
       "release",
       "-a",
       "x86-64",
       "--lto"
     ],
-    "cwd": "[CLEANUP]/rpmalloc-linux-amd64",
+    "cwd": "[START_DIR]/rpmalloc",
     "env": {
       "AR": "[START_DIR]/cipd/bin/llvm-ar",
       "CC": "[START_DIR]/cipd/bin/clang",
@@ -233,7 +200,7 @@
       "[START_DIR]/cipd/ninja",
       "lib/linux/release/x86-64/librpmallocwrap.a"
     ],
-    "cwd": "[CLEANUP]/rpmalloc-linux-amd64",
+    "cwd": "[START_DIR]/rpmalloc",
     "env": {
       "AR": "[START_DIR]/cipd/bin/llvm-ar",
       "CC": "[START_DIR]/cipd/bin/clang",
@@ -247,39 +214,6 @@
     ]
   },
   {
-    "cmd": [
-      "python",
-      "-u",
-      "RECIPE_MODULE[recipe_engine::file]/resources/fileutil.py",
-      "--json-output",
-      "/path/to/tmp/json",
-      "rmtree",
-      "[CLEANUP]/rpmalloc-linux-arm64"
-    ],
-    "infra_step": true,
-    "name": "rpmalloc.remove sources linux-arm64",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
-    ]
-  },
-  {
-    "cmd": [
-      "python",
-      "-u",
-      "RECIPE_MODULE[recipe_engine::file]/resources/fileutil.py",
-      "--json-output",
-      "/path/to/tmp/json",
-      "copytree",
-      "[START_DIR]/rpmalloc",
-      "[CLEANUP]/rpmalloc-linux-arm64"
-    ],
-    "infra_step": true,
-    "name": "rpmalloc.copy sources linux-arm64",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@"
-    ]
-  },
-  {
     "cmd": [],
     "name": "rpmalloc.build rpmalloc-linux-arm64",
     "~followup_annotations": [
@@ -290,14 +224,14 @@
     "cmd": [
       "python",
       "-u",
-      "[CLEANUP]/rpmalloc-linux-arm64/configure.py",
+      "[START_DIR]/rpmalloc/configure.py",
       "-c",
       "release",
       "-a",
       "arm64",
       "--lto"
     ],
-    "cwd": "[CLEANUP]/rpmalloc-linux-arm64",
+    "cwd": "[START_DIR]/rpmalloc",
     "env": {
       "AR": "[START_DIR]/cipd/bin/llvm-ar",
       "CC": "[START_DIR]/cipd/bin/clang",
@@ -315,7 +249,7 @@
       "[START_DIR]/cipd/ninja",
       "lib/linux/release/arm64/librpmallocwrap.a"
     ],
-    "cwd": "[CLEANUP]/rpmalloc-linux-arm64",
+    "cwd": "[START_DIR]/rpmalloc",
     "env": {
       "AR": "[START_DIR]/cipd/bin/llvm-ar",
       "CC": "[START_DIR]/cipd/bin/clang",
@@ -413,7 +347,7 @@
       "[START_DIR]/gn/build/gen.py",
       "--use-lto",
       "--use-icf",
-      "--link-lib=[CLEANUP]/rpmalloc-linux-amd64/lib/linux/release/x86-64/librpmallocwrap.a"
+      "--link-lib=[START_DIR]/rpmalloc/lib/linux/release/x86-64/librpmallocwrap.a"
     ],
     "cwd": "[START_DIR]/gn",
     "env": {
@@ -478,7 +412,7 @@
       "[START_DIR]/gn/build/gen.py",
       "--use-lto",
       "--use-icf",
-      "--link-lib=[CLEANUP]/rpmalloc-linux-arm64/lib/linux/release/arm64/librpmallocwrap.a"
+      "--link-lib=[START_DIR]/rpmalloc/lib/linux/release/arm64/librpmallocwrap.a"
     ],
     "cwd": "[START_DIR]/gn",
     "env": {
