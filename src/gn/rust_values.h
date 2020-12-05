@@ -19,10 +19,13 @@ class RustValues {
   RustValues();
   ~RustValues();
 
-  // Library crate types are specified here. Shared library crate types must be
-  // specified, all other crate types can be automatically deduced from the
-  // target type (e.g. executables use crate_type = "bin", static_libraries use
-  // crate_type = "staticlib") unless explicitly set.
+  // Library crate types.
+  //
+  // The default value CRATE_AUTO means the type should be deduced from the
+  // target type (see InferredCrateType() below).
+  //
+  // Shared library crate types must be specified explicitly, all other target
+  // types can be deduced.
   enum CrateType {
     CRATE_AUTO = 0,
     CRATE_BIN,
@@ -44,6 +47,26 @@ class RustValues {
   // Crate type for compilation.
   CrateType crate_type() const { return crate_type_; }
   void set_crate_type(CrateType s) { crate_type_ = s; }
+
+  // Same as crate_type(), except attempt to resolve CRATE_AUTO based on the
+  // target type.
+  //
+  // Dylib and cdylib targets should call set_crate_type(CRATE_[C]DYLIB)
+  // explicitly to resolve ambiguity. For shared libraries, this assumes
+  // CRATE_DYLIB by default.
+  //
+  // For unsupported target types and targets without Rust sources,
+  // returns CRATE_AUTO.
+  static CrateType InferredCrateType(const Target* target);
+
+  // Returns whether this target is a Rust rlib, dylib, or proc macro.
+  //
+  // Notably, this does not include staticlib or cdylib targets that have Rust
+  // source, because they look like native libraries to the Rust compiler.
+  //
+  // It does include proc_macro targets, which are sometimes a special case.
+  // (TODO: Should it?)
+  static bool IsRustLibrary(const Target* target);
 
   // Any renamed dependencies for the `extern` flags.
   const std::map<Label, std::string>& aliased_deps() const {

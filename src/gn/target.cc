@@ -643,12 +643,8 @@ void Target::PullDependentTargetConfigs() {
 void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
   // Direct dependent libraries.
   if (dep->output_type() == STATIC_LIBRARY ||
-      dep->output_type() == SHARED_LIBRARY) {
-    inherited_libraries_.Append(dep, is_public);
-    rust_values().transitive_libs().Append(dep, is_public);
-  }
-
-  if (dep->output_type() == RUST_LIBRARY ||
+      dep->output_type() == SHARED_LIBRARY ||
+      dep->output_type() == RUST_LIBRARY ||
       dep->output_type() == RUST_PROC_MACRO ||
       dep->output_type() == SOURCE_SET ||
       (dep->output_type() == CREATE_BUNDLE &&
@@ -656,18 +652,24 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     inherited_libraries_.Append(dep, is_public);
   }
 
-  // Propagate public dependent libraries.
-  for (const auto& transitive :
-       dep->rust_values().transitive_libs().GetOrderedAndPublicFlag()) {
-    if (transitive.second &&
-        (dep->output_type() == STATIC_LIBRARY ||
-         dep->output_type() == SHARED_LIBRARY)) {
-      rust_values().transitive_libs().Append(transitive.first, is_public);
+  if (dep->output_type() == STATIC_LIBRARY ||
+      dep->output_type() == SHARED_LIBRARY ||
+      dep->output_type() == RUST_LIBRARY) {
+    rust_values().transitive_libs().Append(dep, is_public);
+
+    // Propagate public dependent libraries.
+    for (const auto& transitive :
+         dep->rust_values().transitive_libs().GetOrderedAndPublicFlag()) {
+      if (transitive.second) {
+        rust_values().transitive_libs().Append(transitive.first, is_public);
+      }
     }
   }
 
-  if (dep->output_type() == RUST_LIBRARY) {
-    rust_values().transitive_libs().Append(dep, is_public);
+  // Rust libraries (those meant for consumption by another Rust target) are
+  // handled the same way, whether static or dynamic.
+  if (dep->output_type() == RUST_LIBRARY ||
+      RustValues::InferredCrateType(dep) == RustValues::CRATE_DYLIB) {
     rust_values().transitive_libs().AppendInherited(
         dep->rust_values().transitive_libs(), is_public);
 
@@ -675,8 +677,7 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     // in the normal location
     for (const auto& inherited :
          rust_values().transitive_libs().GetOrderedAndPublicFlag()) {
-      if (!(inherited.first->output_type() == RUST_LIBRARY ||
-            inherited.first->output_type() == RUST_PROC_MACRO)) {
+      if (!RustValues::IsRustLibrary(inherited.first)) {
         inherited_libraries_.Append(inherited.first, inherited.second);
       }
     }
@@ -704,7 +705,8 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     //
     // Static libraries and source sets aren't inherited across shared
     // library boundaries because they will be linked into the shared
-    // library.
+    // library. Rust dylib deps are handled above and transitive deps are
+    // resolved by the compiler.
     inherited_libraries_.AppendPublicSharedLibraries(dep->inherited_libraries(),
                                                      is_public);
   } else if (!dep->IsFinal()) {

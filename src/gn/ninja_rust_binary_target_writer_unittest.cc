@@ -168,6 +168,103 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDeps) {
   }
 }
 
+TEST_F(NinjaRustBinaryTargetWriterTest, DylibDeps) {
+  Err err;
+  TestWithScope setup;
+
+  Target dylib(setup.settings(), Label(SourceDir("//bar/"), "mylib"));
+  dylib.set_output_type(Target::SHARED_LIBRARY);
+  dylib.visibility().SetPublic();
+  SourceFile barlib("//bar/lib.rs");
+  dylib.sources().push_back(SourceFile("//bar/mylib.rs"));
+  dylib.sources().push_back(barlib);
+  dylib.source_types_used().Set(SourceFile::SOURCE_RS);
+  dylib.rust_values().set_crate_type(RustValues::CRATE_DYLIB); // TODO
+  dylib.rust_values().set_crate_root(barlib);
+  dylib.rust_values().crate_name() = "mylib";
+  dylib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(dylib.OnResolved(&err));
+
+  {
+    std::ostringstream out;
+    NinjaRustBinaryTargetWriter writer(&dylib, out);
+    writer.Run();
+
+    const char expected[] =
+        "crate_name = mylib\n"
+        "crate_type = dylib\n"
+        "output_extension = .so\n"
+        "output_dir = \n"
+        "rustflags =\n"
+        "rustenv =\n"
+        "root_out_dir = .\n"
+        "target_out_dir = obj/bar\n"
+        "target_output_name = libmylib\n"
+        "\n"
+        "build obj/bar/libmylib.so: rust_dylib ../../bar/lib.rs | "
+        "../../bar/mylib.rs ../../bar/lib.rs\n"
+        "  externs =\n"
+        "  rustdeps =\n"
+        "  ldflags =\n"
+        "  sources = ../../bar/mylib.rs ../../bar/lib.rs\n";
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+  }
+
+  Target another_dylib(setup.settings(), Label(SourceDir("//foo/"), "direct"));
+  another_dylib.set_output_type(Target::SHARED_LIBRARY);
+  another_dylib.visibility().SetPublic();
+  SourceFile lib("//foo/main.rs");
+  another_dylib.sources().push_back(SourceFile("//foo/direct.rs"));
+  another_dylib.sources().push_back(lib);
+  another_dylib.source_types_used().Set(SourceFile::SOURCE_RS);
+  another_dylib.rust_values().set_crate_type(RustValues::CRATE_DYLIB);
+  another_dylib.rust_values().set_crate_root(lib);
+  another_dylib.rust_values().crate_name() = "direct";
+  another_dylib.SetToolchain(setup.toolchain());
+  another_dylib.private_deps().push_back(LabelTargetPair(&dylib));
+  ASSERT_TRUE(another_dylib.OnResolved(&err));
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::EXECUTABLE);
+  target.visibility().SetPublic();
+  SourceFile main("//foo/main.rs");
+  target.sources().push_back(SourceFile("//foo/source.rs"));
+  target.sources().push_back(main);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(main);
+  target.rust_values().crate_name() = "foo_bar";
+  target.private_deps().push_back(LabelTargetPair(&another_dylib));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  {
+    std::ostringstream out;
+    NinjaRustBinaryTargetWriter writer(&target, out);
+    writer.Run();
+
+    const char expected[] =
+        "crate_name = foo_bar\n"
+        "crate_type = bin\n"
+        "output_extension = \n"
+        "output_dir = \n"
+        "rustflags =\n"
+        "rustenv =\n"
+        "root_out_dir = .\n"
+        "target_out_dir = obj/foo\n"
+        "target_output_name = bar\n"
+        "\n"
+        "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
+        "../../foo/main.rs obj/foo/libdirect.so\n"
+        "  externs = --extern direct=obj/foo/libdirect.so\n"
+        "  rustdeps = -Ldependency=obj/foo -Ldependency=obj/bar\n"
+        "  ldflags =\n"
+        "  sources = ../../foo/source.rs ../../foo/main.rs\n";
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+  }
+}
+
 TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
   Err err;
   TestWithScope setup;
