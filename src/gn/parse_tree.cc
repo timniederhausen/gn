@@ -393,6 +393,7 @@ Value AccessorNode::ExecuteScopeSubscriptAccess(Scope* scope,
     *err =
         Err(subscript_.get(), "No value named \"" + key_value.string_value() +
                                   "\" in scope \"" + base_.value() + "\"");
+    return Value();
   }
   return *result;
 }
