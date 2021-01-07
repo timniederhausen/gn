@@ -721,6 +721,28 @@ bool Setup::FillBuildDir(const std::string& build_dir,
   return true;
 }
 
+// On Chromium repositories on Windows the Python executable can be specified as
+// python, python.bat, or python.exe (ditto for python3, and with or without a
+// full path specification). This handles all of these cases and returns a fully
+// specified path to a .exe file.
+// This is currently a NOP on other platforms.
+base::FilePath ProcessFileExtensions(base::FilePath script_executable) {
+#if defined(OS_WIN)
+  // If we have a relative path with no extension such as "python" or
+  // "python3" then do a path search on the name with .exe and .bat appended.
+  if (!script_executable.IsAbsolute() &&
+      script_executable.FinalExtension() == u"") {
+    script_executable =
+        FindWindowsPython(script_executable.ReplaceExtension(u".exe"),
+                          script_executable.ReplaceExtension(u".bat"));
+  } else {
+    if (script_executable.FinalExtension() == u".bat")
+      script_executable = PythonBatToExe(script_executable);
+  }
+#endif
+  return script_executable;
+}
+
 bool Setup::FillPythonPath(const base::CommandLine& cmdline, Err* err) {
   // Trace this since it tends to be a bit slow on Windows.
   ScopedTrace setup_trace(TraceItem::TRACE_SETUP, "Fill Python Path");
@@ -728,26 +750,14 @@ bool Setup::FillPythonPath(const base::CommandLine& cmdline, Err* err) {
   if (cmdline.HasSwitch(switches::kScriptExecutable)) {
     auto script_executable =
         cmdline.GetSwitchValuePath(switches::kScriptExecutable);
-#if defined(OS_WIN)
-    // If we have a relative path with no extension such as "python" or
-    // "python3" then do a path search on the name with .exe and .bat appended.
-    if (!script_executable.IsAbsolute() &&
-        script_executable.FinalExtension() == u"") {
-      script_executable =
-          FindWindowsPython(script_executable.ReplaceExtension(u".exe"),
-                            script_executable.ReplaceExtension(u".bat"));
-    } else {
-      if (script_executable.FinalExtension() == u".bat")
-        script_executable = PythonBatToExe(script_executable);
-    }
-#endif
+    script_executable = ProcessFileExtensions(script_executable);
     build_settings_.set_python_path(script_executable);
   } else if (value) {
     if (!value->VerifyTypeIs(Value::STRING, err)) {
       return false;
     }
     build_settings_.set_python_path(
-        base::FilePath(UTF8ToFilePath(value->string_value())));
+        ProcessFileExtensions(UTF8ToFilePath(value->string_value())));
   } else {
 #if defined(OS_WIN)
     const base::FilePath python_exe_name(u"python.exe");
