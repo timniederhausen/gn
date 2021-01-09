@@ -286,16 +286,22 @@ base::FilePath PythonBatToExe(const base::FilePath& bat_path) {
   return base::FilePath();
 }
 
+// python_exe_name and python_bat_name can be empty but cannot be absolute
+// paths. They should be "python.exe" or "", etc., and "python.bat" or "", etc.
 base::FilePath FindWindowsPython(const base::FilePath& python_exe_name,
                                  const base::FilePath& python_bat_name) {
   char16_t current_directory[MAX_PATH];
   ::GetCurrentDirectory(MAX_PATH, reinterpret_cast<LPWSTR>(current_directory));
 
   // First search for python.exe in the current directory.
-  base::FilePath cur_dir_candidate_exe =
-      base::FilePath(current_directory).Append(python_exe_name);
-  if (base::PathExists(cur_dir_candidate_exe))
-    return cur_dir_candidate_exe;
+  if (!python_exe_name.empty()) {
+    CHECK(python_exe_name.FinalExtension() == u".exe");
+    CHECK_EQ(python_exe_name.IsAbsolute(), false);
+    base::FilePath cur_dir_candidate_exe =
+        base::FilePath(current_directory).Append(python_exe_name);
+    if (base::PathExists(cur_dir_candidate_exe))
+      return cur_dir_candidate_exe;
+  }
 
   // Get the path.
   const char16_t kPathEnvVarName[] = u"Path";
@@ -313,18 +319,24 @@ base::FilePath FindWindowsPython(const base::FilePath& python_exe_name,
   for (const auto& component : base::SplitStringPiece(
            std::u16string_view(full_path.get(), path_length), u";",
            base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY)) {
-    base::FilePath candidate_exe =
-        base::FilePath(component).Append(python_exe_name);
-    if (base::PathExists(candidate_exe))
-      return candidate_exe;
+    if (!python_exe_name.empty()) {
+      base::FilePath candidate_exe =
+          base::FilePath(component).Append(python_exe_name);
+      if (base::PathExists(candidate_exe))
+        return candidate_exe;
+    }
 
     // Also allow python.bat, but convert into the .exe.
-    base::FilePath candidate_bat =
-        base::FilePath(component).Append(python_bat_name);
-    if (base::PathExists(candidate_bat)) {
-      base::FilePath python_exe = PythonBatToExe(candidate_bat);
-      if (!python_exe.empty())
-        return python_exe;
+    if (!python_bat_name.empty()) {
+      CHECK(python_bat_name.FinalExtension() == u".bat");
+      CHECK_EQ(python_bat_name.IsAbsolute(), false);
+      base::FilePath candidate_bat =
+          base::FilePath(component).Append(python_bat_name);
+      if (base::PathExists(candidate_bat)) {
+        base::FilePath python_exe = PythonBatToExe(candidate_bat);
+        if (!python_exe.empty())
+          return python_exe;
+      }
     }
   }
   return base::FilePath();
@@ -730,15 +742,29 @@ base::FilePath ProcessFileExtensions(base::FilePath script_executable) {
 #if defined(OS_WIN)
   // If we have a relative path with no extension such as "python" or
   // "python3" then do a path search on the name with .exe and .bat appended.
-  if (!script_executable.IsAbsolute() &&
-      script_executable.FinalExtension() == u"") {
-    script_executable =
-        FindWindowsPython(script_executable.ReplaceExtension(u".exe"),
-                          script_executable.ReplaceExtension(u".bat"));
-  } else {
-    if (script_executable.FinalExtension() == u".bat")
+  auto extension = script_executable.FinalExtension();
+  if (script_executable.IsAbsolute()) {
+    // Do translation from .bat to .exe but otherwise just pass through.
+    if (extension == u".bat")
       script_executable = PythonBatToExe(script_executable);
+  } else {
+    if (extension == u"") {
+      // If no extension is specified then search the path for .exe and .bat
+      // variants.
+      script_executable =
+          FindWindowsPython(script_executable.ReplaceExtension(u".exe"),
+                            script_executable.ReplaceExtension(u".bat"));
+    } else if (extension == u".bat") {
+      // Search the path just for the specified .bat.
+      script_executable =
+          FindWindowsPython(base::FilePath(), script_executable);
+    } else if (extension == u".exe") {
+      // Search the path just for the specified .exe.
+      script_executable =
+          FindWindowsPython(script_executable, base::FilePath());
+    }
   }
+  script_executable = script_executable.NormalizePathSeparatorsTo('/');
 #endif
   return script_executable;
 }
@@ -750,8 +776,7 @@ bool Setup::FillPythonPath(const base::CommandLine& cmdline, Err* err) {
   if (cmdline.HasSwitch(switches::kScriptExecutable)) {
     auto script_executable =
         cmdline.GetSwitchValuePath(switches::kScriptExecutable);
-    script_executable = ProcessFileExtensions(script_executable);
-    build_settings_.set_python_path(script_executable);
+    build_settings_.set_python_path(ProcessFileExtensions(script_executable));
   } else if (value) {
     if (!value->VerifyTypeIs(Value::STRING, err)) {
       return false;
@@ -760,17 +785,15 @@ bool Setup::FillPythonPath(const base::CommandLine& cmdline, Err* err) {
         ProcessFileExtensions(UTF8ToFilePath(value->string_value())));
   } else {
 #if defined(OS_WIN)
-    const base::FilePath python_exe_name(u"python.exe");
-    const base::FilePath python_bat_name(u"python.bat");
     base::FilePath python_path =
-        FindWindowsPython(python_exe_name, python_bat_name);
-    if (python_path.empty()) {
+        ProcessFileExtensions(base::FilePath(u"python"));
+    if (!python_path.IsAbsolute()) {
       scheduler_.Log("WARNING",
                      "Could not find python on path, using "
                      "just \"python.exe\"");
-      python_path = python_exe_name;
+      python_path = base::FilePath(u"python.exe");
     }
-    build_settings_.set_python_path(python_path.NormalizePathSeparatorsTo('/'));
+    build_settings_.set_python_path(python_path);
 #else
     build_settings_.set_python_path(base::FilePath("python"));
 #endif
