@@ -148,7 +148,7 @@ Variables
   default_args [optional]
       Scope containing the default overrides for declared arguments. These
       overrides take precedence over the default values specified in the
-      declare_args() block, but can be overriden using --args or the
+      declare_args() block, but can be overridden using --args or the
       args.gn file.
 
       This is intended to be used when subprojects declare arguments with

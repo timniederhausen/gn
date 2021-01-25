@@ -51,7 +51,7 @@ class SourceDir {
       const std::string_view& source_root = std::string_view(),
       const std::string* v_value = nullptr) const;
 
-  // Like ResolveRelativeAs above, but allows to produce result
+  // Like ResolveRelativeAs above, but allows one to produce result
   // without overhead for string conversion (on input value).
   template <typename StringType>
   std::string ResolveRelativeAs(

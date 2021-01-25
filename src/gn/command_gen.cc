@@ -494,7 +494,7 @@ Visual Studio Flags
 Xcode Flags
 
   --xcode-project=<file_name>
-      Override defaut Xcode project file name ("all"). The project file is
+      Override default Xcode project file name ("all"). The project file is
       written to the root build directory.
 
   --xcode-build-system=<value>

@@ -19,7 +19,7 @@ extern const char kMetadata_Help[];
 // Generally, these keys will include three categories of strings: ordinary
 // strings, filenames intended to be rebased according to their particular
 // source directory, and target labels intended to be used as barriers to the
-// walk. Verfication of these categories occurs at walk time, not creation
+// walk. Verification of these categories occurs at walk time, not creation
 // time (since it is not clear until the walk which values are intended for
 // which purpose).
 //

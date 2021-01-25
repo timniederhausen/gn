@@ -278,7 +278,7 @@ const char kBundleData_HelpShort[] =
 const char kBundleData_Help[] =
     R"(bundle_data: [iOS/macOS] Declare a target without output.
 
-  This target type allows to declare data that is required at runtime. It is
+  This target type allows one to declare data that is required at runtime. It is
   used to inform "create_bundle" targets of the files to copy into generated
   bundle, see "gn help create_bundle" for help.
 

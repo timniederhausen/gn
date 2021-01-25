@@ -792,7 +792,7 @@ Tool variables
 
   The Swift tool has multiple input and outputs. It must have exactly one
   output of .swiftmodule type, but can have one or more object file outputs,
-  in addition to other type of ouputs. The following expansions are available:
+  in addition to other type of outputs. The following expansions are available:
 
     {{module_name}}
         Expands to the string representing the module name of target under
