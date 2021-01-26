@@ -344,7 +344,7 @@ Examples (file input)
 
 int RunRefs(const std::vector<std::string>& args) {
   if (args.size() <= 1) {
-    Err(Location(), "You're holding it wrong.",
+    Err(Location(), "Unknown command format. See \"gn help refs\"",
         "Usage: \"gn refs <out_dir> (<label_pattern>|<file>)*\"")
         .PrintToStdout();
     return 1;

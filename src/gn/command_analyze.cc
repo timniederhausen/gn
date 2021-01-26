@@ -99,7 +99,7 @@ const char kAnalyze_Help[] =
 
 int RunAnalyze(const std::vector<std::string>& args) {
   if (args.size() != 3) {
-    Err(Location(), "You're holding it wrong.",
+    Err(Location(), "Unknown command format. See \"gn help analyze\"",
         "Usage: \"gn analyze <out_dir> <input_path> <output_path>")
         .PrintToStdout();
     return 1;
