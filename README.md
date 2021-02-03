@@ -59,8 +59,8 @@ some disadvanages:
     projects must agree on some conventions in the build files to allow this to
     work.
 
-  * GN is designed with the expectation that the developers build a project want
-    to compile an identical configuration. So while builds can integrate
+  * GN is designed with the expectation that the developers building a project
+    want to compile an identical configuration. So while builds can integrate
     with the user's environment like the CXX and CFLAGS variables if they want,
     this is not the default and most project's builds do not do this. The result
     is that many GN projects do not integrate well with other systems like
@@ -74,9 +74,10 @@ some disadvanages:
 
 GN can generate Ninja build files for C, C++, Rust, Objective C, and Swift
 source on most popular platforms. Other languages can be compiled using the
-general "action" rules (Google does this for Java and Go). But because this is
-not as clean, generally GN is only used when the bulk of the build is in one of
-the main built-in languages.
+general "action" rules which are executed by Python or another scripting
+language (Google does this to compile Java and Go). But because this is not as
+clean, generally GN is only used when the bulk of the build is in one of the
+main built-in languages.
 
 ## Getting a binary
 
@@ -173,11 +174,11 @@ Google Group.
 
 ## Versioning and distribution
 
-Most projects are designed to use the developer's computer's current toolchain
-such as compiler, linker, and build tool. But the large projects that GN is
-designed for typically want a more hermetic environment. They will ensure that
-developers are using a specific compatible toolchain that is versioned with the
-code
+Most open-source projects are designed to use the developer's computer's current
+toolchain such as compiler, linker, and build tool. But the large
+centrally controlled projects that GN is designed for typically want a more
+hermetic environment. They will ensure that developers are using a specific
+compatible toolchain that is versioned with the code
 
 As a result, GN expects that the project choose the appropriate version of GN
 that will work with each version of the project. There is no "current stable
