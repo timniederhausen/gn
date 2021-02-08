@@ -15,7 +15,7 @@
       <key>comment</key>
       <string>keywords</string>
       <key>match</key>
-      <string>\b(?:if)\b</string>
+      <string>\b(?:if|else)\b</string>
       <key>name</key>
       <string>keyword.control.gn</string>
     </dict>
