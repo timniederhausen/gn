@@ -37,8 +37,6 @@
 #include "gn/variables.h"
 #include "gn/xcode_object.h"
 
-#include <iostream>
-
 namespace {
 
 // This is the template of the script used to build the target. It invokes
@@ -101,10 +99,7 @@ enum TargetOsType {
 };
 
 const char* kXCTestFileSuffixes[] = {
-    "egtest.m",
-    "egtest.mm",
-    "xctest.m",
-    "xctest.mm",
+    "egtest.m", "egtest.mm", "xctest.m", "xctest.mm", "UITests.m", "UITests.mm",
 };
 
 const char kXCTestModuleTargetNamePostfix[] = "_module";
@@ -305,15 +300,9 @@ void AddXCTestFilesToTestModuleTarget(const std::vector<SourceFile>& sources,
                                       SourceDir source_dir,
                                       const BuildSettings* build_settings) {
   for (const SourceFile& source : sources) {
-    std::string source_path = RebasePath(source.value(), source_dir,
-                                         build_settings->root_path_utf8());
-
-    // Test files need to be known to Xcode for proper indexing and for
-    // discovery of tests function for XCTest and XCUITest, but the compilation
-    // is done via ninja and thus must prevent Xcode from compiling the files by
-    // adding '-help' as per file compiler flag.
-    project->AddSourceFile(source_path, source_path, CompilerFlags::HELP,
-                           native_target);
+    const std::string source_path = RebasePath(
+        source.value(), source_dir, build_settings->root_path_utf8());
+    project->AddSourceFile(source_path, source_path, native_target);
   }
 }
 
@@ -700,8 +689,7 @@ bool XcodeProject::AddSourcesFromBuilder(const Builder& builder, Err* err) {
   for (const SourceFile& source : sorted_sources) {
     const std::string source_file = RebasePath(
         source.value(), source_dir, build_settings_->root_path_utf8());
-    project_.AddSourceFileToIndexingTarget(source_file, source_file,
-                                           CompilerFlags::NONE);
+    project_.AddSourceFileToIndexingTarget(source_file, source_file);
   }
 
   return true;
@@ -776,12 +764,6 @@ bool XcodeProject::AddTargetsFromBuilder(const Builder& builder, Err* err) {
 bool XcodeProject::AddCXTestSourceFilesForTestModuleTargets(
     const std::map<const Target*, PBXNativeTarget*>& bundle_targets,
     Err* err) {
-  // With the New Build System, the hack of calling clang with --help to get
-  // Xcode to see and parse the file without building them no longer work so
-  // disable it for the moment. See https://crbug.com/1103230 for details.
-  if (options_.build_system == XcodeBuildSystem::kNew)
-    return true;
-
   const SourceDir source_dir("//");
 
   // Needs to search for xctest files under the application targets, and this
