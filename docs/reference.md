@@ -58,7 +58,6 @@
     *   [rebase_path: Rebase a file or directory to another location.](#func_rebase_path)
     *   [set_default_toolchain: Sets the default toolchain name.](#func_set_default_toolchain)
     *   [set_defaults: Set default values for a target type.](#func_set_defaults)
-    *   [set_sources_assignment_filter: Deprecated feature.](#func_set_sources_assignment_filter)
     *   [split_list: Splits a list into N different sub-lists.](#func_split_list)
     *   [string_join: Concatenates a list of strings with a separator.](#func_string_join)
     *   [string_replace: Replaces substring in the given string.](#func_string_replace)
@@ -3098,12 +3097,6 @@
     # you don't want the default for a particular default:
     configs -= [ "//tools/mything:settings" ]
   }
-```
-### <a name="func_set_sources_assignment_filter"></a>**set_sources_assignment_filter**: Deprecated feature.
-
-```
-  This feature is deprecated. It will be removed once all usages have been
-  removed. Only supports a single argument that needs to be an empty list.
 ```
 ### <a name="func_split_list"></a>**split_list**: Splits a list into N different sub-lists.
 

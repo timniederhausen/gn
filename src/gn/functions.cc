@@ -806,40 +806,6 @@ Value RunNotNeeded(Scope* scope,
   return Value();
 }
 
-// set_sources_assignment_filter -----------------------------------------------
-
-const char kSetSourcesAssignmentFilter[] = "set_sources_assignment_filter";
-const char kSetSourcesAssignmentFilter_HelpShort[] =
-    "set_sources_assignment_filter: Deprecated feature.";
-const char kSetSourcesAssignmentFilter_Help[] =
-    R"(set_sources_assignment_filter: Deprecated feature.
-
-  This feature is deprecated. It will be removed once all usages have been
-  removed. Only supports a single argument that needs to be an empty list.
-)";
-
-Value RunSetSourcesAssignmentFilter(Scope* scope,
-                                    const FunctionCallNode* function,
-                                    const std::vector<Value>& args,
-                                    Err* err) {
-  if (args.size() != 1) {
-    *err = Err(function, "set_sources_assignment_filter takes one argument.");
-    return Value();
-  }
-
-  if (!args[0].VerifyTypeIs(Value::LIST, err)) {
-    return Value();
-  }
-
-  if (!args[0].list_value().empty()) {
-    *err = Err(function,
-               "set_sources_assignment_filter argument must be an empty list.");
-    return Value();
-  }
-
-  return Value();
-}
-
 // pool ------------------------------------------------------------------------
 
 const char kPool[] = "pool";
@@ -1431,7 +1397,6 @@ struct FunctionInfoInitializer {
     INSERT_FUNCTION(RebasePath, false)
     INSERT_FUNCTION(SetDefaults, false)
     INSERT_FUNCTION(SetDefaultToolchain, false)
-    INSERT_FUNCTION(SetSourcesAssignmentFilter, false)
     INSERT_FUNCTION(SplitList, false)
     INSERT_FUNCTION(StringJoin, false)
     INSERT_FUNCTION(StringReplace, false)

@@ -328,14 +328,6 @@ Value RunSetDefaultToolchain(Scope* scope,
                              const std::vector<Value>& args,
                              Err* err);
 
-extern const char kSetSourcesAssignmentFilter[];
-extern const char kSetSourcesAssignmentFilter_HelpShort[];
-extern const char kSetSourcesAssignmentFilter_Help[];
-Value RunSetSourcesAssignmentFilter(Scope* scope,
-                                    const FunctionCallNode* function,
-                                    const std::vector<Value>& args,
-                                    Err* err);
-
 extern const char kSharedLibrary[];
 extern const char kSharedLibrary_HelpShort[];
 extern const char kSharedLibrary_Help[];
