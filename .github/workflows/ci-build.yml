@@ -1,0 +1,148 @@
+name: ci-build
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+      - feature/**
+  push:
+    branches:
+      - master
+      - develop
+      - feature/**
+  workflow_dispatch:
+
+env:
+  LLVM_VERSION: 8.0.1
+  NINJA_BASE_URL: https://github.com/ninja-build/ninja/releases/download/
+
+jobs:
+  posix:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: linux-i386
+            cc: gcc-8
+            cxx: g++-8
+            cflags: "-m32"
+            ldflags: "-m32"
+            libflags: "-m32"
+            os: ubuntu-20.04
+            install: "g++-8 g++-8-multilib"
+            ninja_release_name: v1.7.2/ninja-linux.zip
+
+          - slug: linux-amd64
+            cc: gcc-8
+            cxx: g++-8
+            cflags: "-m64"
+            ldflags: "-m64"
+            libflags: "-m64"
+            os: ubuntu-20.04
+            install: "g++-8"
+            ninja_release_name: v1.7.2/ninja-linux.zip
+
+          - slug: macos-amd64
+            gen_args: "--use-lto --use-icf"
+            cc: clang
+            cxx: clang++
+            cflags: "-m64"
+            ldflags: "-m64"
+            libflags: "-m64"
+            os: macos-10.15
+            ninja_release_name: v1.7.2/ninja-mac.zip
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install packages
+        if: matrix.install
+        run: sudo apt install ${{ matrix.install }}
+
+      - uses: actions/checkout@v2
+        with:
+          # we need all everything for `git describe` to work correctly
+          fetch-depth: 0
+
+      - name: Make dependencies directory
+        run: |
+          DEPS_DIR=$(cd ~; pwd)/deps
+          mkdir -p ${DEPS_DIR}
+          echo "export DEPS_DIR=$DEPS_DIR" >> "${GITHUB_WORKSPACE}/.env"
+
+      - name: Install recent Ninja
+        run: |
+          source .env
+          cd ${DEPS_DIR}
+          wget --no-check-certificate --quiet -O ninja.zip "${NINJA_BASE_URL}${{ matrix.ninja_release_name }}"
+          python -c 'import sys,zipfile;zipfile.ZipFile(sys.argv[1]).extractall()' ninja.zip
+          chmod +x ninja
+
+      - name: Setup compiler environment
+        run: |
+          echo 'export CC="${{ matrix.cc }}"' >> "${GITHUB_WORKSPACE}/.env"
+          echo 'export CXX="${{ matrix.cxx }}"' >> "${GITHUB_WORKSPACE}/.env"
+          echo 'export CFLAGS="${{ matrix.cflags }}"' >> "${GITHUB_WORKSPACE}/.env"
+          echo 'export LDFLAGS="${{ matrix.ldflags }}"' >> "${GITHUB_WORKSPACE}/.env"
+          echo 'export LIBFLAGS="${{ matrix.libflags }}"' >> "${GITHUB_WORKSPACE}/.env"
+
+      - name: Cache libc++ and libc++abi if needed
+        if: "${{ matrix.cc == 'clang' }}"
+        uses: actions/cache@v2
+        with:
+          path: ~/deps/llvm
+          key: ${{ runner.os }}-llvm-${{ matrix.slug }}
+
+      - name: Install libc++ and libc++abi if needed
+        if: "${{ matrix.cc == 'clang' }}"
+        run: |
+          source .env
+          cd ${DEPS_DIR}
+          if [[ ! -f "llvm/install/lib/libc++abi.a" ]]; then
+            LLVM_URL="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/llvm-${LLVM_VERSION}.src.tar.xz"
+            LIBCXX_URL="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/libcxx-${LLVM_VERSION}.src.tar.xz"
+            LIBCXXABI_URL="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/libcxxabi-${LLVM_VERSION}.src.tar.xz"
+            mkdir -p llvm llvm/build llvm/projects/libcxx llvm/projects/libcxxabi
+            wget -O - ${LLVM_URL} | tar --strip-components=1 -xJ -C llvm || exit 1
+            wget -O - ${LIBCXX_URL} | tar --strip-components=1 -xJ -C llvm/projects/libcxx || exit 1
+            wget -O - ${LIBCXXABI_URL} | tar --strip-components=1 -xJ -C llvm/projects/libcxxabi || exit 1
+            (cd llvm/build && cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_DIR}/llvm/install) || exit 1
+            (cd llvm/build/projects/libcxx && make install -j2) || exit 1
+            (cd llvm/build/projects/libcxxabi && make install -j2) || exit 1
+          fi
+          echo 'export CXXFLAGS="-stdlib=libc++ -nostdinc++ -cxx-isystem ${DEPS_DIR}/llvm/install/include/c++/v1"' >> "${GITHUB_WORKSPACE}/.env"
+          echo 'export LDFLAGS="${LDFLAGS} -L ${DEPS_DIR}/llvm/install/lib -l c++ -l c++abi"' >> "${GITHUB_WORKSPACE}/.env"
+          echo 'export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${DEPS_DIR}/llvm/install/lib"' >> "${GITHUB_WORKSPACE}/.env"
+
+      - name: Show final environment
+        run: |
+          cat .env
+
+      - name: Compile
+        run: |
+          source .env
+          build/gen.py ${{ matrix.gen_args }}
+          ${DEPS_DIR}/ninja -C out
+
+      - name: Run tests
+        run: |
+          source .env
+          out/gn_unittests
+
+      - name: Archive binaries
+        if: "${{ matrix.cc != 'clang' }}"
+        run: |
+          tar -C out -czf "out/gn-${{ matrix.slug }}.tar.gz" gn
+
+      - name: Archive binaries (custom libc++)
+        if: "${{ matrix.cc == 'clang' }}"
+        run: |
+          tar -C out -czf "out/gn-${{ matrix.slug }}.tar.gz" gn -C ${DEPS_DIR}/llvm/install/lib $(ls ${DEPS_DIR}/llvm/install/lib)
+
+      - name: Upload archives
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries
+          path: |
+            out/gn-${{ matrix.slug }}.tar.gz
