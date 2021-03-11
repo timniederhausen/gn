@@ -28,7 +28,7 @@ class Template;
 // Scope for the script execution.
 //
 // Scopes are nested. Writing goes into the toplevel scope, reading checks
-// values resursively down the stack until a match is found or there are no
+// values recursively down the stack until a match is found or there are no
 // more containing scopes.
 //
 // A containing scope can be const or non-const. The const containing scope is
@@ -174,7 +174,7 @@ class Scope {
   // different underlying buffer. This is useful because this std::string_view
   // is static and won't be deleted for the life of the program, so it can be
   // used as keys in places that may outlive a temporary. It will return an
-  // empty string for programmatic and nonexistant values.
+  // empty string for programmatic and nonexistent values.
   std::string_view GetStorageKey(const std::string_view& ident) const;
 
   // The set_node indicates the statement that caused the set, for displaying
@@ -280,7 +280,7 @@ class Scope {
   void set_source_dir(const SourceDir& d) { source_dir_ = d; }
 
   // Set of files that may affect the execution of this scope. Note that this
-  // set is constructed conservatively, meanining that every file that can
+  // set is constructed conservatively, meaning that every file that can
   // potentially affect this scope is included, but not necessarily every change
   // to these files will affect this scope.
   const SourceFileSet& build_dependency_files() const {

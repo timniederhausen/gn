@@ -107,7 +107,7 @@ void AppendSwitchesAndArguments(CommandLine* command_line,
 }
 
 #if defined(OS_WIN)
-// Quote a string as necessary for CommandLineToArgvW compatiblity *on Windows*.
+// Quote a string as necessary for CommandLineToArgvW compatibility *on Windows*.
 std::u16string QuoteForCommandLineToArgvW(const std::u16string& arg,
                                           bool quote_placeholders) {
   // We follow the quoting rules of CommandLineToArgvW.

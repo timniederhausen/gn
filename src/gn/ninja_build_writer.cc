@@ -528,7 +528,7 @@ bool NinjaBuildWriter::WritePhonyAndAllRules(Err* err) {
     // If at this point there is a collision (no phony rules have been
     // generated yet), two targets make the same output so throw an error.
     for (const auto& output : target->computed_outputs()) {
-      // Need to normalize because many toolchain outputs will be preceeded
+      // Need to normalize because many toolchain outputs will be preceded
       // with "./".
       std::string output_string(output.value());
       NormalizePath(&output_string);

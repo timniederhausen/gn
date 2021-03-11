@@ -79,16 +79,16 @@ class Target : public Item {
   OutputType output_type() const { return output_type_; }
   void set_output_type(OutputType t) { output_type_ = t; }
 
-  // True for targets that compile source code (all types of libaries and
+  // True for targets that compile source code (all types of libraries and
   // executables).
   bool IsBinary() const;
 
   // Can be linked into other targets.
   bool IsLinkable() const;
 
-  // True if the target links dependencies rather than propogated up the graph.
+  // True if the target links dependencies rather than propagated up the graph.
   // This is also true of action and copy steps even though they don't link
-  // dependencies, because they also don't propogate libraries up.
+  // dependencies, because they also don't propagate libraries up.
   bool IsFinal() const;
 
   // Set when the target should normally be treated as a data dependency. These

@@ -171,7 +171,7 @@ void BuildArgJson(base::Value& dict,
   // Fetch argument name.
   dict.SetKey("name", base::Value(name));
 
-  // Fetch overridden value inforrmation (if present).
+  // Fetch overridden value information (if present).
   if (arg.has_override) {
     base::DictionaryValue override_dict;
     override_dict.SetKey("value",

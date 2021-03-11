@@ -396,7 +396,7 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
   declared_arguments[variables::kTargetCpu] = empty_string;
 
   // Mark these variables used so the build config file can override them
-  // without geting a warning about overwriting an unused variable.
+  // without getting a warning about overwriting an unused variable.
   dest->MarkUsed(variables::kHostCpu);
   dest->MarkUsed(variables::kCurrentCpu);
   dest->MarkUsed(variables::kTargetCpu);

@@ -547,7 +547,7 @@ class NonNestableBlock {
   const char* type_description_;
 
   // Set to true when the key is added to the scope so we don't try to
-  // delete nonexistant keys which will cause assertions.
+  // delete nonexistent keys which will cause assertions.
   bool key_added_;
 };
 

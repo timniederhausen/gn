@@ -36,7 +36,7 @@ class Metadata {
   const ParseNode* origin() const { return origin_; }
   void set_origin(const ParseNode* origin) { origin_ = origin; }
 
-  // The contents of this metadata varaiable.
+  // The contents of this metadata variable.
   const Contents& contents() const { return contents_; }
   Contents& contents() { return contents_; }
   void set_contents(Contents&& contents) { contents_ = std::move(contents); }

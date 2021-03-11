@@ -446,7 +446,7 @@ bool NormalizeFilePath(const FilePath& path, FilePath* normalized_path) {
   if (real_path_result.empty())
     return false;
 
-  // To be consistant with windows, fail if |real_path_result| is a
+  // To be consistent with windows, fail if |real_path_result| is a
   // directory.
   if (DirectoryExists(real_path_result))
     return false;

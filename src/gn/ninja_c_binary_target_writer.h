@@ -96,7 +96,7 @@ class NinjaCBinaryTargetWriter : public NinjaBinaryTargetWriter {
   // the "||" and everything following it on the ninja line.
   //
   // The order-only dependencies are the non-linkable deps passed in as an
-  // argument, plus the data file depdencies in the target.
+  // argument, plus the data file dependencies in the target.
   void WriteOrderOnlyDependencies(
       const UniqueVector<const Target*>& non_linkable_deps);
 

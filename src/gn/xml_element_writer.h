@@ -42,7 +42,7 @@ class XmlElementWriter {
                    const XmlAttributes& attributes,
                    int indent);
   // Starts new XML element with specified indentation. Specialized constructor
-  // that allows writting XML element with single attribute without copying
+  // that allows writing XML element with single attribute without copying
   // attribute value.
   template <class Writer>
   XmlElementWriter(std::ostream& out,

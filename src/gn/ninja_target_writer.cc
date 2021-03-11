@@ -206,7 +206,7 @@ std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
     input_deps_sources.push_back(&target_->action_values().script());
 
   // Input files are only considered for non-binary targets which use an
-  // implicit dependency instead. The implicit depedency in this case is
+  // implicit dependency instead. The implicit dependency in this case is
   // handled separately by the binary target writer.
   if (!target_->IsBinary()) {
     for (ConfigValuesIterator iter(target_); !iter.done(); iter.Next()) {

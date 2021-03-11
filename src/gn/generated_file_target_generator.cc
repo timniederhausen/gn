@@ -75,7 +75,7 @@ bool GeneratedFileTargetGenerator::IsMetadataCollectionTarget(
         Err(origin, std::string(variable) + " won't be used.",
             "\"contents\" is defined on this target, and so setting " +
                 std::string(variable) +
-                " will have no effect as no metdata collection will occur.");
+                " will have no effect as no metadata collection will occur.");
     return false;
   }
   return true;

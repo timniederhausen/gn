@@ -24,7 +24,7 @@
 #include "gn/variables.h"
 
 // Example structure of Value for single target
-// (not applicable or empty fields will be ommitted depending on target type)
+// (not applicable or empty fields will be omitted depending on target type)
 //
 // target_properties = {
 //   "type" : "output_type", // matching Target::GetStringForOutputType
@@ -37,7 +37,7 @@
 //   "public" : either "*" or [ list of public headers],
 //   "inputs" : [ list of inputs for target ],
 //   "configs" : [ list of configs for this target ],
-//   "public_configs" : [ list of public configs for this taget],
+//   "public_configs" : [ list of public configs for this target],
 //   "all_dependent_configs", [ list of all dependent configs for this target],
 //   "script" : "script for action targets",
 //   "args" : [ argument list for action targets ],

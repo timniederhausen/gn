@@ -682,14 +682,14 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     //
     // In this case:
     //   EXE -> INTERMEDIATE_SHLIB --[public]--> FINAL_SHLIB
-    // The EXE will also link to to FINAL_SHLIB. The public dependeny means
+    // The EXE will also link to to FINAL_SHLIB. The public dependency means
     // that the EXE can use the headers in FINAL_SHLIB so the FINAL_SHLIB
     // will need to appear on EXE's link line.
     //
     // However, if the dependency is private:
     //   EXE -> INTERMEDIATE_SHLIB --[private]--> FINAL_SHLIB
     // the dependency will not be propagated because INTERMEDIATE_SHLIB is
-    // not granting permission to call functiosn from FINAL_SHLIB. If EXE
+    // not granting permission to call functions from FINAL_SHLIB. If EXE
     // wants to use functions (and link to) FINAL_SHLIB, it will need to do
     // so explicitly.
     //
@@ -699,7 +699,7 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     inherited_libraries_.AppendPublicSharedLibraries(dep->inherited_libraries(),
                                                      is_public);
   } else if (!dep->IsFinal()) {
-    // The current target isn't linked, so propogate linked deps and
+    // The current target isn't linked, so propagate linked deps and
     // libraries up the dependency tree.
     inherited_libraries_.AppendInherited(dep->inherited_libraries(), is_public);
     rust_values().transitive_libs().AppendInherited(

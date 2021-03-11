@@ -417,7 +417,7 @@ bool Scope::NonRecursiveMergeTo(Scope* dest,
     dest->templates_[current_name] = pair.second;
   }
 
-  // Propogate build dependency files,
+  // Propagate build dependency files,
   dest->AddBuildDependencyFiles(build_dependency_files_);
 
   return true;

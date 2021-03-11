@@ -174,7 +174,7 @@ const std::string_view sysroot_crates[] = {"std",
                                            "unwind"};
 
 // Multiple sysroot crates have dependenices on each other.  This provides a
-// mechanism for specifiying that in an extendible manner.
+// mechanism for specifying that in an extendible manner.
 const std::unordered_map<std::string_view, std::vector<std::string_view>>
     sysroot_deps_map = {{"alloc", {"core"}},
                         {"std", {"alloc", "core", "panic_abort", "unwind"}}};

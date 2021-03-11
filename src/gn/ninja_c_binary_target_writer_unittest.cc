@@ -365,7 +365,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, NoHardDepsToNoPublicHeaderTarget) {
       SubstitutionList::MakeForTest("//out/Debug/generated.cc");
   ASSERT_TRUE(action.OnResolved(&err));
 
-  // A source set compiling geneated code, this target does not publicize any
+  // A source set compiling generated code, this target does not publicize any
   // headers.
   Target gen_obj(setup.settings(), Label(SourceDir("//foo/"), "gen_obj"));
   gen_obj.set_output_type(Target::SOURCE_SET);

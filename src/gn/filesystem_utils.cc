@@ -589,7 +589,7 @@ void NormalizePath(std::string* path, const std::string_view& source_root) {
 
                 // |path| is now absolute, so |top_index| is 1. |dest_i| and
                 // |src_i| should be incremented to keep the same relative
-                // position. Comsume the leading "//" by decrementing |dest_i|.
+                // position. Consume the leading "//" by decrementing |dest_i|.
                 top_index = 1;
                 pathbuf = &(*path)[0];
                 dest_i += source_root_len - 2;
@@ -610,7 +610,7 @@ void NormalizePath(std::string* path, const std::string_view& source_root) {
             src_i += consumed_len;
         }
       } else {
-        // Dot not preceeded by a slash, copy it literally.
+        // Dot not preceded by a slash, copy it literally.
         pathbuf[dest_i++] = pathbuf[src_i++];
       }
     } else if (IsSlash(pathbuf[src_i])) {
@@ -618,7 +618,7 @@ void NormalizePath(std::string* path, const std::string_view& source_root) {
         // Two slashes in a row, skip over it.
         src_i++;
       } else {
-        // Just one slash, copy it, normalizing to foward slash.
+        // Just one slash, copy it, normalizing to forward slash.
         pathbuf[dest_i] = '/';
         dest_i++;
         src_i++;
@@ -838,7 +838,7 @@ std::string ResolveRelative(const StringType& input,
 
   // With no source_root, there's nothing we can do about
   // e.g. input=../../../path/to/file and value=//source and we'll
-  // errornously return //file.
+  // erroneously return //file.
   result.reserve(value.size() + input.size());
   result.assign(value);
   result.append(input.data(), input.size());
