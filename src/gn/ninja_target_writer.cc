@@ -188,7 +188,7 @@ void NinjaTargetWriter::WriteSharedVars(const SubstitutionBits& bits) {
 }
 
 std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
-    const std::vector<const Target*>& extra_hard_deps,
+    const std::vector<const Target*>& additional_hard_deps,
     size_t num_stamp_uses) const {
   CHECK(target_->toolchain()) << "Toolchain not set on target "
                               << target_->label().GetUserVisibleName(true);
@@ -241,9 +241,9 @@ std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
       input_deps_targets.push_back(target);
   }
 
-  // Extra hard dependencies passed in. These are usually empty or small, and
-  // we don't want to duplicate the explicit hard deps of the target.
-  for (const Target* target : extra_hard_deps) {
+  // Additional hard dependencies passed in. These are usually empty or small,
+  // and we don't want to duplicate the explicit hard deps of the target.
+  for (const Target* target : additional_hard_deps) {
     if (!hard_deps.count(target))
       input_deps_targets.push_back(target);
   }

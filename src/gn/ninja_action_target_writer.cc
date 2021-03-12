@@ -29,18 +29,18 @@ NinjaActionTargetWriter::~NinjaActionTargetWriter() = default;
 void NinjaActionTargetWriter::Run() {
   std::string custom_rule_name = WriteRuleDefinition();
 
-  // Collect our deps to pass as "extra hard dependencies" for input deps. This
-  // will force all of the action's dependencies to be completed before the
-  // action is run. Usually, if an action has a dependency, it will be
+  // Collect our deps to pass as additional "hard dependencies" for input deps.
+  // This will force all of the action's dependencies to be completed before
+  // the action is run. Usually, if an action has a dependency, it will be
   // operating on the result of that previous step, so we need to be sure to
   // serialize these.
-  std::vector<const Target*> extra_hard_deps;
+  std::vector<const Target*> additional_hard_deps;
   std::vector<OutputFile> data_outs;
   for (const auto& pair : target_->GetDeps(Target::DEPS_LINKED)) {
     if (pair.ptr->IsDataOnly()) {
       data_outs.push_back(pair.ptr->dependency_output_file());
     } else {
-      extra_hard_deps.push_back(pair.ptr);
+      additional_hard_deps.push_back(pair.ptr);
     }
   }
 
@@ -50,7 +50,7 @@ void NinjaActionTargetWriter::Run() {
   size_t num_stamp_uses =
       target_->output_type() == Target::ACTION ? 1u : target_->sources().size();
   std::vector<OutputFile> input_deps =
-      WriteInputDepsStampAndGetDep(extra_hard_deps, num_stamp_uses);
+      WriteInputDepsStampAndGetDep(additional_hard_deps, num_stamp_uses);
   out_ << std::endl;
 
   // Collects all output files for writing below.
