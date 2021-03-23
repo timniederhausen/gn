@@ -161,8 +161,9 @@ class Target : public Item {
   }
 
   // Metadata. Target takes ownership of the resulting scope.
-  const Metadata& metadata() const { return metadata_; }
-  Metadata& metadata() { return metadata_; }
+  const Metadata& metadata() const;
+  Metadata& metadata();
+  bool has_metadata() const { return metadata_.get(); }
 
   // Get metadata from this target and its dependencies. This is intended to
   // be called after the target is resolved.
@@ -177,18 +178,37 @@ class Target : public Item {
   // GeneratedFile-related methods.
   bool GenerateFile(Err* err) const;
 
-  const Value& contents() const { return contents_; }
-  void set_contents(const Value& value) { contents_ = value; }
-  const Value& output_conversion() const { return output_conversion_; }
-  void set_output_conversion(const Value& value) { output_conversion_ = value; }
-
   // Metadata collection methods for GeneratedFile targets.
-  const SourceDir& rebase() const { return rebase_; }
-  void set_rebase(const SourceDir& value) { rebase_ = value; }
-  const std::vector<std::string>& data_keys() const { return data_keys_; }
-  std::vector<std::string>& data_keys() { return data_keys_; }
-  const std::vector<std::string>& walk_keys() const { return walk_keys_; }
-  std::vector<std::string>& walk_keys() { return walk_keys_; }
+  struct GeneratedFile {
+    Value output_conversion_;
+    Value contents_;  // Value::NONE if metadata collection should occur.
+    SourceDir rebase_;
+    std::vector<std::string> data_keys_;
+    std::vector<std::string> walk_keys_;
+  };
+  const GeneratedFile& generated_file() const;
+  GeneratedFile& generated_file();
+  bool has_generated_file() const { return generated_file_.get(); }
+
+  const Value& contents() const { return generated_file().contents_; }
+  void set_contents(const Value& value) { generated_file().contents_ = value; }
+  const Value& output_conversion() const {
+    return generated_file().output_conversion_;
+  }
+  void set_output_conversion(const Value& value) {
+    generated_file().output_conversion_ = value;
+  }
+
+  const SourceDir& rebase() const { return generated_file().rebase_; }
+  void set_rebase(const SourceDir& value) { generated_file().rebase_ = value; }
+  const std::vector<std::string>& data_keys() const {
+    return generated_file().data_keys_;
+  }
+  std::vector<std::string>& data_keys() { return generated_file().data_keys_; }
+  const std::vector<std::string>& walk_keys() const {
+    return generated_file().walk_keys_;
+  }
+  std::vector<std::string>& walk_keys() { return generated_file().walk_keys_; }
 
   bool testonly() const { return testonly_; }
   void set_testonly(bool value) { testonly_ = value; }
@@ -208,8 +228,9 @@ class Target : public Item {
 
   // Information about the bundle. Only valid for CREATE_BUNDLE target after
   // they have been resolved.
-  const BundleData& bundle_data() const { return bundle_data_; }
-  BundleData& bundle_data() { return bundle_data_; }
+  const BundleData& bundle_data() const;
+  BundleData& bundle_data();
+  bool has_bundle_data() const { return bundle_data_.get(); }
 
   // Returns true if targets depending on this one should have an order
   // dependency.
@@ -217,7 +238,7 @@ class Target : public Item {
     return output_type_ == ACTION || output_type_ == ACTION_FOREACH ||
            output_type_ == COPY_FILES || output_type_ == CREATE_BUNDLE ||
            output_type_ == BUNDLE_DATA || output_type_ == GENERATED_FILE ||
-           (IsBinary() && swift_values().builds_module());
+           (IsBinary() && has_swift_values() && swift_values().builds_module());
   }
 
   // Returns the iterator range which can be used in range-based for loops
@@ -272,17 +293,21 @@ class Target : public Item {
   }
 
   // This config represents the configuration set directly on this target.
-  ConfigValues& config_values() { return config_values_; }
-  const ConfigValues& config_values() const { return config_values_; }
+  ConfigValues& config_values();
+  const ConfigValues& config_values() const;
+  bool has_config_values() const { return config_values_.get(); }
 
-  ActionValues& action_values() { return action_values_; }
-  const ActionValues& action_values() const { return action_values_; }
+  ActionValues& action_values();
+  const ActionValues& action_values() const;
+  bool has_action_values() const { return action_values_.get(); }
 
-  SwiftValues& swift_values() { return swift_values_; }
-  const SwiftValues& swift_values() const { return swift_values_; }
+  SwiftValues& swift_values();
+  const SwiftValues& swift_values() const;
+  bool has_swift_values() const { return swift_values_.get(); }
 
-  RustValues& rust_values() { return rust_values_; }
-  const RustValues& rust_values() const { return rust_values_; }
+  RustValues& rust_values();
+  const RustValues& rust_values() const;
+  bool has_rust_values() const { return rust_values_.get(); }
 
   // Transitive closure of libraries that are depended on by this target
   InheritedLibraries& rust_transitive_libs() { return rust_transitive_libs_; }
@@ -444,7 +469,7 @@ class Target : public Item {
   bool complete_static_lib_ = false;
   bool testonly_ = false;
   std::vector<std::string> data_;
-  BundleData bundle_data_;
+  std::unique_ptr<BundleData> bundle_data_;
   OutputFile write_runtime_deps_output_;
 
   LabelTargetVector private_deps_;
@@ -483,19 +508,19 @@ class Target : public Item {
   // Used for all binary targets, and for inputs in regular targets. The
   // precompiled header values in this struct will be resolved to the ones to
   // use for this target, if precompiled headers are used.
-  ConfigValues config_values_;
+  std::unique_ptr<ConfigValues> config_values_;
 
   // Used for action[_foreach] targets.
-  ActionValues action_values_;
+  std::unique_ptr<ActionValues> action_values_;
 
   // Used for Rust targets.
-  RustValues rust_values_;
+  std::unique_ptr<RustValues> rust_values_;
 
   // Used by all targets, only useful to generate Rust targets though.
   InheritedLibraries rust_transitive_libs_;
 
   // User for Swift targets.
-  SwiftValues swift_values_;
+  std::unique_ptr<SwiftValues> swift_values_;
 
   // Toolchain used by this target. Null until target is resolved.
   const Toolchain* toolchain_ = nullptr;
@@ -506,16 +531,10 @@ class Target : public Item {
   OutputFile dependency_output_file_;
   std::vector<OutputFile> runtime_outputs_;
 
-  Metadata metadata_;
-
-  // GeneratedFile values.
-  Value output_conversion_;
-  Value contents_;  // Value::NONE if metadata collection should occur.
+  std::unique_ptr<Metadata> metadata_;
 
   // GeneratedFile as metadata collection values.
-  SourceDir rebase_;
-  std::vector<std::string> data_keys_;
-  std::vector<std::string> walk_keys_;
+  std::unique_ptr<GeneratedFile> generated_file_;
 
   Target(const Target&) = delete;
   Target& operator=(const Target&) = delete;

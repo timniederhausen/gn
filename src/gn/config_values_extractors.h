@@ -30,7 +30,12 @@ struct EscapeOptions;
 //     DoSomething(iter.cur());
 class ConfigValuesIterator {
  public:
-  explicit ConfigValuesIterator(const Target* target) : target_(target) {}
+  explicit ConfigValuesIterator(const Target* target) : target_(target) {
+    // If the target doesn't have its own config_values()
+    if (!target->has_config_values()) {
+      cur_index_ = 0;
+    }
+  }
 
   bool done() const {
     return cur_index_ >= static_cast<int>(target_->configs().size());

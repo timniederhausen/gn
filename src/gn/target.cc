@@ -285,6 +285,116 @@ Target::Target(const Settings* settings,
 
 Target::~Target() = default;
 
+// A technical note on accessors defined below: Using a static global
+// constant is much faster at runtime than using a static local one.
+//
+// In other words:
+//
+//   static const Foo kEmptyFoo;
+//
+//   const Foo& Target::foo() const {
+//     return foo_ ? *foo_ : kEmptyFoo;
+//   }
+//
+// Is considerably faster than:
+//
+//   const Foo& Target::foo() const {
+//     if (foo_) {
+//       return *foo_;
+//     } else {
+//       static const Foo kEmptyFoo;
+//       return kEmptyFoo;
+//     }
+//   }
+//
+// Because the latter requires relatively expensive atomic operations
+// in the second branch.
+//
+
+static const BundleData kEmptyBundleData;
+
+const BundleData& Target::bundle_data() const {
+  return bundle_data_ ? *bundle_data_ : kEmptyBundleData;
+}
+
+BundleData& Target::bundle_data() {
+  if (!bundle_data_)
+    bundle_data_ = std::make_unique<BundleData>();
+  return *bundle_data_;
+}
+
+static ConfigValues kEmptyConfigValues;
+
+const ConfigValues& Target::config_values() const {
+  return config_values_ ? *config_values_ : kEmptyConfigValues;
+}
+
+ConfigValues& Target::config_values() {
+  if (!config_values_)
+    config_values_ = std::make_unique<ConfigValues>();
+  return *config_values_;
+}
+
+static const ActionValues kEmptyActionValues;
+
+const ActionValues& Target::action_values() const {
+  return action_values_ ? *action_values_ : kEmptyActionValues;
+}
+
+ActionValues& Target::action_values() {
+  if (!action_values_)
+    action_values_ = std::make_unique<ActionValues>();
+  return *action_values_;
+}
+
+static const RustValues kEmptyRustValues;
+
+const RustValues& Target::rust_values() const {
+  return rust_values_ ? *rust_values_ : kEmptyRustValues;
+}
+
+RustValues& Target::rust_values() {
+  if (!rust_values_)
+    rust_values_ = std::make_unique<RustValues>();
+  return *rust_values_;
+}
+
+static const SwiftValues kEmptySwiftValues;
+
+const SwiftValues& Target::swift_values() const {
+  return swift_values_ ? *swift_values_ : kEmptySwiftValues;
+}
+
+SwiftValues& Target::swift_values() {
+  if (!swift_values_)
+    swift_values_ = std::make_unique<SwiftValues>();
+  return *swift_values_;
+}
+
+static const Metadata kEmptyMetadata;
+
+const Metadata& Target::metadata() const {
+  return metadata_ ? *metadata_ : kEmptyMetadata;
+}
+
+Metadata& Target::metadata() {
+  if (!metadata_)
+    metadata_ = std::make_unique<Metadata>();
+  return *metadata_;
+}
+
+static const Target::GeneratedFile kEmptyGeneratedFile;
+
+const Target::GeneratedFile& Target::generated_file() const {
+  return generated_file_ ? *generated_file_ : kEmptyGeneratedFile;
+}
+
+Target::GeneratedFile& Target::generated_file() {
+  if (!generated_file_)
+    generated_file_ = std::make_unique<Target::GeneratedFile>();
+  return *generated_file_;
+}
+
 // static
 const char* Target::GetStringForOutputType(OutputType type) {
   switch (type) {
@@ -393,7 +503,7 @@ bool Target::OnResolved(Err* err) {
   if (!FillOutputFiles(err))
     return false;
 
-  if (!swift_values_.OnTargetResolved(this, err))
+  if (!SwiftValues::OnTargetResolved(this, err))
     return false;
 
   if (!CheckSourceSetLanguages(err))
@@ -785,15 +895,19 @@ void Target::PullRecursiveBundleData() {
       continue;
 
     // Direct dependency on a bundle_data target.
-    if (pair.ptr->output_type() == BUNDLE_DATA)
-      bundle_data_.AddBundleData(pair.ptr);
+    if (pair.ptr->output_type() == BUNDLE_DATA) {
+      bundle_data().AddBundleData(pair.ptr);
+    }
 
     // Recursive bundle_data informations from all dependencies.
-    for (auto* target : pair.ptr->bundle_data().bundle_deps())
-      bundle_data_.AddBundleData(target);
+    if (pair.ptr->has_bundle_data()) {
+      for (auto* target : pair.ptr->bundle_data().bundle_deps())
+        bundle_data().AddBundleData(target);
+    }
   }
 
-  bundle_data_.OnTargetResolved(this);
+  if (has_bundle_data())
+    bundle_data().OnTargetResolved(this);
 }
 
 bool Target::FillOutputFiles(Err* err) {
@@ -891,7 +1005,8 @@ bool Target::FillOutputFiles(Err* err) {
 
   // Count anything generated from bundle_data dependencies.
   if (output_type_ == CREATE_BUNDLE) {
-    if (!bundle_data_.GetOutputFiles(settings(), this, &computed_outputs_, err))
+    if (!bundle_data().GetOutputFiles(settings(), this, &computed_outputs_,
+                                      err))
       return false;
   }
 
@@ -910,10 +1025,13 @@ bool Target::FillOutputFiles(Err* err) {
   }
 
   // Also count anything the target has declared to be an output.
-  std::vector<SourceFile> outputs_as_sources;
-  action_values_.GetOutputsAsSourceFiles(this, &outputs_as_sources);
-  for (const SourceFile& out : outputs_as_sources)
-    computed_outputs_.push_back(OutputFile(settings()->build_settings(), out));
+  if (action_values_.get()) {
+    std::vector<SourceFile> outputs_as_sources;
+    action_values_->GetOutputsAsSourceFiles(this, &outputs_as_sources);
+    for (const SourceFile& out : outputs_as_sources)
+      computed_outputs_.push_back(
+          OutputFile(settings()->build_settings(), out));
+  }
 
   return true;
 }
@@ -930,8 +1048,10 @@ bool Target::ResolvePrecompiledHeaders(Err* err) {
   // places must match.
 
   // Track where the current settings came from for issuing errors.
+  bool has_precompiled_headers =
+      config_values_.get() && config_values_->has_precompiled_headers();
   const Label* pch_header_settings_from = NULL;
-  if (config_values_.has_precompiled_headers())
+  if (has_precompiled_headers)
     pch_header_settings_from = &label();
 
   for (ConfigValuesIterator iter(this); !iter.done(); iter.Next()) {
@@ -943,10 +1063,10 @@ bool Target::ResolvePrecompiledHeaders(Err* err) {
     if (!cur.has_precompiled_headers())
       continue;  // This one has no precompiled header info, skip.
 
-    if (config_values_.has_precompiled_headers()) {
+    if (has_precompiled_headers) {
       // Already have a precompiled header values, the settings must match.
-      if (config_values_.precompiled_header() != cur.precompiled_header() ||
-          config_values_.precompiled_source() != cur.precompiled_source()) {
+      if (config_values_->precompiled_header() != cur.precompiled_header() ||
+          config_values_->precompiled_source() != cur.precompiled_source()) {
         *err = Err(
             defined_from(), "Precompiled header setting conflict.",
             "The target " + label().GetUserVisibleName(false) +
@@ -955,8 +1075,8 @@ bool Target::ResolvePrecompiledHeaders(Err* err) {
                 "\n"
                 "From " +
                 pch_header_settings_from->GetUserVisibleName(false) +
-                "\n  header: " + config_values_.precompiled_header() +
-                "\n  source: " + config_values_.precompiled_source().value() +
+                "\n  header: " + config_values_->precompiled_header() +
+                "\n  source: " + config_values_->precompiled_source().value() +
                 "\n\n"
                 "From " +
                 config->label().GetUserVisibleName(false) +
@@ -967,8 +1087,8 @@ bool Target::ResolvePrecompiledHeaders(Err* err) {
     } else {
       // Have settings from a config, apply them to ourselves.
       pch_header_settings_from = &config->label();
-      config_values_.set_precompiled_header(cur.precompiled_header());
-      config_values_.set_precompiled_source(cur.precompiled_source());
+      config_values().set_precompiled_header(cur.precompiled_header());
+      config_values().set_precompiled_source(cur.precompiled_source());
     }
   }
 
@@ -1103,11 +1223,11 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
     // Origin is null because this isn't declared anywhere, and should never
     // trigger any errors.
     next_walk_keys.push_back(Value(nullptr, ""));
-  } else {
+  } else if (has_metadata()) {
     // Otherwise, we walk this target and collect the appropriate data.
-    if (!metadata_.WalkStep(settings()->build_settings(), keys_to_extract,
-                            keys_to_walk, rebase_dir, &next_walk_keys,
-                            &current_result, err))
+    if (!metadata().WalkStep(settings()->build_settings(), keys_to_extract,
+                             keys_to_walk, rebase_dir, &next_walk_keys,
+                             &current_result, err))
       return false;
   }
 

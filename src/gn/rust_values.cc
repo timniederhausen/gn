@@ -22,6 +22,8 @@ RustValues::CrateType RustValues::InferredCrateType(const Target* target) {
   if (!target->source_types_used().RustSourceUsed()) {
     return CRATE_AUTO;
   }
+  if (!target->has_rust_values())
+    return CRATE_AUTO;
 
   CrateType crate_type = target->rust_values().crate_type();
   if (crate_type != CRATE_AUTO) {
