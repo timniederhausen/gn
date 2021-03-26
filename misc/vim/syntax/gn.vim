@@ -43,14 +43,15 @@ hi def link     gnFunctions         Macro
 
 " Variables
 syn keyword     gnVariable all_dependent_configs allow_circular_includes_from
-syn keyword     gnVariable args asmflags cflags cflags_c cflags_cc cflags_objc
-syn keyword     gnVariable cflags_objcc check_includes complete_static_lib
-syn keyword     gnVariable configs data data_deps defines depfile deps
+syn keyword     gnVariable args asmflags assert_no_deps
+syn keyword     gnVariable cflags cflags_c cflags_cc cflags_objc cflags_objcc
+syn keyword     gnVariable check_includes complete_static_lib configs
+syn keyword     gnVariable data data_deps data_keys defines depfile deps
 syn keyword     gnVariable framework_dirs frameworks include_dirs inputs ldflags
 syn keyword     gnVariable lib_dirs libs output_extension output_name outputs
 syn keyword     gnVariable public public_configs public_deps scripte sources
 syn keyword     gnVariable testonly visibility contents output_conversion rebase
-syn keyword     gnVariable data_keys walk_keys
+syn keyword     gnVariable walk_keys
 hi def link     gnVariable          Keyword
 
 " Strings
