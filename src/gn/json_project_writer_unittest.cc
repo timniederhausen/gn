@@ -172,7 +172,7 @@ TEST_F(JSONWriter, ActionWithResponseFile) {
             "lib_switch": "-l",
             "linker_arg": "-Clink-arg=",
             "output_prefix": "lib",
-            "outputs": [ "" ]
+            "outputs": [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
          },
          "rust_dylib": {
             "command": "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} {{rustflags}} -o {{output}} {{rustdeps}} {{externs}}",
@@ -182,7 +182,7 @@ TEST_F(JSONWriter, ActionWithResponseFile) {
             "lib_switch": "-l",
             "linker_arg": "-Clink-arg=",
             "output_prefix": "lib",
-            "outputs": [ "" ]
+            "outputs": [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
          },
          "rust_macro": {
             "command": "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} {{rustflags}} -o {{output}} {{rustdeps}} {{externs}}",
@@ -391,7 +391,7 @@ TEST_F(JSONWriter, RustTarget) {
             "lib_switch": "-l",
             "linker_arg": "-Clink-arg=",
             "output_prefix": "lib",
-            "outputs": [ "" ]
+            "outputs": [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
          },
          "rust_dylib": {
             "command": "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} {{rustflags}} -o {{output}} {{rustdeps}} {{externs}}",
@@ -401,7 +401,7 @@ TEST_F(JSONWriter, RustTarget) {
             "lib_switch": "-l",
             "linker_arg": "-Clink-arg=",
             "output_prefix": "lib",
-            "outputs": [ "" ]
+            "outputs": [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
          },
          "rust_macro": {
             "command": "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} {{rustflags}} -o {{output}} {{rustdeps}} {{externs}}",
@@ -634,7 +634,7 @@ TEST_F(JSONWriter, ForEachWithResponseFile) {
             "lib_switch": "-l",
             "linker_arg": "-Clink-arg=",
             "output_prefix": "lib",
-            "outputs": [ "" ]
+            "outputs": [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
          },
          "rust_dylib": {
             "command": "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} {{rustflags}} -o {{output}} {{rustdeps}} {{externs}}",
@@ -644,7 +644,7 @@ TEST_F(JSONWriter, ForEachWithResponseFile) {
             "lib_switch": "-l",
             "linker_arg": "-Clink-arg=",
             "output_prefix": "lib",
-            "outputs": [ "" ]
+            "outputs": [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
          },
          "rust_macro": {
             "command": "{{rustenv}} rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} {{rustflags}} -o {{output}} {{rustdeps}} {{externs}}",

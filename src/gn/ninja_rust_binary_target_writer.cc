@@ -154,7 +154,9 @@ void NinjaRustBinaryTargetWriter::Run() {
     order_only_deps.push_back(non_linkable_dep->dependency_output_file());
   }
   for (const auto* linkable_dep : classified_deps.linkable_deps) {
-    if (linkable_dep->source_types_used().RustSourceUsed()) {
+    // Rust cdylibs are treated as non-Rust dependencies for linking purposes.
+    if (linkable_dep->source_types_used().RustSourceUsed() &&
+        linkable_dep->rust_values().crate_type() != RustValues::CRATE_CDYLIB) {
       rustdeps.push_back(linkable_dep->link_output_file());
     } else {
       nonrustdeps.push_back(linkable_dep->link_output_file());

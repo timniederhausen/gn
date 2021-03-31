@@ -890,3 +890,80 @@ TEST_F(NinjaRustBinaryTargetWriterTest, Inputs) {
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
 }
+
+TEST_F(NinjaRustBinaryTargetWriterTest, CdylibDeps) {
+  Err err;
+  TestWithScope setup;
+  Target cdylib(setup.settings(), Label(SourceDir("//bar/"), "mylib"));
+  cdylib.set_output_type(Target::SHARED_LIBRARY);
+  cdylib.visibility().SetPublic();
+  SourceFile barlib("//bar/lib.rs");
+  cdylib.sources().push_back(barlib);
+  cdylib.source_types_used().Set(SourceFile::SOURCE_RS);
+  cdylib.rust_values().set_crate_type(RustValues::CRATE_CDYLIB);
+  cdylib.rust_values().set_crate_root(barlib);
+  cdylib.rust_values().crate_name() = "mylib";
+  cdylib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(cdylib.OnResolved(&err));
+  {
+    std::ostringstream out;
+    NinjaRustBinaryTargetWriter writer(&cdylib, out);
+    writer.Run();
+    const char expected[] =
+        "crate_name = mylib\n"
+        "crate_type = cdylib\n"
+        "output_extension = .so\n"
+        "output_dir = \n"
+        "rustflags =\n"
+        "rustenv =\n"
+        "root_out_dir = .\n"
+        "target_out_dir = obj/bar\n"
+        "target_output_name = libmylib\n"
+        "\n"
+        "build obj/bar/libmylib.so: rust_cdylib ../../bar/lib.rs | "
+        "../../bar/lib.rs\n"
+        "  externs =\n"
+        "  rustdeps =\n"
+        "  sources = ../../bar/lib.rs\n";
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+  }
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::EXECUTABLE);
+  target.visibility().SetPublic();
+  SourceFile main("//foo/main.rs");
+  target.sources().push_back(SourceFile("//foo/source.rs"));
+  target.sources().push_back(main);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(main);
+  target.rust_values().crate_name() = "foo_bar";
+  target.private_deps().push_back(LabelTargetPair(&cdylib));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+  {
+    std::ostringstream out;
+    NinjaRustBinaryTargetWriter writer(&target, out);
+    writer.Run();
+
+    const char expected[] =
+        "crate_name = foo_bar\n"
+        "crate_type = bin\n"
+        "output_extension = \n"
+        "output_dir = \n"
+        "rustflags =\n"
+        "rustenv =\n"
+        "root_out_dir = .\n"
+        "target_out_dir = obj/foo\n"
+        "target_output_name = bar\n"
+        "\n"
+        "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
+        "../../foo/main.rs obj/bar/libmylib.so\n"
+        "  externs =\n"
+        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/bar "
+        "-Clink-arg=obj/bar/libmylib.so\n"
+        "  sources = ../../foo/source.rs ../../foo/main.rs\n";
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+  }
+}
