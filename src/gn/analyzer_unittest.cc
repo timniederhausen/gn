@@ -592,8 +592,7 @@ TEST_F(AnalyzerTest, WrongInputFields) {
       })",
       "{"
       R"("error":)"
-      R"("Input does not have a key named )"
-      R"(\"additional_compile_targets\" with a list value.",)"
+      R"("Unknown analyze input key \"compile_targets\".",)"
       R"("invalid_targets":[])"
       "}");
 }
