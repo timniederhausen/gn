@@ -12,6 +12,8 @@ on:
       - develop
       - feature/**
   workflow_dispatch:
+  release:
+    types: published
 
 env:
   LLVM_VERSION: 8.0.1
@@ -146,3 +148,14 @@ jobs:
           name: binaries
           path: |
             out/gn-${{ matrix.slug }}.tar.gz
+
+      - name: Upload release asset
+        if: github.event.action == 'published'
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./out/gn-${{ matrix.slug }}.tar.gz
+          asset_name: gn-${{ matrix.slug }}.tar.gz
+          asset_content_type: application/x-tar
