@@ -31,6 +31,7 @@
 #include "gn/scheduler.h"
 #include "gn/settings.h"
 #include "gn/source_file.h"
+#include "gn/string_output_buffer.h"
 #include "gn/substitution_writer.h"
 #include "gn/target.h"
 #include "gn/value.h"
@@ -489,7 +490,8 @@ bool XcodeWorkspace::WriteWorkspaceDataFile(const std::string& name,
   if (source_file.is_null())
     return false;
 
-  std::stringstream out;
+  StringOutputBuffer storage;
+  std::ostream out(&storage);
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
       << "<Workspace\n"
       << "   version = \"1.0\">\n"
@@ -498,8 +500,8 @@ bool XcodeWorkspace::WriteWorkspaceDataFile(const std::string& name,
       << "   </FileRef>\n"
       << "</Workspace>\n";
 
-  return WriteFileIfChanged(build_settings_->GetFullPath(source_file),
-                            out.str(), err);
+  return storage.WriteToFileIfChanged(build_settings_->GetFullPath(source_file),
+                                      err);
 }
 
 bool XcodeWorkspace::WriteSettingsFile(const std::string& name,
@@ -511,7 +513,8 @@ bool XcodeWorkspace::WriteSettingsFile(const std::string& name,
   if (source_file.is_null())
     return false;
 
-  std::stringstream out;
+  StringOutputBuffer storage;
+  std::ostream out(&storage);
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
       << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
       << "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
@@ -530,8 +533,8 @@ bool XcodeWorkspace::WriteSettingsFile(const std::string& name,
   out << "</dict>\n"
       << "</plist>\n";
 
-  return WriteFileIfChanged(build_settings_->GetFullPath(source_file),
-                            out.str(), err);
+  return storage.WriteToFileIfChanged(build_settings_->GetFullPath(source_file),
+                                      err);
 }
 
 // Class responsible for constructing and writing the .xcodeproj from the
@@ -844,11 +847,12 @@ bool XcodeProject::WriteFile(Err* err) const {
   if (pbxproj_file.is_null())
     return false;
 
-  std::stringstream pbxproj_string_out;
+  StringOutputBuffer storage;
+  std::ostream pbxproj_string_out(&storage);
   WriteFileContent(pbxproj_string_out);
 
-  if (!WriteFileIfChanged(build_settings_->GetFullPath(pbxproj_file),
-                          pbxproj_string_out.str(), err)) {
+  if (!storage.WriteToFileIfChanged(build_settings_->GetFullPath(pbxproj_file),
+                                    err)) {
     return false;
   }
 

@@ -12,7 +12,6 @@
 #include "base/json/string_escape.h"
 #include "gn/builder.h"
 #include "gn/deps_iterator.h"
-#include "gn/filesystem_utils.h"
 #include "gn/ninja_target_command_util.h"
 #include "gn/rust_project_writer_helpers.h"
 #include "gn/rust_tool.h"
@@ -70,12 +69,7 @@ bool RustProjectWriter::RunAndWriteFiles(const BuildSettings* build_settings,
   std::ostream out(&out_buffer);
 
   RenderJSON(build_settings, all_targets, out);
-
-  if (out_buffer.ContentsEqual(output_path)) {
-    return true;
-  }
-
-  return out_buffer.WriteToFile(output_path, err);
+  return out_buffer.WriteToFileIfChanged(output_path, err);
 }
 
 // Map of Targets to their index in the crates list (for linking dependencies to

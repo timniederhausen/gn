@@ -23,6 +23,7 @@
 #include "gn/ninja_utils.h"
 #include "gn/output_file.h"
 #include "gn/scheduler.h"
+#include "gn/string_output_buffer.h"
 #include "gn/string_utils.h"
 #include "gn/substitution_writer.h"
 #include "gn/target.h"
@@ -51,7 +52,8 @@ std::string NinjaTargetWriter::RunAndWriteFile(const Target* target) {
 
   // It's ridiculously faster to write to a string and then write that to
   // disk in one operation than to use an fstream here.
-  std::stringstream rules;
+  StringOutputBuffer storage;
+  std::ostream rules(&storage);
 
   // Call out to the correct sub-type of writer. Binary targets need to be
   // written to separate files for compiler flag scoping, but other target
@@ -101,8 +103,7 @@ std::string NinjaTargetWriter::RunAndWriteFile(const Target* target) {
     SourceFile ninja_file = GetNinjaFileForTarget(target);
     base::FilePath full_ninja_file =
         settings->build_settings()->GetFullPath(ninja_file);
-    base::CreateDirectory(full_ninja_file.DirName());
-    WriteFileIfChanged(full_ninja_file, rules.str(), nullptr);
+    storage.WriteToFileIfChanged(full_ninja_file, nullptr);
 
     EscapeOptions options;
     options.mode = ESCAPE_NINJA;
@@ -117,7 +118,7 @@ std::string NinjaTargetWriter::RunAndWriteFile(const Target* target) {
   }
 
   // No separate file required, just return the rules.
-  return rules.str();
+  return storage.str();
 }
 
 void NinjaTargetWriter::WriteEscapedSubstitution(const Substitution* type) {

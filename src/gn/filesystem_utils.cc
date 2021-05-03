@@ -939,15 +939,6 @@ bool ContentsEqual(const base::FilePath& file_path, const std::string& data) {
   return file_data == data;
 }
 
-bool WriteFileIfChanged(const base::FilePath& file_path,
-                        const std::string& data,
-                        Err* err) {
-  if (ContentsEqual(file_path, data))
-    return true;
-
-  return WriteFile(file_path, data, err);
-}
-
 bool WriteFile(const base::FilePath& file_path,
                const std::string& data,
                Err* err) {

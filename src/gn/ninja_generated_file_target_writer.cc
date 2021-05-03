@@ -6,11 +6,11 @@
 
 #include "base/strings/string_util.h"
 #include "gn/deps_iterator.h"
-#include "gn/filesystem_utils.h"
 #include "gn/output_conversion.h"
 #include "gn/output_file.h"
 #include "gn/scheduler.h"
 #include "gn/settings.h"
+#include "gn/string_output_buffer.h"
 #include "gn/string_utils.h"
 #include "gn/target.h"
 #include "gn/trace.h"
@@ -79,7 +79,8 @@ void NinjaGeneratedFileTargetWriter::GenerateFile() {
   ScopedTrace trace(TraceItem::TRACE_FILE_WRITE, outputs_as_sources[0].value());
 
   // Compute output.
-  std::ostringstream out;
+  StringOutputBuffer storage;
+  std::ostream out(&storage);
   ConvertValueToOutput(settings_, contents, target_->output_conversion(), out,
                        &err);
 
@@ -88,7 +89,7 @@ void NinjaGeneratedFileTargetWriter::GenerateFile() {
     return;
   }
 
-  WriteFileIfChanged(output, out.str(), &err);
+  storage.WriteToFileIfChanged(output, &err);
 
   if (err.has_error()) {
     g_scheduler->FailWithError(err);

@@ -15,7 +15,6 @@
 #include "gn/config_values_extractors.h"
 #include "gn/deps_iterator.h"
 #include "gn/escape.h"
-#include "gn/filesystem_utils.h"
 #include "gn/ninja_target_command_util.h"
 #include "gn/path_output.h"
 #include "gn/string_output_buffer.h"
@@ -324,11 +323,7 @@ bool CompileCommandsWriter::RunAndWriteFiles(
     OutputJSON(build_settings, preserved_targets, output_to_json);
   }
 
-  if (!json.ContentsEqual(output_path)) {
-    if (!json.WriteToFile(output_path, err))
-      return false;
-  }
-  return true;
+  return json.WriteToFileIfChanged(output_path, err);
 }
 
 std::vector<const Target*> CompileCommandsWriter::FilterTargets(
