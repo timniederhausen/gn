@@ -17,7 +17,7 @@
 
 namespace {
 
-std::string GetNthLine(const std::string_view& data, int n) {
+std::string GetNthLine(std::string_view data, int n) {
   size_t line_off = Tokenizer::ByteOffsetOfNthLine(data, n);
   size_t end = line_off + 1;
   while (end < data.size() && !Tokenizer::IsNewline(data, end))

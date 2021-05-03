@@ -9,6 +9,7 @@
 #include <memory>
 #include <streambuf>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace base {

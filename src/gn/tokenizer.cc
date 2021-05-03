@@ -156,7 +156,7 @@ std::vector<Token> Tokenizer::Run() {
 }
 
 // static
-size_t Tokenizer::ByteOffsetOfNthLine(const std::string_view& buf, int n) {
+size_t Tokenizer::ByteOffsetOfNthLine(std::string_view buf, int n) {
   DCHECK_GT(n, 0);
 
   if (n == 1)
@@ -176,7 +176,7 @@ size_t Tokenizer::ByteOffsetOfNthLine(const std::string_view& buf, int n) {
 }
 
 // static
-bool Tokenizer::IsNewline(const std::string_view& buffer, size_t offset) {
+bool Tokenizer::IsNewline(std::string_view buffer, size_t offset) {
   DCHECK(offset < buffer.size());
   // We may need more logic here to handle different line ending styles.
   return buffer[offset] == '\n';

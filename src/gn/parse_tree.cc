@@ -221,7 +221,7 @@ base::Value ParseNode::CreateJSONNode(const char* type,
 }
 
 base::Value ParseNode::CreateJSONNode(const char* type,
-                                      const std::string_view& value,
+                                      std::string_view value,
                                       LocationRange location) const {
   base::Value dict(base::Value::Type::DICTIONARY);
   dict.SetKey(kJsonNodeType, base::Value(type));

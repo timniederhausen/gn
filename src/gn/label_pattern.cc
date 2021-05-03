@@ -53,7 +53,7 @@ LabelPattern::LabelPattern() : type_(MATCH) {}
 
 LabelPattern::LabelPattern(Type type,
                            const SourceDir& dir,
-                           const std::string_view& name,
+                           std::string_view name,
                            const Label& toolchain_label)
     : toolchain_(toolchain_label), type_(type), dir_(dir), name_(name) {}
 
@@ -63,7 +63,7 @@ LabelPattern::~LabelPattern() = default;
 
 // static
 LabelPattern LabelPattern::GetPattern(const SourceDir& current_dir,
-                                      const std::string_view& source_root,
+                                      std::string_view source_root,
                                       const Value& value,
                                       Err* err) {
   if (!value.VerifyTypeIs(Value::STRING, err))

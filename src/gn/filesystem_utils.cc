@@ -81,8 +81,7 @@ inline char NormalizeWindowsPathChar(char c) {
 
 // Attempts to do a case and slash-insensitive comparison of two 8-bit Windows
 // paths.
-bool AreAbsoluteWindowsPathsEqual(const std::string_view& a,
-                                  const std::string_view& b) {
+bool AreAbsoluteWindowsPathsEqual(std::string_view a, std::string_view b) {
   if (a.size() != b.size())
     return false;
 
@@ -95,7 +94,7 @@ bool AreAbsoluteWindowsPathsEqual(const std::string_view& a,
   return true;
 }
 
-bool DoesBeginWindowsDriveLetter(const std::string_view& path) {
+bool DoesBeginWindowsDriveLetter(std::string_view path) {
   if (path.size() < 3)
     return false;
 
@@ -200,7 +199,7 @@ void AppendFixedAbsolutePathSuffix(const BuildSettings* build_settings,
   }
 }
 
-size_t AbsPathLenWithNoTrailingSlash(const std::string_view& path) {
+size_t AbsPathLenWithNoTrailingSlash(std::string_view path) {
   size_t len = path.size();
 #if defined(OS_WIN)
   size_t min_len = 3;
@@ -222,7 +221,7 @@ std::string FilePathToUTF8(const base::FilePath::StringType& str) {
 #endif
 }
 
-base::FilePath UTF8ToFilePath(const std::string_view& sp) {
+base::FilePath UTF8ToFilePath(std::string_view sp) {
 #if defined(OS_WIN)
   return base::FilePath(base::UTF8ToUTF16(sp));
 #else
@@ -283,7 +282,7 @@ void RemoveFilename(std::string* path) {
   path->resize(FindFilenameOffset(*path));
 }
 
-bool EndsWithSlash(const std::string_view s) {
+bool EndsWithSlash(std::string_view s) {
   return !s.empty() && IsSlash(s[s.size() - 1]);
 }
 
@@ -334,7 +333,7 @@ bool EnsureStringIsInOutputDir(const SourceDir& output_dir,
   return false;
 }
 
-bool IsPathAbsolute(const std::string_view& path) {
+bool IsPathAbsolute(std::string_view path) {
   if (path.empty())
     return false;
 
@@ -355,12 +354,12 @@ bool IsPathAbsolute(const std::string_view& path) {
   return true;
 }
 
-bool IsPathSourceAbsolute(const std::string_view& path) {
+bool IsPathSourceAbsolute(std::string_view path) {
   return (path.size() >= 2 && path[0] == '/' && path[1] == '/');
 }
 
-bool MakeAbsolutePathRelativeIfPossible(const std::string_view& source_root,
-                                        const std::string_view& path,
+bool MakeAbsolutePathRelativeIfPossible(std::string_view source_root,
+                                        std::string_view path,
                                         std::string* dest) {
   DCHECK(IsPathAbsolute(source_root));
   DCHECK(IsPathAbsolute(path));
@@ -504,7 +503,7 @@ base::FilePath MakeAbsoluteFilePathRelativeIfPossible(
   return base::FilePath(base::JoinString(relative_components, separator));
 }
 
-void NormalizePath(std::string* path, const std::string_view& source_root) {
+void NormalizePath(std::string* path, std::string_view source_root) {
   char* pathbuf = path->empty() ? nullptr : &(*path)[0];
 
   // top_index is the first character we can modify in the path. Anything
@@ -707,7 +706,7 @@ std::string MakeRelativePath(const std::string& input,
 
 std::string RebasePath(const std::string& input,
                        const SourceDir& dest_dir,
-                       const std::string_view& source_root) {
+                       std::string_view source_root) {
   std::string ret;
   DCHECK(source_root.empty() ||
          !base::EndsWith(source_root, "/", base::CompareCase::SENSITIVE));
@@ -785,11 +784,10 @@ base::FilePath ResolvePath(const std::string& value,
       .NormalizePathSeparatorsTo('/');
 }
 
-template <typename StringType>
-std::string ResolveRelative(const StringType& input,
+std::string ResolveRelative(std::string_view input,
                             const std::string& value,
                             bool as_file,
-                            const std::string_view& source_root) {
+                            std::string_view source_root) {
   std::string result;
 
   if (input.size() >= 2 && input[0] == '/' && input[1] == '/') {
@@ -849,17 +847,6 @@ std::string ResolveRelative(const StringType& input,
 
   return result;
 }
-
-// Explicit template instantiation
-template std::string ResolveRelative(const std::string_view& input,
-                                     const std::string& value,
-                                     bool as_file,
-                                     const std::string_view& source_root);
-
-template std::string ResolveRelative(const std::string& input,
-                                     const std::string& value,
-                                     bool as_file,
-                                     const std::string_view& source_root);
 
 std::string DirectoryWithNoLastSlash(const SourceDir& dir) {
   std::string ret;

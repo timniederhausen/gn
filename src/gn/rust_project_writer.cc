@@ -181,8 +181,8 @@ const std::unordered_map<std::string_view, std::vector<std::string_view>>
 
 // Add each of the crates a sysroot has, including their dependencies.
 void AddSysrootCrate(const BuildSettings* build_settings,
-                     const std::string_view crate,
-                     const std::string_view current_sysroot,
+                     std::string_view crate,
+                     std::string_view current_sysroot,
                      SysrootCrateIndexMap& sysroot_crate_lookup,
                      CrateList& crate_list) {
   if (sysroot_crate_lookup.find(crate) != sysroot_crate_lookup.end()) {
@@ -227,7 +227,7 @@ void AddSysrootCrate(const BuildSettings* build_settings,
 
 // Add the given sysroot to the project, if it hasn't already been added.
 void AddSysroot(const BuildSettings* build_settings,
-                const std::string_view sysroot,
+                std::string_view sysroot,
                 SysrootIndexMap& sysroot_lookup,
                 CrateList& crate_list) {
   // If this sysroot is already in the lookup, we don't add it again.
@@ -244,7 +244,7 @@ void AddSysroot(const BuildSettings* build_settings,
 
 void AddSysrootDependencyToCrate(Crate* crate,
                                  const SysrootCrateIndexMap& sysroot,
-                                 const std::string_view crate_name) {
+                                 std::string_view crate_name) {
   if (const auto crate_idx = sysroot.find(crate_name);
       crate_idx != sysroot.end()) {
     crate->AddDependency(crate_idx->second, std::string(crate_name));

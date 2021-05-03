@@ -8,6 +8,7 @@
 #include <stddef.h>
 
 #include <memory>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -115,7 +116,7 @@ class ParseNode {
   // given type (and value).
   base::Value CreateJSONNode(const char* type, LocationRange location) const;
   base::Value CreateJSONNode(const char* type,
-                             const std::string_view& value,
+                             std::string_view value,
                              LocationRange location) const;
 
  private:

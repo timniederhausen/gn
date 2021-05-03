@@ -629,7 +629,7 @@ bool NinjaBuildWriter::WritePhonyAndAllRules(Err* err) {
 }
 
 void NinjaBuildWriter::WritePhonyRule(const Target* target,
-                                      const std::string& phony_name) {
+                                      std::string_view phony_name) {
   EscapeOptions ninja_escape;
   ninja_escape.mode = ESCAPE_NINJA;
 
