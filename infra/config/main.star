@@ -71,7 +71,7 @@ luci.gitiles_poller(
     name = "gn-trigger",
     bucket = "ci",
     repo = "https://gn.googlesource.com/gn",
-    refs = ["refs/heads/master"],
+    refs = ["refs/heads/main"],
 )
 
 luci.bucket(name = "ci", acls = [
@@ -104,7 +104,7 @@ luci.cq_group(
     name = "gn",
     watch = cq.refset(
         repo = "https://gn.googlesource.com/gn",
-        refs = ["refs/heads/master"],
+        refs = ["refs/heads/main"],
     ),
     acls = [
         acl.entry(
