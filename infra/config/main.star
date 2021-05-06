@@ -69,7 +69,7 @@ luci.milo(
 luci.console_view(
     name = "gn",
     title = "gn",
-    repo = "https://chromium.googlesource.com/external/github.com/llvm/llvm-project",
+    repo = "https://gn.googlesource.com/gn",
     refs = ["refs/heads/main"],
     favicon = "https://storage.googleapis.com/chrome-infra-public/logo/favicon.ico",
 )
