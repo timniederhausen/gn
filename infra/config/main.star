@@ -1,5 +1,11 @@
 #!/usr/bin/env lucicfg
 
+lucicfg.check_version("1.23.3", "Please update depot_tools")
+
+# Enable LUCI Realms support and launch all builds in realms-aware mode.
+lucicfg.enable_experiment("crbug.com/1085650")
+luci.builder.defaults.experiments.set({"luci.use_realms": 100})
+
 lucicfg.config(
     config_dir = "generated",
     tracked_files = [
@@ -9,6 +15,7 @@ lucicfg.config(
         "luci-logdog.cfg",
         "luci-milo.cfg",
         "luci-scheduler.cfg",
+        "realms.cfg",
     ],
     fail_on_warnings = True,
 )
