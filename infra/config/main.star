@@ -37,7 +37,7 @@ luci.project(
             ],
             groups = ["all"],
         ),
-        acl.entry([acl.SCHEDULER_OWNER], groups = ["group:project-gn-committers"]),
+        acl.entry([acl.SCHEDULER_OWNER], groups = ["project-gn-committers"]),
         acl.entry([acl.LOGDOG_WRITER], groups = ["luci-logdog-chromium-writers"]),
     ],
 )
