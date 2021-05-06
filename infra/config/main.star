@@ -84,9 +84,6 @@ luci.gitiles_poller(
 luci.bucket(name = "ci", acls = [
     acl.entry(
         [acl.BUILDBUCKET_TRIGGERER],
-        users = [
-            "luci-scheduler@appspot.gserviceaccount.com",
-        ],
     ),
 ])
 
