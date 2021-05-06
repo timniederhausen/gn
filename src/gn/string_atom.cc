@@ -9,7 +9,6 @@
 #include <mutex>
 #include <set>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 #include "gn/hash_table_base.h"

@@ -10,7 +10,6 @@
 #include <cstring>
 #include <set>
 #include <sstream>
-#include <unordered_set>
 
 #include "base/strings/string_util.h"
 #include "gn/c_substitution_type.h"
@@ -881,7 +880,7 @@ void NinjaCBinaryTargetWriter::WriteOrderOnlyDependencies(
 
 bool NinjaCBinaryTargetWriter::CheckForDuplicateObjectFiles(
     const std::vector<OutputFile>& files) const {
-  std::unordered_set<std::string> set;
+  std::set<std::string> set;
   for (const auto& file : files) {
     if (!set.insert(file.value()).second) {
       Err err(
