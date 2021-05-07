@@ -861,7 +861,10 @@ void NinjaCBinaryTargetWriter::WriteLibsList(
     return;
 
   out_ << "  " << label << " =";
-  path_output_.WriteFiles(out_, libs);
+  PathOutput output(path_output_.current_dir(),
+                    settings_->build_settings()->root_path_utf8(),
+                    ESCAPE_NINJA_COMMAND);
+  output.WriteFiles(out_, libs);
   out_ << std::endl;
 }
 
