@@ -56,6 +56,9 @@
 #define OS_ASMJS 1
 #elif defined(__HAIKU__)
 #define OS_HAIKU 1
+#elif defined(__MVS__)
+#include "zos-base.h"
+#define OS_ZOS 1
 #else
 #error Please add support for your platform in build_config.h
 #endif
@@ -74,7 +77,7 @@
     defined(OS_FREEBSD) || defined(OS_LINUX) || defined(OS_MACOSX) || \
     defined(OS_NACL) || defined(OS_NETBSD) || defined(OS_OPENBSD) ||  \
     defined(OS_QNX) || defined(OS_SOLARIS) || defined(OS_HAIKU) || \
-    defined(OS_MSYS)
+    defined(OS_MSYS) || defined(OS_ZOS)
 #define OS_POSIX 1
 #endif
 

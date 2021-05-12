@@ -320,6 +320,8 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
   os = "solaris";
 #elif defined(OS_NETBSD)
   os = "netbsd";
+#elif defined(OS_ZOS)
+  os = "zos";
 #else
 #error Unknown OS type.
 #endif

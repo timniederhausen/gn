@@ -926,10 +926,14 @@ TEST_F(NinjaRustBinaryTargetWriterTest, Externs) {
   target.source_types_used().Set(SourceFile::SOURCE_RS);
   target.rust_values().set_crate_root(main);
   target.rust_values().crate_name() = "foo_bar";
+
+  const char* lib = "lib1";
   target.config_values().externs().push_back(
-      std::pair("lib1", LibFile(SourceFile("//foo/lib1.rlib"))));
+      std::pair(lib, LibFile(SourceFile("//foo/lib1.rlib"))));
+  lib = "lib2";
   target.config_values().externs().push_back(
-      std::pair("lib2", LibFile("lib2.rlib")));
+      std::pair(lib, LibFile("lib2.rlib")));
+
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
 

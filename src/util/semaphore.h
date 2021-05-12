@@ -15,6 +15,8 @@
 #include <windows.h>
 #elif defined(OS_MACOSX)
 #include <dispatch/dispatch.h>
+#elif defined(OS_ZOS)
+#include "zos-semaphore.h"
 #elif defined(OS_POSIX)
 #include <semaphore.h>
 #else

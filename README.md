@@ -101,9 +101,19 @@ On Windows, it is expected that `cl.exe`, `link.exe`, and `lib.exe` can be found
 in `PATH`, so you'll want to run from a Visual Studio command prompt, or
 similar.
 
-On Linux and Mac, the default compiler is `clang++`, a recent version is
+On Linux, Mac and z/OS, the default compiler is `clang++`, a recent version is
 expected to be found in `PATH`. This can be overridden by setting `CC`, `CXX`,
 and `AR`.
+
+On z/OS, building GN requires [ZOSLIB](https://github.com/ibmruntimes/zoslib) to be
+installed, as described at that URL. When building with `build/gen.py`, use the option
+`--zoslib-dir` to specify the path to [ZOSLIB](https://github.com/ibmruntimes/zoslib):
+
+    cd gn
+    python build/gen.py --zoslib-dir /path/to/zoslib
+
+By default, if you don't specify `--zoslib-dir`, `gn/build/gen.py` expects to find
+`zoslib` directory under `gn/third_party/`.
 
 ## Examples
 

@@ -28,13 +28,15 @@
 
 #if defined(OS_POSIX) || defined(OS_FUCHSIA)
 #include <errno.h>
-#include <paths.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#if !defined(OS_ZOS)
+#include <paths.h>
+#endif
 #endif
 
 #include <algorithm>
