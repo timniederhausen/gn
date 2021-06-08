@@ -47,6 +47,7 @@ class VisualStudioWriter {
                                const std::string& filters,
                                const std::string& win_sdk,
                                const std::string& ninja_extra_args,
+                               const std::string& ninja_executable,
                                bool no_deps,
                                Err* err);
 
@@ -55,6 +56,7 @@ class VisualStudioWriter {
   FRIEND_TEST_ALL_PREFIXES(VisualStudioWriterTest,
                            ResolveSolutionFolders_AbsPath);
   FRIEND_TEST_ALL_PREFIXES(VisualStudioWriterTest, NoDotSlash);
+  FRIEND_TEST_ALL_PREFIXES(VisualStudioWriterTest, NinjaExecutable);
 
   // Solution project or folder.
   struct SolutionEntry {
@@ -109,11 +111,13 @@ class VisualStudioWriter {
 
   bool WriteProjectFiles(const Target* target,
                          const std::string& ninja_extra_args,
+                         const std::string& ninja_executable,
                          Err* err);
   bool WriteProjectFileContents(std::ostream& out,
                                 const SolutionProject& solution_project,
                                 const Target* target,
                                 const std::string& ninja_extra_args,
+                                const std::string& ninja_executable,
                                 SourceFileCompileTypePairs* source_types,
                                 Err* err);
   void WriteFiltersFileContents(std::ostream& out,

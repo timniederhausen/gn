@@ -5,10 +5,10 @@ GN is a meta-build system that generates build files for
 
 Related resources:
 
-  * Documentation in [docs/](https://gn.googlesource.com/gn/+/master/docs/). In
+  * Documentation in [docs/](https://gn.googlesource.com/gn/+/main/docs/). In
     particular [GN Quick Start
-    guide](https://gn.googlesource.com/gn/+/master/docs/quick_start.md)
-    and the [reference](https://gn.googlesource.com/gn/+/master/docs/reference.md)
+    guide](https://gn.googlesource.com/gn/+/main/docs/quick_start.md)
+    and the [reference](https://gn.googlesource.com/gn/+/main/docs/reference.md)
     (the latter is all builtin help converted to a single file).
   * An introductory [presentation](https://docs.google.com/presentation/d/15Zwb53JcncHfEwHpnG_PoIbbzQ3GQi_cpujYwbpcbZo/edit?usp=sharing).
   * The [mailing list](https://groups.google.com/a/chromium.org/forum/#!forum/gn-dev).
@@ -124,10 +124,10 @@ For a maximal configuration see the Chromium setup:
   * [Compiler setup](https://cs.chromium.org/chromium/src/build/config/compiler/BUILD.gn)
 
 and the Fuchsia setup:
-  * [.gn](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/.gn)
-  * [BUILDCONFIG.gn](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/build/config/BUILDCONFIG.gn)
-  * [Toolchain setup](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/build/toolchain/)
-  * [Compiler setup](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/build/config/BUILD.gn)
+  * [.gn](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/.gn)
+  * [BUILDCONFIG.gn](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/build/config/BUILDCONFIG.gn)
+  * [Toolchain setup](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/build/toolchain/)
+  * [Compiler setup](https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/build/config/BUILD.gn)
 
 ## Reporting bugs
 
@@ -147,7 +147,7 @@ version of how to patch is:
 Then, to upload a change for review:
 
     git commit
-    git push origin HEAD:refs/for/master
+    git push origin HEAD:refs/for/main
 
 The first time you do this you'll get an error from the server about a missing
 change-ID. Follow the directions in the error message to install the change-ID
@@ -156,7 +156,7 @@ hook and run `git commit --amend` to apply the hook to the current commit.
 When revising a change, use:
 
     git commit --amend
-    git push origin HEAD:refs/for/master
+    git push origin HEAD:refs/for/main
 
 which will add the new changes to the existing code review, rather than creating
 a new one.
@@ -193,7 +193,7 @@ infrastructure](https://chrome-infra-packages.appspot.com/p/gn/gn) or compile
 your own.
 
 GN does not guarantee the backwards-compatibility of new versions and has no
-branches or versioning scheme beyond the sequence of commits to the master git
+branches or versioning scheme beyond the sequence of commits to the main git
 branch (which is expected to be stable).
 
 In practice, however, GN is very backwards-compatible. The core functionality

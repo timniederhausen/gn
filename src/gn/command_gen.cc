@@ -229,13 +229,19 @@ bool RunIdeWriter(const std::string& ide,
     if (command_line->HasSwitch(kSwitchIdeValueWinSdk))
       win_kit = command_line->GetSwitchValueASCII(kSwitchIdeValueWinSdk);
     std::string ninja_extra_args;
-    if (command_line->HasSwitch(kSwitchNinjaExtraArgs))
+    if (command_line->HasSwitch(kSwitchNinjaExtraArgs)) {
       ninja_extra_args =
           command_line->GetSwitchValueASCII(kSwitchNinjaExtraArgs);
+    }
+    std::string ninja_executable;
+    if (command_line->HasSwitch(kSwitchNinjaExecutable)) {
+      ninja_executable =
+          command_line->GetSwitchValueASCII(kSwitchNinjaExecutable);
+    }
     bool no_deps = command_line->HasSwitch(kSwitchNoDeps);
     bool res = VisualStudioWriter::RunAndWriteFiles(
         build_settings, builder, version, sln_name, filters, win_kit,
-        ninja_extra_args, no_deps, err);
+        ninja_extra_args, ninja_executable, no_deps, err);
     if (res && !quiet) {
       OutputString("Generating Visual Studio projects took " +
                    base::Int64ToString(timer.Elapsed().InMilliseconds()) +
