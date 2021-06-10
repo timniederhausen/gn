@@ -547,8 +547,8 @@ bool VisualStudioWriter::WriteProjectFileContents(
         std::unique_ptr<XmlElementWriter> include_dirs =
             cl_compile->SubElement("AdditionalIncludeDirectories");
         RecursiveTargetConfigToStream<SourceDir>(
-            target, &ConfigValues::include_dirs, IncludeDirWriter(path_output),
-            include_dirs->StartContent(false));
+            kRecursiveWriterSkipDuplicates, target, &ConfigValues::include_dirs,
+            IncludeDirWriter(path_output), include_dirs->StartContent(false));
         include_dirs->Text(windows_kits_include_dirs_ +
                            "$(VSInstallDir)\\VC\\atlmfc\\include;" +
                            "%(AdditionalIncludeDirectories)");
@@ -583,7 +583,8 @@ bool VisualStudioWriter::WriteProjectFileContents(
         std::unique_ptr<XmlElementWriter> preprocessor_definitions =
             cl_compile->SubElement("PreprocessorDefinitions");
         RecursiveTargetConfigToStream<std::string>(
-            target, &ConfigValues::defines, SemicolonSeparatedWriter(),
+            kRecursiveWriterSkipDuplicates, target, &ConfigValues::defines,
+            SemicolonSeparatedWriter(),
             preprocessor_definitions->StartContent(false));
         preprocessor_definitions->Text("%(PreprocessorDefinitions)");
       }

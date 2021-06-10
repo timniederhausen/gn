@@ -300,8 +300,9 @@ void NinjaBinaryTargetWriter::WriteLinkerFlags(
     const SourceFile* optional_def_file) {
   if (tool->AsC()) {
     // First the ldflags from the target and its config.
-    RecursiveTargetConfigStringsToStream(target_, &ConfigValues::ldflags,
-                                       GetFlagOptions(), out);
+    RecursiveTargetConfigStringsToStream(kRecursiveWriterKeepDuplicates,
+                                         target_, &ConfigValues::ldflags,
+                                         GetFlagOptions(), out);
   }
 
   // Followed by library search paths that have been recursively pushed

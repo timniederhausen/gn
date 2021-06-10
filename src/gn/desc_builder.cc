@@ -491,26 +491,39 @@ class TargetDescBuilder : public BaseDescBuilder {
       FillInBundle(res.get());
 
     if (is_binary_output) {
-#define CONFIG_VALUE_ARRAY_HANDLER(name, type)                    \
-  if (what(#name)) {                                              \
-    ValuePtr ptr = RenderConfigValues<type>(&ConfigValues::name); \
-    if (ptr) {                                                    \
-      res->SetWithoutPathExpansion(#name, std::move(ptr));        \
-    }                                                             \
+#define CONFIG_VALUE_ARRAY_HANDLER(name, type, config)                    \
+  if (what(#name)) {                                                      \
+    ValuePtr ptr = RenderConfigValues<type>(config, &ConfigValues::name); \
+    if (ptr) {                                                            \
+      res->SetWithoutPathExpansion(#name, std::move(ptr));                \
+    }                                                                     \
   }
-      CONFIG_VALUE_ARRAY_HANDLER(arflags, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(asmflags, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(cflags, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(cflags_c, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(cflags_cc, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(cflags_objc, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(cflags_objcc, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(rustflags, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(defines, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(include_dirs, SourceDir)
-      CONFIG_VALUE_ARRAY_HANDLER(inputs, SourceFile)
-      CONFIG_VALUE_ARRAY_HANDLER(ldflags, std::string)
-      CONFIG_VALUE_ARRAY_HANDLER(swiftflags, std::string)
+      CONFIG_VALUE_ARRAY_HANDLER(arflags, std::string,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(asmflags, std::string,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(cflags, std::string,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(cflags_c, std::string,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(cflags_cc, std::string,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(cflags_objc, std::string,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(cflags_objcc, std::string,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(rustflags, std::string,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(defines, std::string,
+                                 kRecursiveWriterSkipDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(include_dirs, SourceDir,
+                                 kRecursiveWriterSkipDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(inputs, SourceFile,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(ldflags, std::string,
+                                 kRecursiveWriterKeepDuplicates)
+      CONFIG_VALUE_ARRAY_HANDLER(swiftflags, std::string,
+                                 kRecursiveWriterKeepDuplicates)
 #undef CONFIG_VALUE_ARRAY_HANDLER
 
       // Libs and lib_dirs are handled specially below.
@@ -814,8 +827,10 @@ class TargetDescBuilder : public BaseDescBuilder {
   // attribution.
   // This should match RecursiveTargetConfigToStream in the order it traverses.
   template <class T>
-  ValuePtr RenderConfigValues(const std::vector<T>& (ConfigValues::*getter)()
+  ValuePtr RenderConfigValues(RecursiveWriterConfig writer_config,
+                              const std::vector<T>& (ConfigValues::*getter)()
                                   const) {
+    std::set<T> seen;
     auto res = std::make_unique<base::ListValue>();
     for (ConfigValuesIterator iter(target_); !iter.done(); iter.Next()) {
       const std::vector<T>& vec = (iter.cur().*getter)();
@@ -844,7 +859,24 @@ class TargetDescBuilder : public BaseDescBuilder {
         }
       }
 
+      // If blame is on, then do not de-dup across configs.
+      if (blame_)
+        seen.clear();
+
       for (const T& val : vec) {
+        switch (writer_config) {
+          case kRecursiveWriterKeepDuplicates:
+            break;
+
+          case kRecursiveWriterSkipDuplicates: {
+            if (seen.find(val) != seen.end())
+              continue;
+
+            seen.insert(val);
+            break;
+          }
+        }
+
         ValuePtr rendered = RenderValue(val);
         std::string str;
         // Indent string values in blame mode
