@@ -159,7 +159,9 @@ def RunSteps(api, repository):
           'args': ['--use-lto', '--use-icf'],
           'targets': release_targets(),
           # TODO: Enable this for OS X and Windows.
-          'use_rpmalloc': api.platform.is_linux
+          # TODO: Enable back when https://github.com/mjansson/rpmalloc/pull/246
+          # has landed (using `api.platform.is_linux`).
+          'use_rpmalloc': False,
       },
   ]
 
