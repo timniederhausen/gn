@@ -21,7 +21,6 @@
 #include "gn/label_ptr.h"
 #include "gn/lib_file.h"
 #include "gn/metadata.h"
-#include "gn/ordered_set.h"
 #include "gn/output_file.h"
 #include "gn/rust_values.h"
 #include "gn/source_file.h"
@@ -286,16 +285,16 @@ class Target : public Item {
   RustValues& rust_values() { return rust_values_; }
   const RustValues& rust_values() const { return rust_values_; }
 
-  const OrderedSet<SourceDir>& all_lib_dirs() const { return all_lib_dirs_; }
-  const OrderedSet<LibFile>& all_libs() const { return all_libs_; }
+  const UniqueVector<SourceDir>& all_lib_dirs() const { return all_lib_dirs_; }
+  const UniqueVector<LibFile>& all_libs() const { return all_libs_; }
 
-  const OrderedSet<SourceDir>& all_framework_dirs() const {
+  const UniqueVector<SourceDir>& all_framework_dirs() const {
     return all_framework_dirs_;
   }
-  const OrderedSet<std::string>& all_frameworks() const {
+  const UniqueVector<std::string>& all_frameworks() const {
     return all_frameworks_;
   }
-  const OrderedSet<std::string>& all_weak_frameworks() const {
+  const UniqueVector<std::string>& all_weak_frameworks() const {
     return all_weak_frameworks_;
   }
 
@@ -460,14 +459,14 @@ class Target : public Item {
 
   // These libs and dirs are inherited from statically linked deps and all
   // configs applying to this target.
-  OrderedSet<SourceDir> all_lib_dirs_;
-  OrderedSet<LibFile> all_libs_;
+  UniqueVector<SourceDir> all_lib_dirs_;
+  UniqueVector<LibFile> all_libs_;
 
   // These frameworks and dirs are inherited from statically linked deps and
   // all configs applying to this target.
-  OrderedSet<SourceDir> all_framework_dirs_;
-  OrderedSet<std::string> all_frameworks_;
-  OrderedSet<std::string> all_weak_frameworks_;
+  UniqueVector<SourceDir> all_framework_dirs_;
+  UniqueVector<std::string> all_frameworks_;
+  UniqueVector<std::string> all_weak_frameworks_;
 
   // All hard deps from this target and all dependencies. Filled in when this
   // target is marked resolved. This will not include the current target.

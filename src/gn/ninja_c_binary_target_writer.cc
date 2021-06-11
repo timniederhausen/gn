@@ -755,7 +755,7 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   }
 
   // Libraries specified by paths.
-  const OrderedSet<LibFile>& libs = target_->all_libs();
+  const UniqueVector<LibFile>& libs = target_->all_libs();
   for (size_t i = 0; i < libs.size(); i++) {
     if (libs[i].is_source_file()) {
       implicit_deps.push_back(
