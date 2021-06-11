@@ -307,7 +307,7 @@ void NinjaBinaryTargetWriter::WriteLinkerFlags(
 
   // Followed by library search paths that have been recursively pushed
   // through the dependency tree.
-  const OrderedSet<SourceDir> all_lib_dirs = target_->all_lib_dirs();
+  const OrderedSet<SourceDir>& all_lib_dirs = target_->all_lib_dirs();
   if (!all_lib_dirs.empty()) {
     // Since we're passing these on the command line to the linker and not
     // to Ninja, we need to do shell escaping.
