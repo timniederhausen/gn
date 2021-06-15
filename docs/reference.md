@@ -1748,7 +1748,7 @@
   specifying the intended location of the output file.
 
   The `output_conversion` variable specified the format to write the
-  value. See `gn help output_conversion`.
+  value. See `gn help io_conversion`.
 
   One of `contents` or `data_keys` must be specified; use of `data` will write
   the contents of that value to file, while use of `data_keys` will trigger a
@@ -2352,7 +2352,7 @@
       unspecified or the empty list which means no arguments.
 
   input_conversion:
-      Controls how the file is read and parsed. See "gn help io_conversion".
+      Controls how the file is read and parsed. See `gn help io_conversion`.
 
       If unspecified, defaults to the empty string which causes the script
       result to be discarded. exec script will return None.
@@ -2922,7 +2922,7 @@
       Filename to read, relative to the build file.
 
   input_conversion
-      Controls how the file is read and parsed. See "gn help io_conversion".
+      Controls how the file is read and parsed. See `gn help io_conversion`.
 ```
 
 #### **Example**
@@ -4150,7 +4150,7 @@
       The list or string to write.
 
   output_conversion
-    Controls how the output is written. See "gn help io_conversion".
+    Controls how the output is written. See `gn help io_conversion`.
 ```
 ## <a name="predefined_variables"></a>Built-in predefined variables
 
@@ -5851,7 +5851,7 @@
 
 ```
   Controls how the "contents" of a generated_file target is formatted.
-  See "gn help io_conversion".
+  See `gn help io_conversion`.
 ```
 ### <a name="var_output_dir"></a>**output_dir**: [directory] Directory to put output file in.
 

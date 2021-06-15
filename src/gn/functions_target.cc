@@ -886,7 +886,7 @@ const char kGeneratedFile_Help[] =
   specifying the intended location of the output file.
 
   The `output_conversion` variable specified the format to write the
-  value. See `gn help output_conversion`.
+  value. See `gn help io_conversion`.
 
   One of `contents` or `data_keys` must be specified; use of `data` will write
   the contents of that value to file, while use of `data_keys` will trigger a
