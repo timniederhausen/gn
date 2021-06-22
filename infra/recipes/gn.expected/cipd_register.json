@@ -116,7 +116,7 @@
       "fetch",
       "--tags",
       "https://fuchsia.googlesource.com/third_party/github.com/mjansson/rpmalloc",
-      "60f7c6701d41c4452848bf0002cb27664aac0146"
+      "f4b7c52c858675f732a76bd1c73447e0fcf84b1e"
     ],
     "cwd": "[START_DIR]/rpmalloc",
     "infra_step": true,
