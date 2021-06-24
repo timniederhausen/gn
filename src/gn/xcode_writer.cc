@@ -647,6 +647,11 @@ bool XcodeProject::AddSourcesFromBuilder(const Builder& builder, Err* err) {
         sources.insert(source);
     }
 
+    const SourceFile& bridge_header = target->swift_values().bridge_header();
+    if (!bridge_header.is_null() && ShouldIncludeFileInProject(bridge_header)) {
+      sources.insert(bridge_header);
+    }
+
     if (target->output_type() == Target::ACTION ||
         target->output_type() == Target::ACTION_FOREACH) {
       if (ShouldIncludeFileInProject(target->action_values().script()))
