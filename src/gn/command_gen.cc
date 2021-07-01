@@ -493,6 +493,9 @@ Visual Studio Flags
       As an example, "10.0.15063.0" can be specified to use Creators Update SDK
       instead of the default one.
 
+  --ninja-executable=<string>
+      Can be used to specify the ninja executable to use when building.
+
   --ninja-extra-args=<string>
       This string is passed without any quoting to the ninja invocation
       command-line. Can be used to configure ninja flags, like "-j".
