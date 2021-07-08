@@ -294,18 +294,22 @@ void NinjaBinaryTargetWriter::WriteCompilerBuildLine(
   out_ << std::endl;
 }
 
-void NinjaBinaryTargetWriter::WriteLinkerFlags(
+void NinjaBinaryTargetWriter::WriteCustomLinkerFlags(
     std::ostream& out,
-    const Tool* tool,
-    const SourceFile* optional_def_file) {
-  if (tool->AsC()) {
+    const Tool* tool) {
+
+  if (tool->AsC() || (tool->AsRust() && tool->AsRust()->MayLink())) {
     // First the ldflags from the target and its config.
     RecursiveTargetConfigStringsToStream(kRecursiveWriterKeepDuplicates,
                                          target_, &ConfigValues::ldflags,
                                          GetFlagOptions(), out);
   }
+}
 
-  // Followed by library search paths that have been recursively pushed
+void NinjaBinaryTargetWriter::WriteLibrarySearchPath(
+    std::ostream& out,
+    const Tool* tool) {
+  // Write library search paths that have been recursively pushed
   // through the dependency tree.
   const UniqueVector<SourceDir>& all_lib_dirs = target_->all_lib_dirs();
   if (!all_lib_dirs.empty()) {
@@ -334,6 +338,16 @@ void NinjaBinaryTargetWriter::WriteLinkerFlags(
                                      PathOutput::DIR_NO_LAST_SLASH);
     }
   }
+}
+
+void NinjaBinaryTargetWriter::WriteLinkerFlags(
+    std::ostream& out,
+    const Tool* tool,
+    const SourceFile* optional_def_file) {
+  // First any ldflags
+  WriteCustomLinkerFlags(out, tool);
+  // Then the library search path
+  WriteLibrarySearchPath(out, tool);
 
   if (optional_def_file) {
     out_ << " /DEF:";

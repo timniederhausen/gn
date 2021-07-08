@@ -38,6 +38,7 @@ class RustTool : public Tool {
   bool ValidateName(const char* name) const override;
   void SetComplete() override;
   bool ValidateSubstitution(const Substitution* sub_type) const override;
+  bool MayLink() const;
 
   RustTool* AsRust() override;
   const RustTool* AsRust() const override;

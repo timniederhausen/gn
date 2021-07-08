@@ -69,6 +69,10 @@ class NinjaBinaryTargetWriter : public NinjaTargetWriter {
   void WriteLinkerFlags(std::ostream& out,
                         const Tool* tool,
                         const SourceFile* optional_def_file);
+  void WriteCustomLinkerFlags(std::ostream& out,
+                        const Tool* tool);
+  void WriteLibrarySearchPath(std::ostream& out,
+                        const Tool* tool);
   void WriteLibs(std::ostream& out, const Tool* tool);
   void WriteFrameworks(std::ostream& out, const Tool* tool);
   void WriteSwiftModules(std::ostream& out,

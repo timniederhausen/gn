@@ -320,8 +320,10 @@ void NinjaRustBinaryTargetWriter::WriteRustdeps(
     out_ << " -Clink-arg=";
     path_output_.WriteFile(out_, nonrustdep);
   }
-
-  WriteLinkerFlags(out_, tool_, nullptr);
+  WriteLibrarySearchPath(out_, tool_);
   WriteLibs(out_, tool_);
+  out_ << std::endl;
+  out_ << "  ldflags =";
+  WriteCustomLinkerFlags(out_, tool_);
   out_ << std::endl;
 }
