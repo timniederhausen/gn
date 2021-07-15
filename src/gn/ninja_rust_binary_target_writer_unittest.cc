@@ -990,3 +990,78 @@ TEST_F(NinjaRustBinaryTargetWriterTest, CdylibDeps) {
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
 }
+
+TEST_F(NinjaRustBinaryTargetWriterTest, TransitivePublicNonRustDeps) {
+  Err err;
+  TestWithScope setup;
+
+  // This test verifies that the Rust binary "target" links against this lib.
+  Target implicitlib(setup.settings(), Label(SourceDir("//foo/"), "implicit"));
+  implicitlib.set_output_type(Target::SHARED_LIBRARY);
+  implicitlib.visibility().SetPublic();
+  implicitlib.sources().push_back(SourceFile("//foo/implicit.cpp"));
+  implicitlib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  implicitlib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(implicitlib.OnResolved(&err));
+
+  Target sharedlib(setup.settings(), Label(SourceDir("//foo/"), "shared"));
+  sharedlib.set_output_type(Target::SHARED_LIBRARY);
+  sharedlib.visibility().SetPublic();
+  sharedlib.sources().push_back(SourceFile("//foo/shared.cpp"));
+  sharedlib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  sharedlib.SetToolchain(setup.toolchain());
+  sharedlib.public_deps().push_back(LabelTargetPair(&implicitlib));
+  ASSERT_TRUE(sharedlib.OnResolved(&err));
+
+  Target rlib(setup.settings(), Label(SourceDir("//bar/"), "mylib"));
+  rlib.set_output_type(Target::RUST_LIBRARY);
+  rlib.visibility().SetPublic();
+  SourceFile barlib("//bar/lib.rs");
+  rlib.sources().push_back(SourceFile("//bar/mylib.rs"));
+  rlib.sources().push_back(barlib);
+  rlib.source_types_used().Set(SourceFile::SOURCE_RS);
+  rlib.rust_values().set_crate_root(barlib);
+  rlib.rust_values().crate_name() = "mylib";
+  rlib.SetToolchain(setup.toolchain());
+  rlib.private_deps().push_back(LabelTargetPair(&sharedlib));
+  ASSERT_TRUE(rlib.OnResolved(&err));
+
+  Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
+  target.set_output_type(Target::EXECUTABLE);
+  target.visibility().SetPublic();
+  SourceFile main("//foo/main.rs");
+  target.sources().push_back(main);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(main);
+  target.rust_values().crate_name() = "foo_bar";
+  target.private_deps().push_back(LabelTargetPair(&rlib));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  {
+    std::ostringstream out;
+    NinjaRustBinaryTargetWriter writer(&target, out);
+    writer.Run();
+
+    const char expected[] =
+        "crate_name = foo_bar\n"
+        "crate_type = bin\n"
+        "output_extension = \n"
+        "output_dir = \n"
+        "rustflags =\n"
+        "rustenv =\n"
+        "root_out_dir = .\n"
+        "target_out_dir = obj/foo\n"
+        "target_output_name = bar\n"
+        "\n"
+        "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/main.rs "
+        "obj/bar/libmylib.rlib ./libshared.so ./libimplicit.so\n"
+        "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
+        "  rustdeps = -Ldependency=obj/bar -Lnative=. -Clink-arg=-Bdynamic "
+        "-Clink-arg=./libshared.so -Clink-arg=./libimplicit.so\n"
+        "  ldflags =\n"
+        "  sources = ../../foo/main.rs\n";
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+  }
+}

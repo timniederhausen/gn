@@ -656,6 +656,16 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     inherited_libraries_.Append(dep, is_public);
   }
 
+  // Propagate public dependent libraries.
+  for (const auto& transitive :
+       dep->rust_values().transitive_libs().GetOrderedAndPublicFlag()) {
+    if (transitive.second &&
+        (dep->output_type() == STATIC_LIBRARY ||
+         dep->output_type() == SHARED_LIBRARY)) {
+      rust_values().transitive_libs().Append(transitive.first, is_public);
+    }
+  }
+
   if (dep->output_type() == RUST_LIBRARY) {
     rust_values().transitive_libs().Append(dep, is_public);
     rust_values().transitive_libs().AppendInherited(
