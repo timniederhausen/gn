@@ -316,6 +316,12 @@ void NinjaRustBinaryTargetWriter::WriteRustdeps(
     out_ << " -Lnative=";
     path_output_.WriteDir(out_, nonrustdep_dir, PathOutput::DIR_NO_LAST_SLASH);
   }
+  // Before outputting any libraries to link, ensure the linker is in a mode
+  // that allows dynamic linking, as rustc may have previously put it into
+  // static-only mode.
+  if (nonrustdeps.size() > 0) {
+    out_ << " -Clink-arg=-Bdynamic";
+  }
   for (const auto& nonrustdep : nonrustdeps) {
     out_ << " -Clink-arg=";
     path_output_.WriteFile(out_, nonrustdep);

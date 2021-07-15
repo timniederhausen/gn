@@ -448,7 +448,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
         "  rustdeps = -Ldependency=obj/bar "
         "-Lnative=obj/baz -Lnative=obj/foo -Lnative=. "
-        "-Clink-arg=obj/baz/sourceset.csourceset.o "
+        "-Clink-arg=-Bdynamic -Clink-arg=obj/baz/sourceset.csourceset.o "
         "-Clink-arg=obj/foo/libstatic.a -Clink-arg=./libshared.so "
         "-Clink-arg=./libshared_with_toc.so\n"
         "  ldflags =\n"
@@ -488,7 +488,8 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
         "../../foo/main.rs obj/foo/libstatic.a\n"
         "  externs =\n"
-        "  rustdeps = -Lnative=obj/foo -Clink-arg=obj/foo/libstatic.a\n"
+        "  rustdeps = -Lnative=obj/foo -Clink-arg=-Bdynamic "
+        "-Clink-arg=obj/foo/libstatic.a\n"
         "  ldflags =\n"
         "  sources = ../../foo/source.rs ../../foo/main.rs\n";
     std::string out_str = out.str();
@@ -527,7 +528,8 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "../../baz/lib.rs "
         "obj/foo/libstatic.a\n"
         "  externs =\n"
-        "  rustdeps = -Lnative=obj/foo -Clink-arg=obj/foo/libstatic.a\n"
+        "  rustdeps = -Lnative=obj/foo -Clink-arg=-Bdynamic "
+        "-Clink-arg=obj/foo/libstatic.a\n"
         "  ldflags =\n"
         "  sources = ../../baz/lib.rs\n";
     std::string out_str = out.str();
@@ -981,7 +983,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, CdylibDeps) {
         "../../foo/main.rs obj/bar/libmylib.so\n"
         "  externs =\n"
         "  rustdeps = -Ldependency=obj/bar -Lnative=obj/bar "
-        "-Clink-arg=obj/bar/libmylib.so\n"
+        "-Clink-arg=-Bdynamic -Clink-arg=obj/bar/libmylib.so\n"
         "  ldflags =\n"
         "  sources = ../../foo/source.rs ../../foo/main.rs\n";
     std::string out_str = out.str();
