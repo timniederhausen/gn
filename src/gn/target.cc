@@ -677,8 +677,7 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
          rust_values().transitive_libs().GetOrderedAndPublicFlag()) {
       if (!(inherited.first->output_type() == RUST_LIBRARY ||
             inherited.first->output_type() == RUST_PROC_MACRO)) {
-        inherited_libraries_.Append(inherited.first,
-                                    is_public && inherited.second);
+        inherited_libraries_.Append(inherited.first, inherited.second);
       }
     }
   } else if (dep->output_type() == RUST_PROC_MACRO) {
