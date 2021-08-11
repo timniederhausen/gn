@@ -29,7 +29,6 @@
 #include "base/files/file_path.h"
 #include "base/files/scoped_file.h"
 #include "base/logging.h"
-#include "base/macros.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/stl_util.h"
 #include "base/strings/string_split.h"
@@ -61,7 +60,7 @@ namespace base {
 namespace {
 
 #if defined(OS_BSD) || defined(OS_MACOSX) || defined(OS_NACL) || \
-    defined(OS_HAIKU) || defined(OS_MSYS) || defined(OS_ZOS) || \
+    defined(OS_HAIKU) || defined(OS_MSYS) || defined(OS_ZOS) ||  \
     defined(OS_ANDROID) && __ANDROID_API__ < 21
 int CallStat(const char* path, stat_wrapper_t* sb) {
   return stat(path, sb);

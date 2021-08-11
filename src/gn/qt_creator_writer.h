@@ -9,7 +9,6 @@
 #include <string>
 
 #include "base/files/file_path.h"
-#include "base/macros.h"
 #include "gn/err.h"
 #include "gn/target.h"
 
@@ -50,7 +49,8 @@ class QtCreatorWriter {
   std::set<std::string> defines_;
   Err err_;
 
-  DISALLOW_COPY_AND_ASSIGN(QtCreatorWriter);
+  QtCreatorWriter(const QtCreatorWriter&) = delete;
+  QtCreatorWriter& operator=(const QtCreatorWriter&) = delete;
 };
 
 #endif  // TOOLS_GN_QT_CREATOR_WRITER_H_

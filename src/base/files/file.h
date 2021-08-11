@@ -12,7 +12,6 @@
 #include "base/files/file_path.h"
 #include "base/files/platform_file.h"
 #include "base/files/scoped_file.h"
-#include "base/macros.h"
 #include "util/build_config.h"
 #include "util/ticks.h"
 
@@ -23,7 +22,7 @@
 namespace base {
 
 #if defined(OS_BSD) || defined(OS_MACOSX) || defined(OS_NACL) || \
-    defined(OS_HAIKU) || defined(OS_MSYS) || defined(OS_ZOS) || \
+    defined(OS_HAIKU) || defined(OS_MSYS) || defined(OS_ZOS) ||  \
     defined(OS_ANDROID) && __ANDROID_API__ < 21
 typedef struct stat stat_wrapper_t;
 #elif defined(OS_POSIX) || defined(OS_FUCHSIA)
@@ -45,8 +44,8 @@ class File {
   // of the five (possibly combining with other flags) when opening or creating
   // a file.
   enum Flags {
-    FLAG_OPEN = 1 << 0,            // Opens a file, only if it exists.
-    FLAG_CREATE_ALWAYS = 1 << 3,   // May overwrite an old file.
+    FLAG_OPEN = 1 << 0,           // Opens a file, only if it exists.
+    FLAG_CREATE_ALWAYS = 1 << 3,  // May overwrite an old file.
     FLAG_READ = 1 << 4,
     FLAG_WRITE = 1 << 5,
   };
@@ -276,7 +275,8 @@ class File {
 
   Error error_details_ = FILE_ERROR_FAILED;
 
-  DISALLOW_COPY_AND_ASSIGN(File);
+  File(const File&) = delete;
+  File& operator=(const File&) = delete;
 };
 
 }  // namespace base

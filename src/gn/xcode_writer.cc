@@ -325,7 +325,10 @@ class CollectPBXObjectsPerClassHelper : public PBXObjectVisitorConst {
  private:
   std::map<PBXObjectClass, std::vector<const PBXObject*>> objects_per_class_;
 
-  DISALLOW_COPY_AND_ASSIGN(CollectPBXObjectsPerClassHelper);
+  CollectPBXObjectsPerClassHelper(const CollectPBXObjectsPerClassHelper&) =
+      delete;
+  CollectPBXObjectsPerClassHelper& operator=(
+      const CollectPBXObjectsPerClassHelper&) = delete;
 };
 
 std::map<PBXObjectClass, std::vector<const PBXObject*>>
@@ -360,7 +363,9 @@ class RecursivelyAssignIdsHelper : public PBXObjectVisitor {
   std::string seed_;
   int64_t counter_;
 
-  DISALLOW_COPY_AND_ASSIGN(RecursivelyAssignIdsHelper);
+  RecursivelyAssignIdsHelper(const RecursivelyAssignIdsHelper&) = delete;
+  RecursivelyAssignIdsHelper& operator=(const RecursivelyAssignIdsHelper&) =
+      delete;
 };
 
 void RecursivelyAssignIds(PBXProject* project) {
@@ -975,10 +980,9 @@ PBXNativeTarget* XcodeProject::AddBundleTarget(const Target* target,
   const std::string& target_output_name = RebasePath(
       target->bundle_data().GetBundleRootDirOutput(target->settings()).value(),
       build_settings_->build_dir());
-  const std::string output_dir = RebasePath(target->bundle_data()
-          .GetBundleDir(target->settings())
-          .value(),
-      build_settings_->build_dir());
+  const std::string output_dir =
+      RebasePath(target->bundle_data().GetBundleDir(target->settings()).value(),
+                 build_settings_->build_dir());
   const std::string root_src_dir =
       RebasePath("//", build_settings_->build_dir());
   return project_.AddNativeTarget(

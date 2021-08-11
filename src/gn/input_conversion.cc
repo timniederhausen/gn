@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "base/json/json_reader.h"
-#include "base/macros.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/values.h"

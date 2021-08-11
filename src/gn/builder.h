@@ -9,7 +9,6 @@
 #include <map>
 #include <memory>
 
-#include "base/macros.h"
 #include "gn/builder_record.h"
 #include "gn/label.h"
 #include "gn/label_ptr.h"
@@ -140,7 +139,8 @@ class Builder {
 
   ResolvedGeneratedCallback resolved_and_generated_callback_;
 
-  DISALLOW_COPY_AND_ASSIGN(Builder);
+  Builder(const Builder&) = delete;
+  Builder& operator=(const Builder&) = delete;
 };
 
 #endif  // TOOLS_GN_BUILDER_H_

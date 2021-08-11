@@ -9,7 +9,6 @@
 #include <set>
 #include <utility>
 
-#include "base/macros.h"
 #include "gn/item.h"
 #include "gn/location.h"
 
@@ -104,7 +103,8 @@ class BuilderRecord {
   BuilderRecordSet unresolved_deps_;
   BuilderRecordSet waiting_on_resolution_;
 
-  DISALLOW_COPY_AND_ASSIGN(BuilderRecord);
+  BuilderRecord(const BuilderRecord&) = delete;
+  BuilderRecord& operator=(const BuilderRecord&) = delete;
 };
 
 #endif  // TOOLS_GN_BUILDER_RECORD_H_

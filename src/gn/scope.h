@@ -13,7 +13,6 @@
 #include <utility>
 #include <vector>
 
-#include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "gn/err.h"
 #include "gn/pattern.h"
@@ -379,7 +378,8 @@ class Scope {
 
   SourceFileSet build_dependency_files_;
 
-  DISALLOW_COPY_AND_ASSIGN(Scope);
+  Scope(const Scope&) = delete;
+  Scope& operator=(const Scope&) = delete;
 };
 
 #endif  // TOOLS_GN_SCOPE_H_

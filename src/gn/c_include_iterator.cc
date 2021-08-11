@@ -7,7 +7,6 @@
 #include <iterator>
 
 #include "base/logging.h"
-#include "base/macros.h"
 #include "base/strings/string_util.h"
 #include "gn/input_file.h"
 #include "gn/location.h"

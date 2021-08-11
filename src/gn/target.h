@@ -11,7 +11,6 @@
 
 #include "base/gtest_prod_util.h"
 #include "base/logging.h"
-#include "base/macros.h"
 #include "gn/action_values.h"
 #include "gn/bundle_data.h"
 #include "gn/config_values.h"
@@ -509,7 +508,8 @@ class Target : public Item {
   std::vector<std::string> data_keys_;
   std::vector<std::string> walk_keys_;
 
-  DISALLOW_COPY_AND_ASSIGN(Target);
+  Target(const Target&) = delete;
+  Target& operator=(const Target&) = delete;
 };
 
 extern const char kExecution_Help[];

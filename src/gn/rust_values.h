@@ -85,7 +85,8 @@ class RustValues {
   std::map<Label, std::string> aliased_deps_;
   InheritedLibraries rust_libs_;
 
-  DISALLOW_COPY_AND_ASSIGN(RustValues);
+  RustValues(const RustValues&) = delete;
+  RustValues& operator=(const RustValues&) = delete;
 };
 
 #endif  // TOOLS_GN_RUST_TARGET_VALUES_H_

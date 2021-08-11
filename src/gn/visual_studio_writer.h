@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "base/gtest_prod_util.h"
-#include "base/macros.h"
 #include "gn/path_output.h"
 
 namespace base {
@@ -166,7 +165,8 @@ class VisualStudioWriter {
   // Windows 10 SDK version string (e.g. 10.0.14393.0)
   std::string windows_sdk_version_;
 
-  DISALLOW_COPY_AND_ASSIGN(VisualStudioWriter);
+  VisualStudioWriter(const VisualStudioWriter&) = delete;
+  VisualStudioWriter& operator=(const VisualStudioWriter&) = delete;
 };
 
 #endif  // TOOLS_GN_VISUAL_STUDIO_WRITER_H_

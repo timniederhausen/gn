@@ -10,7 +10,6 @@
 #include <iterator>
 #include <thread>
 
-#include "base/macros.h"
 #include "util/build_config.h"
 
 #if defined(OS_WIN)
@@ -179,7 +178,7 @@ LogMessage::~LogMessage() {
 #if defined(OS_WIN)
   OutputDebugStringA(str_newline.c_str());
 #endif
-  ignore_result(fwrite(str_newline.data(), str_newline.size(), 1, stderr));
+  fwrite(str_newline.data(), str_newline.size(), 1, stderr);
   fflush(stderr);
 
   if (severity_ == LOG_FATAL) {
