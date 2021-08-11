@@ -97,14 +97,14 @@ class File {
 #endif
 
     // The size of the file in bytes.  Undefined when is_directory is true.
-    int64_t size;
+    int64_t size = 0;
 
     // True if the file corresponds to a directory.
-    bool is_directory;
+    bool is_directory = false;
 
     // True if the file corresponds to a symbolic link.  For Windows currently
     // not supported and thus always false.
-    bool is_symbolic_link;
+    bool is_symbolic_link = false;
 
     // The last modified time of a file.
     Ticks last_modified;
@@ -141,11 +141,6 @@ class File {
   // method doesn't interact with the file system (and is safe to be called from
   // ThreadRestrictions::SetIOAllowed(false) threads).
   bool IsValid() const;
-
-  // Returns true if a new file was created (or an old one truncated to zero
-  // length to simulate a new file, which can happen with
-  // FLAG_CREATE_ALWAYS), and false otherwise.
-  bool created() const { return created_; }
 
   // Returns the OS result of opening this file. Note that the way to verify
   // the success of the operation is to use IsValid(), not this method:
@@ -279,8 +274,7 @@ class File {
 
   ScopedPlatformFile file_;
 
-  Error error_details_;
-  bool created_;
+  Error error_details_ = FILE_ERROR_FAILED;
 
   DISALLOW_COPY_AND_ASSIGN(File);
 };
