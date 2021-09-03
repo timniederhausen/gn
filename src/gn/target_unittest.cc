@@ -511,6 +511,54 @@ TEST_F(TargetTest, VisibilityFails) {
   ASSERT_FALSE(a.OnResolved(&err));
 }
 
+// Test config visibility failure cases.
+TEST_F(TargetTest, VisibilityConfigFails) {
+  TestWithScope setup;
+  Err err;
+
+  Label config_label(SourceDir("//a/"), "config");
+  Config config(setup.settings(), config_label);
+  config.visibility().SetPrivate(config.label().dir());
+  ASSERT_TRUE(config.OnResolved(&err));
+
+  // Make a target using configs. This should fail.
+  TestTarget a(setup, "//app:a", Target::EXECUTABLE);
+  a.configs().push_back(LabelConfigPair(&config));
+  ASSERT_FALSE(a.OnResolved(&err));
+
+  // A target using public_configs should also fail.
+  TestTarget b(setup, "//app:b", Target::EXECUTABLE);
+  b.public_configs().push_back(LabelConfigPair(&config));
+  ASSERT_FALSE(b.OnResolved(&err));
+
+  // A target using all_dependent_configs should fail as well.
+  TestTarget c(setup, "//app:c", Target::EXECUTABLE);
+  c.all_dependent_configs().push_back(LabelConfigPair(&config));
+  ASSERT_FALSE(c.OnResolved(&err));
+}
+
+// Test Config -> Group -> A where the config is group is visible from A but
+// the config isn't, and the config is visible from the group.
+TEST_F(TargetTest, VisibilityConfigGroup) {
+  TestWithScope setup;
+  Err err;
+
+  Label config_label(SourceDir("//a/"), "config");
+  Config config(setup.settings(), config_label);
+  config.visibility().SetPrivate(config.label().dir());
+  ASSERT_TRUE(config.OnResolved(&err));
+
+  // Make a target using the config in the same directory.
+  TestTarget a(setup, "//a:a", Target::GROUP);
+  a.public_configs().push_back(LabelConfigPair(&config));
+  ASSERT_TRUE(a.OnResolved(&err));
+
+  // A target depending on a should be okay.
+  TestTarget b(setup, "//app:b", Target::EXECUTABLE);
+  b.private_deps().push_back(LabelTargetPair(&a));
+  ASSERT_TRUE(b.OnResolved(&err));
+}
+
 // Test visibility with a single data_dep.
 TEST_F(TargetTest, VisibilityDatadeps) {
   TestWithScope setup;

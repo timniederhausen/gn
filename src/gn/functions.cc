@@ -332,6 +332,7 @@ Variables valid in a config definition
     CONFIG_VALUES_VARS_HELP
 
     R"(  Nested configs: configs
+  General: visibility
 
 Variables on a target used to apply configs
 

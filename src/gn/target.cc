@@ -338,15 +338,15 @@ bool Target::OnResolved(Err* err) {
   ScopedTrace trace(TraceItem::TRACE_ON_RESOLVED, label());
   trace.SetToolchain(settings()->toolchain_label());
 
-  // Check visibility for just this target's own configs, before dependents are
-  // added.
-  if (!CheckConfigVisibility(err))
-    return false;
-
   // Copy this target's own dependent and public configs to the list of configs
   // applying to it.
   configs_.Append(all_dependent_configs_.begin(), all_dependent_configs_.end());
   MergePublicConfigsFrom(this, &configs_);
+
+  // Check visibility for just this target's own configs, before dependents are
+  // added, but after public_configs and all_dependent_configs are merged.
+  if (!CheckConfigVisibility(err))
+    return false;
 
   // Copy public configs from all dependencies into the list of configs
   // applying to this target (configs_).
