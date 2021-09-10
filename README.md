@@ -188,16 +188,16 @@ Most open-source projects are designed to use the developer's computer's current
 toolchain such as compiler, linker, and build tool. But the large
 centrally controlled projects that GN is designed for typically want a more
 hermetic environment. They will ensure that developers are using a specific
-compatible toolchain that is versioned with the code
+compatible toolchain that is versioned with the code.
 
 As a result, GN expects that the project choose the appropriate version of GN
 that will work with each version of the project. There is no "current stable
 version" of GN that is expected to work for all projects.
 
-As a result, the GN developers to not maintain any packages in any of the
+As a result, the GN developers do not maintain any packages in any of the
 various packaging systems (Debian, RedHat, HomeBrew, etc.). Some of these
 systems to have GN packages, but they are maintained by third parties and you
-should use at your own risk. Instead, we recommend you refer your checkout
+should use them at your own risk. Instead, we recommend you refer your checkout
 tooling to download binaries for a specific hash from [Google's build
 infrastructure](https://chrome-infra-packages.appspot.com/p/gn/gn) or compile
 your own.
