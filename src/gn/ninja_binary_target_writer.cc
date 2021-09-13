@@ -357,6 +357,11 @@ void NinjaBinaryTargetWriter::WriteLinkerFlags(
 
 void NinjaBinaryTargetWriter::WriteLibs(std::ostream& out, const Tool* tool) {
   // Libraries that have been recursively pushed through the dependency tree.
+  // Since we're passing these on the command line to the linker and not
+  // to Ninja, we need to do shell escaping.
+  PathOutput lib_path_output(
+      path_output_.current_dir(), settings_->build_settings()->root_path_utf8(),
+      ESCAPE_NINJA_COMMAND);
   EscapeOptions lib_escape_opts;
   lib_escape_opts.mode = ESCAPE_NINJA_COMMAND;
   const UniqueVector<LibFile>& all_libs = target_->all_libs();
@@ -365,7 +370,7 @@ void NinjaBinaryTargetWriter::WriteLibs(std::ostream& out, const Tool* tool) {
     const std::string& lib_value = lib_file.value();
     if (lib_file.is_source_file()) {
       out << " " << tool->linker_arg();
-      path_output_.WriteFile(out, lib_file.source_file());
+      lib_path_output.WriteFile(out, lib_file.source_file());
     } else {
       out << " " << tool->lib_switch();
       EscapeStringToStream(out, lib_value, lib_escape_opts);
