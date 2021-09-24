@@ -874,6 +874,36 @@ TEST_F(TargetTest, GetOutputFilesForSource_Binary) {
   EXPECT_EQ("//out/Debug/obj/a/a.stamp", computed_outputs[0].value());
 }
 
+TEST_F(TargetTest, CheckStampFileName) {
+  TestWithScope setup;
+
+  Toolchain toolchain(setup.settings(), Label(SourceDir("//tc/"), "tc"));
+
+  std::unique_ptr<Tool> tool = Tool::CreateTool(CTool::kCToolCxx);
+  CTool* cxx = tool->AsC();
+  cxx->set_outputs(SubstitutionList::MakeForTest("{{source_file_part}}.o"));
+  toolchain.SetTool(std::move(tool));
+
+  Target target(setup.settings(), Label(SourceDir("//a/"), "a"));
+  target.set_output_type(Target::SOURCE_SET);
+  target.SetToolchain(&toolchain);
+
+  // Change the output artifact name on purpose.
+  target.set_output_name("b");
+
+  Err err;
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  // Test GetOutputsAsSourceFiles(). Since this is a source set it should give a
+  // stamp file.
+  std::vector<SourceFile> computed_outputs;
+  EXPECT_TRUE(target.GetOutputsAsSourceFiles(LocationRange(), true,
+                                             &computed_outputs, &err));
+  ASSERT_EQ(1u, computed_outputs.size());
+  EXPECT_EQ("//out/Debug/obj/a/a.stamp", computed_outputs[0].value())
+    << "was instead: " << computed_outputs[0].value();
+}
+
 // Tests Target::GetOutputFilesForSource for action_foreach targets (these, like
 // copy targets, apply a pattern to the source file). Also tests
 // GetOutputsAsSourceFiles() for action_foreach().

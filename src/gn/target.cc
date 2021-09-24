@@ -810,10 +810,12 @@ bool Target::FillOutputFiles(Err* err) {
     case GENERATED_FILE: {
       // These don't get linked to and use stamps which should be the first
       // entry in the outputs. These stamps are named
-      // "<target_out_dir>/<targetname>.stamp".
+      // "<target_out_dir>/<targetname>.stamp". Setting "output_name" does not
+      // affect the stamp file name: it is always based on the original target
+      // name.
       dependency_output_file_ =
           GetBuildDirForTargetAsOutputFile(this, BuildDirType::OBJ);
-      dependency_output_file_.value().append(GetComputedOutputName());
+      dependency_output_file_.value().append(label().name());
       dependency_output_file_.value().append(".stamp");
       break;
     }
