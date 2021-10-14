@@ -260,6 +260,13 @@ Which targets are built
   required (directly or transitively) to build a target in the default
   toolchain.
 
+  Some targets might be associated but without a formal build dependency (for
+  example, related tools or optional variants). A target that is marked as
+  "generated" can propagate its generated state to an associated target using
+  "gen_deps". This will make the referenced dependency have Ninja rules
+  generated in the same cases the source target has but without a build-time
+  dependency and even in non-default toolchains.
+
   See also "gn help ninja_rules".
 
 Dependencies

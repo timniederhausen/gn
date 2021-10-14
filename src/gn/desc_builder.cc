@@ -52,6 +52,7 @@
 //   "precompiled_header" : "name of precompiled header file",
 //   "precompiled_source" : "path to precompiled source",
 //   "deps : [ list of target dependencies ],
+//   "gen_deps : [ list of generate dependencies ],
 //   "libs" : [ list of libraries ],
 //   "lib_dirs" : [ list of library directories ]
 //   "metadata" : [ dictionary of target metadata values ]
@@ -569,6 +570,9 @@ class TargetDescBuilder : public BaseDescBuilder {
     if (what(variables::kDeps))
       res->SetWithoutPathExpansion(variables::kDeps, RenderDeps());
 
+    if (what(variables::kGenDeps) && !target_->gen_deps().empty())
+      res->SetWithoutPathExpansion(variables::kGenDeps, RenderGenDeps());
+
     // Runtime deps are special, print only when explicitly asked for and not in
     // overview mode.
     if (what_.find("runtime_deps") != what_.end())
@@ -708,6 +712,18 @@ class TargetDescBuilder : public BaseDescBuilder {
       }
     }
 
+    return std::move(res);
+  }
+
+  ValuePtr RenderGenDeps() {
+    auto res = std::make_unique<base::ListValue>();
+    Label default_tc = target_->settings()->default_toolchain_label();
+    std::vector<std::string> gen_deps;
+    for (const auto& pair : target_->gen_deps())
+      gen_deps.push_back(pair.label.GetUserVisibleName(default_tc));
+    std::sort(gen_deps.begin(), gen_deps.end());
+    for (const auto& dep : gen_deps)
+      res->AppendString(dep);
     return std::move(res);
   }
 

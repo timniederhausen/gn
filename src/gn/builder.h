@@ -94,6 +94,9 @@ class Builder {
   bool AddDeps(BuilderRecord* record,
                const LabelTargetVector& targets,
                Err* err);
+  bool AddGenDeps(BuilderRecord* record,
+                  const LabelTargetVector& targets,
+                  Err* err);
   bool AddActionValuesDep(BuilderRecord* record,
                           const ActionValues& action_values,
                           Err* err);

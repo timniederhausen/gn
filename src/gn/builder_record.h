@@ -74,7 +74,8 @@ class BuilderRecord {
 
   bool can_resolve() const { return item_ && unresolved_deps_.empty(); }
 
-  // All records this one is depending on.
+  // All records this one is depending on. Note that this includes gen_deps for
+  // targets, which can have cycles.
   BuilderRecordSet& all_deps() { return all_deps_; }
   const BuilderRecordSet& all_deps() const { return all_deps_; }
 
@@ -89,6 +90,7 @@ class BuilderRecord {
     return waiting_on_resolution_;
   }
 
+  void AddGenDep(BuilderRecord* record);
   void AddDep(BuilderRecord* record);
 
  private:
