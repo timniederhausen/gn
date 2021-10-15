@@ -284,6 +284,12 @@ class Target : public Item {
   RustValues& rust_values() { return rust_values_; }
   const RustValues& rust_values() const { return rust_values_; }
 
+  // Transitive closure of libraries that are depended on by this target
+  InheritedLibraries& rust_transitive_libs() { return rust_transitive_libs_; }
+  const InheritedLibraries& rust_transitive_libs() const {
+    return rust_transitive_libs_;
+  }
+
   const UniqueVector<SourceDir>& all_lib_dirs() const { return all_lib_dirs_; }
   const UniqueVector<LibFile>& all_libs() const { return all_libs_; }
 
@@ -484,6 +490,9 @@ class Target : public Item {
 
   // Used for Rust targets.
   RustValues rust_values_;
+
+  // Used by all targets, only useful to generate Rust targets though.
+  InheritedLibraries rust_transitive_libs_;
 
   // User for Swift targets.
   SwiftValues swift_values_;

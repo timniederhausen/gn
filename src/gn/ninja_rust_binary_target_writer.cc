@@ -178,8 +178,7 @@ void NinjaRustBinaryTargetWriter::Run() {
 
   // Bubble up the full list of transitive rlib dependencies.
   std::vector<OutputFile> transitive_rustlibs;
-  for (const auto* dep :
-       target_->rust_values().transitive_libs().GetOrdered()) {
+  for (const auto* dep : target_->rust_transitive_libs().GetOrdered()) {
     if (dep->source_types_used().RustSourceUsed()) {
       transitive_rustlibs.push_back(dep->dependency_output_file());
     }
