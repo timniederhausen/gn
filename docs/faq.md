@@ -56,3 +56,36 @@ default, rather than building everything.
 [There's at least one](https://docs.google.com/presentation/d/15Zwb53JcncHfEwHpnG_PoIbbzQ3GQi_cpujYwbpcbZo/edit?usp=sharing), from 2015. There
 haven't been big changes since then apart from moving it to a standalone
 repo, so it should still be relevant.
+
+## How can I recursively copy a directory as a build step?
+
+Sometimes people want to write a build action that expresses copying all files
+(possibly recursively, possily not) from a source directory without specifying
+all files in that directory in a BUILD file. This is not possible to express:
+correct builds must list all inputs. Most approaches people try to work around
+this break in some way for incremental builds, either the build step is run
+every time (the build is always "dirty"), file modifications will be missed, or
+file additions will be missed.
+
+One thing people try is to write an action that declares an input directory and
+an output directory and have it copy all files from the source to the
+destination. But incremental builds are likely going to be incorrect if you do
+this. Ninja determines if an output is in need of rebuilding by comparing the
+last modified date of the source to the last modified date of the destination.
+Since almost no filesystems propagate the last modified date of files to their
+directory, modifications to files in the source will not trigger an incremental
+rebuild.
+
+Beware when testing this: most filesystems update the last modified date of the
+parent directory (but not recursive parents) when adding to or removing a file
+from that directory so this will appear to work in many cases. But no modern
+production filesystems propagate modification times of the contents of the files
+to any directories because it would be very slow. The result will be that
+modifications to the source files will not be reflected in the output when doing
+incremental builds.
+
+Another thing people try is to write all of the source files to a "depfile" (see
+`gn help depfile`) and to write a single stamp file that tracks the modified
+date of the output. This approach also may appear to work but is subtly wrong:
+the additions of new files to the source directory will not trigger the build
+step and that addition will not be reflected in an incremental build.
