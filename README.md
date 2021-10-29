@@ -71,7 +71,7 @@ some disadvanages:
   * There is no simple release scheme (see "Versioning and distribution" below).
     Projects are expected to manage the version of GN they require. Getting an
     appropriate GN binary can be a hurdle for new contributors to a project.
-    Since it is relatively uncommon, it can be more difficult to find
+    Since GN is relatively uncommon, it can be more difficult to find
     information and examples.
 
 GN can generate Ninja build files for C, C++, Rust, Objective C, and Swift
@@ -148,7 +148,8 @@ database](https://bugs.chromium.org/p/gn/issues/list).
 
 ## Sending patches
 
-GN uses [Gerrit](https://www.gerritcodereview.com/) for code review. The short
+GN uses [Gerrit](https://www.gerritcodereview.com/) for code review hosted at
+[gn-review.googlesource.com](https://gn-review.googlesource.com/). The short
 version of how to patch is:
 
     Register at https://gn-review.googlesource.com.

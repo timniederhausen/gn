@@ -98,7 +98,7 @@ shared_library("browser") {
 
 Another way apply settings up the dependency graph is with
 `all_dependent_configs` which works like `public_configs` except that it is
-applied to all dependent targets regardless of `deps`/`public_deps`. use of this
+applied to all dependent targets regardless of `deps`/`public_deps`. Use of this
 feature is discouraged because it is easy to accumulate lots of unnecessary
 settings in a large project. Ideally all targets can define which information
 their dependencies need and can control this explicitly with `public_deps`.
@@ -132,7 +132,7 @@ a template or by writing things like the sources to a variable and using that
 variable in each version of the target.
 
 2. Use different toolchains. This is commonly used to encode "host" versus
-"target" differences or to compile parts of a project with sometime like ASAN.
+"target" differences or to compile parts of a project with something like ASAN.
 It is possible to use toolchains to encode any variation you might desire but
 this can be difficult to manage and might be impossible or discoraged depending
 on how your project is set up (Chrome and Fuchsia use toolchains for specific
