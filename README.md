@@ -6,12 +6,14 @@ GN is a meta-build system that generates build files for
 Related resources:
 
   * Documentation in [docs/](https://gn.googlesource.com/gn/+/main/docs/). In
-    particular [GN Quick Start
-    guide](https://gn.googlesource.com/gn/+/main/docs/quick_start.md)
-    and the [reference](https://gn.googlesource.com/gn/+/main/docs/reference.md)
-    (the latter is all builtin help converted to a single file).
+    particular:
+    *  [GN quick start guide](https://gn.googlesource.com/gn/+/main/docs/quick_start.md).
+    *  [Frequently asked questions](https://gn.googlesource.com/gn/+/main/docs/faq.md)
+    *  [Reference](https://gn.googlesource.com/gn/+/main/docs/reference.md)
+       (all builtin help converted to a single file).
   * An introductory [presentation](https://docs.google.com/presentation/d/15Zwb53JcncHfEwHpnG_PoIbbzQ3GQi_cpujYwbpcbZo/edit?usp=sharing).
   * The [mailing list](https://groups.google.com/a/chromium.org/forum/#!forum/gn-dev).
+  * The [bug database](https://bugs.chromium.org/p/gn/issues/list).
 
 ## What GN is for
 
