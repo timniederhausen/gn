@@ -56,7 +56,7 @@ bool SwiftValues::FillModuleOuputFile(const Target* target, Err* err) {
 
   const SourceFile module_output_file_as_source =
       module_output_file.AsSourceFile(target->settings()->build_settings());
-  if (module_output_file_as_source.type() != SourceFile::SOURCE_SWIFTMODULE) {
+  if (!module_output_file_as_source.IsSwiftModuleType()) {
     *err = Err(tool->defined_from(), "Incorrect outputs for tool",
                "The first output of tool " + std::string(tool->name()) +
                    " must be a .swiftmodule file.");

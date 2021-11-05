@@ -589,7 +589,7 @@ bool Target::GetOutputFilesForSource(const SourceFile& source,
     // All binary targets do a tool lookup.
     DCHECK(IsBinary());
 
-    SourceFile::Type file_type = source.type();
+    const SourceFile::Type file_type = source.GetType();
     if (file_type == SourceFile::SOURCE_UNKNOWN)
       return false;
     if (file_type == SourceFile::SOURCE_O) {

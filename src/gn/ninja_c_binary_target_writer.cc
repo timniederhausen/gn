@@ -76,9 +76,8 @@ const char* GetPCHLangForToolType(const char* name) {
 
 const SourceFile* GetModuleMapFromTargetSources(const Target* target) {
   for (const SourceFile& sf : target->sources()) {
-    if (sf.type() == SourceFile::SOURCE_MODULEMAP) {
+    if (sf.IsModuleMapType())
       return &sf;
-    }
   }
   return nullptr;
 }
@@ -552,13 +551,13 @@ void NinjaCBinaryTargetWriter::WriteSources(
   std::vector<OutputFile> tool_outputs;  // Prevent reallocation in loop.
   std::vector<OutputFile> deps;
   for (const auto& source : target_->sources()) {
-    DCHECK_NE(source.type(), SourceFile::SOURCE_SWIFT);
+    DCHECK_NE(source.GetType(), SourceFile::SOURCE_SWIFT);
 
     // Clear the vector but maintain the max capacity to prevent reallocations.
     deps.resize(0);
     const char* tool_name = Tool::kToolNone;
     if (!target_->GetOutputFilesForSource(source, &tool_name, &tool_outputs)) {
-      if (source.type() == SourceFile::SOURCE_DEF)
+      if (source.IsDefType())
         other_files->push_back(source);
       continue;  // No output for this source.
     }
@@ -606,7 +605,7 @@ void NinjaCBinaryTargetWriter::WriteSources(
 
     // It's theoretically possible for a compiler to produce more than one
     // output, but we'll only link to the first output.
-    if (source.type() != SourceFile::SOURCE_MODULEMAP) {
+    if (!source.IsModuleMapType()) {
       object_files->push_back(tool_outputs[0]);
     }
   }
@@ -644,7 +643,7 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
       const SourceFile output_as_source =
           output.AsSourceFile(target_->settings()->build_settings());
 
-      if (output_as_source.type() == SourceFile::SOURCE_O) {
+      if (output_as_source.IsObjectType()) {
         object_files->push_back(output);
       }
     }
@@ -654,7 +653,7 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
       // Avoid re-allocation during loop.
       std::vector<OutputFile> partial_outputs;
       for (const auto& source : target_->sources()) {
-        if (source.type() != SourceFile::SOURCE_SWIFT)
+        if (!source.IsSwiftType())
           continue;
 
         partial_outputs.resize(0);
@@ -665,7 +664,7 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
           additional_outputs.push_back(output);
           SourceFile output_as_source =
               output.AsSourceFile(target_->settings()->build_settings());
-          if (output_as_source.type() == SourceFile::SOURCE_O) {
+          if (output_as_source.IsObjectType()) {
             object_files->push_back(output);
           }
         }
@@ -745,7 +744,7 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   const SourceFile* optional_def_file = nullptr;
   if (!other_files.empty()) {
     for (const SourceFile& src_file : other_files) {
-      if (src_file.type() == SourceFile::SOURCE_DEF) {
+      if (src_file.IsDefType()) {
         optional_def_file = &src_file;
         implicit_deps.push_back(
             OutputFile(settings_->build_settings(), src_file));

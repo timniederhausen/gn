@@ -228,7 +228,7 @@ void NinjaBinaryTargetWriter::AddSourceSetFiles(
     for (const OutputFile& output : outputs) {
       SourceFile output_as_source =
           output.AsSourceFile(source_set->settings()->build_settings());
-      if (output_as_source.type() == SourceFile::SOURCE_O) {
+      if (output_as_source.IsObjectType()) {
         obj_files->push_back(output);
       }
     }

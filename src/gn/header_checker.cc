@@ -154,7 +154,7 @@ void HeaderChecker::RunCheckOverFiles(const FileMap& files, bool force_check) {
 
   for (const auto& file : files) {
     // Only check C-like source files (RC files also have includes).
-    SourceFile::Type type = file.first.type();
+    const SourceFile::Type type = file.first.GetType();
     if (type != SourceFile::SOURCE_CPP && type != SourceFile::SOURCE_H &&
         type != SourceFile::SOURCE_C && type != SourceFile::SOURCE_M &&
         type != SourceFile::SOURCE_MM && type != SourceFile::SOURCE_RC)

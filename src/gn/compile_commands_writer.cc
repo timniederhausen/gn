@@ -252,7 +252,7 @@ void OutputJSON(const BuildSettings* build_settings,
     for (const auto& source : target->sources()) {
       // If this source is not a C/C++/ObjC/ObjC++ source (not header) file,
       // continue as it does not belong in the compilation database.
-      SourceFile::Type source_type = source.type();
+      const SourceFile::Type source_type = source.GetType();
       if (source_type != SourceFile::SOURCE_CPP &&
           source_type != SourceFile::SOURCE_C &&
           source_type != SourceFile::SOURCE_M &&
