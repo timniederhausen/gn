@@ -3671,6 +3671,14 @@
         If specified, this list is the subset of the outputs that should be
         added to runtime deps (see "gn help runtime_deps"). By default (if
         runtime_outputs is empty or unspecified), it will be the link_output.
+
+    rust_sysroot
+        Valid for: Rust tools
+
+        A path relative to root_out_dir. This is not used in the build
+        process, but may be used when generating metadata for rust-analyzer.
+        (See --export-rust-project). It enables such metadata to include
+        information about the Rust standard library.
 ```
 
 #### **Expansions for tool variables**
