@@ -30,6 +30,7 @@ class VisualStudioWriter {
     Vs2015,      // Visual Studio 2015
     Vs2017,      // Visual Studio 2017
     Vs2019,      // Visual Studio 2019
+    Vs2022,      // Visual Studio 2022
   };
 
   // Writes Visual Studio project and solution files. |sln_name| is the optional

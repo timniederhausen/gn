@@ -73,14 +73,17 @@ const char kToolsetVersionVs2013[] = "v120";               // Visual Studio 2013
 const char kToolsetVersionVs2015[] = "v140";               // Visual Studio 2015
 const char kToolsetVersionVs2017[] = "v141";               // Visual Studio 2017
 const char kToolsetVersionVs2019[] = "v142";               // Visual Studio 2019
+const char kToolsetVersionVs2022[] = "v143";               // Visual Studio 2022
 const char kProjectVersionVs2013[] = "12.0";               // Visual Studio 2013
 const char kProjectVersionVs2015[] = "14.0";               // Visual Studio 2015
 const char kProjectVersionVs2017[] = "15.0";               // Visual Studio 2017
 const char kProjectVersionVs2019[] = "16.0";               // Visual Studio 2019
+const char kProjectVersionVs2022[] = "17.0";               // Visual Studio 2022
 const char kVersionStringVs2013[] = "Visual Studio 2013";  // Visual Studio 2013
 const char kVersionStringVs2015[] = "Visual Studio 2015";  // Visual Studio 2015
 const char kVersionStringVs2017[] = "Visual Studio 2017";  // Visual Studio 2017
 const char kVersionStringVs2019[] = "Visual Studio 2019";  // Visual Studio 2019
+const char kVersionStringVs2022[] = "Visual Studio 2022";  // Visual Studio 2022
 const char kWindowsKitsVersion[] = "10";                   // Windows 10 SDK
 const char kWindowsKitsDefaultVersion[] = "10";            // Windows 10 SDK
 
@@ -311,8 +314,11 @@ VisualStudioWriter::VisualStudioWriter(const BuildSettings* build_settings,
       toolset_version_ = kToolsetVersionVs2019;
       version_string_ = kVersionStringVs2019;
       break;
-    default:
-      NOTREACHED() << "Not a valid Visual Studio Version: " << version;
+    case Version::Vs2022:
+      project_version_ = kProjectVersionVs2022;
+      toolset_version_ = kToolsetVersionVs2022;
+      version_string_ = kVersionStringVs2022;
+      break;
   }
 
   windows_kits_include_dirs_ = GetWindowsKitsIncludeDirs(win_kit);
