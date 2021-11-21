@@ -47,11 +47,10 @@ LocationRange CreatePersistentRange(const InputFile& input_file,
       input_file.name(), &clone_input_file, &tokens, &parse_root);
   clone_input_file->SetContents(input_file.contents());
 
-  return LocationRange(
-      Location(clone_input_file, range.begin().line_number(),
-               range.begin().column_number(), -1 /* TODO(scottmg) */),
-      Location(clone_input_file, range.end().line_number(),
-               range.end().column_number(), -1 /* TODO(scottmg) */));
+  return LocationRange(Location(clone_input_file, range.begin().line_number(),
+                                range.begin().column_number()),
+                       Location(clone_input_file, range.end().line_number(),
+                                range.end().column_number()));
 }
 
 // Given a reverse dependency chain where the target chain[0]'s includes are

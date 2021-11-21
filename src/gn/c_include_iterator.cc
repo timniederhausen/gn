@@ -139,11 +139,9 @@ bool CIncludeIterator::GetNextIncludeString(
     if (type != INCLUDE_NONE) {
       include->contents = include_contents;
       include->location = LocationRange(
-          Location(input_file_, cur_line_number, begin_char,
-                   -1 /* TODO(scottmg): Is this important? */),
+          Location(input_file_, cur_line_number, begin_char),
           Location(input_file_, cur_line_number,
-                   begin_char + static_cast<int>(include_contents.size()),
-                   -1 /* TODO(scottmg): Is this important? */));
+                   begin_char + static_cast<int>(include_contents.size())));
       include->system_style_include = (type == INCLUDE_SYSTEM);
 
       lines_since_last_include_ = 0;
