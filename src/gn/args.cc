@@ -340,6 +340,7 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
   static const char kRISCV32[] = "riscv32";
   static const char kRISCV64[] = "riscv64";
   static const char kE2K[] = "e2k";
+  static const char kLA64[] = "loong64";
   const char* arch = nullptr;
 
   // Set the host CPU architecture based on the underlying OS, not
@@ -370,6 +371,8 @@ void Args::SetSystemVarsLocked(Scope* dest) const {
     arch = kRISCV64;
   else if (os_arch == "e2k")
     arch = kE2K;
+  else if (os_arch == "loongarch64")
+    arch = kLA64;
   else
     CHECK(false) << "OS architecture not handled. (" << os_arch << ")";
 
