@@ -100,9 +100,8 @@ std::string FormatSourceDir(const SourceDir& dir) {
 void RecursiveCollectChildDeps(const Target* target, TargetSet* result);
 
 void RecursiveCollectDeps(const Target* target, TargetSet* result) {
-  if (result->find(target) != result->end())
+  if (!result->add(target))
     return;  // Already did this target.
-  result->insert(target);
 
   RecursiveCollectChildDeps(target, result);
 }
@@ -660,10 +659,7 @@ class TargetDescBuilder : public BaseDescBuilder {
 
       bool print_children = true;
       if (seen_targets) {
-        if (seen_targets->find(cur_dep) == seen_targets->end()) {
-          // New target, mark it visited.
-          seen_targets->insert(cur_dep);
-        } else {
+        if (!seen_targets->add(cur_dep)) {
           // Already seen.
           print_children = false;
           // Only print "..." if something is actually elided, which means that

@@ -220,9 +220,7 @@ void BreadthFirstSearch(const Target* from,
     // If we've already checked this one, stop. This should be after the above
     // check for a known-good check, because known-good ones will always have
     // been previously visited.
-    if (visited.find(current_target) == visited.end())
-      visited.insert(current_target);
-    else
+    if (!visited.add(current_target))
       continue;
 
     // Add public deps for this target to the queue.

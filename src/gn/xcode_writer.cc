@@ -906,9 +906,7 @@ std::optional<std::vector<const Target*>> XcodeProject::GetTargetsFromBuilder(
       if (pair.ptr->output_type() != Target::EXECUTABLE)
         continue;
 
-      auto iter = targets.find(pair.ptr);
-      if (iter != targets.end())
-        targets.erase(iter);
+      targets.erase(pair.ptr);
     }
   }
 

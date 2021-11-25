@@ -245,7 +245,7 @@ std::vector<OutputFile> NinjaTargetWriter::WriteInputDepsStampAndGetDep(
   // Additional hard dependencies passed in. These are usually empty or small,
   // and we don't want to duplicate the explicit hard deps of the target.
   for (const Target* target : additional_hard_deps) {
-    if (!hard_deps.count(target))
+    if (!hard_deps.contains(target))
       input_deps_targets.push_back(target);
   }
 

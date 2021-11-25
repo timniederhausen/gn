@@ -74,9 +74,8 @@ bool EnsureFileIsGeneratedByDependency(const Target* target,
                                        bool consider_object_files,
                                        bool check_data_deps,
                                        TargetSet* seen_targets) {
-  if (seen_targets->find(target) != seen_targets->end())
+  if (!seen_targets->add(target))
     return false;  // Already checked this one and it's not found.
-  seen_targets->insert(target);
 
   // Assume that we have relatively few generated inputs so brute-force
   // searching here is OK. If this becomes a bottleneck, consider storing
@@ -161,9 +160,8 @@ bool RecursiveCheckAssertNoDeps(const Target* target,
                                 const LabelPattern** failure_pattern) {
   static const char kIndentPath[] = "  ";
 
-  if (visited->find(target) != visited->end())
+  if (!visited->add(target))
     return true;  // Already checked this target.
-  visited->insert(target);
 
   if (check_this) {
     // Check this target against the given list of patterns.
@@ -1248,8 +1246,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
     if (next.string_value().empty()) {
       for (const auto& dep : all_deps) {
         // If we haven't walked this dep yet, go down into it.
-        auto pair = targets_walked->insert(dep.ptr);
-        if (pair.second) {
+        if (targets_walked->add(dep.ptr)) {
           if (!dep.ptr->GetMetadata(keys_to_extract, keys_to_walk, rebase_dir,
                                     false, result, targets_walked, err))
             return false;
@@ -1277,8 +1274,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
       // Match against the label with the toolchain.
       if (dep.label.GetUserVisibleName(true) == canonicalize_next_label) {
         // If we haven't walked this dep yet, go down into it.
-        auto pair = targets_walked->insert(dep.ptr);
-        if (pair.second) {
+        if (targets_walked->add(dep.ptr)) {
           if (!dep.ptr->GetMetadata(keys_to_extract, keys_to_walk, rebase_dir,
                                     false, result, targets_walked, err))
             return false;

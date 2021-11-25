@@ -55,10 +55,7 @@ std::set<Label> LabelsFor(const TargetSet& targets) {
 }
 
 TargetSet Intersect(const TargetSet& l, const TargetSet& r) {
-  TargetSet result;
-  std::set_intersection(l.begin(), l.end(), r.begin(), r.end(),
-                        std::inserter(result, result.begin()));
-  return result;
+  return l.intersection_with(r);
 }
 
 std::vector<std::string> GetStringVector(const base::DictionaryValue& dict,
@@ -402,8 +399,7 @@ TargetSet Analyzer::Filter(const TargetSet& targets) const {
 void Analyzer::FilterTarget(const Target* target,
                             TargetSet* seen,
                             TargetSet* filtered) const {
-  if (seen->find(target) == seen->end()) {
-    seen->insert(target);
+  if (seen->add(target)) {
     if (target->output_type() != Target::GROUP) {
       filtered->insert(target);
     } else {

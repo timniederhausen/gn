@@ -349,7 +349,7 @@ std::vector<const Target*> CompileCommandsWriter::FilterTargets(
   // Preserve the original ordering of all_targets
   // to allow easier debugging and testing.
   for (auto& target : all_targets) {
-    if (visited.count(target)) {
+    if (visited.contains(target)) {
       preserved_targets.push_back(target);
     }
   }
@@ -358,8 +358,7 @@ std::vector<const Target*> CompileCommandsWriter::FilterTargets(
 
 void CompileCommandsWriter::VisitDeps(const Target* target,
                                       TargetSet* visited) {
-  if (!visited->count(target)) {
-    visited->insert(target);
+  if (visited->add(target)) {
     for (const auto& pair : target->GetDeps(Target::DEPS_ALL)) {
       VisitDeps(pair.ptr, visited);
     }

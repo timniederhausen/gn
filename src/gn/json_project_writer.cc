@@ -45,8 +45,7 @@ namespace {
 
 void AddTargetDependencies(const Target* target, TargetSet* deps) {
   for (const auto& pair : target->GetDeps(Target::DEPS_LINKED)) {
-    if (deps->find(pair.ptr) == deps->end()) {
-      deps->insert(pair.ptr);
+    if (deps->add(pair.ptr)) {
       AddTargetDependencies(pair.ptr, deps);
     }
   }
