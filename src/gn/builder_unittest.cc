@@ -138,17 +138,14 @@ TEST_F(BuilderTest, BasicDeps) {
 
   // A should have two deps: B and the toolchain. Only B should be unresolved.
   EXPECT_EQ(2u, a_record->all_deps().size());
-  EXPECT_EQ(1u, a_record->unresolved_deps().size());
-  EXPECT_NE(a_record->all_deps().end(),
-            a_record->all_deps().find(toolchain_record));
-  EXPECT_NE(a_record->all_deps().end(), a_record->all_deps().find(b_record));
-  EXPECT_NE(a_record->unresolved_deps().end(),
-            a_record->unresolved_deps().find(b_record));
+  EXPECT_EQ(1u, a_record->GetUnresolvedDeps().size());
+  EXPECT_TRUE(a_record->all_deps().contains(toolchain_record));
+  EXPECT_TRUE(a_record->all_deps().contains(b_record));
+  EXPECT_TRUE(a_record->GetUnresolvedDeps().contains(b_record));
 
   // B should be marked as having A waiting on it.
   EXPECT_EQ(1u, b_record->waiting_on_resolution().size());
-  EXPECT_NE(b_record->waiting_on_resolution().end(),
-            b_record->waiting_on_resolution().find(a_record));
+  EXPECT_TRUE(b_record->waiting_on_resolution().contains(a_record));
 
   // Add the C target.
   Target* c = new Target(&settings_, c_label);
@@ -177,9 +174,9 @@ TEST_F(BuilderTest, BasicDeps) {
   EXPECT_TRUE(b_record->resolved());
   EXPECT_TRUE(c_record->resolved());
 
-  EXPECT_TRUE(a_record->unresolved_deps().empty());
-  EXPECT_TRUE(b_record->unresolved_deps().empty());
-  EXPECT_TRUE(c_record->unresolved_deps().empty());
+  EXPECT_TRUE(a_record->GetUnresolvedDeps().empty());
+  EXPECT_TRUE(b_record->GetUnresolvedDeps().empty());
+  EXPECT_TRUE(c_record->GetUnresolvedDeps().empty());
 
   EXPECT_TRUE(a_record->waiting_on_resolution().empty());
   EXPECT_TRUE(b_record->waiting_on_resolution().empty());
