@@ -26,7 +26,7 @@ namespace commands {
 
 namespace {
 
-using TargetSet = std::set<const Target*>;
+using TargetSet = TargetSet;
 using TargetVector = std::vector<const Target*>;
 
 // Maps targets to the list of targets that depend on them.

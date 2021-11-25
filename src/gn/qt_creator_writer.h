@@ -43,7 +43,7 @@ class QtCreatorWriter {
   const Builder& builder_;
   base::FilePath project_prefix_;
   std::string root_target_name_;
-  std::set<const Target*> targets_;
+  TargetSet targets_;
   std::set<std::string> sources_;
   std::set<std::string> includes_;
   std::set<std::string> defines_;

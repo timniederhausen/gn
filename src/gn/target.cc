@@ -73,7 +73,7 @@ bool EnsureFileIsGeneratedByDependency(const Target* target,
                                        bool check_private_deps,
                                        bool consider_object_files,
                                        bool check_data_deps,
-                                       std::set<const Target*>* seen_targets) {
+                                       TargetSet* seen_targets) {
   if (seen_targets->find(target) != seen_targets->end())
     return false;  // Already checked this one and it's not found.
   seen_targets->insert(target);
@@ -156,7 +156,7 @@ bool EnsureFileIsGeneratedByDependency(const Target* target,
 bool RecursiveCheckAssertNoDeps(const Target* target,
                                 bool check_this,
                                 const std::vector<LabelPattern>& assert_no,
-                                std::set<const Target*>* visited,
+                                TargetSet* visited,
                                 std::string* failure_path_str,
                                 const LabelPattern** failure_pattern) {
   static const char kIndentPath[] = "  ";
@@ -1144,7 +1144,7 @@ bool Target::CheckAssertNoDeps(Err* err) const {
   if (assert_no_deps_.empty())
     return true;
 
-  std::set<const Target*> visited;
+  TargetSet visited;
   std::string failure_path_str;
   const LabelPattern* failure_pattern = nullptr;
 
@@ -1186,7 +1186,7 @@ void Target::CheckSourceGenerated(const SourceFile& source) const {
   // the list of files written by the GN build itself (often response files)
   // can be filtered out of this list.
   OutputFile out_file(settings()->build_settings(), source);
-  std::set<const Target*> seen_targets;
+  TargetSet seen_targets;
   bool check_data_deps = false;
   bool consider_object_files = false;
   if (!EnsureFileIsGeneratedByDependency(this, out_file, true,
@@ -1212,7 +1212,7 @@ bool Target::GetMetadata(const std::vector<std::string>& keys_to_extract,
                          const SourceDir& rebase_dir,
                          bool deps_only,
                          std::vector<Value>* result,
-                         std::set<const Target*>* targets_walked,
+                         TargetSet* targets_walked,
                          Err* err) const {
   std::vector<Value> next_walk_keys;
   std::vector<Value> current_result;

@@ -338,7 +338,7 @@ std::vector<const Target*> CompileCommandsWriter::FilterTargets(
     const std::set<std::string>& target_filters_set) {
   std::vector<const Target*> preserved_targets;
 
-  std::set<const Target*> visited;
+  TargetSet visited;
   for (auto& target : all_targets) {
     if (target_filters_set.count(target->label().name())) {
       VisitDeps(target, &visited);
@@ -357,7 +357,7 @@ std::vector<const Target*> CompileCommandsWriter::FilterTargets(
 }
 
 void CompileCommandsWriter::VisitDeps(const Target* target,
-                                      std::set<const Target*>* visited) {
+                                      TargetSet* visited) {
   if (!visited->count(target)) {
     visited->insert(target);
     for (const auto& pair : target->GetDeps(Target::DEPS_ALL)) {

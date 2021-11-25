@@ -179,7 +179,7 @@ void BreadthFirstSearch(const Target* from,
   work_queue.push_back(initial_stack);
 
   // Track checked targets to avoid checking the same once more than once.
-  std::set<const Target*> visited;
+  TargetSet visited;
 
   while (!work_queue.empty()) {
     PathVector current_path = work_queue.front();

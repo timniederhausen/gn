@@ -97,11 +97,9 @@ std::string FormatSourceDir(const SourceDir& dir) {
   return dir.value();
 }
 
-void RecursiveCollectChildDeps(const Target* target,
-                               std::set<const Target*>* result);
+void RecursiveCollectChildDeps(const Target* target, TargetSet* result);
 
-void RecursiveCollectDeps(const Target* target,
-                          std::set<const Target*>* result) {
+void RecursiveCollectDeps(const Target* target, TargetSet* result) {
   if (result->find(target) != result->end())
     return;  // Already did this target.
   result->insert(target);
@@ -109,8 +107,7 @@ void RecursiveCollectDeps(const Target* target,
   RecursiveCollectChildDeps(target, result);
 }
 
-void RecursiveCollectChildDeps(const Target* target,
-                               std::set<const Target*>* result) {
+void RecursiveCollectChildDeps(const Target* target, TargetSet* result) {
   for (const auto& pair : target->GetDeps(Target::DEPS_ALL))
     RecursiveCollectDeps(pair.ptr, result);
 }
@@ -646,7 +643,7 @@ class TargetDescBuilder : public BaseDescBuilder {
   // set is null, all dependencies will be printed.
   void RecursivePrintDeps(base::ListValue* out,
                           const Target* target,
-                          std::set<const Target*>* seen_targets,
+                          TargetSet* seen_targets,
                           int indent_level) {
     // Combine all deps into one sorted list.
     std::vector<LabelTargetPair> sorted_deps;
@@ -694,7 +691,7 @@ class TargetDescBuilder : public BaseDescBuilder {
         RecursivePrintDeps(res.get(), target_, nullptr, 0);
       } else {
         // Don't recurse into duplicates.
-        std::set<const Target*> seen_targets;
+        TargetSet seen_targets;
         RecursivePrintDeps(res.get(), target_, &seen_targets, 0);
       }
     } else {  // not tree
@@ -702,7 +699,7 @@ class TargetDescBuilder : public BaseDescBuilder {
       // Collect the deps to display.
       if (all_) {
         // Show all dependencies.
-        std::set<const Target*> all_deps;
+        TargetSet all_deps;
         RecursiveCollectChildDeps(target_, &all_deps);
         commands::FilterAndPrintTargetSet(all_deps, res.get());
       } else {

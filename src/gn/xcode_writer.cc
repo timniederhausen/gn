@@ -894,7 +894,7 @@ std::optional<std::vector<const Target*>> XcodeProject::GetTargetsFromBuilder(
   // Filter out all target of type EXECUTABLE that are direct dependency of
   // a BUNDLE_DATA target (under the assumption that they will be part of a
   // CREATE_BUNDLE target generating an application bundle).
-  std::set<const Target*> targets(all_targets.begin(), all_targets.end());
+  TargetSet targets(all_targets.begin(), all_targets.end());
   for (const Target* target : all_targets) {
     if (!target->settings()->is_default())
       continue;

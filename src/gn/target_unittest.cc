@@ -1403,7 +1403,7 @@ TEST(TargetTest, CollectMetadataNoRecurse) {
 
   Err err;
   std::vector<Value> result;
-  std::set<const Target*> targets;
+  TargetSet targets;
   one.GetMetadata(data_keys, walk_keys, SourceDir(), false, &result, &targets,
                   &err);
   EXPECT_FALSE(err.has_error());
@@ -1444,7 +1444,7 @@ TEST(TargetTest, CollectMetadataWithRecurse) {
 
   Err err;
   std::vector<Value> result;
-  std::set<const Target*> targets;
+  TargetSet targets;
   one.GetMetadata(data_keys, walk_keys, SourceDir(), false, &result, &targets,
                   &err);
   EXPECT_FALSE(err.has_error());
@@ -1491,7 +1491,7 @@ TEST(TargetTest, CollectMetadataWithRecurseHole) {
 
   Err err;
   std::vector<Value> result;
-  std::set<const Target*> targets;
+  TargetSet targets;
   one.GetMetadata(data_keys, walk_keys, SourceDir(), false, &result, &targets,
                   &err);
   EXPECT_FALSE(err.has_error());
@@ -1540,7 +1540,7 @@ TEST(TargetTest, CollectMetadataWithBarrier) {
 
   Err err;
   std::vector<Value> result;
-  std::set<const Target*> targets;
+  TargetSet targets;
   one.GetMetadata(data_keys, walk_keys, SourceDir(), false, &result, &targets,
                   &err);
   EXPECT_FALSE(err.has_error()) << err.message();
@@ -1573,7 +1573,7 @@ TEST(TargetTest, CollectMetadataWithError) {
 
   Err err;
   std::vector<Value> result;
-  std::set<const Target*> targets;
+  TargetSet targets;
   one.GetMetadata(data_keys, walk_keys, SourceDir(), false, &result, &targets,
                   &err);
   EXPECT_TRUE(err.has_error());

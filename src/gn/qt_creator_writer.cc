@@ -86,7 +86,7 @@ bool QtCreatorWriter::DiscoverTargets() {
   auto all_targets = builder_.GetAllResolvedTargets();
 
   if (root_target_name_.empty()) {
-    targets_ = std::set<const Target*>(all_targets.begin(), all_targets.end());
+    targets_ = TargetSet(all_targets.begin(), all_targets.end());
     return true;
   }
 
