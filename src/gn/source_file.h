@@ -98,7 +98,7 @@ class SourceFile {
   }
 
   bool operator==(const SourceFile& other) const {
-    return value_ == other.value_;
+    return value_.SameAs(other.value_);
   }
   bool operator!=(const SourceFile& other) const { return !operator==(other); }
   bool operator<(const SourceFile& other) const {
