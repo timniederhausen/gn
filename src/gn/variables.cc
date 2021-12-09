@@ -124,6 +124,13 @@ Possible values
   - "arm"
   - "arm64"
   - "mipsel"
+  - "mips64el"
+  - "s390x"
+  - "ppc64"
+  - "riscv32"
+  - "riscv64"
+  - "e2k"
+  - "loong64"
 )";
 
 const char kTargetName[] = "target_name";
