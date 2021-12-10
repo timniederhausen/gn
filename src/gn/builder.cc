@@ -5,6 +5,7 @@
 #include "gn/builder.h"
 
 #include <stddef.h>
+#include <algorithm>
 #include <utility>
 
 #include "gn/action_values.h"
@@ -34,9 +35,7 @@ using BuilderRecordSet = BuilderRecord::BuilderRecordSet;
 bool RecursiveFindCycle(const BuilderRecord* search_in,
                         std::vector<const BuilderRecord*>* path) {
   path->push_back(search_in);
-  BuilderRecordSet unresolved_deps = search_in->GetUnresolvedDeps();
-  for (auto it = unresolved_deps.begin(); it.valid(); ++it) {
-    const BuilderRecord* cur = *it;
+  for (const auto& cur : search_in->GetSortedUnresolvedDeps()) {
     std::vector<const BuilderRecord*>::iterator found =
         std::find(path->begin(), path->end(), cur);
     if (found != path->end()) {
@@ -136,6 +135,8 @@ std::vector<const BuilderRecord*> Builder::GetAllRecords() const {
   result.reserve(records_.size());
   for (const auto& record : records_)
     result.push_back(&record);
+  // Ensure deterministic outputs.
+  std::sort(result.begin(), result.end(), BuilderRecord::LabelCompare);
   return result;
 }
 
@@ -148,7 +149,10 @@ std::vector<const Item*> Builder::GetAllResolvedItems() const {
       result.push_back(record.item());
     }
   }
-
+  // Ensure deterministic outputs.
+  std::sort(result.begin(), result.end(), [](const Item* a, const Item* b) {
+    return a->label() < b->label();
+  });
   return result;
 }
 
@@ -160,6 +164,10 @@ std::vector<const Target*> Builder::GetAllResolvedTargets() const {
         record.should_generate() && record.item())
       result.push_back(record.item()->AsTarget());
   }
+  // Ensure deterministic outputs.
+  std::sort(result.begin(), result.end(), [](const Target* a, const Target* b) {
+    return a->label() < b->label();
+  });
   return result;
 }
 
@@ -183,21 +191,27 @@ bool Builder::CheckForBadItems(Err* err) const {
   // but none will be resolved. If this happens, we'll check explicitly for
   // that below.
   std::vector<const BuilderRecord*> bad_records;
-  std::string depstring;
   for (const auto& src : records_) {
     if (!src.should_generate())
       continue;  // Skip ungenerated nodes.
 
-    if (!src.resolved()) {
+    if (!src.resolved())
       bad_records.push_back(&src);
+  }
+  if (bad_records.empty())
+    return true;
 
-      // Check dependencies.
-      BuilderRecordSet unresolved_deps = src.GetUnresolvedDeps();
-      for (const auto* dest : unresolved_deps) {
-        if (!dest->item()) {
-          depstring += src.label().GetUserVisibleName(true) + "\n  needs " +
-                       dest->label().GetUserVisibleName(true) + "\n";
-        }
+  // Sort by label to ensure deterministic outputs.
+  std::sort(bad_records.begin(), bad_records.end(),
+            BuilderRecord::LabelCompare);
+
+  std::string depstring;
+  for (const auto& src : bad_records) {
+    // Check dependencies.
+    for (const auto* dest : src->GetSortedUnresolvedDeps()) {
+      if (!dest->item()) {
+        depstring += src->label().GetUserVisibleName(true) + "\n  needs " +
+                     dest->label().GetUserVisibleName(true) + "\n";
       }
     }
   }
@@ -299,6 +313,11 @@ bool Builder::ToolchainDefined(BuilderRecord* record, Err* err) {
 
   loader_->ToolchainLoaded(toolchain);
   return true;
+}
+
+BuilderRecord* Builder::GetOrCreateRecordForTesting(const Label& label) {
+  Err err;
+  return GetOrCreateRecordOfType(label, nullptr, BuilderRecord::ITEM_UNKNOWN, &err);
 }
 
 BuilderRecord* Builder::GetOrCreateRecordOfType(const Label& label,

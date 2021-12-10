@@ -74,13 +74,15 @@ bool BuilderRecord::OnResolvedDep(const BuilderRecord* dep) {
   return --unresolved_count_ == 0;
 }
 
-BuilderRecord::BuilderRecordSet BuilderRecord::GetUnresolvedDeps() const {
-  BuilderRecordSet result;
+std::vector<const BuilderRecord*> BuilderRecord::GetSortedUnresolvedDeps()
+    const {
+  std::vector<const BuilderRecord*> result;
   for (auto it = all_deps_.begin(); it.valid(); ++it) {
     BuilderRecord* dep = *it;
     if (dep->waiting_on_resolution_.contains(const_cast<BuilderRecord*>(this)))
-      result.add(dep);
+      result.push_back(dep);
   }
+  std::sort(result.begin(), result.end(), LabelCompare);
   return result;
 }
 

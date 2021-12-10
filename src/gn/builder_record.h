@@ -78,9 +78,9 @@ class BuilderRecord {
   BuilderRecordSet& all_deps() { return all_deps_; }
   const BuilderRecordSet& all_deps() const { return all_deps_; }
 
-  // Return the set of unresolved records this one is depend on.
-  // This is a subset of all_deps() above.
-  BuilderRecordSet GetUnresolvedDeps() const;
+  // Get the set of unresolved records this one depends on,
+  // as a list sorted by label.
+  std::vector<const BuilderRecord*> GetSortedUnresolvedDeps() const;
 
   // Call this method to notify the record that its dependency |dep| was
   // just resolved. This returns true to indicate that the current record
@@ -96,6 +96,11 @@ class BuilderRecord {
 
   void AddGenDep(BuilderRecord* record);
   void AddDep(BuilderRecord* record);
+
+  // Comparator function used to sort records from their label.
+  static bool LabelCompare(const BuilderRecord* a, const BuilderRecord* b) {
+    return a->label_ < b->label_;
+  }
 
  private:
   ItemType type_;

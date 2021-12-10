@@ -60,6 +60,9 @@ class Builder {
   // If there are any undefined references, returns false and sets the error.
   bool CheckForBadItems(Err* err) const;
 
+  // Get or create an empty record for unit-testing.
+  BuilderRecord* GetOrCreateRecordForTesting(const Label& label);
+
  private:
   bool TargetDefined(BuilderRecord* record, Err* err);
   bool ConfigDefined(BuilderRecord* record, Err* err);
