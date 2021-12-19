@@ -214,9 +214,6 @@ class Target : public Item {
   }
   std::vector<std::string>& walk_keys() { return generated_file().walk_keys_; }
 
-  bool testonly() const { return testonly_; }
-  void set_testonly(bool value) { testonly_ = value; }
-
   OutputFile write_runtime_deps_output() const {
     return write_runtime_deps_output_;
   }
@@ -474,7 +471,6 @@ class Target : public Item {
   FileList public_headers_;
   bool check_includes_ = true;
   bool complete_static_lib_ = false;
-  bool testonly_ = false;
   std::vector<std::string> data_;
   std::unique_ptr<BundleData> bundle_data_;
   OutputFile write_runtime_deps_output_;

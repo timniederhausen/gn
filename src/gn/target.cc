@@ -43,7 +43,7 @@ void MergeAllDependentConfigsFrom(const Target* from_target,
   }
 }
 
-Err MakeTestOnlyError(const Target* from, const Target* to) {
+Err MakeTestOnlyError(const Item* from, const Item* to) {
   return Err(
       from->defined_from(), "Test-only dependency not allowed.",
       from->label().GetUserVisibleName(false) +
@@ -1139,6 +1139,16 @@ bool Target::CheckTestonly(Err* err) const {
     if (pair.ptr->testonly()) {
       *err = MakeTestOnlyError(this, pair.ptr);
       return false;
+    }
+  }
+
+  // Verify no configs have "testonly" set.
+  for (ConfigValuesIterator iter(this); !iter.done(); iter.Next()) {
+    if (const Config* config = iter.GetCurrentConfig()) {
+      if (config->testonly()) {
+        *err = MakeTestOnlyError(this, config);
+        return false;
+      }
     }
   }
 
