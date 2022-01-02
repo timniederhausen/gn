@@ -75,7 +75,6 @@ static void RunExtensionCheckTest(std::string extension,
             setup.DoSetupWithErr(FilePathToUTF8(build_temp_dir.GetPath()), true,
                                  cmdline, &err));
   EXPECT_EQ(success, !err.has_error());
-  EXPECT_EQ(expected_error_message, err.message());
 }
 
 TEST_F(SetupTest, NoSeparatorInExtension) {
