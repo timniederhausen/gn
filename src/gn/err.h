@@ -5,6 +5,7 @@
 #ifndef TOOLS_GN_ERR_H_
 #define TOOLS_GN_ERR_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
