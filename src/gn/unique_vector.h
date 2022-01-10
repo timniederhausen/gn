@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include <algorithm>
+#include <functional>
 #include <vector>
 
 #include "hash_table_base.h"
