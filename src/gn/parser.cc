@@ -472,7 +472,7 @@ std::unique_ptr<ParseNode> Parser::BlockComment(const Token& token) {
   std::unique_ptr<BlockCommentNode> comment =
       std::make_unique<BlockCommentNode>();
   comment->set_comment(token);
-  return std::move(comment);
+  return comment;
 }
 
 std::unique_ptr<ParseNode> Parser::Group(const Token& token) {
@@ -495,7 +495,7 @@ std::unique_ptr<ParseNode> Parser::Not(const Token& token) {
   std::unique_ptr<UnaryOpNode> unary_op = std::make_unique<UnaryOpNode>();
   unary_op->set_op(token);
   unary_op->set_operand(std::move(expr));
-  return std::move(unary_op);
+  return unary_op;
 }
 
 std::unique_ptr<ParseNode> Parser::List(const Token& node) {
@@ -521,7 +521,7 @@ std::unique_ptr<ParseNode> Parser::BinaryOperator(
   binary_op->set_op(token);
   binary_op->set_left(std::move(left));
   binary_op->set_right(std::move(right));
-  return std::move(binary_op);
+  return binary_op;
 }
 
 std::unique_ptr<ParseNode> Parser::IdentifierOrCall(
@@ -562,7 +562,7 @@ std::unique_ptr<ParseNode> Parser::IdentifierOrCall(
   func_call->set_args(std::move(list));
   if (block)
     func_call->set_block(std::move(block));
-  return std::move(func_call);
+  return func_call;
 }
 
 std::unique_ptr<ParseNode> Parser::Assignment(std::unique_ptr<ParseNode> left,
@@ -583,7 +583,7 @@ std::unique_ptr<ParseNode> Parser::Assignment(std::unique_ptr<ParseNode> left,
   assign->set_op(token);
   assign->set_left(std::move(left));
   assign->set_right(std::move(value));
-  return std::move(assign);
+  return assign;
 }
 
 std::unique_ptr<ParseNode> Parser::Subscript(std::unique_ptr<ParseNode> left,
@@ -603,7 +603,7 @@ std::unique_ptr<ParseNode> Parser::Subscript(std::unique_ptr<ParseNode> left,
   std::unique_ptr<AccessorNode> accessor = std::make_unique<AccessorNode>();
   accessor->set_base(left->AsIdentifier()->value());
   accessor->set_subscript(std::move(value));
-  return std::move(accessor);
+  return accessor;
 }
 
 std::unique_ptr<ParseNode> Parser::DotOperator(std::unique_ptr<ParseNode> left,
@@ -629,7 +629,7 @@ std::unique_ptr<ParseNode> Parser::DotOperator(std::unique_ptr<ParseNode> left,
   accessor->set_base(left->AsIdentifier()->value());
   accessor->set_member(std::unique_ptr<IdentifierNode>(
       static_cast<IdentifierNode*>(right.release())));
-  return std::move(accessor);
+  return accessor;
 }
 
 // Does not Consume the start or end token.
@@ -699,7 +699,7 @@ std::unique_ptr<ParseNode> Parser::ParseFile() {
   // ignorant of them.
   AssignComments(file.get());
 
-  return std::move(file);
+  return file;
 }
 
 std::unique_ptr<ParseNode> Parser::ParseStatement() {
@@ -769,7 +769,7 @@ std::unique_ptr<ParseNode> Parser::ParseCondition() {
   }
   if (has_error())
     return std::unique_ptr<ParseNode>();
-  return std::move(condition);
+  return condition;
 }
 
 void Parser::TraverseOrder(const ParseNode* root,
