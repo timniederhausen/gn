@@ -681,14 +681,14 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
 
     WriteCompilerBuildLine(target_->sources(), input_deps,
                            swift_order_only_deps.vector(), tool->name(),
-                           {swiftmodule_output_file});
+                           {swiftmodule_output_file}, false);
 
     if (!additional_outputs.empty()) {
       out_ << std::endl;
       WriteCompilerBuildLine(
           {swiftmodule_output_file.AsSourceFile(settings_->build_settings())},
           input_deps, swift_order_only_deps.vector(),
-          GeneralTool::kGeneralToolStamp, additional_outputs);
+          GeneralTool::kGeneralToolStamp, additional_outputs, false);
     }
   }
 
