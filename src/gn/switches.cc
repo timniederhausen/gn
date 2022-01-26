@@ -123,39 +123,6 @@ const char kScriptExecutable_Help[] =
   and exec_script calls will be executed directly.
 )";
 
-const char kMetaDataKeys[] = "data";
-const char kMetaDataKeys_HelpShort[] =
-    "--data: list of data keys to concatenate when collecting metadata.";
-const char kMetaDataKeys_Help[] =
-    R"(--data: list of data keys to concatenate when collecting metadata.
-
-  Data keys identify which variables in the given targets' `metadata`
-  scopes should be collected. At least one data key must be specified.
-)";
-
-const char kMetaWalkKeys[] = "walk";
-const char kMetaWalkKeys_HelpShort[] =
-    "--walk: list of walk keys to traverse when collecting metadata.";
-const char kMetaWalkKeys_Help[] =
-    R"(--walk: list of walk keys to traverse when collecting metadata.
-
-  Walk keys identify which variables in the given targets' `metadata`
-  scopes contain the list of dependencies to walk next. Absence of any
-  walk keys indicates that all deps and data_deps should be walked.
-)";
-
-const char kMetaRebaseFiles[] = "rebase-files";
-const char kMetaRebaseFiles_HelpShort[] =
-    "--rebase-files (boolean): whether to rebase the paths of the collected "
-    "metadata.";
-const char kMetaRebaseFiles_Help[] =
-    R"(--rebase-files: whether to rebase the paths of the collected metadata.
-
-  This flag indicates whether or not to rebase the collected results onto their
-  declaring source directory path. Note that this requires the data key(s) to
-  contain only lists of strings, which will be interpreted as file names.
-)";
-
 const char kQuiet[] = "q";
 const char kQuiet_HelpShort[] =
     "-q: Quiet mode. Don't print output on success.";
