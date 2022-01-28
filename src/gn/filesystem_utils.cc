@@ -1006,6 +1006,8 @@ OutputFile GetBuildDirAsOutputFile(const BuildDirContext& context,
     result.value().append("gen/");
   else if (type == BuildDirType::OBJ)
     result.value().append("obj/");
+  else if (type == BuildDirType::PHONY)
+    result.value().append("phony/");
   return result;
 }
 
