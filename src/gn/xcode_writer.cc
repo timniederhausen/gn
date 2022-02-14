@@ -100,7 +100,8 @@ enum TargetOsType {
 };
 
 const char* kXCTestFileSuffixes[] = {
-    "egtest.m", "egtest.mm", "xctest.m", "xctest.mm", "UITests.m", "UITests.mm",
+    "egtest.m",     "egtest.mm", "egtest.swift", "xctest.m",      "xctest.mm",
+    "xctest.swift", "UITests.m", "UITests.mm",   "UITests.swift",
 };
 
 const char kXCTestModuleTargetNamePostfix[] = "_module";
