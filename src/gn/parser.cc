@@ -181,19 +181,20 @@ Scopes
 
   All execution happens in the context of a scope which holds the current state
   (like variables). With the exception of loops and conditions, '{' introduces
-  a new scope that has a parent reference to the old scope.
+  a new scope.
 
-  Variable reads recursively search all nested scopes until the variable is
-  found or there are no more scopes. Variable writes always go into the current
-  scope. This means that after the closing '}' (again excepting loops and
-  conditions), all local variables will be restored to the previous values.
-  This also means that "foo = foo" can do useful work by copying a variable
-  into the current scope that was defined in a containing scope.
+  Most scopes have a parent reference to the old scope. Variable reads
+  recursively search all parent scopes until the variable is found or there are
+  no more scopes. Variable writes always go into the current scope. This means
+  that after the closing '}' (again excepting loops and conditions), all local
+  variables will be restored to the previous values.  This also means that "foo
+  = foo" can do useful work by copying a variable into the current scope that
+  was defined in a containing scope.
 
-  Scopes can also be assigned to variables. Such scopes can be created by
-  functions like exec_script, when invoking a template (the template code
-  refers to the variables set by the invoking code by the implicitly-created
-  "invoker" scope), or explicitly like:
+  Scopes can be assigned to variables. Examples of such scopes are the
+  implicitly-created "invoker" when invoking a template (which refers to the
+  variables set by the invoking code), scopes created by functions like
+  exec_script, and scopes explicitly created like
 
     empty_scope = {}
     myvalues = {
@@ -201,10 +202,14 @@ Scopes
       bar = "something"
     }
 
-  Inside such a scope definition can be any GN code including conditionals and
-  function calls. After the close of the scope, it will contain all variables
-  explicitly set by the code contained inside it. After this, the values can be
-  read, modified, or added to:
+  In the case of explicitly created scopes and scopes created by functions like
+  exec_script, there is no reference to the parent scope. Such scopes are fully
+  self-contained and do not "inherit" values from their defining scope.
+
+  Inside an explicit scope definition can be any GN code including conditionals
+  and function calls. After the close of the scope, it will contain all
+  variables explicitly set by the code contained inside it. After this, the
+  values can be read, modified, or added to:
 
     myvalues.foo += 2
     empty_scope.new_thing = [ 1, 2, 3 ]
