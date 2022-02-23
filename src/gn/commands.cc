@@ -366,16 +366,22 @@ CommandSwitches CommandSwitches::s_global_switches_ = {};
 
 // static
 bool CommandSwitches::Init(const base::CommandLine& cmdline) {
+  CHECK(!s_global_switches_.is_initialized())
+      << "Only call this once from main()";
   return s_global_switches_.InitFrom(cmdline);
 }
 
 // static
 const CommandSwitches& CommandSwitches::Get() {
+  CHECK(s_global_switches_.is_initialized())
+      << "Missing previous succesful call to CommandSwitches::Init()";
   return s_global_switches_;
 }
 
 // static
 CommandSwitches CommandSwitches::Set(CommandSwitches new_switches) {
+  CHECK(s_global_switches_.is_initialized())
+      << "Missing previous succesful call to CommandSwitches::Init()";
   CommandSwitches result = std::move(s_global_switches_);
   s_global_switches_ = std::move(new_switches);
   return result;
@@ -383,6 +389,7 @@ CommandSwitches CommandSwitches::Set(CommandSwitches new_switches) {
 
 bool CommandSwitches::InitFrom(const base::CommandLine& cmdline) {
   CommandSwitches result;
+  result.initialized_ = true;
   result.has_quiet_ = cmdline.HasSwitch("a");
   result.has_force_ = cmdline.HasSwitch("force");
   result.has_all_ = cmdline.HasSwitch("all");

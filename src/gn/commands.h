@@ -209,10 +209,13 @@ class CommandSwitches {
   static CommandSwitches Set(CommandSwitches new_switches);
 
  private:
+  bool is_initialized() const { return initialized_; }
+
   bool InitFrom(const base::CommandLine&);
 
   static CommandSwitches s_global_switches_;
 
+  bool initialized_ = false;
   bool has_quiet_ = false;
   bool has_force_ = false;
   bool has_all_ = false;
