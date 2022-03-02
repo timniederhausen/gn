@@ -97,15 +97,18 @@ std::string ComputeScriptEnviron(base::Environment* environment) {
   return buffer.str();
 }
 
-std::string GetBuildScript(const std::string& ninja_executable,
+std::string GetBuildScript(const std::string& target_name,
+                           const std::string& ninja_executable,
                            base::Environment* environment) {
   // Launch ninja with a sanitized environment (Xcode sets many environment
   // variables overridding settings, including the SDK, thus breaking hermetic
   // build).
   std::stringstream buffer;
   buffer << "exec env -i " << ComputeScriptEnviron(environment);
-  buffer << GetNinjaExecutable(ninja_executable) << " -C .\n";
-  buffer << "exit 1\n";
+  buffer << GetNinjaExecutable(ninja_executable) << " -C .";
+  if (!target_name.empty()) {
+    buffer << " '" << target_name << "'";
+  }
   return buffer.str();
 }
 
@@ -659,7 +662,8 @@ bool XcodeProject::AddTargetsFromBuilder(const Builder& builder, Err* err) {
   std::unique_ptr<base::Environment> env(base::Environment::Create());
 
   project_.AddAggregateTarget(
-      "All", GetBuildScript(options_.ninja_executable, env.get()));
+      "All", GetBuildScript(options_.root_target_name,
+                            options_.ninja_executable, env.get()));
 
   const std::optional<std::vector<const Target*>> targets =
       GetTargetsFromBuilder(builder, err);
@@ -895,7 +899,7 @@ PBXNativeTarget* XcodeProject::AddBinaryTarget(const Target* target,
       target->output_name().empty() ? target->label().name()
                                     : target->output_name(),
       "com.apple.product-type.tool", output_dir,
-      GetBuildScript(options_.ninja_executable, env));
+      GetBuildScript(target->label().name(), options_.ninja_executable, env));
 }
 
 PBXNativeTarget* XcodeProject::AddBundleTarget(const Target* target,
@@ -925,7 +929,8 @@ PBXNativeTarget* XcodeProject::AddBundleTarget(const Target* target,
   return project_.AddNativeTarget(
       pbxtarget_name, std::string(), target_output_name,
       target->bundle_data().product_type(), output_dir,
-      GetBuildScript(options_.ninja_executable, env), xcode_extra_attributes);
+      GetBuildScript(pbxtarget_name, options_.ninja_executable, env),
+      xcode_extra_attributes);
 }
 
 void XcodeProject::WriteFileContent(std::ostream& out) const {
