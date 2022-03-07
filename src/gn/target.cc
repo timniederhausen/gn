@@ -769,38 +769,40 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
 
   if (dep->output_type() == STATIC_LIBRARY ||
       dep->output_type() == SHARED_LIBRARY ||
-      dep->output_type() == RUST_LIBRARY) {
-    rust_transitive_libs_.Append(dep, is_public);
+      dep->output_type() == RUST_LIBRARY ||
+      dep->output_type() == GROUP) {
+    // Here we have: `this` --[depends-on]--> `dep`
+    //
+    // The `this` target has direct access to `dep` since its a direct
+    // dependency, regardless of the edge being a public_dep or not, so we pass
+    // true for public-ness. Whereas, anything depending on `this` can only gain
+    // direct access to `dep` if the edge between `this` and `dep` is public,
+    // so we pass `is_public`.
+    rust_transitive_inherited_libs_.Append(dep, true);
+    rust_transitive_inheritable_libs_.Append(dep, is_public);
 
-    // Propagate public dependent libraries.
-    for (const auto& transitive :
-         dep->rust_transitive_libs_.GetOrderedAndPublicFlag()) {
-      if (transitive.second) {
-        rust_transitive_libs_.Append(transitive.first, is_public);
-      }
-    }
+    rust_transitive_inherited_libs_.AppendInherited(
+        dep->rust_transitive_inheritable_libs(), true);
+    rust_transitive_inheritable_libs_.AppendInherited(
+        dep->rust_transitive_inheritable_libs(), is_public);
+  } else if (dep->output_type() == RUST_PROC_MACRO) {
+    // Proc-macros are inherited as a transitive dependency, but the things they
+    // depend on can't be used elsewhere, as the proc macro is not linked into
+    // the target (as it's only used during compilation).
+    rust_transitive_inherited_libs_.Append(dep, true);
+    rust_transitive_inheritable_libs_.Append(dep, is_public);
   }
 
-  // Rust libraries (those meant for consumption by another Rust target) are
-  // handled the same way, whether static or dynamic.
   if (dep->output_type() == RUST_LIBRARY ||
       RustValues::InferredCrateType(dep) == RustValues::CRATE_DYLIB) {
-    rust_transitive_libs_.AppendInherited(dep->rust_transitive_libs_,
-                                          is_public);
-
-    // If there is a transitive dependency that is not a rust library, place it
-    // in the normal location
-    for (const auto& inherited :
-         rust_transitive_libs_.GetOrderedAndPublicFlag()) {
-      if (!RustValues::IsRustLibrary(inherited.first)) {
-        inherited_libraries_.Append(inherited.first, inherited.second);
+    // Transitive dependencies behind a library (shared or static), that would
+    // be consumed by rustc, gets bumped up to this target.
+    for (const auto& [inherited, inherited_is_public] :
+         rust_transitive_inheritable_libs_.GetOrderedAndPublicFlag()) {
+      if (!RustValues::IsRustLibrary(inherited)) {
+        inherited_libraries_.Append(inherited, inherited_is_public);
       }
     }
-  } else if (dep->output_type() == RUST_PROC_MACRO) {
-    // We will need to specify the path to find a procedural macro,
-    // but have no need to specify the paths to find its dependencies
-    // as the procedural macro is now a complete .so.
-    rust_transitive_libs_.Append(dep, is_public);
   } else if (dep->output_type() == SHARED_LIBRARY) {
     // Shared library dependendencies are inherited across public shared
     // library boundaries.
@@ -828,8 +830,6 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     // The current target isn't linked, so propagate linked deps and
     // libraries up the dependency tree.
     inherited_libraries_.AppendInherited(dep->inherited_libraries(), is_public);
-    rust_transitive_libs_.AppendInherited(dep->rust_transitive_libs_,
-                                          is_public);
   } else if (dep->complete_static_lib()) {
     // Inherit only final targets through _complete_ static libraries.
     //

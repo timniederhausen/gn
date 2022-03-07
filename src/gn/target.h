@@ -316,9 +316,11 @@ class Target : public Item {
   bool has_rust_values() const { return rust_values_.get(); }
 
   // Transitive closure of libraries that are depended on by this target
-  InheritedLibraries& rust_transitive_libs() { return rust_transitive_libs_; }
-  const InheritedLibraries& rust_transitive_libs() const {
-    return rust_transitive_libs_;
+  const InheritedLibraries& rust_transitive_inherited_libs() const {
+    return rust_transitive_inherited_libs_;
+  }
+  const InheritedLibraries& rust_transitive_inheritable_libs() const {
+    return rust_transitive_inheritable_libs_;
   }
 
   const UniqueVector<SourceDir>& all_lib_dirs() const { return all_lib_dirs_; }
@@ -520,8 +522,18 @@ class Target : public Item {
   // Used for Rust targets.
   std::unique_ptr<RustValues> rust_values_;
 
-  // Used by all targets, only useful to generate Rust targets though.
-  InheritedLibraries rust_transitive_libs_;
+  // Used by all targets, only useful to generate Rust targets though. These
+  // present 2 different views of the public flags:
+  //
+  // Lists all transitive libraries, and for each one the public bit says if
+  // there is a public chain such that this target can make direct use of the
+  // lib. For each library marked public: "I have access to these targets."
+  InheritedLibraries rust_transitive_inherited_libs_;
+  // Lists all transitive libraries, and for each one the public bit says if a
+  // target depending on this target would inherit the libraries as public too.
+  // For each library marked public: "If you depend on me, you get access to
+  // these targets."
+  InheritedLibraries rust_transitive_inheritable_libs_;
 
   // User for Swift targets.
   std::unique_ptr<SwiftValues> swift_values_;

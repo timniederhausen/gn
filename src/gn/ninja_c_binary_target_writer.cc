@@ -779,7 +779,8 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   // entire tree of transitive rlibs.
   std::vector<OutputFile> transitive_rustlibs;
   if (target_->IsFinal()) {
-    for (const auto* dep : target_->rust_transitive_libs().GetOrdered()) {
+    for (const auto* dep :
+         target_->rust_transitive_inherited_libs().GetOrdered()) {
       if (dep->output_type() == Target::RUST_LIBRARY) {
         transitive_rustlibs.push_back(dep->dependency_output_file());
         implicit_deps.push_back(dep->dependency_output_file());
