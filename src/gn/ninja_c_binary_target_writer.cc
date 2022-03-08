@@ -775,12 +775,13 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   std::copy(input_deps.begin(), input_deps.end(),
             std::back_inserter(implicit_deps));
 
-  // Any C++ target which depends on a Rust .rlib has to depend on its
-  // entire tree of transitive rlibs.
+  // Any C++ target which depends on a Rust .rlib has to depend on its entire
+  // tree of transitive rlibs found inside the linking target (which excludes
+  // rlibs only depended on inside a shared library dependency).
   std::vector<OutputFile> transitive_rustlibs;
   if (target_->IsFinal()) {
     for (const auto* dep :
-         target_->rust_transitive_inherited_libs().GetOrdered()) {
+         target_->rust_linkable_inherited_libs().GetOrdered()) {
       if (dep->output_type() == Target::RUST_LIBRARY) {
         transitive_rustlibs.push_back(dep->dependency_output_file());
         implicit_deps.push_back(dep->dependency_output_file());

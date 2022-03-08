@@ -1500,6 +1500,110 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustDeps) {
   }
 }
 
+TEST_F(NinjaCBinaryTargetWriterTest, RustDepsOverDynamicLinking) {
+  Err err;
+  TestWithScope setup;
+
+  Target rlib3(setup.settings(), Label(SourceDir("//baz/"), "baz"));
+  rlib3.set_output_type(Target::RUST_LIBRARY);
+  rlib3.visibility().SetPublic();
+  SourceFile lib3("//baz/lib.rs");
+  rlib3.sources().push_back(lib3);
+  rlib3.source_types_used().Set(SourceFile::SOURCE_RS);
+  rlib3.rust_values().set_crate_root(lib3);
+  rlib3.rust_values().crate_name() = "baz";
+  rlib3.public_deps().push_back(LabelTargetPair(&rlib3));
+  rlib3.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(rlib3.OnResolved(&err));
+
+  Target rlib2(setup.settings(), Label(SourceDir("//bar/"), "bar"));
+  rlib2.set_output_type(Target::RUST_LIBRARY);
+  rlib2.visibility().SetPublic();
+  SourceFile lib2("//bar/lib.rs");
+  rlib2.sources().push_back(lib2);
+  rlib2.source_types_used().Set(SourceFile::SOURCE_RS);
+  rlib2.rust_values().set_crate_root(lib2);
+  rlib2.rust_values().crate_name() = "bar";
+  rlib2.public_deps().push_back(LabelTargetPair(&rlib2));
+  rlib2.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(rlib2.OnResolved(&err));
+
+  Target rlib(setup.settings(), Label(SourceDir("//foo/"), "foo"));
+  rlib.set_output_type(Target::RUST_LIBRARY);
+  rlib.visibility().SetPublic();
+  SourceFile lib("//foo/lib.rs");
+  rlib.sources().push_back(lib);
+  rlib.source_types_used().Set(SourceFile::SOURCE_RS);
+  rlib.rust_values().set_crate_root(lib);
+  rlib.rust_values().crate_name() = "foo";
+  rlib.public_deps().push_back(LabelTargetPair(&rlib2));
+  rlib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(rlib.OnResolved(&err));
+
+  Target cdylib(setup.settings(), Label(SourceDir("//sh/"), "mylib"));
+  cdylib.set_output_type(Target::SHARED_LIBRARY);
+  cdylib.visibility().SetPublic();
+  SourceFile barlib("//sh/lib.rs");
+  cdylib.sources().push_back(barlib);
+  cdylib.source_types_used().Set(SourceFile::SOURCE_RS);
+  cdylib.rust_values().set_crate_type(RustValues::CRATE_CDYLIB);
+  cdylib.rust_values().set_crate_root(barlib);
+  cdylib.rust_values().crate_name() = "mylib";
+  cdylib.private_deps().push_back(LabelTargetPair(&rlib));
+  cdylib.public_deps().push_back(LabelTargetPair(&rlib3));
+  cdylib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(cdylib.OnResolved(&err));
+
+  Target nearrlib(setup.settings(), Label(SourceDir("//near/"), "near"));
+  nearrlib.set_output_type(Target::RUST_LIBRARY);
+  nearrlib.visibility().SetPublic();
+  SourceFile nearlib("//near/lib.rs");
+  nearrlib.sources().push_back(nearlib);
+  nearrlib.source_types_used().Set(SourceFile::SOURCE_RS);
+  nearrlib.rust_values().set_crate_root(nearlib);
+  nearrlib.rust_values().crate_name() = "near";
+  nearrlib.public_deps().push_back(LabelTargetPair(&cdylib));
+  nearrlib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(nearrlib.OnResolved(&err));
+
+  Target target(setup.settings(), Label(SourceDir("//exe/"), "binary"));
+  target.set_output_type(Target::EXECUTABLE);
+  target.visibility().SetPublic();
+  target.sources().push_back(SourceFile("//exe/main.cc"));
+  target.source_types_used().Set(SourceFile::SOURCE_CPP);
+  target.private_deps().push_back(LabelTargetPair(&nearrlib));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream out;
+  NinjaCBinaryTargetWriter writer(&target, out);
+  writer.Run();
+
+  const char expected[] =
+      "defines =\n"
+      "include_dirs =\n"
+      "cflags =\n"
+      "cflags_cc =\n"
+      "root_out_dir = .\n"
+      "target_out_dir = obj/exe\n"
+      "target_output_name = binary\n"
+      "\n"
+      "build obj/exe/binary.main.o: cxx ../../exe/main.cc\n"
+      "\n"
+      "build ./binary: link obj/exe/binary.main.o obj/sh/libmylib.so | "
+      "obj/near/libnear.rlib\n"
+      "  ldflags =\n"
+      "  libs =\n"
+      "  frameworks =\n"
+      "  swiftmodules =\n"
+      "  output_extension = \n"
+      "  output_dir = \n"
+      "  rlibs = obj/near/libnear.rlib\n";
+
+  std::string out_str = out.str();
+  EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+}
+
 TEST_F(NinjaCBinaryTargetWriterTest, ModuleMapInStaticLibrary) {
   TestWithScope setup;
   Err err;
