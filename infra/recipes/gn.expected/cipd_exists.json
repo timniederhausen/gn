@@ -139,6 +139,44 @@
     ]
   },
   {
+    "cmd": [
+      "vpython",
+      "-u",
+      "RECIPE_MODULE[recipe_engine::file]/resources/fileutil.py",
+      "--json-output",
+      "/path/to/tmp/json",
+      "copy",
+      "[START_DIR]/rpmalloc/build/ninja/clang.py",
+      "/path/to/tmp/"
+    ],
+    "infra_step": true,
+    "name": "rpmalloc.read [START_DIR]/rpmalloc/build/ninja/clang.py",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@1@@@",
+      "@@@STEP_LOG_LINE@clang.py@CXXFLAGS = ['-Wall', '-Weverything', '-Wfoo']@@@",
+      "@@@STEP_LOG_END@clang.py@@@"
+    ]
+  },
+  {
+    "cmd": [
+      "vpython",
+      "-u",
+      "RECIPE_MODULE[recipe_engine::file]/resources/fileutil.py",
+      "--json-output",
+      "/path/to/tmp/json",
+      "copy",
+      "CXXFLAGS = ['-Wall',  '-Wfoo']",
+      "[START_DIR]/rpmalloc/build/ninja/clang.py"
+    ],
+    "infra_step": true,
+    "name": "rpmalloc.write [START_DIR]/rpmalloc/build/ninja/clang.py",
+    "~followup_annotations": [
+      "@@@STEP_NEST_LEVEL@1@@@",
+      "@@@STEP_LOG_LINE@clang.py@CXXFLAGS = ['-Wall',  '-Wfoo']@@@",
+      "@@@STEP_LOG_END@clang.py@@@"
+    ]
+  },
+  {
     "cmd": [],
     "name": "rpmalloc.build rpmalloc-linux-amd64",
     "~followup_annotations": [

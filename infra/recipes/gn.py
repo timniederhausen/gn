@@ -198,6 +198,19 @@ def RunSteps(api, repository):
               ['git', 'fetch', '--tags', RPMALLOC_GIT_URL, RPMALLOC_REVISION])
           api.step('checkout', ['git', 'checkout', 'FETCH_HEAD'])
 
+        # Patch configure.py since it forces -Weverything which conflicts
+        # with recent Clang rolls. Remove it in-place to work around the issue.
+        # See https://bugs.chromium.org/p/gn/issues/detail?id=278
+        build_ninja_clang_path = api.path.join(rpmalloc_src_dir, 'build/ninja/clang.py')
+        build_ninja_clang_py = api.file.read_text('read %s' % build_ninja_clang_path,
+                                                 build_ninja_clang_path,
+                                                 "CXXFLAGS = ['-Wall', '-Weverything', '-Wfoo']")
+        if '-Weverything' in build_ninja_clang_py:
+          build_ninja_clang_py = build_ninja_clang_py.replace("'-Weverything',", '')
+          api.file.write_text('write %s' % build_ninja_clang_path,
+                              build_ninja_clang_path,
+                              build_ninja_clang_py)
+
         for platform in all_config_platforms:
           # Convert target architecture and os to rpmalloc format.
           rpmalloc_os, rpmalloc_arch = platform.split('-')
