@@ -781,8 +781,14 @@ bool Setup::FillPythonPath(const base::CommandLine& cmdline, Err* err) {
     if (!value->VerifyTypeIs(Value::STRING, err)) {
       return false;
     }
-    build_settings_.set_python_path(
-        ProcessFileExtensions(UTF8ToFilePath(value->string_value())));
+    base::FilePath python_path =
+        ProcessFileExtensions(UTF8ToFilePath(value->string_value()));
+    if (python_path.empty()) {
+      *err = Err(Location(), "Could not find \"" + value->string_value() +
+                                 "\" from dotfile in PATH.");
+      return false;
+    }
+    build_settings_.set_python_path(python_path);
   } else {
 #if defined(OS_WIN)
     base::FilePath python_path =
