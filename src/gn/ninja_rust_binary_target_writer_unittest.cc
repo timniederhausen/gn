@@ -1659,3 +1659,90 @@ TEST_F(NinjaRustBinaryTargetWriterTest, TransitivePublicNonRustDeps) {
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
 }
+
+TEST_F(NinjaRustBinaryTargetWriterTest, TransitiveRustDepsThroughSourceSet) {
+  Err err;
+  TestWithScope setup;
+
+  Target rlib_pub(setup.settings(),
+                  Label(SourceDir("//public/"), "behind_sourceset_public"));
+  rlib_pub.set_output_type(Target::RUST_LIBRARY);
+  rlib_pub.visibility().SetPublic();
+  SourceFile rlib_pub_root("//public/lib.rs");
+  rlib_pub.sources().push_back(
+      SourceFile("//public/behind_sourceset_public.rs"));
+  rlib_pub.sources().push_back(rlib_pub_root);
+  rlib_pub.source_types_used().Set(SourceFile::SOURCE_RS);
+  rlib_pub.rust_values().set_crate_root(rlib_pub_root);
+  rlib_pub.rust_values().crate_name() = "behind_sourceset_public";
+  rlib_pub.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(rlib_pub.OnResolved(&err));
+
+  Target rlib_priv(setup.settings(),
+                  Label(SourceDir("//private/"), "behind_sourceset_private"));
+  rlib_priv.set_output_type(Target::RUST_LIBRARY);
+  rlib_priv.visibility().SetPublic();
+  SourceFile rlib_priv_root("//private/lib.rs");
+  rlib_priv.sources().push_back(
+      SourceFile("//private/behind_sourceset_private.rs"));
+  rlib_priv.sources().push_back(rlib_priv_root);
+  rlib_priv.source_types_used().Set(SourceFile::SOURCE_RS);
+  rlib_priv.rust_values().set_crate_root(rlib_priv_root);
+  rlib_priv.rust_values().crate_name() = "behind_sourceset_private";
+  rlib_priv.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(rlib_priv.OnResolved(&err));
+
+  Target sset(setup.settings(), Label(SourceDir("//sset/"), "bar"));
+  sset.set_output_type(Target::SOURCE_SET);
+  sset.visibility().SetPublic();
+  sset.sources().push_back(SourceFile("//sset/input1.cc"));
+  sset.source_types_used().Set(SourceFile::SOURCE_CPP);
+  sset.SetToolchain(setup.toolchain());
+  sset.public_deps().push_back(LabelTargetPair(&rlib_pub));
+  sset.private_deps().push_back(LabelTargetPair(&rlib_priv));
+  ASSERT_TRUE(sset.OnResolved(&err));
+
+  Target target(setup.settings(), Label(SourceDir("//linked/"), "exe"));
+  target.set_output_type(Target::EXECUTABLE);
+  target.visibility().SetPublic();
+  SourceFile main("//linked/exe.rs");
+  target.sources().push_back(main);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(main);
+  target.rust_values().crate_name() = "exe";
+  target.private_deps().push_back(LabelTargetPair(&sset));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  {
+    std::ostringstream out;
+    NinjaRustBinaryTargetWriter writer(&target, out);
+    writer.Run();
+
+    const char expected[] =
+        "crate_name = exe\n"
+        "crate_type = bin\n"
+        "output_extension = \n"
+        "output_dir = \n"
+        "rustflags =\n"
+        "rustenv =\n"
+        "root_out_dir = .\n"
+        "target_out_dir = obj/linked\n"
+        "target_output_name = exe\n"
+        "\n"
+        "build ./exe: rust_bin ../../linked/exe.rs | ../../linked/exe.rs "
+        "obj/sset/bar.input1.o obj/public/libbehind_sourceset_public.rlib "
+        "obj/private/libbehind_sourceset_private.rlib || obj/sset/bar.stamp\n"
+        "  source_file_part = exe.rs\n"
+        "  source_name_part = exe\n"
+        "  externs = --extern "
+        "behind_sourceset_public=obj/public/libbehind_sourceset_public.rlib\n"
+        "  rustdeps = -Ldependency=obj/public -Ldependency=obj/private "
+        "-Lnative=obj/sset -Clink-arg=-Bdynamic "
+        "-Clink-arg=obj/sset/bar.input1.o\n"
+        "  ldflags =\n"
+        "  sources = ../../linked/exe.rs\n";
+    std::string out_str = out.str();
+    EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+  }
+}

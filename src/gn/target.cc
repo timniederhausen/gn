@@ -770,7 +770,8 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
   // transitively part of the current target.
   if (dep->output_type() == STATIC_LIBRARY ||
       dep->output_type() == SHARED_LIBRARY ||
-      dep->output_type() == RUST_LIBRARY || dep->output_type() == GROUP) {
+      dep->output_type() == SOURCE_SET || dep->output_type() == RUST_LIBRARY ||
+      dep->output_type() == GROUP) {
     // Here we have: `this` --[depends-on]--> `dep`
     //
     // The `this` target has direct access to `dep` since its a direct
