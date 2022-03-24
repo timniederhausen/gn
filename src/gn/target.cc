@@ -760,13 +760,14 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
   if (dep->output_type() == STATIC_LIBRARY ||
       dep->output_type() == SHARED_LIBRARY ||
       dep->output_type() == RUST_LIBRARY ||
-      dep->output_type() == RUST_PROC_MACRO ||
       dep->output_type() == SOURCE_SET ||
       (dep->output_type() == CREATE_BUNDLE &&
        dep->bundle_data().is_framework())) {
     inherited_libraries_.Append(dep, is_public);
   }
 
+  // Collect Rust libraries that are accessible from the current target, or
+  // transitively part of the current target.
   if (dep->output_type() == STATIC_LIBRARY ||
       dep->output_type() == SHARED_LIBRARY ||
       dep->output_type() == RUST_LIBRARY || dep->output_type() == GROUP) {
@@ -775,8 +776,12 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     // The `this` target has direct access to `dep` since its a direct
     // dependency, regardless of the edge being a public_dep or not, so we pass
     // true for public-ness. Whereas, anything depending on `this` can only gain
-    // direct access to `dep` if the edge between `this` and `dep` is public,
-    // so we pass `is_public`.
+    // direct access to `dep` if the edge between `this` and `dep` is public, so
+    // we pass `is_public`.
+    //
+    // TODO(danakj): We should only need to track Rust rlibs or dylibs here, as
+    // it's used for passing to rustc with --extern. We currently track
+    // everything then drop non-Rust libs in ninja_rust_binary_target_writer.cc.
     rust_transitive_inherited_libs_.Append(dep, true);
     rust_transitive_inheritable_libs_.Append(dep, is_public);
 
@@ -791,32 +796,8 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     rust_transitive_inherited_libs_.Append(dep, true);
     rust_transitive_inheritable_libs_.Append(dep, is_public);
   }
-  if (!dep->IsFinal()) {
-    // A "final" dependency is not an rlib, so while a final dependency would be
-    // part of another linking target, we don't inherit it here. Example:
-    //
-    //   [bin E] -> [rlib A] -> [so D] -> [rlib B]
-    //
-    // The [so D] is linked into [bin E] along with [rlib A]. But we didn't add
-    // the edge to [so D] as an inherited rlib.
-    rust_linkable_inherited_libs_.Append(dep, true);
-    // Gathers the set of rlibs that are part of the current target's final
-    // linking target.
-    rust_linkable_inherited_libs_.AppendInherited(
-        dep->rust_linkable_inherited_libs(), true);
-  }
 
-  if (dep->output_type() == RUST_LIBRARY ||
-      RustValues::InferredCrateType(dep) == RustValues::CRATE_DYLIB) {
-    // Transitive dependencies behind a library (shared or static), that would
-    // be consumed by rustc, gets bumped up to this target.
-    for (const auto& [inherited, inherited_is_public] :
-         rust_transitive_inheritable_libs_.GetOrderedAndPublicFlag()) {
-      if (!RustValues::IsRustLibrary(inherited)) {
-        inherited_libraries_.Append(inherited, inherited_is_public);
-      }
-    }
-  } else if (dep->output_type() == SHARED_LIBRARY) {
+  if (dep->output_type() == SHARED_LIBRARY) {
     // Shared library dependendencies are inherited across public shared
     // library boundaries.
     //
@@ -839,22 +820,37 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     // resolved by the compiler.
     inherited_libraries_.AppendPublicSharedLibraries(dep->inherited_libraries(),
                                                      is_public);
-  } else if (!dep->IsFinal()) {
-    // The current target isn't linked, so propagate linked deps and
-    // libraries up the dependency tree.
-    inherited_libraries_.AppendInherited(dep->inherited_libraries(), is_public);
-  } else if (dep->complete_static_lib()) {
-    // Inherit only final targets through _complete_ static libraries.
-    //
-    // Inherited final libraries aren't linked into complete static libraries.
-    // They are forwarded here so that targets that depend on complete
-    // static libraries can link them in. Conversely, since complete static
-    // libraries link in non-final targets they shouldn't be inherited.
-    for (const auto& inherited :
-         dep->inherited_libraries().GetOrderedAndPublicFlag()) {
-      if (inherited.first->IsFinal()) {
-        inherited_libraries_.Append(inherited.first,
-                                    is_public && inherited.second);
+  } else {
+    InheritedLibraries transitive;
+
+    if (!dep->IsFinal()) {
+      // The current target isn't linked, so propagate linked deps and
+      // libraries up the dependency tree.
+      for (const auto& [inherited, inherited_is_public] :
+           dep->inherited_libraries().GetOrderedAndPublicFlag()) {
+        transitive.Append(inherited, is_public && inherited_is_public);
+      }
+    } else if (dep->complete_static_lib()) {
+      // Inherit only final targets through _complete_ static libraries.
+      //
+      // Inherited final libraries aren't linked into complete static libraries.
+      // They are forwarded here so that targets that depend on complete
+      // static libraries can link them in. Conversely, since complete static
+      // libraries link in non-final targets they shouldn't be inherited.
+      for (const auto& [inherited, inherited_is_public] :
+           dep->inherited_libraries().GetOrderedAndPublicFlag()) {
+        if (inherited->IsFinal()) {
+          transitive.Append(inherited, is_public && inherited_is_public);
+        }
+      }
+    }
+
+    for (const auto& [target, pub] : transitive.GetOrderedAndPublicFlag()) {
+      // Proc macros are not linked into targets that depend on them, so do not
+      // get inherited; they are consumed by the Rust compiler and only need to
+      // be specified in --extern.
+      if (target->output_type() != RUST_PROC_MACRO) {
+        inherited_libraries_.Append(target, pub);
       }
     }
   }

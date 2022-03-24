@@ -253,7 +253,9 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDeps) {
         "target_output_name = main\n"
         "\n"
         "build ./main_crate: rust_bin ../../main/main.rs | "
-        "../../main/source.rs ../../main/main.rs obj/foo/libdirect.rlib\n"
+        "../../main/source.rs ../../main/main.rs obj/foo/libdirect.rlib "
+        "obj/bar/libpubliclib.rlib obj/far/libfarlib.rlib "
+        "obj/baz/libprivatelib.rlib\n"
         "  source_file_part = main.rs\n"
         "  source_name_part = main\n"
         "  externs = --extern direct=obj/foo/libdirect.rlib "
@@ -359,7 +361,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, DylibDeps) {
   dylib.sources().push_back(SourceFile("//bar/mylib.rs"));
   dylib.sources().push_back(barlib);
   dylib.source_types_used().Set(SourceFile::SOURCE_RS);
-  dylib.rust_values().set_crate_type(RustValues::CRATE_DYLIB);  // TODO
+  dylib.rust_values().set_crate_type(RustValues::CRATE_DYLIB);
   dylib.rust_values().set_crate_root(barlib);
   dylib.rust_values().crate_name() = "mylib";
   dylib.public_deps().push_back(LabelTargetPair(&inside_dylib));
@@ -397,6 +399,19 @@ TEST_F(NinjaRustBinaryTargetWriterTest, DylibDeps) {
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
 
+  Target private_dylib(setup.settings(), Label(SourceDir("//private_dylib/"), "private_dylib"));
+  private_dylib.set_output_type(Target::SHARED_LIBRARY);
+  private_dylib.visibility().SetPublic();
+  SourceFile private_dyliblib("//private_dylib/lib.rs");
+  private_dylib.sources().push_back(SourceFile("//private_dylib/mylib.rs"));
+  private_dylib.sources().push_back(private_dyliblib);
+  private_dylib.source_types_used().Set(SourceFile::SOURCE_RS);
+  private_dylib.rust_values().set_crate_type(RustValues::CRATE_DYLIB);
+  private_dylib.rust_values().set_crate_root(private_dyliblib);
+  private_dylib.rust_values().crate_name() = "private_dylib";
+  private_dylib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(private_dylib.OnResolved(&err));
+
   Target another_dylib(setup.settings(), Label(SourceDir("//foo/"), "direct"));
   another_dylib.set_output_type(Target::SHARED_LIBRARY);
   another_dylib.visibility().SetPublic();
@@ -409,6 +424,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, DylibDeps) {
   another_dylib.rust_values().crate_name() = "direct";
   another_dylib.SetToolchain(setup.toolchain());
   another_dylib.public_deps().push_back(LabelTargetPair(&dylib));
+  another_dylib.private_deps().push_back(LabelTargetPair(&private_dylib));
   ASSERT_TRUE(another_dylib.OnResolved(&err));
 
   Target target(setup.settings(), Label(SourceDir("//foo/"), "bar"));
@@ -441,14 +457,15 @@ TEST_F(NinjaRustBinaryTargetWriterTest, DylibDeps) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
-        "../../foo/main.rs obj/foo/libdirect.so\n"
+        "../../foo/main.rs obj/foo/libdirect.so obj/bar/libmylib.so\n"
         "  source_file_part = main.rs\n"
         "  source_name_part = main\n"
         "  externs = --extern direct=obj/foo/libdirect.so "
         "--extern mylib=obj/bar/libmylib.so "
         "--extern inside=obj/baz/libinside.rlib\n"
         "  rustdeps = -Ldependency=obj/foo -Ldependency=obj/bar "
-        "-Ldependency=obj/baz -Ldependency=obj/faz\n"
+        "-Ldependency=obj/baz -Ldependency=obj/faz "
+        "-Ldependency=obj/private_dylib\n"
         "  ldflags =\n"
         "  sources = ../../foo/source.rs ../../foo/main.rs\n";
     std::string out_str = out.str();
@@ -538,7 +555,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
         "target_output_name = libmylib\n"
         "\n"
         "build obj/bar/libmylib.rlib: rust_rlib ../../bar/lib.rs | "
-        "../../bar/mylib.rs ../../bar/lib.rs obj/bar/libmymacro.so || "
+        "../../bar/mylib.rs ../../bar/lib.rs || "
         "obj/baz/group.stamp\n"
         "  source_file_part = lib.rs\n"
         "  source_name_part = lib\n"
@@ -580,8 +597,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | "
-        "../../foo/source.rs ../../foo/main.rs obj/bar/libmylib.rlib || "
-        "obj/baz/group.stamp\n"
+        "../../foo/source.rs ../../foo/main.rs obj/bar/libmylib.rlib\n"
         "  source_file_part = main.rs\n"
         "  source_name_part = main\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib "
@@ -671,7 +687,8 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RenamedDeps) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
-        "../../foo/main.rs obj/bar/libdirect.rlib obj/baz/libmylib.rlib\n"
+        "../../foo/main.rs obj/bar/libdirect.rlib obj/baz/libmylib.rlib "
+        "obj/faz/libtransitive.rlib\n"
         "  source_file_part = main.rs\n"
         "  source_name_part = main\n"
         "  externs = --extern direct_renamed=obj/bar/libdirect.rlib "
@@ -872,6 +889,195 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
     std::string out_str = out.str();
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
+}
+
+TEST_F(NinjaRustBinaryTargetWriterTest, RlibInLibrary) {
+  Err err;
+  TestWithScope setup;
+
+  Target priv_sset_in_staticlib(
+      setup.settings(),
+      Label(SourceDir("//priv_sset_in_staticlib/"), "priv_sset_in_staticlib"));
+  priv_sset_in_staticlib.set_output_type(Target::SOURCE_SET);
+  priv_sset_in_staticlib.visibility().SetPublic();
+  priv_sset_in_staticlib.sources().push_back(
+      SourceFile("//priv_sset_in_staticlib/lib.cc"));
+  priv_sset_in_staticlib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  priv_sset_in_staticlib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(priv_sset_in_staticlib.OnResolved(&err));
+
+  Target pub_sset_in_staticlib(
+      setup.settings(),
+      Label(SourceDir("//pub_sset_in_staticlib/"), "pub_sset_in_staticlib"));
+  pub_sset_in_staticlib.set_output_type(Target::SOURCE_SET);
+  pub_sset_in_staticlib.visibility().SetPublic();
+  pub_sset_in_staticlib.sources().push_back(
+      SourceFile("//pub_sset_in_staticlib/lib.cc"));
+  pub_sset_in_staticlib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  pub_sset_in_staticlib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(pub_sset_in_staticlib.OnResolved(&err));
+
+  Target priv_sset_in_dylib(
+      setup.settings(),
+      Label(SourceDir("//priv_sset_in_dylib/"), "priv_sset_in_dylib"));
+  priv_sset_in_dylib.set_output_type(Target::SOURCE_SET);
+  priv_sset_in_dylib.visibility().SetPublic();
+  priv_sset_in_dylib.sources().push_back(
+      SourceFile("//priv_sset_in_dylib/lib.cc"));
+  priv_sset_in_dylib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  priv_sset_in_dylib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(priv_sset_in_dylib.OnResolved(&err));
+
+  Target pub_sset_in_dylib(
+      setup.settings(),
+      Label(SourceDir("//pub_sset_in_dylib"), "pub_sset_in_dylib"));
+  pub_sset_in_dylib.set_output_type(Target::SOURCE_SET);
+  pub_sset_in_dylib.visibility().SetPublic();
+  pub_sset_in_dylib.sources().push_back(
+      SourceFile("//pub_sset_in_dylib/lib.cc"));
+  pub_sset_in_dylib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  pub_sset_in_dylib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(pub_sset_in_dylib.OnResolved(&err));
+
+  Target priv_in_staticlib(
+      setup.settings(),
+      Label(SourceDir("//priv_in_staticlib/"), "priv_in_staticlib"));
+  priv_in_staticlib.set_output_type(Target::RUST_LIBRARY);
+  priv_in_staticlib.visibility().SetPublic();
+  SourceFile priv_in_staticlib_root("//priv_in_staticlib/lib.rs");
+  priv_in_staticlib.sources().push_back(priv_in_staticlib_root);
+  priv_in_staticlib.source_types_used().Set(SourceFile::SOURCE_RS);
+  priv_in_staticlib.rust_values().set_crate_root(priv_in_staticlib_root);
+  priv_in_staticlib.rust_values().crate_name() = "priv_in_staticlib";
+  priv_in_staticlib.SetToolchain(setup.toolchain());
+  priv_in_staticlib.private_deps().push_back(
+      LabelTargetPair(&priv_sset_in_staticlib));
+  ASSERT_TRUE(priv_in_staticlib.OnResolved(&err));
+
+  Target pub_in_staticlib(
+      setup.settings(),
+      Label(SourceDir("//pub_in_staticlib/"), "pub_in_staticlib"));
+  pub_in_staticlib.set_output_type(Target::RUST_LIBRARY);
+  pub_in_staticlib.visibility().SetPublic();
+  SourceFile pub_in_staticlib_root("//pub_in_staticlib/lib.rs");
+  pub_in_staticlib.sources().push_back(pub_in_staticlib_root);
+  pub_in_staticlib.source_types_used().Set(SourceFile::SOURCE_RS);
+  pub_in_staticlib.rust_values().set_crate_root(pub_in_staticlib_root);
+  pub_in_staticlib.rust_values().crate_name() = "pub_in_staticlib";
+  pub_in_staticlib.SetToolchain(setup.toolchain());
+  pub_in_staticlib.private_deps().push_back(
+      LabelTargetPair(&pub_sset_in_staticlib));
+  ASSERT_TRUE(pub_in_staticlib.OnResolved(&err));
+
+  Target priv_in_dylib(setup.settings(),
+                       Label(SourceDir("//priv_in_dylib/"), "priv_in_dylib"));
+  priv_in_dylib.set_output_type(Target::RUST_LIBRARY);
+  priv_in_dylib.visibility().SetPublic();
+  SourceFile priv_in_dylib_root("//priv_in_dylib/lib.rs");
+  priv_in_dylib.sources().push_back(priv_in_dylib_root);
+  priv_in_dylib.source_types_used().Set(SourceFile::SOURCE_RS);
+  priv_in_dylib.rust_values().set_crate_root(priv_in_dylib_root);
+  priv_in_dylib.rust_values().crate_name() = "priv_in_dylib";
+  priv_in_dylib.SetToolchain(setup.toolchain());
+  priv_in_dylib.private_deps().push_back(LabelTargetPair(&priv_sset_in_dylib));
+  ASSERT_TRUE(priv_in_dylib.OnResolved(&err));
+
+  Target pub_in_dylib(setup.settings(),
+                      Label(SourceDir("//pub_in_dylib/"), "pub_in_dylib"));
+  pub_in_dylib.set_output_type(Target::RUST_LIBRARY);
+  pub_in_dylib.visibility().SetPublic();
+  SourceFile pub_in_dylib_root("//pub_in_dylib/lib.rs");
+  pub_in_dylib.sources().push_back(pub_in_dylib_root);
+  pub_in_dylib.source_types_used().Set(SourceFile::SOURCE_RS);
+  pub_in_dylib.rust_values().set_crate_root(pub_in_dylib_root);
+  pub_in_dylib.rust_values().crate_name() = "pub_in_dylib";
+  pub_in_dylib.SetToolchain(setup.toolchain());
+  pub_in_dylib.private_deps().push_back(LabelTargetPair(&pub_sset_in_dylib));
+  ASSERT_TRUE(pub_in_dylib.OnResolved(&err));
+
+  Target staticlib(setup.settings(),
+                   Label(SourceDir("//staticlib/"), "staticlib"));
+  staticlib.set_output_type(Target::STATIC_LIBRARY);
+  staticlib.visibility().SetPublic();
+  staticlib.sources().push_back(SourceFile("//staticlib/lib.cc"));
+  staticlib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  staticlib.public_deps().push_back(LabelTargetPair(&pub_in_staticlib));
+  staticlib.private_deps().push_back(LabelTargetPair(&priv_in_staticlib));
+  staticlib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(staticlib.OnResolved(&err));
+
+  Target dylib(setup.settings(), Label(SourceDir("//dylib/"), "dylib"));
+  dylib.set_output_type(Target::SHARED_LIBRARY);
+  dylib.visibility().SetPublic();
+  SourceFile dylib_root("//dylib/lib.rs");
+  dylib.sources().push_back(dylib_root);
+  dylib.source_types_used().Set(SourceFile::SOURCE_RS);
+  dylib.rust_values().set_crate_root(dylib_root);
+  dylib.rust_values().crate_name() = "dylib";
+  dylib.public_deps().push_back(LabelTargetPair(&pub_in_dylib));
+  dylib.private_deps().push_back(LabelTargetPair(&priv_in_dylib));
+  dylib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(dylib.OnResolved(&err));
+
+  Target target(setup.settings(), Label(SourceDir("//exe/"), "exe"));
+  target.set_output_type(Target::EXECUTABLE);
+  target.visibility().SetPublic();
+  SourceFile main("//exe/main.rs");
+  target.sources().push_back(main);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(main);
+  target.rust_values().crate_name() = "exe";
+  target.private_deps().push_back(LabelTargetPair(&staticlib));
+  target.private_deps().push_back(LabelTargetPair(&dylib));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+
+  std::ostringstream out;
+  NinjaRustBinaryTargetWriter writer(&target, out);
+  writer.Run();
+
+  const char expected[] =
+      "crate_name = exe\n"
+      "crate_type = bin\n"
+      "output_extension = \n"
+      "output_dir = \n"
+      "rustflags =\n"
+      "rustenv =\n"
+      "root_out_dir = .\n"
+      "target_out_dir = obj/exe\n"
+      "target_output_name = exe\n"
+      "\n"
+      "build ./exe: rust_bin ../../exe/main.rs | "
+      "../../exe/main.rs "
+      "obj/pub_sset_in_staticlib/pub_sset_in_staticlib.lib.o "
+      "obj/priv_sset_in_staticlib/priv_sset_in_staticlib.lib.o "
+      "obj/staticlib/libstaticlib.a "
+      "obj/dylib/libdylib.so "
+      "obj/pub_in_staticlib/libpub_in_staticlib.rlib "
+      "obj/priv_in_staticlib/libpriv_in_staticlib.rlib || "
+      "obj/pub_sset_in_staticlib/pub_sset_in_staticlib.stamp "
+      "obj/priv_sset_in_staticlib/priv_sset_in_staticlib.stamp\n"
+      "  source_file_part = main.rs\n"
+      "  source_name_part = main\n"
+      "  externs = "
+      "--extern pub_in_staticlib=obj/pub_in_staticlib/libpub_in_staticlib.rlib "
+      "--extern dylib=obj/dylib/libdylib.so "
+      "--extern pub_in_dylib=obj/pub_in_dylib/libpub_in_dylib.rlib\n"
+      "  rustdeps = -Ldependency=obj/pub_in_staticlib "
+      "-Ldependency=obj/priv_in_staticlib -Ldependency=obj/dylib "
+      "-Ldependency=obj/pub_in_dylib -Ldependency=obj/priv_in_dylib "
+      "-Lnative=obj/pub_sset_in_staticlib "
+      "-Lnative=obj/priv_sset_in_staticlib "
+      "-Lnative=obj/staticlib -Clink-arg=-Bdynamic "
+      "-Clink-arg=obj/pub_sset_in_staticlib/pub_sset_in_staticlib.lib.o "
+      "-Clink-arg=obj/priv_sset_in_staticlib/priv_sset_in_staticlib.lib.o "
+      "-Clink-arg=obj/staticlib/libstaticlib.a\n"
+      "  ldflags =\n"
+      "  sources = ../../exe/main.rs\n";
+
+  std::string out_str = out.str();
+  EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
 }
 
 TEST_F(NinjaRustBinaryTargetWriterTest, RustOutputExtensionAndDir) {
@@ -1175,8 +1381,9 @@ TEST_F(NinjaRustBinaryTargetWriterTest, GroupDeps) {
         "target_out_dir = obj/foo\n"
         "target_output_name = bar\n"
         "\n"
-        "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
-        "../../foo/main.rs obj/bar/libmylib.rlib || obj/baz/group.stamp\n"
+        "build ./foo_bar: rust_bin ../../foo/main.rs | "
+        "../../foo/source.rs ../../foo/main.rs obj/bar/libmylib.rlib || "
+        "obj/baz/group.stamp\n"
         "  source_file_part = main.rs\n"
         "  source_name_part = main\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib\n"
