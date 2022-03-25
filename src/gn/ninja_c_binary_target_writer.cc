@@ -224,42 +224,8 @@ void NinjaCBinaryTargetWriter::WriteCompilerVars(
     const std::vector<ModuleDep>& module_dep_info) {
   const SubstitutionBits& subst = target_->toolchain()->substitution_bits();
 
-  // Defines.
-  if (subst.used.count(&CSubstitutionDefines)) {
-    out_ << CSubstitutionDefines.ninja_name << " =";
-    RecursiveTargetConfigToStream<std::string>(kRecursiveWriterSkipDuplicates,
-                                               target_, &ConfigValues::defines,
-                                               DefineWriter(), out_);
-    out_ << std::endl;
-  }
-
-  // Framework search path.
-  if (subst.used.count(&CSubstitutionFrameworkDirs)) {
-    const Tool* tool = target_->toolchain()->GetTool(CTool::kCToolLink);
-
-    out_ << CSubstitutionFrameworkDirs.ninja_name << " =";
-    PathOutput framework_dirs_output(
-        path_output_.current_dir(),
-        settings_->build_settings()->root_path_utf8(), ESCAPE_NINJA_COMMAND);
-    RecursiveTargetConfigToStream<SourceDir>(
-        kRecursiveWriterSkipDuplicates, target_, &ConfigValues::framework_dirs,
-        FrameworkDirsWriter(framework_dirs_output,
-                            tool->framework_dir_switch()),
-        out_);
-    out_ << std::endl;
-  }
-
-  // Include directories.
-  if (subst.used.count(&CSubstitutionIncludeDirs)) {
-    out_ << CSubstitutionIncludeDirs.ninja_name << " =";
-    PathOutput include_path_output(
-        path_output_.current_dir(),
-        settings_->build_settings()->root_path_utf8(), ESCAPE_NINJA_COMMAND);
-    RecursiveTargetConfigToStream<SourceDir>(
-        kRecursiveWriterSkipDuplicates, target_, &ConfigValues::include_dirs,
-        IncludeWriter(include_path_output), out_);
-    out_ << std::endl;
-  }
+  WriteCCompilerVars(subst, /*indent=*/false,
+                     /*respect_source_types_used=*/true);
 
   if (!module_dep_info.empty()) {
     // TODO(scottmg): Currently clang modules only working for C++.
@@ -270,89 +236,6 @@ void NinjaCBinaryTargetWriter::WriteCompilerVars(
       WriteModuleDepsSubstitution(&CSubstitutionModuleDepsNoSelf,
                                   module_dep_info, false);
     }
-  }
-
-  bool has_precompiled_headers =
-      target_->config_values().has_precompiled_headers();
-
-  EscapeOptions opts = GetFlagOptions();
-  if (target_->source_types_used().Get(SourceFile::SOURCE_S) ||
-      target_->source_types_used().Get(SourceFile::SOURCE_ASM)) {
-    WriteOneFlag(kRecursiveWriterKeepDuplicates, target_,
-                 &CSubstitutionAsmFlags, false, Tool::kToolNone,
-                 &ConfigValues::asmflags, opts, path_output_, out_);
-  }
-  if (target_->source_types_used().Get(SourceFile::SOURCE_C) ||
-      target_->source_types_used().Get(SourceFile::SOURCE_CPP) ||
-      target_->source_types_used().Get(SourceFile::SOURCE_M) ||
-      target_->source_types_used().Get(SourceFile::SOURCE_MM) ||
-      target_->source_types_used().Get(SourceFile::SOURCE_MODULEMAP)) {
-    WriteOneFlag(kRecursiveWriterKeepDuplicates, target_, &CSubstitutionCFlags,
-                 false, Tool::kToolNone, &ConfigValues::cflags, opts,
-                 path_output_, out_);
-  }
-  if (target_->source_types_used().Get(SourceFile::SOURCE_C)) {
-    WriteOneFlag(kRecursiveWriterKeepDuplicates, target_, &CSubstitutionCFlagsC,
-                 has_precompiled_headers, CTool::kCToolCc,
-                 &ConfigValues::cflags_c, opts, path_output_, out_);
-  }
-  if (target_->source_types_used().Get(SourceFile::SOURCE_CPP) ||
-      target_->source_types_used().Get(SourceFile::SOURCE_MODULEMAP)) {
-    WriteOneFlag(kRecursiveWriterKeepDuplicates, target_,
-                 &CSubstitutionCFlagsCc, has_precompiled_headers,
-                 CTool::kCToolCxx, &ConfigValues::cflags_cc, opts, path_output_,
-                 out_);
-  }
-  if (target_->source_types_used().Get(SourceFile::SOURCE_M)) {
-    WriteOneFlag(kRecursiveWriterKeepDuplicates, target_,
-                 &CSubstitutionCFlagsObjC, has_precompiled_headers,
-                 CTool::kCToolObjC, &ConfigValues::cflags_objc, opts,
-                 path_output_, out_);
-  }
-  if (target_->source_types_used().Get(SourceFile::SOURCE_MM)) {
-    WriteOneFlag(kRecursiveWriterKeepDuplicates, target_,
-                 &CSubstitutionCFlagsObjCc, has_precompiled_headers,
-                 CTool::kCToolObjCxx, &ConfigValues::cflags_objcc, opts,
-                 path_output_, out_);
-  }
-  if (target_->source_types_used().SwiftSourceUsed()) {
-    if (subst.used.count(&CSubstitutionSwiftModuleName)) {
-      out_ << CSubstitutionSwiftModuleName.ninja_name << " = ";
-      EscapeStringToStream(out_, target_->swift_values().module_name(), opts);
-      out_ << std::endl;
-    }
-
-    if (subst.used.count(&CSubstitutionSwiftBridgeHeader)) {
-      out_ << CSubstitutionSwiftBridgeHeader.ninja_name << " = ";
-      if (!target_->swift_values().bridge_header().is_null()) {
-        path_output_.WriteFile(out_, target_->swift_values().bridge_header());
-      } else {
-        out_ << R"("")";
-      }
-      out_ << std::endl;
-    }
-
-    if (subst.used.count(&CSubstitutionSwiftModuleDirs)) {
-      // Uniquify the list of swiftmodule dirs (in case multiple swiftmodules
-      // are generated in the same directory).
-      UniqueVector<SourceDir> swiftmodule_dirs;
-      for (const Target* dep : target_->swift_values().modules())
-        swiftmodule_dirs.push_back(dep->swift_values().module_output_dir());
-
-      out_ << CSubstitutionSwiftModuleDirs.ninja_name << " =";
-      PathOutput swiftmodule_path_output(
-          path_output_.current_dir(),
-          settings_->build_settings()->root_path_utf8(), ESCAPE_NINJA_COMMAND);
-      IncludeWriter swiftmodule_path_writer(swiftmodule_path_output);
-      for (const SourceDir& swiftmodule_dir : swiftmodule_dirs) {
-        swiftmodule_path_writer(swiftmodule_dir, out_);
-      }
-      out_ << std::endl;
-    }
-
-    WriteOneFlag(kRecursiveWriterKeepDuplicates, target_,
-                 &CSubstitutionSwiftFlags, false, CTool::kCToolSwift,
-                 &ConfigValues::swiftflags, opts, path_output_, out_);
   }
 
   WriteSharedVars(subst);

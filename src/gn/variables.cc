@@ -561,6 +561,14 @@ const char kArgs_Help[] =
   to the script. Typically you would use source expansion (see "gn help
   source_expansion") to insert the source file names.
 
+  Args can also expand the substitution patterns corresponding to config
+  variables in the same way that compiler tools (see "gn help tool") do. These
+  allow actions that run compiler or compiler-like tools to access the results
+  of propagating configs through the build graph. For example:
+
+  args = [ "{{defines}}", "{{include_dirs}}", "{{rustenv}}", "--input-file",
+           "{{source}}" ]
+
   See also "gn help action" and "gn help action_foreach".
 )";
 

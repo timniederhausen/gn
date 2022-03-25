@@ -2505,10 +2505,10 @@ TEST_F(NinjaCBinaryTargetWriterTest, DependOnModule) {
 
     const char expected[] = R"(defines =
 include_dirs =
-module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm
-module_deps_no_self = -Xclang -fmodules-embed-all-files
 cflags =
 cflags_cc =
+module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm
+module_deps_no_self = -Xclang -fmodules-embed-all-files
 label = //blah$:a
 root_out_dir = withmodules
 target_out_dir = obj/blah
@@ -2550,10 +2550,10 @@ build obj/blah/liba.a: alink obj/blah/liba.a.o
 
     const char expected[] = R"(defines =
 include_dirs =
-module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/stuff/libb.b.pcm
-module_deps_no_self = -Xclang -fmodules-embed-all-files
 cflags =
 cflags_cc =
+module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/stuff/libb.b.pcm
+module_deps_no_self = -Xclang -fmodules-embed-all-files
 label = //stuff$:b
 root_out_dir = withmodules
 target_out_dir = obj/stuff
@@ -2594,10 +2594,10 @@ build obj/stuff/libb.a: alink obj/stuff/libb.b.o
 
     const char expected[] = R"(defines =
 include_dirs =
-module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/stuff/libc.c.pcm -fmodule-file=obj/blah/liba.a.pcm
-module_deps_no_self = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm
 cflags =
 cflags_cc =
+module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/stuff/libc.c.pcm -fmodule-file=obj/blah/liba.a.pcm
+module_deps_no_self = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm
 label = //things$:c
 root_out_dir = withmodules
 target_out_dir = obj/things
@@ -2635,10 +2635,10 @@ build obj/things/libc.a: alink || obj/blah/liba.a
 
     const char expected[] = R"(defines =
 include_dirs =
-module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm -fmodule-file=obj/stuff/libb.b.pcm
-module_deps_no_self = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm -fmodule-file=obj/stuff/libb.b.pcm
 cflags =
 cflags_cc =
+module_deps = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm -fmodule-file=obj/stuff/libb.b.pcm
+module_deps_no_self = -Xclang -fmodules-embed-all-files -fmodule-file=obj/blah/liba.a.pcm -fmodule-file=obj/stuff/libb.b.pcm
 label = //zap$:c
 root_out_dir = withmodules
 target_out_dir = obj/zap

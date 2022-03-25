@@ -1312,6 +1312,12 @@
   and stuff like other Python files required to run your script in the "inputs"
   variable.
 
+  Actions can take the configs and public_configs lists, as well as any of the
+  configs variables (defines, include_dirs, etc.) set directly on the target.
+  These behave exactly as they would on a binary target and can be accessed
+  using substitution patterns in the script args (see "gn help args") to
+  implement custom compiler-like tools.
+
   The "deps" and "public_deps" for an action will always be
   completed before any part of the action is run so it can depend on
   the output of previous steps. The "data_deps" will be built if the
@@ -1354,8 +1360,11 @@
 #### **Variables**
 
 ```
-  args, data, data_deps, depfile, deps, inputs, metadata, outputs*, pool,
-  response_file_contents, script*, sources
+  args, asmflags, bridge_header, cflags, cflags_c, cflags_cc, cflags_objc,
+  cflags_objcc, configs, data, data_deps, defines, depfile, deps,
+  framework_dirs, include_dirs, inputs, metadata, module_deps, module_name,
+  outputs*, pool, response_file_contents, rustenv, rustflags, script*, sources,
+  swiftflags
   * = required
 ```
 
@@ -1443,9 +1452,11 @@
 #### **Variables**
 
 ```
-  args, data, data_deps, depfile, deps, inputs, metadata, outputs*, pool,
-  response_file_contents, script*, sources*
-  * = required
+  args, asmflags, bridge_header, cflags, cflags_c, cflags_cc, cflags_objc,
+  cflags_objcc, configs, data, data_deps, defines, depfile, deps,
+  framework_dirs, include_dirs, inputs, metadata, module_deps, module_name,
+  outputs*, pool, response_file_contents, rustenv, rustflags, script*, sources,
+  swiftflags
 ```
 
 #### **Example**
@@ -4695,6 +4706,14 @@
   For action and action_foreach targets, args is the list of arguments to pass
   to the script. Typically you would use source expansion (see "gn help
   source_expansion") to insert the source file names.
+
+  Args can also expand the substitution patterns corresponding to config
+  variables in the same way that compiler tools (see "gn help tool") do. These
+  allow actions that run compiler or compiler-like tools to access the results
+  of propagating configs through the build graph. For example:
+
+  args = [ "{{defines}}", "{{include_dirs}}", "{{rustenv}}", "--input-file",
+           "{{source}}" ]
 
   See also "gn help action" and "gn help action_foreach".
 ```

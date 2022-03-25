@@ -212,13 +212,7 @@ void NinjaRustBinaryTargetWriter::WriteCompilerVars() {
   EscapeOptions opts = GetFlagOptions();
   WriteCrateVars(target_, tool_, opts, out_);
 
-  WriteOneFlag(kRecursiveWriterKeepDuplicates, target_,
-               &kRustSubstitutionRustFlags, false, Tool::kToolNone,
-               &ConfigValues::rustflags, opts, path_output_, out_);
-
-  WriteOneFlag(kRecursiveWriterKeepDuplicates, target_,
-               &kRustSubstitutionRustEnv, false, Tool::kToolNone,
-               &ConfigValues::rustenv, opts, path_output_, out_);
+  WriteRustCompilerVars(subst, /*indent=*/false, /*always_write=*/true);
 
   WriteSharedVars(subst);
 }
