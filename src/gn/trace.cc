@@ -250,19 +250,27 @@ void SaveTraces(const base::FilePath& file_name) {
 
   std::string quote_buffer;  // Allocate outside loop to prevent reallocationg.
 
+  // Trace viewer doesn't handle integer > 2^53 well, so re-numbering them to
+  // small numbers.
+  std::map<std::thread::id, int> tidmap;
+  std::vector<TraceItem*> events = trace_log->events();
+  for (const auto* item : events) {
+    int id = tidmap.size();
+    tidmap.emplace(item->thread_id(), id);
+  }
+
   // Write main thread metadata (assume this is being written on the main
   // thread).
-  out << "{\"pid\":0,\"tid\":\"" << std::this_thread::get_id() << "\"";
+  out << "{\"pid\":0,\"tid\":\"" << tidmap[std::this_thread::get_id()] << "\"";
   out << ",\"ts\":0,\"ph\":\"M\",";
   out << "\"name\":\"thread_name\",\"args\":{\"name\":\"Main thread\"}},";
 
-  std::vector<TraceItem*> events = trace_log->events();
   for (size_t i = 0; i < events.size(); i++) {
     const TraceItem& item = *events[i];
 
     if (i != 0)
       out << ",";
-    out << "{\"pid\":0,\"tid\":\"" << item.thread_id() << "\"";
+    out << "{\"pid\":0,\"tid\":\"" << tidmap[item.thread_id()] << "\"";
     out << ",\"ts\":" << item.begin() / kNanosecondsToMicroseconds;
     out << ",\"ph\":\"X\"";  // "X" = complete event with begin & duration.
     out << ",\"dur\":" << item.delta().InMicroseconds();
