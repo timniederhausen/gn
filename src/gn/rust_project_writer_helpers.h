@@ -55,6 +55,11 @@ class Crate {
   // Set the compiler target ("e.g. x86_64-linux-kernel")
   void SetCompilerTarget(std::string target) { compiler_target_ = target; }
 
+  // Set that this is a proc macro with the path to the output .so/dylib/dll
+  void SetIsProcMacro(OutputFile proc_macro_dynamic_library) {
+    proc_macro_dynamic_library_ = proc_macro_dynamic_library;
+  }
+
   // Returns the root file for the crate.
   SourceFile& root() { return root_; }
 
@@ -81,6 +86,11 @@ class Crate {
     return compiler_target_;
   }
 
+  // Returns whether this crate builds a proc macro .so
+  const std::optional<OutputFile>& proc_macro_path() {
+    return proc_macro_dynamic_library_;
+  }
+
  private:
   SourceFile root_;
   CrateIndex index_;
@@ -90,6 +100,7 @@ class Crate {
   DependencyList deps_;
   std::optional<std::string> compiler_target_;
   std::vector<std::string> compiler_args_;
+  std::optional<OutputFile> proc_macro_dynamic_library_;
 };
 
 using CrateList = std::vector<Crate>;

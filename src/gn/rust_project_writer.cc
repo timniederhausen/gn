@@ -320,6 +320,15 @@ void AddTarget(const BuildSettings* build_settings,
     }
   }
 
+  // If it's a proc macro, record its output location so IDEs can invoke it.
+  if (std::string_view(rust_tool->name()) ==
+      std::string_view(RustTool::kRsToolMacro)) {
+    auto outputs = target->computed_outputs();
+    if (outputs.size() > 0) {
+      crate.SetIsProcMacro(outputs[0]);
+    }
+  }
+
   // Add the rest of the crate dependencies.
   for (const auto& dep : crate_deps) {
     auto idx = lookup[dep];
@@ -403,6 +412,15 @@ void WriteCrates(const BuildSettings* build_settings,
     rust_project << NEWLINE "      ]," NEWLINE;  // end dep list
 
     rust_project << "      \"edition\": \"" << crate.edition() << "\"," NEWLINE;
+
+    auto proc_macro_target = crate.proc_macro_path();
+    if (proc_macro_target.has_value()) {
+      rust_project << "      \"is_proc_macro\": true," NEWLINE;
+      auto so_location = FilePathToUTF8(build_settings->GetFullPath(
+          proc_macro_target->AsSourceFile(build_settings)));
+      rust_project << "      \"proc_macro_dylib_path\": \"" << so_location
+                   << "\"," NEWLINE;
+    }
 
     rust_project << "      \"cfg\": [";
     bool first_cfg = true;
