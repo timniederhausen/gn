@@ -10,6 +10,7 @@
 #include <tuple>
 
 #include "base/json/string_escape.h"
+#include "base/strings/string_split.h"
 #include "gn/builder.h"
 #include "gn/deps_iterator.h"
 #include "gn/ninja_target_command_util.h"
@@ -329,6 +330,17 @@ void AddTarget(const BuildSettings* build_settings,
     }
   }
 
+  // Note any environment variables. These may be used by proc macros
+  // invoked by the current crate (so we want to record these for all crates,
+  // not just proc macro crates)
+  for (const auto& env_var : target->config_values().rustenv()) {
+    std::vector<std::string> parts = base::SplitString(
+        env_var, "=", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
+    if (parts.size() >= 2) {
+      crate.AddRustenv(parts[0], parts[1]);
+    }
+  }
+
   // Add the rest of the crate dependencies.
   for (const auto& dep : crate_deps) {
     auto idx = lookup[dep];
@@ -436,8 +448,29 @@ void WriteCrates(const BuildSettings* build_settings,
       rust_project << "        \"" << escaped_config << "\"";
     }
     rust_project << NEWLINE;
-    rust_project << "      ]" NEWLINE;  // end cfgs
+    rust_project << "      ]";  // end cfgs
 
+    if (!crate.rustenv().empty()) {
+      rust_project << "," NEWLINE;
+      rust_project << "      \"env\": {";
+      bool first_env = true;
+      for (const auto& env : crate.rustenv()) {
+        if (!first_env)
+          rust_project << ",";
+        first_env = false;
+        std::string escaped_key, escaped_val;
+        base::EscapeJSONString(env.first, false, &escaped_key);
+        base::EscapeJSONString(env.second, false, &escaped_val);
+        rust_project << NEWLINE;
+        rust_project << "        \"" << escaped_key << "\": \"" << escaped_val
+                     << "\"";
+      }
+
+      rust_project << NEWLINE;
+      rust_project << "      }" NEWLINE;  // end env vars
+    } else {
+      rust_project << NEWLINE;
+    }
     rust_project << "    }";  // end crate
   }
   rust_project << NEWLINE "  ]" NEWLINE;  // end crate list

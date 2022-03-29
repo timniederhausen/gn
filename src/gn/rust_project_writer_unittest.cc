@@ -535,6 +535,8 @@ TEST_F(RustProjectJSONWriter, OneRustProcMacroTarget) {
   target.sources().push_back(lib);
   target.source_types_used().Set(SourceFile::SOURCE_RS);
   target.rust_values().set_crate_root(lib);
+  target.config_values().rustenv().push_back("TEST_ENV_VAR=baz");
+  target.config_values().rustenv().push_back("TEST_ENV_VAR2=baz2");
   target.rust_values().crate_name() = "foo";
   target.config_values().rustflags().push_back("--cfg=feature=\"foo_enabled\"");
   target.SetToolchain(setup.toolchain());
@@ -568,7 +570,11 @@ TEST_F(RustProjectJSONWriter, OneRustProcMacroTarget) {
       "        \"test\",\n"
       "        \"debug_assertions\",\n"
       "        \"feature=\\\"foo_enabled\\\"\"\n"
-      "      ]\n"
+      "      ],\n"
+      "      \"env\": {\n"
+      "        \"TEST_ENV_VAR\": \"baz\",\n"
+      "        \"TEST_ENV_VAR2\": \"baz2\"\n"
+      "      }\n"
       "    }\n"
       "  ]\n"
       "}\n";

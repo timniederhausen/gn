@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "base/containers/flat_map.h"
 #include "build_settings.h"
 #include "gn/source_file.h"
 #include "gn/target.h"
@@ -43,6 +44,11 @@ class Crate {
 
   // Add a config item to the crate.
   void AddConfigItem(std::string cfg_item) { configs_.push_back(cfg_item); }
+
+  // Add a key-value environment variable pair used when building this crate.
+  void AddRustenv(std::string key, std::string value) {
+    rustenv_.emplace(key, value);
+  }
 
   // Add another crate as a dependency of this one.
   void AddDependency(CrateIndex index, std::string name) {
@@ -91,6 +97,10 @@ class Crate {
     return proc_macro_dynamic_library_;
   }
 
+  // Returns environment variables applied to this, which may be necessary
+  // for correct functioning of environment variables
+  const base::flat_map<std::string, std::string>& rustenv() { return rustenv_; }
+
  private:
   SourceFile root_;
   CrateIndex index_;
@@ -101,6 +111,7 @@ class Crate {
   std::optional<std::string> compiler_target_;
   std::vector<std::string> compiler_args_;
   std::optional<OutputFile> proc_macro_dynamic_library_;
+  base::flat_map<std::string, std::string> rustenv_;
 };
 
 using CrateList = std::vector<Crate>;
