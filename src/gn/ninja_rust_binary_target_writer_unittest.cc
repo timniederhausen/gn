@@ -457,7 +457,8 @@ TEST_F(NinjaRustBinaryTargetWriterTest, DylibDeps) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | ../../foo/source.rs "
-        "../../foo/main.rs obj/foo/libdirect.so obj/bar/libmylib.so\n"
+        "../../foo/main.rs obj/foo/libdirect.so obj/bar/libmylib.so "
+        "obj/baz/libinside.rlib\n"
         "  source_file_part = main.rs\n"
         "  source_name_part = main\n"
         "  externs = --extern direct=obj/foo/libdirect.so "
@@ -518,6 +519,13 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
     EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
   }
 
+  // A group produces an order-only dependency in ninja:
+  // https://ninja-build.org/manual.html#ref_dependencies.
+  //
+  // If a crate D inside the group is visible to a crate C depending on the
+  // group, the crate C needs to be rebuilt when D is changed. The group
+  // dependency does not guarantee that it would, so we test that C has an
+  // indirect dependency on D through this group.
   Target group(setup.settings(), Label(SourceDir("//baz/"), "group"));
   group.set_output_type(Target::GROUP);
   group.visibility().SetPublic();
@@ -543,6 +551,10 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
     NinjaRustBinaryTargetWriter writer(&rlib, out);
     writer.Run();
 
+    // libmymacro.so is inside the obj/baz/group, so would be built before
+    // libmylib.rlib. However it must also cause libmylib.rlib to be recompiled
+    // when changed, so we expect an implicit dependency (appearing after `|` on
+    // the build line) from libmylib.rlib to libmymacro.so.
     const char expected[] =
         "crate_name = mylib\n"
         "crate_type = rlib\n"
@@ -555,7 +567,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
         "target_output_name = libmylib\n"
         "\n"
         "build obj/bar/libmylib.rlib: rust_rlib ../../bar/lib.rs | "
-        "../../bar/mylib.rs ../../bar/lib.rs || "
+        "../../bar/mylib.rs ../../bar/lib.rs obj/bar/libmymacro.so || "
         "obj/baz/group.stamp\n"
         "  source_file_part = lib.rs\n"
         "  source_name_part = lib\n"
@@ -597,7 +609,8 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibDepsAcrossGroups) {
         "target_output_name = bar\n"
         "\n"
         "build ./foo_bar: rust_bin ../../foo/main.rs | "
-        "../../foo/source.rs ../../foo/main.rs obj/bar/libmylib.rlib\n"
+        "../../foo/source.rs ../../foo/main.rs "
+        "obj/bar/libmylib.rlib obj/bar/libmymacro.so\n"
         "  source_file_part = main.rs\n"
         "  source_name_part = main\n"
         "  externs = --extern mylib=obj/bar/libmylib.rlib "
@@ -1055,7 +1068,8 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibInLibrary) {
       "obj/staticlib/libstaticlib.a "
       "obj/dylib/libdylib.so "
       "obj/pub_in_staticlib/libpub_in_staticlib.rlib "
-      "obj/priv_in_staticlib/libpriv_in_staticlib.rlib || "
+      "obj/priv_in_staticlib/libpriv_in_staticlib.rlib "
+      "obj/pub_in_dylib/libpub_in_dylib.rlib || "
       "obj/pub_sset_in_staticlib/pub_sset_in_staticlib.stamp "
       "obj/priv_sset_in_staticlib/priv_sset_in_staticlib.stamp\n"
       "  source_file_part = main.rs\n"

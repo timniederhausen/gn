@@ -187,6 +187,12 @@ void NinjaRustBinaryTargetWriter::Run() {
     if (dep->source_types_used().RustSourceUsed() &&
         RustValues::IsRustLibrary(dep)) {
       transitive_crates.push_back({dep, has_direct_access});
+      // If the current crate can directly acccess the `dep` crate, then the
+      // current crate needs an implicit dependency on `dep` so it will be
+      // rebuilt if `dep` changes.
+      if (has_direct_access) {
+        implicit_deps.push_back(dep->dependency_output_file());
+      }
     }
   }
 
