@@ -10,18 +10,6 @@
       "[START_DIR]/gn"
     ],
     "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "git.init",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
@@ -37,18 +25,6 @@
     ],
     "cwd": "[START_DIR]/gn",
     "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "git.fetch",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
@@ -62,18 +38,6 @@
     ],
     "cwd": "[START_DIR]/gn",
     "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "git.checkout",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
@@ -87,18 +51,6 @@
     ],
     "cwd": "[START_DIR]/gn",
     "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "git.rev-parse",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
@@ -118,18 +70,6 @@
       "/path/to/tmp/json"
     ],
     "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "ensure_installed",
     "~followup_annotations": [
       "@@@STEP_LOG_LINE@json.output@{@@@",
@@ -163,18 +103,6 @@
       "/path/to/tmp/json"
     ],
     "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "ensure_installed (2)",
     "~followup_annotations": [
       "@@@STEP_LOG_LINE@json.output@{@@@",
@@ -202,18 +130,6 @@
       "[CACHE]/macos_sdk/XCode.app"
     ],
     "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "install xcode"
   },
   {
@@ -224,18 +140,6 @@
       "[CACHE]/macos_sdk/XCode.app"
     ],
     "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "select XCode"
   },
   {
@@ -247,23 +151,11 @@
       "xcrun",
       "--show-sdk-path"
     ],
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "debug.xcrun sdk-path",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@raw_io.output_text[sdk-path]@/some/xcode/path@@@",
-      "@@@STEP_LOG_END@raw_io.output_text[sdk-path]@@@"
+      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
+      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
     ]
   },
   {
@@ -277,23 +169,11 @@
       "-Wp,-v",
       "-"
     ],
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "debug.xcrun toolchain",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@raw_io.output_text[toolchain]@[CACHE]/macos_sdk/XCode.app/include/c++/v1@@@",
-      "@@@STEP_LOG_END@raw_io.output_text[toolchain]@@@"
+      "@@@STEP_LOG_LINE@raw_io.output[toolchain]@[CACHE]/macos_sdk/XCode.app/include/c++/v1@@@",
+      "@@@STEP_LOG_END@raw_io.output[toolchain]@@@"
     ]
   },
   {
@@ -318,18 +198,6 @@
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path"
     },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "debug.mac-amd64.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -349,18 +217,6 @@
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path"
     },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "debug.mac-amd64.build",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -378,18 +234,6 @@
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path"
     },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "debug.mac-amd64.test",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -404,23 +248,11 @@
       "xcrun",
       "--show-sdk-path"
     ],
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "release.xcrun sdk-path",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@raw_io.output_text[sdk-path]@/some/xcode/path@@@",
-      "@@@STEP_LOG_END@raw_io.output_text[sdk-path]@@@"
+      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
+      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
     ]
   },
   {
@@ -434,23 +266,11 @@
       "-Wp,-v",
       "-"
     ],
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "release.xcrun toolchain",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@raw_io.output_text[toolchain]@[CACHE]/macos_sdk/XCode.app/include/c++/v1@@@",
-      "@@@STEP_LOG_END@raw_io.output_text[toolchain]@@@"
+      "@@@STEP_LOG_LINE@raw_io.output[toolchain]@[CACHE]/macos_sdk/XCode.app/include/c++/v1@@@",
+      "@@@STEP_LOG_END@raw_io.output[toolchain]@@@"
     ]
   },
   {
@@ -476,18 +296,6 @@
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path"
     },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "release.mac-amd64.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -507,18 +315,6 @@
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path"
     },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "release.mac-amd64.build",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -535,18 +331,6 @@
       "CFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path -nostdinc++ -cxx-isystem [CACHE]/macos_sdk/XCode.app/include/c++/v1",
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path"
-    },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
     },
     "name": "release.mac-amd64.test",
     "~followup_annotations": [
@@ -581,18 +365,6 @@
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=x86_64-apple-darwin --sysroot=/some/xcode/path"
     },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "release.mac-amd64.upload.build gn/gn/mac-amd64",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@3@@@",
@@ -610,23 +382,11 @@
       "xcrun",
       "--show-sdk-path"
     ],
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "release.xcrun sdk-path (2)",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@raw_io.output_text[sdk-path]@/some/xcode/path@@@",
-      "@@@STEP_LOG_END@raw_io.output_text[sdk-path]@@@"
+      "@@@STEP_LOG_LINE@raw_io.output[sdk-path]@/some/xcode/path@@@",
+      "@@@STEP_LOG_END@raw_io.output[sdk-path]@@@"
     ]
   },
   {
@@ -640,23 +400,11 @@
       "-Wp,-v",
       "-"
     ],
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "release.xcrun toolchain (2)",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@raw_io.output_text[toolchain]@[CACHE]/macos_sdk/XCode.app/include/c++/v1@@@",
-      "@@@STEP_LOG_END@raw_io.output_text[toolchain]@@@"
+      "@@@STEP_LOG_LINE@raw_io.output[toolchain]@[CACHE]/macos_sdk/XCode.app/include/c++/v1@@@",
+      "@@@STEP_LOG_END@raw_io.output[toolchain]@@@"
     ]
   },
   {
@@ -682,18 +430,6 @@
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=arm64-apple-darwin --sysroot=/some/xcode/path"
     },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "release.mac-arm64.generate",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@2@@@"
@@ -712,18 +448,6 @@
       "CFLAGS": "--target=arm64-apple-darwin --sysroot=/some/xcode/path -nostdinc++ -cxx-isystem [CACHE]/macos_sdk/XCode.app/include/c++/v1",
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=arm64-apple-darwin --sysroot=/some/xcode/path"
-    },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
     },
     "name": "release.mac-arm64.build",
     "~followup_annotations": [
@@ -758,18 +482,6 @@
       "CXX": "[START_DIR]/cipd/bin/clang++",
       "LDFLAGS": "--target=arm64-apple-darwin --sysroot=/some/xcode/path"
     },
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "release.mac-arm64.upload.build gn/gn/mac-arm64",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@3@@@",
@@ -789,18 +501,6 @@
       "--reset"
     ],
     "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:ci"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
     "name": "reset XCode"
   },
   {

@@ -5,8 +5,6 @@
 
 from recipe_engine.recipe_api import Property
 
-PYTHON_VERSION_COMPATIBILITY = 'PY2+3'
-
 DEPS = [
     'recipe_engine/buildbucket',
     'recipe_engine/cipd',
@@ -46,8 +44,8 @@ def _get_libcxx_include_path(api):
           'xcrun', '--toolchain', 'clang', 'clang++', '-xc++', '-fsyntax-only',
           '-Wp,-v', '-'
       ],
-      stderr=api.raw_io.output_text(name='toolchain', add_output_log=True),
-      step_test_data=lambda: api.raw_io.test_api.stream_output_text(
+      stderr=api.raw_io.output(name='toolchain', add_output_log=True),
+      step_test_data=lambda: api.raw_io.test_api.stream_output(
           str(api.macos_sdk.sdk_dir.join('include', 'c++', 'v1')),
           stream='stderr')).stderr.splitlines()
   # Iterate over all include paths and look for the SDK libc++ one.
@@ -74,8 +72,8 @@ def _get_compilation_environment(api, target, cipd_dir):
     triple = '--target=%s' % target.triple
     sysroot = '--sysroot=%s' % api.step(
         'xcrun sdk-path', ['xcrun', '--show-sdk-path'],
-        stdout=api.raw_io.output_text(name='sdk-path', add_output_log=True),
-        step_test_data=lambda: api.raw_io.test_api.stream_output_text(
+        stdout=api.raw_io.output(name='sdk-path', add_output_log=True),
+        step_test_data=lambda: api.raw_io.test_api.stream_output(
             '/some/xcode/path')).stdout.strip()
     stdlib = cipd_dir.join('lib', 'libc++.a')
     cxx_include = _get_libcxx_include_path(api)
@@ -119,7 +117,7 @@ def RunSteps(api, repository):
       api.step('checkout', ['git', 'checkout', 'FETCH_HEAD'])
       revision = api.step(
           'rev-parse', ['git', 'rev-parse', 'HEAD'],
-          stdout=api.raw_io.output_text()).stdout.strip()
+          stdout=api.raw_io.output()).stdout.strip()
       for change in build_input.gerrit_changes:
         api.step('fetch %s/%s' % (change.change, change.patchset), [
             'git', 'fetch', repository,
@@ -321,7 +319,7 @@ def GenTests(api):
       git_repo='gn.googlesource.com/gn',
       revision='a' * 40,
   ) + api.step_data(
-      'git.rev-parse', api.raw_io.stream_output_text('a' * 40)
+      'git.rev-parse', api.raw_io.stream_output('a' * 40)
   ) + api.step_data(
       'release.linux-amd64.upload.cipd search gn/gn/linux-amd64 git_revision:' +
       'a' * 40,
@@ -333,7 +331,7 @@ def GenTests(api):
       git_repo='gn.googlesource.com/gn',
       revision='a' * 40,
   ) + api.step_data(
-      'git.rev-parse', api.raw_io.stream_output_text('a' * 40)
+      'git.rev-parse', api.raw_io.stream_output('a' * 40)
   ) + api.step_data(
       'release.linux-amd64.upload.cipd search gn/gn/linux-amd64 git_revision:' +
       'a' * 40, api.cipd.example_search('gn/gn/linux-amd64', [])))
