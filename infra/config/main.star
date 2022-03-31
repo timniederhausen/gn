@@ -135,6 +135,12 @@ luci.bucket(name = "try", acls = [
     ),
 ])
 
+luci.binding(
+    realm = "try",
+    roles = "role/swarming.taskTriggerer",
+    groups = "flex-try-led-users",
+)
+
 def try_builder(name, os, caches = None):
     builder(name, "try", os, caches)
     luci.cq_tryjob_verifier(
