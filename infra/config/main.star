@@ -55,6 +55,9 @@ def builder(name, bucket, os, caches = None, triggered_by = None):
         execution_timeout = 1 * time.hour,
         dimensions = {"cpu": "x86-64", "os": os, "pool": "luci.flex.%s" % bucket},
         triggered_by = triggered_by,
+        experiments = {
+            "luci.recipes.use_python3": 100,
+        },
     )
 
 luci.logdog(
