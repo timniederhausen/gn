@@ -119,8 +119,8 @@ const char kScriptExecutable_Help[] =
   action targets and exec_script calls. By default GN searches the
   PATH for Python to execute these scripts.
 
-  If set to the empty string, the path specified in action targets
-  and exec_script calls will be executed directly.
+  If set to the empty string, the path of scripts specified in action
+  targets and exec_script calls will be executed directly.
 )";
 
 const char kQuiet[] = "q";
