@@ -29,9 +29,6 @@
 // Current structure of rust-project.json output file
 //
 // {
-//    "roots": [
-//      "some/source/root"  // each crate's source root
-//    ],
 //    "crates": [
 //        {
 //            "deps": [
@@ -40,6 +37,13 @@
 //                    "name": "alloc" // extern name of dependency
 //                },
 //            ],
+//            "source": [
+//                "include_dirs": [
+//                     "some/source/root",
+//                     "some/gen/dir",
+//                ],
+//                "exclude_dirs": []
+//            },
 //            "edition": "2018", // edition of crate
 //            "cfg": [
 //              "unix", // "atomic" value config options
@@ -204,8 +208,8 @@ void AddSysrootCrate(const BuildSettings* build_settings,
       FilePathToUTF8(rebased_out_dir) + std::string(current_sysroot) +
       "/lib/rustlib/src/rust/library/" + std::string(crate) + "/src/lib.rs";
 
-  Crate sysroot_crate =
-      Crate(SourceFile(crate_path), crate_index, std::string(crate), "2018");
+  Crate sysroot_crate = Crate(SourceFile(crate_path), std::nullopt, crate_index,
+                              std::string(crate), "2018");
 
   sysroot_crate.AddConfigItem("debug_assertions");
 
@@ -290,8 +294,10 @@ void AddTarget(const BuildSettings* build_settings,
     edition = FindArgValue("--edition", compiler_args);
   }
 
-  Crate crate =
-      Crate(crate_root, crate_id, crate_label, edition.value_or("2015"));
+  auto gen_dir = GetBuildDirForTargetAsOutputFile(target, BuildDirType::GEN);
+
+  Crate crate = Crate(crate_root, gen_dir, crate_id, crate_label,
+                      edition.value_or("2015"));
 
   crate.SetCompilerArgs(compiler_args);
   if (compiler_target.has_value())
@@ -353,24 +359,7 @@ void AddTarget(const BuildSettings* build_settings,
 void WriteCrates(const BuildSettings* build_settings,
                  CrateList& crate_list,
                  std::ostream& rust_project) {
-  // produce a de-duplicated set of source roots:
-  std::set<std::string> roots;
-  for (auto& crate : crate_list) {
-    roots.insert(
-        FilePathToUTF8(build_settings->GetFullPath(crate.root().GetDir())));
-  }
-
   rust_project << "{" NEWLINE;
-  rust_project << "  \"roots\": [";
-  bool first_root = true;
-  for (auto& root : roots) {
-    if (!first_root)
-      rust_project << ",";
-    first_root = false;
-
-    rust_project << NEWLINE "    \"" << root << "\"";
-  }
-  rust_project << NEWLINE "  ]," NEWLINE;
   rust_project << "  \"crates\": [";
   bool first_crate = true;
   for (auto& crate : crate_list) {
@@ -384,7 +373,25 @@ void WriteCrates(const BuildSettings* build_settings,
     rust_project << NEWLINE << "    {" NEWLINE
                  << "      \"crate_id\": " << crate.index() << "," NEWLINE
                  << "      \"root_module\": \"" << crate_module << "\"," NEWLINE
-                 << "      \"label\": \"" << crate.label() << "\"," NEWLINE;
+                 << "      \"label\": \"" << crate.label() << "\"," NEWLINE
+                 << "      \"source\": {" NEWLINE
+                 << "          \"include_dirs\": [" NEWLINE
+                 << "               \""
+                 << FilePathToUTF8(
+                        build_settings->GetFullPath(crate.root().GetDir()))
+                 << "\"";
+    auto gen_dir = crate.gen_dir();
+    if (gen_dir.has_value()) {
+      auto gen_dir_path = FilePathToUTF8(
+          build_settings->GetFullPath(gen_dir->AsSourceDir(build_settings)));
+      rust_project << "," NEWLINE << "               \"" << gen_dir_path
+                   << "\"" NEWLINE;
+    } else {
+      rust_project << NEWLINE;
+    }
+    rust_project << "          ]," NEWLINE
+                 << "          \"exclude_dirs\": []" NEWLINE
+                 << "      }," NEWLINE;
 
     auto compiler_target = crate.CompilerTarget();
     if (compiler_target.has_value()) {

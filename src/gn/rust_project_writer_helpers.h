@@ -35,10 +35,15 @@ using DependencyList = std::vector<Dependency>;
 class Crate {
  public:
   Crate(SourceFile root,
+        std::optional<OutputFile> gen_dir,
         CrateIndex index,
         std::string label,
         std::string edition)
-      : root_(root), index_(index), label_(label), edition_(edition) {}
+      : root_(root),
+        gen_dir_(gen_dir),
+        index_(index),
+        label_(label),
+        edition_(edition) {}
 
   ~Crate() = default;
 
@@ -68,6 +73,9 @@ class Crate {
 
   // Returns the root file for the crate.
   SourceFile& root() { return root_; }
+
+  // Returns the root file for the crate.
+  std::optional<OutputFile>& gen_dir() { return gen_dir_; }
 
   // Returns the crate index.
   CrateIndex index() { return index_; };
@@ -103,6 +111,7 @@ class Crate {
 
  private:
   SourceFile root_;
+  std::optional<OutputFile> gen_dir_;
   CrateIndex index_;
   std::string label_;
   std::string edition_;
