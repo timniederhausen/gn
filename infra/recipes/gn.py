@@ -9,6 +9,7 @@ PYTHON_VERSION_COMPATIBILITY = 'PY3'
 
 DEPS = [
     'recipe_engine/buildbucket',
+    'recipe_engine/cas',
     'recipe_engine/cipd',
     'recipe_engine/context',
     'recipe_engine/file',
@@ -260,15 +261,19 @@ def RunSteps(api, repository):
             if target.is_host:
               api.step('test', [src_dir.join('out', 'gn_unittests')])
 
-            if build_input.gerrit_changes:
-              continue
-
             if config['name'] != 'release':
               continue
 
             with api.step.nest('upload'):
-              cipd_pkg_name = 'gn/gn/%s' % target.platform
               gn = 'gn' + ('.exe' if target.is_win else '')
+
+              if build_input.gerrit_changes:
+                # Upload to CAS from CQ.
+                api.cas.archive('upload binary to CAS', src_dir.join('out'),
+                                src_dir.join('out', gn))
+                continue
+
+              cipd_pkg_name = 'gn/gn/%s' % target.platform
 
               pkg_def = api.cipd.PackageDefinition(
                   package_name=cipd_pkg_name,
