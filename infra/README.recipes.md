@@ -18,7 +18,7 @@
 
 [DEPS](/infra/recipe_modules/macos_sdk/__init__.py#7): [recipe\_engine/cipd][recipe_engine/recipe_modules/cipd], [recipe\_engine/context][recipe_engine/recipe_modules/context], [recipe\_engine/json][recipe_engine/recipe_modules/json], [recipe\_engine/path][recipe_engine/recipe_modules/path], [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/step][recipe_engine/recipe_modules/step]
 
-PYTHON_VERSION_COMPATIBILITY: PY2+3
+PYTHON_VERSION_COMPATIBILITY: PY3
 
 The `macos_sdk` module provides safe functions to access a semi-hermetic
 XCode installation.
@@ -68,7 +68,7 @@ Raises:
 
 [DEPS](/infra/recipe_modules/target/__init__.py#7): [recipe\_engine/platform][recipe_engine/recipe_modules/platform]
 
-PYTHON_VERSION_COMPATIBILITY: PY2+3
+PYTHON_VERSION_COMPATIBILITY: PY3
 
 #### **class [TargetApi](/infra/recipe_modules/target/api.py#82)([RecipeApi][recipe_engine/wkt/RecipeApi]):**
 
@@ -77,7 +77,7 @@ PYTHON_VERSION_COMPATIBILITY: PY2+3
 
 [DEPS](/infra/recipe_modules/windows_sdk/__init__.py#7): [recipe\_engine/cipd][recipe_engine/recipe_modules/cipd], [recipe\_engine/context][recipe_engine/recipe_modules/context], [recipe\_engine/json][recipe_engine/recipe_modules/json], [recipe\_engine/path][recipe_engine/recipe_modules/path], [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/step][recipe_engine/recipe_modules/step]
 
-PYTHON_VERSION_COMPATIBILITY: PY2+3
+PYTHON_VERSION_COMPATIBILITY: PY3
 
 #### **class [WindowsSDKApi](/infra/recipe_modules/windows_sdk/api.py#10)([RecipeApi][recipe_engine/wkt/RecipeApi]):**
 
@@ -97,7 +97,7 @@ Raises:
 
 [DEPS](/infra/recipes/gn.py#10): [macos\_sdk](#recipe_modules-macos_sdk), [target](#recipe_modules-target), [windows\_sdk](#recipe_modules-windows_sdk), [recipe\_engine/buildbucket][recipe_engine/recipe_modules/buildbucket], [recipe\_engine/cipd][recipe_engine/recipe_modules/cipd], [recipe\_engine/context][recipe_engine/recipe_modules/context], [recipe\_engine/file][recipe_engine/recipe_modules/file], [recipe\_engine/json][recipe_engine/recipe_modules/json], [recipe\_engine/path][recipe_engine/recipe_modules/path], [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/properties][recipe_engine/recipe_modules/properties], [recipe\_engine/python][recipe_engine/recipe_modules/python], [recipe\_engine/raw\_io][recipe_engine/recipe_modules/raw_io], [recipe\_engine/step][recipe_engine/recipe_modules/step]
 
-PYTHON_VERSION_COMPATIBILITY: PY2+3
+PYTHON_VERSION_COMPATIBILITY: PY3
 
 Recipe for building GN.
 
@@ -106,21 +106,21 @@ Recipe for building GN.
 
 [DEPS](/infra/recipe_modules/macos_sdk/examples/full.py#7): [macos\_sdk](#recipe_modules-macos_sdk), [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/properties][recipe_engine/recipe_modules/properties], [recipe\_engine/step][recipe_engine/recipe_modules/step]
 
-PYTHON_VERSION_COMPATIBILITY: PY2+3
+PYTHON_VERSION_COMPATIBILITY: PY3
 
 &mdash; **def [RunSteps](/infra/recipe_modules/macos_sdk/examples/full.py#15)(api):**
 ### *recipes* / [target:examples/full](/infra/recipe_modules/target/examples/full.py)
 
 [DEPS](/infra/recipe_modules/target/examples/full.py#7): [target](#recipe_modules-target), [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/properties][recipe_engine/recipe_modules/properties], [recipe\_engine/step][recipe_engine/recipe_modules/step]
 
-PYTHON_VERSION_COMPATIBILITY: PY2+3
+PYTHON_VERSION_COMPATIBILITY: PY3
 
 &mdash; **def [RunSteps](/infra/recipe_modules/target/examples/full.py#15)(api):**
 ### *recipes* / [windows\_sdk:examples/full](/infra/recipe_modules/windows_sdk/examples/full.py)
 
 [DEPS](/infra/recipe_modules/windows_sdk/examples/full.py#7): [windows\_sdk](#recipe_modules-windows_sdk), [recipe\_engine/platform][recipe_engine/recipe_modules/platform], [recipe\_engine/properties][recipe_engine/recipe_modules/properties], [recipe\_engine/step][recipe_engine/recipe_modules/step]
 
-PYTHON_VERSION_COMPATIBILITY: PY2+3
+PYTHON_VERSION_COMPATIBILITY: PY3
 
 &mdash; **def [RunSteps](/infra/recipe_modules/windows_sdk/examples/full.py#15)(api):**
 
