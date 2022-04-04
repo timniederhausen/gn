@@ -239,7 +239,7 @@
       "fetch",
       "--tags",
       "https://fuchsia.googlesource.com/third_party/github.com/mjansson/rpmalloc",
-      "f4b7c52c858675f732a76bd1c73447e0fcf84b1e"
+      "+upstream/develop"
     ],
     "cwd": "[START_DIR]/rpmalloc",
     "infra_step": true,
@@ -264,7 +264,7 @@
     "cmd": [
       "git",
       "checkout",
-      "FETCH_HEAD"
+      "b097fd0916500439721a114bb9cd8d14bd998683"
     ],
     "cwd": "[START_DIR]/rpmalloc",
     "infra_step": true,
@@ -283,68 +283,6 @@
     "name": "rpmalloc.checkout",
     "~followup_annotations": [
       "@@@STEP_NEST_LEVEL@1@@@"
-    ]
-  },
-  {
-    "cmd": [
-      "vpython",
-      "-u",
-      "RECIPE_MODULE[recipe_engine::file]/resources/fileutil.py",
-      "--json-output",
-      "/path/to/tmp/json",
-      "copy",
-      "[START_DIR]/rpmalloc/build/ninja/clang.py",
-      "/path/to/tmp/"
-    ],
-    "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:try"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
-    "name": "rpmalloc.read [START_DIR]/rpmalloc/build/ninja/clang.py",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@clang.py@CXXFLAGS = ['-Wall', '-Weverything', '-Wfoo']@@@",
-      "@@@STEP_LOG_END@clang.py@@@"
-    ]
-  },
-  {
-    "cmd": [
-      "vpython",
-      "-u",
-      "RECIPE_MODULE[recipe_engine::file]/resources/fileutil.py",
-      "--json-output",
-      "/path/to/tmp/json",
-      "copy",
-      "CXXFLAGS = ['-Wall',  '-Wfoo']",
-      "[START_DIR]/rpmalloc/build/ninja/clang.py"
-    ],
-    "infra_step": true,
-    "luci_context": {
-      "realm": {
-        "name": "gn:try"
-      },
-      "resultdb": {
-        "current_invocation": {
-          "name": "invocations/build:8945511751514863184",
-          "update_token": "token"
-        },
-        "hostname": "rdbhost"
-      }
-    },
-    "name": "rpmalloc.write [START_DIR]/rpmalloc/build/ninja/clang.py",
-    "~followup_annotations": [
-      "@@@STEP_NEST_LEVEL@1@@@",
-      "@@@STEP_LOG_LINE@clang.py@CXXFLAGS = ['-Wall',  '-Wfoo']@@@",
-      "@@@STEP_LOG_END@clang.py@@@"
     ]
   },
   {
