@@ -1025,25 +1025,10 @@ OutputFile GetSubBuildDirAsOutputFile(const BuildDirContext& context,
   OutputFile result = GetBuildDirAsOutputFile(context, type);
 
   if (source_dir.is_source_absolute()) {
-    std::string_view build_dir = context.build_settings->build_dir().value();
-    std::string_view source_dir_path = source_dir.value();
-    if (source_dir_path.substr(0, build_dir.size()) == build_dir) {
-      // The source dir is source-absolute, but in the build directory
-      // (e.g. `//out/Debug/gen/src/foo.cc` or
-      // `//out/Debug/toolchain1/gen/foo.cc`), which happens for generated
-      // sources. In this case, remove the build directory prefix, and replace
-      // it with `BUILD_DIR`. This will create results like `obj/BUILD_DIR/gen`
-      // or `toolchain2/obj/BUILD_DIR/toolchain1/gen` which look surprising,
-      // but guarantee unicity.
-      result.value().append("BUILD_DIR/");
-      result.value().append(&source_dir_path[build_dir.size()],
-                            source_dir_path.size() - build_dir.size());
-    } else {
-      // The source dir is source-absolute, so we trim off the two leading
-      // slashes to append to the toolchain object directory.
-      result.value().append(&source_dir.value()[2],
-                            source_dir.value().size() - 2);
-    }
+    // The source dir is source-absolute, so we trim off the two leading
+    // slashes to append to the toolchain object directory.
+    result.value().append(&source_dir.value()[2],
+                          source_dir.value().size() - 2);
   } else {
     // System-absolute.
     AppendFixedAbsolutePathSuffix(context.build_settings, source_dir, &result);

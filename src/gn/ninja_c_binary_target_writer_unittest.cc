@@ -405,18 +405,18 @@ TEST_F(NinjaCBinaryTargetWriterTest, NoHardDepsToNoPublicHeaderTarget) {
       "target_out_dir = obj/foo\n"
       "target_output_name = gen_obj\n"
       "\n"
-      "build obj/BUILD_DIR/gen_obj.generated.o: cxx generated.cc"
+      "build obj/out/Debug/gen_obj.generated.o: cxx generated.cc"
       " || obj/foo/generate.stamp\n"
       "  source_file_part = generated.cc\n"
       "  source_name_part = generated\n"
       "\n"
-      "build obj/foo/gen_obj.stamp: stamp obj/BUILD_DIR/gen_obj.generated.o"
+      "build obj/foo/gen_obj.stamp: stamp obj/out/Debug/gen_obj.generated.o"
       // The order-only dependency here is strictly unnecessary since the
       // sources list this as an order-only dep.
       " || obj/foo/generate.stamp\n";
 
   std::string obj_str = obj_out.str();
-  EXPECT_EQ(std::string(obj_expected), obj_str);
+  EXPECT_EQ(obj_expected, obj_str);
 
   // A shared library depends on gen_obj, having corresponding header for
   // generated obj.
@@ -442,7 +442,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, NoHardDepsToNoPublicHeaderTarget) {
       "target_output_name = libgen_lib\n"
       "\n"
       "\n"
-      "build ./libgen_lib.so: solink obj/BUILD_DIR/gen_obj.generated.o"
+      "build ./libgen_lib.so: solink obj/out/Debug/gen_obj.generated.o"
       // The order-only dependency here is strictly unnecessary since
       // obj/out/Debug/gen_obj.generated.o has dependency to
       // obj/foo/gen_obj.stamp
