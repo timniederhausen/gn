@@ -92,6 +92,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDep) {
   dep.rust_values().set_crate_root(tlib);
   dep.rust_values().crate_name() = "tortoise";
   dep.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(dep.OnResolved(&err));
 
   Target target(setup.settings(), Label(SourceDir("//hare/"), "bar"));
   target.set_output_type(Target::RUST_LIBRARY);
@@ -177,6 +178,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
   dep.rust_values().set_crate_root(tlib);
   dep.rust_values().crate_name() = "tortoise";
   dep.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(dep.OnResolved(&err));
 
   Target dep2(setup.settings(), Label(SourceDir("//achilles/"), "bar"));
   dep2.set_output_type(Target::RUST_LIBRARY);
@@ -187,6 +189,7 @@ TEST_F(RustProjectJSONWriter, RustTargetDepTwo) {
   dep2.rust_values().set_crate_root(alib);
   dep2.rust_values().crate_name() = "achilles";
   dep2.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(dep2.OnResolved(&err));
 
   Target target(setup.settings(), Label(SourceDir("//hare/"), "bar"));
   target.set_output_type(Target::RUST_LIBRARY);
@@ -297,18 +300,21 @@ TEST_F(RustProjectJSONWriter, RustTargetGetDepRustOnly) {
   dep.rust_values().set_crate_root(tlib);
   dep.rust_values().crate_name() = "tortoise";
   dep.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(dep.OnResolved(&err));
 
   Target dep2(setup.settings(), Label(SourceDir("//achilles/"), "bar"));
   dep2.set_output_type(Target::STATIC_LIBRARY);
   dep2.visibility().SetPublic();
   SourceFile alib("//achilles/lib.o");
   dep2.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(dep2.OnResolved(&err));
 
   Target dep3(setup.settings(), Label(SourceDir("//achilles/"), "group"));
   dep3.set_output_type(Target::GROUP);
   dep3.visibility().SetPublic();
   dep3.public_deps().push_back(LabelTargetPair(&dep));
   dep3.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(dep3.OnResolved(&err));
 
   Target dep4(setup.settings(), Label(SourceDir("//tortoise/"), "macro"));
   dep4.set_output_type(Target::RUST_PROC_MACRO);
@@ -319,6 +325,7 @@ TEST_F(RustProjectJSONWriter, RustTargetGetDepRustOnly) {
   dep4.rust_values().set_crate_root(tmlib);
   dep4.rust_values().crate_name() = "tortoise_macro";
   dep4.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(dep4.OnResolved(&err));
 
   Target target(setup.settings(), Label(SourceDir("//hare/"), "bar"));
   target.set_output_type(Target::RUST_LIBRARY);
@@ -378,6 +385,9 @@ TEST_F(RustProjectJSONWriter, RustTargetGetDepRustOnly) {
       "      \"deps\": [\n"
       "      ],\n"
       "      \"edition\": \"2015\",\n"
+      "      \"is_proc_macro\": true,\n"
+      "      \"proc_macro_dylib_path\": "
+      "\"out/Debug/obj/tortoise/libmacro.so\",\n"
       "      \"cfg\": [\n"
       "        \"test\",\n"
       "        \"debug_assertions\"\n"
