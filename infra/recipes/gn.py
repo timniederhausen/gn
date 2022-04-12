@@ -202,6 +202,19 @@ def RunSteps(api, repository):
               ['git', 'fetch', '--tags', RPMALLOC_GIT_URL, RPMALLOC_BRANCH])
           api.step('checkout', ['git', 'checkout', RPMALLOC_REVISION])
 
+        # Patch configure.py since to add -Wno-ignored-optimization-flag since
+        # Clang will now complain when `-funit-at-a-time` is being used.
+        build_ninja_clang_path = api.path.join(rpmalloc_src_dir, 'build/ninja/clang.py')
+        build_ninja_clang_py = api.file.read_text('read %s' % build_ninja_clang_path,
+                                                 build_ninja_clang_path,
+                                                 "CXXFLAGS = ['-Wall', '-Weverything', '-Wfoo']")
+        build_ninja_clang_py = build_ninja_clang_py.replace(
+            "'-Wno-disabled-macro-expansion'",
+            "'-Wno-disabled-macro-expansion', '-Wno-ignored-optimization-argument'")
+        api.file.write_text('write %s' % build_ninja_clang_path,
+                            build_ninja_clang_path,
+                            build_ninja_clang_py)
+
         for platform in all_config_platforms:
           # Convert target architecture and os to rpmalloc format.
           rpmalloc_os, rpmalloc_arch = platform.split('-')
