@@ -1825,7 +1825,6 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustDepsOverDynamicLinking) {
   rlib3.source_types_used().Set(SourceFile::SOURCE_RS);
   rlib3.rust_values().set_crate_root(lib3);
   rlib3.rust_values().crate_name() = "baz";
-  rlib3.public_deps().push_back(LabelTargetPair(&rlib3));
   rlib3.SetToolchain(setup.toolchain());
   ASSERT_TRUE(rlib3.OnResolved(&err));
 
@@ -1837,7 +1836,6 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustDepsOverDynamicLinking) {
   rlib2.source_types_used().Set(SourceFile::SOURCE_RS);
   rlib2.rust_values().set_crate_root(lib2);
   rlib2.rust_values().crate_name() = "bar";
-  rlib2.public_deps().push_back(LabelTargetPair(&rlib2));
   rlib2.SetToolchain(setup.toolchain());
   ASSERT_TRUE(rlib2.OnResolved(&err));
 
