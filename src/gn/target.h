@@ -239,7 +239,7 @@ class Target : public Item {
     return output_type_ == ACTION || output_type_ == ACTION_FOREACH ||
            output_type_ == COPY_FILES || output_type_ == CREATE_BUNDLE ||
            output_type_ == BUNDLE_DATA || output_type_ == GENERATED_FILE ||
-           (IsBinary() && has_swift_values() && swift_values().builds_module());
+           builds_swift_module();
   }
 
   // Returns the iterator range which can be used in range-based for loops
@@ -310,6 +310,12 @@ class Target : public Item {
   SwiftValues& swift_values();
   const SwiftValues& swift_values() const;
   bool has_swift_values() const { return swift_values_.get(); }
+
+  // Return true if this targets builds a SwiftModule
+  bool builds_swift_module() const {
+    return IsBinary() && has_swift_values() &&
+           source_types_used().SwiftSourceUsed();
+  }
 
   RustValues& rust_values();
   const RustValues& rust_values() const;

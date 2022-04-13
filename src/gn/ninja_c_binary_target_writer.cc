@@ -678,7 +678,7 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
       swiftmodules.push_back(dep->swift_values().module_output_file());
       implicit_deps.push_back(dep->swift_values().module_output_file());
     }
-    if (target_->swift_values().builds_module()) {
+    if (target_->builds_swift_module()) {
       swiftmodules.push_back(target_->swift_values().module_output_file());
       implicit_deps.push_back(target_->swift_values().module_output_file());
     }

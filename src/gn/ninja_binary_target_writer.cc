@@ -156,7 +156,7 @@ void NinjaBinaryTargetWriter::ClassifyDependency(
   // don't link at all.
   bool can_link_libs = target_->IsFinal();
 
-  if (can_link_libs && dep->swift_values().builds_module())
+  if (can_link_libs && dep->builds_swift_module())
     classified_deps->swiftmodule_deps.push_back(dep);
 
   if (target_->source_types_used().RustSourceUsed() &&

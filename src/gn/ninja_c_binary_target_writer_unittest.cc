@@ -2378,10 +2378,10 @@ TEST_F(NinjaCBinaryTargetWriterTest, SwiftModule) {
         "target_output_name = bar\n"
         "\n"
         "build obj/bar/Bar.swiftmodule: swift ../../bar/bar.swift"
-        " || obj/foo/foo.stamp\n"
+        " || obj/bar/group.stamp obj/foo/foo.stamp\n"
         "\n"
         "build obj/bar/bar.o: stamp obj/bar/Bar.swiftmodule"
-        " || obj/foo/foo.stamp\n"
+        " || obj/bar/group.stamp obj/foo/foo.stamp\n"
         "\n"
         "build obj/bar/bar.stamp: stamp obj/bar/bar.o "
         "|| obj/bar/group.stamp obj/foo/foo.stamp\n";

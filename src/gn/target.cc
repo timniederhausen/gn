@@ -889,7 +889,7 @@ void Target::PullRecursiveHardDeps() {
     // by the current target).
     if (pair.ptr->IsBinary() && !pair.ptr->all_headers_public() &&
         pair.ptr->public_headers().empty() &&
-        !pair.ptr->swift_values().builds_module()) {
+        !pair.ptr->builds_swift_module()) {
       continue;
     }
 
