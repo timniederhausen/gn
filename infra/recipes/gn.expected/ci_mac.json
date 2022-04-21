@@ -197,7 +197,7 @@
       "-kind",
       "mac",
       "-xcode-version",
-      "13e113",
+      "12b5025f",
       "-output-dir",
       "[CACHE]/macos_sdk/XCode.app"
     ],
