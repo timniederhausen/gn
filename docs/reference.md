@@ -1360,11 +1360,20 @@
 #### **Variables**
 
 ```
-  args, asmflags, bridge_header, cflags, cflags_c, cflags_cc, cflags_objc,
-  cflags_objcc, configs, data, data_deps, defines, depfile, deps,
-  framework_dirs, include_dirs, inputs, metadata, module_deps, module_name,
-  outputs*, pool, response_file_contents, rustenv, rustflags, script*, sources,
-  swiftflags
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
+  Dependent configs: all_dependent_configs, public_configs
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_extension, output_name, public, sources, testonly,
+           visibility
+  Action variables: args, bridge_header, configs, data, depfile,
+                    framework_dirs, inputs, module_deps, module_name,
+                    outputs*, pool, response_file_contents, script*,
+                    sources
   * = required
 ```
 
@@ -1452,11 +1461,21 @@
 #### **Variables**
 
 ```
-  args, asmflags, bridge_header, cflags, cflags_c, cflags_cc, cflags_objc,
-  cflags_objcc, configs, data, data_deps, defines, depfile, deps,
-  framework_dirs, include_dirs, inputs, metadata, module_deps, module_name,
-  outputs*, pool, response_file_contents, rustenv, rustflags, script*, sources,
-  swiftflags
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
+  Dependent configs: all_dependent_configs, public_configs
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_extension, output_name, public, sources, testonly,
+           visibility
+  Action variables: args, bridge_header, configs, data, depfile,
+                    framework_dirs, inputs, module_deps, module_name,
+                    outputs*, pool, response_file_contents, script*,
+                    sources
+  * = required
 ```
 
 #### **Example**
@@ -1507,7 +1526,13 @@
 #### **Variables**
 
 ```
-  sources*, outputs*, deps, data_deps, metadata, public_deps, visibility
+  Dependent configs: all_dependent_configs, public_configs
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_extension, output_name, public, sources, testonly,
+           visibility
+  Bundle-specific: sources*, outputs*
   * = required
 ```
 
@@ -1557,6 +1582,23 @@
   mapping from each source file to an output file name using source expansion
   (see "gn help source_expansion"). The placeholders will look like
   "{{source_name_part}}", for example.
+
+  If you want to copy the output of a previous build step, the target that
+  generates the file to copy must be reachable from the deps or public_deps of
+  the copy target.
+```
+
+#### **Variables**
+
+```
+  Dependent configs: all_dependent_configs, public_configs
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_extension, output_name, public, sources, testonly,
+           visibility
+  Copy variables: sources*, outputs*
+  * = required
 ```
 
 #### **Examples**
@@ -1575,6 +1617,24 @@
     # Use source expansion to generate output files with the corresponding file
     # names in the gen dir. This will just copy each file.
     outputs = [ "$target_gen_dir/{{source_file_part}}" ]
+  }
+
+  # Copy the output of a generated executable.
+  copy("package_melon") {
+    # This example uses get_label_info() to compute the output directory of the
+    # dependency. This allows the copy rule to work regardless of the toolchain.
+    #
+    # In some cases (particularly actions defined previously in the same file)
+    # you can use get_target_outputs() to get the input file which can eliminate
+    # the assumptions about the output file name of the dependency.
+
+    input_dir = get_label_info("//src/tools/melon", "root_out_dir");
+    sources = [ "$input_dir/melon" ]
+
+    outputs = [ "$target_gen_dir/{{source_file_part}}" ]
+
+    # Depend on the target to build the file before copying.
+    deps = [ "//src/tools/melon" ]
   }
 ```
 ### <a name="func_create_bundle"></a>**create_bundle**: [ios/macOS] Build an iOS or macOS bundle.
@@ -1621,11 +1681,17 @@
 #### **Variables**
 
 ```
-  bundle_root_dir, bundle_contents_dir, bundle_resources_dir,
-  bundle_executable_dir, bundle_deps_filter, deps, data_deps, public_deps,
-  visibility, product_type, code_signing_args, code_signing_script,
-  code_signing_sources, code_signing_outputs, xcode_extra_attributes,
-  xcode_test_application_name, partial_info_plist, metadata
+  Dependent configs: all_dependent_configs, public_configs
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_extension, output_name, public, sources, testonly,
+           visibility
+  Bundle vars: bundle_root_dir, bundle_contents_dir, bundle_resources_dir,
+               bundle_executable_dir, bundle_deps_filter, product_type,
+               code_signing_args, code_signing_script, code_signing_sources,
+               code_signing_outputs, xcode_extra_attributes,
+               xcode_test_application_name, partial_info_plist
 ```
 
 #### **Example**
@@ -1742,14 +1808,15 @@
 #### **Variables**
 
 ```
-  Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
-         asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
-         libs, precompiled_header, precompiled_source, rustflags,
-         rustenv, swiftflags, testonly
-  Deps: data_deps, deps, public_deps
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
   Dependent configs: all_dependent_configs, public_configs
   General: check_includes, configs, data, friend, inputs, metadata,
-           output_name, output_extension, public, sources, testonly,
+           output_extension, output_name, public, sources, testonly,
            visibility
   Rust variables: aliased_deps, crate_root, crate_name
 ```
@@ -1775,6 +1842,18 @@
 
   Collected metadata, if specified, will be returned in postorder of
   dependencies. See the example for details.
+```
+
+#### **Variables**
+
+```
+  Dependent configs: all_dependent_configs, public_configs
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_extension, output_name, public, sources, testonly,
+           visibility
+  Generated file: contents, data_keys, rebase, walk_keys, output_conversion
 ```
 
 #### **Example (metadata collection)**
@@ -1874,18 +1953,6 @@
       "../base/foo.cpp",  // from //base:a
     ]
 ```
-
-#### **Variables**
-
-```
-  contents
-  data_keys
-  rebase
-  walk_keys
-  output_conversion
-  Deps: data_deps, deps, public_deps
-  Dependent configs: all_dependent_configs, public_configs
-```
 ### <a name="func_group"></a>**group**: Declare a named group of targets.
 
 ```
@@ -1897,8 +1964,12 @@
 #### **Variables**
 
 ```
-  Deps: data_deps, deps, public_deps
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
   Dependent configs: all_dependent_configs, public_configs
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_extension, output_name, public, sources, testonly,
+           visibility
 ```
 
 #### **Example**
@@ -1936,14 +2007,15 @@
 #### **Variables**
 
 ```
-  Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
-         asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
-         libs, precompiled_header, precompiled_source, rustflags,
-         rustenv, swiftflags, testonly
-  Deps: data_deps, deps, public_deps
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
   Dependent configs: all_dependent_configs, public_configs
   General: check_includes, configs, data, friend, inputs, metadata,
-           output_name, output_extension, public, sources, testonly,
+           output_extension, output_name, public, sources, testonly,
            visibility
   Rust variables: aliased_deps, crate_root, crate_name, crate_type
 ```
@@ -1968,14 +2040,15 @@
 #### **Variables**
 
 ```
-  Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
-         asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
-         libs, precompiled_header, precompiled_source, rustflags,
-         rustenv, swiftflags, testonly
-  Deps: data_deps, deps, public_deps
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
   Dependent configs: all_dependent_configs, public_configs
   General: check_includes, configs, data, friend, inputs, metadata,
-           output_name, output_extension, public, sources, testonly,
+           output_extension, output_name, public, sources, testonly,
            visibility
   Rust variables: aliased_deps, crate_root, crate_name
 ```
@@ -2003,14 +2076,15 @@
 #### **Variables**
 
 ```
-  Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
-         asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
-         libs, precompiled_header, precompiled_source, rustflags,
-         rustenv, swiftflags, testonly
-  Deps: data_deps, deps, public_deps
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
   Dependent configs: all_dependent_configs, public_configs
   General: check_includes, configs, data, friend, inputs, metadata,
-           output_name, output_extension, public, sources, testonly,
+           output_extension, output_name, public, sources, testonly,
            visibility
   Rust variables: aliased_deps, crate_root, crate_name
 ```
@@ -2037,14 +2111,15 @@
 #### **Variables**
 
 ```
-  Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
-         asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
-         libs, precompiled_header, precompiled_source, rustflags,
-         rustenv, swiftflags, testonly
-  Deps: data_deps, deps, public_deps
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
   Dependent configs: all_dependent_configs, public_configs
   General: check_includes, configs, data, friend, inputs, metadata,
-           output_name, output_extension, public, sources, testonly,
+           output_extension, output_name, public, sources, testonly,
            visibility
   Rust variables: aliased_deps, crate_root, crate_name, crate_type
 ```
@@ -2082,14 +2157,15 @@
 #### **Variables**
 
 ```
-  Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
-         asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
-         libs, precompiled_header, precompiled_source, rustflags,
-         rustenv, swiftflags, testonly
-  Deps: data_deps, deps, public_deps
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
   Dependent configs: all_dependent_configs, public_configs
   General: check_includes, configs, data, friend, inputs, metadata,
-           output_name, output_extension, public, sources, testonly,
+           output_extension, output_name, public, sources, testonly,
            visibility
 ```
 ### <a name="func_static_library"></a>**static_library**: Declare a static library target.
@@ -2106,14 +2182,15 @@
 
 ```
   complete_static_lib
-  Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
-         asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
-         libs, precompiled_header, precompiled_source, rustflags,
-         rustenv, swiftflags, testonly
-  Deps: data_deps, deps, public_deps
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
   Dependent configs: all_dependent_configs, public_configs
   General: check_includes, configs, data, friend, inputs, metadata,
-           output_name, output_extension, public, sources, testonly,
+           output_extension, output_name, public, sources, testonly,
            visibility
   Rust variables: aliased_deps, crate_root, crate_name
 
@@ -2140,6 +2217,20 @@
     target("source_set", "doom_melon") {
   Is equivalent to:
     source_set("doom_melon") {
+```
+
+#### **Common target variables**
+
+```
+  Deps: assert_no_deps, data_deps, deps, public_deps, runtime_deps,
+        write_runtime_deps
+  Dependent configs: all_dependent_configs, public_configs
+  General: check_includes, configs, data, friend, inputs, metadata,
+           output_extension, output_name, public, sources, testonly,
+           visibility
+
+  Targets will also have variables specific to that type, see "gn help <type>"
+  for more.
 ```
 
 #### **Example**
@@ -2215,10 +2306,10 @@
 #### **Variables valid in a config definition**
 
 ```
-  Flags: cflags, cflags_c, cflags_cc, cflags_objc, cflags_objcc,
-         asmflags, defines, include_dirs, inputs, ldflags, lib_dirs,
-         libs, precompiled_header, precompiled_source, rustflags,
-         rustenv, swiftflags, testonly
+  Flags: asmflags, cflags, cflags_c, cflags_cc, cflags_objc,
+         cflags_objcc, defines, include_dirs, inputs, ldflags,
+         lib_dirs, libs, precompiled_header, precompiled_source,
+         rustenv, rustflags, swiftflags, testonly
   Nested configs: configs
   General: visibility
 ```
@@ -6814,12 +6905,14 @@
       help --root-target").
 
   script_executable [optional]
-      Path to specific Python executable or other interpreter to use in
-      action targets and exec_script calls. By default GN searches the
-      PATH for Python to execute these scripts.
+      By default, GN runs the scripts used in action targets and exec_script
+      calls using the Python interpreter found in PATH. This value specifies the
+      Python executable or other interpreter to use instead.
 
-      If set to the empty string, the path specified in action targets
-      and exec_script calls will be executed directly.
+      If set to the empty string, the scripts will be executed directly.
+
+      The command-line switch --script-executable will override this value (see
+      "gn help --script-executable")
 
   secondary_source [optional]
       Label of an alternate directory tree to find input files. When searching
