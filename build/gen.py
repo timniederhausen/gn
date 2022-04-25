@@ -435,9 +435,11 @@ def WriteGNNinja(path, platform, host, options, args_list):
         '-fno-exceptions',
         '-fno-rtti',
         '-fdiagnostics-color',
+        '-Werror',
         '-Wall',
         '-Wextra',
         '-Wno-unused-parameter',
+        '-Wundef',
         '-std=c++17'
     ])
 
