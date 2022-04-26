@@ -457,3 +457,147 @@ TEST(Functions, NotNeeded) {
   ASSERT_FALSE(err.has_error())
       << err.message() << err.location().Describe(true);
 }
+
+TEST(Template, PrintStackTraceWithOneTemplate) {
+  TestWithScope setup;
+  TestParseInput input(
+      "template(\"foo\") {\n"
+      "  print(target_name)\n"
+      "  print(invoker.foo_value)\n"
+      "  print_stack_trace()\n"
+      "}\n"
+      "foo(\"lala\") {\n"
+      "  foo_value = 42\n"
+      "}");
+  ASSERT_FALSE(input.has_error());
+
+  Err err;
+  input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message();
+
+  EXPECT_EQ(
+    "lala\n"
+    "42\n"
+    "print_stack_trace() initiated at:  //test:4\n"
+    "  foo(\"lala\")  //test:6\n"
+    "  print_stack_trace()  //test:4\n",
+    setup.print_output());
+}
+
+TEST(Template, PrintStackTraceWithNoTemplates) {
+  TestWithScope setup;
+  TestParseInput input("print_stack_trace()\n");
+  ASSERT_FALSE(input.has_error());
+
+  Err err;
+  input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message();
+
+  EXPECT_EQ(
+    "print_stack_trace() initiated at:  //test:1\n"
+    "  print_stack_trace()  //test:1\n",
+    setup.print_output());
+}
+
+
+TEST(Template, PrintStackTraceWithNestedTemplates) {
+  TestWithScope setup;
+  TestParseInput input(
+      "template(\"foo\") {\n"
+      "  print(target_name)\n"
+      "  print(invoker.foo_value)\n"
+      "  print_stack_trace()\n"
+      "}\n"
+      "template(\"baz\") {\n"
+      "  foo(\"${target_name}.foo\") {\n"
+      "    foo_value = invoker.bar\n"
+      "  }\n"
+      "}\n"
+      "baz(\"lala\") {\n"
+      "  bar = 42\n"
+      "}");
+  ASSERT_FALSE(input.has_error());
+
+  Err err;
+  input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message();
+
+  EXPECT_EQ(
+    "lala.foo\n"
+    "42\n"
+    "print_stack_trace() initiated at:  //test:4\n"
+    "  baz(\"lala\")  //test:11\n"
+    "  foo(\"lala.foo\")  //test:7\n"
+    "  print_stack_trace()  //test:4\n",
+    setup.print_output());
+}
+
+TEST(Template, PrintStackTraceWithNonTemplateScopes) {
+  TestWithScope setup;
+  TestParseInput input(
+      "template(\"foo\") {\n"
+      "  print(target_name)\n"
+      "  if (defined(invoker.foo_value)) {\n"
+      "    print(invoker.foo_value)\n"
+      "    print_stack_trace()\n"
+      "  }\n"
+      "}\n"
+      "template(\"baz\") {\n"
+      "  foo(\"${target_name}.foo\") {\n"
+      "    foo_value = invoker.bar\n"
+      "  }\n"
+      "}\n"
+      "baz(\"lala\") {\n"
+      "  bar = 42\n"
+      "}");
+  ASSERT_FALSE(input.has_error());
+
+  Err err;
+  input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message();
+
+  EXPECT_EQ(
+    "lala.foo\n"
+    "42\n"
+    "print_stack_trace() initiated at:  //test:5\n"
+    "  baz(\"lala\")  //test:13\n"
+    "  foo(\"lala.foo\")  //test:9\n"
+    "  print_stack_trace()  //test:5\n",
+    setup.print_output());
+}
+
+TEST(Template, PrintStackTraceWithNonTemplateScopesBetweenTemplateInvocations) {
+  TestWithScope setup;
+  TestParseInput input(
+      "template(\"foo\") {\n"
+      "  print(target_name)\n"
+      "  if (defined(invoker.foo_value)) {\n"
+      "    print(invoker.foo_value)\n"
+      "    print_stack_trace()\n"
+      "  }\n"
+      "}\n"
+      "template(\"baz\") {\n"
+      "  if (invoker.bar == 42) {\n"
+      "    foo(\"${target_name}.foo\") {\n"
+      "      foo_value = invoker.bar\n"
+      "    }\n"
+      "  }\n"
+      "}\n"
+      "baz(\"lala\") {\n"
+      "  bar = 42\n"
+      "}");
+  ASSERT_FALSE(input.has_error());
+  Err err;
+  input.parsed()->Execute(setup.scope(), &err);
+
+  ASSERT_FALSE(err.has_error()) << err.message();
+
+  EXPECT_EQ(
+    "lala.foo\n"
+    "42\n"
+    "print_stack_trace() initiated at:  //test:5\n"
+    "  baz(\"lala\")  //test:15\n"
+    "  foo(\"lala.foo\")  //test:10\n"
+    "  print_stack_trace()  //test:5\n",
+    setup.print_output());
+}

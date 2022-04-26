@@ -39,6 +39,13 @@ Scope::ProgrammaticProvider::~ProgrammaticProvider() {
   scope_->RemoveProvider(this);
 }
 
+std::string Scope::TemplateInvocationEntry::Describe() const {
+  std::string ret = template_name;
+  ret += "(\"" + target_name + "\")  ";
+  ret += location.Describe(false);
+  return ret;
+}
+
 Scope::Scope(const Settings* settings)
     : const_containing_(nullptr),
       mutable_containing_(nullptr),
@@ -555,6 +562,42 @@ void Scope::AddProvider(ProgrammaticProvider* p) {
 void Scope::RemoveProvider(ProgrammaticProvider* p) {
   DCHECK(programmatic_providers_.find(p) != programmatic_providers_.end());
   programmatic_providers_.erase(p);
+}
+
+void Scope::SetTemplateInvocationEntry(std::string template_name,
+                                       std::string target_name,
+                                       Location location) {
+  template_invocation_entry_ = std::make_unique<TemplateInvocationEntry>(
+      TemplateInvocationEntry{std::move(template_name), std::move(target_name),
+                              std::move(location)});
+}
+
+void Scope::AppendTemplateInvocationEntries(
+    std::vector<TemplateInvocationEntry>* out) const {
+
+  // Bare scopes and if/for_each() scopes need to walk up their containing
+  // scopes to find previous template invocations.  A scope like this within
+  // a template invocation will have an "invoker" value, but that invoker will
+  // not have an entry, and so both are checked to ensure that the full stack of
+  // invocations is captured.
+  if (containing())
+    containing()->AppendTemplateInvocationEntries(out);
+
+  // Template scopes need to walk up invoker to find previous template
+  // invocations
+  const Value* invoker = GetValue("invoker");
+  if (invoker && invoker->type() == Value::SCOPE)
+    invoker->scope_value()->AppendTemplateInvocationEntries(out);
+
+  if (template_invocation_entry_)
+    out->push_back(*template_invocation_entry_);
+}
+
+std::vector<Scope::TemplateInvocationEntry>
+Scope::GetTemplateInvocationEntries() const {
+  std::vector<Scope::TemplateInvocationEntry> result;
+  AppendTemplateInvocationEntries(&result);
+  return result;
 }
 
 // static

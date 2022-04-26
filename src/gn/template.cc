@@ -64,6 +64,10 @@ Value Template::Invoke(Scope* scope,
   Scope template_scope(closure_.get());
   template_scope.set_source_dir(scope->GetSourceDir());
 
+  // Track the invocation of the template on the template's scope
+  template_scope.SetTemplateInvocationEntry(
+      template_name, args[0].string_value(), invocation->GetRange().begin());
+
   // Propagate build dependency files from invoker scope (template scope already
   // propagated via parent scope).
   template_scope.AddBuildDependencyFiles(

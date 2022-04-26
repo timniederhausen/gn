@@ -53,6 +53,7 @@
     *   [not_needed: Mark variables from scope as not needed.](#func_not_needed)
     *   [pool: Defines a pool object.](#func_pool)
     *   [print: Prints to the console.](#func_print)
+    *   [print_stack_trace: Prints a stack trace.](#func_print_stack_trace)
     *   [process_file_template: Do template expansion over a list of files.](#func_process_file_template)
     *   [read_file: Read a file into a variable.](#func_read_file)
     *   [rebase_path: Rebase a file or directory to another location.](#func_rebase_path)
@@ -2969,6 +2970,35 @@
   print("Hello world")
 
   print(sources, deps)
+```
+### <a name="func_print_stack_trace"></a>**print_stack_trace**: Prints a stack trace.
+
+```
+  Prints the current file location, and all template invocations that led up to
+  this location, to the console.
+```
+
+#### **Examples**
+
+```
+  template("foo"){
+    print_stack_trace()
+  }
+  template("bar"){
+    foo(target_name + ".foo") {
+      baz = invoker.baz
+    }
+  }
+  bar("lala") {
+    baz = 42
+  }
+
+  will print out the following:
+
+  print_stack_trace() initiated at  //build.gn:2
+    bar("lala")  //BUILD.gn:9
+    foo("lala.foo")  //BUILD.gn:5
+    print_stack_trace()  //BUILD.gn:2
 ```
 ### <a name="func_process_file_template"></a>**process_file_template**: Do template expansion over a list of files.
 

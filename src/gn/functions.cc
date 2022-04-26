@@ -968,6 +968,65 @@ Value RunPrint(Scope* scope,
   return Value();
 }
 
+// print_stack_trace -----------------------------------------------------------
+
+const char kPrintStackTrace[] = "print_stack_trace";
+const char kPrintStackTrace_HelpShort[] =
+    "print_stack_trace: Prints a stack trace.";
+const char kPrintStackTrace_Help[] =
+    R"(print_stack_trace: Prints a stack trace.
+
+  Prints the current file location, and all template invocations that led up to
+  this location, to the console.
+
+Examples
+
+  template("foo"){
+    print_stack_trace()
+  }
+  template("bar"){
+    foo(target_name + ".foo") {
+      baz = invoker.baz
+    }
+  }
+  bar("lala") {
+    baz = 42
+  }
+
+  will print out the following:
+
+  print_stack_trace() initiated at  //build.gn:2
+    bar("lala")  //BUILD.gn:9
+    foo("lala.foo")  //BUILD.gn:5
+    print_stack_trace()  //BUILD.gn:2
+
+)";
+
+Value RunPrintStackTrace(Scope* scope,
+                         const FunctionCallNode* function,
+                         const std::vector<Value>& args,
+                         Err* err) {
+  std::string location_str = function->GetRange().begin().Describe(false);
+  std::string output = "print_stack_trace() initiated at:  " + location_str;
+  output.push_back('\n');
+
+  for (const auto& entry : scope->GetTemplateInvocationEntries()) {
+    output.append("  " + entry.Describe() + "\n");
+  }
+  output.append("  print_stack_trace()  " + location_str + "\n");
+
+  const BuildSettings::PrintCallback& cb =
+      scope->settings()->build_settings()->print_callback();
+  if (cb) {
+    cb(output);
+  } else {
+    printf("%s", output.c_str());
+    fflush(stdout);
+  }
+
+  return Value();
+}
+
 // split_list ------------------------------------------------------------------
 
 const char kSplitList[] = "split_list";
@@ -1393,6 +1452,7 @@ struct FunctionInfoInitializer {
     INSERT_FUNCTION(NotNeeded, false)
     INSERT_FUNCTION(Pool, false)
     INSERT_FUNCTION(Print, false)
+    INSERT_FUNCTION(PrintStackTrace, false)
     INSERT_FUNCTION(ProcessFileTemplate, false)
     INSERT_FUNCTION(ReadFile, false)
     INSERT_FUNCTION(RebasePath, false)
