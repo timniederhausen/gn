@@ -183,7 +183,7 @@ Err JSONToInputs(const Label& default_toolchain,
     }
   }
 
-  for (const auto& kv : dict->DictItems()) {
+  for (const auto kv : dict->DictItems()) {
     if (kv.first == kFilesKey || kv.first == kAdditonalCompileTargetsKey ||
         kv.first == kTestTargetsKey) {
       continue;

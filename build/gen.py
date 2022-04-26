@@ -439,6 +439,7 @@ def WriteGNNinja(path, platform, host, options, args_list):
         '-Wall',
         '-Wextra',
         '-Wno-unused-parameter',
+        '-Wrange-loop-analysis',
         '-Wundef',
         '-std=c++17'
     ])
