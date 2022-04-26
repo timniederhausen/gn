@@ -562,7 +562,6 @@ def WriteGNNinja(path, platform, host, options, args_list):
         'src/base/strings/stringprintf.cc',
         'src/base/strings/utf_string_conversion_utils.cc',
         'src/base/strings/utf_string_conversions.cc',
-        'src/base/third_party/icu/icu_utf.cc',
         'src/base/timer/elapsed_timer.cc',
         'src/base/value_iterators.cc',
         'src/base/values.cc',
