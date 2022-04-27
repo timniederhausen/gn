@@ -439,10 +439,13 @@ def WriteGNNinja(path, platform, host, options, args_list):
         '-Wall',
         '-Wextra',
         '-Wno-unused-parameter',
-        '-Wrange-loop-analysis',
         '-Wundef',
         '-std=c++17'
     ])
+
+    # flag not supported by gcc/g++.
+    if not (platform.is_aix() or platform.is_msys() or platform.is_mingw()):
+      cflags.extend(['-Wrange-loop-analysis']);
 
     if platform.is_linux() or platform.is_mingw() or platform.is_msys():
       ldflags.append('-Wl,--as-needed')
