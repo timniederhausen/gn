@@ -66,7 +66,7 @@ std::string FlagsGetter(RecursiveWriterConfig config,
   RecursiveTargetConfigToStream<T>(config, target, getter, writer, out);
   base::EscapeJSONString(out.str(), false, &result);
   return result;
-};
+}
 
 void SetupCompileFlags(const Target* target,
                        PathOutput& path_output,

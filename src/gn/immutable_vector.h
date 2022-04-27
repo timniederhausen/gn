@@ -40,7 +40,7 @@ class ImmutableVectorView {
   const T* data() const { return begin(); }
   size_t size() const { return header_ ? header_->size : 0u; }
   bool empty() const { return size() == 0; }
-  const T& operator[](size_t offset) const { return begin()[offset]; };
+  const T& operator[](size_t offset) const { return begin()[offset]; }
 
   const T* begin() const { return header_ ? &header_->item0 : nullptr; }
   const T* end() const {

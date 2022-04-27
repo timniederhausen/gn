@@ -78,7 +78,7 @@ class Crate {
   std::optional<OutputFile>& gen_dir() { return gen_dir_; }
 
   // Returns the crate index.
-  CrateIndex index() { return index_; };
+  CrateIndex index() { return index_; }
 
   // Returns the displayable crate label.
   const std::string& label() { return label_; }

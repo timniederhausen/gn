@@ -439,7 +439,11 @@ def WriteGNNinja(path, platform, host, options, args_list):
         '-Wall',
         '-Wextra',
         '-Wno-unused-parameter',
+
+        '-Wextra-semi',
+        '-Wextra-semi-stmt',
         '-Wundef',
+
         '-std=c++17'
     ])
 

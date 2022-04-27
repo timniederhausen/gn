@@ -519,7 +519,7 @@ int SuffixCommentTreeWalk(const ParseNode* node) {
 
 #define RETURN_IF_SET(x)             \
   if (int result = (x); result >= 0) \
-    return result;
+    return result
 
   if (const AccessorNode* accessor = node->AsAccessor()) {
     RETURN_IF_SET(SuffixCommentTreeWalk(accessor->subscript()));
@@ -559,7 +559,7 @@ int SuffixCommentTreeWalk(const ParseNode* node) {
   }
 
   return -1;
-};
+}
 
 // If there are suffix comments on the first node or its children, they might
 // carry down multiple lines. Otherwise, use the node's normal end range. This
