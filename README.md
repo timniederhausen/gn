@@ -94,7 +94,7 @@ Alternatively, you can build GN from source with a C++17 compiler:
 
     git clone https://gn.googlesource.com/gn
     cd gn
-    python build/gen.py
+    python build/gen.py # --allow-warning if you want to build with warnings.
     ninja -C out
     # To run tests:
     out/gn_unittests
