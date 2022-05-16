@@ -131,6 +131,7 @@ const SourceTypeForExt kSourceTypeForExt[] = {
     {"storyboard", "file.storyboard"},
     {"strings", "text.plist.strings"},
     {"swift", "sourcecode.swift"},
+    {"ts", "sourcecode.javascript"},
     {"ttf", "file"},
     {"xcassets", "folder.assetcatalog"},
     {"xcconfig", "text.xcconfig"},
@@ -152,7 +153,7 @@ const char* GetSourceType(std::string_view ext) {
 }
 
 bool HasExplicitFileType(std::string_view ext) {
-  return ext == "dart";
+  return ext == "dart" || ext == "ts";
 }
 
 bool IsSourceFileForIndexing(std::string_view ext) {
