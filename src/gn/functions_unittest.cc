@@ -478,7 +478,7 @@ TEST(Template, PrintStackTraceWithOneTemplate) {
   EXPECT_EQ(
     "lala\n"
     "42\n"
-    "print_stack_trace() initiated at:  //test:4\n"
+    "print_stack_trace() initiated at:  //test:4  using: //toolchain:default\n"
     "  foo(\"lala\")  //test:6\n"
     "  print_stack_trace()  //test:4\n",
     setup.print_output());
@@ -491,10 +491,10 @@ TEST(Template, PrintStackTraceWithNoTemplates) {
 
   Err err;
   input.parsed()->Execute(setup.scope(), &err);
-  ASSERT_FALSE(err.has_error()) << err.message();
+  ASSERT_FALSE(err.has_error()) << err.message() << "\n\n" << err.help_text();
 
   EXPECT_EQ(
-    "print_stack_trace() initiated at:  //test:1\n"
+    "print_stack_trace() initiated at:  //test:1  using: //toolchain:default\n"
     "  print_stack_trace()  //test:1\n",
     setup.print_output());
 }
@@ -520,12 +520,12 @@ TEST(Template, PrintStackTraceWithNestedTemplates) {
 
   Err err;
   input.parsed()->Execute(setup.scope(), &err);
-  ASSERT_FALSE(err.has_error()) << err.message();
+  ASSERT_FALSE(err.has_error()) << err.message() << "\n\n" << err.help_text();
 
   EXPECT_EQ(
     "lala.foo\n"
     "42\n"
-    "print_stack_trace() initiated at:  //test:4\n"
+    "print_stack_trace() initiated at:  //test:4  using: //toolchain:default\n"
     "  baz(\"lala\")  //test:11\n"
     "  foo(\"lala.foo\")  //test:7\n"
     "  print_stack_trace()  //test:4\n",
@@ -554,12 +554,12 @@ TEST(Template, PrintStackTraceWithNonTemplateScopes) {
 
   Err err;
   input.parsed()->Execute(setup.scope(), &err);
-  ASSERT_FALSE(err.has_error()) << err.message();
+  ASSERT_FALSE(err.has_error()) << err.message() << "\n\n" << err.help_text();
 
   EXPECT_EQ(
     "lala.foo\n"
     "42\n"
-    "print_stack_trace() initiated at:  //test:5\n"
+    "print_stack_trace() initiated at:  //test:5  using: //toolchain:default\n"
     "  baz(\"lala\")  //test:13\n"
     "  foo(\"lala.foo\")  //test:9\n"
     "  print_stack_trace()  //test:5\n",
@@ -589,15 +589,57 @@ TEST(Template, PrintStackTraceWithNonTemplateScopesBetweenTemplateInvocations) {
   ASSERT_FALSE(input.has_error());
   Err err;
   input.parsed()->Execute(setup.scope(), &err);
-
-  ASSERT_FALSE(err.has_error()) << err.message();
+  ASSERT_FALSE(err.has_error()) << err.message() << "\n\n" << err.help_text();
 
   EXPECT_EQ(
     "lala.foo\n"
     "42\n"
-    "print_stack_trace() initiated at:  //test:5\n"
+    "print_stack_trace() initiated at:  //test:5  using: //toolchain:default\n"
     "  baz(\"lala\")  //test:15\n"
     "  foo(\"lala.foo\")  //test:10\n"
     "  print_stack_trace()  //test:5\n",
+    setup.print_output());
+}
+
+TEST(Template, PrintStackTraceWithTemplateDefinedWithinATemplate) {
+  TestWithScope setup;
+  TestParseInput input(
+      "template(\"foo\") {\n"
+      "  print(target_name)\n"
+      "  if (defined(invoker.foo_value)) {\n"
+      "    template(\"foo_internal\") {"
+      "      print(target_name)\n"
+      "      print(invoker.foo_internal_value)\n"
+      "      print_stack_trace()\n"
+      "    }\n"
+      "    foo_internal(target_name+\".internal\") {"
+      "      foo_internal_value = invoker.foo_value\n"
+      "    }\n"
+      "  }\n"
+      "}\n"
+      "template(\"baz\") {\n"
+      "  if (invoker.bar == 42) {\n"
+      "    foo(\"${target_name}.foo\") {\n"
+      "      foo_value = invoker.bar\n"
+      "    }\n"
+      "  }\n"
+      "}\n"
+      "baz(\"lala\") {\n"
+      "  bar = 42\n"
+      "}");
+  ASSERT_FALSE(input.has_error());
+  Err err;
+  input.parsed()->Execute(setup.scope(), &err);
+  ASSERT_FALSE(err.has_error()) << err.message() << "\n\n" << err.help_text();
+
+  EXPECT_EQ(
+    "lala.foo\n"
+    "lala.foo.internal\n"
+    "42\n"
+    "print_stack_trace() initiated at:  //test:6  using: //toolchain:default\n"
+    "  baz(\"lala\")  //test:19\n"
+    "  foo(\"lala.foo\")  //test:14\n"
+    "  foo_internal(\"lala.foo.internal\")  //test:8\n"
+    "  print_stack_trace()  //test:6\n",
     setup.print_output());
 }

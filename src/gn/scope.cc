@@ -572,25 +572,24 @@ void Scope::SetTemplateInvocationEntry(std::string template_name,
                               std::move(location)});
 }
 
+const Scope::TemplateInvocationEntry* Scope::FindTemplateInvocationEntry() const {
+  if (template_invocation_entry_)
+    return template_invocation_entry_.get();
+  if (const Scope* scope = containing())
+    return scope->FindTemplateInvocationEntry();
+  return nullptr;
+}
+
 void Scope::AppendTemplateInvocationEntries(
     std::vector<TemplateInvocationEntry>* out) const {
 
-  // Bare scopes and if/for_each() scopes need to walk up their containing
-  // scopes to find previous template invocations.  A scope like this within
-  // a template invocation will have an "invoker" value, but that invoker will
-  // not have an entry, and so both are checked to ensure that the full stack of
-  // invocations is captured.
-  if (containing())
-    containing()->AppendTemplateInvocationEntries(out);
-
-  // Template scopes need to walk up invoker to find previous template
-  // invocations
   const Value* invoker = GetValue("invoker");
   if (invoker && invoker->type() == Value::SCOPE)
     invoker->scope_value()->AppendTemplateInvocationEntries(out);
 
-  if (template_invocation_entry_)
-    out->push_back(*template_invocation_entry_);
+  const TemplateInvocationEntry* entry = FindTemplateInvocationEntry();
+  if (entry)
+    out->push_back(*entry);
 }
 
 std::vector<Scope::TemplateInvocationEntry>
