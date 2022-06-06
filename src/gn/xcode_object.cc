@@ -968,6 +968,7 @@ void PBXShellScriptBuildPhase::Print(std::ostream& out, unsigned indent) const {
   const IndentRules rules = {false, indent + 1};
   out << indent_str << Reference() << " = {\n";
   PrintProperty(out, rules, "isa", ToString(Class()));
+  PrintProperty(out, rules, "alwaysOutOfDate", 1u);
   PrintProperty(out, rules, "buildActionMask", 0x7fffffffu);
   PrintProperty(out, rules, "files", files_);
   PrintProperty(out, rules, "inputPaths", EmptyPBXObjectVector());
