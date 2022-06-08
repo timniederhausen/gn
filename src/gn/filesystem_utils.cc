@@ -1036,10 +1036,8 @@ OutputFile GetSubBuildDirAsOutputFile(const BuildDirContext& context,
       // or `toolchain2/obj/BUILD_DIR/toolchain1/gen` which look surprising,
       // but guarantee unicity.
       result.value().append("BUILD_DIR/");
-      if (source_dir_path.size() > build_dir.size()) {
-        result.value().append(&source_dir_path[build_dir.size()],
-                              source_dir_path.size() - build_dir.size());
-      }
+      result.value().append(source_dir_path.substr(build_dir.size()));
+
     } else {
       // The source dir is source-absolute, so we trim off the two leading
       // slashes to append to the toolchain object directory.
