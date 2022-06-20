@@ -284,12 +284,6 @@ class PBXGroup : public PBXObject {
   PBXFileReference* AddSourceFile(const std::string& navigator_path,
                                   const std::string& source_path);
 
-  bool is_source() const { return is_source_; }
-  void set_is_source(bool is_source) { is_source_ = is_source; }
-
-  bool autosorted() const { return autosorted_; }
-  void set_autosorted(bool autosorted) { autosorted_ = autosorted; }
-
   template <typename T, typename... Args>
   T* CreateChild(Args&&... args) {
     return static_cast<T*>(
@@ -303,17 +297,41 @@ class PBXGroup : public PBXObject {
   void Visit(PBXObjectVisitorConst& visitor) const override;
   void Print(std::ostream& out, unsigned indent) const override;
 
+  // Returns whether the current PBXGroup should sort last when sorting
+  // children of a PBXGroup. This should only be used for the "Products"
+  // group which is hidden in Xcode UI when it is the last children of
+  // the main PBXProject group.
+  virtual bool SortLast() const;
+
  private:
   PBXObject* AddChildImpl(std::unique_ptr<PBXObject> child);
 
   std::vector<std::unique_ptr<PBXObject>> children_;
   std::string name_;
   std::string path_;
-  bool is_source_ = false;
-  bool autosorted_ = true;
 
   PBXGroup(const PBXGroup&) = delete;
   PBXGroup& operator=(const PBXGroup&) = delete;
+};
+
+// PBXMainGroup ---------------------------------------------------------------
+
+class PBXMainGroup : public PBXGroup {
+ public:
+  explicit PBXMainGroup(const std::string& source_path);
+  ~PBXMainGroup() override;
+
+  std::string Name() const override;
+};
+
+// PBXProductsGroup -----------------------------------------------------------
+
+class PBXProductsGroup : public PBXGroup {
+ public:
+  explicit PBXProductsGroup();
+  ~PBXProductsGroup() override;
+
+  bool SortLast() const override;
 };
 
 // PBXNativeTarget ------------------------------------------------------------
@@ -395,7 +413,6 @@ class PBXProject : public PBXObject {
   std::string name_;
   std::string config_name_;
 
-  PBXGroup* sources_ = nullptr;
   PBXGroup* products_ = nullptr;
   PBXNativeTarget* target_for_indexing_ = nullptr;
 
