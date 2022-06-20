@@ -828,6 +828,23 @@
       "legacy" - Legacy Build system
       "new" - New Build System
 
+  --xcode-configs=<config_name_list>
+      Configure the list of build configuration supported by the generated
+      project. If specified, must be a list of semicolon-separated strings.
+      If ommitted, a single configuration will be used in the generated
+      project derived from the build directory.
+
+  --xcode-config-build-dir=<string>
+      If present, must be a path relative to the source directory. It will
+      default to $root_out_dir if ommitted. The path is assumed to point to
+      the directory where ninja needs to be invoked. This variable can be
+      used to build for multiple configuration / platform / environment from
+      the same generated Xcode project (assuming that the user has created a
+      gn build directory with the correct args.gn for each).
+
+      One useful value is to use Xcode variables such as '${CONFIGURATION}'
+      or '${EFFECTIVE_PLATFORM}'.
+
   --ninja-executable=<string>
       Can be used to specify the ninja executable to use when building.
 

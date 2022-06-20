@@ -388,10 +388,10 @@ void PBXBuildPhase::Visit(PBXObjectVisitorConst& visitor) const {
 
 PBXTarget::PBXTarget(const std::string& name,
                      const std::string& shell_script,
-                     const std::string& config_name,
+                     const std::vector<std::string>& configs,
                      const PBXAttributes& attributes)
     : configurations_(
-          std::make_unique<XCConfigurationList>(config_name, attributes, this)),
+          std::make_unique<XCConfigurationList>(configs, attributes, this)),
       name_(name) {
   if (!shell_script.empty()) {
     build_phases_.push_back(
@@ -432,9 +432,9 @@ void PBXTarget::Visit(PBXObjectVisitorConst& visitor) const {
 
 PBXAggregateTarget::PBXAggregateTarget(const std::string& name,
                                        const std::string& shell_script,
-                                       const std::string& config_name,
+                                       const std::vector<std::string>& configs,
                                        const PBXAttributes& attributes)
-    : PBXTarget(name, shell_script, config_name, attributes) {}
+    : PBXTarget(name, shell_script, configs, attributes) {}
 
 PBXAggregateTarget::~PBXAggregateTarget() = default;
 
@@ -715,12 +715,12 @@ bool PBXProductsGroup::SortLast() const {
 
 PBXNativeTarget::PBXNativeTarget(const std::string& name,
                                  const std::string& shell_script,
-                                 const std::string& config_name,
+                                 const std::vector<std::string>& configs,
                                  const PBXAttributes& attributes,
                                  const std::string& product_type,
                                  const std::string& product_name,
                                  const PBXFileReference* product_reference)
-    : PBXTarget(name, shell_script, config_name, attributes),
+    : PBXTarget(name, shell_script, configs, attributes),
       product_reference_(product_reference),
       product_type_(product_type),
       product_name_(product_name) {
@@ -773,15 +773,15 @@ void PBXNativeTarget::Print(std::ostream& out, unsigned indent) const {
 // PBXProject -----------------------------------------------------------------
 
 PBXProject::PBXProject(const std::string& name,
-                       const std::string& config_name,
+                       std::vector<std::string> configs,
                        const std::string& source_path,
                        const PBXAttributes& attributes)
-    : name_(name), config_name_(config_name), target_for_indexing_(nullptr) {
+    : name_(name), configs_(std::move(configs)), target_for_indexing_(nullptr) {
   main_group_ = std::make_unique<PBXMainGroup>(source_path);
   products_ = main_group_->CreateChild<PBXProductsGroup>();
 
   configurations_ =
-      std::make_unique<XCConfigurationList>(config_name, attributes, this);
+      std::make_unique<XCConfigurationList>(configs_, attributes, this);
 }
 
 PBXProject::~PBXProject() = default;
@@ -809,15 +809,16 @@ void PBXProject::AddSourceFile(const std::string& navigator_path,
 }
 
 void PBXProject::AddAggregateTarget(const std::string& name,
+                                    const std::string& output_dir,
                                     const std::string& shell_script) {
   PBXAttributes attributes;
   attributes["CLANG_ENABLE_OBJC_WEAK"] = "YES";
   attributes["CODE_SIGNING_REQUIRED"] = "NO";
-  attributes["CONFIGURATION_BUILD_DIR"] = ".";
+  attributes["CONFIGURATION_BUILD_DIR"] = output_dir;
   attributes["PRODUCT_NAME"] = name;
 
   targets_.push_back(std::make_unique<PBXAggregateTarget>(
-      name, shell_script, config_name_, attributes));
+      name, shell_script, configs_, attributes));
 }
 
 void PBXProject::AddIndexingTarget() {
@@ -835,8 +836,8 @@ void PBXProject::AddIndexingTarget() {
 
   const char product_type[] = "com.apple.product-type.tool";
   targets_.push_back(std::make_unique<PBXNativeTarget>(
-      "sources", std::string(), config_name_, attributes, product_type,
-      "sources", product_reference));
+      "sources", std::string(), configs_, attributes, product_type, "sources",
+      product_reference));
   target_for_indexing_ = static_cast<PBXNativeTarget*>(targets_.back().get());
 }
 
@@ -873,7 +874,7 @@ PBXNativeTarget* PBXProject::AddNativeTarget(
   attributes["EXCLUDED_SOURCE_FILE_NAMES"] = "*.*";
 
   targets_.push_back(std::make_unique<PBXNativeTarget>(
-      name, shell_script, config_name_, attributes, output_type, product_name,
+      name, shell_script, configs_, attributes, output_type, product_name,
       product));
   return static_cast<PBXNativeTarget*>(targets_.back().get());
 }
@@ -1091,13 +1092,16 @@ void XCBuildConfiguration::Print(std::ostream& out, unsigned indent) const {
 
 // XCConfigurationList --------------------------------------------------------
 
-XCConfigurationList::XCConfigurationList(const std::string& name,
-                                         const PBXAttributes& attributes,
-                                         const PBXObject* owner_reference)
+XCConfigurationList::XCConfigurationList(
+    const std::vector<std::string>& configs,
+    const PBXAttributes& attributes,
+    const PBXObject* owner_reference)
     : owner_reference_(owner_reference) {
   DCHECK(owner_reference_);
-  configurations_.push_back(
-      std::make_unique<XCBuildConfiguration>(name, attributes));
+  for (const std::string& config_name : configs) {
+    configurations_.push_back(
+        std::make_unique<XCBuildConfiguration>(config_name, attributes));
+  }
 }
 
 XCConfigurationList::~XCConfigurationList() = default;
@@ -1134,7 +1138,7 @@ void XCConfigurationList::Print(std::ostream& out, unsigned indent) const {
   out << indent_str << Reference() << " = {\n";
   PrintProperty(out, rules, "isa", ToString(Class()));
   PrintProperty(out, rules, "buildConfigurations", configurations_);
-  PrintProperty(out, rules, "defaultConfigurationIsVisible", 1u);
+  PrintProperty(out, rules, "defaultConfigurationIsVisible", 0u);
   PrintProperty(out, rules, "defaultConfigurationName",
                 configurations_[0]->Name());
   out << indent_str << "};\n";
