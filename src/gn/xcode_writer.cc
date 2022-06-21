@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "base/environment.h"
+#include "base/files/file_enumerator.h"
 #include "base/logging.h"
 #include "base/sha1.h"
 #include "base/stl_util.h"
@@ -193,6 +194,49 @@ void AddPBXTargetDependency(const PBXTarget* base_pbxtarget,
       base_pbxtarget, std::move(container_item_proxy));
 
   dependent_pbxtarget->AddDependency(std::move(dependency));
+}
+
+// Returns a SourceFile for absolute path `file_path` below `//`.
+SourceFile FilePathToSourceFile(const BuildSettings* build_settings,
+                                const base::FilePath& file_path) {
+  const std::string file_path_utf8 = FilePathToUTF8(file_path);
+  return SourceFile("//" + file_path_utf8.substr(
+                               build_settings->root_path_utf8().size() + 1));
+}
+
+// Returns the list of patterns to use when looking for additional files
+// from `options`.
+std::vector<base::FilePath::StringType> GetAdditionalFilesPatterns(
+    const XcodeWriter::Options& options) {
+  return base::SplitString(options.additional_files_patterns,
+                           FILE_PATH_LITERAL(";"), base::TRIM_WHITESPACE,
+                           base::SPLIT_WANT_ALL);
+}
+
+// Returns the list of roots to use when looking for additional files
+// from `options`.
+std::vector<base::FilePath> GetAdditionalFilesRoots(
+    const BuildSettings* build_settings,
+    const XcodeWriter::Options& options) {
+  if (options.additional_files_roots.empty()) {
+    return {build_settings->root_path()};
+  }
+
+  const std::vector<base::FilePath::StringType> roots =
+      base::SplitString(options.additional_files_roots, FILE_PATH_LITERAL(";"),
+                        base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
+
+  std::vector<base::FilePath> root_paths;
+  for (const base::FilePath::StringType& root : roots) {
+    const std::string rebased_root =
+        RebasePath(FilePathToUTF8(root), SourceDir("//"),
+                   build_settings->root_path_utf8());
+
+    root_paths.push_back(
+        build_settings->root_path().Append(UTF8ToFilePath(rebased_root)));
+  }
+
+  return root_paths;
 }
 
 // Helper class to resolve list of XCTest files per target.
@@ -639,12 +683,32 @@ bool XcodeProject::AddSourcesFromBuilder(const Builder& builder, Err* err) {
     if (!build_settings_->root_path().IsParent(path))
       continue;
 
-    const std::string as8bit = path.As8Bit();
-    const SourceFile source(
-        "//" + as8bit.substr(build_settings_->root_path().value().size() + 1));
-
+    const SourceFile source = FilePathToSourceFile(build_settings_, path);
     if (ShouldIncludeFileInProject(source))
       sources.insert(source);
+  }
+
+  // Add any files from --xcode-additional-files-patterns, using the root
+  // listed in --xcode-additional-files-roots.
+  if (!options_.additional_files_patterns.empty()) {
+    const std::vector<base::FilePath::StringType> patterns =
+        GetAdditionalFilesPatterns(options_);
+    const std::vector<base::FilePath> roots =
+        GetAdditionalFilesRoots(build_settings_, options_);
+
+    for (const base::FilePath& root : roots) {
+      for (const base::FilePath::StringType& pattern : patterns) {
+        base::FileEnumerator it(root, /*recursive*/ true,
+                                base::FileEnumerator::FILES, pattern,
+                                base::FileEnumerator::FolderSearchPolicy::ALL);
+
+        for (base::FilePath path = it.Next(); !path.empty(); path = it.Next()) {
+          const SourceFile source = FilePathToSourceFile(build_settings_, path);
+          if (ShouldIncludeFileInProject(source))
+            sources.insert(source);
+        }
+      }
+    }
   }
 
   // Sort files to ensure deterministic generation of the project file (and

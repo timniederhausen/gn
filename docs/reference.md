@@ -845,6 +845,17 @@
       One useful value is to use Xcode variables such as '${CONFIGURATION}'
       or '${EFFECTIVE_PLATFORM}'.
 
+  --xcode-additional-files-patterns=<pattern_list>
+      If present, must be a list of semicolon-separated file patterns. It
+      will be used to add all files matching the pattern located in the
+      source tree to the project. It can be used to add, e.g. documentation
+      files to the project to allow easily edit them.
+
+  --xcode-additional-files-roots=<path_list>
+      If present, must be a list of semicolon-separated paths. It will be used
+      as roots when looking for additional files to add. If ommitted, defaults
+      to "//".
+
   --ninja-executable=<string>
       Can be used to specify the ninja executable to use when building.
 

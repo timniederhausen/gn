@@ -116,6 +116,7 @@ const SourceTypeForExt kSourceTypeForExt[] = {
     {"js", "sourcecode.javascript"},
     {"kext", "wrapper.kext"},
     {"m", "sourcecode.c.objc"},
+    {"md", "net.daringfireball.markdown"},
     {"mm", "sourcecode.cpp.objcpp"},
     {"nib", "wrapper.nib"},
     {"o", "compiled.mach-o.objfile"},

@@ -56,6 +56,18 @@ class XcodeWriter {
     // as the project directory.
     base::FilePath configuration_build_dir;
 
+    // If specified, should be a semicolon-separated list of file patterns.
+    // It will be used to add files to the project that are not referenced
+    // from the BUILD.gn files. This is usually used to add documentation
+    // files.
+    base::FilePath::StringType additional_files_patterns;
+
+    // If specified, should be a semicolon-separated list of file roots.
+    // It will be used to add files to the project that are not referenced
+    // from the BUILD.gn files. This is usually used to add documentation
+    // files.
+    base::FilePath::StringType additional_files_roots;
+
     // Control which version of the build system should be used for the
     // generated Xcode project.
     XcodeBuildSystem build_system = XcodeBuildSystem::kLegacy;
