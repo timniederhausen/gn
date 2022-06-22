@@ -170,6 +170,10 @@ class Printer {
   // 'visibility': same as 'deps'.
   void SortIfApplicable(const BinaryOpNode* binop);
 
+  // Traverse a binary op node tree and apply a callback to each leaf node.
+  void TraverseBinaryOpNode(const ParseNode* node,
+                            std::function<void(const ParseNode*)> callback);
+
   // Sort contiguous import() function calls in the given ordered list of
   // statements (the body of a block or scope).
   template <class PARSENODE>
@@ -403,17 +407,37 @@ void Printer::SortIfApplicable(const BinaryOpNode* binop) {
     }
   }
   const IdentifierNode* ident = binop->left()->AsIdentifier();
-  const ListNode* list = binop->right()->AsList();
   if ((binop->op().value() == "=" || binop->op().value() == "+=" ||
        binop->op().value() == "-=") &&
-      ident && list) {
+      ident) {
     const std::string_view lhs = ident->value().value();
     if (base::EndsWith(lhs, "sources", base::CompareCase::SENSITIVE) ||
-        lhs == "public")
-      const_cast<ListNode*>(list)->SortAsStringsList();
-    else if (base::EndsWith(lhs, "deps", base::CompareCase::SENSITIVE) ||
-             lhs == "visibility")
-      const_cast<ListNode*>(list)->SortAsTargetsList();
+        lhs == "public") {
+      TraverseBinaryOpNode(binop->right(), [](const ParseNode* node) {
+        const ListNode* list = node->AsList();
+        if (list)
+          const_cast<ListNode*>(list)->SortAsStringsList();
+      });
+    } else if (base::EndsWith(lhs, "deps", base::CompareCase::SENSITIVE) ||
+               lhs == "visibility") {
+      TraverseBinaryOpNode(binop->right(), [](const ParseNode* node) {
+        const ListNode* list = node->AsList();
+        if (list)
+          const_cast<ListNode*>(list)->SortAsTargetsList();
+      });
+    }
+  }
+}
+
+void Printer::TraverseBinaryOpNode(
+    const ParseNode* node,
+    std::function<void(const ParseNode*)> callback) {
+  const BinaryOpNode* binop = node->AsBinaryOp();
+  if (binop) {
+    TraverseBinaryOpNode(binop->left(), callback);
+    TraverseBinaryOpNode(binop->right(), callback);
+  } else {
+    callback(node);
   }
 }
 
