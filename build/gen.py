@@ -731,6 +731,7 @@ def WriteGNNinja(path, platform, host, options, args_list):
         'src/gn/xcode_object.cc',
         'src/gn/xcode_writer.cc',
         'src/gn/xml_element_writer.cc',
+        'src/util/atomic_write.cc',
         'src/util/exe_path.cc',
         'src/util/msg_loop.cc',
         'src/util/semaphore.cc',

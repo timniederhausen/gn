@@ -8,6 +8,7 @@
 
 #include "base/command_line.h"
 #include "base/environment.h"
+#include "base/files/file_util.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/values.h"
@@ -17,10 +18,12 @@
 #include "gn/item.h"
 #include "gn/label.h"
 #include "gn/label_pattern.h"
+#include "gn/ninja_build_writer.h"
 #include "gn/setup.h"
 #include "gn/standard_out.h"
 #include "gn/switches.h"
 #include "gn/target.h"
+#include "util/atomic_write.h"
 #include "util/build_config.h"
 
 namespace commands {
@@ -471,6 +474,50 @@ bool CommandSwitches::InitFrom(const base::CommandLine& cmdline) {
   result.meta_data_keys_ = cmdline.GetSwitchValueASCII("data");
   result.meta_walk_keys_ = cmdline.GetSwitchValueASCII("walk");
   *this = result;
+  return true;
+}
+
+bool PrepareForRegeneration(const BuildSettings* settings) {
+  // Write a .d file for the build which references a nonexistent file.
+  // This will make Ninja always mark the build as dirty.
+  base::FilePath build_ninja_d_file(settings->GetFullPath(
+      SourceFile(settings->build_dir().value() + "build.ninja.d")));
+  std::string dummy_depfile("build.ninja.stamp: nonexistent_file.gn\n");
+  if (util::WriteFileAtomically(build_ninja_d_file, dummy_depfile.data(),
+                                static_cast<int>(dummy_depfile.size())) == -1) {
+    Err(Location(), std::string("Failed to write build.ninja.d."))
+        .PrintToStdout();
+    return false;
+  }
+
+  // Write a stripped down build.ninja file with just the commands needed
+  // for ninja to call GN and regenerate ninja files.
+  base::FilePath build_ninja_file(settings->GetFullPath(
+      SourceFile(settings->build_dir().value() + "build.ninja")));
+  std::string build_ninja_contents;
+  if (!base::ReadFileToString(build_ninja_file, &build_ninja_contents)) {
+    // Couldn't parse the build.ninja file.
+    Err(Location(), "Couldn't read build.ninja in this directory.",
+        "Try running \"gn gen\" on it and then re-running \"gn clean\".")
+        .PrintToStdout();
+    return false;
+  }
+  std::string build_commands =
+      NinjaBuildWriter::ExtractRegenerationCommands(build_ninja_contents);
+  if (build_commands.empty()) {
+    Err(Location(), "Unexpected build.ninja contents in this directory.",
+        "Try running \"gn gen\" on it and then re-running \"gn clean\".")
+        .PrintToStdout();
+    return false;
+  }
+  if (util::WriteFileAtomically(build_ninja_file, build_commands.data(),
+                                static_cast<int>(build_commands.size())) ==
+      -1) {
+    Err(Location(), std::string("Failed to write build.ninja."))
+        .PrintToStdout();
+    return false;
+  }
+
   return true;
 }
 

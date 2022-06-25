@@ -408,7 +408,7 @@ bool RunNinjaPostProcessTools(const BuildSettings* build_settings,
       return false;
     }
 
-    if(!InvokeNinjaRecompactTool(ninja_executable, build_dir, err)) {
+    if (!InvokeNinjaRecompactTool(ninja_executable, build_dir, err)) {
       return false;
     }
   }
@@ -652,6 +652,16 @@ int RunGen(const std::vector<std::string>& args) {
     setup->set_check_public_headers(true);
     if (command_line->GetSwitchValueASCII(kSwitchCheck) == "system")
       setup->set_check_system_includes(true);
+  }
+
+  // If this is a regeneration, replace existing build.ninja and build.ninja.d
+  // with just enough for ninja to call GN and regenerate ninja files. This
+  // removes any potential soon-to-be-dangling references and ensures that
+  // regeneration can be restarted if interrupted.
+  if (command_line->HasSwitch(switches::kRegeneration)) {
+    if (!commands::PrepareForRegeneration(&setup->build_settings())) {
+      return false;
+    }
   }
 
   // Cause the load to also generate the ninja files for each target.
