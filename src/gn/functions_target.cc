@@ -859,9 +859,9 @@ Value RunStaticLibrary(Scope* scope,
 
 const char kTarget[] = "target";
 const char kTarget_HelpShort[] =
-    "target: Declare an target with the given programmatic type.";
+    "target: Declare a target with the given programmatic type.";
 const char kTarget_Help[] =
-    R"(target: Declare an target with the given programmatic type.
+    R"(target: Declare a target with the given programmatic type.
 
   target(target_type_string, target_name_string) { ... }
 

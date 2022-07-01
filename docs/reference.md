@@ -34,7 +34,7 @@
     *   [shared_library: Declare a shared library target.](#func_shared_library)
     *   [source_set: Declare a source set target.](#func_source_set)
     *   [static_library: Declare a static library target.](#func_static_library)
-    *   [target: Declare an target with the given programmatic type.](#func_target)
+    *   [target: Declare a target with the given programmatic type.](#func_target)
 *   [Buildfile functions](#functions)
     *   [assert: Assert an expression is true at generation time.](#func_assert)
     *   [config: Defines a configuration object.](#func_config)
@@ -2229,7 +2229,7 @@
   target containing both C and C++ sources is acceptable, but a
   target containing C and Rust sources is not).
 ```
-### <a name="func_target"></a>**target**: Declare an target with the given programmatic type.
+### <a name="func_target"></a>**target**: Declare a target with the given programmatic type.
 
 ```
   target(target_type_string, target_name_string) { ... }
