@@ -218,8 +218,8 @@ def main(argv):
 def GenerateLastCommitPosition(host, header):
   ROOT_TAG = 'initial-commit'
   describe_output = subprocess.check_output(
-      ['git', 'describe', 'HEAD', '--match', ROOT_TAG], shell=host.is_windows(),
-      cwd=REPO_ROOT)
+      ['git', 'describe', 'HEAD', '--abbrev=12', '--match', ROOT_TAG],
+      shell=host.is_windows(), cwd=REPO_ROOT)
   mo = re.match(ROOT_TAG + '-(\d+)-g([0-9a-f]+)', describe_output.decode())
   if not mo:
     raise ValueError(
