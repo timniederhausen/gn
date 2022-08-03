@@ -269,7 +269,8 @@ Args::ValueWithOverrideMap Args::GetAllArguments() const {
   std::lock_guard<std::mutex> lock(lock_);
 
   // Sort the keys from declared_arguments_per_toolchain_ so
-  // the return value will be deterministic.
+  // the return value will be deterministic. Always prioritize
+  // the default toolchain.
   std::vector<const Settings*> keys;
   keys.reserve(declared_arguments_per_toolchain_.size());
   for (const auto& map_pair : declared_arguments_per_toolchain_) {
@@ -277,7 +278,8 @@ Args::ValueWithOverrideMap Args::GetAllArguments() const {
   }
   std::sort(keys.begin(), keys.end(),
             [](const Settings* a, const Settings* b) -> bool {
-              return a->toolchain_label() < b->toolchain_label();
+              return a->is_default() ||
+                     a->toolchain_label() < b->toolchain_label();
             });
 
   // Default values.
