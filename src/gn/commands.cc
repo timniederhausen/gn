@@ -4,6 +4,7 @@
 
 #include "gn/commands.h"
 
+#include <fstream>
 #include <optional>
 
 #include "base/command_line.h"
@@ -492,25 +493,25 @@ bool PrepareForRegeneration(const BuildSettings* settings) {
 
   // Write a stripped down build.ninja file with just the commands needed
   // for ninja to call GN and regenerate ninja files.
-  base::FilePath build_ninja_file(settings->GetFullPath(
+  base::FilePath build_ninja_path(settings->GetFullPath(
       SourceFile(settings->build_dir().value() + "build.ninja")));
-  std::string build_ninja_contents;
-  if (!base::ReadFileToString(build_ninja_file, &build_ninja_contents)) {
-    // Couldn't parse the build.ninja file.
-    Err(Location(), "Couldn't read build.ninja in this directory.",
+  std::ifstream build_ninja_file(build_ninja_path.value());
+  if (!build_ninja_file) {
+    // Couldn't open the build.ninja file.
+    Err(Location(), "Couldn't open build.ninja in this directory.",
         "Try running \"gn gen\" on it and then re-running \"gn clean\".")
         .PrintToStdout();
     return false;
   }
   std::string build_commands =
-      NinjaBuildWriter::ExtractRegenerationCommands(build_ninja_contents);
+      NinjaBuildWriter::ExtractRegenerationCommands(build_ninja_file);
   if (build_commands.empty()) {
     Err(Location(), "Unexpected build.ninja contents in this directory.",
         "Try running \"gn gen\" on it and then re-running \"gn clean\".")
         .PrintToStdout();
     return false;
   }
-  if (util::WriteFileAtomically(build_ninja_file, build_commands.data(),
+  if (util::WriteFileAtomically(build_ninja_path, build_commands.data(),
                                 static_cast<int>(build_commands.size())) ==
       -1) {
     Err(Location(), std::string("Failed to write build.ninja."))

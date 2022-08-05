@@ -13,7 +13,6 @@
 
 #include "base/command_line.h"
 #include "base/files/file_util.h"
-#include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "gn/build_settings.h"
@@ -302,13 +301,10 @@ bool NinjaBuildWriter::RunAndWriteFile(const BuildSettings* build_settings,
 
 // static
 std::string NinjaBuildWriter::ExtractRegenerationCommands(
-    const std::string& build_ninja_in) {
-  std::vector<std::string_view> lines = base::SplitStringPiece(
-      build_ninja_in, "\n", base::KEEP_WHITESPACE, base::SPLIT_WANT_ALL);
-
+    std::istream& build_ninja_in) {
   std::ostringstream out;
   int num_blank_lines = 0;
-  for (const auto& line : lines) {
+  for (std::string line; std::getline(build_ninja_in, line);) {
     out << line << '\n';
     if (line.empty())
       ++num_blank_lines;

@@ -56,8 +56,7 @@ class NinjaBuildWriter {
   // commands::PrepareForRegeneration.
   //
   // On error, returns an empty string.
-  static std::string ExtractRegenerationCommands(
-      const std::string& build_ninja_in);
+  static std::string ExtractRegenerationCommands(std::istream& build_ninja_in);
 
   bool Run(Err* err);
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <fstream>
 #include <sstream>
 
 #include "base/command_line.h"
@@ -211,7 +212,7 @@ TEST_F(NinjaBuildWriterTest, ExtractRegenerationCommands) {
 
   std::vector<const Target*> targets = {&target_foo};
 
-  std::ostringstream ninja_out;
+  std::stringstream ninja_out;
   std::ostringstream depfile_out;
 
   NinjaBuildWriter writer(setup.build_settings(), used_toolchains, targets,
@@ -242,7 +243,7 @@ TEST_F(NinjaBuildWriterTest, ExtractRegenerationCommands) {
   EXPECT_SNIPPET(ninja_out_str, expected_default);
 
   std::string commands =
-      NinjaBuildWriter::ExtractRegenerationCommands(ninja_out_str);
+      NinjaBuildWriter::ExtractRegenerationCommands(ninja_out);
   EXPECT_SNIPPET(commands, expected_rule_gn);
   EXPECT_SNIPPET(commands, expected_build_ninja_stamp);
   EXPECT_SNIPPET(commands, expected_build_ninja);
@@ -252,6 +253,22 @@ TEST_F(NinjaBuildWriterTest, ExtractRegenerationCommands) {
 
 #undef EXPECT_SNIPPET
 #undef EXPECT_NO_SNIPPET
+}
+
+TEST_F(NinjaBuildWriterTest, ExtractRegenerationCommands_DefaultStream) {
+  std::ifstream ninja_in;
+  EXPECT_EQ(NinjaBuildWriter::ExtractRegenerationCommands(ninja_in), "");
+}
+
+TEST_F(NinjaBuildWriterTest, ExtractRegenerationCommands_StreamError) {
+  std::ifstream ninja_in("/does/not/exist");
+  EXPECT_EQ(NinjaBuildWriter::ExtractRegenerationCommands(ninja_in), "");
+}
+
+TEST_F(NinjaBuildWriterTest, ExtractRegenerationCommands_IncompleteNinja) {
+  std::stringstream ninja_in;
+  ninja_in << "foo\nbar\nbaz\nbif\n";
+  EXPECT_EQ(NinjaBuildWriter::ExtractRegenerationCommands(ninja_in), "");
 }
 
 TEST_F(NinjaBuildWriterTest, SpaceInDepfile) {
