@@ -12,6 +12,7 @@
 #include "base/files/file_util.h"
 #include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
+#include "base/strings/utf_string_conversions.h"
 #include "base/values.h"
 #include "gn/builder.h"
 #include "gn/config_values_extractors.h"
@@ -329,6 +330,14 @@ std::optional<HowTargetContainsFile> TargetContainsFile(
   return std::nullopt;
 }
 
+std::string ToUTF8(base::FilePath::StringType in) {
+#if defined(OS_WIN)
+  return base::UTF16ToUTF8(in);
+#else
+  return in;
+#endif
+}
+
 }  // namespace
 
 CommandInfo::CommandInfo()
@@ -495,7 +504,7 @@ bool PrepareForRegeneration(const BuildSettings* settings) {
   // for ninja to call GN and regenerate ninja files.
   base::FilePath build_ninja_path(settings->GetFullPath(
       SourceFile(settings->build_dir().value() + "build.ninja")));
-  std::ifstream build_ninja_file(build_ninja_path.value());
+  std::ifstream build_ninja_file(ToUTF8(build_ninja_path.value()));
   if (!build_ninja_file) {
     // Couldn't open the build.ninja file.
     Err(Location(), "Couldn't open build.ninja in this directory.",

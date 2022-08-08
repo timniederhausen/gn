@@ -51,7 +51,8 @@ bool CleanOneDir(const std::string& dir) {
       base::FileEnumerator::FILES | base::FileEnumerator::DIRECTORIES);
   for (base::FilePath current = traversal.Next(); !current.empty();
        current = traversal.Next()) {
-    std::string basename = base::ToLowerASCII(current.BaseName().value());
+    base::FilePath::StringType basename =
+        base::ToLowerASCII(current.BaseName().value());
     if (std::none_of(std::begin(remaining), std::end(remaining),
                      [&](auto rem) { return basename == rem; })) {
       base::DeleteFile(current, true);
