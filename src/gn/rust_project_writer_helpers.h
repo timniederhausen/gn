@@ -144,6 +144,7 @@ void AddSysroot(const BuildSettings* build_settings,
 // on the the given crates list.
 void WriteCrates(const BuildSettings* build_settings,
                  CrateList& crate_list,
+                 SysrootIndexMap& sysroot_lookup,
                  std::ostream& rust_project);
 
 // Assemble the compiler arguments for the given GN Target.

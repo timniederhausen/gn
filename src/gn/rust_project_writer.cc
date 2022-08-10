@@ -29,6 +29,7 @@
 // Current structure of rust-project.json output file
 //
 // {
+//    "sysroot": "path/to/rust/sysroot",  // if there is only one sysroot found
 //    "crates": [
 //        {
 //            "deps": [
@@ -358,8 +359,22 @@ void AddTarget(const BuildSettings* build_settings,
 
 void WriteCrates(const BuildSettings* build_settings,
                  CrateList& crate_list,
+                 SysrootIndexMap& sysroots,
                  std::ostream& rust_project) {
   rust_project << "{" NEWLINE;
+
+  // If there is one, and only one, sysroot found, then that can be used to tell
+  // rust-analyzer where to find the sysroot (and associated tools like the
+  // 'rust-analyzer-proc-macro-srv` proc-macro server that matches the abi used
+  // by 'rustc'
+  if (sysroots.size() == 1) {
+    auto sysroot = sysroots.begin()->first;
+    base::FilePath rebased_out_dir =
+        build_settings->GetFullPath(build_settings->build_dir());
+    auto sysroot_path = FilePathToUTF8(rebased_out_dir) + std::string(sysroot);
+    rust_project << "  \"sysroot\": \"" << sysroot_path << "\"," NEWLINE;
+  }
+
   rust_project << "  \"crates\": [";
   bool first_crate = true;
   for (auto& crate : crate_list) {
@@ -499,5 +514,5 @@ void RustProjectWriter::RenderJSON(const BuildSettings* build_settings,
     AddTarget(build_settings, target, lookup, sysroot_lookup, crate_list);
   }
 
-  WriteCrates(build_settings, crate_list, rust_project);
+  WriteCrates(build_settings, crate_list, sysroot_lookup, rust_project);
 }

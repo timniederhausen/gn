@@ -26,6 +26,8 @@ using RustProjectWriterHelper = TestWithScheduler;
 TEST_F(RustProjectWriterHelper, WriteCrates) {
   TestWithScope setup;
 
+  SysrootIndexMap sysroot_lookup;
+
   CrateList crates;
   Crate dep = Crate(SourceFile("/root/tortoise/lib.rs"), std::nullopt, 0,
                     "//tortoise:bar", "2015");
@@ -39,7 +41,7 @@ TEST_F(RustProjectWriterHelper, WriteCrates) {
   crates.push_back(target);
 
   std::ostringstream stream;
-  WriteCrates(setup.build_settings(), crates, stream);
+  WriteCrates(setup.build_settings(), crates, sysroot_lookup, stream);
   std::string out = stream.str();
 #if defined(OS_WIN)
   base::ReplaceSubstringsAfterOffset(&out, 0, "\r\n", "\n");
@@ -102,7 +104,7 @@ TEST_F(RustProjectWriterHelper, SysrootDepsAreCorrect) {
   AddSysroot(setup.build_settings(), "sysroot", sysroot_lookup, crates);
 
   std::ostringstream stream;
-  WriteCrates(setup.build_settings(), crates, stream);
+  WriteCrates(setup.build_settings(), crates, sysroot_lookup, stream);
   std::string out = stream.str();
 #if defined(OS_WIN)
   base::ReplaceSubstringsAfterOffset(&out, 0, "\r\n", "\n");
@@ -110,6 +112,7 @@ TEST_F(RustProjectWriterHelper, SysrootDepsAreCorrect) {
 
   const char expected_json[] =
       "{\n"
+      "  \"sysroot\": \"/root/out/Debug/sysroot\",\n"
       "  \"crates\": [\n"
       "    {\n"
       "      \"crate_id\": 0,\n"
