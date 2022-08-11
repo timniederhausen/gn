@@ -520,6 +520,8 @@ bool PrepareForRegeneration(const BuildSettings* settings) {
         .PrintToStdout();
     return false;
   }
+  // Close build.ninja or else WriteFileAtomically will fail on Windows.
+  build_ninja_file.close();
   if (util::WriteFileAtomically(build_ninja_path, build_commands.data(),
                                 static_cast<int>(build_commands.size())) ==
       -1) {

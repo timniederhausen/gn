@@ -62,3 +62,5 @@ Thumbs.db
 # Visual Studio Code
 /.vscode/
 /_out
+# VSChromium configuration file
+vs-chromium-project.txt
