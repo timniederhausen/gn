@@ -24,10 +24,12 @@ bool CleanOneDir(const std::string& dir) {
   base::FilePath build_dir(setup->build_settings().GetFullPath(
       SourceDir(setup->build_settings().build_dir().value())));
 
-  // NOTE: Not all GN builds have args.gn file hence we check here
+  // NOTE: Not all GN builds have args.gn file hence we also check here
   // if a build.ninja.d files exists instead.
+  base::FilePath args_gn_file = build_dir.AppendASCII("args.gn");
   base::FilePath build_ninja_d_file = build_dir.AppendASCII("build.ninja.d");
-  if (!base::PathExists(build_ninja_d_file)) {
+  if (!base::PathExists(args_gn_file) &&
+      !base::PathExists(build_ninja_d_file)) {
     Err(Location(),
         base::StringPrintf(
             "%s does not look like a build directory.\n",
@@ -42,10 +44,13 @@ bool CleanOneDir(const std::string& dir) {
     return false;
   }
 
-  // Erase everything but (user-created) args.gn and the build.ninja we just
-  // wrote.
-  const base::FilePath::CharType* remaining[]{FILE_PATH_LITERAL("args.gn"),
-                                              FILE_PATH_LITERAL("build.ninja")};
+  // Erase everything but (user-created) args.gn and the build.ninja files we
+  // just wrote.
+  const base::FilePath::CharType* remaining[]{
+      FILE_PATH_LITERAL("args.gn"),
+      FILE_PATH_LITERAL("build.ninja"),
+      FILE_PATH_LITERAL("build.ninja.d"),
+  };
   base::FileEnumerator traversal(
       build_dir, false,
       base::FileEnumerator::FILES | base::FileEnumerator::DIRECTORIES);
