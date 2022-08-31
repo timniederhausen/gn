@@ -300,17 +300,25 @@ std::string CompileCommandsWriter::RenderJSON(
 bool CompileCommandsWriter::RunAndWriteFiles(
     const BuildSettings* build_settings,
     const Builder& builder,
-    const std::string& file_name,
-    const std::string& target_filters,
-    bool quiet,
+    const base::FilePath& output_path,
+    const std::vector<LabelPattern>& patterns,
     Err* err) {
-  SourceFile output_file = build_settings->build_dir().ResolveRelativeFile(
-      Value(nullptr, file_name), err);
-  if (output_file.is_null())
-    return false;
+  std::vector<const Target*> to_write =
+      CollectDepsOfMatches(builder.GetAllResolvedTargets(), patterns);
 
-  base::FilePath output_path = build_settings->GetFullPath(output_file);
+  StringOutputBuffer json;
+  std::ostream output_to_json(&json);
+  OutputJSON(build_settings, to_write, output_to_json);
 
+  return json.WriteToFileIfChanged(output_path, err);
+}
+
+bool CompileCommandsWriter::RunAndWriteFilesLegacyFilters(
+    const BuildSettings* build_settings,
+    const Builder& builder,
+    const base::FilePath& output_path,
+    const std::string& target_filters,
+    Err* err) {
   std::vector<const Target*> all_targets = builder.GetAllResolvedTargets();
 
   std::set<std::string> target_filters_set;
@@ -331,6 +339,59 @@ bool CompileCommandsWriter::RunAndWriteFiles(
   }
 
   return json.WriteToFileIfChanged(output_path, err);
+}
+
+std::vector<const Target*> CompileCommandsWriter::CollectDepsOfMatches(
+    const std::vector<const Target*>& all_targets,
+    const std::vector<LabelPattern>& patterns) {
+  // The current set of matched targets.
+  TargetSet collected;
+
+  // Represents the next layer of the breadth-first seach. These are all targets
+  // that we haven't checked so far.
+  std::vector<const Target*> frontier;
+
+  // Collect the first level of target matches. These are the ones that the
+  // patterns match directly.
+  for (const Target* target : all_targets) {
+    if (LabelPattern::VectorMatches(patterns, target->label())) {
+      collected.add(target);
+      frontier.push_back(target);
+    }
+  }
+
+  // Collects the dependencies for the next level of iteration. This could be
+  // inside the loop but is kept outside to avoid reallocating in every
+  // iteration.
+  std::vector<const Target*> next_frontier;
+
+  // Loop for each level of the search.
+  while (!frontier.empty()) {
+    for (const Target* target : frontier) {
+      // Check the target's dependencies.
+      for (const auto& pair : target->GetDeps(Target::DEPS_ALL)) {
+        if (!collected.contains(pair.ptr)) {
+          // New dependency found.
+          collected.add(pair.ptr);
+          next_frontier.push_back(pair.ptr);
+        }
+      }
+    }
+
+    // Swap to the new level and clear out the next one without deallocating the
+    // buffer (in most STL implementations, clear() doesn't free the existing
+    // buffer).
+    std::swap(frontier, next_frontier);
+    next_frontier.clear();
+  }
+
+  // Convert to vector for output.
+  std::vector<const Target*> output;
+  output.reserve(collected.size());
+  for (const Target* target : collected) {
+    output.push_back(target);
+  }
+  return output;
 }
 
 std::vector<const Target*> CompileCommandsWriter::FilterTargets(

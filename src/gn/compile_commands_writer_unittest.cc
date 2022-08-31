@@ -586,6 +586,102 @@ TEST_F(CompileCommandsTest, EscapedFlags) {
   EXPECT_EQ(expected, out);
 }
 
+TEST_F(CompileCommandsTest, CollectDepsOfMatches) {
+  // Contruct the dependency tree:
+  //
+  //   //foo:bar1
+  //     //base:base
+  //   //foo:bar2
+  //     //base:i18n
+  //       //base
+  //       //third_party:icu
+  //   //random:random
+  Err err;
+  std::vector<const Target*> targets;
+
+  Target icu_target(settings(), Label(SourceDir("//third_party/"), "icu"));
+  icu_target.set_output_type(Target::SOURCE_SET);
+  icu_target.visibility().SetPublic();
+  icu_target.SetToolchain(toolchain());
+  ASSERT_TRUE(icu_target.OnResolved(&err));
+  targets.push_back(&icu_target);
+
+  Target base_target(settings(), Label(SourceDir("//base/"), "base"));
+  base_target.set_output_type(Target::SOURCE_SET);
+  base_target.visibility().SetPublic();
+  base_target.SetToolchain(toolchain());
+  ASSERT_TRUE(base_target.OnResolved(&err));
+  targets.push_back(&base_target);
+
+  Target base_i18n(settings(), Label(SourceDir("//base/"), "i18n"));
+  base_i18n.set_output_type(Target::SOURCE_SET);
+  base_i18n.visibility().SetPublic();
+  base_i18n.private_deps().push_back(LabelTargetPair(&icu_target));
+  base_i18n.public_deps().push_back(LabelTargetPair(&base_target));
+  base_i18n.SetToolchain(toolchain());
+  ASSERT_TRUE(base_i18n.OnResolved(&err))
+      << err.message() << " " << err.help_text();
+  targets.push_back(&base_i18n);
+
+  Target target1(settings(), Label(SourceDir("//foo/"), "bar1"));
+  target1.set_output_type(Target::SOURCE_SET);
+  target1.public_deps().push_back(LabelTargetPair(&base_target));
+  target1.SetToolchain(toolchain());
+  ASSERT_TRUE(target1.OnResolved(&err));
+  targets.push_back(&target1);
+
+  Target target2(settings(), Label(SourceDir("//foo/"), "bar2"));
+  target2.set_output_type(Target::SOURCE_SET);
+  target2.public_deps().push_back(LabelTargetPair(&base_i18n));
+  target2.SetToolchain(toolchain());
+  ASSERT_TRUE(target2.OnResolved(&err));
+  targets.push_back(&target2);
+
+  Target random_target(settings(), Label(SourceDir("//random/"), "random"));
+  random_target.set_output_type(Target::SOURCE_SET);
+  random_target.SetToolchain(toolchain());
+  ASSERT_TRUE(random_target.OnResolved(&err));
+  targets.push_back(&random_target);
+
+  // Sort for stability in comparisons below.
+  auto compare_label = [](const Target* a, const Target* b) -> bool {
+    return a->label() < b->label();
+  };
+  std::sort(targets.begin(), targets.end(), compare_label);
+
+  // Collect everything, the result should match the input.
+  const std::string source_root("/home/me/build/");
+  LabelPattern wildcard_pattern = LabelPattern::GetPattern(
+      SourceDir(), source_root, Value(nullptr, "//*"), &err);
+  ASSERT_FALSE(err.has_error());
+  std::vector<const Target*> output =
+      CompileCommandsWriter::CollectDepsOfMatches(
+          targets, std::vector<LabelPattern>{wildcard_pattern});
+  std::sort(output.begin(), output.end(), compare_label);
+  EXPECT_EQ(output, targets);
+
+  // Collect nothing.
+  output = CompileCommandsWriter::CollectDepsOfMatches(
+      targets, std::vector<LabelPattern>());
+  EXPECT_TRUE(output.empty());
+
+  // Collect all deps of "//foo/*".
+  LabelPattern foo_wildcard = LabelPattern::GetPattern(
+      SourceDir(), source_root, Value(nullptr, "//foo/*"), &err);
+  ASSERT_FALSE(err.has_error());
+  output = CompileCommandsWriter::CollectDepsOfMatches(
+      targets, std::vector<LabelPattern>{foo_wildcard});
+
+  // The result should be everything except "random".
+  std::sort(output.begin(), output.end(), compare_label);
+  ASSERT_EQ(5u, output.size());
+  EXPECT_EQ(&base_target, output[0]);  // Note: order sorted by label.
+  EXPECT_EQ(&base_i18n, output[1]);
+  EXPECT_EQ(&target1, output[2]);
+  EXPECT_EQ(&target2, output[3]);
+  EXPECT_EQ(&icu_target, output[4]);
+}
+
 TEST_F(CompileCommandsTest, CompDBFilter) {
   Err err;
 

@@ -351,26 +351,49 @@ bool RunRustProjectWriter(const BuildSettings* build_settings,
   return res;
 }
 
-bool RunCompileCommandsWriter(const BuildSettings* build_settings,
-                              const Builder& builder,
-                              Err* err) {
+bool RunCompileCommandsWriter(Setup& setup, Err* err) {
+  // The compilation database is written if either the .gn setting is set or if
+  // the command line flag is set. The command line flag takes precedence.
   const base::CommandLine* command_line =
       base::CommandLine::ForCurrentProcess();
+  bool has_switch = command_line->HasSwitch(kSwitchExportCompileCommands);
+
+  bool has_patterns = !setup.export_compile_commands().empty();
+  if (!has_switch && !has_patterns)
+    return true;  // No compilation database needs to be written.
+
   bool quiet = command_line->HasSwitch(switches::kQuiet);
   base::ElapsedTimer timer;
 
-  std::string file_name = "compile_commands.json";
-  std::string target_filters =
-      command_line->GetSwitchValueASCII(kSwitchExportCompileCommands);
+  // The compilation database file goes in the build directory.
+  SourceFile output_file =
+      setup.build_settings().build_dir().ResolveRelativeFile(
+          Value(nullptr, "compile_commands.json"), err);
+  if (output_file.is_null())
+    return false;
+  base::FilePath output_path = setup.build_settings().GetFullPath(output_file);
 
-  bool res = CompileCommandsWriter::RunAndWriteFiles(
-      build_settings, builder, file_name, target_filters, quiet, err);
-  if (res && !quiet) {
+  bool ok = true;
+  if (has_switch) {
+    // Legacy format using the command-line switch.
+    std::string target_filters =
+        command_line->GetSwitchValueASCII(kSwitchExportCompileCommands);
+    ok = CompileCommandsWriter::RunAndWriteFilesLegacyFilters(
+        &setup.build_settings(), setup.builder(), output_path, target_filters,
+        err);
+  } else {
+    // Use the patterns from the .gn file.
+    ok = CompileCommandsWriter::RunAndWriteFiles(
+        &setup.build_settings(), setup.builder(), output_path,
+        setup.export_compile_commands(), err);
+  }
+
+  if (ok && !quiet) {
     OutputString("Generating compile_commands took " +
                  base::Int64ToString(timer.Elapsed().InMilliseconds()) +
                  "ms\n");
   }
-  return res;
+  return ok;
 }
 
 bool RunNinjaPostProcessTools(const BuildSettings* build_settings,
@@ -610,20 +633,17 @@ Compilation Database
       This is an unstable format and likely to change without warning.
 
   --export-compile-commands[=<target_name1,target_name2...>]
-      Produces a compile_commands.json file in the root of the build directory
-      containing an array of “command objects”, where each command object
-      specifies one way a translation unit is compiled in the project. If a list
-      of target_name is supplied, only targets that are reachable from any
-      target in any build file whose name is target_name will be used for
-      “command objects” generation, otherwise all available targets will be used.
-      This is used for various Clang-based tooling, allowing for the replay of
-      individual compilations independent of the build system.
-      e.g. "foo" will match:
-      - "//path/to/src:foo"
-      - "//other/path:foo"
-      - "//foo:foo"
+      Overrides the value of the export_compile_commands in the .gn file (see
+      "gn help dotfile").
+
+      Unlike the .gn setting, this switch takes a legacy format which is a list
+      of target names that are matched in any directory. For example, "foo" will
+      match:
+       - "//path/to/src:foo"
+       - "//other/path:foo"
+       - "//foo:foo"
       and not match:
-      - "//foo:bar"
+       - "//foo:bar"
 )";
 
 int RunGen(const std::vector<std::string>& args) {
@@ -718,9 +738,7 @@ int RunGen(const std::vector<std::string>& args) {
     return 1;
   }
 
-  if (command_line->HasSwitch(kSwitchExportCompileCommands) &&
-      !RunCompileCommandsWriter(&setup->build_settings(), setup->builder(),
-                                &err)) {
+  if (!RunCompileCommandsWriter(*setup, &err)) {
     err.PrintToStdout();
     return 1;
   }
