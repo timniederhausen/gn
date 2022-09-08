@@ -111,7 +111,7 @@ base::CommandLine GetSelfInvocationCommandLine(
         i->first != switches::kDotfile && i->first != switches::kArgs) {
       std::string escaped_value =
           EscapeString(FilePathToUTF8(i->second), escape_shell, nullptr);
-      cmdline.AppendSwitchASCII(i->first, escaped_value);
+      cmdline.AppendSwitch(i->first, escaped_value);
     }
   }
 

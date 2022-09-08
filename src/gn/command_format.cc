@@ -1306,7 +1306,7 @@ int RunFormat(const std::vector<std::string>& args) {
   TreeDumpMode dump_tree = TreeDumpMode::kInactive;
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(kSwitchDumpTree)) {
     std::string tree_type =
-        base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
+        base::CommandLine::ForCurrentProcess()->GetSwitchValueString(
             kSwitchDumpTree);
     if (tree_type == kSwitchTreeTypeJSON) {
       dump_tree = TreeDumpMode::kJSON;
@@ -1361,7 +1361,7 @@ int RunFormat(const std::vector<std::string>& args) {
 
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(kSwitchReadTree)) {
     std::string tree_type =
-        base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
+        base::CommandLine::ForCurrentProcess()->GetSwitchValueString(
             kSwitchReadTree);
     if (tree_type != kSwitchTreeTypeJSON) {
       Err(Location(), "Only json supported for read-tree.\n").PrintToStdout();

@@ -113,6 +113,8 @@ class Setup {
     return no_check_patterns_.get();
   }
 
+  // This is a combination of the export_compile_commands list in the dotfile,
+  // and any additions specified on the command-line.
   const std::vector<LabelPattern>& export_compile_commands() const {
     return export_compile_commands_;
   }

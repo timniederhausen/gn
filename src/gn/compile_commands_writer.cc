@@ -299,12 +299,15 @@ std::string CompileCommandsWriter::RenderJSON(
 
 bool CompileCommandsWriter::RunAndWriteFiles(
     const BuildSettings* build_settings,
-    const Builder& builder,
-    const base::FilePath& output_path,
+    const std::vector<const Target*>& all_targets,
     const std::vector<LabelPattern>& patterns,
+    const std::optional<std::string>& legacy_target_filters,
+    const base::FilePath& output_path,
     Err* err) {
-  std::vector<const Target*> to_write =
-      CollectDepsOfMatches(builder.GetAllResolvedTargets(), patterns);
+  std::vector<const Target*> to_write = CollectTargets(
+      build_settings, all_targets, patterns, legacy_target_filters, err);
+  if (err->has_error())
+    return false;
 
   StringOutputBuffer json;
   std::ostream output_to_json(&json);
@@ -313,37 +316,42 @@ bool CompileCommandsWriter::RunAndWriteFiles(
   return json.WriteToFileIfChanged(output_path, err);
 }
 
-bool CompileCommandsWriter::RunAndWriteFilesLegacyFilters(
-    const BuildSettings* build_settings,
-    const Builder& builder,
-    const base::FilePath& output_path,
-    const std::string& target_filters,
+std::vector<const Target*> CompileCommandsWriter::CollectTargets(
+    const BuildSettings* build_setting,
+    const std::vector<const Target*>& all_targets,
+    const std::vector<LabelPattern>& patterns,
+    const std::optional<std::string>& legacy_target_filters,
     Err* err) {
-  std::vector<const Target*> all_targets = builder.GetAllResolvedTargets();
-
-  std::set<std::string> target_filters_set;
-  for (auto& target :
-       base::SplitString(target_filters, ",", base::TRIM_WHITESPACE,
-                         base::SPLIT_WANT_NONEMPTY)) {
-    target_filters_set.insert(target);
+  if (legacy_target_filters && legacy_target_filters->empty()) {
+    // The legacy filter was specified but has no parameter. This matches
+    // everything and we can skip any other kinds of matching.
+    return all_targets;
   }
 
-  StringOutputBuffer json;
-  std::ostream output_to_json(&json);
-  if (target_filters_set.empty()) {
-    OutputJSON(build_settings, all_targets, output_to_json);
-  } else {
-    std::vector<const Target*> preserved_targets =
-        FilterTargets(all_targets, target_filters_set);
-    OutputJSON(build_settings, preserved_targets, output_to_json);
+  // Collect the first level of target matches. These are the ones that the
+  // patterns match directly.
+  std::vector<const Target*> input_targets;
+  for (const Target* target : all_targets) {
+    if (LabelPattern::VectorMatches(patterns, target->label()))
+      input_targets.push_back(target);
   }
 
-  return json.WriteToFileIfChanged(output_path, err);
+  // Add in any legacy filter matches.
+  if (legacy_target_filters) {
+    std::vector<const Target*> legacy_matches =
+        FilterLegacyTargets(all_targets, *legacy_target_filters);
+
+    // This can produce some duplicates with the patterns but the "collect
+    // deps" phase will eliminate them.
+    input_targets.insert(input_targets.end(), legacy_matches.begin(),
+                         legacy_matches.end());
+  }
+
+  return CollectDepsOfMatches(input_targets);
 }
 
 std::vector<const Target*> CompileCommandsWriter::CollectDepsOfMatches(
-    const std::vector<const Target*>& all_targets,
-    const std::vector<LabelPattern>& patterns) {
+    const std::vector<const Target*>& input_targets) {
   // The current set of matched targets.
   TargetSet collected;
 
@@ -351,10 +359,11 @@ std::vector<const Target*> CompileCommandsWriter::CollectDepsOfMatches(
   // that we haven't checked so far.
   std::vector<const Target*> frontier;
 
-  // Collect the first level of target matches. These are the ones that the
+  // Collect the first level of target matches specified in the input. There may
+  // be duplicates so we still need to do the set checking.
   // patterns match directly.
-  for (const Target* target : all_targets) {
-    if (LabelPattern::VectorMatches(patterns, target->label())) {
+  for (const Target* target : input_targets) {
+    if (!collected.contains(target)) {
       collected.add(target);
       frontier.push_back(target);
     }
@@ -394,34 +403,21 @@ std::vector<const Target*> CompileCommandsWriter::CollectDepsOfMatches(
   return output;
 }
 
-std::vector<const Target*> CompileCommandsWriter::FilterTargets(
+std::vector<const Target*> CompileCommandsWriter::FilterLegacyTargets(
     const std::vector<const Target*>& all_targets,
-    const std::set<std::string>& target_filters_set) {
-  std::vector<const Target*> preserved_targets;
+    const std::string& target_filter_string) {
+  std::set<std::string> target_filters_set;
+  for (auto& target :
+       base::SplitString(target_filter_string, ",", base::TRIM_WHITESPACE,
+                         base::SPLIT_WANT_NONEMPTY)) {
+    target_filters_set.insert(target);
+  }
 
-  TargetSet visited;
+  std::vector<const Target*> result;
   for (auto& target : all_targets) {
-    if (target_filters_set.count(target->label().name())) {
-      VisitDeps(target, &visited);
-    }
+    if (target_filters_set.count(target->label().name()))
+      result.push_back(target);
   }
 
-  preserved_targets.reserve(visited.size());
-  // Preserve the original ordering of all_targets
-  // to allow easier debugging and testing.
-  for (auto& target : all_targets) {
-    if (visited.contains(target)) {
-      preserved_targets.push_back(target);
-    }
-  }
-  return preserved_targets;
-}
-
-void CompileCommandsWriter::VisitDeps(const Target* target,
-                                      TargetSet* visited) {
-  if (visited->add(target)) {
-    for (const auto& pair : target->GetDeps(Target::DEPS_ALL)) {
-      VisitDeps(pair.ptr, visited);
-    }
-  }
+  return result;
 }

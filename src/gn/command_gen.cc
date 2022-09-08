@@ -14,6 +14,7 @@
 #include "gn/eclipse_writer.h"
 #include "gn/filesystem_utils.h"
 #include "gn/json_project_writer.h"
+#include "gn/label_pattern.h"
 #include "gn/ninja_target_writer.h"
 #include "gn/ninja_tools.h"
 #include "gn/ninja_writer.h"
@@ -229,22 +230,22 @@ bool RunIdeWriter(const std::string& ide,
 
     std::string sln_name;
     if (command_line->HasSwitch(kSwitchSln))
-      sln_name = command_line->GetSwitchValueASCII(kSwitchSln);
+      sln_name = command_line->GetSwitchValueString(kSwitchSln);
     std::string filters;
     if (command_line->HasSwitch(kSwitchFilters))
-      filters = command_line->GetSwitchValueASCII(kSwitchFilters);
+      filters = command_line->GetSwitchValueString(kSwitchFilters);
     std::string win_kit;
     if (command_line->HasSwitch(kSwitchIdeValueWinSdk))
-      win_kit = command_line->GetSwitchValueASCII(kSwitchIdeValueWinSdk);
+      win_kit = command_line->GetSwitchValueString(kSwitchIdeValueWinSdk);
     std::string ninja_extra_args;
     if (command_line->HasSwitch(kSwitchNinjaExtraArgs)) {
       ninja_extra_args =
-          command_line->GetSwitchValueASCII(kSwitchNinjaExtraArgs);
+          command_line->GetSwitchValueString(kSwitchNinjaExtraArgs);
     }
     std::string ninja_executable;
     if (command_line->HasSwitch(kSwitchNinjaExecutable)) {
       ninja_executable =
-          command_line->GetSwitchValueASCII(kSwitchNinjaExecutable);
+          command_line->GetSwitchValueString(kSwitchNinjaExecutable);
     }
     bool no_deps = command_line->HasSwitch(kSwitchNoDeps);
     bool res = VisualStudioWriter::RunAndWriteFiles(
@@ -258,11 +259,11 @@ bool RunIdeWriter(const std::string& ide,
     return res;
   } else if (ide == kSwitchIdeValueXcode) {
     XcodeWriter::Options options = {
-        command_line->GetSwitchValueASCII(kSwitchXcodeProject),
-        command_line->GetSwitchValueASCII(kSwitchIdeRootTarget),
-        command_line->GetSwitchValueASCII(kSwitchNinjaExecutable),
-        command_line->GetSwitchValueASCII(kSwitchFilters),
-        command_line->GetSwitchValueASCII(kSwitchXcodeConfigurations),
+        command_line->GetSwitchValueString(kSwitchXcodeProject),
+        command_line->GetSwitchValueString(kSwitchIdeRootTarget),
+        command_line->GetSwitchValueString(kSwitchNinjaExecutable),
+        command_line->GetSwitchValueString(kSwitchFilters),
+        command_line->GetSwitchValueString(kSwitchXcodeConfigurations),
         command_line->GetSwitchValuePath(kSwitchXcodeConfigurationBuildPath),
         command_line->GetSwitchValueNative(kSwitchXcodeAdditionalFilesPatterns),
         command_line->GetSwitchValueNative(kSwitchXcodeAdditionalFilesRoots),
@@ -274,7 +275,7 @@ bool RunIdeWriter(const std::string& ide,
     }
 
     const std::string build_system =
-        command_line->GetSwitchValueASCII(kSwitchXcodeBuildSystem);
+        command_line->GetSwitchValueString(kSwitchXcodeBuildSystem);
     if (!build_system.empty()) {
       if (build_system == kSwitchXcodeBuildsystemValueNew) {
         options.build_system = XcodeBuildSystem::kNew;
@@ -297,7 +298,7 @@ bool RunIdeWriter(const std::string& ide,
   } else if (ide == kSwitchIdeValueQtCreator) {
     std::string root_target;
     if (command_line->HasSwitch(kSwitchIdeRootTarget))
-      root_target = command_line->GetSwitchValueASCII(kSwitchIdeRootTarget);
+      root_target = command_line->GetSwitchValueString(kSwitchIdeRootTarget);
     bool res = QtCreatorWriter::RunAndWriteFile(build_settings, builder, err,
                                                 root_target);
     if (res && !quiet) {
@@ -308,14 +309,14 @@ bool RunIdeWriter(const std::string& ide,
     return res;
   } else if (ide == kSwitchIdeValueJson) {
     std::string file_name =
-        command_line->GetSwitchValueASCII(kSwitchJsonFileName);
+        command_line->GetSwitchValueString(kSwitchJsonFileName);
     if (file_name.empty())
       file_name = "project.json";
     std::string exec_script =
-        command_line->GetSwitchValueASCII(kSwitchJsonIdeScript);
+        command_line->GetSwitchValueString(kSwitchJsonIdeScript);
     std::string exec_script_extra_args =
-        command_line->GetSwitchValueASCII(kSwitchJsonIdeScriptArgs);
-    std::string filters = command_line->GetSwitchValueASCII(kSwitchFilters);
+        command_line->GetSwitchValueString(kSwitchJsonIdeScriptArgs);
+    std::string filters = command_line->GetSwitchValueString(kSwitchFilters);
 
     bool res = JSONProjectWriter::RunAndWriteFiles(
         build_settings, builder, file_name, exec_script, exec_script_extra_args,
@@ -356,10 +357,11 @@ bool RunCompileCommandsWriter(Setup& setup, Err* err) {
   // the command line flag is set. The command line flag takes precedence.
   const base::CommandLine* command_line =
       base::CommandLine::ForCurrentProcess();
-  bool has_switch = command_line->HasSwitch(kSwitchExportCompileCommands);
+  bool has_legacy_switch =
+      command_line->HasSwitch(kSwitchExportCompileCommands);
 
   bool has_patterns = !setup.export_compile_commands().empty();
-  if (!has_switch && !has_patterns)
+  if (!has_legacy_switch && !has_patterns)
     return true;  // No compilation database needs to be written.
 
   bool quiet = command_line->HasSwitch(switches::kQuiet);
@@ -373,21 +375,15 @@ bool RunCompileCommandsWriter(Setup& setup, Err* err) {
     return false;
   base::FilePath output_path = setup.build_settings().GetFullPath(output_file);
 
-  bool ok = true;
-  if (has_switch) {
-    // Legacy format using the command-line switch.
-    std::string target_filters =
-        command_line->GetSwitchValueASCII(kSwitchExportCompileCommands);
-    ok = CompileCommandsWriter::RunAndWriteFilesLegacyFilters(
-        &setup.build_settings(), setup.builder(), output_path, target_filters,
-        err);
-  } else {
-    // Use the patterns from the .gn file.
-    ok = CompileCommandsWriter::RunAndWriteFiles(
-        &setup.build_settings(), setup.builder(), output_path,
-        setup.export_compile_commands(), err);
+  std::optional<std::string> legacy_target_filters;
+  if (has_legacy_switch) {
+    legacy_target_filters =
+        command_line->GetSwitchValueString(kSwitchExportCompileCommands);
   }
 
+  bool ok = CompileCommandsWriter::RunAndWriteFiles(
+      &setup.build_settings(), setup.builder().GetAllResolvedTargets(),
+      setup.export_compile_commands(), legacy_target_filters, output_path, err);
   if (ok && !quiet) {
     OutputString("Generating compile_commands took " +
                  base::Int64ToString(timer.Elapsed().InMilliseconds()) +
@@ -632,9 +628,28 @@ Compilation Database
       replay of individual compilations independent of the build system.
       This is an unstable format and likely to change without warning.
 
+  --add-export-compile-commands=<label_pattern>
+      Adds an additional label pattern (see "gn help label_pattern") of a
+      target to add to the compilation database. This pattern is appended to any
+      list values specified in the export_compile_commands variable in the
+      .gn file (see "gn help dotfile"). This allows the user to add additional
+      targets to the compilation database that the project doesn't add by default.
+
+      To add more than one value, specify this switch more than once. Each
+      invocation adds an additional label pattern.
+
+      Example:
+        --add-export-compile-commands=//tools:my_tool
+        --add-export-compile-commands="//base/*"
+
   --export-compile-commands[=<target_name1,target_name2...>]
+      DEPRECATED https://bugs.chromium.org/p/gn/issues/detail?id=302.
+      Please use --add-export-compile-commands for per-user configuration, and
+      the "export_compile_commands" value in the project-level .gn file (see
+      "gn help dotfile") for per-project configuration.
+
       Overrides the value of the export_compile_commands in the .gn file (see
-      "gn help dotfile").
+      "gn help dotfile") as well as the --add-export-compile-commands switch.
 
       Unlike the .gn setting, this switch takes a legacy format which is a list
       of target names that are matched in any directory. For example, "foo" will
@@ -670,7 +685,7 @@ int RunGen(const std::vector<std::string>& args) {
       base::CommandLine::ForCurrentProcess();
   if (command_line->HasSwitch(kSwitchCheck)) {
     setup->set_check_public_headers(true);
-    if (command_line->GetSwitchValueASCII(kSwitchCheck) == "system")
+    if (command_line->GetSwitchValueString(kSwitchCheck) == "system")
       setup->set_check_system_includes(true);
   }
 
@@ -732,7 +747,7 @@ int RunGen(const std::vector<std::string>& args) {
     return 1;
 
   if (command_line->HasSwitch(kSwitchIde) &&
-      !RunIdeWriter(command_line->GetSwitchValueASCII(kSwitchIde),
+      !RunIdeWriter(command_line->GetSwitchValueString(kSwitchIde),
                     &setup->build_settings(), setup->builder(), &err)) {
     err.PrintToStdout();
     return 1;

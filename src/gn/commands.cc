@@ -408,7 +408,7 @@ bool CommandSwitches::InitFrom(const base::CommandLine& cmdline) {
   result.has_all_ = cmdline.HasSwitch("all");
   result.has_blame_ = cmdline.HasSwitch("blame");
   result.has_tree_ = cmdline.HasSwitch("tree");
-  result.has_format_json_ = cmdline.GetSwitchValueASCII("format") == "json";
+  result.has_format_json_ = cmdline.GetSwitchValueString("format") == "json";
   result.has_default_toolchain_ =
       cmdline.HasSwitch(switches::kDefaultToolchain);
 
@@ -419,7 +419,7 @@ bool CommandSwitches::InitFrom(const base::CommandLine& cmdline) {
 
   std::string_view target_print_switch = "as";
   if (cmdline.HasSwitch(target_print_switch)) {
-    std::string value = cmdline.GetSwitchValueASCII(target_print_switch);
+    std::string value = cmdline.GetSwitchValueString(target_print_switch);
     if (value == "buildfile") {
       result.target_print_mode_ = TARGET_PRINT_BUILDFILE;
     } else if (value == "label") {
@@ -438,7 +438,7 @@ bool CommandSwitches::InitFrom(const base::CommandLine& cmdline) {
 
   std::string_view target_type_switch = "type";
   if (cmdline.HasSwitch(target_type_switch)) {
-    std::string value = cmdline.GetSwitchValueASCII(target_type_switch);
+    std::string value = cmdline.GetSwitchValueString(target_type_switch);
     static const struct {
       const char* name;
       Target::OutputType type;
@@ -467,7 +467,7 @@ bool CommandSwitches::InitFrom(const base::CommandLine& cmdline) {
   }
   std::string_view testonly_switch = "testonly";
   if (cmdline.HasSwitch(testonly_switch)) {
-    std::string value = cmdline.GetSwitchValueASCII(testonly_switch);
+    std::string value = cmdline.GetSwitchValueString(testonly_switch);
     if (value == "true") {
       testonly_mode_ = TESTONLY_TRUE;
     } else if (value == "false") {
@@ -480,9 +480,9 @@ bool CommandSwitches::InitFrom(const base::CommandLine& cmdline) {
     }
   }
 
-  result.meta_rebase_dir_ = cmdline.GetSwitchValueASCII("rebase");
-  result.meta_data_keys_ = cmdline.GetSwitchValueASCII("data");
-  result.meta_walk_keys_ = cmdline.GetSwitchValueASCII("walk");
+  result.meta_rebase_dir_ = cmdline.GetSwitchValueString("rebase");
+  result.meta_data_keys_ = cmdline.GetSwitchValueString("data");
+  result.meta_walk_keys_ = cmdline.GetSwitchValueString("walk");
   *this = result;
   return true;
 }

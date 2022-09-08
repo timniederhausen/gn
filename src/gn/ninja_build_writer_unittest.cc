@@ -54,7 +54,7 @@ TEST_F(NinjaBuildWriterTest, GetSelfInvocationCommandLine) {
   // (from //out/Debug to //).
   setup.build_settings()->SetRootPath(root_realpath);
   cmd_out = GetSelfInvocationCommandLine(setup.build_settings());
-  EXPECT_EQ("../..", cmd_out.GetSwitchValueASCII(switches::kRoot));
+  EXPECT_EQ("../..", cmd_out.GetSwitchValueString(switches::kRoot));
   EXPECT_FALSE(cmd_out.HasSwitch(switches::kDotfile));
 
   // If --root is . and --dotfile is foo/.gn, then --dotfile also needs
@@ -62,9 +62,9 @@ TEST_F(NinjaBuildWriterTest, GetSelfInvocationCommandLine) {
   setup.build_settings()->SetRootPath(root_realpath);
   setup.build_settings()->set_dotfile_name(gn_realpath);
   cmd_out = GetSelfInvocationCommandLine(setup.build_settings());
-  EXPECT_EQ("../..", cmd_out.GetSwitchValueASCII(switches::kRoot));
+  EXPECT_EQ("../..", cmd_out.GetSwitchValueString(switches::kRoot));
   EXPECT_EQ("../../testdot.gn",
-            cmd_out.GetSwitchValueASCII(switches::kDotfile));
+            cmd_out.GetSwitchValueString(switches::kDotfile));
 }
 
 TEST_F(NinjaBuildWriterTest, TwoTargets) {

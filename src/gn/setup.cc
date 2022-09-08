@@ -127,8 +127,11 @@ Variables
       This is used for Clang-based tooling and some editor integration. See
       https://clang.llvm.org/docs/JSONCompilationDatabase.html
 
-      The switch --export-compile-commands to "gn gen" (see "gn help gen")
-      overwrites this value.
+      The switch --add-export-compile-commands to "gn gen" (see "gn help gen")
+      appends to this value which provides a per-user way to customize it.
+
+      The deprecated switch --export-compile-commands to "gn gen" (see "gn help
+      gen") adds to the export target list using a different format.
 
       Example:
         export_compile_commands = [
@@ -529,7 +532,7 @@ bool Setup::FillArguments(const base::CommandLine& cmdline, Err* err) {
 
   base::FilePath build_arg_file =
       build_settings_.GetFullPath(GetBuildArgFile());
-  auto switch_value = cmdline.GetSwitchValueASCII(switches::kArgs);
+  auto switch_value = cmdline.GetSwitchValueString(switches::kArgs);
   if (cmdline.HasSwitch(switches::kArgs) ||
       (gen_empty_args_ && !PathExists(build_arg_file))) {
     if (!FillArgsFromCommandLine(
@@ -926,7 +929,7 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline, Err* err) {
 
   // Root build file.
   if (cmdline.HasSwitch(switches::kRootTarget)) {
-    auto switch_value = cmdline.GetSwitchValueASCII(switches::kRootTarget);
+    auto switch_value = cmdline.GetSwitchValueString(switches::kRootTarget);
     Value root_value(nullptr, switch_value);
     root_target_label = Label::Resolve(current_dir, std::string_view(), Label(),
                                        root_value, err);
@@ -1078,6 +1081,21 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline, Err* err) {
                                     err)) {
       return false;
     }
+  }
+
+  // Append any additional export compile command patterns from the cmdline.
+  for (const std::string& cur :
+       cmdline.GetSwitchValueStrings(switches::kAddExportCompileCommands)) {
+    LabelPattern pat = LabelPattern::GetPattern(
+        SourceDir("//"), build_settings_.root_path_utf8(), Value(nullptr, cur),
+        err);
+    if (err->has_error()) {
+      err->AppendSubErr(Err(
+          Location(),
+          "for the command-line switch --add-export-compile-commands=" + cur));
+      return false;
+    }
+    export_compile_commands_.push_back(std::move(pat));
   }
 
   return true;
