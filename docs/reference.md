@@ -919,21 +919,37 @@
       replay of individual compilations independent of the build system.
       This is an unstable format and likely to change without warning.
 
+  --add-export-compile-commands=<label_pattern>
+      Adds an additional label pattern (see "gn help label_pattern") of a
+      target to add to the compilation database. This pattern is appended to any
+      list values specified in the export_compile_commands variable in the
+      .gn file (see "gn help dotfile"). This allows the user to add additional
+      targets to the compilation database that the project doesn't add by default.
+
+      To add more than one value, specify this switch more than once. Each
+      invocation adds an additional label pattern.
+
+      Example:
+        --add-export-compile-commands=//tools:my_tool
+        --add-export-compile-commands="//base/*"
+
   --export-compile-commands[=<target_name1,target_name2...>]
-      Produces a compile_commands.json file in the root of the build directory
-      containing an array of “command objects”, where each command object
-      specifies one way a translation unit is compiled in the project. If a list
-      of target_name is supplied, only targets that are reachable from any
-      target in any build file whose name is target_name will be used for
-      “command objects” generation, otherwise all available targets will be used.
-      This is used for various Clang-based tooling, allowing for the replay of
-      individual compilations independent of the build system.
-      e.g. "foo" will match:
-      - "//path/to/src:foo"
-      - "//other/path:foo"
-      - "//foo:foo"
+      DEPRECATED https://bugs.chromium.org/p/gn/issues/detail?id=302.
+      Please use --add-export-compile-commands for per-user configuration, and
+      the "export_compile_commands" value in the project-level .gn file (see
+      "gn help dotfile") for per-project configuration.
+
+      Overrides the value of the export_compile_commands in the .gn file (see
+      "gn help dotfile") as well as the --add-export-compile-commands switch.
+
+      Unlike the .gn setting, this switch takes a legacy format which is a list
+      of target names that are matched in any directory. For example, "foo" will
+      match:
+       - "//path/to/src:foo"
+       - "//other/path:foo"
+       - "//foo:foo"
       and not match:
-      - "//foo:bar"
+       - "//foo:bar"
 ```
 ### <a name="cmd_help"></a>**gn help &lt;anything&gt;**
 
@@ -6951,6 +6967,28 @@
         exec_script_whitelist = [
           "//base/BUILD.gn",
           "//build/my_config.gni",
+        ]
+
+  export_compile_commands [optional]
+      A list of label patterns for which to generate a Clang compilation
+      database (see "gn help label_pattern" for the string format).
+
+      When specified, GN will generate a compile_commands.json file in the root
+      of the build directory containing information on how to compile each
+      source file reachable from any label matching any pattern in the list.
+      This is used for Clang-based tooling and some editor integration. See
+      https://clang.llvm.org/docs/JSONCompilationDatabase.html
+
+      The switch --add-export-compile-commands to "gn gen" (see "gn help gen")
+      appends to this value which provides a per-user way to customize it.
+
+      The deprecated switch --export-compile-commands to "gn gen" (see "gn help
+      gen") adds to the export target list using a different format.
+
+      Example:
+        export_compile_commands = [
+          "//base/*",
+          "//tools:doom_melon",
         ]
 
   root [optional]
