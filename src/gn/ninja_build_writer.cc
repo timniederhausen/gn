@@ -23,7 +23,6 @@
 #include "gn/input_file_manager.h"
 #include "gn/loader.h"
 #include "gn/ninja_utils.h"
-#include "gn/pointer_set.h"
 #include "gn/pool.h"
 #include "gn/scheduler.h"
 #include "gn/string_atom.h"
@@ -141,10 +140,10 @@ std::string GetSelfInvocationCommand(const BuildSettings* build_settings) {
 
 // Given an output that appears more than once, generates an error message
 // that describes the problem and which targets generate it.
-Err GetDuplicateOutputError(const std::vector<const Target*>& targets,
+Err GetDuplicateOutputError(const std::vector<const Target*>& all_targets,
                             const OutputFile& bad_output) {
   std::vector<const Target*> matches;
-  for (const Target* target : targets) {
+  for (const Target* target : all_targets) {
     for (const auto& output : target->computed_outputs()) {
       if (output == bad_output) {
         matches.push_back(target);
@@ -197,7 +196,7 @@ NinjaBuildWriter::NinjaBuildWriter(
     const BuildSettings* build_settings,
     const std::unordered_map<const Settings*, const Toolchain*>&
         used_toolchains,
-    const PointerSet<const Target>& all_targets,
+    const std::vector<const Target*>& all_targets,
     const Toolchain* default_toolchain,
     const std::vector<const Target*>& default_toolchain_targets,
     std::ostream& out,
@@ -241,11 +240,9 @@ bool NinjaBuildWriter::RunAndWriteFile(const BuildSettings* build_settings,
   // skip adding it to the list every time in the loop.
   used_toolchains[default_toolchain_settings] = default_toolchain;
 
-  PointerSet<const Target> target_set;
   std::vector<const Target*> default_toolchain_targets;
   default_toolchain_targets.reserve(all_targets.size());
   for (const Target* target : all_targets) {
-    target_set.insert(target);
     if (target->settings() == default_toolchain_settings) {
       default_toolchain_targets.push_back(target);
       // The default toolchain will already have been added to the used
@@ -259,7 +256,7 @@ bool NinjaBuildWriter::RunAndWriteFile(const BuildSettings* build_settings,
 
   std::stringstream file;
   std::stringstream depfile;
-  NinjaBuildWriter gen(build_settings, used_toolchains, target_set,
+  NinjaBuildWriter gen(build_settings, used_toolchains, all_targets,
                        default_toolchain, default_toolchain_targets, file,
                        depfile);
   if (!gen.Run(err))
@@ -335,27 +332,7 @@ void NinjaBuildWriter::WriteNinjaRules() {
        << "# build.ninja edge is separate to prevent ninja from deleting it\n"
        << "# (due to depfile usage) if interrupted. gn uses atomic writes to\n"
        << "# ensure that build.ninja is always valid even if interrupted.\n"
-       << "build build.ninja.stamp";
-
-  // Record all generated files as outputs of `gn` as well.
-  //
-  // TODO(fxbug.dev/303): We currently rely on the sort below to dedupe
-  // entries.
-  std::multimap<OutputFile, const Target*> generated_files = g_scheduler->GetGeneratedFiles();
-  VectorSetSorter<OutputFile> generated_file_sorter(generated_files.size());
-  for (const auto& entry : generated_files) {
-    // Only includes those actually in the build.
-    if (all_targets_.contains(entry.second)) {
-      generated_file_sorter.Add(entry.first);
-    }
-  }
-  generated_file_sorter.IterateOver(
-      [this](const OutputFile& output_file) {
-        out_ << " ";
-        path_output_.WriteFile(out_, output_file);
-      });
-
-  out_ << ": gn\n"
+       << "build build.ninja.stamp: gn\n"
        << "  generator = 1\n"
        << "  depfile = build.ninja.d\n"
        << "\n"
@@ -382,6 +359,7 @@ void NinjaBuildWriter::WriteNinjaRules() {
 
   const base::FilePath build_path =
       build_settings_->build_dir().Resolve(build_settings_->root_path());
+
   EscapeOptions depfile_escape;
   depfile_escape.mode = ESCAPE_DEPFILE;
   auto item_callback = [this, &depfile_escape,
