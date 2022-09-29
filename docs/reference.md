@@ -6718,8 +6718,11 @@
     visibility = [ ":mything", "//foo:something_else" ]
 
   Any target in the current directory and any subdirectory thereof, plus
-  any targets in "//bar/" and any subdirectory thereof.
+  any targets in "//bar/" and any subdirectory thereof:
     visibility = [ "./*", "//bar/*" ]
+
+  All targets in the current buildfile that are in the same toolchain:
+    visibility = [ ":*($current_toolchain)" ]
 ```
 ### <a name="var_walk_keys"></a>**walk_keys**: Key(s) for managing the metadata collection walk.
 
