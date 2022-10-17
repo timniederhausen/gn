@@ -469,9 +469,9 @@ bool CommandSwitches::InitFrom(const base::CommandLine& cmdline) {
   if (cmdline.HasSwitch(testonly_switch)) {
     std::string value = cmdline.GetSwitchValueString(testonly_switch);
     if (value == "true") {
-      testonly_mode_ = TESTONLY_TRUE;
+      result.testonly_mode_ = TESTONLY_TRUE;
     } else if (value == "false") {
-      testonly_mode_ = TESTONLY_FALSE;
+      result.testonly_mode_ = TESTONLY_FALSE;
     } else {
       Err(Location(), "Bad value for --testonly.",
           "I was expecting --testonly=true or --testonly=false.")
