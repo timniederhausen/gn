@@ -1642,14 +1642,19 @@ const char kOutputs_Help[] =
 
 const char kPool[] = "pool";
 const char kPool_HelpShort[] =
-    "pool: [string] Label of the pool used by the action.";
+    "pool: [string] Label of the pool used by binary targets and actions.";
 const char kPool_Help[] =
-    R"(pool: Label of the pool used by the action.
+    R"(pool: Label of the pool used by binary targets actions.
 
-  A fully-qualified label representing the pool that will be used for the
-  action. Pools are defined using the pool() {...} declaration.
+  A fully-qualified label representing the pool that will be used for binary
+  targets and actions. Pools are defined using the pool() {...} declaration.
 
 Example
+
+  executable("binary") {
+    pool = "//build:custom_pool"
+    ...
+  }
 
   action("action") {
     pool = "//build:custom_pool"

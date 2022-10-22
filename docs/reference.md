@@ -140,7 +140,7 @@
     *   [output_prefix_override: [boolean] Don't use prefix for output name.](#var_output_prefix_override)
     *   [outputs: [file list] Output files for actions and copy targets.](#var_outputs)
     *   [partial_info_plist: [filename] Path plist from asset catalog compiler.](#var_partial_info_plist)
-    *   [pool: [string] Label of the pool used by the action.](#var_pool)
+    *   [pool: [string] Label of the pool used by binary targets and actions.](#var_pool)
     *   [precompiled_header: [string] Header file to precompile.](#var_precompiled_header)
     *   [precompiled_header_type: [string] "gcc" or "msvc".](#var_precompiled_header_type)
     *   [precompiled_source: [file name] Source file to precompile.](#var_precompiled_source)
@@ -6217,16 +6217,21 @@
   The file will be generated regardless of whether the asset compiler has
   been invoked or not. See "gn help create_bundle".
 ```
-### <a name="var_pool"></a>**pool**: Label of the pool used by the action.
+### <a name="var_pool"></a>**pool**: Label of the pool used by binary targets actions.
 
 ```
-  A fully-qualified label representing the pool that will be used for the
-  action. Pools are defined using the pool() {...} declaration.
+  A fully-qualified label representing the pool that will be used for binary
+  targets and actions. Pools are defined using the pool() {...} declaration.
 ```
 
 #### **Example**
 
 ```
+  executable("binary") {
+    pool = "//build:custom_pool"
+    ...
+  }
+
   action("action") {
     pool = "//build:custom_pool"
     ...
@@ -6718,11 +6723,8 @@
     visibility = [ ":mything", "//foo:something_else" ]
 
   Any target in the current directory and any subdirectory thereof, plus
-  any targets in "//bar/" and any subdirectory thereof:
+  any targets in "//bar/" and any subdirectory thereof.
     visibility = [ "./*", "//bar/*" ]
-
-  All targets in the current buildfile that are in the same toolchain:
-    visibility = [ ":*($current_toolchain)" ]
 ```
 ### <a name="var_walk_keys"></a>**walk_keys**: Key(s) for managing the metadata collection walk.
 

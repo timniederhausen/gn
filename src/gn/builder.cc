@@ -254,7 +254,7 @@ bool Builder::TargetDefined(BuilderRecord* record, Err* err) {
       !AddDeps(record, target->all_dependent_configs(), err) ||
       !AddDeps(record, target->public_configs(), err) ||
       !AddGenDeps(record, target->gen_deps(), err) ||
-      !AddActionValuesDep(record, target->action_values(), err) ||
+      !AddPoolDep(record, target, err) ||
       !AddToolchainDep(record, target, err))
     return false;
 
@@ -432,14 +432,14 @@ bool Builder::AddGenDeps(BuilderRecord* record,
   return true;
 }
 
-bool Builder::AddActionValuesDep(BuilderRecord* record,
-                                 const ActionValues& action_values,
-                                 Err* err) {
-  if (action_values.pool().label.is_null())
+bool Builder::AddPoolDep(BuilderRecord* record,
+                         const Target* target,
+                         Err* err) {
+  if (target->pool().label.is_null())
     return true;
 
   BuilderRecord* pool_record = GetOrCreateRecordOfType(
-      action_values.pool().label, action_values.pool().origin,
+      target->pool().label, target->pool().origin,
       BuilderRecord::ITEM_POOL, err);
   if (!pool_record)
     return false;
@@ -500,7 +500,7 @@ bool Builder::ResolveItem(BuilderRecord* record, Err* err) {
         !ResolveConfigs(&target->configs(), err) ||
         !ResolveConfigs(&target->all_dependent_configs(), err) ||
         !ResolveConfigs(&target->public_configs(), err) ||
-        !ResolveActionValues(&target->action_values(), err) ||
+        !ResolvePool(target, err) ||
         !ResolveToolchain(target, err))
       return false;
   } else if (record->type() == BuilderRecord::ITEM_CONFIG) {
@@ -579,16 +579,16 @@ bool Builder::ResolveToolchain(Target* target, Err* err) {
   return true;
 }
 
-bool Builder::ResolveActionValues(ActionValues* action_values, Err* err) {
-  if (action_values->pool().label.is_null())
+bool Builder::ResolvePool(Target* target, Err* err) {
+  if (target->pool().label.is_null())
     return true;
 
   BuilderRecord* record = GetResolvedRecordOfType(
-      action_values->pool().label, action_values->pool().origin,
+      target->pool().label, target->pool().origin,
       BuilderRecord::ITEM_POOL, err);
   if (!record)
     return false;
-  action_values->set_pool(LabelPtrPair<Pool>(record->item()->AsPool()));
+  target->set_pool(LabelPtrPair<Pool>(record->item()->AsPool()));
 
   return true;
 }

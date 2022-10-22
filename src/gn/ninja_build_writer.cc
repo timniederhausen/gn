@@ -388,8 +388,10 @@ void NinjaBuildWriter::WriteAllPools() {
   }
 
   for (const Target* target : all_targets_) {
-    if (target->output_type() == Target::ACTION) {
-      const LabelPtrPair<Pool>& pool = target->action_values().pool();
+    if (target->IsBinary() ||
+        target->output_type() == Target::ACTION ||
+        target->output_type() == Target::ACTION_FOREACH) {
+      const LabelPtrPair<Pool>& pool = target->pool();
       if (pool.ptr)
         used_pools.insert(pool.ptr);
     }

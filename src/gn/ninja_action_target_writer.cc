@@ -83,9 +83,9 @@ void NinjaActionTargetWriter::Run() {
 
     WriteNinjaVariablesForAction();
 
-    if (target_->action_values().pool().ptr) {
+    if (target_->pool().ptr) {
       out_ << "  pool = ";
-      out_ << target_->action_values().pool().ptr->GetNinjaName(
+      out_ << target_->pool().ptr->GetNinjaName(
           settings_->default_toolchain_label());
       out_ << std::endl;
     }
@@ -213,9 +213,9 @@ void NinjaActionTargetWriter::WriteSourceRules(
     if (target_->action_values().has_depfile()) {
       WriteDepfile(sources[i]);
     }
-    if (target_->action_values().pool().ptr) {
+    if (target_->pool().ptr) {
       out_ << "  pool = ";
-      out_ << target_->action_values().pool().ptr->GetNinjaName(
+      out_ << target_->pool().ptr->GetNinjaName(
           settings_->default_toolchain_label());
       out_ << std::endl;
     }

@@ -254,10 +254,11 @@ Analyzer::Analyzer(const Builder& builder,
 
       dep_map_.insert(std::make_pair(item->AsTarget()->toolchain(), item));
 
-      if (item->AsTarget()->output_type() == Target::ACTION ||
+      if (item->AsTarget()->IsBinary() ||
+          item->AsTarget()->output_type() == Target::ACTION ||
           item->AsTarget()->output_type() == Target::ACTION_FOREACH) {
         const LabelPtrPair<Pool>& pool =
-            item->AsTarget()->action_values().pool();
+            item->AsTarget()->pool();
         if (pool.ptr)
           dep_map_.insert(std::make_pair(pool.ptr, item));
       }

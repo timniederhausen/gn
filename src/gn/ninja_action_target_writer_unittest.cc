@@ -91,7 +91,7 @@ TEST(NinjaActionTargetWriter, ActionNoSourcesConsole) {
             Label(SourceDir("//"), "console", setup.toolchain()->label().dir(),
                   setup.toolchain()->label().name()));
   pool.set_depth(1);
-  target.action_values().set_pool(LabelPtrPair<Pool>(&pool));
+  target.set_pool(LabelPtrPair<Pool>(&pool));
 
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
@@ -377,7 +377,7 @@ TEST(NinjaActionTargetWriter, ForEachWithPool) {
             Label(SourceDir("//foo/"), "pool", setup.toolchain()->label().dir(),
                   setup.toolchain()->label().name()));
   pool.set_depth(5);
-  target.action_values().set_pool(LabelPtrPair<Pool>(&pool));
+  target.set_pool(LabelPtrPair<Pool>(&pool));
 
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
