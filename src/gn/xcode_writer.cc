@@ -117,6 +117,15 @@ std::string GetBuildScript(const std::string& target_name,
   return buffer.str();
 }
 
+std::string GetBuildScript(const Label& target_label,
+                           const std::string& ninja_executable,
+                           const std::string& build_dir,
+                           base::Environment* environment) {
+  std::string target_name = target_label.GetUserVisibleName(false);
+  base::TrimString(target_name, "/", &target_name);
+  return GetBuildScript(target_name, ninja_executable, build_dir, environment);
+}
+
 bool IsApplicationTarget(const Target* target) {
   return target->output_type() == Target::CREATE_BUNDLE &&
          target->bundle_data().product_type() ==
@@ -968,7 +977,7 @@ PBXNativeTarget* XcodeProject::AddBinaryTarget(const Target* target,
       target->output_name().empty() ? target->label().name()
                                     : target->output_name(),
       "com.apple.product-type.tool", GetConfigOutputDir(output_dir),
-      GetBuildScript(target->label().name(), options_.ninja_executable,
+      GetBuildScript(target->label(), options_.ninja_executable,
                      GetConfigOutputDir("."), env));
 }
 
@@ -1001,7 +1010,7 @@ PBXNativeTarget* XcodeProject::AddBundleTarget(const Target* target,
   return project_.AddNativeTarget(
       pbxtarget_name, std::string(), target_output_name,
       target->bundle_data().product_type(), GetConfigOutputDir(output_dir),
-      GetBuildScript(pbxtarget_name, options_.ninja_executable,
+      GetBuildScript(target->label(), options_.ninja_executable,
                      GetConfigOutputDir("."), env),
       xcode_extra_attributes);
 }
