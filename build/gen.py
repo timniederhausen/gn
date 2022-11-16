@@ -807,6 +807,7 @@ def WriteGNNinja(path, platform, host, options, args_list):
         'src/gn/path_output_unittest.cc',
         'src/gn/pattern_unittest.cc',
         'src/gn/pointer_set_unittest.cc',
+        'src/gn/resolved_target_deps_unittest.cc',
         'src/gn/runtime_deps_unittest.cc',
         'src/gn/scope_per_file_provider_unittest.cc',
         'src/gn/scope_unittest.cc',
