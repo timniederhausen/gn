@@ -818,6 +818,7 @@ def WriteGNNinja(path, platform, host, options, args_list):
         'src/gn/string_utils_unittest.cc',
         'src/gn/substitution_pattern_unittest.cc',
         'src/gn/substitution_writer_unittest.cc',
+        'src/gn/target_public_pair_unittest.cc',
         'src/gn/target_unittest.cc',
         'src/gn/template_unittest.cc',
         'src/gn/test_with_scheduler.cc',
