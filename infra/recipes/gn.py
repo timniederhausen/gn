@@ -5,8 +5,6 @@
 
 from recipe_engine.recipe_api import Property
 
-PYTHON_VERSION_COMPATIBILITY = 'PY3'
-
 DEPS = [
     'recipe_engine/buildbucket',
     'recipe_engine/cas',
@@ -17,7 +15,6 @@ DEPS = [
     'recipe_engine/path',
     'recipe_engine/platform',
     'recipe_engine/properties',
-    'recipe_engine/python',
     'recipe_engine/raw_io',
     'recipe_engine/step',
     'target',
@@ -226,10 +223,10 @@ def RunSteps(api, repository):
                                              cipd_dir)
           with api.step.nest('build rpmalloc-' + platform), api.context(
               env=env, cwd=rpmalloc_src_dir):
-            api.python(
+            api.step(
                 'configure',
-                rpmalloc_src_dir.join('configure.py'),
-                args=['-c', 'release', '-a', rpmalloc_arch, '--lto'])
+                ['python3', '-u', rpmalloc_src_dir.join('configure.py')] +
+                ['-c', 'release', '-a', rpmalloc_arch, '--lto'])
 
             # NOTE: Only build the static library.
             rpmalloc_static_lib = api.path.join('lib', rpmalloc_os, 'release',
@@ -252,7 +249,8 @@ def RunSteps(api, repository):
                   '--link-lib=%s' % rpmalloc_static_libs[target.platform]
               ]
 
-            api.python('generate', src_dir.join('build', 'gen.py'), args=args)
+            api.step('generate',
+                     ['python3', '-u', src_dir.join('build', 'gen.py')] + args)
 
             # Windows requires the environment modifications when building too.
             api.step('build',
