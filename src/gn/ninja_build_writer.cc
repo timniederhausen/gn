@@ -487,6 +487,10 @@ Phony rules
        short name. Use "ninja doom_melon" to compile the
        "//tools/fruit:doom_melon" executable.
 
+       Note that for Apple platforms, create_bundle targets with a product_type
+       of "com.apple.product-type.application" are considered as executable
+       for this rule (as they define application bundles).
+
     5. The short names of all targets if there is only one target with that
        short name.
 
@@ -545,6 +549,13 @@ bool NinjaBuildWriter::WritePhonyAndAllRules(Err* err) {
 
     // Count executables with the given short name.
     if (target->output_type() == Target::EXECUTABLE) {
+      Counts& exes_counts = exes[short_name];
+      exes_counts.count++;
+      exes_counts.last_seen = target;
+    }
+
+    if (target->output_type() == Target::CREATE_BUNDLE &&
+        target->bundle_data().is_application()) {
       Counts& exes_counts = exes[short_name];
       exes_counts.count++;
       exes_counts.last_seen = target;

@@ -7799,6 +7799,10 @@
        short name. Use "ninja doom_melon" to compile the
        "//tools/fruit:doom_melon" executable.
 
+       Note that for Apple platforms, create_bundle targets with a product_type
+       of "com.apple.product-type.application" are considered as executable
+       for this rule (as they define application bundles).
+
     5. The short names of all targets if there is only one target with that
        short name.
 
