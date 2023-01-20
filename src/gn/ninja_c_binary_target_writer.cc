@@ -642,7 +642,7 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
   }
 
   // Libraries specified by paths.
-  for (const auto& lib : target_->all_libs()) {
+  for (const auto& lib : resolved().GetLinkedLibraries(target_)) {
     if (lib.is_source_file()) {
       implicit_deps.push_back(
           OutputFile(settings_->build_settings(), lib.source_file()));

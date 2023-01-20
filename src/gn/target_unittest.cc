@@ -9,6 +9,7 @@
 
 #include "gn/build_settings.h"
 #include "gn/config.h"
+#include "gn/resolved_target_data.h"
 #include "gn/scheduler.h"
 #include "gn/settings.h"
 #include "gn/test_with_scheduler.h"
@@ -35,52 +36,6 @@ void AssertSchedulerHasOneUnknownFileMatching(const Target* target,
 }  // namespace
 
 using TargetTest = TestWithScheduler;
-
-// Tests that lib[_dir]s are inherited across deps boundaries for static
-// libraries but not executables.
-TEST_F(TargetTest, LibInheritance) {
-  TestWithScope setup;
-  Err err;
-
-  const LibFile lib("foo");
-  const SourceDir libdir("/foo_dir/");
-
-  // Leaf target with ldflags set.
-  TestTarget z(setup, "//foo:z", Target::STATIC_LIBRARY);
-  z.config_values().libs().push_back(lib);
-  z.config_values().lib_dirs().push_back(libdir);
-  ASSERT_TRUE(z.OnResolved(&err));
-
-  // All lib[_dir]s should be set when target is resolved.
-  ASSERT_EQ(1u, z.all_libs().size());
-  EXPECT_EQ(lib, z.all_libs()[0]);
-  ASSERT_EQ(1u, z.all_lib_dirs().size());
-  EXPECT_EQ(libdir, z.all_lib_dirs()[0]);
-
-  // Shared library target should inherit the libs from the static library
-  // and its own. Its own flag should be before the inherited one.
-  const LibFile second_lib("bar");
-  const SourceDir second_libdir("/bar_dir/");
-  TestTarget shared(setup, "//foo:shared", Target::SHARED_LIBRARY);
-  shared.config_values().libs().push_back(second_lib);
-  shared.config_values().lib_dirs().push_back(second_libdir);
-  shared.private_deps().push_back(LabelTargetPair(&z));
-  ASSERT_TRUE(shared.OnResolved(&err));
-
-  ASSERT_EQ(2u, shared.all_libs().size());
-  EXPECT_EQ(second_lib, shared.all_libs()[0]);
-  EXPECT_EQ(lib, shared.all_libs()[1]);
-  ASSERT_EQ(2u, shared.all_lib_dirs().size());
-  EXPECT_EQ(second_libdir, shared.all_lib_dirs()[0]);
-  EXPECT_EQ(libdir, shared.all_lib_dirs()[1]);
-
-  // Executable target shouldn't get either by depending on shared.
-  TestTarget exec(setup, "//foo:exec", Target::EXECUTABLE);
-  exec.private_deps().push_back(LabelTargetPair(&shared));
-  ASSERT_TRUE(exec.OnResolved(&err));
-  EXPECT_EQ(0u, exec.all_libs().size());
-  EXPECT_EQ(0u, exec.all_lib_dirs().size());
-}
 
 // Tests that framework[_dir]s are inherited across deps boundaries for static
 // libraries but not executables.
@@ -366,10 +321,14 @@ TEST_F(TargetTest, InheritCompleteStaticLib) {
   EXPECT_EQ(&b, a_inherited[0]);
 
   // A should inherit the libs and lib_dirs from the C.
-  ASSERT_EQ(1u, a.all_libs().size());
-  EXPECT_EQ(lib, a.all_libs()[0]);
-  ASSERT_EQ(1u, a.all_lib_dirs().size());
-  EXPECT_EQ(lib_dir, a.all_lib_dirs()[0]);
+  ResolvedTargetData resolved;
+  const auto& a_all_libs = resolved.GetLinkedLibraries(&a);
+  ASSERT_EQ(1u, a_all_libs.size());
+  EXPECT_EQ(lib, a_all_libs[0]);
+
+  const auto& a_all_lib_dirs = resolved.GetLinkedLibraryDirs(&a);
+  ASSERT_EQ(1u, a_all_lib_dirs.size());
+  EXPECT_EQ(lib_dir, a_all_lib_dirs[0]);
 }
 
 TEST_F(TargetTest, InheritCompleteStaticLibStaticLibDeps) {
@@ -684,8 +643,10 @@ TEST_F(TargetTest, PublicConfigs) {
 
   // Libs have special handling, check that they were forwarded from the
   // public config to all_libs.
-  ASSERT_EQ(1u, dep_on_pub.all_libs().size());
-  ASSERT_EQ(lib_name, dep_on_pub.all_libs()[0]);
+  ResolvedTargetData resolved;
+  const auto& dep_on_pub_all_libs = resolved.GetLinkedLibraries(&dep_on_pub);
+  ASSERT_EQ(1u, dep_on_pub_all_libs.size());
+  ASSERT_EQ(lib_name, dep_on_pub_all_libs[0]);
 
   // This target has a private dependency on dest for forwards configs.
   TestTarget forward(setup, "//a:f", Target::SOURCE_SET);

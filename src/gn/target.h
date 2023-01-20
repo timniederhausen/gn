@@ -332,9 +332,6 @@ class Target : public Item {
     return rust_transitive_inheritable_libs_;
   }
 
-  const UniqueVector<SourceDir>& all_lib_dirs() const { return all_lib_dirs_; }
-  const UniqueVector<LibFile>& all_libs() const { return all_libs_; }
-
   const UniqueVector<SourceDir>& all_framework_dirs() const {
     return all_framework_dirs_;
   }
@@ -503,11 +500,6 @@ class Target : public Item {
   // Static libraries, shared libraries, and source sets from transitive deps
   // that need to be linked.
   InheritedLibraries inherited_libraries_;
-
-  // These libs and dirs are inherited from statically linked deps and all
-  // configs applying to this target.
-  UniqueVector<SourceDir> all_lib_dirs_;
-  UniqueVector<LibFile> all_libs_;
 
   // These frameworks and dirs are inherited from statically linked deps and
   // all configs applying to this target.

@@ -493,9 +493,6 @@ bool Target::OnResolved(Err* err) {
   // order (local ones first, then the dependency's).
   for (ConfigValuesIterator iter(this); !iter.done(); iter.Next()) {
     const ConfigValues& cur = iter.cur();
-    all_lib_dirs_.Append(cur.lib_dirs().begin(), cur.lib_dirs().end());
-    all_libs_.Append(cur.libs().begin(), cur.libs().end());
-
     all_framework_dirs_.Append(cur.framework_dirs().begin(),
                                cur.framework_dirs().end());
     all_frameworks_.Append(cur.frameworks().begin(), cur.frameworks().end());
@@ -862,9 +859,6 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
 
   // Library settings are always inherited across static library boundaries.
   if (!dep->IsFinal() || dep->output_type() == STATIC_LIBRARY) {
-    all_lib_dirs_.Append(dep->all_lib_dirs());
-    all_libs_.Append(dep->all_libs());
-
     all_framework_dirs_.Append(dep->all_framework_dirs());
     all_frameworks_.Append(dep->all_frameworks());
     all_weak_frameworks_.Append(dep->all_weak_frameworks());

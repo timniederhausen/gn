@@ -60,6 +60,21 @@ class ResolvedTargetData {
     return GetTargetDeps(target).linked_deps();
   }
 
+  // The list of all library directory search path to add to the final link
+  // command of linkable binary. For example, if this returns ['dir1', 'dir2']
+  // a command for a C++ linker would typically use `-Ldir1 -Ldir2`.
+  const std::vector<SourceDir>& GetLinkedLibraryDirs(
+      const Target* target) const {
+    return GetTargetLibInfo(target)->lib_dirs;
+  }
+
+  // The list of all library files to add to the final link command of linkable
+  // binaries. For example, if this returns ['foo', '/path/to/bar'], the command
+  // for a C++ linker would typically use '-lfoo /path/to/bar'.
+  const std::vector<LibFile>& GetLinkedLibraries(const Target* target) const {
+    return GetTargetLibInfo(target)->libs;
+  }
+
  private:
   // The information associated with a given Target pointer.
   struct TargetInfo {
@@ -73,11 +88,31 @@ class ResolvedTargetData {
 
     const Target* target = nullptr;
     ResolvedTargetDeps deps;
+
+    bool has_lib_info = false;
+
+    // Only valid if |has_lib_info| is true.
+    std::vector<SourceDir> lib_dirs;
+    std::vector<LibFile> libs;
   };
 
   // Retrieve TargetInfo value associated with |target|. Create
   // a new empty instance on demand if none is already available.
   TargetInfo* GetTargetInfo(const Target* target) const;
+
+  const TargetInfo* GetTargetLibInfo(const Target* target) const {
+    TargetInfo* info = GetTargetInfo(target);
+    if (!info->has_lib_info) {
+      ComputeLibInfo(info);
+      DCHECK(info->has_lib_info);
+    }
+    return info;
+  }
+
+  // Compute the portion of TargetInfo guarded by one of the |has_xxx|
+  // booleans. This performs recursive and expensive computations and
+  // should only be called once per TargetInfo instance.
+  void ComputeLibInfo(TargetInfo* info) const;
 
   // A { Target* -> TargetInfo } map that will create entries
   // on demand (hence the mutable qualifier). Implemented with a

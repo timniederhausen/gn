@@ -327,7 +327,7 @@ void NinjaBinaryTargetWriter::WriteLibrarySearchPath(
     const Tool* tool) {
   // Write library search paths that have been recursively pushed
   // through the dependency tree.
-  const UniqueVector<SourceDir>& all_lib_dirs = target_->all_lib_dirs();
+  const auto& all_lib_dirs = resolved().GetLinkedLibraryDirs(target_);
   if (!all_lib_dirs.empty()) {
     // Since we're passing these on the command line to the linker and not
     // to Ninja, we need to do shell escaping.
@@ -380,7 +380,7 @@ void NinjaBinaryTargetWriter::WriteLibs(std::ostream& out, const Tool* tool) {
       ESCAPE_NINJA_COMMAND);
   EscapeOptions lib_escape_opts;
   lib_escape_opts.mode = ESCAPE_NINJA_COMMAND;
-  const UniqueVector<LibFile>& all_libs = target_->all_libs();
+  const auto& all_libs = resolved().GetLinkedLibraries(target_);
   for (size_t i = 0; i < all_libs.size(); i++) {
     const LibFile& lib_file = all_libs[i];
     const std::string& lib_value = lib_file.value();
