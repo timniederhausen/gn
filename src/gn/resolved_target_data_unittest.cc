@@ -109,3 +109,61 @@ TEST(ResolvedTargetDataTest, LibInheritance) {
   const auto& all_lib_dirs3 = resolved.GetLinkedLibraryDirs(&exec);
   EXPECT_EQ(0u, all_lib_dirs3.size());
 }
+
+// Tests that framework[_dir]s are inherited across deps boundaries for static
+// libraries but not executables.
+TEST(ResolvedTargetDataTest, FrameworkInheritance) {
+  TestWithScope setup;
+  Err err;
+
+  const std::string framework("Foo.framework");
+  const SourceDir frameworkdir("//out/foo/");
+
+  // Leaf target with ldflags set.
+  TestTarget z(setup, "//foo:z", Target::STATIC_LIBRARY);
+  z.config_values().frameworks().push_back(framework);
+  z.config_values().framework_dirs().push_back(frameworkdir);
+  ASSERT_TRUE(z.OnResolved(&err));
+
+  ResolvedTargetData resolved;
+
+  // All framework[_dir]s should be set when target is resolved.
+  const auto& frameworks = resolved.GetLinkedFrameworks(&z);
+  ASSERT_EQ(1u, frameworks.size());
+  EXPECT_EQ(framework, frameworks[0]);
+
+  const auto& framework_dirs = resolved.GetLinkedFrameworkDirs(&z);
+  ASSERT_EQ(1u, framework_dirs.size());
+  EXPECT_EQ(frameworkdir, framework_dirs[0]);
+
+  // Shared library target should inherit the libs from the static library
+  // and its own. Its own flag should be before the inherited one.
+  const std::string second_framework("Bar.framework");
+  const SourceDir second_frameworkdir("//out/bar/");
+  TestTarget shared(setup, "//foo:shared", Target::SHARED_LIBRARY);
+  shared.config_values().frameworks().push_back(second_framework);
+  shared.config_values().framework_dirs().push_back(second_frameworkdir);
+  shared.private_deps().push_back(LabelTargetPair(&z));
+  ASSERT_TRUE(shared.OnResolved(&err));
+
+  const auto& frameworks2 = resolved.GetLinkedFrameworks(&shared);
+  ASSERT_EQ(2u, frameworks2.size());
+  EXPECT_EQ(second_framework, frameworks2[0]);
+  EXPECT_EQ(framework, frameworks2[1]);
+
+  const auto& framework_dirs2 = resolved.GetLinkedFrameworkDirs(&shared);
+  ASSERT_EQ(2u, framework_dirs2.size());
+  EXPECT_EQ(second_frameworkdir, framework_dirs2[0]);
+  EXPECT_EQ(frameworkdir, framework_dirs2[1]);
+
+  // Executable target shouldn't get either by depending on shared.
+  TestTarget exec(setup, "//foo:exec", Target::EXECUTABLE);
+  exec.private_deps().push_back(LabelTargetPair(&shared));
+  ASSERT_TRUE(exec.OnResolved(&err));
+
+  const auto& frameworks3 = resolved.GetLinkedFrameworks(&exec);
+  EXPECT_EQ(0u, frameworks3.size());
+
+  const auto& framework_dirs3 = resolved.GetLinkedFrameworkDirs(&exec);
+  EXPECT_EQ(0u, framework_dirs3.size());
+}

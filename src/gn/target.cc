@@ -483,23 +483,6 @@ bool Target::OnResolved(Err* err) {
                              dep.ptr->public_configs().end());
   }
 
-  // Copy our own libs and lib_dirs to the final set. This will be from our
-  // target and all of our configs. We do this specially since these must be
-  // inherited through the dependency tree (other flags don't work this way).
-  //
-  // This needs to happen after we pull dependent target configs for the
-  // public config's libs to be included here. And it needs to happen
-  // before pulling the dependent target libs so the libs are in the correct
-  // order (local ones first, then the dependency's).
-  for (ConfigValuesIterator iter(this); !iter.done(); iter.Next()) {
-    const ConfigValues& cur = iter.cur();
-    all_framework_dirs_.Append(cur.framework_dirs().begin(),
-                               cur.framework_dirs().end());
-    all_frameworks_.Append(cur.frameworks().begin(), cur.frameworks().end());
-    all_weak_frameworks_.Append(cur.weak_frameworks().begin(),
-                                cur.weak_frameworks().end());
-  }
-
   PullRecursiveBundleData();
   PullDependentTargetLibs();
   PullRecursiveHardDeps();
@@ -855,13 +838,6 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
         inherited_libraries_.Append(target, pub);
       }
     }
-  }
-
-  // Library settings are always inherited across static library boundaries.
-  if (!dep->IsFinal() || dep->output_type() == STATIC_LIBRARY) {
-    all_framework_dirs_.Append(dep->all_framework_dirs());
-    all_frameworks_.Append(dep->all_frameworks());
-    all_weak_frameworks_.Append(dep->all_weak_frameworks());
   }
 }
 

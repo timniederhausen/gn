@@ -75,6 +75,27 @@ class ResolvedTargetData {
     return GetTargetLibInfo(target)->libs;
   }
 
+  // The list of framework directories search paths to use at link time
+  // when generating macOS or iOS linkable binaries.
+  const std::vector<SourceDir>& GetLinkedFrameworkDirs(
+      const Target* target) const {
+    return GetTargetFrameworkInfo(target)->framework_dirs;
+  }
+
+  // The list of framework names to use at link time when generating macOS
+  // or iOS linkable binaries.
+  const std::vector<std::string>& GetLinkedFrameworks(
+      const Target* target) const {
+    return GetTargetFrameworkInfo(target)->frameworks;
+  }
+
+  // The list of weak framework names to use at link time when generating macOS
+  // or iOS linkable binaries.
+  const std::vector<std::string>& GetLinkedWeakFrameworks(
+      const Target* target) const {
+    return GetTargetFrameworkInfo(target)->weak_frameworks;
+  }
+
  private:
   // The information associated with a given Target pointer.
   struct TargetInfo {
@@ -90,10 +111,16 @@ class ResolvedTargetData {
     ResolvedTargetDeps deps;
 
     bool has_lib_info = false;
+    bool has_framework_info = false;
 
     // Only valid if |has_lib_info| is true.
     std::vector<SourceDir> lib_dirs;
     std::vector<LibFile> libs;
+
+    // Only valid if |has_framework_info| is true.
+    std::vector<SourceDir> framework_dirs;
+    std::vector<std::string> frameworks;
+    std::vector<std::string> weak_frameworks;
   };
 
   // Retrieve TargetInfo value associated with |target|. Create
@@ -109,10 +136,20 @@ class ResolvedTargetData {
     return info;
   }
 
+  const TargetInfo* GetTargetFrameworkInfo(const Target* target) const {
+    TargetInfo* info = GetTargetInfo(target);
+    if (!info->has_framework_info) {
+      ComputeFrameworkInfo(info);
+      DCHECK(info->has_framework_info);
+    }
+    return info;
+  }
+
   // Compute the portion of TargetInfo guarded by one of the |has_xxx|
   // booleans. This performs recursive and expensive computations and
   // should only be called once per TargetInfo instance.
   void ComputeLibInfo(TargetInfo* info) const;
+  void ComputeFrameworkInfo(TargetInfo* info) const;
 
   // A { Target* -> TargetInfo } map that will create entries
   // on demand (hence the mutable qualifier). Implemented with a

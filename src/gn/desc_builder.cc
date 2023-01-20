@@ -608,7 +608,7 @@ class TargetDescBuilder : public BaseDescBuilder {
     }
 
     if (what(variables::kFrameworks)) {
-      const auto& all_frameworks = target_->all_frameworks();
+      const auto& all_frameworks = resolved.GetLinkedFrameworks(target_);
       if (!all_frameworks.empty()) {
         auto frameworks = std::make_unique<base::ListValue>();
         for (size_t i = 0; i < all_frameworks.size(); i++)
@@ -618,7 +618,7 @@ class TargetDescBuilder : public BaseDescBuilder {
       }
     }
     if (what(variables::kWeakFrameworks)) {
-      const auto& weak_frameworks = target_->all_weak_frameworks();
+      const auto& weak_frameworks = resolved.GetLinkedWeakFrameworks(target_);
       if (!weak_frameworks.empty()) {
         auto frameworks = std::make_unique<base::ListValue>();
         for (size_t i = 0; i < weak_frameworks.size(); i++)
@@ -629,7 +629,7 @@ class TargetDescBuilder : public BaseDescBuilder {
     }
 
     if (what(variables::kFrameworkDirs)) {
-      const auto& all_framework_dirs = target_->all_framework_dirs();
+      const auto& all_framework_dirs = resolved.GetLinkedFrameworkDirs(target_);
       if (!all_framework_dirs.empty()) {
         auto framework_dirs = std::make_unique<base::ListValue>();
         for (size_t i = 0; i < all_framework_dirs.size(); i++)

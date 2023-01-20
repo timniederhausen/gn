@@ -36,3 +36,29 @@ void ResolvedTargetData::ComputeLibInfo(TargetInfo* info) const {
   info->libs = all_libs.release();
   info->has_lib_info = true;
 }
+
+void ResolvedTargetData::ComputeFrameworkInfo(TargetInfo* info) const {
+  UniqueVector<SourceDir> all_framework_dirs;
+  UniqueVector<std::string> all_frameworks;
+  UniqueVector<std::string> all_weak_frameworks;
+
+  for (ConfigValuesIterator iter(info->target); !iter.done(); iter.Next()) {
+    const ConfigValues& cur = iter.cur();
+    all_framework_dirs.Append(cur.framework_dirs());
+    all_frameworks.Append(cur.frameworks());
+    all_weak_frameworks.Append(cur.weak_frameworks());
+  }
+  for (const Target* dep : info->deps.linked_deps()) {
+    if (!dep->IsFinal() || dep->output_type() == Target::STATIC_LIBRARY) {
+      const TargetInfo* dep_info = GetTargetFrameworkInfo(dep);
+      all_framework_dirs.Append(dep_info->framework_dirs);
+      all_frameworks.Append(dep_info->frameworks);
+      all_weak_frameworks.Append(dep_info->weak_frameworks);
+    }
+  }
+
+  info->framework_dirs = all_framework_dirs.release();
+  info->frameworks = all_frameworks.release();
+  info->weak_frameworks = all_weak_frameworks.release();
+  info->has_framework_info = true;
+}

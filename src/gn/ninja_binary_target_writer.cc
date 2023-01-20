@@ -341,7 +341,7 @@ void NinjaBinaryTargetWriter::WriteLibrarySearchPath(
     }
   }
 
-  const auto& all_framework_dirs = target_->all_framework_dirs();
+  const auto& all_framework_dirs = resolved().GetLinkedFrameworkDirs(target_);
   if (!all_framework_dirs.empty()) {
     // Since we're passing these on the command line to the linker and not
     // to Ninja, we need to do shell escaping.
@@ -398,13 +398,13 @@ void NinjaBinaryTargetWriter::WriteFrameworks(std::ostream& out,
                                               const Tool* tool) {
   // Frameworks that have been recursively pushed through the dependency tree.
   FrameworksWriter writer(tool->framework_switch());
-  const auto& all_frameworks = target_->all_frameworks();
+  const auto& all_frameworks = resolved().GetLinkedFrameworks(target_);
   for (size_t i = 0; i < all_frameworks.size(); i++) {
     writer(all_frameworks[i], out);
   }
 
   FrameworksWriter weak_writer(tool->weak_framework_switch());
-  const auto& all_weak_frameworks = target_->all_weak_frameworks();
+  const auto& all_weak_frameworks = resolved().GetLinkedWeakFrameworks(target_);
   for (size_t i = 0; i < all_weak_frameworks.size(); i++) {
     weak_writer(all_weak_frameworks[i], out);
   }

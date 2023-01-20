@@ -332,16 +332,6 @@ class Target : public Item {
     return rust_transitive_inheritable_libs_;
   }
 
-  const UniqueVector<SourceDir>& all_framework_dirs() const {
-    return all_framework_dirs_;
-  }
-  const UniqueVector<std::string>& all_frameworks() const {
-    return all_frameworks_;
-  }
-  const UniqueVector<std::string>& all_weak_frameworks() const {
-    return all_weak_frameworks_;
-  }
-
   const TargetSet& recursive_hard_deps() const { return recursive_hard_deps_; }
 
   std::vector<LabelPattern>& friends() { return friends_; }
@@ -500,12 +490,6 @@ class Target : public Item {
   // Static libraries, shared libraries, and source sets from transitive deps
   // that need to be linked.
   InheritedLibraries inherited_libraries_;
-
-  // These frameworks and dirs are inherited from statically linked deps and
-  // all configs applying to this target.
-  UniqueVector<SourceDir> all_framework_dirs_;
-  UniqueVector<std::string> all_frameworks_;
-  UniqueVector<std::string> all_weak_frameworks_;
 
   // All hard deps from this target and all dependencies. Filled in when this
   // target is marked resolved. This will not include the current target.
