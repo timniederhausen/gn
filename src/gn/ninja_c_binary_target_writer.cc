@@ -83,7 +83,9 @@ const SourceFile* GetModuleMapFromTargetSources(const Target* target) {
   return nullptr;
 }
 
-std::vector<ModuleDep> GetModuleDepsInformation(const Target* target) {
+std::vector<ModuleDep> GetModuleDepsInformation(
+    const Target* target,
+    const ResolvedTargetData& resolved) {
   std::vector<ModuleDep> ret;
 
   auto add = [&ret](const Target* t, bool is_self) {
@@ -107,10 +109,10 @@ std::vector<ModuleDep> GetModuleDepsInformation(const Target* target) {
     add(target, true);
   }
 
-  for (const auto& pair: target->GetDeps(Target::DEPS_LINKED)) {
+  for (const Target* dep : resolved.GetLinkedDeps(target)) {
     // Having a .modulemap source means that the dependency is modularized.
-    if (pair.ptr->source_types_used().Get(SourceFile::SOURCE_MODULEMAP)) {
-      add(pair.ptr, false);
+    if (dep->source_types_used().Get(SourceFile::SOURCE_MODULEMAP)) {
+      add(dep, false);
     }
   }
 
@@ -127,7 +129,8 @@ NinjaCBinaryTargetWriter::NinjaCBinaryTargetWriter(const Target* target,
 NinjaCBinaryTargetWriter::~NinjaCBinaryTargetWriter() = default;
 
 void NinjaCBinaryTargetWriter::Run() {
-  std::vector<ModuleDep> module_dep_info = GetModuleDepsInformation(target_);
+  std::vector<ModuleDep> module_dep_info =
+      GetModuleDepsInformation(target_, resolved());
 
   WriteCompilerVars(module_dep_info);
 

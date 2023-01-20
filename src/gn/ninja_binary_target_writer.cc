@@ -129,9 +129,11 @@ NinjaBinaryTargetWriter::ClassifiedDeps
 NinjaBinaryTargetWriter::GetClassifiedDeps() const {
   ClassifiedDeps classified_deps;
 
+  const auto& target_deps = resolved().GetTargetDeps(target_);
+
   // Normal public/private deps.
-  for (const auto& pair : target_->GetDeps(Target::DEPS_LINKED)) {
-    ClassifyDependency(pair.ptr, &classified_deps);
+  for (const Target* dep : target_deps.linked_deps()) {
+    ClassifyDependency(dep, &classified_deps);
   }
 
   // Inherited libraries.
@@ -140,8 +142,8 @@ NinjaBinaryTargetWriter::GetClassifiedDeps() const {
   }
 
   // Data deps.
-  for (const auto& data_dep_pair : target_->data_deps())
-    classified_deps.non_linkable_deps.push_back(data_dep_pair.ptr);
+  for (const Target* data_dep : target_deps.data_deps())
+    classified_deps.non_linkable_deps.push_back(data_dep);
 
   return classified_deps;
 }
