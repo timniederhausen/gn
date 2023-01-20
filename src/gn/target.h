@@ -14,7 +14,6 @@
 #include "gn/action_values.h"
 #include "gn/bundle_data.h"
 #include "gn/config_values.h"
-#include "gn/inherited_libraries.h"
 #include "gn/item.h"
 #include "gn/label_pattern.h"
 #include "gn/label_ptr.h"
@@ -298,10 +297,6 @@ class Target : public Item {
   const LabelPtrPair<Pool>& pool() const { return pool_; }
   void set_pool(LabelPtrPair<Pool> pool) { pool_ = std::move(pool); }
 
-  const InheritedLibraries& inherited_libraries() const {
-    return inherited_libraries_;
-  }
-
   // This config represents the configuration set directly on this target.
   ConfigValues& config_values();
   const ConfigValues& config_values() const;
@@ -484,10 +479,6 @@ class Target : public Item {
   std::set<Label> allow_circular_includes_from_;
 
   LabelPtrPair<Pool> pool_;
-
-  // Static libraries, shared libraries, and source sets from transitive deps
-  // that need to be linked.
-  InheritedLibraries inherited_libraries_;
 
   std::vector<LabelPattern> friends_;
   std::vector<LabelPattern> assert_no_deps_;

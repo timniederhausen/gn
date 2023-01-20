@@ -103,6 +103,13 @@ class ResolvedTargetData {
     return GetTargetHardDeps(target)->hard_deps;
   }
 
+  // Retrieves an ordered list of (target, is_public) pairs for all link-time
+  // libraries inherited by this target.
+  const std::vector<TargetPublicPair>& GetInheritedLibraries(
+      const Target* target) const {
+    return GetTargetInheritedLibs(target)->inherited_libs;
+  }
+
  private:
   // The information associated with a given Target pointer.
   struct TargetInfo {
@@ -120,6 +127,7 @@ class ResolvedTargetData {
     bool has_lib_info = false;
     bool has_framework_info = false;
     bool has_hard_deps = false;
+    bool has_inherited_libs = false;
 
     // Only valid if |has_lib_info| is true.
     std::vector<SourceDir> lib_dirs;
@@ -132,6 +140,9 @@ class ResolvedTargetData {
 
     // Only valid if |has_hard_deps| is true.
     TargetSet hard_deps;
+
+    // Only valid if |has_inherited_libs| is true.
+    std::vector<TargetPublicPair> inherited_libs;
   };
 
   // Retrieve TargetInfo value associated with |target|. Create
@@ -165,12 +176,28 @@ class ResolvedTargetData {
     return info;
   }
 
+  const TargetInfo* GetTargetInheritedLibs(const Target* target) const {
+    TargetInfo* info = GetTargetInfo(target);
+    if (!info->has_inherited_libs) {
+      ComputeInheritedLibs(info);
+      DCHECK(info->has_inherited_libs);
+    }
+    return info;
+  }
+
   // Compute the portion of TargetInfo guarded by one of the |has_xxx|
   // booleans. This performs recursive and expensive computations and
   // should only be called once per TargetInfo instance.
   void ComputeLibInfo(TargetInfo* info) const;
   void ComputeFrameworkInfo(TargetInfo* info) const;
   void ComputeHardDeps(TargetInfo* info) const;
+  void ComputeInheritedLibs(TargetInfo* info) const;
+
+  // Helper function usde by ComputeInheritedLibs().
+  void ComputeInheritedLibsFor(
+      base::span<const Target*> deps,
+      bool is_public,
+      TargetPublicPairListBuilder* inherited_libraries) const;
 
   // A { Target* -> TargetInfo } map that will create entries
   // on demand (hence the mutable qualifier). Implemented with a

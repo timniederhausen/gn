@@ -137,8 +137,8 @@ NinjaBinaryTargetWriter::GetClassifiedDeps() const {
   }
 
   // Inherited libraries.
-  for (auto* inherited_target : target_->inherited_libraries().GetOrdered()) {
-    ClassifyDependency(inherited_target, &classified_deps);
+  for (const auto& inherited : resolved().GetInheritedLibraries(target_)) {
+    ClassifyDependency(inherited.target(), &classified_deps);
   }
 
   // Data deps.

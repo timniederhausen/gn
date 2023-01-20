@@ -739,16 +739,6 @@ void Target::PullDependentTargetConfigs() {
 }
 
 void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
-  // Direct dependent libraries.
-  if (dep->output_type() == STATIC_LIBRARY ||
-      dep->output_type() == SHARED_LIBRARY ||
-      dep->output_type() == RUST_LIBRARY ||
-      dep->output_type() == SOURCE_SET ||
-      (dep->output_type() == CREATE_BUNDLE &&
-       dep->bundle_data().is_framework())) {
-    inherited_libraries_.Append(dep, is_public);
-  }
-
   // Collect Rust libraries that are accessible from the current target, or
   // transitively part of the current target.
   if (dep->output_type() == STATIC_LIBRARY ||
@@ -779,64 +769,6 @@ void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
     // the target (as it's only used during compilation).
     rust_transitive_inherited_libs_.Append(dep, true);
     rust_transitive_inheritable_libs_.Append(dep, is_public);
-  }
-
-  if (dep->output_type() == SHARED_LIBRARY) {
-    // Shared library dependendencies are inherited across public shared
-    // library boundaries.
-    //
-    // In this case:
-    //   EXE -> INTERMEDIATE_SHLIB --[public]--> FINAL_SHLIB
-    // The EXE will also link to to FINAL_SHLIB. The public dependency means
-    // that the EXE can use the headers in FINAL_SHLIB so the FINAL_SHLIB
-    // will need to appear on EXE's link line.
-    //
-    // However, if the dependency is private:
-    //   EXE -> INTERMEDIATE_SHLIB --[private]--> FINAL_SHLIB
-    // the dependency will not be propagated because INTERMEDIATE_SHLIB is
-    // not granting permission to call functions from FINAL_SHLIB. If EXE
-    // wants to use functions (and link to) FINAL_SHLIB, it will need to do
-    // so explicitly.
-    //
-    // Static libraries and source sets aren't inherited across shared
-    // library boundaries because they will be linked into the shared
-    // library. Rust dylib deps are handled above and transitive deps are
-    // resolved by the compiler.
-    inherited_libraries_.AppendPublicSharedLibraries(dep->inherited_libraries(),
-                                                     is_public);
-  } else {
-    InheritedLibraries transitive;
-
-    if (!dep->IsFinal()) {
-      // The current target isn't linked, so propagate linked deps and
-      // libraries up the dependency tree.
-      for (const auto& [inherited, inherited_is_public] :
-           dep->inherited_libraries().GetOrderedAndPublicFlag()) {
-        transitive.Append(inherited, is_public && inherited_is_public);
-      }
-    } else if (dep->complete_static_lib()) {
-      // Inherit only final targets through _complete_ static libraries.
-      //
-      // Inherited final libraries aren't linked into complete static libraries.
-      // They are forwarded here so that targets that depend on complete
-      // static libraries can link them in. Conversely, since complete static
-      // libraries link in non-final targets they shouldn't be inherited.
-      for (const auto& [inherited, inherited_is_public] :
-           dep->inherited_libraries().GetOrderedAndPublicFlag()) {
-        if (inherited->IsFinal()) {
-          transitive.Append(inherited, is_public && inherited_is_public);
-        }
-      }
-    }
-
-    for (const auto& [target, pub] : transitive.GetOrderedAndPublicFlag()) {
-      // Proc macros are not linked into targets that depend on them, so do not
-      // get inherited; they are consumed by the Rust compiler and only need to
-      // be specified in --extern.
-      if (target->output_type() != RUST_PROC_MACRO) {
-        inherited_libraries_.Append(target, pub);
-      }
-    }
   }
 }
 
