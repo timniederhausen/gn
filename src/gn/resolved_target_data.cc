@@ -171,3 +171,55 @@ void ResolvedTargetData::ComputeInheritedLibsFor(
     }
   }
 }
+
+void ResolvedTargetData::ComputeRustLibs(TargetInfo* info) const {
+  RustLibsBuilder rust_libs;
+
+  ComputeRustLibsFor(info->deps.public_deps(), true, &rust_libs);
+  ComputeRustLibsFor(info->deps.private_deps(), false, &rust_libs);
+
+  info->rust_inherited_libs = rust_libs.inherited.Build();
+  info->rust_inheritable_libs = rust_libs.inheritable.Build();
+  info->has_rust_libs = true;
+}
+
+void ResolvedTargetData::ComputeRustLibsFor(base::span<const Target*> deps,
+                                            bool is_public,
+                                            RustLibsBuilder* rust_libs) const {
+  for (const Target* dep : deps) {
+    // Collect Rust libraries that are accessible from the current target, or
+    // transitively part of the current target.
+    if (dep->output_type() == Target::STATIC_LIBRARY ||
+        dep->output_type() == Target::SHARED_LIBRARY ||
+        dep->output_type() == Target::SOURCE_SET ||
+        dep->output_type() == Target::RUST_LIBRARY ||
+        dep->output_type() == Target::GROUP) {
+      // Here we have: `this` --[depends-on]--> `dep`
+      //
+      // The `this` target has direct access to `dep` since its a direct
+      // dependency, regardless of the edge being a public_dep or not, so we
+      // pass true for public-ness. Whereas, anything depending on `this` can
+      // only gain direct access to `dep` if the edge between `this` and `dep`
+      // is public, so we pass `is_public`.
+      //
+      // TODO(danakj): We should only need to track Rust rlibs or dylibs here,
+      // as it's used for passing to rustc with --extern. We currently track
+      // everything then drop non-Rust libs in
+      // ninja_rust_binary_target_writer.cc.
+      rust_libs->inherited.Append(dep, true);
+      rust_libs->inheritable.Append(dep, is_public);
+
+      const TargetInfo* dep_info = GetTargetRustLibs(dep);
+      rust_libs->inherited.AppendInherited(dep_info->rust_inheritable_libs,
+                                           true);
+      rust_libs->inheritable.AppendInherited(dep_info->rust_inheritable_libs,
+                                             is_public);
+    } else if (dep->output_type() == Target::RUST_PROC_MACRO) {
+      // Proc-macros are inherited as a transitive dependency, but the things
+      // they depend on can't be used elsewhere, as the proc macro is not
+      // linked into the target (as it's only used during compilation).
+      rust_libs->inherited.Append(dep, true);
+      rust_libs->inheritable.Append(dep, is_public);
+    }
+  }
+}

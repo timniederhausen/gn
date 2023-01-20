@@ -110,6 +110,13 @@ class ResolvedTargetData {
     return GetTargetInheritedLibs(target)->inherited_libs;
   }
 
+  // Retrieves an ordered list of (target, is_public) paris for all link-time
+  // libraries for Rust-specific binary targets.
+  const std::vector<TargetPublicPair>& GetRustInheritedLibraries(
+      const Target* target) const {
+    return GetTargetRustLibs(target)->rust_inherited_libs;
+  }
+
  private:
   // The information associated with a given Target pointer.
   struct TargetInfo {
@@ -128,6 +135,7 @@ class ResolvedTargetData {
     bool has_framework_info = false;
     bool has_hard_deps = false;
     bool has_inherited_libs = false;
+    bool has_rust_libs = false;
 
     // Only valid if |has_lib_info| is true.
     std::vector<SourceDir> lib_dirs;
@@ -143,6 +151,10 @@ class ResolvedTargetData {
 
     // Only valid if |has_inherited_libs| is true.
     std::vector<TargetPublicPair> inherited_libs;
+
+    // Only valid if |has_rust_libs| is true.
+    std::vector<TargetPublicPair> rust_inherited_libs;
+    std::vector<TargetPublicPair> rust_inheritable_libs;
   };
 
   // Retrieve TargetInfo value associated with |target|. Create
@@ -185,6 +197,15 @@ class ResolvedTargetData {
     return info;
   }
 
+  const TargetInfo* GetTargetRustLibs(const Target* target) const {
+    TargetInfo* info = GetTargetInfo(target);
+    if (!info->has_rust_libs) {
+      ComputeRustLibs(info);
+      DCHECK(info->has_rust_libs);
+    }
+    return info;
+  }
+
   // Compute the portion of TargetInfo guarded by one of the |has_xxx|
   // booleans. This performs recursive and expensive computations and
   // should only be called once per TargetInfo instance.
@@ -192,12 +213,23 @@ class ResolvedTargetData {
   void ComputeFrameworkInfo(TargetInfo* info) const;
   void ComputeHardDeps(TargetInfo* info) const;
   void ComputeInheritedLibs(TargetInfo* info) const;
+  void ComputeRustLibs(TargetInfo* info) const;
 
-  // Helper function usde by ComputeInheritedLibs().
+  // Helper function used by ComputeInheritedLibs().
   void ComputeInheritedLibsFor(
       base::span<const Target*> deps,
       bool is_public,
       TargetPublicPairListBuilder* inherited_libraries) const;
+
+  // Helper data structure and function used by ComputeRustLibs().
+  struct RustLibsBuilder {
+    TargetPublicPairListBuilder inherited;
+    TargetPublicPairListBuilder inheritable;
+  };
+
+  void ComputeRustLibsFor(base::span<const Target*> deps,
+                          bool is_public,
+                          RustLibsBuilder* rust_libs) const;
 
   // A { Target* -> TargetInfo } map that will create entries
   // on demand (hence the mutable qualifier). Implemented with a

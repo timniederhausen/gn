@@ -484,7 +484,6 @@ bool Target::OnResolved(Err* err) {
   }
 
   PullRecursiveBundleData();
-  PullDependentTargetLibs();
   if (!ResolvePrecompiledHeaders(err))
     return false;
 
@@ -736,47 +735,6 @@ void Target::PullDependentTargetConfigs() {
         pair.ptr->toolchain()->propagates_configs())
       MergePublicConfigsFrom(pair.ptr, &configs_);
   }
-}
-
-void Target::PullDependentTargetLibsFrom(const Target* dep, bool is_public) {
-  // Collect Rust libraries that are accessible from the current target, or
-  // transitively part of the current target.
-  if (dep->output_type() == STATIC_LIBRARY ||
-      dep->output_type() == SHARED_LIBRARY ||
-      dep->output_type() == SOURCE_SET || dep->output_type() == RUST_LIBRARY ||
-      dep->output_type() == GROUP) {
-    // Here we have: `this` --[depends-on]--> `dep`
-    //
-    // The `this` target has direct access to `dep` since its a direct
-    // dependency, regardless of the edge being a public_dep or not, so we pass
-    // true for public-ness. Whereas, anything depending on `this` can only gain
-    // direct access to `dep` if the edge between `this` and `dep` is public, so
-    // we pass `is_public`.
-    //
-    // TODO(danakj): We should only need to track Rust rlibs or dylibs here, as
-    // it's used for passing to rustc with --extern. We currently track
-    // everything then drop non-Rust libs in ninja_rust_binary_target_writer.cc.
-    rust_transitive_inherited_libs_.Append(dep, true);
-    rust_transitive_inheritable_libs_.Append(dep, is_public);
-
-    rust_transitive_inherited_libs_.AppendInherited(
-        dep->rust_transitive_inheritable_libs(), true);
-    rust_transitive_inheritable_libs_.AppendInherited(
-        dep->rust_transitive_inheritable_libs(), is_public);
-  } else if (dep->output_type() == RUST_PROC_MACRO) {
-    // Proc-macros are inherited as a transitive dependency, but the things they
-    // depend on can't be used elsewhere, as the proc macro is not linked into
-    // the target (as it's only used during compilation).
-    rust_transitive_inherited_libs_.Append(dep, true);
-    rust_transitive_inheritable_libs_.Append(dep, is_public);
-  }
-}
-
-void Target::PullDependentTargetLibs() {
-  for (const auto& dep : public_deps_)
-    PullDependentTargetLibsFrom(dep.ptr, true);
-  for (const auto& dep : private_deps_)
-    PullDependentTargetLibsFrom(dep.ptr, false);
 }
 
 void Target::PullRecursiveBundleData() {
