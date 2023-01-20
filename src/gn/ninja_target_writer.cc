@@ -40,10 +40,30 @@ NinjaTargetWriter::NinjaTargetWriter(const Target* target, std::ostream& out)
                    settings_->build_settings()->root_path_utf8(),
                    ESCAPE_NINJA) {}
 
+void NinjaTargetWriter::SetResolvedTargetData(ResolvedTargetData* resolved) {
+  if (resolved) {
+    resolved_owned_.reset();
+    resolved_ptr_ = resolved;
+  }
+}
+
+ResolvedTargetData* NinjaTargetWriter::GetResolvedTargetData() {
+  return const_cast<ResolvedTargetData*>(&resolved());
+}
+
+const ResolvedTargetData& NinjaTargetWriter::resolved() const {
+  if (!resolved_ptr_) {
+    resolved_owned_ = std::make_unique<ResolvedTargetData>();
+    resolved_ptr_ = resolved_owned_.get();
+  }
+  return *resolved_ptr_;
+}
+
 NinjaTargetWriter::~NinjaTargetWriter() = default;
 
 // static
-std::string NinjaTargetWriter::RunAndWriteFile(const Target* target) {
+std::string NinjaTargetWriter::RunAndWriteFile(const Target* target,
+                                               ResolvedTargetData* resolved) {
   const Settings* settings = target->settings();
 
   ScopedTrace trace(TraceItem::TRACE_FILE_WRITE_NINJA,
@@ -76,26 +96,33 @@ std::string NinjaTargetWriter::RunAndWriteFile(const Target* target) {
   bool needs_file_write = false;
   if (target->output_type() == Target::BUNDLE_DATA) {
     NinjaBundleDataTargetWriter writer(target, rules);
+    writer.SetResolvedTargetData(resolved);
     writer.Run();
   } else if (target->output_type() == Target::CREATE_BUNDLE) {
     NinjaCreateBundleTargetWriter writer(target, rules);
+    writer.SetResolvedTargetData(resolved);
     writer.Run();
   } else if (target->output_type() == Target::COPY_FILES) {
     NinjaCopyTargetWriter writer(target, rules);
+    writer.SetResolvedTargetData(resolved);
     writer.Run();
   } else if (target->output_type() == Target::ACTION ||
              target->output_type() == Target::ACTION_FOREACH) {
     NinjaActionTargetWriter writer(target, rules);
+    writer.SetResolvedTargetData(resolved);
     writer.Run();
   } else if (target->output_type() == Target::GROUP) {
     NinjaGroupTargetWriter writer(target, rules);
+    writer.SetResolvedTargetData(resolved);
     writer.Run();
   } else if (target->output_type() == Target::GENERATED_FILE) {
     NinjaGeneratedFileTargetWriter writer(target, rules);
+    writer.SetResolvedTargetData(resolved);
     writer.Run();
   } else if (target->IsBinary()) {
     needs_file_write = true;
     NinjaBinaryTargetWriter writer(target, rules);
+    writer.SetResolvedTargetData(resolved);
     writer.Run();
   } else {
     CHECK(0) << "Output type of target not handled.";

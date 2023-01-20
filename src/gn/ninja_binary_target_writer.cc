@@ -43,11 +43,13 @@ NinjaBinaryTargetWriter::~NinjaBinaryTargetWriter() = default;
 void NinjaBinaryTargetWriter::Run() {
   if (target_->source_types_used().RustSourceUsed()) {
     NinjaRustBinaryTargetWriter writer(target_, out_);
+    writer.SetResolvedTargetData(GetResolvedTargetData());
     writer.Run();
     return;
   }
 
   NinjaCBinaryTargetWriter writer(target_, out_);
+  writer.SetResolvedTargetData(GetResolvedTargetData());
   writer.Run();
 }
 

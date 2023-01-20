@@ -317,8 +317,7 @@ class Target : public Item {
 
   // Return true if this targets builds a SwiftModule
   bool builds_swift_module() const {
-    return IsBinary() && has_swift_values() &&
-           source_types_used().SwiftSourceUsed();
+    return IsBinary() && source_types_used().SwiftSourceUsed();
   }
 
   RustValues& rust_values();

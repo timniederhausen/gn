@@ -54,7 +54,7 @@ void SwiftValues::FillModuleDependencies(Target* target) {
 
 // static
 bool SwiftValues::FillModuleOutputFile(Target* target, Err* err) {
-  if (!target->IsBinary() || !target->source_types_used().SwiftSourceUsed())
+  if (!target->builds_swift_module())
     return true;
 
   const Tool* tool =
