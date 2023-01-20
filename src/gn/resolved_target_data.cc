@@ -62,3 +62,29 @@ void ResolvedTargetData::ComputeFrameworkInfo(TargetInfo* info) const {
   info->weak_frameworks = all_weak_frameworks.release();
   info->has_framework_info = true;
 }
+
+void ResolvedTargetData::ComputeHardDeps(TargetInfo* info) const {
+  TargetSet all_hard_deps;
+  for (const Target* dep : info->deps.linked_deps()) {
+    // Direct hard dependencies
+    if (info->target->hard_dep() || dep->hard_dep()) {
+      all_hard_deps.insert(dep);
+      continue;
+    }
+    // If |dep| is binary target and |dep| has no public header,
+    // |this| target does not need to have |dep|'s hard_deps as its
+    // hard_deps to start compiles earlier. Unless the target compiles a
+    // Swift module (since they also generate a header that can be used
+    // by the current target).
+    if (dep->IsBinary() && !dep->all_headers_public() &&
+        dep->public_headers().empty() && !dep->builds_swift_module()) {
+      continue;
+    }
+
+    // Recursive hard dependencies of all dependencies.
+    const TargetInfo* dep_info = GetTargetHardDeps(dep);
+    all_hard_deps.insert(dep_info->hard_deps);
+  }
+  info->hard_deps = std::move(all_hard_deps);
+  info->has_hard_deps = true;
+}

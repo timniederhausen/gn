@@ -96,6 +96,13 @@ class ResolvedTargetData {
     return GetTargetFrameworkInfo(target)->weak_frameworks;
   }
 
+  // Retrieves a set of hard dependencies for this target.
+  // All hard deps from this target and all dependencies, but not the
+  // target itself.
+  const TargetSet& GetHardDeps(const Target* target) const {
+    return GetTargetHardDeps(target)->hard_deps;
+  }
+
  private:
   // The information associated with a given Target pointer.
   struct TargetInfo {
@@ -112,6 +119,7 @@ class ResolvedTargetData {
 
     bool has_lib_info = false;
     bool has_framework_info = false;
+    bool has_hard_deps = false;
 
     // Only valid if |has_lib_info| is true.
     std::vector<SourceDir> lib_dirs;
@@ -121,6 +129,9 @@ class ResolvedTargetData {
     std::vector<SourceDir> framework_dirs;
     std::vector<std::string> frameworks;
     std::vector<std::string> weak_frameworks;
+
+    // Only valid if |has_hard_deps| is true.
+    TargetSet hard_deps;
   };
 
   // Retrieve TargetInfo value associated with |target|. Create
@@ -145,11 +156,21 @@ class ResolvedTargetData {
     return info;
   }
 
+  const TargetInfo* GetTargetHardDeps(const Target* target) const {
+    TargetInfo* info = GetTargetInfo(target);
+    if (!info->has_hard_deps) {
+      ComputeHardDeps(info);
+      DCHECK(info->has_hard_deps);
+    }
+    return info;
+  }
+
   // Compute the portion of TargetInfo guarded by one of the |has_xxx|
   // booleans. This performs recursive and expensive computations and
   // should only be called once per TargetInfo instance.
   void ComputeLibInfo(TargetInfo* info) const;
   void ComputeFrameworkInfo(TargetInfo* info) const;
+  void ComputeHardDeps(TargetInfo* info) const;
 
   // A { Target* -> TargetInfo } map that will create entries
   // on demand (hence the mutable qualifier). Implemented with a

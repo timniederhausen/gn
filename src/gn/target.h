@@ -332,8 +332,6 @@ class Target : public Item {
     return rust_transitive_inheritable_libs_;
   }
 
-  const TargetSet& recursive_hard_deps() const { return recursive_hard_deps_; }
-
   std::vector<LabelPattern>& friends() { return friends_; }
   const std::vector<LabelPattern>& friends() const { return friends_; }
 
@@ -490,10 +488,6 @@ class Target : public Item {
   // Static libraries, shared libraries, and source sets from transitive deps
   // that need to be linked.
   InheritedLibraries inherited_libraries_;
-
-  // All hard deps from this target and all dependencies. Filled in when this
-  // target is marked resolved. This will not include the current target.
-  TargetSet recursive_hard_deps_;
 
   std::vector<LabelPattern> friends_;
   std::vector<LabelPattern> assert_no_deps_;

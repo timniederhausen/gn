@@ -485,7 +485,6 @@ bool Target::OnResolved(Err* err) {
 
   PullRecursiveBundleData();
   PullDependentTargetLibs();
-  PullRecursiveHardDeps();
   if (!ResolvePrecompiledHeaders(err))
     return false;
 
@@ -846,31 +845,6 @@ void Target::PullDependentTargetLibs() {
     PullDependentTargetLibsFrom(dep.ptr, true);
   for (const auto& dep : private_deps_)
     PullDependentTargetLibsFrom(dep.ptr, false);
-}
-
-void Target::PullRecursiveHardDeps() {
-  for (const auto& pair : GetDeps(DEPS_LINKED)) {
-    // Direct hard dependencies.
-    if (hard_dep() || pair.ptr->hard_dep()) {
-      recursive_hard_deps_.insert(pair.ptr);
-      continue;
-    }
-
-    // If |pair.ptr| is binary target and |pair.ptr| has no public header,
-    // |this| target does not need to have |pair.ptr|'s hard_deps as its
-    // hard_deps to start compiles earlier. Unless the target compiles a
-    // Swift module (since they also generate a header that can be used
-    // by the current target).
-    if (pair.ptr->IsBinary() && !pair.ptr->all_headers_public() &&
-        pair.ptr->public_headers().empty() &&
-        !pair.ptr->builds_swift_module()) {
-      continue;
-    }
-
-    // Recursive hard dependencies of all dependencies.
-    recursive_hard_deps_.insert(pair.ptr->recursive_hard_deps().begin(),
-                                pair.ptr->recursive_hard_deps().end());
-  }
 }
 
 void Target::PullRecursiveBundleData() {
