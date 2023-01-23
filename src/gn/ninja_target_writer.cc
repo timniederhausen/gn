@@ -346,7 +346,7 @@ void NinjaTargetWriter::WriteCCompilerVars(const SubstitutionBits& bits,
       // Uniquify the list of swiftmodule dirs (in case multiple swiftmodules
       // are generated in the same directory).
       UniqueVector<SourceDir> swiftmodule_dirs;
-      for (const Target* dep : target_->swift_values().modules())
+      for (const Target* dep : resolved().GetSwiftModuleDependencies(target_))
         swiftmodule_dirs.push_back(dep->swift_values().module_output_dir());
 
       if (indent)

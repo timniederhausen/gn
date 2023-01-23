@@ -117,6 +117,17 @@ class ResolvedTargetData {
     return GetTargetRustLibs(target)->rust_inherited_libs;
   }
 
+  // List of dependent target that generate a .swiftmodule. The current target
+  // is assumed to depend on those modules, and will add them to the module
+  // search path.
+  base::span<const Target*> GetSwiftModuleDependencies(
+      const Target* target) const {
+    const TargetInfo* info = GetTargetSwiftValues(target);
+    if (!info->swift_values.get())
+      return {};
+    return info->swift_values->modules;
+  }
+
  private:
   // The information associated with a given Target pointer.
   struct TargetInfo {
@@ -136,6 +147,7 @@ class ResolvedTargetData {
     bool has_hard_deps = false;
     bool has_inherited_libs = false;
     bool has_rust_libs = false;
+    bool has_swift_values = false;
 
     // Only valid if |has_lib_info| is true.
     std::vector<SourceDir> lib_dirs;
@@ -155,6 +167,21 @@ class ResolvedTargetData {
     // Only valid if |has_rust_libs| is true.
     std::vector<TargetPublicPair> rust_inherited_libs;
     std::vector<TargetPublicPair> rust_inheritable_libs;
+
+    // Only valid if |has_swift_values| is true.
+    // Most targets will not have Swift dependencies, so only
+    // allocate a SwiftValues struct when needed. A null pointer
+    // indicates empty lists.
+    struct SwiftValues {
+      std::vector<const Target*> modules;
+      std::vector<const Target*> public_modules;
+
+      SwiftValues(std::vector<const Target*> modules,
+                  std::vector<const Target*> public_modules)
+          : modules(std::move(modules)),
+            public_modules(std::move(public_modules)) {}
+    };
+    std::unique_ptr<SwiftValues> swift_values;
   };
 
   // Retrieve TargetInfo value associated with |target|. Create
@@ -206,6 +233,15 @@ class ResolvedTargetData {
     return info;
   }
 
+  const TargetInfo* GetTargetSwiftValues(const Target* target) const {
+    TargetInfo* info = GetTargetInfo(target);
+    if (!info->has_swift_values) {
+      ComputeSwiftValues(info);
+      DCHECK(info->has_swift_values);
+    }
+    return info;
+  }
+
   // Compute the portion of TargetInfo guarded by one of the |has_xxx|
   // booleans. This performs recursive and expensive computations and
   // should only be called once per TargetInfo instance.
@@ -214,6 +250,7 @@ class ResolvedTargetData {
   void ComputeHardDeps(TargetInfo* info) const;
   void ComputeInheritedLibs(TargetInfo* info) const;
   void ComputeRustLibs(TargetInfo* info) const;
+  void ComputeSwiftValues(TargetInfo* info) const;
 
   // Helper function used by ComputeInheritedLibs().
   void ComputeInheritedLibsFor(

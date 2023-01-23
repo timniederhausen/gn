@@ -564,7 +564,8 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
     swift_order_only_deps.Append(order_only_deps.begin(),
                                  order_only_deps.end());
 
-    for (const Target* swiftmodule : target_->swift_values().modules())
+    for (const Target* swiftmodule :
+         resolved().GetSwiftModuleDependencies(target_))
       swift_order_only_deps.push_back(swiftmodule->dependency_output_file());
 
     WriteCompilerBuildLine(target_->sources(), input_deps,

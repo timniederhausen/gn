@@ -223,3 +223,43 @@ void ResolvedTargetData::ComputeRustLibsFor(base::span<const Target*> deps,
     }
   }
 }
+
+void ResolvedTargetData::ComputeSwiftValues(TargetInfo* info) const {
+  UniqueVector<const Target*> modules;
+  UniqueVector<const Target*> public_modules;
+  const Target* target = info->target;
+
+  for (const Target* dep : info->deps.public_deps()) {
+    if (dep->toolchain() != target->toolchain() &&
+        !dep->toolchain()->propagates_configs()) {
+      continue;
+    }
+
+    const TargetInfo* dep_info = GetTargetSwiftValues(dep);
+    if (dep_info->swift_values.get()) {
+      const auto& public_deps = dep_info->swift_values->public_modules;
+      modules.Append(public_deps);
+      public_modules.Append(public_deps);
+    }
+  }
+
+  for (const Target* dep : info->deps.private_deps()) {
+    if (dep->toolchain() != target->toolchain() &&
+        !dep->toolchain()->propagates_configs()) {
+      continue;
+    }
+    const TargetInfo* dep_info = GetTargetSwiftValues(dep);
+    if (dep_info->swift_values.get()) {
+      modules.Append(dep_info->swift_values->public_modules);
+    }
+  }
+
+  if (target->builds_swift_module())
+    public_modules.push_back(target);
+
+  if (!modules.empty() || !public_modules.empty()) {
+    info->swift_values = std::make_unique<TargetInfo::SwiftValues>(
+        modules.release(), public_modules.release());
+  }
+  info->has_swift_values = true;
+}

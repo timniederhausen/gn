@@ -16,40 +16,7 @@ SwiftValues::~SwiftValues() = default;
 
 // static
 bool SwiftValues::OnTargetResolved(Target* target, Err* err) {
-  if (!FillModuleOutputFile(target, err))
-    return false;
-
-  FillModuleDependencies(target);
-  return true;
-}
-
-// static
-void SwiftValues::FillModuleDependencies(Target* target) {
-  for (const auto& pair : target->GetDeps(Target::DEPS_LINKED)) {
-    if (!pair.ptr->has_swift_values())
-      continue;
-
-    if (pair.ptr->toolchain() == target->toolchain() ||
-        pair.ptr->toolchain()->propagates_configs()) {
-      target->swift_values().modules_.Append(
-          pair.ptr->swift_values().public_modules().begin(),
-          pair.ptr->swift_values().public_modules().end());
-    }
-  }
-
-  for (const auto& pair : target->public_deps()) {
-    if (!pair.ptr->has_swift_values())
-      continue;
-
-    if (pair.ptr->toolchain() == target->toolchain() ||
-        pair.ptr->toolchain()->propagates_configs())
-      target->swift_values().public_modules_.Append(
-          pair.ptr->swift_values().public_modules().begin(),
-          pair.ptr->swift_values().public_modules().end());
-  }
-
-  if (target->builds_swift_module())
-    target->swift_values().public_modules_.push_back(target);
+  return FillModuleOutputFile(target, err);
 }
 
 // static
