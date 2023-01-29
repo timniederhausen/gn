@@ -5589,10 +5589,10 @@
 
     # Locate the depfile in the output directory named like the
     # inputs but with a ".d" appended.
-    depfile = "$relative_target_output_dir/{{source_name}}.d"
+    depfile = "$target_gen_dir/{{source_name_part}}.d"
 
     # Say our script uses "-o <d file>" to indicate the depfile.
-    args = [ "{{source}}", "-o", depfile ]
+    args = [ "{{source}}", "-o", rebase_path(depfile, root_build_dir)]
   }
 ```
 ### <a name="var_deps"></a>**deps**: Private linked dependencies.
