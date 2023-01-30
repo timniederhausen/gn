@@ -29,7 +29,7 @@ PROPERTIES = {
 # On select platforms, link the GN executable against rpmalloc for a small 10% speed boost.
 RPMALLOC_GIT_URL = 'https://fuchsia.googlesource.com/third_party/github.com/mjansson/rpmalloc'
 RPMALLOC_BRANCH = '+upstream/develop'
-RPMALLOC_REVISION = 'b097fd0916500439721a114bb9cd8d14bd998683'
+RPMALLOC_REVISION = '668a7f81b588a985c6528b70674dbcc005d9cb75'
 
 # Used to convert os and arch strings to rpmalloc format
 RPMALLOC_MAP = {
@@ -199,15 +199,16 @@ def RunSteps(api, repository):
               ['git', 'fetch', '--tags', RPMALLOC_GIT_URL, RPMALLOC_BRANCH])
           api.step('checkout', ['git', 'checkout', RPMALLOC_REVISION])
 
-        # Patch configure.py since to add -Wno-ignored-optimization-flag since
-        # Clang will now complain when `-funit-at-a-time` is being used.
+        # Patch configure.py since to add -Wno-unsafe-buffer-usage since Clang-16 will
+        # now complain about this when building rpmalloc (latest version only
+        # supports clang-15).
         build_ninja_clang_path = api.path.join(rpmalloc_src_dir, 'build/ninja/clang.py')
         build_ninja_clang_py = api.file.read_text('read %s' % build_ninja_clang_path,
                                                  build_ninja_clang_path,
                                                  "CXXFLAGS = ['-Wall', '-Weverything', '-Wfoo']")
         build_ninja_clang_py = build_ninja_clang_py.replace(
             "'-Wno-disabled-macro-expansion'",
-            "'-Wno-disabled-macro-expansion', '-Wno-ignored-optimization-argument'")
+            "'-Wno-disabled-macro-expansion', '-Wno-unsafe-buffer-usage'")
         api.file.write_text('write %s' % build_ninja_clang_path,
                             build_ninja_clang_path,
                             build_ninja_clang_py)
