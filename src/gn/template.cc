@@ -116,13 +116,21 @@ Value Template::Invoke(Scope* scope,
   invoker_value = template_scope.GetMutableValue(variables::kInvoker,
                                                  Scope::SEARCH_NESTED, false);
   if (invoker_value && invoker_value->type() == Value::SCOPE) {
-    if (!invoker_value->scope_value()->CheckForUnusedVars(err))
+    if (!invoker_value->scope_value()->CheckForUnusedVars(err)) {
+      // If there was an error, append the caller location so the error message
+      // displays a stack trace of how it got here.
+      err->AppendSubErr(Err(invocation, "whence it was called."));
       return Value();
+    }
   }
 
   // Check for unused variables in the template itself.
-  if (!template_scope.CheckForUnusedVars(err))
+  if (!template_scope.CheckForUnusedVars(err)) {
+    // If there was an error, append the caller location so the error message
+    // displays a stack trace of how it got here.
+    err->AppendSubErr(Err(invocation, "whence it was called."));
     return Value();
+  }
 
   return result;
 }
