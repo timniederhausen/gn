@@ -141,10 +141,16 @@ std::string NinjaActionTargetWriter::WriteRuleDefinition() {
     out_ << std::endl;
   }
 
+  // The command line requires shell escaping to properly handle filenames
+  // with spaces.
+  PathOutput command_output(path_output_.current_dir(),
+                            settings_->build_settings()->root_path_utf8(),
+                            ESCAPE_NINJA_COMMAND);
+
   out_ << "  command = ";
-  path_output_.WriteFile(out_, settings_->build_settings()->python_path());
+  command_output.WriteFile(out_, settings_->build_settings()->python_path());
   out_ << " ";
-  path_output_.WriteFile(out_, target_->action_values().script());
+  command_output.WriteFile(out_, target_->action_values().script());
   for (const auto& arg : args.list()) {
     out_ << " ";
     SubstitutionWriter::WriteWithNinjaVariables(arg, args_escape_options, out_);
