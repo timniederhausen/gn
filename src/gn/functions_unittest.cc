@@ -115,6 +115,21 @@ TEST(Functions, Defined) {
                                  &args_list_accessor_defined, &err);
   ASSERT_EQ(Value::BOOLEAN, result.type());
   EXPECT_FALSE(result.boolean_value());
+
+  // Should also work by pasing an accessor node so you can do
+  // "defined(def["foo"])" to see if foo is defined on the def scope.
+  std::unique_ptr<AccessorNode> subscript_accessor =
+      std::make_unique<AccessorNode>();
+  subscript_accessor->set_base(defined_token);
+  subscript_accessor->set_subscript(
+      std::make_unique<LiteralNode>(Token(Location(), Token::STRING, "foo")));
+  ListNode args_list_subscript_accessor_defined;
+  args_list_subscript_accessor_defined.append_item(
+      std::move(subscript_accessor));
+  result = functions::RunDefined(setup.scope(), &function_call,
+                                 &args_list_subscript_accessor_defined, &err);
+  ASSERT_EQ(Value::BOOLEAN, result.type());
+  EXPECT_FALSE(result.boolean_value());
 }
 
 // Tests that an error is thrown when a {} is supplied to a function that
