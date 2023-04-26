@@ -132,6 +132,7 @@
     *   [lib_dirs: [directory list] Additional library directories.](#var_lib_dirs)
     *   [libs: [string list] Additional libraries to link.](#var_libs)
     *   [metadata: [scope] Metadata of this target.](#var_metadata)
+    *   [mnemonic: [string] Prefix displayed when ninja runs this action.](#var_mnemonic)
     *   [module_name: [string] The name for the compiled module.](#var_module_name)
     *   [output_conversion: Data format for generated_file targets.](#var_output_conversion)
     *   [output_dir: [directory] Directory to put output file in.](#var_output_dir)
@@ -1416,9 +1417,9 @@
            output_extension, output_name, public, sources, testonly,
            visibility
   Action variables: args, bridge_header, configs, data, depfile,
-                    framework_dirs, inputs, module_deps, module_name,
-                    outputs*, pool, response_file_contents, script*,
-                    sources
+                    framework_dirs, inputs, mnemonic, module_deps,
+                    module_name, outputs*, pool, response_file_contents,
+                    script*, sources
   * = required
 ```
 
@@ -1517,9 +1518,9 @@
            output_extension, output_name, public, sources, testonly,
            visibility
   Action variables: args, bridge_header, configs, data, depfile,
-                    framework_dirs, inputs, module_deps, module_name,
-                    outputs*, pool, response_file_contents, script*,
-                    sources
+                    framework_dirs, inputs, mnemonic, module_deps,
+                    module_name, outputs*, pool, response_file_contents,
+                    script*, sources
   * = required
 ```
 
@@ -1531,6 +1532,10 @@
   action_foreach("my_idl") {
     script = "idl_processor.py"
     sources = [ "foo.idl", "bar.idl" ]
+
+    # Causes ninja to output "IDL <label>" rather than the default
+    # "ACTION <label>" when building this action.
+    mnemonic = "IDL"
 
     # Our script reads this file each time, so we need to list it as a
     # dependency so we can rebuild if it changes.
@@ -2454,6 +2459,13 @@
   which will return true or false depending on whether bar is defined in the
   named scope foo. It will throw an error if foo is not defined or is not a
   scope.
+
+  You can also check a named scope using a subscript string expression:
+    defined(foo[bar + "_name"])
+  Which will return true or false depending on whether the subscript
+  expression expands to the name of a member of the scope foo. It will
+  throw an error if foo is not defined or is not a scope, or if the
+  expression does not expand to a string, or if it is an empty string.
 ```
 
 #### **Example**
@@ -6057,6 +6069,17 @@
       my_files = [ "a.txt", "b.txt" ]
     }
   }
+```
+### <a name="var_mnemonic"></a>**mnemonic**: [string] Prefix displayed when ninja runs this action.
+
+```
+  Tools in GN can set their ninja "description" which is displayed when
+  building a target. These are commonly set with the format "CXX $output"
+  or "LINK $label". By default, all GN actions will have the description
+  "ACTION $label". Setting a mnemonic will override the "ACTION" prefix
+  with another string, but the label will still be unconditionally displayed.
+
+  Whitespace is not allowed within a mnemonic.
 ```
 ### <a name="var_module_name"></a>**module_name**: [string] The name for the compiled module.
 

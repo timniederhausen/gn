@@ -572,6 +572,21 @@ const char kArgs_Help[] =
   See also "gn help action" and "gn help action_foreach".
 )";
 
+const char kMnemonic[] = "mnemonic";
+const char kMnemonic_HelpShort[] =
+    "mnemonic: [string] Prefix displayed when ninja runs this action.";
+const char kMnemonic_Help[] =
+    R"(mnemonic: [string] Prefix displayed when ninja runs this action.
+
+  Tools in GN can set their ninja "description" which is displayed when
+  building a target. These are commonly set with the format "CXX $output"
+  or "LINK $label". By default, all GN actions will have the description
+  "ACTION $label". Setting a mnemonic will override the "ACTION" prefix
+  with another string, but the label will still be unconditionally displayed.
+
+  Whitespace is not allowed within a mnemonic.
+)";
+
 const char kAssertNoDeps[] = "assert_no_deps";
 const char kAssertNoDeps_HelpShort[] =
     "assert_no_deps: [label pattern list] Ensure no deps on these targets.";
@@ -2330,6 +2345,7 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(Defines)
     INSERT_VARIABLE(Depfile)
     INSERT_VARIABLE(Deps)
+    INSERT_VARIABLE(Mnemonic)
     INSERT_VARIABLE(Externs)
     INSERT_VARIABLE(Friend)
     INSERT_VARIABLE(FrameworkDirs)
