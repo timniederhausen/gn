@@ -46,7 +46,7 @@ NinjaTargetWriter::~NinjaTargetWriter() = default;
 std::string NinjaTargetWriter::RunAndWriteFile(const Target* target) {
   const Settings* settings = target->settings();
 
-  ScopedTrace trace(TraceItem::TRACE_FILE_WRITE_NINJA,
+  ScopedTrace trace(TraceItem::TRACE_FILE_WRITE,
                     target->label().GetUserVisibleName(false));
   trace.SetToolchain(settings->toolchain_label());
 
