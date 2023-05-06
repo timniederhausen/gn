@@ -706,9 +706,15 @@ int RunGen(const std::vector<std::string>& args) {
         ItemResolvedAndGeneratedCallback(&write_info, record);
       });
 
+  OutputString("Starting Run @ " +
+               base::Int64ToString(timer.Elapsed().InMilliseconds()) + "ms\n");
+
   // Do the actual load. This will also write out the target ninja files.
   if (!setup->Run())
     return 1;
+
+  OutputString("Run complete @ " +
+               base::Int64ToString(timer.Elapsed().InMilliseconds()) + "ms\n");
 
   // Sort the targets in each toolchain according to their label. This makes
   // the ninja files have deterministic content.
@@ -719,6 +725,9 @@ int RunGen(const std::vector<std::string>& args) {
                 return a.first->label() < b.first->label();
               });
   }
+
+  OutputString("RunAndWriteNinjaFiles starting @ " +
+               base::Int64ToString(timer.Elapsed().InMilliseconds()) + "ms\n");
 
   Err err;
   // Write the root ninja files.
@@ -736,6 +745,9 @@ int RunGen(const std::vector<std::string>& args) {
     err.PrintToStdout();
     return 1;
   }
+
+  OutputString("WriteRuntimeDepsFilesIfNeccessary starting @ " +
+               base::Int64ToString(timer.Elapsed().InMilliseconds()) + "ms\n");
 
   if (!WriteRuntimeDepsFilesIfNecessary(&setup->build_settings(),
                                         setup->builder(), &err)) {
