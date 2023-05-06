@@ -710,6 +710,11 @@ int RunGen(const std::vector<std::string>& args) {
   if (!setup->Run())
     return 1;
 
+  if (command_line->HasSwitch(switches::kVerbose))
+    OutputString("Build graph constructed in " +
+                 base::Int64ToString(timer.Elapsed().InMilliseconds()) +
+                 "ms\n");
+
   // Sort the targets in each toolchain according to their label. This makes
   // the ninja files have deterministic content.
   for (auto& cur_toolchain : write_info.rules) {
