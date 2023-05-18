@@ -164,6 +164,10 @@ def main(argv):
                     help='Enable the use of LTO')
   args_list.add('--use-icf', action='store_true',
                     help='Enable the use of Identical Code Folding')
+  args_list.add('--use-asan', action='store_true',
+                    help='Enable the use of AddressSanitizer')
+  args_list.add('--use-ubsan', action='store_true',
+                    help='Enable the use of UndefinedBehaviorSanitizer')
   args_list.add('--no-last-commit-position', action='store_true',
                     help='Do not generate last_commit_position.h.')
   args_list.add('--out-path',
@@ -429,6 +433,14 @@ def WriteGNNinja(path, platform, host, options, args_list):
       if options.use_lto:
         cflags.extend(['-flto', '-fwhole-program-vtables'])
         ldflags.extend(['-flto', '-fwhole-program-vtables'])
+
+    if options.use_asan:
+      cflags.append('-fsanitize=address')
+      ldflags.append('-fsanitize=address')
+
+    if options.use_ubsan:
+      cflags.append('-fsanitize=undefined')
+      ldflags.append('-fsanitize=undefined')
 
     if not options.allow_warnings:
       cflags.append('-Werror')
