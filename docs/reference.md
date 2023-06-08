@@ -145,7 +145,7 @@
     *   [precompiled_header: [string] Header file to precompile.](#var_precompiled_header)
     *   [precompiled_header_type: [string] "gcc" or "msvc".](#var_precompiled_header_type)
     *   [precompiled_source: [file name] Source file to precompile.](#var_precompiled_source)
-    *   [product_type: [string] Product type for Xcode projects.](#var_product_type)
+    *   [product_type: [string] Product type for the bundle.](#var_product_type)
     *   [public: [file list] Declare public header files for a target.](#var_public)
     *   [public_configs: [label list] Configs applied to dependents.](#var_public_configs)
     *   [public_deps: [label list] Declare public dependencies.](#var_public_deps)
@@ -155,6 +155,7 @@
     *   [sources: [file list] Source files for a target.](#var_sources)
     *   [swiftflags: [string list] Flags passed to the swift compiler.](#var_swiftflags)
     *   [testonly: [boolean] Declares a target must only be used for testing.](#var_testonly)
+    *   [transparent: [bool] True if the bundle is transparent.](#var_transparent)
     *   [visibility: [label list] A list of labels that can depend on a target.](#var_visibility)
     *   [walk_keys: [string list] Key(s) for managing the metadata collection walk.](#var_walk_keys)
     *   [weak_frameworks: [name list] Name of frameworks that must be weak linked.](#var_weak_frameworks)
@@ -6354,14 +6355,17 @@
   "msvc"-style precompiled headers. It will be implicitly added to the sources
   of the target. See "gn help precompiled_header".
 ```
-### <a name="var_product_type"></a>**product_type**: Product type for Xcode projects.
+### <a name="var_product_type"></a>**product_type**: [string] Product type for the bundle.
 
 ```
-  Correspond to the type of the product of a create_bundle target. Only
-  meaningful to Xcode (used as part of the Xcode project generation).
+  Valid for "create_bundle" and "bundle_data" targets.
 
-  When generating Xcode project files, only create_bundle target with a
-  non-empty product_type will have a corresponding target in Xcode project.
+  Correspond to the type of the bundle. Used by transparent "create_bundle"
+  target to control whether a "bundle_data" needs to be propagated or not.
+
+  When generating Xcode project, the product_type is propagated and only
+  "create_bundle" with a non-empty product_type will have a corresponding
+  target in the project.
 ```
 ### <a name="var_public"></a>**public**: Declare public header files for a target.
 
@@ -6707,6 +6711,16 @@
     testonly = true
     ...
   }
+```
+### <a name="var_transparent"></a>**transparent**: [bool] True if the bundle is transparent.
+
+```
+  A boolean.
+
+  Valid for "create_bundle" target. If true, the "create_bundle" target will
+  not package the "bundle_data" deps but will forward them to all targets that
+  depends on it (unless the "bundle_data" target sets "product_type" to the
+  same value as the "create_bundle" target).
 ```
 ### <a name="var_visibility"></a>**visibility**: A list of labels that can depend on a target.
 

@@ -1101,18 +1101,18 @@ TEST_F(TargetTest, PullRecursiveBundleData) {
   ASSERT_EQ(a.bundle_data().file_rules()[0].sources().size(), 2u);
   ASSERT_EQ(a.bundle_data().file_rules()[1].sources().size(), 3u);
   ASSERT_EQ(a.bundle_data().assets_catalog_sources().size(), 1u);
-  ASSERT_EQ(a.bundle_data().bundle_deps().size(), 2u);
+  ASSERT_EQ(a.bundle_data().forwarded_bundle_deps().size(), 2u);
 
   // C gets its data from D.
   ASSERT_EQ(c.bundle_data().file_rules().size(), 1u);
   ASSERT_EQ(c.bundle_data().file_rules()[0].sources().size(), 1u);
-  ASSERT_EQ(c.bundle_data().bundle_deps().size(), 1u);
+  ASSERT_EQ(c.bundle_data().forwarded_bundle_deps().size(), 1u);
 
   // E does not have any bundle_data information but gets a list of
-  // bundle_deps to propagate them during target resolution.
+  // forwarded_bundle_deps to propagate them during target resolution.
   ASSERT_TRUE(e.bundle_data().file_rules().empty());
   ASSERT_TRUE(e.bundle_data().assets_catalog_sources().empty());
-  ASSERT_EQ(e.bundle_data().bundle_deps().size(), 2u);
+  ASSERT_EQ(e.bundle_data().forwarded_bundle_deps().size(), 2u);
 }
 
 TEST(TargetTest, CollectMetadataNoRecurse) {

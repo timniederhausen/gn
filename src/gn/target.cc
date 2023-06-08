@@ -132,7 +132,7 @@ bool EnsureFileIsGeneratedByDependency(const Target* target,
         return true;  // Found a path.
     }
     if (target->output_type() == Target::CREATE_BUNDLE) {
-      for (auto* dep : target->bundle_data().bundle_deps()) {
+      for (const auto* dep : target->bundle_data().bundle_deps()) {
         if (EnsureFileIsGeneratedByDependency(dep, file, false,
                                               consider_object_files,
                                               check_data_deps, seen_targets))
@@ -738,24 +738,27 @@ void Target::PullDependentTargetConfigs() {
 }
 
 void Target::PullRecursiveBundleData() {
+  const bool is_create_bundle = output_type_ == CREATE_BUNDLE;
   for (const auto& pair : GetDeps(DEPS_LINKED)) {
-    // Don't propagate bundle_data once they are added to a bundle.
-    if (pair.ptr->output_type() == CREATE_BUNDLE)
-      continue;
-
     // Don't propagate across toolchain.
     if (pair.ptr->toolchain() != toolchain())
       continue;
 
+    // Don't propagete through create_bundle, unless it is transparent.
+    if (pair.ptr->output_type() == CREATE_BUNDLE &&
+        !pair.ptr->bundle_data().transparent()) {
+      continue;
+    }
+
     // Direct dependency on a bundle_data target.
     if (pair.ptr->output_type() == BUNDLE_DATA) {
-      bundle_data().AddBundleData(pair.ptr);
+      bundle_data().AddBundleData(pair.ptr, is_create_bundle);
     }
 
     // Recursive bundle_data informations from all dependencies.
     if (pair.ptr->has_bundle_data()) {
-      for (auto* target : pair.ptr->bundle_data().bundle_deps())
-        bundle_data().AddBundleData(target);
+      for (const auto* target : pair.ptr->bundle_data().forwarded_bundle_deps())
+        bundle_data().AddBundleData(target, is_create_bundle);
     }
   }
 

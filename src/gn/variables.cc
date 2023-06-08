@@ -758,6 +758,20 @@ const char kXcassetCompilerFlags_Help[] =
   in compile_xcassets tool.
 )";
 
+const char kTransparent[] = "transparent";
+const char kTransparent_HelpShort[] =
+    "transparent: [bool] True if the bundle is transparent.";
+const char kTransparent_Help[] =
+    R"(transparent: [bool] True if the bundle is transparent.
+
+  A boolean.
+
+  Valid for "create_bundle" target. If true, the "create_bundle" target will
+  not package the "bundle_data" deps but will forward them to all targets that
+  depends on it (unless the "bundle_data" target sets "product_type" to the
+  same value as the "create_bundle" target).
+)";
+
 const char kCflags[] = "cflags";
 const char kCflags_HelpShort[] =
     "cflags: [string list] Flags passed to all C compiler variants.";
@@ -1767,15 +1781,18 @@ const char kPrecompiledSource_Help[] =
 
 const char kProductType[] = "product_type";
 const char kProductType_HelpShort[] =
-    "product_type: [string] Product type for Xcode projects.";
+    "product_type: [string] Product type for the bundle.";
 const char kProductType_Help[] =
-    R"(product_type: Product type for Xcode projects.
+    R"(product_type: [string] Product type for the bundle.
 
-  Correspond to the type of the product of a create_bundle target. Only
-  meaningful to Xcode (used as part of the Xcode project generation).
+  Valid for "create_bundle" and "bundle_data" targets.
 
-  When generating Xcode project files, only create_bundle target with a
-  non-empty product_type will have a corresponding target in Xcode project.
+  Correspond to the type of the bundle. Used by transparent "create_bundle"
+  target to control whether a "bundle_data" needs to be propagated or not.
+
+  When generating Xcode project, the product_type is propagated and only
+  "create_bundle" with a non-empty product_type will have a corresponding
+  target in the project.
 )";
 
 const char kPublic[] = "public";
@@ -2327,6 +2344,7 @@ const VariableInfoMap& GetTargetVariables() {
     INSERT_VARIABLE(BundleDepsFilter)
     INSERT_VARIABLE(BundleExecutableDir)
     INSERT_VARIABLE(XcassetCompilerFlags)
+    INSERT_VARIABLE(Transparent)
     INSERT_VARIABLE(Cflags)
     INSERT_VARIABLE(CflagsC)
     INSERT_VARIABLE(CflagsCC)
