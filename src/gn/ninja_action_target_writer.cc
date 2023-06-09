@@ -112,7 +112,7 @@ std::string NinjaActionTargetWriter::WriteRuleDefinition() {
   // there will be only one invocation so we can use a simple name.
   std::string target_label = target_->label().GetUserVisibleName(true);
   std::string custom_rule_name(target_label);
-  base::ReplaceChars(custom_rule_name, ":/()", "_", &custom_rule_name);
+  base::ReplaceChars(custom_rule_name, ":/()+", "_", &custom_rule_name);
   custom_rule_name.append("_rule");
 
   const SubstitutionList& args = target_->action_values().args();
