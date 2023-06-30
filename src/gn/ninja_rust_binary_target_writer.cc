@@ -209,7 +209,8 @@ void NinjaRustBinaryTargetWriter::Run() {
   std::copy(classified_deps.non_linkable_deps.begin(),
             classified_deps.non_linkable_deps.end(),
             std::back_inserter(extern_deps));
-  WriteExternsAndDeps(extern_deps, transitive_crates, rustdeps, nonrustdeps);
+  WriteExternsAndDeps(target_->IsFinal(), extern_deps, transitive_crates,
+                      rustdeps, nonrustdeps);
   WriteSourcesAndInputs();
   WritePool(out_);
 }
@@ -255,6 +256,7 @@ void NinjaRustBinaryTargetWriter::WriteSourcesAndInputs() {
 }
 
 void NinjaRustBinaryTargetWriter::WriteExternsAndDeps(
+    bool target_is_final,
     const std::vector<const Target*>& deps,
     const std::vector<ExternCrate>& transitive_rust_deps,
     const std::vector<OutputFile>& rustdeps,
@@ -347,30 +349,33 @@ void NinjaRustBinaryTargetWriter::WriteExternsAndDeps(
     path_output_.WriteDir(out_, dir, PathOutput::DIR_NO_LAST_SLASH);
   }
 
-  // Non-Rust native dependencies.
-  UniqueVector<SourceDir> nonrustdep_dirs;
-  for (const auto& nonrustdep : nonrustdeps) {
-    nonrustdep_dirs.push_back(
-        nonrustdep.AsSourceFile(settings_->build_settings()).GetDir());
+  if (target_is_final) {
+    // Non-Rust native dependencies.
+    UniqueVector<SourceDir> nonrustdep_dirs;
+    for (const auto& nonrustdep : nonrustdeps) {
+      nonrustdep_dirs.push_back(
+          nonrustdep.AsSourceFile(settings_->build_settings()).GetDir());
+    }
+    // First -Lnative to specify the search directories.
+    // This is necessary for #[link(...)] directives to work properly.
+    for (const auto& nonrustdep_dir : nonrustdep_dirs) {
+      out_ << " -Lnative=";
+      path_output_.WriteDir(out_, nonrustdep_dir,
+                            PathOutput::DIR_NO_LAST_SLASH);
+    }
+    // Before outputting any libraries to link, ensure the linker is in a mode
+    // that allows dynamic linking, as rustc may have previously put it into
+    // static-only mode.
+    if (nonrustdeps.size() > 0) {
+      out_ << " " << tool_->dynamic_link_switch();
+    }
+    for (const auto& nonrustdep : nonrustdeps) {
+      out_ << " -Clink-arg=";
+      path_output_.WriteFile(out_, nonrustdep);
+    }
+    WriteLibrarySearchPath(out_, tool_);
+    WriteLibs(out_, tool_);
   }
-  // First -Lnative to specify the search directories.
-  // This is necessary for #[link(...)] directives to work properly.
-  for (const auto& nonrustdep_dir : nonrustdep_dirs) {
-    out_ << " -Lnative=";
-    path_output_.WriteDir(out_, nonrustdep_dir, PathOutput::DIR_NO_LAST_SLASH);
-  }
-  // Before outputting any libraries to link, ensure the linker is in a mode
-  // that allows dynamic linking, as rustc may have previously put it into
-  // static-only mode.
-  if (nonrustdeps.size() > 0) {
-    out_ << " " << tool_->dynamic_link_switch();
-  }
-  for (const auto& nonrustdep : nonrustdeps) {
-    out_ << " -Clink-arg=";
-    path_output_.WriteFile(out_, nonrustdep);
-  }
-  WriteLibrarySearchPath(out_, tool_);
-  WriteLibs(out_, tool_);
   out_ << std::endl;
   out_ << "  ldflags =";
   WriteCustomLinkerFlags(out_, tool_);
