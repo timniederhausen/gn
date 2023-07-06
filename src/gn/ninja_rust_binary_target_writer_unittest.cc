@@ -896,7 +896,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "  source_file_part = lib.rs\n"
         "  source_name_part = lib\n"
         "  externs =\n"
-        "  rustdeps =\n"
+        "  rustdeps = -Lnative=obj/foo\n"
         "  ldflags =\n"
         "  sources = ../../baz/lib.rs\n";
     std::string out_str = out.str();
@@ -1227,6 +1227,14 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibWithLibDeps) {
   public_rlib.SetToolchain(setup.toolchain());
   ASSERT_TRUE(public_rlib.OnResolved(&err));
 
+  Target staticlib(setup.settings(), Label(SourceDir("//clib/"), "static"));
+  staticlib.set_output_type(Target::STATIC_LIBRARY);
+  staticlib.visibility().SetPublic();
+  staticlib.sources().push_back(SourceFile("//foo/clib.cpp"));
+  staticlib.source_types_used().Set(SourceFile::SOURCE_CPP);
+  staticlib.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(staticlib.OnResolved(&err));
+
   Target rlib(setup.settings(), Label(SourceDir("//foo/"), "rlibcrate"));
   rlib.set_output_type(Target::RUST_LIBRARY);
   rlib.visibility().SetPublic();
@@ -1243,18 +1251,31 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibWithLibDeps) {
   // `rustdeps` for a `rust_rlib`, though they would for a `rust_bin` (as tested
   // for above).
   //
-  // 1. A dependency on an archive file directly as happens with a `deps` rule
-  //    pointing to a `static_library` target.
+  // 1. A dependency on an archive file directly as happens with a `libs` rule,
+  //    requesting a system library. The path to that library must be specified
+  //    separately with `-L` in ldflags, the library does not appear in the
+  //    rustc compilation of an rlib.
   rlib.config_values().libs().push_back(
       LibFile(SourceFile("//dir1/ar.a")));
-  // 2. A dependency on a library name as happens with a `libs` rule.
+  // 2. A dependency on a library name as happens with a `libs` rule. Libraries
+  //    need only be named when linking, they do not need to appear in an rlib
+  //    compilation.
   rlib.config_values().libs().push_back(LibFile("quux"));
   // 3. A dependency on a library path which will be used for linking, which is
-  //    separate from the dependency paths for finding Rust crates.
+  //    separate from the dependency paths for finding Rust crates. But it may
+  //    be needed to resolve the path to a native library in a #[link]
+  //    directive.
   rlib.config_values().lib_dirs().push_back(SourceDir("//baz/"));
   // 4. A framework search directory will be used for linking frameworks, which
-  //    is also separate from finding Rust crates.
+  //    is also separate from finding Rust crates. Again a #[link] directive can
+  //    point to a framework, so these paths need to be present during
+  //    compilation
   rlib.config_values().framework_dirs().push_back(SourceDir("//fwdir/"));
+  // 5. A dependency on a C library through a `deps` rule, which points to a
+  //    `static_library` target. GN guarantees that Rust can refer to that
+  //    library through #[link] without having to specify the path in ldflags
+  //    as well.
+  rlib.private_deps().push_back(LabelTargetPair(&staticlib));
 
   ASSERT_TRUE(rlib.OnResolved(&err));
 
@@ -1274,11 +1295,12 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibWithLibDeps) {
         "target_out_dir = obj/foo\n"
         "target_output_name = librlibcrate\n"
         "\n"
-        "build obj/foo/librlibcrate.rlib: rust_rlib ../../foo/input.rs | ../../foo/input.rs obj/bar/libpubliclib.rlib\n"
+        "build obj/foo/librlibcrate.rlib: rust_rlib ../../foo/input.rs | ../../foo/input.rs obj/bar/libpubliclib.rlib obj/clib/libstatic.a\n"
         "  source_file_part = input.rs\n"
         "  source_name_part = input\n"
         "  externs = --extern publiccrate=obj/bar/libpubliclib.rlib\n"
-        "  rustdeps = -Ldependency=obj/bar\n"
+        "  rustdeps = -Ldependency=obj/bar -Lnative=obj/clib "
+"-Lnative=../../baz -Lframework=../../fwdir\n"
         "  ldflags =\n"
         "  sources = ../../foo/input.rs\n";
     std::string out_str = out.str();
