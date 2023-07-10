@@ -62,8 +62,6 @@
 #else
 #error Please add support for your platform in build_config.h
 #endif
-// NOTE: Adding a new port? Please follow
-// https://chromium.googlesource.com/chromium/src/+/master/docs/new_port_policy.md
 
 // For access to standard BSD features, use OS_BSD instead of a
 // more specific macro.
