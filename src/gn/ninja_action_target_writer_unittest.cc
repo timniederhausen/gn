@@ -209,13 +209,12 @@ TEST(NinjaActionTargetWriter, ActionWithOrderOnlyDeps) {
       "  restat = 1\n"
       "\n"
       "build foo.out: __foo_bar___rule | ../../foo/script.py "
-      "../../foo/included.txt ../../foo/source.txt obj/foo/dep.stamp\n"
+      "../../foo/included.txt ../../foo/source.txt obj/foo/dep.stamp || "
+      "obj/foo/datadep.stamp\n"
       "\n"
-      "build obj/foo/bar.stamp: stamp foo.out || "
-      "obj/foo/datadep.stamp\n";
+      "build obj/foo/bar.stamp: stamp foo.out\n";
 
-  std::string out_str = out.str();
-  EXPECT_EQ(expected, out_str);
+  EXPECT_EQ(expected, out.str());
 }
 
 
@@ -290,15 +289,16 @@ TEST(NinjaActionTargetWriter, ForEach) {
       "../../foo/included.txt obj/foo/dep.stamp\n"
       "\n"
       "build input1.out: __foo_bar___rule ../../foo/input1.txt | "
-      "obj/foo/bar.inputdeps.stamp\n"
+      "obj/foo/bar.inputdeps.stamp || obj/foo/bundle_data_dep.stamp "
+      "obj/foo/datadep.stamp\n"
       "  source_name_part = input1\n"
       "build input2.out: __foo_bar___rule ../../foo/input2.txt | "
-      "obj/foo/bar.inputdeps.stamp\n"
+      "obj/foo/bar.inputdeps.stamp || obj/foo/bundle_data_dep.stamp "
+      "obj/foo/datadep.stamp\n"
       "  source_name_part = input2\n"
       "\n"
       "build obj/foo/bar.stamp: "
-      "stamp input1.out input2.out || obj/foo/bundle_data_dep.stamp "
-      "obj/foo/datadep.stamp\n";
+      "stamp input1.out input2.out\n";
 
   std::string out_str = out.str();
 #if defined(OS_WIN)
