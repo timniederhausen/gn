@@ -896,7 +896,8 @@ TEST_F(NinjaRustBinaryTargetWriterTest, NonRustDeps) {
         "  source_file_part = lib.rs\n"
         "  source_name_part = lib\n"
         "  externs =\n"
-        "  rustdeps = -Lnative=obj/foo\n"
+        "  rustdeps = -Lnative=obj/foo -Clink-arg=-Balternative-dynamic "
+        "-Clink-arg=obj/foo/libstatic.a\n"
         "  ldflags =\n"
         "  sources = ../../baz/lib.rs\n";
     std::string out_str = out.str();
@@ -1255,8 +1256,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibWithLibDeps) {
   //    requesting a system library. The path to that library must be specified
   //    separately with `-L` in ldflags, the library does not appear in the
   //    rustc compilation of an rlib.
-  rlib.config_values().libs().push_back(
-      LibFile(SourceFile("//dir1/ar.a")));
+  rlib.config_values().libs().push_back(LibFile(SourceFile("//dir1/ar.a")));
   // 2. A dependency on a library name as happens with a `libs` rule. Libraries
   //    need only be named when linking, they do not need to appear in an rlib
   //    compilation.
@@ -1295,12 +1295,15 @@ TEST_F(NinjaRustBinaryTargetWriterTest, RlibWithLibDeps) {
         "target_out_dir = obj/foo\n"
         "target_output_name = librlibcrate\n"
         "\n"
-        "build obj/foo/librlibcrate.rlib: rust_rlib ../../foo/input.rs | ../../foo/input.rs obj/bar/libpubliclib.rlib obj/clib/libstatic.a\n"
+        "build obj/foo/librlibcrate.rlib: rust_rlib ../../foo/input.rs | "
+        "../../foo/input.rs obj/bar/libpubliclib.rlib obj/clib/libstatic.a\n"
         "  source_file_part = input.rs\n"
         "  source_name_part = input\n"
         "  externs = --extern publiccrate=obj/bar/libpubliclib.rlib\n"
         "  rustdeps = -Ldependency=obj/bar -Lnative=obj/clib "
-"-Lnative=../../baz -Lframework=../../fwdir\n"
+        "-Clink-arg=-Bdynamic -Clink-arg=obj/clib/libstatic.a "
+        "-Lnative=../../baz -Lframework=../../fwdir -Clink-arg=../../dir1/ar.a "
+        "-lquux\n"
         "  ldflags =\n"
         "  sources = ../../foo/input.rs\n";
     std::string out_str = out.str();

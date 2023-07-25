@@ -28,8 +28,7 @@ class NinjaRustBinaryTargetWriter : public NinjaBinaryTargetWriter {
   void WriteCompilerVars();
   void WriteSources(const OutputFile& input_dep,
                     const std::vector<OutputFile>& order_only_deps);
-  void WriteExternsAndDeps(bool target_is_final,
-                           const std::vector<const Target*>& deps,
+  void WriteExternsAndDeps(const std::vector<const Target*>& deps,
                            const std::vector<ExternCrate>& transitive_rust_deps,
                            const std::vector<OutputFile>& rustdeps,
                            const std::vector<OutputFile>& nonrustdeps);

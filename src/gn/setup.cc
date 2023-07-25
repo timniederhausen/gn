@@ -191,6 +191,7 @@ Variables
       required version is 1.7.2. Specifying a higher version might enable the
       use of some of newer features that can make the build more efficient.
 
+
 Example .gn file contents
 
   buildconfig = "//build/config/BUILDCONFIG.gn"

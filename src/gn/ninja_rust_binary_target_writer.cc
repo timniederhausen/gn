@@ -209,8 +209,8 @@ void NinjaRustBinaryTargetWriter::Run() {
   std::copy(classified_deps.non_linkable_deps.begin(),
             classified_deps.non_linkable_deps.end(),
             std::back_inserter(extern_deps));
-  WriteExternsAndDeps(target_->IsFinal(), extern_deps, transitive_crates,
-                      rustdeps, nonrustdeps);
+
+  WriteExternsAndDeps(extern_deps, transitive_crates, rustdeps, nonrustdeps);
   WriteSourcesAndInputs();
   WritePool(out_);
 }
@@ -256,7 +256,6 @@ void NinjaRustBinaryTargetWriter::WriteSourcesAndInputs() {
 }
 
 void NinjaRustBinaryTargetWriter::WriteExternsAndDeps(
-    bool target_is_final,
     const std::vector<const Target*>& deps,
     const std::vector<ExternCrate>& transitive_rust_deps,
     const std::vector<OutputFile>& rustdeps,
@@ -365,17 +364,16 @@ void NinjaRustBinaryTargetWriter::WriteExternsAndDeps(
 
   // If rustc will invoke a linker, then pass linker arguments to include those
   // non-Rust native dependencies in the linking step.
-  if (target_is_final) {
-    // Before outputting any libraries to link, ensure the linker is in a mode
-    // that allows dynamic linking, as rustc may have previously put it into
-    // static-only mode.
-    if (nonrustdeps.size() > 0) {
-      out_ << " " << tool_->dynamic_link_switch();
-    }
-    for (const auto& nonrustdep : nonrustdeps) {
-      out_ << " -Clink-arg=";
-      path_output_.WriteFile(out_, nonrustdep);
-    }
+
+  // Before outputting any libraries to link, ensure the linker is in a mode
+  // that allows dynamic linking, as rustc may have previously put it into
+  // static-only mode.
+  if (nonrustdeps.size() > 0) {
+    out_ << " " << tool_->dynamic_link_switch();
+  }
+  for (const auto& nonrustdep : nonrustdeps) {
+    out_ << " -Clink-arg=";
+    path_output_.WriteFile(out_, nonrustdep);
   }
 
   // Library search paths are required to find system libraries named in #[link]
@@ -383,15 +381,13 @@ void NinjaRustBinaryTargetWriter::WriteExternsAndDeps(
   WriteLibrarySearchPath(out_, tool_);
   // If rustc will invoke a linker, all libraries need the passed through to the
   // linker.
-  if (target_is_final) {
-    WriteLibs(out_, tool_);
-  }
+  WriteLibs(out_, tool_);
+
   out_ << std::endl;
   out_ << "  ldflags =";
   // If rustc will invoke a linker, linker flags need to be forwarded through to
   // the linker.
-  if (target_is_final) {
-    WriteCustomLinkerFlags(out_, tool_);
-  }
+  WriteCustomLinkerFlags(out_, tool_);
+
   out_ << std::endl;
 }
