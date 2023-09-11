@@ -391,7 +391,7 @@ Value AccessorNode::ExecuteScopeSubscriptAccess(Scope* scope,
   if (!key_value.VerifyTypeIs(Value::STRING, err))
     return Value();
   const Value* result =
-      base_value->scope_value()->GetValue(key_value.string_value());
+      ExecuteScopeAccessForMember(scope, key_value.string_value(), err);
   if (!result) {
     *err =
         Err(subscript_.get(), "No value named \"" + key_value.string_value() +
@@ -402,6 +402,21 @@ Value AccessorNode::ExecuteScopeSubscriptAccess(Scope* scope,
 }
 
 Value AccessorNode::ExecuteScopeAccess(Scope* scope, Err* err) const {
+  const Value* result =
+      ExecuteScopeAccessForMember(scope, member_->value().value(), err);
+
+  if (!result) {
+    *err = Err(member_.get(), "No value named \"" + member_->value().value() +
+                                  "\" in scope \"" + base_.value() + "\"");
+    return Value();
+  }
+  return *result;
+}
+
+const Value* AccessorNode::ExecuteScopeAccessForMember(
+    Scope* scope,
+    std::string_view member_str,
+    Err* err) const {
   // We jump through some hoops here since ideally a.b will count "b" as
   // accessed in the given scope. The value "a" might be in some normal nested
   // scope and we can modify it, but it might also be inherited from the
@@ -418,30 +433,22 @@ Value AccessorNode::ExecuteScopeAccess(Scope* scope, Err* err) const {
     // Common case: base value is mutable so we can track variable accesses
     // for unused value warnings.
     if (!mutable_base_value->VerifyTypeIs(Value::SCOPE, err))
-      return Value();
-    result = mutable_base_value->scope_value()->GetValue(
-        member_->value().value(), true);
+      return nullptr;
+    result = mutable_base_value->scope_value()->GetValue(member_str, true);
   } else {
     // Fall back to see if the value is on a read-only scope.
     const Value* const_base_value = scope->GetValue(base_.value(), true);
     if (const_base_value) {
       // Read only value, don't try to mark the value access as a "used" one.
       if (!const_base_value->VerifyTypeIs(Value::SCOPE, err))
-        return Value();
-      result =
-          const_base_value->scope_value()->GetValue(member_->value().value());
+        return nullptr;
+      result = const_base_value->scope_value()->GetValue(member_str);
     } else {
       *err = Err(base_, "Undefined identifier.");
-      return Value();
+      return nullptr;
     }
   }
-
-  if (!result) {
-    *err = Err(member_.get(), "No value named \"" + member_->value().value() +
-                                  "\" in scope \"" + base_.value() + "\"");
-    return Value();
-  }
-  return *result;
+  return result;
 }
 
 void AccessorNode::SetNewLocation(int line_number) {
