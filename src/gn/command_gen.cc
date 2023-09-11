@@ -447,14 +447,16 @@ bool RunNinjaPostProcessTools(const BuildSettings* build_settings,
   }
 
   // If we have a ninja version that supports restat, we should restat the
-  // build.ninja file so the next ninja invocation will use the right mtime. If
-  // gen is being invoked as part of a re-gen (ie, ninja is invoking gn gen),
-  // then we can elide this restat, as ninja will restat build.ninja anyways
-  // after it is complete.
+  // build.ninja or build.ninja.stamp files so the next ninja invocation
+  // will use the right mtimes. If gen is being invoked as part of a re-gen
+  // (ie, ninja is invoking gn gen), then we can elide this restat, as
+  // ninja will restat the appropriate file anyways after it is complete.
   if (!is_regeneration &&
       build_settings->ninja_required_version() >= Version{1, 10, 0}) {
     std::vector<base::FilePath> files_to_restat{
-        base::FilePath(FILE_PATH_LITERAL("build.ninja"))};
+        base::FilePath(FILE_PATH_LITERAL("build.ninja")),
+        base::FilePath(FILE_PATH_LITERAL("build.ninja.stamp")),
+    };
     if (!InvokeNinjaRestatTool(ninja_executable, build_dir, files_to_restat,
                                err)) {
       return false;
