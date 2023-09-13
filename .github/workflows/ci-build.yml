@@ -140,6 +140,7 @@ jobs:
       - name: Archive binaries (custom libc++)
         if: "${{ matrix.cc == 'clang' }}"
         run: |
+          source .env
           tar -C out -czf "out/gn-${{ matrix.slug }}.tar.gz" gn -C ${DEPS_DIR}/llvm/install/lib $(ls ${DEPS_DIR}/llvm/install/lib)
 
       - name: Upload archives
