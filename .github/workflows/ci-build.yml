@@ -64,7 +64,7 @@ jobs:
         if: matrix.install
         run: sudo apt install ${{ matrix.install }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           # we need all everything for `git describe` to work correctly
           fetch-depth: 0
@@ -118,7 +118,7 @@ jobs:
           tar -C out -czf "out/gn-${{ matrix.slug }}.tar.gz" gn
 
       - name: Upload archives
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: binaries
           path: |
