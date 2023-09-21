@@ -17,34 +17,36 @@ on:
   release:
     types: published
 
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}
+  cancel-in-progress: true
+
 env:
-  LLVM_VERSION: 8.0.1
   NINJA_BASE_URL: https://github.com/ninja-build/ninja/releases/download/
 
 jobs:
   posix:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - slug: linux-i386
-            cc: gcc-8
-            cxx: g++-8
+            cc: gcc
+            cxx: g++
             cflags: "-m32"
             ldflags: "-m32"
             libflags: "-m32"
             os: ubuntu-20.04
-            install: "g++-8 g++-8-multilib"
+            install: "g++-multilib"
             ninja_release_name: v1.11.1/ninja-linux.zip
 
           - slug: linux-amd64
-            cc: gcc-8
-            cxx: g++-8
+            cc: gcc
+            cxx: g++
             cflags: "-m64"
             ldflags: "-m64"
             libflags: "-m64"
             os: ubuntu-20.04
-            install: "g++-8"
             ninja_release_name: v1.11.1/ninja-linux.zip
 
           - slug: macos-amd64
@@ -93,7 +95,7 @@ jobs:
 
       - name: Cache libc++ and libc++abi if needed
         if: "${{ matrix.cc == 'clang' }}"
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/deps/llvm
           key: ${{ runner.os }}-llvm-${{ matrix.slug }}
@@ -130,3 +132,66 @@ jobs:
         with:
           files: |
             out/gn-${{ matrix.slug }}.tar.gz
+
+  windows:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - slug: windows-i386
+            arch: x86
+            gen_args: "--use-lto --use-icf"
+            ninja_release_name: v1.11.1/ninja-linux.zip
+
+          - slug: windows-amd64
+            arch: x64
+            gen_args: "--use-lto --use-icf"
+            ninja_release_name: v1.11.1/ninja-linux.zip
+
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # we need all everything for `git describe` to work correctly
+          fetch-depth: 0
+
+      - name: Download Ninja
+        run: |
+          Invoke-WebRequest -Uri https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip -OutFile ninja.zip
+          7z x ninja.zip > nul
+          ./ninja --version
+      - name: Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Build
+        run: |
+          python build/gen.py ${{ matrix.gen_args }}
+          ./ninja -C out
+
+      - name: Run tests
+        run: |
+          out/gn_unittests
+
+      - name: Make zip
+        run: |
+          7z a -tzip out\gn-${{ matrix.slug }}.zip out\gn.exe
+
+      - name: Upload archives
+        uses: actions/upload-artifact@v3
+        with:
+          name: binaries
+          path: |
+            out/gn-${{ matrix.slug }}.zip
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            out/gn-${{ matrix.slug }}.zip
