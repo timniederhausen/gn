@@ -159,7 +159,7 @@ void Err::InternalPrintToStdout(bool is_sub_err, bool is_fatal) const {
     if (is_fatal)
       OutputString("ERROR ", DECORATION_RED);
     else
-      OutputString("WARNING ", DECORATION_RED);
+      OutputString("WARNING ", DECORATION_MAGENTA);
   }
 
   // File name and location.
