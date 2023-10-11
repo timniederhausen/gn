@@ -64,7 +64,7 @@ jobs:
     steps:
       - name: Install packages
         if: matrix.install
-        run: sudo apt install ${{ matrix.install }}
+        run: sudo apt update && sudo apt install ${{ matrix.install }}
 
       - uses: actions/checkout@v4
         with:
