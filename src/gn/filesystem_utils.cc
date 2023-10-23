@@ -13,6 +13,7 @@
 #include "gn/location.h"
 #include "gn/settings.h"
 #include "gn/source_dir.h"
+#include "gn/target.h"
 #include "util/build_config.h"
 
 #if defined(OS_WIN)

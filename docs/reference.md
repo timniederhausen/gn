@@ -7060,6 +7060,18 @@
       The command-line switch --root-target will override this value (see "gn
       help --root-target").
 
+  root_patterns [optional]
+      A list of label pattern strings. When not defined or empty, the GN build
+      graph will contain all targets from any BUILD.gn evaluated in the default
+      toolchain context, and their transitive dependencies.
+
+      When set to a non empty list, only the targets in the default toolchain
+      matching these patterns, and their transitive dependencies, will be defined
+      instead.
+
+      The command-line switch --root-pattern will override this value (see
+      "gn help --root-pattern")
+
   script_executable [optional]
       By default, GN runs the scripts used in action targets and exec_script
       calls using the Python interpreter found in PATH. This value specifies the

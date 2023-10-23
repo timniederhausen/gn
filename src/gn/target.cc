@@ -544,6 +544,15 @@ bool Target::IsDataOnly() const {
   return output_type_ == BUNDLE_DATA;
 }
 
+bool Target::ShouldGenerate() const {
+  const auto& root_patterns = settings()->build_settings()->root_patterns();
+  if (root_patterns.empty()) {
+    // By default, generate all targets that belong to the default toolchain.
+    return settings()->is_default();
+  }
+  return LabelPattern::VectorMatches(root_patterns, label());
+}
+
 DepsIteratorRange Target::GetDeps(DepsIterationType type) const {
   if (type == DEPS_LINKED) {
     return DepsIteratorRange(

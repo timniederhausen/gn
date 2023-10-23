@@ -263,7 +263,7 @@ bool Builder::TargetDefined(BuilderRecord* record, Err* err) {
   // check if this target was previously marked as "required" and force setting
   // the bit again so the target's dependencies (which we now know) get the
   // required bit pushed to them.
-  if (record->should_generate() || target->settings()->is_default())
+  if (record->should_generate() || target->ShouldGenerate())
     RecursiveSetShouldGenerate(record, true);
 
   return true;
