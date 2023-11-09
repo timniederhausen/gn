@@ -202,9 +202,28 @@ bool ApplyTypeFilter(std::vector<const Target*>* targets) {
   return true;
 }
 
-// Returns the file path generating this item.
+// Returns the file path of the BUILD.gn file generating this item.
 base::FilePath BuildFileForItem(const Item* item) {
-  return item->defined_from()->GetRange().begin().file()->physical_name();
+  // Find the only BUILD.gn file listed in build_dependency_files() for
+  // this Item. This may not exist if the item is defined in BUILDCONFIG.gn
+  // instead, so account for this too.
+  const SourceFile* buildconfig_gn = nullptr;
+  const SourceFile* build_gn = nullptr;
+  for (const SourceFile& build_file : item->build_dependency_files()) {
+    const std::string& name = build_file.GetName();
+    if (name == "BUILDCONFIG.gn") {
+      buildconfig_gn = &build_file;
+    } else if (name == "BUILD.gn") {
+      build_gn = &build_file;
+      break;
+    }
+  }
+  if (!build_gn)
+    build_gn = buildconfig_gn;
+
+  CHECK(build_gn) << "No BUILD.gn or BUILDCONFIG.gn file defining "
+                  << item->label().GetUserVisibleName(true);
+  return build_gn->Resolve(item->settings()->build_settings()->root_path());
 }
 
 void PrintTargetsAsBuildfiles(const std::vector<const Target*>& targets,
