@@ -387,14 +387,14 @@ bool CommandSwitches::Init(const base::CommandLine& cmdline) {
 // static
 const CommandSwitches& CommandSwitches::Get() {
   CHECK(s_global_switches_.is_initialized())
-      << "Missing previous succesful call to CommandSwitches::Init()";
+      << "Missing previous successful call to CommandSwitches::Init()";
   return s_global_switches_;
 }
 
 // static
 CommandSwitches CommandSwitches::Set(CommandSwitches new_switches) {
   CHECK(s_global_switches_.is_initialized())
-      << "Missing previous succesful call to CommandSwitches::Init()";
+      << "Missing previous successful call to CommandSwitches::Init()";
   CommandSwitches result = std::move(s_global_switches_);
   s_global_switches_ = std::move(new_switches);
   return result;

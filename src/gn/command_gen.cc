@@ -563,12 +563,12 @@ Xcode Flags
   --xcode-configs=<config_name_list>
       Configure the list of build configuration supported by the generated
       project. If specified, must be a list of semicolon-separated strings.
-      If ommitted, a single configuration will be used in the generated
+      If omitted, a single configuration will be used in the generated
       project derived from the build directory.
 
   --xcode-config-build-dir=<string>
       If present, must be a path relative to the source directory. It will
-      default to $root_out_dir if ommitted. The path is assumed to point to
+      default to $root_out_dir if omitted. The path is assumed to point to
       the directory where ninja needs to be invoked. This variable can be
       used to build for multiple configuration / platform / environment from
       the same generated Xcode project (assuming that the user has created a
@@ -585,7 +585,7 @@ Xcode Flags
 
   --xcode-additional-files-roots=<path_list>
       If present, must be a list of semicolon-separated paths. It will be used
-      as roots when looking for additional files to add. If ommitted, defaults
+      as roots when looking for additional files to add. If omitted, defaults
       to "//".
 
   --ninja-executable=<string>

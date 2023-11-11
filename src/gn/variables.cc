@@ -526,7 +526,7 @@ const char kGenDeps_Help[] =
 
   Not all GN targets that get evaluated are actually turned into ninja targets
   (see "gn help execution"). If this target is generated, then any targets in
-  the "gen_deps" list will also be generated, regardless of the usual critera.
+  the "gen_deps" list will also be generated, regardless of the usual criteria.
 
   Since "gen_deps" are not build time dependencies, there can be cycles between
   "deps" and "gen_deps" or within "gen_deps" itself.
