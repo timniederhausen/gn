@@ -472,6 +472,8 @@ def WriteGNNinja(path, platform, host, options, args_list):
     # flags not supported by gcc/g++.
     if cxx == 'clang++':
       cflags.extend(['-Wrange-loop-analysis', '-Wextra-semi-stmt'])
+    else:
+      cflags.append('-Wno-redundant-move')
 
     if platform.is_linux() or platform.is_mingw() or platform.is_msys():
       ldflags.append('-Wl,--as-needed')
