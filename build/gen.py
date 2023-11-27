@@ -522,6 +522,7 @@ def WriteGNNinja(path, platform, host, options, args_list):
       cflags.append('-Wno-unused-function')
       cflags.append('-D_OPEN_SYS_FILE_EXT')
       cflags.append('-DPATH_MAX=1024')
+      cflags.append('-DZOSLIB_OVERRIDE_CLIB')
 
     if platform.is_posix() and not platform.is_haiku():
       ldflags.append('-pthread')
