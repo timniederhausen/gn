@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <string>
 #include <string_view>
 
 #include "base/logging.h"
@@ -623,8 +624,9 @@ FilePath FilePath::NormalizePathSeparators() const {
 
 FilePath FilePath::NormalizePathSeparatorsTo(CharType separator) const {
 #if defined(FILE_PATH_USES_WIN_SEPARATORS)
-  DCHECK_NE(kSeparators + kSeparatorsLength,
-            std::find(kSeparators, kSeparators + kSeparatorsLength, separator));
+  DCHECK_NE(static_cast<const void*>(kSeparators + kSeparatorsLength),
+            static_cast<const void*>(std::find(
+                kSeparators, kSeparators + kSeparatorsLength, separator)));
   StringType copy = path_;
   for (size_t i = 0; i < kSeparatorsLength; ++i) {
     std::replace(copy.begin(), copy.end(), kSeparators[i], separator);

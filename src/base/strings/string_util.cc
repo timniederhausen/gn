@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include <string>
 #include <vector>
 
 #include "base/logging.h"
@@ -963,7 +964,7 @@ OutStringType DoReplaceStringPlaceholders(
           --i;
         } else {
           if (*i < '1' || *i > '9') {
-            DLOG(ERROR) << "Invalid placeholder: $" << *i;
+            DLOG(ERROR) << "Invalid placeholder: $" << std::to_string(*i);
             continue;
           }
           uintptr_t index = *i - '1';
