@@ -61,8 +61,7 @@ DepsCategory GetDepsCategory(std::string_view deps) {
 std::tuple<std::string_view, std::string_view> SplitAtFirst(
     std::string_view str,
     char c) {
-  if (!base::StartsWith(str, "\"", base::CompareCase::SENSITIVE) ||
-      !base::EndsWith(str, "\"", base::CompareCase::SENSITIVE))
+  if (!str.starts_with("\"") || !str.ends_with("\""))
     return std::make_tuple(str, std::string_view());
 
   str = str.substr(1, str.length() - 2);
@@ -1090,9 +1089,7 @@ Value LiteralNode::Execute(Scope* scope, Err* err) const {
       return Value(this, false);
     case Token::INTEGER: {
       std::string_view s = value_.value();
-      if ((base::StartsWith(s, "0", base::CompareCase::SENSITIVE) &&
-           s.size() > 1) ||
-          base::StartsWith(s, "-0", base::CompareCase::SENSITIVE)) {
+      if ((s.starts_with("0") && s.size() > 1) || s.starts_with("-0")) {
         if (s == "-0")
           *err = MakeErrorDescribing("Negative zero doesn't make sense");
         else

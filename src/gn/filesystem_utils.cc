@@ -179,8 +179,7 @@ void AppendFixedAbsolutePathSuffix(const BuildSettings* build_settings,
                                    OutputFile* result) {
   const std::string& build_dir = build_settings->build_dir().value();
 
-  if (base::StartsWith(source_dir.value(), build_dir,
-                       base::CompareCase::SENSITIVE)) {
+  if (source_dir.value().starts_with(build_dir)) {
     size_t build_dir_size = build_dir.size();
     result->value().append(&source_dir.value()[build_dir_size],
                            source_dir.value().size() - build_dir_size);
@@ -709,8 +708,7 @@ std::string RebasePath(const std::string& input,
                        const SourceDir& dest_dir,
                        std::string_view source_root) {
   std::string ret;
-  DCHECK(source_root.empty() ||
-         !base::EndsWith(source_root, "/", base::CompareCase::SENSITIVE));
+  DCHECK(source_root.empty() || !source_root.ends_with("/"));
 
   bool input_is_source_path =
       (input.size() >= 2 && input[0] == '/' && input[1] == '/');

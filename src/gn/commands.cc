@@ -327,8 +327,7 @@ std::optional<HowTargetContainsFile> TargetContainsFile(
   for (const auto& cur_file : target->data()) {
     if (cur_file == file.value())
       return HowTargetContainsFile::kData;
-    if (cur_file.back() == '/' &&
-        base::StartsWith(file.value(), cur_file, base::CompareCase::SENSITIVE))
+    if (cur_file.back() == '/' && file.value().starts_with(cur_file))
       return HowTargetContainsFile::kData;
   }
 
