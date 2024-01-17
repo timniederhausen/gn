@@ -258,12 +258,12 @@ void ParseNode::AddCommentsJSONNodes(base::Value* out_value) const {
 std::unique_ptr<ParseNode> ParseNode::BuildFromJSON(const base::Value& value) {
   const std::string& str_type = value.FindKey(kJsonNodeType)->GetString();
 
-#define RETURN_IF_MATCHES_NAME(t)               \
-  do {                                          \
-    if (str_type == t::kDumpNodeName) {         \
-      return t::NewFromJSON(value);             \
-    }                                           \
-  } while(0)
+#define RETURN_IF_MATCHES_NAME(t)       \
+  do {                                  \
+    if (str_type == t::kDumpNodeName) { \
+      return t::NewFromJSON(value);     \
+    }                                   \
+  } while (0)
 
   RETURN_IF_MATCHES_NAME(AccessorNode);
   RETURN_IF_MATCHES_NAME(BinaryOpNode);
@@ -335,7 +335,7 @@ base::Value AccessorNode::GetJSONNode() const {
   if (!child || !child->is_list()) {                        \
     return nullptr;                                         \
   }                                                         \
-  (void)(0) // this is to supress extra semicolon warning.
+  (void)(0)  // this is to supress extra semicolon warning.
 
 // static
 std::unique_ptr<AccessorNode> AccessorNode::NewFromJSON(

@@ -543,7 +543,7 @@ int SuffixCommentTreeWalk(const ParseNode* node) {
 
 #define RETURN_IF_SET(x)             \
   if (int result = (x); result >= 0) \
-    return result
+  return result
 
   if (const AccessorNode* accessor = node->AsAccessor()) {
     RETURN_IF_SET(SuffixCommentTreeWalk(accessor->subscript()));

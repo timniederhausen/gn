@@ -1029,8 +1029,8 @@ Value RunPrintStackTrace(Scope* scope,
   std::string location_str = function->GetRange().begin().Describe(false);
   std::string toolchain =
       scope->settings()->toolchain_label().GetUserVisibleName(false);
-  std::string output =
-      "print_stack_trace() initiated at:  " + location_str + "  using: " + toolchain;
+  std::string output = "print_stack_trace() initiated at:  " + location_str +
+                       "  using: " + toolchain;
   output.push_back('\n');
 
   for (const auto& entry : scope->GetTemplateInvocationEntries()) {

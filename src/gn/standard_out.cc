@@ -130,8 +130,8 @@ void OutputString(const std::string& output,
         ::SetConsoleTextAttribute(hstdout, FOREGROUND_RED | FOREGROUND_GREEN);
         break;
       case DECORATION_MAGENTA:
-        ::SetConsoleTextAttribute(hstdout,
-                                  FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+        ::SetConsoleTextAttribute(
+            hstdout, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
         break;
     }
   }

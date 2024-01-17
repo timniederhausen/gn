@@ -55,8 +55,8 @@ bool FileWriter::Write(std::string_view str) {
     return false;
   }
   if (static_cast<size_t>(written) != str.size()) {
-    PLOG(ERROR) << "wrote " << written << " bytes to "
-                << file_path_ << " expected " << str.size();
+    PLOG(ERROR) << "wrote " << written << " bytes to " << file_path_
+                << " expected " << str.size();
     valid_ = false;
     return false;
   }

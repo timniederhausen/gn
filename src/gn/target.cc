@@ -45,8 +45,8 @@ void MergeAllDependentConfigsFrom(const Target* from_target,
 
 Err MakeTestOnlyError(const Item* from, const Item* to) {
   bool with_toolchain = from->settings()->ShouldShowToolchain({
-    &from->label(),
-    &to->label(),
+      &from->label(),
+      &to->label(),
   });
   return Err(
       from->defined_from(), "Test-only dependency not allowed.",
@@ -933,9 +933,9 @@ bool Target::ResolvePrecompiledHeaders(Err* err) {
       if (config_values_->precompiled_header() != cur.precompiled_header() ||
           config_values_->precompiled_source() != cur.precompiled_source()) {
         bool with_toolchain = settings()->ShouldShowToolchain({
-          &label(),
-          pch_header_settings_from,
-          &config->label(),
+            &label(),
+            pch_header_settings_from,
+            &config->label(),
         });
         *err = Err(
             defined_from(), "Precompiled header setting conflict.",

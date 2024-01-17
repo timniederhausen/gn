@@ -306,10 +306,10 @@ extern const char kRustProcMacro[];
 extern const char kRustProcMacro_HelpShort[];
 extern const char kRustProcMacro_Help[];
 Value RunRustProcMacro(Scope* scope,
-                   const FunctionCallNode* function,
-                   const std::vector<Value>& args,
-                   BlockNode* block,
-                   Err* err);
+                       const FunctionCallNode* function,
+                       const std::vector<Value>& args,
+                       BlockNode* block,
+                       Err* err);
 
 extern const char kSetDefaults[];
 extern const char kSetDefaults_HelpShort[];

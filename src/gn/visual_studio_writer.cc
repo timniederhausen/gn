@@ -677,9 +677,8 @@ bool VisualStudioWriter::WriteProjectFileContents(
         project.SubElement("Target", XmlAttributes("Name", "Clean"));
     clean->SubElement(
         "Exec",
-        XmlAttributes("Command",
-                      "call " + ninja_exe + " -C $(OutDir) -tclean " +
-                      ninja_target));
+        XmlAttributes("Command", "call " + ninja_exe +
+                                     " -C $(OutDir) -tclean " + ninja_target));
   }
 
   return true;

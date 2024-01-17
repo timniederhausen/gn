@@ -175,7 +175,8 @@ void Err::InternalPrintToStdout(bool is_sub_err, bool is_fatal) const {
   }
   std::string toolchain_str;
   if (!info_->toolchain_label.is_null()) {
-    toolchain_str += "(" + info_->toolchain_label.GetUserVisibleName(false) + ")";
+    toolchain_str +=
+        "(" + info_->toolchain_label.GetUserVisibleName(false) + ")";
   }
   std::string colon;
   if (!loc_str.empty() || !toolchain_str.empty())

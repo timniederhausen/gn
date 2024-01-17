@@ -496,7 +496,8 @@ StringOutputBuffer JSONProjectWriter::GenerateJSON(
       std::string json_dict;
       base::JSONWriter::WriteWithOptions(
           toolchain, base::JSONWriter::OPTIONS_PRETTY_PRINT, &json_dict);
-      json_writer.AddJSONDict(tool_chain_kv.first.GetUserVisibleName(false), json_dict);
+      json_writer.AddJSONDict(tool_chain_kv.first.GetUserVisibleName(false),
+                              json_dict);
     }
   }
   json_writer.EndDict();  // toolchains

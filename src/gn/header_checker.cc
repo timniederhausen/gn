@@ -263,11 +263,11 @@ SourceFile HeaderChecker::SourceFileForInclude(
 
   Value relative_file_value(nullptr, std::string(include.contents));
 
-  auto find_predicate = [relative_file_value, err, this](const SourceDir& dir) -> bool {
-        SourceFile include_file =
-            dir.ResolveRelativeFile(relative_file_value, err);
-        return file_map_.find(include_file) != file_map_.end();
-      };
+  auto find_predicate = [relative_file_value, err,
+                         this](const SourceDir& dir) -> bool {
+    SourceFile include_file = dir.ResolveRelativeFile(relative_file_value, err);
+    return file_map_.find(include_file) != file_map_.end();
+  };
   if (!include.system_style_include) {
     const SourceDir& file_dir = source_file.dir();
     if (find_predicate(file_dir)) {
@@ -275,8 +275,8 @@ SourceFile HeaderChecker::SourceFileForInclude(
     }
   }
 
-  auto it = std::find_if(
-      include_dirs.begin(), include_dirs.end(), find_predicate);
+  auto it =
+      std::find_if(include_dirs.begin(), include_dirs.end(), find_predicate);
 
   if (it != include_dirs.end())
     return it->ResolveRelativeFile(relative_file_value, err);
@@ -335,10 +335,8 @@ bool HeaderChecker::CheckFile(const Target* from_target,
       continue;
 
     Err err;
-    SourceFile included_file = SourceFileForInclude(include,
-                                                    include_dirs,
-                                                    input_file,
-                                                    &err);
+    SourceFile included_file =
+        SourceFileForInclude(include, include_dirs, input_file, &err);
     if (!included_file.is_null()) {
       CheckInclude(from_target, input_file, included_file, include.location,
                    &no_dependency_cache, errors);

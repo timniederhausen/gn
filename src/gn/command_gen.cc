@@ -78,9 +78,7 @@ struct TargetWriteInfo {
   using ResolvedMap = std::unordered_map<std::thread::id, ResolvedTargetData>;
   std::unique_ptr<ResolvedMap> resolved_map = std::make_unique<ResolvedMap>();
 
-  void LeakOnPurpose() {
-    (void)resolved_map.release();
-  }
+  void LeakOnPurpose() { (void)resolved_map.release(); }
 };
 
 // Called on worker thread to write the ninja file.

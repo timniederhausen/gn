@@ -509,7 +509,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, LibsAndLibDirs) {
   Target target(setup.settings(), Label(SourceDir("//foo/"), "shlib"));
   target.set_output_type(Target::SHARED_LIBRARY);
   target.config_values().libs().push_back(LibFile(SourceFile("//foo/lib1.a")));
-  target.config_values().libs().push_back(LibFile(SourceFile("//sysroot/DIA SDK/diaguids.lib")));
+  target.config_values().libs().push_back(
+      LibFile(SourceFile("//sysroot/DIA SDK/diaguids.lib")));
   target.config_values().libs().push_back(LibFile("foo"));
   target.config_values().lib_dirs().push_back(SourceDir("//foo/bar/"));
   target.SetToolchain(setup.toolchain());
@@ -527,10 +528,12 @@ TEST_F(NinjaCBinaryTargetWriterTest, LibsAndLibDirs) {
       "target_output_name = libshlib\n"
       "\n"
       "\n"
-      "build ./libshlib.so: solink | ../../foo/lib1.a ../../sysroot/DIA$ SDK/diaguids.lib\n"
+      "build ./libshlib.so: solink | ../../foo/lib1.a ../../sysroot/DIA$ "
+      "SDK/diaguids.lib\n"
       "  ldflags = -L../../foo/bar\n"
 #ifdef _WIN32
-      "  libs = ../../foo/lib1.a \"../../sysroot/DIA$ SDK/diaguids.lib\" -lfoo\n"
+      "  libs = ../../foo/lib1.a \"../../sysroot/DIA$ SDK/diaguids.lib\" "
+      "-lfoo\n"
 #else
       "  libs = ../../foo/lib1.a ../../sysroot/DIA\\$ SDK/diaguids.lib -lfoo\n"
 #endif
@@ -1541,7 +1544,6 @@ TEST_F(NinjaCBinaryTargetWriterTest, RlibInLibrary) {
   target.SetToolchain(setup.toolchain());
   ASSERT_TRUE(target.OnResolved(&err));
 
-
   std::ostringstream out;
   NinjaCBinaryTargetWriter writer(&target, out);
   writer.Run();
@@ -2119,7 +2121,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustLibAfterSharedLib) {
   TestWithScope setup;
 
   Target static1(setup.settings(),
-                Label(SourceDir("//static1/"), "staticlib1"));
+                 Label(SourceDir("//static1/"), "staticlib1"));
   static1.set_output_type(Target::STATIC_LIBRARY);
   static1.visibility().SetPublic();
   static1.sources().push_back(SourceFile("//static1/c.cc"));
@@ -2128,7 +2130,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustLibAfterSharedLib) {
   ASSERT_TRUE(static1.OnResolved(&err));
 
   Target static2(setup.settings(),
-                Label(SourceDir("//static2/"), "staticlib2"));
+                 Label(SourceDir("//static2/"), "staticlib2"));
   static2.set_output_type(Target::STATIC_LIBRARY);
   static2.visibility().SetPublic();
   static2.sources().push_back(SourceFile("//static2/c.cc"));
@@ -2137,7 +2139,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustLibAfterSharedLib) {
   ASSERT_TRUE(static2.OnResolved(&err));
 
   Target static3(setup.settings(),
-                Label(SourceDir("//static3/"), "staticlib3"));
+                 Label(SourceDir("//static3/"), "staticlib3"));
   static3.set_output_type(Target::STATIC_LIBRARY);
   static3.visibility().SetPublic();
   static3.sources().push_back(SourceFile("//static3/c.cc"));
@@ -2146,7 +2148,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustLibAfterSharedLib) {
   ASSERT_TRUE(static3.OnResolved(&err));
 
   Target shared1(setup.settings(),
-                    Label(SourceDir("//shared1"), "mysharedlib1"));
+                 Label(SourceDir("//shared1"), "mysharedlib1"));
   shared1.set_output_type(Target::SHARED_LIBRARY);
   shared1.set_output_name("mysharedlib1");
   shared1.set_output_prefix_override("");
@@ -2168,7 +2170,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, RustLibAfterSharedLib) {
   ASSERT_TRUE(rlib2.OnResolved(&err));
 
   Target shared3(setup.settings(),
-                    Label(SourceDir("//shared3"), "mysharedlib3"));
+                 Label(SourceDir("//shared3"), "mysharedlib3"));
   shared3.set_output_type(Target::SHARED_LIBRARY);
   shared3.set_output_name("mysharedlib3");
   shared3.set_output_prefix_override("");
@@ -2250,7 +2252,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, ModuleMapInStaticLibrary) {
       "target_out_dir = obj/foo\n"
       "target_output_name = libbar\n"
       "\n"
-      "build obj/foo/libbar.bar.o: cxx ../../foo/bar.cc | obj/foo/libbar.bar.pcm\n"
+      "build obj/foo/libbar.bar.o: cxx ../../foo/bar.cc | "
+      "obj/foo/libbar.bar.pcm\n"
       "  source_file_part = bar.cc\n"
       "  source_name_part = bar\n"
       "build obj/foo/libbar.bar.pcm: cxx_module ../../foo/bar.modulemap\n"
@@ -2713,9 +2716,9 @@ build ./main: link obj/launchpad/main.main.o | ./Space$ Cadet.so.TOC
   output_dir = 
 )"
 #if defined(OS_WIN)
-  "  solibs = \"./Space$ Cadet.so\"\n";
+                          "  solibs = \"./Space$ Cadet.so\"\n";
 #else
-  "  solibs = ./Space\\$ Cadet.so\n";
+                          "  solibs = ./Space\\$ Cadet.so\n";
 #endif
 
   std::string out_str = out.str();

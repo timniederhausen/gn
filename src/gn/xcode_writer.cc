@@ -538,8 +538,7 @@ bool XcodeWorkspace::WriteSettingsFile(const std::string& name,
       break;
   }
 
-  out << "</dict>\n"
-      << "</plist>\n";
+  out << "</dict>\n" << "</plist>\n";
 
   return storage.WriteToFileIfChanged(build_settings_->GetFullPath(source_file),
                                       err);
@@ -1039,8 +1038,7 @@ void XcodeProject::WriteFileContent(std::ostream& out) const {
       << "\tobjects = {\n";
 
   for (auto& pair : CollectPBXObjectsPerClass(&project_)) {
-    out << "\n"
-        << "/* Begin " << ToString(pair.first) << " section */\n";
+    out << "\n" << "/* Begin " << ToString(pair.first) << " section */\n";
     std::sort(pair.second.begin(), pair.second.end(),
               [](const PBXObject* a, const PBXObject* b) {
                 return a->id() < b->id();

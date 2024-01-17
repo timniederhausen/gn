@@ -459,12 +459,9 @@ TEST(FilesystemUtils, RebasePath) {
             RebasePath("//a/b/foo/bar", SourceDir("//a/b/"), source_root));
   EXPECT_EQ("foo/bar/",
             RebasePath("//a/b/foo/bar/", SourceDir("//a/b/"), source_root));
-  EXPECT_EQ(".",
-            RebasePath("//foo/bar", SourceDir("//foo/bar/"), source_root));
-  EXPECT_EQ("..",
-            RebasePath("//foo", SourceDir("//foo/bar/"), source_root));
-  EXPECT_EQ("../",
-            RebasePath("//foo/", SourceDir("//foo/bar/"), source_root));
+  EXPECT_EQ(".", RebasePath("//foo/bar", SourceDir("//foo/bar/"), source_root));
+  EXPECT_EQ("..", RebasePath("//foo", SourceDir("//foo/bar/"), source_root));
+  EXPECT_EQ("../", RebasePath("//foo/", SourceDir("//foo/bar/"), source_root));
 
   // Check when only |input| is system-absolute
   EXPECT_EQ("foo", RebasePath("/source/root/foo", SourceDir("//"),

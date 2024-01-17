@@ -136,8 +136,8 @@ void NinjaCBinaryTargetWriter::Run() {
 
   size_t num_stamp_uses = target_->sources().size();
 
-  std::vector<OutputFile> input_deps = WriteInputsStampAndGetDep(
-      num_stamp_uses);
+  std::vector<OutputFile> input_deps =
+      WriteInputsStampAndGetDep(num_stamp_uses);
 
   // The input dependencies will be an order-only dependency. This will cause
   // Ninja to make sure the inputs are up to date before compiling this source,
@@ -249,8 +249,7 @@ void NinjaCBinaryTargetWriter::WriteModuleDepsSubstitution(
     const Substitution* substitution,
     const std::vector<ModuleDep>& module_dep_info,
     bool include_self) {
-  if (target_->toolchain()->substitution_bits().used.count(
-          substitution)) {
+  if (target_->toolchain()->substitution_bits().used.count(substitution)) {
     EscapeOptions options;
     options.mode = ESCAPE_NINJA_COMMAND;
 
