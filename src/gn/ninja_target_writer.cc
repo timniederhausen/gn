@@ -524,8 +524,7 @@ void NinjaTargetWriter::WriteStampForTarget(
 
   // First validate that the target's dependency is a stamp file. Otherwise,
   // we shouldn't have gotten here!
-  CHECK(base::EndsWith(stamp_file.value(), ".stamp",
-                       base::CompareCase::INSENSITIVE_ASCII))
+  CHECK(base::EndsWithCaseInsensitiveASCII(stamp_file.value(), ".stamp"))
       << "Output should end in \".stamp\" for stamp file output. Instead got: "
       << "\"" << stamp_file.value() << "\"";
 

@@ -67,7 +67,7 @@ bool EqualDriveLetterCaseInsensitive(StringViewType a, StringViewType b) {
 
   StringViewType a_letter(a.substr(0, a_letter_pos + 1));
   StringViewType b_letter(b.substr(0, b_letter_pos + 1));
-  if (!StartsWith(a_letter, b_letter, CompareCase::INSENSITIVE_ASCII))
+  if (!StartsWithCaseInsensitiveASCII(a_letter, b_letter))
     return false;
 
   StringViewType a_rest(a.substr(a_letter_pos + 1));
@@ -271,7 +271,7 @@ bool FilePath::AppendRelativePath(const FilePath& child, FilePath* path) const {
   // never case sensitive.
   if ((FindDriveLetter(*parent_comp) != StringType::npos) &&
       (FindDriveLetter(*child_comp) != StringType::npos)) {
-    if (!StartsWith(*parent_comp, *child_comp, CompareCase::INSENSITIVE_ASCII))
+    if (!StartsWithCaseInsensitiveASCII(*parent_comp, *child_comp))
       return false;
     ++parent_comp;
     ++child_comp;

@@ -505,75 +505,50 @@ bool EqualsASCII(std::u16string_view str, std::string_view ascii) {
 }
 
 template <typename char_type>
-bool StartsWithT(std::basic_string_view<char_type> str,
-                 std::basic_string_view<char_type> search_for,
-                 CompareCase case_sensitivity) {
+bool StartsWithCaseInsensitiveASCIIT(
+    std::basic_string_view<char_type> str,
+    std::basic_string_view<char_type> search_for) {
   if (search_for.size() > str.size())
     return false;
 
   std::basic_string_view<char_type> source = str.substr(0, search_for.size());
 
-  switch (case_sensitivity) {
-    case CompareCase::SENSITIVE:
-      return source == search_for;
-
-    case CompareCase::INSENSITIVE_ASCII:
-      return std::equal(search_for.begin(), search_for.end(), source.begin(),
-                        CaseInsensitiveCompareASCII<char_type>());
-
-    default:
-      NOTREACHED();
-      return false;
-  }
+  return std::equal(search_for.begin(), search_for.end(), source.begin(),
+                    CaseInsensitiveCompareASCII<char_type>());
 }
 
-bool StartsWith(std::string_view str,
-                std::string_view search_for,
-                CompareCase case_sensitivity) {
-  return StartsWithT(str, search_for, case_sensitivity);
+bool StartsWithCaseInsensitiveASCII(std::string_view str,
+                                    std::string_view search_for) {
+  return StartsWithCaseInsensitiveASCIIT(str, search_for);
 }
 
-bool StartsWith(std::u16string_view str,
-                std::u16string_view search_for,
-                CompareCase case_sensitivity) {
-  return StartsWithT(str, search_for, case_sensitivity);
+bool StartsWithCaseInsensitiveASCII(std::u16string_view str,
+                                    std::u16string_view search_for) {
+  return StartsWithCaseInsensitiveASCIIT(str, search_for);
 }
 
-template <typename Str>
-bool EndsWithT(std::basic_string_view<typename Str::value_type> str,
-               std::basic_string_view<typename Str::value_type> search_for,
-               CompareCase case_sensitivity) {
+template <typename char_type>
+bool EndsWithCaseInsensitiveASCIIT(
+    std::basic_string_view<char_type> str,
+    std::basic_string_view<char_type> search_for) {
   if (search_for.size() > str.size())
     return false;
 
-  std::basic_string_view<typename Str::value_type> source =
+  std::basic_string_view<char_type> source =
       str.substr(str.size() - search_for.size(), search_for.size());
 
-  switch (case_sensitivity) {
-    case CompareCase::SENSITIVE:
-      return source == search_for;
-
-    case CompareCase::INSENSITIVE_ASCII:
-      return std::equal(
-          source.begin(), source.end(), search_for.begin(),
-          CaseInsensitiveCompareASCII<typename Str::value_type>());
-
-    default:
-      NOTREACHED();
-      return false;
-  }
+  return std::equal(source.begin(), source.end(), search_for.begin(),
+                    CaseInsensitiveCompareASCII<char_type>());
 }
 
-bool EndsWith(std::string_view str,
-              std::string_view search_for,
-              CompareCase case_sensitivity) {
-  return EndsWithT<std::string>(str, search_for, case_sensitivity);
+bool EndsWithCaseInsensitiveASCII(std::string_view str,
+                                  std::string_view search_for) {
+  return EndsWithCaseInsensitiveASCIIT(str, search_for);
 }
 
-bool EndsWith(std::u16string_view str,
-              std::u16string_view search_for,
-              CompareCase case_sensitivity) {
-  return EndsWithT<std::u16string>(str, search_for, case_sensitivity);
+bool EndsWithCaseInsensitiveASCII(std::u16string_view str,
+                                  std::u16string_view search_for) {
+  return EndsWithCaseInsensitiveASCIIT(str, search_for);
 }
 
 char HexDigitToInt(char16_t c) {
