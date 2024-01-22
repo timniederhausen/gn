@@ -151,6 +151,7 @@
     *   [public_deps: [label list] Declare public dependencies.](#var_public_deps)
     *   [rebase: [boolean] Rebase collected metadata as files.](#var_rebase)
     *   [response_file_contents: [string list] Contents of .rsp file for actions.](#var_response_file_contents)
+    *   [rustflags: [string list] Flags passed to the Rust compiler.](#var_rustflags)
     *   [script: [file name] Script file for actions.](#var_script)
     *   [sources: [file list] Source files for a target.](#var_sources)
     *   [swiftflags: [string list] Flags passed to the swift compiler.](#var_swiftflags)
@@ -5093,8 +5094,8 @@
   versions of cflags* will be appended on the compiler command line after
   "cflags".
 
-  See also "asmflags" for flags for assembly-language files and "swiftflags"
-  for swift files.
+  See also "asmflags" for flags for assembly-language files, "swiftflags" for
+  swift files, and "rustflags" for Rust files.
 ```
 
 #### **Ordering of flags and values**
@@ -5127,8 +5128,8 @@
   versions of cflags* will be appended on the compiler command line after
   "cflags".
 
-  See also "asmflags" for flags for assembly-language files and "swiftflags"
-  for swift files.
+  See also "asmflags" for flags for assembly-language files, "swiftflags" for
+  swift files, and "rustflags" for Rust files.
 ```
 
 #### **Ordering of flags and values**
@@ -5161,8 +5162,8 @@
   versions of cflags* will be appended on the compiler command line after
   "cflags".
 
-  See also "asmflags" for flags for assembly-language files and "swiftflags"
-  for swift files.
+  See also "asmflags" for flags for assembly-language files, "swiftflags" for
+  swift files, and "rustflags" for Rust files.
 ```
 
 #### **Ordering of flags and values**
@@ -5195,8 +5196,8 @@
   versions of cflags* will be appended on the compiler command line after
   "cflags".
 
-  See also "asmflags" for flags for assembly-language files and "swiftflags"
-  for swift files.
+  See also "asmflags" for flags for assembly-language files, "swiftflags" for
+  swift files, and "rustflags" for Rust files.
 ```
 
 #### **Ordering of flags and values**
@@ -5229,8 +5230,8 @@
   versions of cflags* will be appended on the compiler command line after
   "cflags".
 
-  See also "asmflags" for flags for assembly-language files and "swiftflags"
-  for swift files.
+  See also "asmflags" for flags for assembly-language files, "swiftflags" for
+  swift files, and "rustflags" for Rust files.
 ```
 
 #### **Ordering of flags and values**
@@ -6619,6 +6620,13 @@
       "--file-list={{response_file_name}}",
     ]
   }
+```
+### <a name="var_rustflags"></a>**rustflags**: Flags passed to the Rust compiler.
+
+```
+  A list of strings.
+
+  "rustflags" are passed to all invocations of the Rust compiler.
 ```
 ### <a name="var_script"></a>**script**: Script file for actions.
 

@@ -788,8 +788,8 @@ const char kCommonCflagsHelp[] =
   versions of cflags* will be appended on the compiler command line after
   "cflags".
 
-  See also "asmflags" for flags for assembly-language files and "swiftflags"
-  for swift files.
+  See also "asmflags" for flags for assembly-language files, "swiftflags" for
+  swift files, and "rustflags" for Rust files.
 )" COMMON_ORDERING_HELP;
 const char* kCflags_Help = kCommonCflagsHelp;
 
