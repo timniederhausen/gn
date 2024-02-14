@@ -43,6 +43,8 @@
     *   [exec_script: Synchronously run a script and return the output.](#func_exec_script)
     *   [filter_exclude: Remove values that match a set of patterns.](#func_filter_exclude)
     *   [filter_include: Remove values that do not match a set of patterns.](#func_filter_include)
+    *   [filter_labels_exclude: Remove labels that match a set of patterns.](#func_filter_labels_exclude)
+    *   [filter_labels_include: Remove labels that do not match a set of patterns.](#func_filter_labels_include)
     *   [foreach: Iterate over a list.](#func_foreach)
     *   [forward_variables_from: Copies variables from a different scope.](#func_forward_variables_from)
     *   [get_label_info: Get an attribute from a target's label.](#func_get_label_info)
@@ -50,6 +52,7 @@
     *   [get_target_outputs: [file list] Get the list of outputs from a target.](#func_get_target_outputs)
     *   [getenv: Get an environment variable.](#func_getenv)
     *   [import: Import a file into the current scope.](#func_import)
+    *   [label_matches: Returns whether a label matches any of a list of patterns.](#func_label_matches)
     *   [not_needed: Mark variables from scope as not needed.](#func_not_needed)
     *   [pool: Defines a pool object.](#func_pool)
     *   [print: Prints to the console.](#func_print)
@@ -2610,6 +2613,42 @@
   result = filter_include(values, [ "*.proto" ])
   # result will be [ "foo.proto" ]
 ```
+### <a name="func_filter_labels_exclude"></a>**filter_labels_exclude**: Remove labels that match a set of patterns.
+
+```
+  filter_labels_exclude(labels, exclude_patterns)
+
+  The argument labels must be a list of strings.
+
+  The argument exclude_patterns must be a list of label patterns (see
+  "gn help label_pattern"). Only elements from labels matching at least
+  one of the patterns will be excluded.
+```
+
+#### **Examples**
+```
+  labels = [ "//foo:baz", "//foo/bar:baz", "//bar:baz" ]
+  result = filter_labels_exclude(labels, [ "//foo:*" ])
+  # result will be [ "//foo/bar:baz", "//bar:baz" ]
+```
+### <a name="func_filter_labels_include"></a>**filter_labels_include**: Remove labels that do not match a set of patterns.
+
+```
+  filter_labels_include(labels, include_patterns)
+
+  The argument labels must be a list of strings.
+
+  The argument include_patterns must be a list of label patterns (see
+  "gn help label_pattern"). Only elements from labels matching at least
+  one of the patterns will be included.
+```
+
+#### **Examples**
+```
+  labels = [ "//foo:baz", "//foo/bar:baz", "//bar:baz" ]
+  result = filter_labels_include(labels, [ "//foo:*" ])
+  # result will be [ "//foo:baz" ]
+```
 ### <a name="func_foreach"></a>**foreach**: Iterate over a list.
 
 ```
@@ -2971,6 +3010,21 @@
 
   # Looks in the current directory.
   import("my_vars.gni")
+```
+### <a name="func_label_matches"></a>**label_matches**: Returns true if the label matches any of a set of patterns.
+
+```
+  label_matches(target_label, patterns)
+
+  The argument patterns must be a list of label patterns (see
+  "gn help label_pattern"). If the target_label matches any of the patterns,
+  the function returns the value true.
+```
+
+#### **Examples**
+```
+  result = label_matches("//baz:bar", [ "//foo/bar/*", "//baz:*" ])
+  # result will be true
 ```
 ### <a name="func_not_needed"></a>**not_needed**: Mark variables from scope as not needed.
 
