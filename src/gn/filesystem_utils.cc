@@ -722,9 +722,11 @@ std::string MakeRelativePath(std::string_view input,
   size_t common_prefix_len = 0;
   size_t max_common_length = std::min(input.size(), dest.size());
   for (size_t i = common_prefix_len; i <= max_common_length; i++) {
-    if ((IsSlash(input[i]) || input[i] == '\0') && IsSlash(dest[i]))
+    if (dest.size() == i)
+      break;
+    if ((input.size() == i || IsSlash(input[i])) && IsSlash(dest[i]))
       common_prefix_len = i + 1;
-    else if (input[i] != dest[i])
+    else if (input.size() == i || input[i] != dest[i])
       break;
   }
 
@@ -736,7 +738,7 @@ std::string MakeRelativePath(std::string_view input,
 
   // Append any remaining unique input.
   if (common_prefix_len <= input.size())
-    ret.append(&input[common_prefix_len], input.size() - common_prefix_len);
+    ret.append(input.begin() + common_prefix_len, input.end());
   else if (input.back() != '/' && !ret.empty())
     ret.pop_back();
 
