@@ -408,6 +408,12 @@ def WriteGNNinja(path, platform, host, options, args_list):
   if not platform.is_msvc():
     if options.debug:
       cflags.extend(['-O0', '-g'])
+      # Enable libc++ or libstdc++ assertions in debug mode.
+      # Just set both macros to avoid detecting the C++ runtime being used.
+      # Currently disabled on MacOS since this results in linking errors at the
+      # moment, due to what looks like an XCode-specific Clang packaging error.
+      if not platform.is_darwin():
+        cflags.extend(['-D_LIBCPP_DEBUG=1', '-D_GLIBCXX_DEBUG=1'])
     else:
       cflags.append('-DNDEBUG')
       cflags.append('-O3')

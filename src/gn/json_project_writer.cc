@@ -5,14 +5,12 @@
 #include "gn/json_project_writer.h"
 
 #include <algorithm>
-#include <fstream>
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include "base/command_line.h"
 #include "base/files/file_path.h"
-#include "base/files/file_util.h"
 #include "base/json/json_writer.h"
 #include "base/json/string_escape.h"
 #include "base/strings/string_number_conversions.h"
@@ -73,8 +71,7 @@ bool FilterTargets(const BuildSettings* build_settings,
     for (const auto* target : *targets)
       AddTargetDependencies(target, &target_set);
 
-    targets->clear();
-    targets->insert(targets->end(), target_set.begin(), target_set.end());
+    targets->assign(target_set.begin(), target_set.end());
   }
 
   // Sort the list of targets per-label to get a consistent ordering of them
