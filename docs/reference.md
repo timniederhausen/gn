@@ -910,7 +910,35 @@
       generated JSON file will be first argument when invoking script.
 
   --json-ide-script-args=<argument>
-      Optional second argument that will passed to executed script.
+      Optional second argument that will be passed to executed script.
+```
+
+#### **Ninja Outputs**
+
+```
+  The --ninja-outputs-file=<FILE> option dumps a JSON file that maps GN labels
+  to their Ninja output paths. This can be later processed to build an index
+  to convert between Ninja targets and GN ones before or after the build itself.
+  It looks like:
+
+    {
+      "label1": [
+        "path1",
+        "path2"
+      ],
+      "label2": [
+        "path3"
+      ]
+    }
+
+  --ninja-outputs-script=<path_to_python_script>
+    Executes python script after the outputs file is generated or updated
+    with new content. Path can be project absolute (//), system absolute (/) or
+    relative, in which case the output directory will be base. Path to
+    generated file will be first argument when invoking script.
+
+  --ninja-outputs-script-args=<argument>
+    Optional second argument that will be passed to executed script.
 ```
 
 #### **Compilation Database**

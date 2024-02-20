@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <inttypes.h>
+
 #include <mutex>
 #include <thread>
 #include <unordered_map>
@@ -17,6 +19,7 @@
 #include "gn/filesystem_utils.h"
 #include "gn/json_project_writer.h"
 #include "gn/label_pattern.h"
+#include "gn/ninja_outputs_writer.h"
 #include "gn/ninja_target_writer.h"
 #include "gn/ninja_tools.h"
 #include "gn/ninja_writer.h"
@@ -53,6 +56,9 @@ const char kSwitchIdeValueJson[] = "json";
 const char kSwitchIdeRootTarget[] = "ide-root-target";
 const char kSwitchNinjaExecutable[] = "ninja-executable";
 const char kSwitchNinjaExtraArgs[] = "ninja-extra-args";
+const char kSwitchNinjaOutputsFile[] = "ninja-outputs-file";
+const char kSwitchNinjaOutputsScript[] = "ninja-outputs-script";
+const char kSwitchNinjaOutputsScriptArgs[] = "ninja-outputs-script-args";
 const char kSwitchNoDeps[] = "no-deps";
 const char kSwitchSln[] = "sln";
 const char kSwitchXcodeProject[] = "xcode-project";
@@ -70,10 +76,18 @@ const char kSwitchJsonIdeScriptArgs[] = "json-ide-script-args";
 const char kSwitchExportCompileCommands[] = "export-compile-commands";
 const char kSwitchExportRustProject[] = "export-rust-project";
 
-// Collects Ninja rules for each toolchain. The lock protectes the rules.
+// A map type used to implement --ide=ninja_outputs
+using NinjaOutputsMap = NinjaOutputsWriter::MapType;
+
+// Collects Ninja rules for each toolchain. The lock protects the rules
 struct TargetWriteInfo {
+  // Set this to true to populate |ninja_outputs_map| below.
+  bool want_ninja_outputs = false;
+
   std::mutex lock;
   NinjaWriter::PerToolchainRules rules;
+
+  NinjaOutputsMap ninja_outputs_map;
 
   using ResolvedMap = std::unordered_map<std::thread::id, ResolvedTargetData>;
   std::unique_ptr<ResolvedMap> resolved_map = std::make_unique<ResolvedMap>();
@@ -84,17 +98,28 @@ struct TargetWriteInfo {
 // Called on worker thread to write the ninja file.
 void BackgroundDoWrite(TargetWriteInfo* write_info, const Target* target) {
   ResolvedTargetData* resolved;
+  std::vector<OutputFile> target_ninja_outputs;
+  std::vector<OutputFile>* ninja_outputs =
+      write_info->want_ninja_outputs ? &target_ninja_outputs : nullptr;
+
   {
     std::lock_guard<std::mutex> lock(write_info->lock);
     resolved = &((*write_info->resolved_map)[std::this_thread::get_id()]);
   }
-  std::string rule = NinjaTargetWriter::RunAndWriteFile(target, resolved);
+  std::string rule =
+      NinjaTargetWriter::RunAndWriteFile(target, resolved, ninja_outputs);
+
   DCHECK(!rule.empty());
 
   {
     std::lock_guard<std::mutex> lock(write_info->lock);
     write_info->rules[target->toolchain()].emplace_back(target,
                                                         std::move(rule));
+
+    if (write_info->want_ninja_outputs) {
+      write_info->ninja_outputs_map.emplace(target,
+                                            std::move(target_ninja_outputs));
+    }
   }
 }
 
@@ -632,7 +657,33 @@ Generic JSON Output
       generated JSON file will be first argument when invoking script.
 
   --json-ide-script-args=<argument>
-      Optional second argument that will passed to executed script.
+      Optional second argument that will be passed to executed script.
+
+Ninja Outputs
+
+  The --ninja-outputs-file=<FILE> option dumps a JSON file that maps GN labels
+  to their Ninja output paths. This can be later processed to build an index
+  to convert between Ninja targets and GN ones before or after the build itself.
+  It looks like:
+
+    {
+      "label1": [
+        "path1",
+        "path2"
+      ],
+      "label2": [
+        "path3"
+      ]
+    }
+
+  --ninja-outputs-script=<path_to_python_script>
+    Executes python script after the outputs file is generated or updated
+    with new content. Path can be project absolute (//), system absolute (/) or
+    relative, in which case the output directory will be base. Path to
+    generated file will be first argument when invoking script.
+
+  --ninja-outputs-script-args=<argument>
+    Optional second argument that will be passed to executed script.
 
 Compilation Database
 
@@ -715,6 +766,9 @@ int RunGen(const std::vector<std::string>& args) {
 
   // Cause the load to also generate the ninja files for each target.
   TargetWriteInfo write_info;
+  write_info.want_ninja_outputs =
+      command_line->HasSwitch(kSwitchNinjaOutputsFile);
+
   setup->builder().set_resolved_and_generated_callback(
       [&write_info](const BuilderRecord* record) {
         ItemResolvedAndGeneratedCallback(&write_info, record);
@@ -754,6 +808,38 @@ int RunGen(const std::vector<std::string>& args) {
           command_line->HasSwitch(kSwitchCleanStale), &err)) {
     err.PrintToStdout();
     return 1;
+  }
+
+  if (write_info.want_ninja_outputs) {
+    ElapsedTimer outputs_timer;
+    std::string file_name =
+        command_line->GetSwitchValueString(kSwitchNinjaOutputsFile);
+    if (file_name.empty()) {
+      Err(Location(), "The --ninja-outputs-file argument cannot be empty!")
+          .PrintToStdout();
+      return 1;
+    }
+
+    bool quiet = command_line->HasSwitch(switches::kQuiet);
+
+    std::string exec_script =
+        command_line->GetSwitchValueString(kSwitchNinjaOutputsScript);
+
+    std::string exec_script_extra_args =
+        command_line->GetSwitchValueString(kSwitchNinjaOutputsScriptArgs);
+
+    bool res = NinjaOutputsWriter::RunAndWriteFiles(
+        write_info.ninja_outputs_map, &setup->build_settings(), file_name,
+        exec_script, exec_script_extra_args, quiet, &err);
+    if (!res) {
+      err.PrintToStdout();
+      return 1;
+    }
+    if (!command_line->HasSwitch(switches::kQuiet)) {
+      OutputString(base::StringPrintf(
+          "Generating Ninja outputs file took %" PRId64 "ms\n",
+          outputs_timer.Elapsed().InMilliseconds()));
+    }
   }
 
   if (!WriteRuntimeDepsFilesIfNecessary(&setup->build_settings(),
