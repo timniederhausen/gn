@@ -687,6 +687,7 @@ def WriteGNNinja(path, platform, host, options, args_list):
         'src/gn/input_conversion.cc',
         'src/gn/input_file.cc',
         'src/gn/input_file_manager.cc',
+        'src/gn/invoke_python.cc',
         'src/gn/item.cc',
         'src/gn/json_project_writer.cc',
         'src/gn/label.cc',
