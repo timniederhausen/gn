@@ -612,7 +612,7 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
       target_, tool_, tool_->outputs(), &output_files);
 
   out_ << "build";
-  path_output_.WriteFiles(out_, output_files);
+  WriteOutputs(output_files);
 
   out_ << ": " << rule_prefix_
        << Tool::GetToolTypeForTargetFinalOutput(target_);

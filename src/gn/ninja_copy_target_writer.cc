@@ -113,7 +113,8 @@ void NinjaCopyTargetWriter::WriteCopyRules(
     output_files->push_back(output_file);
 
     out_ << "build ";
-    path_output_.WriteFile(out_, output_file);
+    WriteOutput(std::move(output_file));
+
     out_ << ": " << tool_name << " ";
     path_output_.WriteFile(out_, input_file);
     if (!input_deps.empty() || !data_outs.empty()) {

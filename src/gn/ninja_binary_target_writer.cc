@@ -44,12 +44,14 @@ void NinjaBinaryTargetWriter::Run() {
   if (target_->source_types_used().RustSourceUsed()) {
     NinjaRustBinaryTargetWriter writer(target_, out_);
     writer.SetResolvedTargetData(GetResolvedTargetData());
+    writer.SetNinjaOutputs(ninja_outputs_);
     writer.Run();
     return;
   }
 
   NinjaCBinaryTargetWriter writer(target_, out_);
   writer.SetResolvedTargetData(GetResolvedTargetData());
+  writer.SetNinjaOutputs(ninja_outputs_);
   writer.Run();
 }
 
@@ -91,7 +93,8 @@ std::vector<OutputFile> NinjaBinaryTargetWriter::WriteInputsStampAndGetDep(
   stamp_file.value().append(".inputs.stamp");
 
   out_ << "build ";
-  path_output_.WriteFile(out_, stamp_file);
+  WriteOutput(stamp_file);
+
   out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
        << GeneralTool::kGeneralToolStamp;
 
@@ -263,7 +266,7 @@ void NinjaBinaryTargetWriter::WriteCompilerBuildLine(
     const std::vector<OutputFile>& outputs,
     bool can_write_source_info) {
   out_ << "build";
-  path_output_.WriteFiles(out_, outputs);
+  WriteOutputs(outputs);
 
   out_ << ": " << rule_prefix_ << tool_name;
   path_output_.WriteFiles(out_, sources);
