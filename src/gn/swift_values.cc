@@ -26,24 +26,39 @@ bool SwiftValues::FillModuleOutputFile(Target* target, Err* err) {
 
   const Tool* tool =
       target->toolchain()->GetToolForSourceType(SourceFile::SOURCE_SWIFT);
-  CHECK(tool->outputs().list().size() >= 1);
 
-  OutputFile module_output_file =
-      SubstitutionWriter::ApplyPatternToLinkerAsOutputFile(
-          target, tool, tool->outputs().list()[0]);
+  std::vector<OutputFile> outputs;
+  SubstitutionWriter::ApplyListToLinkerAsOutputFile(target, tool,
+                                                    tool->outputs(), &outputs);
 
-  const SourceFile module_output_file_as_source =
-      module_output_file.AsSourceFile(target->settings()->build_settings());
-  if (!module_output_file_as_source.IsSwiftModuleType()) {
-    *err = Err(tool->defined_from(), "Incorrect outputs for tool",
-               "The first output of tool " + std::string(tool->name()) +
-                   " must be a .swiftmodule file.");
-    return false;
+  bool swiftmodule_output_found = false;
+  SwiftValues& swift_values = target->swift_values();
+  for (const OutputFile& output : outputs) {
+    const SourceFile output_as_source =
+        output.AsSourceFile(target->settings()->build_settings());
+    if (!output_as_source.IsSwiftModuleType()) {
+      continue;
+    }
+
+    if (swiftmodule_output_found) {
+      *err = Err(tool->defined_from(), "Incorrect outputs for tool",
+                 "The outputs of tool " + std::string(tool->name()) +
+                     " must list exactly one .swiftmodule file");
+      return false;
+    }
+
+    swift_values.module_output_file_ = output;
+    swift_values.module_output_dir_ = output_as_source.GetDir();
+
+    swiftmodule_output_found = true;
   }
 
-  SwiftValues& swift_values = target->swift_values();
-  swift_values.module_output_file_ = std::move(module_output_file);
-  swift_values.module_output_dir_ = module_output_file_as_source.GetDir();
+  if (!swiftmodule_output_found) {
+    *err = Err(tool->defined_from(), "Incorrect outputs for tool",
+               "The outputs of tool " + std::string(tool->name()) +
+                   " must list exactly one .swiftmodule file");
+    return false;
+  }
 
   return true;
 }
