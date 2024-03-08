@@ -504,33 +504,14 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
     const std::vector<OutputFile>& input_deps,
     const std::vector<OutputFile>& order_only_deps,
     std::vector<OutputFile>* object_files) {
-  DCHECK(target_->source_types_used().SwiftSourceUsed());
-  object_files->reserve(object_files->size() + target_->sources().size());
-
-  // If the target contains .swift source files, they needs to be compiled as
-  // a single unit but still can produce more than one object file (if the
-  // whole module optimization is disabled).
-  const Tool* tool =
-      target_->toolchain()->GetToolForSourceType(SourceFile::SOURCE_SWIFT);
-  DCHECK(!tool->outputs().list().empty());
+  DCHECK(target_->builds_swift_module());
 
   std::vector<OutputFile> outputs;
-  SubstitutionWriter::ApplyListToLinkerAsOutputFile(target_, tool,
-                                                    tool->outputs(), &outputs);
+  target_->swift_values().GetOutputs(target_, &outputs);
 
-  // Expand partial outputs too (if any).
-  for (const SourceFile& source : target_->sources()) {
-    if (!source.IsSwiftType())
-      continue;
-
-    SubstitutionWriter::ApplyListToCompilerAsOutputFile(
-        target_, source, tool->partial_outputs(), &outputs);
-  }
-
+  const BuildSettings* build_settings = settings_->build_settings();
   for (const OutputFile& output : outputs) {
-    const SourceFile output_as_source =
-        output.AsSourceFile(target_->settings()->build_settings());
-
+    const SourceFile output_as_source = output.AsSourceFile(build_settings);
     if (output_as_source.IsObjectType()) {
       object_files->push_back(output);
     }
@@ -541,9 +522,11 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
   swift_order_only_deps.Append(order_only_deps.begin(), order_only_deps.end());
 
   for (const Target* swiftmodule :
-       resolved().GetSwiftModuleDependencies(target_))
+       resolved().GetSwiftModuleDependencies(target_)) {
     swift_order_only_deps.push_back(swiftmodule->dependency_output_file());
+  }
 
+  const Tool* tool = target_->swift_values().GetTool(target_);
   WriteCompilerBuildLine(target_->sources(), input_deps,
                          swift_order_only_deps.vector(), tool->name(), outputs,
                          /*can_write_source_info=*/false,

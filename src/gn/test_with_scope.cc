@@ -237,6 +237,7 @@ void TestWithScope::SetupToolchain(Toolchain* toolchain, bool use_toc) {
       "swiftc --module-name {{module_name}} {{module_dirs}} {{inputs}}",
       swift_tool.get());
   swift_tool->set_outputs(SubstitutionList::MakeForTest(
+      "{{target_gen_dir}}/{{target_output_name}}.h",
       "{{target_out_dir}}/{{module_name}}.swiftmodule"));
   swift_tool->set_partial_outputs(SubstitutionList::MakeForTest(
       "{{target_out_dir}}/{{source_name_part}}.o"));
