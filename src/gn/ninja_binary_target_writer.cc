@@ -264,7 +264,8 @@ void NinjaBinaryTargetWriter::WriteCompilerBuildLine(
     const std::vector<OutputFile>& order_only_deps,
     const char* tool_name,
     const std::vector<OutputFile>& outputs,
-    bool can_write_source_info) {
+    bool can_write_source_info,
+    bool restat_output_allowed) {
   out_ << "build";
   WriteOutputs(outputs);
 
@@ -288,6 +289,10 @@ void NinjaBinaryTargetWriter::WriteCompilerBuildLine(
     out_ << "  " << "source_name_part = "
          << FindFilenameNoExtension(&sources[0].value());
     out_ << std::endl;
+  }
+
+  if (restat_output_allowed) {
+    out_ << "  restat = 1" << std::endl;
   }
 }
 

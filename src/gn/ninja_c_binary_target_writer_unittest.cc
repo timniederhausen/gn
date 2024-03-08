@@ -2300,6 +2300,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, SwiftModule) {
         "\n"
         "build obj/foo/Foo.swiftmodule obj/foo/file1.o obj/foo/file2.o: swift"
         " ../../foo/file1.swift ../../foo/file2.swift\n"
+        "  restat = 1\n"
         "\n"
         "build obj/foo/foo.stamp: stamp"
         " obj/foo/file1.o obj/foo/file2.o\n";
@@ -2335,6 +2336,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, SwiftModule) {
         "\n"
         "build obj/bar/Bar.swiftmodule obj/bar/bar.o: swift ../../bar/bar.swift"
         " || obj/foo/foo.stamp\n"
+        "  restat = 1\n"
         "\n"
         "build obj/bar/bar.stamp: stamp obj/bar/bar.o "
         "|| obj/foo/foo.stamp\n";
@@ -2378,6 +2380,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, SwiftModule) {
         "\n"
         "build obj/bar/Bar.swiftmodule obj/bar/bar.o: swift ../../bar/bar.swift"
         " || obj/bar/group.stamp obj/foo/foo.stamp\n"
+        "  restat = 1\n"
         "\n"
         "build obj/bar/bar.stamp: stamp obj/bar/bar.o "
         "|| obj/bar/group.stamp obj/foo/foo.stamp\n";

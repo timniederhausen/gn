@@ -546,7 +546,8 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
 
   WriteCompilerBuildLine(target_->sources(), input_deps,
                          swift_order_only_deps.vector(), tool->name(), outputs,
-                         false);
+                         /*can_write_source_info=*/false,
+                         /*restat_output_allowed=*/true);
 
   out_ << std::endl;
 }
