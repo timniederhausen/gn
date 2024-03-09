@@ -36,7 +36,7 @@ jobs:
             cflags: "-m32"
             ldflags: "-m32"
             libflags: "-m32"
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             install: "g++-multilib"
             ninja_release_name: v1.11.1/ninja-linux.zip
 
@@ -46,7 +46,7 @@ jobs:
             cflags: "-m64"
             ldflags: "-m64"
             libflags: "-m64"
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             ninja_release_name: v1.11.1/ninja-linux.zip
 
           - slug: macos-amd64
