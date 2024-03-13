@@ -195,12 +195,15 @@ void NinjaCBinaryTargetWriter::Run() {
   //  - GCC .gch files are not object files, therefore they are not added to the
   //    object file list.
   std::vector<OutputFile> obj_files;
+  std::vector<OutputFile> extra_files;
   std::vector<SourceFile> other_files;
+  std::vector<OutputFile>* stamp_files = &obj_files;  // default
   if (!target_->source_types_used().SwiftSourceUsed()) {
     WriteSources(*pch_files, input_deps, order_only_deps, module_dep_info,
                  &obj_files, &other_files);
   } else {
-    WriteSwiftSources(input_deps, order_only_deps, &obj_files);
+    stamp_files = &extra_files;  // Swift generates more than object files
+    WriteSwiftSources(input_deps, order_only_deps, &obj_files, &extra_files);
   }
 
   // Link all MSVC pch object files. The vector will be empty on GCC toolchains.
@@ -209,7 +212,7 @@ void NinjaCBinaryTargetWriter::Run() {
     return;
 
   if (target_->output_type() == Target::SOURCE_SET) {
-    WriteSourceSetStamp(obj_files);
+    WriteSourceSetStamp(*stamp_files);
 #ifndef NDEBUG
     // Verify that the function that separately computes a source set's object
     // files match the object files just computed.
@@ -503,14 +506,13 @@ void NinjaCBinaryTargetWriter::WriteSources(
 void NinjaCBinaryTargetWriter::WriteSwiftSources(
     const std::vector<OutputFile>& input_deps,
     const std::vector<OutputFile>& order_only_deps,
-    std::vector<OutputFile>* object_files) {
+    std::vector<OutputFile>* object_files,
+    std::vector<OutputFile>* output_files) {
   DCHECK(target_->builds_swift_module());
-
-  std::vector<OutputFile> outputs;
-  target_->swift_values().GetOutputs(target_, &outputs);
+  target_->swift_values().GetOutputs(target_, output_files);
 
   const BuildSettings* build_settings = settings_->build_settings();
-  for (const OutputFile& output : outputs) {
+  for (const OutputFile& output : *output_files) {
     const SourceFile output_as_source = output.AsSourceFile(build_settings);
     if (output_as_source.IsObjectType()) {
       object_files->push_back(output);
@@ -528,7 +530,8 @@ void NinjaCBinaryTargetWriter::WriteSwiftSources(
 
   const Tool* tool = target_->swift_values().GetTool(target_);
   WriteCompilerBuildLine(target_->sources(), input_deps,
-                         swift_order_only_deps.vector(), tool->name(), outputs,
+                         swift_order_only_deps.vector(), tool->name(),
+                         *output_files,
                          /*can_write_source_info=*/false,
                          /*restat_output_allowed=*/true);
 

@@ -2336,6 +2336,7 @@ TEST_F(NinjaCBinaryTargetWriterTest, SwiftModule) {
         "  restat = 1\n"
         "\n"
         "build obj/foo/foo.stamp: stamp"
+        " gen/foo/foo.h obj/foo/Foo.swiftmodule"
         " obj/foo/file1.o obj/foo/file2.o\n";
 
     const std::string out_str = out.str();
@@ -2372,7 +2373,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, SwiftModule) {
         "../../bar/bar.swift || obj/foo/foo.stamp\n"
         "  restat = 1\n"
         "\n"
-        "build obj/bar/bar.stamp: stamp obj/bar/bar.o "
+        "build obj/bar/bar.stamp: stamp"
+        " gen/bar/bar.h obj/bar/Bar.swiftmodule obj/bar/bar.o "
         "|| obj/foo/foo.stamp\n";
 
     const std::string out_str = out.str();
@@ -2417,7 +2419,8 @@ TEST_F(NinjaCBinaryTargetWriterTest, SwiftModule) {
         "../../bar/bar.swift || obj/bar/group.stamp obj/foo/foo.stamp\n"
         "  restat = 1\n"
         "\n"
-        "build obj/bar/bar.stamp: stamp obj/bar/bar.o "
+        "build obj/bar/bar.stamp: stamp"
+        " gen/bar/bar.h obj/bar/Bar.swiftmodule obj/bar/bar.o "
         "|| obj/bar/group.stamp obj/foo/foo.stamp\n";
 
     const std::string out_str = out.str();

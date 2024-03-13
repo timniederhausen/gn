@@ -206,12 +206,8 @@ void NinjaBinaryTargetWriter::AddSourceSetFiles(
   // Swift files may generate one object file per module or one per source file
   // depending on how the compiler is invoked (whole module optimization).
   if (source_set->source_types_used().SwiftSourceUsed()) {
-    const Tool* tool = source_set->toolchain()->GetToolForSourceTypeAsC(
-        SourceFile::SOURCE_SWIFT);
-
     std::vector<OutputFile> outputs;
-    SubstitutionWriter::ApplyListToLinkerAsOutputFile(
-        source_set, tool, tool->outputs(), &outputs);
+    source_set->swift_values().GetOutputs(source_set, &outputs);
 
     for (const OutputFile& output : outputs) {
       SourceFile output_as_source =
