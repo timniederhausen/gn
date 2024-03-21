@@ -306,6 +306,11 @@ const char kBundleData_Help[] =
   generate iOS/macOS bundle. In cross-platform projects, it is advised to put it
   behind iOS/macOS conditionals.
 
+  If any source files in a bundle_data target match `*/*.xcassets/*` then they
+  will be considered part of an assets catalog, and instead of being copied to
+  the final bundle the assets catalog itself will be added to the inputs of the
+  assets catalog compilation step. See "compile_xcassets" tool.
+
   See "gn help create_bundle" for more information.
 
 Variables

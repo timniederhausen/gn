@@ -199,6 +199,10 @@ TEST(NinjaCreateBundleTargetWriter, AssetCatalog) {
       SourceFile("//foo/Foo.xcassets/foo.dataset/Contents.json"));
   bundle_data.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.dataset/FooScript.js"));
+  bundle_data.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/file/with/no/known/pattern"));
+  bundle_data.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/nested/bar.xcassets/my/file"));
   bundle_data.action_values().outputs() = SubstitutionList::MakeForTest(
       "{{bundle_resources_dir}}/{{source_file_part}}");
   bundle_data.SetToolchain(setup.toolchain());
@@ -313,6 +317,10 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
       SourceFile("//foo/Foo.xcassets/foo.dataset/Contents.json"));
   bundle_data2.sources().push_back(
       SourceFile("//foo/Foo.xcassets/foo.dataset/FooScript.js"));
+  bundle_data2.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/file/with/no/known/pattern"));
+  bundle_data2.sources().push_back(
+      SourceFile("//foo/Foo.xcassets/nested/bar.xcassets/my/file"));
   bundle_data2.action_values().outputs() = SubstitutionList::MakeForTest(
       "{{bundle_resources_dir}}/{{source_file_part}}");
   bundle_data2.SetToolchain(setup.toolchain());

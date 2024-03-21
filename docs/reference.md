@@ -1603,6 +1603,11 @@
   generate iOS/macOS bundle. In cross-platform projects, it is advised to put it
   behind iOS/macOS conditionals.
 
+  If any source files in a bundle_data target match `*/*.xcassets/*` then they
+  will be considered part of an assets catalog, and instead of being copied to
+  the final bundle the assets catalog itself will be added to the inputs of the
+  assets catalog compilation step. See "compile_xcassets" tool.
+
   See "gn help create_bundle" for more information.
 ```
 
@@ -4174,6 +4179,10 @@
     {{xcasset_compiler_flags}}
         Expands to the list of flags specified in corresponding
         create_bundle target.
+
+  The inputs for compile_xcassets tool will be found from the bundle_data
+  dependencies by looking for any file matching "*/*.xcassets/*" pattern.
+  The "$assets.xcassets" directory will be added as input to the tool.
 
   The Swift tool has multiple input and outputs. It must have exactly one
   output of .swiftmodule type, but can have one or more object file outputs,
