@@ -170,7 +170,7 @@ TEST(NinjaCreateBundleTargetWriter, JustPartialInfoPlist) {
       "baz/bar/bar_partial_info.plist || obj/foo/bar.stamp\n"
       "build bar.bundle: phony obj/baz/bar.stamp\n";
   std::string out_str = out.str();
-  EXPECT_EQ(expected, out_str);
+  EXPECT_EQ(expected, out_str) << expected << "----\n" << out_str;
 }
 
 // Tests multiple files from asset catalog.
@@ -393,7 +393,7 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
       "../../foo/input1.txt || obj/baz/bar.inputdeps.stamp\n"
       "build bar.bundle/Contents/Resources/input2.txt: copy_bundle_data "
       "../../foo/input2.txt || obj/baz/bar.inputdeps.stamp\n"
-      "build obj/baz/bar.xcassets.inputdeps.stamp: stamp "
+      "build obj/baz/bar.xcassets.inputdeps.stamp: phony "
       "obj/foo/assets.stamp "
       "obj/quz/assets.stamp obj/biz/assets.stamp\n"
       "build bar.bundle/Contents/Resources/Assets.car | "
@@ -411,7 +411,7 @@ TEST(NinjaCreateBundleTargetWriter, Complex) {
       "baz/bar/bar_partial_info.plist || obj/baz/bar.inputdeps.stamp\n"
       "build bar.bundle: phony obj/baz/bar.stamp\n";
   std::string out_str = out.str();
-  EXPECT_EQ(expected, out_str);
+  EXPECT_EQ(expected, out_str) << expected << "----\n" << out_str;
 }
 
 // Tests code signing steps.
@@ -477,7 +477,7 @@ TEST(NinjaCreateBundleTargetWriter, CodeSigning) {
       "../../foo/input1.txt || obj/baz/bar.inputdeps.stamp\n"
       "build bar.bundle/Contents/Resources/input2.txt: copy_bundle_data "
       "../../foo/input2.txt || obj/baz/bar.inputdeps.stamp\n"
-      "build obj/baz/bar.codesigning.inputdeps.stamp: stamp "
+      "build obj/baz/bar.codesigning.inputdeps.stamp: phony "
       "../../build/codesign.py "
       "quz "
       "bar.bundle/Contents/Resources/input1.txt "
@@ -491,5 +491,5 @@ TEST(NinjaCreateBundleTargetWriter, CodeSigning) {
       "bar.bundle/_CodeSignature/CodeResources || obj/baz/bar.inputdeps.stamp\n"
       "build bar.bundle: phony obj/baz/bar.stamp\n";
   std::string out_str = out.str();
-  EXPECT_EQ(expected, out_str);
+  EXPECT_EQ(expected, out_str) << expected << "----\n" << out_str;
 }
