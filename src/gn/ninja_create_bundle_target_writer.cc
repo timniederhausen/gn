@@ -7,7 +7,6 @@
 #include <iterator>
 
 #include "base/strings/string_util.h"
-#include "gn/builtin_tool.h"
 #include "gn/filesystem_utils.h"
 #include "gn/general_tool.h"
 #include "gn/ninja_utils.h"
@@ -37,23 +36,15 @@ void FailWithMissingToolError(const char* tool_name, const Target* target) {
               tool_name + "\" tool."));
 }
 
-bool EnsureToolAvailable(const Target* target, const char* tool) {
-  if (!target->toolchain()->GetTool(tool)) {
-    FailWithMissingToolError(tool, target);
-    return false;
-  }
-
-  return true;
-}
-
 bool EnsureAllToolsAvailable(const Target* target) {
   const char* kRequiredTools[] = {
       GeneralTool::kGeneralToolCopyBundleData,
-      GeneralTool::kGeneralToolStamp,  // To create empty partial Info.plist.
+      GeneralTool::kGeneralToolStamp,
   };
 
-  for (const char* tool : kRequiredTools) {
-    if (!EnsureToolAvailable(target, tool)) {
+  for (size_t i = 0; i < std::size(kRequiredTools); ++i) {
+    if (!target->toolchain()->GetTool(kRequiredTools[i])) {
+      FailWithMissingToolError(kRequiredTools[i], target);
       return false;
     }
   }
@@ -61,8 +52,10 @@ bool EnsureAllToolsAvailable(const Target* target) {
   // The compile_xcassets tool is only required if the target has asset
   // catalog resources to compile.
   if (TargetRequireAssetCatalogCompilation(target)) {
-    if (!EnsureToolAvailable(target,
-                             GeneralTool::kGeneralToolCompileXCAssets)) {
+    if (!target->toolchain()->GetTool(
+            GeneralTool::kGeneralToolCompileXCAssets)) {
+      FailWithMissingToolError(GeneralTool::kGeneralToolCompileXCAssets,
+                               target);
       return false;
     }
   }
@@ -109,8 +102,7 @@ void NinjaCreateBundleTargetWriter::Run() {
       OutputFile(settings_->build_settings(),
                  target_->bundle_data().GetBundleRootDirOutput(settings_)));
 
-  out_ << ": " << BuiltinTool::kBuiltinToolPhony << " "
-       << target_->dependency_output_file().value();
+  out_ << ": phony " << target_->dependency_output_file().value();
   out_ << std::endl;
 }
 
@@ -299,7 +291,8 @@ NinjaCreateBundleTargetWriter::WriteCompileAssetsCatalogInputDepsStamp(
 
   out_ << "build ";
   WriteOutput(xcassets_input_stamp_file);
-  out_ << ": " << BuiltinTool::kBuiltinToolPhony;
+  out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
+       << GeneralTool::kGeneralToolStamp;
 
   for (const Target* target : dependencies) {
     out_ << " ";
@@ -364,7 +357,8 @@ OutputFile NinjaCreateBundleTargetWriter::WriteCodeSigningInputDepsStamp(
 
   out_ << "build ";
   WriteOutput(code_signing_input_stamp_file);
-  out_ << ": " << BuiltinTool::kBuiltinToolPhony;
+  out_ << ": " << GetNinjaRulePrefixForToolchain(settings_)
+       << GeneralTool::kGeneralToolStamp;
 
   for (const SourceFile& source : code_signing_input_files) {
     out_ << " ";
