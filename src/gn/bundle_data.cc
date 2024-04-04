@@ -102,9 +102,9 @@ void BundleData::GetSourceFiles(SourceFiles* sources) const {
   }
   sources->insert(sources->end(), assets_catalog_sources_.begin(),
                   assets_catalog_sources_.end());
-  if (!code_signing_script_.is_null()) {
-    sources->insert(sources->end(), code_signing_sources_.begin(),
-                    code_signing_sources_.end());
+  if (!post_processing_script_.is_null()) {
+    sources->insert(sources->end(), post_processing_sources_.begin(),
+                    post_processing_sources_.end());
   }
 }
 
@@ -140,13 +140,13 @@ bool BundleData::GetOutputsAsSourceFiles(const Settings* settings,
   if (!partial_info_plist_.is_null())
     outputs_as_source->push_back(partial_info_plist_);
 
-  if (!code_signing_script_.is_null()) {
-    std::vector<SourceFile> code_signing_output_files;
-    SubstitutionWriter::GetListAsSourceFiles(code_signing_outputs_,
-                                             &code_signing_output_files);
+  if (!post_processing_script_.is_null()) {
+    std::vector<SourceFile> post_processing_output_files;
+    SubstitutionWriter::GetListAsSourceFiles(post_processing_outputs_,
+                                             &post_processing_output_files);
     outputs_as_source->insert(outputs_as_source->end(),
-                              code_signing_output_files.begin(),
-                              code_signing_output_files.end());
+                              post_processing_output_files.begin(),
+                              post_processing_output_files.end());
   }
 
   if (!root_dir_.is_null())
