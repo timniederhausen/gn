@@ -357,20 +357,6 @@ void NinjaRustBinaryTargetWriter::WriteExternsAndDeps(
     path_output_.WriteDir(out_, dir, PathOutput::DIR_NO_LAST_SLASH);
   }
 
-  UniqueVector<SourceDir> nonrustdep_dirs;
-
-  // Non-Rust native dependencies. A dependency from Rust implies the ability
-  // to specify it in #[link], and GN will ensure that rustc can find it by
-  // adding it to the native library search paths.
-  for (const auto& nonrustdep : nonrustdeps) {
-    nonrustdep_dirs.push_back(
-        nonrustdep.AsSourceFile(settings_->build_settings()).GetDir());
-  }
-  for (const auto& nonrustdep_dir : nonrustdep_dirs) {
-    out_ << " -Lnative=";
-    path_output_.WriteDir(out_, nonrustdep_dir, PathOutput::DIR_NO_LAST_SLASH);
-  }
-
   // If rustc will invoke a linker, then pass linker arguments to include those
   // non-Rust native dependencies in the linking step.
 
