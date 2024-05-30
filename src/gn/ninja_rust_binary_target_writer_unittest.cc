@@ -1963,3 +1963,130 @@ TEST_F(NinjaRustBinaryTargetWriterTest, Pool) {
   std::string out_str = out.str();
   EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
 }
+
+// Tests frameworks are applied.
+TEST_F(NinjaRustBinaryTargetWriterTest, FrameworksAndFrameworkDirs) {
+  Err err;
+  TestWithScope setup;
+
+  // A config that force linking with the framework.
+  Config framework_config(setup.settings(),
+                          Label(SourceDir("//bar"), "framework_config"));
+  framework_config.visibility().SetPublic();
+  framework_config.own_values().frameworks().push_back("Bar.framework");
+  framework_config.own_values().framework_dirs().push_back(
+      SourceDir("//out/Debug/"));
+  ASSERT_TRUE(framework_config.OnResolved(&err));
+
+  // A target creating a framework bundle.
+  Target framework(setup.settings(), Label(SourceDir("//bar"), "framework"));
+  framework.set_output_type(Target::CREATE_BUNDLE);
+  framework.bundle_data().product_type() = "com.apple.product-type.framework";
+  framework.public_configs().push_back(LabelConfigPair(&framework_config));
+  framework.SetToolchain(setup.toolchain());
+  framework.visibility().SetPublic();
+  ASSERT_TRUE(framework.OnResolved(&err));
+
+  Target target(setup.settings(), Label(SourceDir("//linked/"), "exe"));
+  target.set_output_type(Target::EXECUTABLE);
+  target.visibility().SetPublic();
+  SourceFile main("//linked/exe.rs");
+  target.sources().push_back(main);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(main);
+  target.rust_values().crate_name() = "exe";
+  target.private_deps().push_back(LabelTargetPair(&framework));
+  target.config_values().frameworks().push_back("System.framework");
+  target.config_values().weak_frameworks().push_back("Whizbang.framework");
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream out;
+  NinjaRustBinaryTargetWriter writer(&target, out);
+  writer.Run();
+
+  const char expected[] =
+      "crate_name = exe\n"
+      "crate_type = bin\n"
+      "output_extension = \n"
+      "output_dir = \n"
+      "rustflags =\n"
+      "rustenv =\n"
+      "root_out_dir = .\n"
+      "target_gen_dir = gen/linked\n"
+      "target_out_dir = obj/linked\n"
+      "target_output_name = exe\n"
+      "\n"
+      "build ./exe: rust_bin ../../linked/exe.rs | ../../linked/exe.rs || "
+      "obj/bar/framework.stamp obj/bar/framework.stamp\n"
+      "  source_file_part = exe.rs\n"
+      "  source_name_part = exe\n"
+      "  externs =\n"
+      "  rustdeps = -Lframework=. -lframework=System -lframework=Bar "
+      "-lframework=Whizbang\n"
+      "  ldflags =\n"
+      "  sources = ../../linked/exe.rs\n";
+  const std::string out_str = out.str();
+  EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+}
+
+// Test linking of targets containing Swift modules.
+TEST_F(NinjaRustBinaryTargetWriterTest, SwiftModule) {
+  Err err;
+  TestWithScope setup;
+
+  // A single Swift module.
+  Target foo_target(setup.settings(), Label(SourceDir("//foo/"), "foo"));
+  foo_target.set_output_type(Target::SOURCE_SET);
+  foo_target.visibility().SetPublic();
+  foo_target.sources().push_back(SourceFile("//foo/file1.swift"));
+  foo_target.sources().push_back(SourceFile("//foo/file2.swift"));
+  foo_target.source_types_used().Set(SourceFile::SOURCE_SWIFT);
+  foo_target.swift_values().module_name() = "Foo";
+  foo_target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(foo_target.OnResolved(&err));
+
+  // Rust target links with module.
+  Target target(setup.settings(), Label(SourceDir("//linked/"), "exe"));
+  target.set_output_type(Target::EXECUTABLE);
+  target.visibility().SetPublic();
+  SourceFile main("//linked/exe.rs");
+  target.sources().push_back(main);
+  target.source_types_used().Set(SourceFile::SOURCE_RS);
+  target.rust_values().set_crate_root(main);
+  target.rust_values().crate_name() = "exe";
+  target.private_deps().push_back(LabelTargetPair(&foo_target));
+  target.SetToolchain(setup.toolchain());
+  ASSERT_TRUE(target.OnResolved(&err));
+
+  std::ostringstream out;
+  NinjaRustBinaryTargetWriter writer(&target, out);
+  writer.Run();
+
+  const char expected[] =
+      "crate_name = exe\n"
+      "crate_type = bin\n"
+      "output_extension = \n"
+      "output_dir = \n"
+      "rustflags =\n"
+      "rustenv =\n"
+      "root_out_dir = .\n"
+      "target_gen_dir = gen/linked\n"
+      "target_out_dir = obj/linked\n"
+      "target_output_name = exe\n"
+      "\n"
+      "build ./exe: rust_bin ../../linked/exe.rs | ../../linked/exe.rs "
+      "obj/foo/file1.o obj/foo/file2.o || "
+      "obj/foo/foo.stamp obj/foo/Foo.swiftmodule obj/foo/foo.stamp\n"
+      "  source_file_part = exe.rs\n"
+      "  source_name_part = exe\n"
+      "  externs =\n"
+      "  rustdeps = -Lnative=obj/foo -Clink-arg=-Bdynamic "
+      "-Clink-arg=obj/foo/file1.o -Clink-arg=obj/foo/file2.o "
+      "-Clink-arg=-swiftmodule=obj/foo/Foo.swiftmodule\n"
+      "  ldflags =\n"
+      "  sources = ../../linked/exe.rs\n";
+
+  const std::string out_str = out.str();
+  EXPECT_EQ(expected, out_str) << expected << "\n" << out_str;
+}

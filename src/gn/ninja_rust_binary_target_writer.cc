@@ -141,11 +141,18 @@ void NinjaRustBinaryTargetWriter::Run() {
 
   std::vector<OutputFile> rustdeps;
   std::vector<OutputFile> nonrustdeps;
+  std::vector<OutputFile> swiftmodules;
   nonrustdeps.insert(nonrustdeps.end(),
                      classified_deps.extra_object_files.begin(),
                      classified_deps.extra_object_files.end());
   for (const auto* framework_dep : classified_deps.framework_deps) {
     order_only_deps.push_back(framework_dep->dependency_output_file());
+  }
+  if (target_->IsFinal()) {
+    for (const Target* dep : classified_deps.swiftmodule_deps) {
+      swiftmodules.push_back(dep->swift_values().module_output_file());
+      order_only_deps.push_back(dep->swift_values().module_output_file());
+    }
   }
   for (const auto* non_linkable_dep : classified_deps.non_linkable_deps) {
     if (non_linkable_dep->source_types_used().RustSourceUsed() &&
@@ -210,7 +217,8 @@ void NinjaRustBinaryTargetWriter::Run() {
             classified_deps.non_linkable_deps.end(),
             std::back_inserter(extern_deps));
 
-  WriteExternsAndDeps(extern_deps, transitive_crates, rustdeps, nonrustdeps);
+  WriteExternsAndDeps(extern_deps, transitive_crates, rustdeps, nonrustdeps,
+                      swiftmodules);
   WriteSourcesAndInputs();
   WritePool(out_);
 }
@@ -259,7 +267,8 @@ void NinjaRustBinaryTargetWriter::WriteExternsAndDeps(
     const std::vector<const Target*>& deps,
     const std::vector<ExternCrate>& transitive_rust_deps,
     const std::vector<OutputFile>& rustdeps,
-    const std::vector<OutputFile>& nonrustdeps) {
+    const std::vector<OutputFile>& nonrustdeps,
+    const std::vector<OutputFile>& swiftmodules) {
   // Writes a external LibFile which comes from user-specified externs, and may
   // be either a string or a SourceFile.
   auto write_extern_lib_file = [this](std::string_view crate_name,
@@ -382,6 +391,8 @@ void NinjaRustBinaryTargetWriter::WriteExternsAndDeps(
   // If rustc will invoke a linker, all libraries need the passed through to the
   // linker.
   WriteLibs(out_, tool_);
+  WriteFrameworks(out_, tool_);
+  WriteSwiftModules(out_, tool_, swiftmodules);
 
   out_ << std::endl;
   out_ << "  ldflags =";
