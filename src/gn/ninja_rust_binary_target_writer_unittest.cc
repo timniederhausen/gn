@@ -2076,7 +2076,7 @@ TEST_F(NinjaRustBinaryTargetWriterTest, SwiftModule) {
       "  source_file_part = exe.rs\n"
       "  source_name_part = exe\n"
       "  externs =\n"
-      "  rustdeps = -Lnative=obj/foo -Clink-arg=-Bdynamic "
+      "  rustdeps = -Clink-arg=-Bdynamic "
       "-Clink-arg=obj/foo/file1.o -Clink-arg=obj/foo/file2.o "
       "-Clink-arg=-swiftmodule=obj/foo/Foo.swiftmodule\n"
       "  ldflags =\n"
