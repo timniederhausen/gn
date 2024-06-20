@@ -38,7 +38,7 @@ jobs:
             libflags: "-m32"
             os: ubuntu-22.04
             install: "g++-multilib"
-            ninja_release_name: v1.11.1/ninja-linux.zip
+            ninja_release_name: v1.12.1/ninja-linux.zip
 
           - slug: linux-amd64
             cc: gcc
@@ -47,7 +47,7 @@ jobs:
             ldflags: "-m64"
             libflags: "-m64"
             os: ubuntu-22.04
-            ninja_release_name: v1.11.1/ninja-linux.zip
+            ninja_release_name: v1.12.1/ninja-linux.zip
 
           - slug: macos-amd64
             gen_args: "--use-lto --use-icf"
@@ -57,7 +57,7 @@ jobs:
             ldflags: "-m64"
             libflags: "-m64"
             os: macos-12
-            ninja_release_name: v1.11.1/ninja-mac.zip
+            ninja_release_name: v1.12.1/ninja-mac.zip
 
     runs-on: ${{ matrix.os }}
 
@@ -95,7 +95,7 @@ jobs:
 
       - name: Cache libc++ and libc++abi if needed
         if: "${{ matrix.cc == 'clang' }}"
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/deps/llvm
           key: ${{ runner.os }}-llvm-${{ matrix.slug }}
@@ -119,12 +119,11 @@ jobs:
         run: |
           tar -C out -czf "out/gn-${{ matrix.slug }}.tar.gz" gn
 
-      - name: Upload archives
-        uses: actions/upload-artifact@v3
+      - name: Upload bin
+        uses: actions/upload-artifact@v4
         with:
-          name: binaries
-          path: |
-            out/gn-${{ matrix.slug }}.tar.gz
+          name: gn-${{ matrix.slug }}
+          path: out/gn
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -141,12 +140,10 @@ jobs:
           - slug: windows-i386
             arch: x86
             gen_args: "--use-lto --use-icf"
-            ninja_release_name: v1.11.1/ninja-linux.zip
 
           - slug: windows-amd64
             arch: x64
             gen_args: "--use-lto --use-icf"
-            ninja_release_name: v1.11.1/ninja-linux.zip
 
     runs-on: windows-2022
     defaults:
@@ -161,7 +158,7 @@ jobs:
 
       - name: Download Ninja
         run: |
-          Invoke-WebRequest -Uri https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip -OutFile ninja.zip
+          Invoke-WebRequest -Uri https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-win.zip -OutFile ninja.zip
           7z x ninja.zip > nul
           ./ninja --version
       - name: Set up Visual Studio shell
@@ -182,12 +179,11 @@ jobs:
         run: |
           7z a -tzip out\gn-${{ matrix.slug }}.zip out\gn.exe
 
-      - name: Upload archives
-        uses: actions/upload-artifact@v3
+      - name: Upload bin
+        uses: actions/upload-artifact@v4
         with:
-          name: binaries
-          path: |
-            out/gn-${{ matrix.slug }}.zip
+          name: gn-${{ matrix.slug }}
+          path: out/gn.exe
 
       - name: Release
         uses: softprops/action-gh-release@v1
