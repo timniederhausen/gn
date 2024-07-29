@@ -117,6 +117,100 @@ TEST_F(FunctionToolchain, Rust) {
   }
 }
 
+TEST_F(FunctionToolchain, RustRuntimeOutputs) {
+  TestWithScope setup;
+
+  // These runtime outputs are a subset of the outputs so are OK.
+  {
+    TestParseInput input(
+        R"(toolchain("good") {
+          tool("rust_dylib") {
+            command = "rust_dylib"
+            outputs = [ "foo" ]
+            runtime_outputs = [ "foo" ]
+          }
+        })");
+    ASSERT_FALSE(input.has_error());
+
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_FALSE(err.has_error()) << err.message();
+
+    // It should have generated a toolchain.
+    ASSERT_EQ(1u, setup.items().size());
+    const Toolchain* toolchain = setup.items()[0]->AsToolchain();
+    ASSERT_TRUE(toolchain);
+
+    // The toolchain should have a link tool with the two outputs.
+    const Tool* link = toolchain->GetTool(RustTool::kRsToolDylib);
+    ASSERT_TRUE(link);
+    ASSERT_EQ(1u, link->outputs().list().size());
+    EXPECT_EQ("foo", link->outputs().list()[0].AsString());
+    ASSERT_EQ(1u, link->runtime_outputs().list().size());
+    EXPECT_EQ("foo", link->runtime_outputs().list()[0].AsString());
+  }
+
+  // This one is not a subset so should throw an error.
+  {
+    TestParseInput input(
+        R"(toolchain("bad") {
+          tool("rust_dylib") {
+            outputs = [ "foo" ]
+            runtime_outputs = [ "bar" ]
+          }
+        })");
+    ASSERT_FALSE(input.has_error());
+
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_TRUE(err.has_error()) << err.message();
+  }
+}
+
+TEST_F(FunctionToolchain, RustLinkDependAndRuntimeOutputs) {
+  TestWithScope setup;
+
+  // These runtime outputs are a subset of the outputs so are OK.
+  {
+    TestParseInput input(
+        R"(toolchain("good") {
+          tool("rust_dylib") {
+            command = "rust_dylib"
+            outputs = [ "interface", "lib", "unstripped", "stripped" ]
+            depend_output = "interface"
+            link_output = "lib"
+            runtime_outputs = [ "stripped" ]
+          }
+        })");
+    ASSERT_FALSE(input.has_error());
+
+    Err err;
+    input.parsed()->Execute(setup.scope(), &err);
+    ASSERT_FALSE(err.has_error()) << err.message();
+
+    // It should have generated a toolchain.
+    ASSERT_EQ(1u, setup.items().size());
+    const Toolchain* toolchain = setup.items()[0]->AsToolchain();
+    ASSERT_TRUE(toolchain);
+
+    // The toolchain should have a link tool with the two outputs.
+    const Tool* link = toolchain->GetTool(RustTool::kRsToolDylib);
+    ASSERT_TRUE(link);
+    ASSERT_EQ(4u, link->outputs().list().size());
+    EXPECT_EQ("interface", link->outputs().list()[0].AsString());
+    EXPECT_EQ("lib", link->outputs().list()[1].AsString());
+    EXPECT_EQ("unstripped", link->outputs().list()[2].AsString());
+    EXPECT_EQ("stripped", link->outputs().list()[3].AsString());
+    ASSERT_EQ(1u, link->runtime_outputs().list().size());
+    EXPECT_EQ("stripped", link->runtime_outputs().list()[0].AsString());
+
+    const RustTool* rust_tool = link->AsRust();
+    ASSERT_TRUE(rust_tool);
+    EXPECT_EQ("interface", rust_tool->depend_output().AsString());
+    EXPECT_EQ("lib", rust_tool->link_output().AsString());
+  }
+}
+
 TEST_F(FunctionToolchain, Command) {
   TestWithScope setup;
 
