@@ -3890,13 +3890,13 @@
 
     link_output  [string with substitutions]
     depend_output  [string with substitutions]
-        Valid for: "solink", "rust_dylib" or "rust_cdylib" only (optional)
+        Valid for: "solink" only (optional)
 
-        These two files specify which of the outputs from the tool should
-        be used for linking and dependency tracking. These should match entries
-        in the "outputs". If unspecified, the first item in the "outputs" array
-        will be used for all. See "Separate linking and dependencies for shared
-        libraries" below for more.
+        These two files specify which of the outputs from the solink tool
+        should be used for linking and dependency tracking. These should match
+        entries in the "outputs". If unspecified, the first item in the
+        "outputs" array will be used for all. See "Separate linking and
+        dependencies for shared libraries" below for more.
 
         On Windows, where the tools produce a .dll shared library and a .lib
         import library, you will want the first two to be the import library
@@ -4142,8 +4142,8 @@
     {{solibs}}
         Extra libraries from shared library dependencies not specified in the
         {{inputs}}. This is the list of link_output files from shared libraries
-        (if the solink, rust_dylib and rust_cdylib tools specify a "link_output"
-        variable separate from the "depend_output").
+        (if the solink tool specifies a "link_output" variable separate from
+        the "depend_output").
 
         These should generally be treated the same as libs by your tool.
 

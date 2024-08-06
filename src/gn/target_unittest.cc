@@ -553,48 +553,6 @@ TEST_F(TargetTest, LinkAndDepOutputs) {
   EXPECT_EQ("./liba.so", target.runtime_outputs()[0].value());
 }
 
-TEST_F(TargetTest, RustLinkAndDepOutputs) {
-  TestWithScope setup;
-  Err err;
-
-  Toolchain toolchain(setup.settings(), Label(SourceDir("//tc/"), "tc"));
-
-  std::unique_ptr<Tool> tool = Tool::CreateTool(RustTool::kRsToolDylib);
-  RustTool* rust_tool = tool->AsRust();
-  rust_tool->set_output_prefix("lib");
-  rust_tool->set_default_output_extension(".so");
-
-  const char kLinkPattern[] =
-      "{{root_out_dir}}/{{target_output_name}}{{output_extension}}";
-  SubstitutionPattern link_output =
-      SubstitutionPattern::MakeForTest(kLinkPattern);
-  rust_tool->set_link_output(link_output);
-
-  const char kDependPattern[] =
-      "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.TOC";
-  SubstitutionPattern depend_output =
-      SubstitutionPattern::MakeForTest(kDependPattern);
-  rust_tool->set_depend_output(depend_output);
-
-  rust_tool->set_outputs(
-      SubstitutionList::MakeForTest(kLinkPattern, kDependPattern));
-
-  toolchain.SetTool(std::move(tool));
-
-  Target target(setup.settings(), Label(SourceDir("//a/"), "a"));
-  target.source_types_used().Set(SourceFile::SOURCE_RS);
-  target.rust_values().set_crate_type(RustValues::CRATE_DYLIB);
-  target.set_output_type(Target::SHARED_LIBRARY);
-  target.SetToolchain(&toolchain);
-  ASSERT_TRUE(target.OnResolved(&err));
-
-  EXPECT_EQ("./liba.so", target.link_output_file().value());
-  EXPECT_EQ("./liba.so.TOC", target.dependency_output_file().value());
-
-  ASSERT_EQ(1u, target.runtime_outputs().size());
-  EXPECT_EQ("./liba.so", target.runtime_outputs()[0].value());
-}
-
 // Tests that runtime_outputs works without an explicit link_output for
 // solink tools.
 //
@@ -651,59 +609,6 @@ TEST_F(TargetTest, RuntimeOuputs) {
   EXPECT_EQ("//out/Debug/a.pdb", computed_outputs[2].value());
 }
 
-TEST_F(TargetTest, RustRuntimeOuputs) {
-  TestWithScope setup;
-  Err err;
-
-  Toolchain toolchain(setup.settings(), Label(SourceDir("//tc/"), "tc"));
-
-  std::unique_ptr<Tool> tool = Tool::CreateTool(RustTool::kRsToolCDylib);
-  RustTool* rust_tool = tool->AsRust();
-  rust_tool->set_output_prefix("");
-  rust_tool->set_default_output_extension(".dll");
-
-  // Say the linker makes a DLL< an import library, and a symbol file we want
-  // to treat as a runtime output.
-  const char kLibPattern[] =
-      "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.lib";
-  const char kDllPattern[] =
-      "{{root_out_dir}}/{{target_output_name}}{{output_extension}}";
-  const char kPdbPattern[] = "{{root_out_dir}}/{{target_output_name}}.pdb";
-  SubstitutionPattern pdb_pattern =
-      SubstitutionPattern::MakeForTest(kPdbPattern);
-
-  rust_tool->set_outputs(
-      SubstitutionList::MakeForTest(kLibPattern, kDllPattern, kPdbPattern));
-
-  // Say we only want the DLL and symbol file treaded as runtime outputs.
-  rust_tool->set_runtime_outputs(
-      SubstitutionList::MakeForTest(kDllPattern, kPdbPattern));
-
-  toolchain.SetTool(std::move(tool));
-
-  Target target(setup.settings(), Label(SourceDir("//a/"), "a"));
-  target.source_types_used().Set(SourceFile::SOURCE_RS);
-  target.rust_values().set_crate_type(RustValues::CRATE_CDYLIB);
-  target.set_output_type(Target::SHARED_LIBRARY);
-  target.SetToolchain(&toolchain);
-  ASSERT_TRUE(target.OnResolved(&err));
-
-  EXPECT_EQ("./a.dll.lib", target.link_output_file().value());
-  EXPECT_EQ("./a.dll.lib", target.dependency_output_file().value());
-
-  ASSERT_EQ(2u, target.runtime_outputs().size());
-  EXPECT_EQ("./a.dll", target.runtime_outputs()[0].value());
-  EXPECT_EQ("./a.pdb", target.runtime_outputs()[1].value());
-
-  // Test GetOutputsAsSourceFiles().
-  std::vector<SourceFile> computed_outputs;
-  EXPECT_TRUE(target.GetOutputsAsSourceFiles(LocationRange(), true,
-                                             &computed_outputs, &err));
-  ASSERT_EQ(3u, computed_outputs.size());
-  EXPECT_EQ("//out/Debug/a.dll.lib", computed_outputs[0].value());
-  EXPECT_EQ("//out/Debug/a.dll", computed_outputs[1].value());
-  EXPECT_EQ("//out/Debug/a.pdb", computed_outputs[2].value());
-}
 // Tests Target::GetOutputFilesForSource for binary targets (these require a
 // tool definition). Also tests GetOutputsAsSourceFiles() for source sets.
 TEST_F(TargetTest, GetOutputFilesForSource_Binary) {
