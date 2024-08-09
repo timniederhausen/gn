@@ -1954,7 +1954,8 @@
   General: check_includes, configs, data, friend, inputs, metadata,
            output_extension, output_name, public, sources, testonly,
            visibility
-  Generated file: contents, data_keys, rebase, walk_keys, output_conversion
+  Generated file: contents, data_keys, rebase, walk_keys, output_conversion,
+                  outputs
 ```
 
 #### **Example (metadata collection)**
