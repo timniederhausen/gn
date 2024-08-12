@@ -109,6 +109,28 @@ bool RustTool::ReadOutputsPatternList(Scope* scope,
   return true;
 }
 
+bool RustTool::ValidateRuntimeOutputs(Err* err) {
+  if (runtime_outputs().list().empty())
+    return true;  // Empty is always OK.
+
+  if (name_ == kRsToolRlib || name_ == kRsToolStaticlib) {
+    *err =
+        Err(defined_from(), "This tool specifies runtime_outputs.",
+            "This is only valid for linker tools (rust_rlib doesn't count).");
+    return false;
+  }
+
+  for (const SubstitutionPattern& pattern : runtime_outputs().list()) {
+    if (!IsPatternInOutputList(outputs(), pattern)) {
+      *err = Err(defined_from(), "This tool's runtime_outputs is bad.",
+                 "It must be a subset of the outputs. The bad one is:\n  " +
+                     pattern.AsString());
+      return false;
+    }
+  }
+  return true;
+}
+
 bool RustTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
   // Initialize default vars.
   if (!Tool::InitTool(scope, toolchain, err)) {
@@ -131,6 +153,10 @@ bool RustTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
         !ReadString(scope, "dynamic_link_switch", &dynamic_link_switch_, err)) {
       return false;
     }
+  }
+
+  if (!ValidateRuntimeOutputs(err)) {
+    return false;
   }
 
   return true;

@@ -61,6 +61,7 @@ class RustTool : public Tool {
                               const char* var,
                               SubstitutionList* field,
                               Err* err);
+  bool ValidateRuntimeOutputs(Err* err);
 
   RustTool(const RustTool&) = delete;
   RustTool& operator=(const RustTool&) = delete;
