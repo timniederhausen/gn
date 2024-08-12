@@ -54,6 +54,8 @@ bool RustTool::MayLink() const {
 
 void RustTool::SetComplete() {
   SetToolComplete();
+  link_output_.FillRequiredTypes(&substitution_bits_);
+  depend_output_.FillRequiredTypes(&substitution_bits_);
 }
 
 std::string_view RustTool::GetSysroot() const {
@@ -131,6 +133,33 @@ bool RustTool::ValidateRuntimeOutputs(Err* err) {
   return true;
 }
 
+// Validates either link_output or depend_output. To generalize to either, pass
+// the associated pattern, and the variable name that should appear in error
+// messages.
+bool RustTool::ValidateLinkAndDependOutput(const SubstitutionPattern& pattern,
+                                           const char* variable_name,
+                                           Err* err) {
+  if (pattern.empty())
+    return true;  // Empty is always OK.
+
+  // It should only be specified for certain tool types.
+  if (name_ == kRsToolRlib || name_ == kRsToolStaticlib) {
+    *err = Err(defined_from(),
+               "This tool specifies a " + std::string(variable_name) + ".",
+               "This is only valid for linking tools, not rust_rlib or "
+               "rust_staticlib.");
+    return false;
+  }
+
+  if (!IsPatternInOutputList(outputs(), pattern)) {
+    *err = Err(defined_from(), "This tool's link_output is bad.",
+               "It must match one of the outputs.");
+    return false;
+  }
+
+  return true;
+}
+
 bool RustTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
   // Initialize default vars.
   if (!Tool::InitTool(scope, toolchain, err)) {
@@ -156,6 +185,25 @@ bool RustTool::InitTool(Scope* scope, Toolchain* toolchain, Err* err) {
   }
 
   if (!ValidateRuntimeOutputs(err)) {
+    return false;
+  }
+
+  if (!ReadPattern(scope, "link_output", &link_output_, err) ||
+      !ReadPattern(scope, "depend_output", &depend_output_, err)) {
+    return false;
+  }
+
+  // Validate link_output and depend_output.
+  if (!ValidateLinkAndDependOutput(link_output(), "link_output", err)) {
+    return false;
+  }
+  if (!ValidateLinkAndDependOutput(depend_output(), "depend_output", err)) {
+    return false;
+  }
+  if (link_output().empty() != depend_output().empty()) {
+    *err = Err(defined_from(),
+               "Both link_output and depend_output should either "
+               "be specified or they should both be empty.");
     return false;
   }
 
