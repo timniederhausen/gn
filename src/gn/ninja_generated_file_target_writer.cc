@@ -28,8 +28,9 @@ void NinjaGeneratedFileTargetWriter::Run() {
 
   // A generated_file target should generate a stamp file with dependencies
   // on each of the deps and data_deps in the target. The actual collection is
-  // done at gen time, and so ninja doesn't need to know about it.
-  std::vector<OutputFile> output_files;
+  // done at gen time, but to have correct input deps in ninja, we add output
+  // from generated_file targets as deps for the stamp.
+  std::vector<OutputFile> output_files = target_->computed_outputs();
   std::vector<OutputFile> data_output_files;
   const auto& target_deps = resolved().GetTargetDeps(target_);
   for (const Target* dep : target_deps.linked_deps()) {
