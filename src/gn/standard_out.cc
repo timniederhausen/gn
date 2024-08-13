@@ -310,7 +310,9 @@ void PrintLongHelp(const std::string& text, const std::string& tag) {
       OutputString(line.substr(0, chars_to_highlight), DECORATION_YELLOW);
       OutputString(line.substr(chars_to_highlight));
       if (first_header) {
-        OutputString("&nbsp;[Back to Top](#gn-reference)", DECORATION_NONE);
+        if (is_markdown) {
+          OutputString("&nbsp;[Back to Top](#gn-reference)", DECORATION_NONE);
+        }
         first_header = false;
       }
       OutputString("\n");
