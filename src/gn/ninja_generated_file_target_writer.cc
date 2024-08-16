@@ -4,8 +4,6 @@
 
 #include "gn/ninja_generated_file_target_writer.h"
 
-#include "base/strings/string_util.h"
-#include "gn/deps_iterator.h"
 #include "gn/output_conversion.h"
 #include "gn/output_file.h"
 #include "gn/scheduler.h"

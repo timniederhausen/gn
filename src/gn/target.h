@@ -17,7 +17,6 @@
 #include "gn/item.h"
 #include "gn/label_pattern.h"
 #include "gn/label_ptr.h"
-#include "gn/lib_file.h"
 #include "gn/metadata.h"
 #include "gn/output_file.h"
 #include "gn/pointer_set.h"
