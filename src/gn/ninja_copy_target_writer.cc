@@ -38,7 +38,7 @@ void NinjaCopyTargetWriter::Run() {
       target_->toolchain()->GetTool(GeneralTool::kGeneralToolStamp);
   if (!stamp_tool) {
     g_scheduler->FailWithError(Err(
-        nullptr, "Copy tool not defined",
+        nullptr, "Stamp tool not defined",
         "The toolchain " +
             target_->toolchain()->label().GetUserVisibleName(false) +
             "\n used by target " + target_->label().GetUserVisibleName(false) +
