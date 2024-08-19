@@ -862,6 +862,46 @@ TEST_F(TargetTest, GetOutputFilesForSource_Action) {
   EXPECT_EQ("//out/Debug/one", computed_outputs[0].value());
 }
 
+TEST_F(TargetTest, HasRealInputs) {
+  TestWithScope setup;
+  Err err;
+  // Action always have real inputs.
+  TestTarget target_a(setup, "//a:a", Target::ACTION);
+  ASSERT_TRUE(target_a.FillOutputFiles(&err));
+  EXPECT_TRUE(target_a.HasRealInputs());
+
+  // A target with no inputs and no deps has no real inputs.
+  TestTarget target_b(setup, "//a:b", Target::GROUP);
+  ASSERT_TRUE(target_b.FillOutputFiles(&err));
+  EXPECT_FALSE(target_b.HasRealInputs());
+
+  // A target with no inputs and one dep with real inputs has real inputs.
+  target_b.private_deps().push_back(LabelTargetPair(&target_a));
+  ASSERT_TRUE(target_b.FillOutputFiles(&err));
+  EXPECT_TRUE(target_b.HasRealInputs());
+
+  // A target with one input with no tool, and no deps, has no real inputs.
+  TestTarget target_c(setup, "//a:c", Target::SOURCE_SET);
+  target_c.config_values().inputs().push_back(SourceFile("//a/no_tool.txt"));
+  ASSERT_TRUE(target_c.FillOutputFiles(&err));
+  EXPECT_FALSE(target_c.HasRealInputs());  // One input with no tool, no deps.
+
+  // The same, but with one dep without a dependency output.
+  TestTarget target_d(setup, "//a:c2", Target::GROUP);
+  target_c.private_deps().push_back(LabelTargetPair(&target_d));
+  ASSERT_TRUE(target_c.FillOutputFiles(&err));
+  EXPECT_FALSE(target_c.HasRealInputs());
+
+  // The same, but with one dep with a dependency output.
+  TestTarget target_e(setup, "//a:d", Target::EXECUTABLE);
+  target_e.sources().push_back(SourceFile("//a/source.cc"));
+  ASSERT_TRUE(target_e.FillOutputFiles(&err));
+  EXPECT_TRUE(target_e.HasRealInputs());
+  target_c.private_deps().push_back(LabelTargetPair(&target_e));
+  ASSERT_TRUE(target_c.FillOutputFiles(&err));
+  EXPECT_TRUE(target_c.HasRealInputs());
+}
+
 TEST_F(TargetTest, GeneratedInputs) {
   TestWithScope setup;
   Err err;
