@@ -203,6 +203,10 @@ Variables
       required version is 1.7.2. Specifying a higher version might enable the
       use of some of newer features that can make the build more efficient.
 
+  no_stamp_files [optional]
+      A boolean flag that can be set to generate Ninja files that use phony
+      rules instead of stamp files whenever possible. This results in smaller
+      Ninja build plans, but requires at least Ninja 1.11.
 
 Example .gn file contents
 
@@ -1135,8 +1139,6 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline, Err* err) {
       return false;
     }
     build_settings_.set_no_stamp_files(no_stamp_files_value->boolean_value());
-    CHECK(!build_settings_.no_stamp_files())
-        << "no_stamp_files does not work yet!";
   }
 
   // Export compile commands.

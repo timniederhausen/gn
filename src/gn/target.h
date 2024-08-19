@@ -379,28 +379,28 @@ class Target : public Item {
   bool has_dependency_output() const {
     return has_dependency_output_file() || has_dependency_output_alias();
   }
-  // Returns the output dependency file path or phony alias if one is defined,
+  // Return the output dependency file path or phony alias if one is defined,
   // or an empty string otherwise.
   const OutputFile& dependency_output() const {
     return has_dependency_output_file() ? dependency_output_file_
                                         : dependency_output_alias_;
   }
 
-  // Returns true if there is a dependency file path defined for this target.
+  // Return true if there is a dependency file path defined for this target.
   bool has_dependency_output_file() const {
     return !dependency_output_file_.value().empty();
   }
-  // Returns the dependency output file path for this target if defined, or
+  // Return the dependency output file path for this target if defined, or
   // an empty string otherwise.
   const OutputFile& dependency_output_file() const {
     return dependency_output_file_;
   }
 
-  // Returns true if there is a dependency output alias defined for this target.
+  // Return true if there is a dependency output alias defined for this target.
   bool has_dependency_output_alias() const {
     return !dependency_output_alias_.value().empty();
   }
-  // Returns the dependency output alias if any, or an empty string otherwise.
+  // Return the dependency output alias if any, or an empty string otherwise.
   const OutputFile& dependency_output_alias() const {
     return dependency_output_alias_;
   }

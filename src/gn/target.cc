@@ -784,10 +784,12 @@ bool Target::HasRealInputs() const {
   // This check is only necessary if this target will result in a phony target.
   // Phony targets with no real inputs are treated as always dirty.
 
-  // Actions always have at least one input file: the script used to execute
-  // the action. As such, they will never have an input-less phony target. We
-  // check this first to elide the common checks.
-  if (output_type() == ACTION || output_type() == ACTION_FOREACH) {
+  // Actions and generated_file always have at least one input file: the script
+  // used to execute the action or generated file itself. As such, they will
+  // never have an input-less phony target. We check this first to elide the
+  // common checks.
+  if (output_type() == ACTION || output_type() == ACTION_FOREACH ||
+      output_type() == GENERATED_FILE) {
     return true;
   }
 
