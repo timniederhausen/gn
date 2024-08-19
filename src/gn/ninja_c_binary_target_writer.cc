@@ -719,13 +719,21 @@ void NinjaCBinaryTargetWriter::WriteLinkerStuff(
 }
 
 void NinjaCBinaryTargetWriter::WriteOutputSubstitutions() {
-  out_ << "  output_extension = "
-       << SubstitutionWriter::GetLinkerSubstitution(
-              target_, tool_, &SubstitutionOutputExtension);
+  const std::string output_extension =
+      SubstitutionWriter::GetLinkerSubstitution(target_, tool_,
+                                                &SubstitutionOutputExtension);
+  out_ << "  output_extension =";
+  if (!output_extension.empty()) {
+    out_ << " " << output_extension;
+  }
   out_ << std::endl;
-  out_ << "  output_dir = "
-       << SubstitutionWriter::GetLinkerSubstitution(target_, tool_,
-                                                    &SubstitutionOutputDir);
+
+  const std::string output_dir = SubstitutionWriter::GetLinkerSubstitution(
+      target_, tool_, &SubstitutionOutputDir);
+  out_ << "  output_dir =";
+  if (!output_dir.empty()) {
+    out_ << " " << output_dir;
+  }
   out_ << std::endl;
 }
 
