@@ -395,12 +395,13 @@ NinjaCreateBundleTargetWriter::WritePostProcessingInputDepsStampOrPhony(
         GetBuildDirForTargetAsOutputFile(target_, BuildDirType::OBJ);
     stamp_or_phony.value().append(target_->label().name());
     stamp_or_phony.value().append(".postprocessing.inputdeps.stamp");
-    tool = GeneralTool::kGeneralToolStamp;
+    tool = GetNinjaRulePrefixForToolchain(settings_) +
+           GeneralTool::kGeneralToolStamp;
   }
 
   out_ << "build ";
   WriteOutput(stamp_or_phony);
-  out_ << ": " << GetNinjaRulePrefixForToolchain(settings_) << tool;
+  out_ << ": " << tool;
 
   for (const SourceFile& source : post_processing_input_files) {
     out_ << " ";
