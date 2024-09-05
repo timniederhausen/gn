@@ -3945,7 +3945,7 @@
         skip writing output if the output file has not changed.
 
         Normally, Ninja will assume that when a tool runs the output be new and
-        downstream dependents must be rebuild. When this is set to trye, Ninja
+        downstream dependents must be rebuild. When this is set to true, Ninja
         can skip rebuilding downstream dependents for input changes that don't
         actually affect the output.
 
@@ -7291,6 +7291,11 @@
       When set specifies the minimum required version of Ninja. The default
       required version is 1.7.2. Specifying a higher version might enable the
       use of some of newer features that can make the build more efficient.
+
+  no_stamp_files [optional]
+      A boolean flag that can be set to generate Ninja files that use phony
+      rules instead of stamp files whenever possible. This results in smaller
+      Ninja build plans, but requires at least Ninja 1.11.
 ```
 
 #### **Example .gn file contents**

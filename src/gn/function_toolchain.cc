@@ -563,7 +563,7 @@ Tool variables
         skip writing output if the output file has not changed.
 
         Normally, Ninja will assume that when a tool runs the output be new and
-        downstream dependents must be rebuild. When this is set to trye, Ninja
+        downstream dependents must be rebuild. When this is set to true, Ninja
         can skip rebuilding downstream dependents for input changes that don't
         actually affect the output.
 
