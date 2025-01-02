@@ -56,7 +56,7 @@ jobs:
             cflags: "-m64"
             ldflags: "-m64"
             libflags: "-m64"
-            os: macos-12
+            os: macos-13
             ninja_release_name: v1.12.1/ninja-mac.zip
 
     runs-on: ${{ matrix.os }}
