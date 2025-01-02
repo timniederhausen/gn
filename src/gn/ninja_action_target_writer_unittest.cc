@@ -702,6 +702,6 @@ TEST(NinjaActionTargetWriter, ForEachWithDescription) {
       // Substitution for the args.
       "  source_file_part = input1.txt\n"
       "\n"
-      "build obj/foo/bar.stamp: stamp input1.out\n";
+      "build phony/foo/bar: phony input1.out\n";
   EXPECT_EQ(expected, out.str());
 }
